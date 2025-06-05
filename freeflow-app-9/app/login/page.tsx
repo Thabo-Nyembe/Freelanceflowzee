@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, AlertCircle } from 'lucide-react'
 import { login } from './actions'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
@@ -141,5 +141,40 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+// Fallback component for Suspense boundary
+function LoginFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="mx-auto w-full max-w-md space-y-6 rounded-lg border bg-card p-6 shadow-lg">
+        <div className="space-y-2 text-center">
+          <h1 className="text-3xl font-bold">Welcome to FreeflowZee</h1>
+          <p className="text-muted-foreground">
+            Loading login form...
+          </p>
+        </div>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="h-4 bg-muted rounded animate-pulse"></div>
+            <div className="h-10 bg-muted rounded animate-pulse"></div>
+          </div>
+          <div className="space-y-2">
+            <div className="h-4 bg-muted rounded animate-pulse"></div>
+            <div className="h-10 bg-muted rounded animate-pulse"></div>
+          </div>
+          <div className="h-10 bg-muted rounded animate-pulse"></div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginFallback />}>
+      <LoginForm />
+    </Suspense>
   )
 } 

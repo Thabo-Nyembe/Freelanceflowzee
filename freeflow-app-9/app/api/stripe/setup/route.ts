@@ -1,0 +1,1 @@
+import { NextRequest, NextResponse } from "next/server"; import { stripeMCPService } from "@/lib/stripe-mcp-service"; export async function POST() { try { const setup = await stripeMCPService.setupFreeflowZeePayments(); return NextResponse.json({ success: true, setup }); } catch (error) { return NextResponse.json({ success: false, error: "Setup failed" }, { status: 500 }); } }

@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
-export default function PaymentPage() {
+function PaymentForm() {
   const searchParams = useSearchParams()
   const projectId = searchParams.get('project')
   const returnUrl = searchParams.get('return')
@@ -189,5 +189,45 @@ export default function PaymentPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+// Fallback component for Suspense boundary
+function PaymentFallback() {
+  return (
+    <div className="container mx-auto p-6 max-w-md" data-testid="payment-container">
+      <Card>
+        <CardHeader>
+          <CardTitle>Loading Payment Form...</CardTitle>
+          <CardDescription>
+            Preparing secure payment options
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
+            <div className="h-4 bg-muted rounded animate-pulse"></div>
+            <div className="space-y-2">
+              <div className="h-10 bg-muted rounded animate-pulse"></div>
+              <div className="h-10 bg-muted rounded animate-pulse"></div>
+              <div className="h-10 bg-muted rounded animate-pulse"></div>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="h-10 bg-muted rounded animate-pulse"></div>
+            <div className="h-10 bg-muted rounded animate-pulse"></div>
+            <div className="h-10 bg-muted rounded animate-pulse"></div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+export default function PaymentPage() {
+  return (
+    <Suspense fallback={<PaymentFallback />}>
+      <PaymentForm />
+    </Suspense>
   )
 }

@@ -1,0 +1,1 @@
+export const stripeMCPService = { setupFreeflowZeePayments: async () => ({ products: [], prices: [], paymentLinks: [], customers: [] }), listProducts: async () => [], listPrices: async () => [], getPaymentAnalytics: async () => ({ totalProducts: 0 }) }; export default stripeMCPService;

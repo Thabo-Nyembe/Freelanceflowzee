@@ -9,6 +9,19 @@ const nextConfig = {
   
   // Webpack configuration to fix module resolution
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Configure webpack cache to prevent corruption issues
+    if (config.cache && !dev) {
+      config.cache = Object.freeze({
+        type: 'memory',
+      })
+    }
+    
+    // Prevent module resolution issues
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      // Ensure proper path resolution
+    }
+    
     // Fix module resolution issues
     config.resolve.fallback = {
       ...config.resolve.fallback,
