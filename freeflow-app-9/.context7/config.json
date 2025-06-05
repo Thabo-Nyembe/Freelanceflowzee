@@ -1,0 +1,34 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "env": {
+        "DEFAULT_MINIMUM_TOKENS": "10000"
+      },
+      "description": "Context7 MCP Server for up-to-date library documentation"
+    }
+  },
+  "libraries": [
+    "next.js",
+    "react",
+    "typescript",
+    "tailwindcss",
+    "supabase",
+    "@radix-ui/react-accordion",
+    "@radix-ui/react-dialog",
+    "@radix-ui/react-dropdown-menu",
+    "@radix-ui/react-tabs",
+    "@radix-ui/react-toast",
+    "lucide-react",
+    "react-hook-form",
+    "zod",
+    "class-variance-authority",
+    "clsx",
+    "tailwind-merge",
+    "date-fns",
+    "recharts"
+  ],
+  "defaultTokens": 10000,
+  "autoUpdate": true
+} 
