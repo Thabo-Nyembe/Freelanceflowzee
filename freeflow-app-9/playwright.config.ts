@@ -1,29 +1,32 @@
 import { defineConfig, devices } from '@playwright/test';
 
+/**
+ * @see https://playwright.dev/docs/test-configuration
+ */
 export default defineConfig({
-  testDir: './tests',
+  testDir: './tests/e2e',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 2 : 1,
   /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 1 : 4,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
-    ['html', { 
-      open: 'never',
-      port: 9325  // Fixed: Use different port to avoid conflicts
-    }],
-    ['list'] // Add list reporter for better terminal output
+    ['html', { open: 'never' }],
+    ['json', { outputFile: 'test-results/results.json' }],
+    ['junit', { outputFile: 'test-results/junit.xml' }],
+    ['line']
   ],
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  
+  /* Shared settings for all the projects below. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:3000',
-
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+    baseURL: 'http://localhost:3001',
+    
+    /* Collect trace when retrying the failed test. */
     trace: 'on-first-retry',
     
     /* Take screenshot on failure */
@@ -31,97 +34,54 @@ export default defineConfig({
     
     /* Record video on failure */
     video: 'retain-on-failure',
-
-    /* Enhanced timeout configurations */
+    
+    /* Timeout for each action */
     actionTimeout: 15000,
-    navigationTimeout: 45000,
+    
+    /* Global timeout for each test */
+    timeout: 45000,
+    
+    /* Extra HTTP headers */
+    extraHTTPHeaders: {
+      'x-test-mode': 'true'
+    }
   },
 
-  /* Configure projects for major browsers - Enhanced */
+  /* Configure projects for major browsers */
   projects: [
     {
       name: 'chromium',
-      use: { 
-        ...devices['Desktop Chrome'],
-        // Enhanced Chrome settings
-        viewport: { width: 1280, height: 720 },
-        launchOptions: {
-          args: ['--disable-web-security', '--disable-features=VizDisplayCompositor']
-        }
-      },
+      use: { ...devices['Desktop Chrome'] },
     },
-
     {
       name: 'firefox',
-      use: { 
-        ...devices['Desktop Firefox'],
-        // Enhanced Firefox settings
-        viewport: { width: 1280, height: 720 },
-      },
+      use: { ...devices['Desktop Firefox'] },
     },
-
     {
       name: 'webkit',
-      use: { 
-        ...devices['Desktop Safari'],
-        // Enhanced Safari/WebKit settings for better compatibility
-        viewport: { width: 1280, height: 720 },
-        // Increase timeouts for WebKit as it can be slower
-        actionTimeout: 20000,
-        navigationTimeout: 60000,
-      },
+      use: { ...devices['Desktop Safari'] },
     },
-
-    /* Test against mobile viewports. */
     {
       name: 'Mobile Chrome',
-      use: { 
-        ...devices['Pixel 5'],
-        // Enhanced mobile testing settings
-        isMobile: true,
-        hasTouch: true,
-        // Explicitly set context options for mobile
-        contextOptions: {
-          hasTouch: true,
-          isMobile: true,
-        }
-      },
+      use: { ...devices['Pixel 5'] },
     },
     {
       name: 'Mobile Safari',
-      use: { 
-        ...devices['iPhone 12'],
-        // Enhanced mobile Safari testing
-        isMobile: true,
-        hasTouch: true,
-        // WebKit mobile needs extra time
-        actionTimeout: 20000,
-        navigationTimeout: 60000,
-        // Explicitly set context options for mobile
-        contextOptions: {
-          hasTouch: true,
-          isMobile: true,
-        }
-      },
+      use: { ...devices['iPhone 12'] },
     },
   ],
 
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:3000',
+    url: 'http://localhost:3001',
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-    // Enhanced error handling for dev server
+    timeout: 120000,
+    stdout: 'ignore',
     stderr: 'pipe',
-    stdout: 'pipe',
   },
-
-  /* Global test timeout */
-  timeout: 45 * 1000,
-
-  /* Enhanced expect timeout */
-  expect: {
-    timeout: 15 * 1000,
-  },
-}); 
+  
+  /* Global setup and teardown */
+  globalSetup: require.resolve('./tests/global-setup.ts'),
+  globalTeardown: require.resolve('./tests/global-teardown.ts'),
+});

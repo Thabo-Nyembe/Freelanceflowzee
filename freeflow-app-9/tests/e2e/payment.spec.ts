@@ -6,17 +6,7 @@
 import { test, expect, Page } from '@playwright/test';
 
 // Configuration for enhanced testing following Context7 patterns
-test.use({
-  baseURL: 'http://localhost:3000',
-  viewport: { width: 1280, height: 720 },
-  extraHTTPHeaders: {
-    'x-test-mode': 'true',
-    'user-agent': 'Playwright/Test Runner',
-    'x-payment-test': 'true'
-  },
-  actionTimeout: 15000,
-  navigationTimeout: 30000,
-});
+// Using baseURL from playwright.config.ts (http://localhost:3001)
 
 // Test data constants for payment scenarios
 const TEST_PROJECT = {
