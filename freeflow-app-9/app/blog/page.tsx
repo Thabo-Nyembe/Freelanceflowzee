@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { SiteHeader } from '@/components/site-header'
@@ -10,6 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { 
   PenTool, 
   Calendar, 
@@ -22,8 +24,13 @@ import {
   Lightbulb,
   Target,
   Zap,
-  X
+  X,
+  Code,
+  Copy,
+  RefreshCw,
+  Book
 } from 'lucide-react'
+import { context7Client, type LibraryDoc, type CodeSnippet } from '@/lib/context7/client'
 
 const categories = [
   { name: 'All Posts', slug: 'all', count: 12 },
@@ -207,6 +214,62 @@ export default function BlogPage() {
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [searchMode, setSearchMode] = useState<'articles' | 'docs'>('articles')
+  const [docSearchResults, setDocSearchResults] = useState<LibraryDoc[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [selectedLibrary, setSelectedLibrary] = useState('next.js')
+
+  const libraries = [
+    'next.js',
+    'react',
+    'typescript',
+    'tailwindcss',
+    'supabase',
+    '@radix-ui/react-dialog',
+    'react-hook-form',
+    'zod'
+  ]
+
+  // Handle Context7 documentation search
+  const handleDocSearch = async (query: string, library?: string) => {
+    if (!query.trim()) {
+      setDocSearchResults([])
+      return
+    }
+
+    setIsSearching(true)
+    try {
+      if (library) {
+        // Search specific library
+        const doc = await context7Client.getLibraryDocs(library, query)
+        setDocSearchResults([doc])
+      } else {
+        // Search all libraries
+        const results = await context7Client.searchLibraries(query)
+        setDocSearchResults(results)
+      }
+    } catch (error) {
+      console.error('Failed to search documentation:', error)
+      setDocSearchResults([])
+    } finally {
+      setIsSearching(false)
+    }
+  }
+
+  // Handle search term changes
+  useEffect(() => {
+    if (searchMode === 'docs' && searchTerm) {
+      const debounceTimer = setTimeout(() => {
+        handleDocSearch(searchTerm, selectedLibrary)
+      }, 500)
+      return () => clearTimeout(debounceTimer)
+    }
+  }, [searchTerm, searchMode, selectedLibrary])
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+    // You could add a toast notification here
+  }
 
   const handleLoadMore = () => {
     setIsLoading(true)
@@ -255,27 +318,67 @@ export default function BlogPage() {
               grow their business, and succeed in the digital age.
             </p>
             
-            {/* Search Bar */}
-            <div className="max-w-2xl mx-auto relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <Input
-                type="text"
-                placeholder="Search articles, tips, and guides..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-12 pr-4 py-3 text-lg bg-white border-gray-300 focus:border-indigo-500 rounded-lg shadow-sm"
-                suppressHydrationWarning
-              />
-              {searchTerm && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSearchTerm('')}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              )}
+            {/* Enhanced Search Bar */}
+            <div className="max-w-4xl mx-auto space-y-4">
+              {/* Search Mode Tabs */}
+              <Tabs value={searchMode} onValueChange={(value) => setSearchMode(value as 'articles' | 'docs')} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
+                  <TabsTrigger value="articles" className="flex items-center gap-2">
+                    <PenTool className="w-4 h-4" />
+                    Articles
+                  </TabsTrigger>
+                  <TabsTrigger value="docs" className="flex items-center gap-2">
+                    <Book className="w-4 h-4" />
+                    Documentation
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Search Input */}
+                <div className="relative max-w-2xl mx-auto mt-4">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Input
+                    type="text"
+                    placeholder={searchMode === 'articles' ? "Search articles, tips, and guides..." : "Search documentation and code examples..."}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-12 pr-4 py-3 text-lg bg-white border-gray-300 focus:border-indigo-500 rounded-lg shadow-sm"
+                    suppressHydrationWarning
+                  />
+                  {(isSearching || isLoading) && (
+                    <RefreshCw className="absolute right-12 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 animate-spin" />
+                  )}
+                  {searchTerm && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setSearchTerm('')
+                        setDocSearchResults([])
+                      }}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+
+                {/* Library Selector for Documentation Search */}
+                {searchMode === 'docs' && (
+                  <div className="max-w-md mx-auto">
+                    <select
+                      value={selectedLibrary}
+                      onChange={(e) => setSelectedLibrary(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-lg bg-white focus:border-indigo-500 focus:outline-none"
+                    >
+                      {libraries.map((lib) => (
+                        <option key={lib} value={lib}>
+                          {lib}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </Tabs>
             </div>
           </div>
         </section>
@@ -365,7 +468,109 @@ export default function BlogPage() {
           </div>
         </section>
 
+        {/* Documentation Search Results */}
+        {searchMode === 'docs' && searchTerm && (
+          <section className="py-16 bg-gray-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Documentation Search Results</h2>
+                <p className="text-gray-600">
+                  {isSearching ? 'Searching...' : `Found ${docSearchResults.length} result${docSearchResults.length !== 1 ? 's' : ''} for "${searchTerm}" in ${selectedLibrary}`}
+                </p>
+              </div>
+
+              {docSearchResults.length > 0 && (
+                <div className="space-y-6">
+                  {docSearchResults.map((doc) => (
+                    <Card key={doc.id} className="overflow-hidden">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="flex items-center gap-2">
+                            <Code className="w-5 h-5 text-indigo-600" />
+                            {doc.name} {doc.version && `v${doc.version}`}
+                          </CardTitle>
+                          <Badge variant="outline">{doc.id}</Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <ScrollArea className="h-64 w-full rounded-md border p-4">
+                          <pre className="text-sm whitespace-pre-wrap">{doc.documentation}</pre>
+                        </ScrollArea>
+                        
+                        {doc.codeSnippets.length > 0 && (
+                          <div className="mt-6">
+                            <h4 className="font-medium mb-4 flex items-center gap-2">
+                              <Code className="w-4 h-4" />
+                              Code Examples
+                            </h4>
+                            <div className="space-y-4">
+                              {doc.codeSnippets.map((snippet, index) => (
+                                <Card key={index} className="bg-gray-50">
+                                  <CardHeader className="pb-2">
+                                    <div className="flex items-center justify-between">
+                                      <CardTitle className="text-sm">{snippet.title}</CardTitle>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => copyToClipboard(snippet.code)}
+                                        className="h-8 w-8 p-0"
+                                      >
+                                        <Copy className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                    <CardDescription className="text-xs">
+                                      {snippet.description}
+                                    </CardDescription>
+                                  </CardHeader>
+                                  <CardContent className="pt-0">
+                                    <pre className="text-xs bg-white p-3 rounded border overflow-x-auto">
+                                      <code>{snippet.code}</code>
+                                    </pre>
+                                    <div className="flex gap-1 mt-2">
+                                      {snippet.tags.map((tag) => (
+                                        <Badge key={tag} variant="outline" className="text-xs">
+                                          {tag}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+
+              {!isSearching && docSearchResults.length === 0 && searchTerm && (
+                <div className="text-center py-16">
+                  <div className="text-gray-400 mb-4">
+                    <Search className="w-16 h-16 mx-auto" />
+                  </div>
+                  <h3 className="text-xl font-medium text-gray-900 mb-2">No documentation found</h3>
+                  <p className="text-gray-600 mb-4">
+                    Try adjusting your search terms or selecting a different library.
+                  </p>
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      setSearchTerm('')
+                      setDocSearchResults([])
+                    }}
+                  >
+                    Clear Search
+                  </Button>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
         {/* Categories and Articles */}
+        {searchMode === 'articles' && (
         <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col lg:flex-row gap-12">
@@ -551,6 +756,7 @@ export default function BlogPage() {
             </div>
           </div>
         </section>
+        )}
 
         {/* CTA Section */}
         <section className="py-16 bg-indigo-600">
