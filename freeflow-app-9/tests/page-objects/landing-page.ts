@@ -55,24 +55,24 @@ export class LandingPage {
     this.page = page;
     
     // Navigation elements
-    this.logo = page.locator('nav').getByText('FreeflowZee');
-    this.loginLink = page.getByRole('link', { name: 'Login' });
-    this.signupLink = page.getByRole('link', { name: 'Sign Up' });
-    this.navigationMenu = page.locator('nav');
+    this.logo = page.getByTestId('nav-logo');
+    this.loginLink = page.getByTestId('nav-login');
+    this.signupLink = page.getByTestId('nav-signup');
+    this.navigationMenu = page.getByTestId('navigation');
 
     // Hero section elements
-    this.heroHeading = page.locator('h1').filter({ hasText: 'Create, Share & Get Paid' });
-    this.heroSubtitle = page.locator('p').filter({ hasText: 'all-in-one platform' });
-    this.ctaButtons = page.locator('.flex.flex-col.sm\\:flex-row.gap-4');
-    this.startCreatingButton = page.getByRole('button', { name: 'Start Creating Free' });
-    this.watchDemoButton = page.getByRole('button', { name: 'Watch Demo' });
+    this.heroHeading = page.getByTestId('hero-title');
+    this.heroSubtitle = page.getByTestId('hero-subtitle');
+    this.ctaButtons = page.getByTestId('hero-cta-buttons');
+    this.startCreatingButton = page.getByTestId('hero-cta-primary');
+    this.watchDemoButton = page.getByTestId('hero-cta-demo');
 
     // Features section
-    this.featuresSection = page.locator('#features');
-    this.featureCards = page.locator('.grid.grid-cols-1.md\\:grid-cols-3.gap-8 > div');
-    this.fileManagementFeature = page.locator('div').filter({ hasText: 'Smart File Management' });
-    this.paymentProcessingFeature = page.locator('div').filter({ hasText: 'Instant Payments' });
-    this.collaborationFeature = page.locator('div').filter({ hasText: 'Real-time Collaboration' });
+    this.featuresSection = page.getByTestId('features-section');
+    this.featureCards = page.locator('[data-testid^="feature-card-"]');
+    this.fileManagementFeature = page.getByTestId('feature-card-0');
+    this.paymentProcessingFeature = page.getByTestId('feature-card-2');
+    this.collaborationFeature = page.getByTestId('feature-card-1');
 
     // How it works section
     this.howItWorksSection = page.locator('#how-it-works');
@@ -86,17 +86,17 @@ export class LandingPage {
     this.customerLogos = page.locator('.flex.items-center.justify-center.gap-8');
 
     // Pricing section
-    this.pricingSection = page.locator('#pricing');
-    this.pricingCards = page.locator('.grid.grid-cols-1.md\\:grid-cols-3.gap-8 > div');
-    this.freePricingCard = page.locator('div').filter({ hasText: 'Free' }).filter({ hasText: '$0' });
-    this.proPricingCard = page.locator('div').filter({ hasText: 'Pro' }).filter({ hasText: '$29' });
-    this.agencyPricingCard = page.locator('div').filter({ hasText: 'Agency' }).filter({ hasText: 'Custom' });
-    this.pricingButtons = page.locator('.w-full').filter({ hasText: /Start Free|Get Started|Contact Sales/ });
+    this.pricingSection = page.getByTestId('pricing-section');
+    this.pricingCards = page.locator('[data-testid^="pricing-card-"]');
+    this.freePricingCard = page.getByTestId('pricing-card-starter');
+    this.proPricingCard = page.getByTestId('pricing-card-professional');
+    this.agencyPricingCard = page.getByTestId('pricing-card-agency');
+    this.pricingButtons = page.locator('[data-testid^="pricing-cta-"]');
 
     // Final CTA section
-    this.finalCtaSection = page.locator('section').filter({ hasText: 'Ready to transform' });
-    this.finalCtaButton = page.getByRole('button', { name: 'Start Free Today' });
-    this.contactSalesButton = page.getByRole('button', { name: 'Talk to Sales' });
+    this.finalCtaSection = page.getByTestId('cta-section');
+    this.finalCtaButton = page.getByTestId('cta-primary');
+    this.contactSalesButton = page.getByTestId('cta-sales');
 
     // Footer elements
     this.footer = page.locator('footer');

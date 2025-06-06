@@ -45,7 +45,7 @@ function HeroSection() {
   }, [])
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+    <section data-testid="hero-section" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
@@ -56,40 +56,40 @@ function HeroSection() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className={`transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
           {/* Badge */}
-          <Badge variant="secondary" className="mb-8 bg-white/80 backdrop-blur-sm border border-white/20 px-6 py-2 text-sm font-medium">
+          <Badge data-testid="hero-badge" variant="secondary" className="mb-8 bg-white/80 backdrop-blur-sm border border-white/20 px-6 py-2 text-sm font-medium">
             <Sparkles className="w-4 h-4 mr-2" />
             New: AI-Powered Project Analytics
           </Badge>
 
           {/* Main heading */}
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 mb-8 leading-tight">
+          <h1 data-testid="hero-title" className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 mb-8 leading-tight">
             Create, Share & 
             <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> Get Paid</span>
           </h1>
 
           {/* Subheading */}
-          <p className="text-xl sm:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
+          <p data-testid="hero-subtitle" className="text-xl sm:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
             The all-in-one platform for creatives and freelancers. Upload your work, collaborate with clients, 
             and get paid faster than ever before.
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+          <div data-testid="hero-cta-buttons" className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
             <Link href="/signup">
-              <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+              <Button data-testid="hero-cta-primary" size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
                 Start Creating Free
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
             
-            <Button size="lg" variant="outline" className="border-2 border-gray-300 hover:border-indigo-300 px-8 py-4 text-lg font-semibold rounded-xl backdrop-blur-sm bg-white/80">
+            <Button data-testid="hero-cta-demo" size="lg" variant="outline" className="border-2 border-gray-300 hover:border-indigo-300 px-8 py-4 text-lg font-semibold rounded-xl backdrop-blur-sm bg-white/80">
               <Play className="mr-2 w-5 h-5" />
               Watch Demo
             </Button>
           </div>
 
           {/* Social proof */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-8 text-gray-500">
+          <div data-testid="hero-social-proof" className="flex flex-col sm:flex-row items-center justify-center gap-8 text-gray-500">
             <div className="flex items-center">
               <div className="flex -space-x-2 mr-3">
                 <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-red-400 rounded-full border-2 border-white"></div>
@@ -156,29 +156,29 @@ function FeaturesSection() {
   ]
 
   return (
-    <section id="features" className="py-24 bg-white">
+    <section id="features" data-testid="features-section" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-20">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+          <h2 data-testid="features-title" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
             Everything you need to 
             <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> succeed</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p data-testid="features-subtitle" className="text-xl text-gray-600 max-w-3xl mx-auto">
             From upload to payment, we've built every tool you need to run your creative business efficiently.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div data-testid="features-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => {
             const IconComponent = feature.icon
             return (
-              <Card key={index} className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50">
+              <Card key={index} data-testid={`feature-card-${index}`} className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50">
                 <CardContent className="p-8">
                   <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                     <IconComponent className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                  <h3 data-testid={`feature-title-${index}`} className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
+                  <p data-testid={`feature-description-${index}`} className="text-gray-600 leading-relaxed">{feature.description}</p>
                 </CardContent>
               </Card>
             )
@@ -405,36 +405,36 @@ function PricingSection() {
   ]
 
   return (
-    <section id="pricing" className="py-24 bg-gradient-to-b from-gray-50 to-white">
+    <section id="pricing" data-testid="pricing-section" className="py-24 bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-20">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+          <h2 data-testid="pricing-title" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
             Simple, transparent pricing
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p data-testid="pricing-subtitle" className="text-xl text-gray-600 max-w-3xl mx-auto">
             Choose the plan that fits your needs. Upgrade or downgrade at any time.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div data-testid="pricing-plans" className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {plans.map((plan, index) => (
-            <Card key={index} className={`relative border-2 ${plan.popular ? 'border-indigo-500 shadow-2xl scale-105' : 'border-gray-200'} hover:shadow-xl transition-all duration-300`}>
+            <Card key={index} data-testid={`pricing-card-${plan.name.toLowerCase()}`} className={`relative border-2 ${plan.popular ? 'border-indigo-500 shadow-2xl scale-105' : 'border-gray-200'} hover:shadow-xl transition-all duration-300`}>
               {plan.popular && (
-                <Badge className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-indigo-600 text-white px-6 py-1">
+                <Badge data-testid="pricing-popular-badge" className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-indigo-600 text-white px-6 py-1">
                   Most Popular
                 </Badge>
               )}
               <CardContent className="p-8">
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                  <h3 data-testid={`pricing-plan-name-${plan.name.toLowerCase()}`} className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
                   <div className="mb-4">
-                    <span className="text-5xl font-bold text-gray-900">{plan.price}</span>
+                    <span data-testid={`pricing-plan-price-${plan.name.toLowerCase()}`} className="text-5xl font-bold text-gray-900">{plan.price}</span>
                     {plan.price !== "Free" && <span className="text-gray-600">/month</span>}
                   </div>
-                  <p className="text-gray-600">{plan.description}</p>
+                  <p data-testid={`pricing-plan-description-${plan.name.toLowerCase()}`} className="text-gray-600">{plan.description}</p>
                 </div>
 
-                <ul className="space-y-3 mb-8">
+                <ul data-testid={`pricing-features-${plan.name.toLowerCase()}`} className="space-y-3 mb-8">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-center">
                       <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
@@ -445,6 +445,7 @@ function PricingSection() {
 
                 <Link href={plan.name === 'Agency' ? '/contact' : '/signup'}>
                   <Button 
+                    data-testid={`pricing-cta-${plan.name.toLowerCase()}`}
                     className={`w-full ${plan.popular ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-white border-2 border-gray-200 text-gray-900 hover:bg-gray-50'}`}
                     size="lg"
                   >
@@ -457,7 +458,7 @@ function PricingSection() {
         </div>
 
         <div className="text-center mt-12">
-          <p className="text-gray-600">
+          <p data-testid="pricing-trial-info" className="text-gray-600">
             All plans include 14-day free trial. No credit card required.
           </p>
         </div>
@@ -469,30 +470,30 @@ function PricingSection() {
 // CTA section
 function CTASection() {
   return (
-    <section className="py-24 bg-gradient-to-r from-indigo-600 to-purple-600">
+    <section data-testid="cta-section" className="py-24 bg-gradient-to-r from-indigo-600 to-purple-600">
       <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-        <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
+        <h2 data-testid="cta-title" className="text-4xl sm:text-5xl font-bold text-white mb-6">
           Ready to transform your workflow?
         </h2>
-        <p className="text-xl text-indigo-100 mb-10 leading-relaxed">
+        <p data-testid="cta-subtitle" className="text-xl text-indigo-100 mb-10 leading-relaxed">
           Join 50,000+ creators who've already made the switch to faster, smarter project management.
         </p>
         
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div data-testid="cta-buttons" className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link href="/signup">
-            <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-xl">
+            <Button data-testid="cta-primary" size="lg" className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-xl">
               Start Free Today
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </Link>
           <Link href="/contact">
-            <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-indigo-600 px-8 py-4 text-lg font-semibold rounded-xl">
+            <Button data-testid="cta-sales" size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-indigo-600 px-8 py-4 text-lg font-semibold rounded-xl">
               Talk to Sales
             </Button>
           </Link>
         </div>
 
-        <p className="text-indigo-200 mt-6 text-sm">
+        <p data-testid="cta-disclaimer" className="text-indigo-200 mt-6 text-sm">
           No credit card required • 14-day free trial • Cancel anytime
         </p>
       </div>
@@ -513,32 +514,32 @@ function Navigation() {
   }, [])
 
   return (
-    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-md shadow-lg' : 'bg-transparent'}`}>
+    <nav data-testid="navigation" className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-md shadow-lg' : 'bg-transparent'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <span className="text-2xl font-bold text-indigo-600">FreeflowZee</span>
+              <span data-testid="nav-logo" className="text-2xl font-bold text-indigo-600">FreeflowZee</span>
             </div>
           </div>
 
           <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-8">
-              <a href="#features" className="text-gray-700 hover:text-indigo-600 transition-colors">Features</a>
-              <a href="#how-it-works" className="text-gray-700 hover:text-indigo-600 transition-colors">How it works</a>
-              <a href="#pricing" className="text-gray-700 hover:text-indigo-600 transition-colors">Pricing</a>
-              <a href="#testimonials" className="text-gray-700 hover:text-indigo-600 transition-colors">Reviews</a>
+            <div data-testid="nav-menu" className="ml-10 flex items-baseline space-x-8">
+              <a data-testid="nav-features" href="#features" className="text-gray-700 hover:text-indigo-600 transition-colors">Features</a>
+              <a data-testid="nav-how-it-works" href="#how-it-works" className="text-gray-700 hover:text-indigo-600 transition-colors">How it works</a>
+              <a data-testid="nav-pricing" href="#pricing" className="text-gray-700 hover:text-indigo-600 transition-colors">Pricing</a>
+              <a data-testid="nav-testimonials" href="#testimonials" className="text-gray-700 hover:text-indigo-600 transition-colors">Reviews</a>
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div data-testid="nav-auth-buttons" className="flex items-center space-x-4">
             <Link href="/login">
-              <Button variant="ghost" className="text-gray-700 hover:text-indigo-600">
+              <Button data-testid="nav-login" variant="ghost" className="text-gray-700 hover:text-indigo-600">
                 Log in
               </Button>
             </Link>
             <Link href="/signup">
-              <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
+              <Button data-testid="nav-signup" className="bg-indigo-600 hover:bg-indigo-700 text-white">
                 Sign up free
               </Button>
             </Link>
