@@ -20,8 +20,9 @@ function checkAuthRateLimit(ip: string): boolean {
     return true
   }
 
-  // Allow 20 attempts per 10 minutes for testing
-  if (attempt.count >= 20) {
+  // Allow more attempts in development, fewer in production
+  const maxAttempts = process.env.NODE_ENV === 'development' ? 100 : 20
+  if (attempt.count >= maxAttempts) {
     return false
   }
 
@@ -31,15 +32,24 @@ function checkAuthRateLimit(ip: string): boolean {
 }
 
 export async function middleware(request: NextRequest) {
-  // Check for test environment
+  // Check for test environment or development bypass
   const isTestEnv = 
     request.headers.get('x-test-mode') === 'true' ||
     request.headers.get('user-agent')?.includes('Playwright') ||
     process.env.NODE_ENV === 'test'
 
+  const isDevBypass = 
+    process.env.NODE_ENV === 'development' && 
+    request.headers.get('x-dev-bypass') === 'true'
+
   if (isTestEnv) {
     console.log('🧪 Test environment detected - skipping auth middleware')
     return NextResponse.next()
+  }
+
+  if (isDevBypass) {
+    console.log('🔧 Development bypass detected - skipping rate limiting')
+    return await updateSession(request)
   }
 
   // Get client IP for rate limiting
