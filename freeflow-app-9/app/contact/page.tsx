@@ -121,7 +121,7 @@ export default function ContactPage() {
                     </AlertDescription>
                   </Alert>
                 ) : (
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-6" suppressHydrationWarning>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
@@ -134,6 +134,7 @@ export default function ContactPage() {
                           required
                           className="bg-white/50 border-gray-200 focus:bg-white transition-colors"
                           placeholder="John"
+                          suppressHydrationWarning
                         />
                       </div>
                       <div>
@@ -147,6 +148,7 @@ export default function ContactPage() {
                           required
                           className="bg-white/50 border-gray-200 focus:bg-white transition-colors"
                           placeholder="Doe"
+                          suppressHydrationWarning
                         />
                       </div>
                     </div>
@@ -162,6 +164,7 @@ export default function ContactPage() {
                         required
                         className="bg-white/50 border-gray-200 focus:bg-white transition-colors"
                         placeholder="john@example.com"
+                        suppressHydrationWarning
                       />
                     </div>
 
@@ -175,6 +178,7 @@ export default function ContactPage() {
                         type="text"
                         className="bg-white/50 border-gray-200 focus:bg-white transition-colors"
                         placeholder="Your Company"
+                        suppressHydrationWarning
                       />
                     </div>
 
@@ -189,6 +193,7 @@ export default function ContactPage() {
                         required
                         className="bg-white/50 border-gray-200 focus:bg-white transition-colors"
                         placeholder="How can we help you?"
+                        suppressHydrationWarning
                       />
                     </div>
 
@@ -203,6 +208,7 @@ export default function ContactPage() {
                         rows={5}
                         className="bg-white/50 border-gray-200 focus:bg-white transition-colors"
                         placeholder="Tell us more about your project and how we can help..."
+                        suppressHydrationWarning
                       />
                     </div>
 

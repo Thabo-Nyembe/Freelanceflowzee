@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { signup } from './actions'
 import { Button } from '@/components/ui/button'
@@ -16,6 +16,12 @@ export default function SignUp() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  // Handle hydration properly
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
 
   const handleSubmit = async (formData: FormData) => {
     const password = formData.get('password') as string
@@ -71,7 +77,7 @@ export default function SignUp() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={handleSubmit} className="space-y-4">
+          <form action={handleSubmit} className="space-y-4" suppressHydrationWarning>
             <div className="space-y-2">
               <Label htmlFor="fullName" className="text-sm font-medium">
                 Full Name
@@ -85,6 +91,7 @@ export default function SignUp() {
                   placeholder="Enter your full name"
                   required
                   className="pl-10 bg-white/50 border-gray-200 focus:bg-white transition-colors"
+                  suppressHydrationWarning
                 />
               </div>
             </div>
@@ -102,6 +109,7 @@ export default function SignUp() {
                   placeholder="Enter your email"
                   required
                   className="pl-10 bg-white/50 border-gray-200 focus:bg-white transition-colors"
+                  suppressHydrationWarning
                 />
               </div>
             </div>
@@ -119,14 +127,17 @@ export default function SignUp() {
                   placeholder="Create a password"
                   required
                   className="pl-10 pr-10 bg-white/50 border-gray-200 focus:bg-white transition-colors"
+                  suppressHydrationWarning
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
+                {isHydrated && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -143,14 +154,17 @@ export default function SignUp() {
                   placeholder="Confirm your password"
                   required
                   className="pl-10 pr-10 bg-white/50 border-gray-200 focus:bg-white transition-colors"
+                  suppressHydrationWarning
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
+                {isHydrated && (
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                )}
               </div>
             </div>
 

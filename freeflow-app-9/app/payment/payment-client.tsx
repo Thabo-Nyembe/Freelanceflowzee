@@ -135,6 +135,7 @@ export default function PaymentClient() {
                   value={cardData.name}
                   onChange={(e) => setCardData({...cardData, name: e.target.value})}
                   data-testid="card-name-input"
+                  suppressHydrationWarning
                 />
               </div>
               <div className="space-y-2">
@@ -146,6 +147,7 @@ export default function PaymentClient() {
                   onChange={(e) => setCardData({...cardData, number: formatCardNumber(e.target.value)})}
                   maxLength={19}
                   data-testid="card-number-input"
+                  suppressHydrationWarning
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -158,6 +160,7 @@ export default function PaymentClient() {
                     onChange={(e) => setCardData({...cardData, expiry: formatExpiry(e.target.value)})}
                     maxLength={5}
                     data-testid="card-expiry-input"
+                    suppressHydrationWarning
                   />
                 </div>
                 <div className="space-y-2">
@@ -169,6 +172,7 @@ export default function PaymentClient() {
                     onChange={(e) => setCardData({...cardData, cvc: e.target.value.replace(/\D/g, '')})}
                     maxLength={4}
                     data-testid="card-cvc-input"
+                    suppressHydrationWarning
                   />
                 </div>
               </div>
@@ -202,6 +206,7 @@ export default function PaymentClient() {
                   type="password"
                   placeholder="Enter access password"
                   data-testid="access-password-input"
+                  suppressHydrationWarning
                 />
               </div>
               <Button
@@ -233,6 +238,7 @@ export default function PaymentClient() {
                   id="accessCode"
                   placeholder="Enter access code"
                   data-testid="access-code-input"
+                  suppressHydrationWarning
                 />
               </div>
               <Button

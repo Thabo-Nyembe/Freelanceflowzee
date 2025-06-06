@@ -81,7 +81,7 @@ function LoginForm() {
           </Alert>
         )}
 
-        <form action={handleSubmit} className="space-y-4">
+        <form action={handleSubmit} className="space-y-4" suppressHydrationWarning>
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
               Email:
@@ -95,6 +95,7 @@ function LoginForm() {
               className="w-full"
               placeholder="Enter your email"
               autoComplete="email"
+              suppressHydrationWarning
             />
           </div>
           <div className="space-y-2">
@@ -110,6 +111,7 @@ function LoginForm() {
               className="w-full"
               placeholder="Enter your password"
               autoComplete="current-password"
+              suppressHydrationWarning
             />
           </div>
           <div className="space-y-2">
