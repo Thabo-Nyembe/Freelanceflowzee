@@ -27,9 +27,9 @@ import {
 const categories = [
   { name: 'All Posts', slug: 'all', count: 12 },
   { name: 'Workflow Tips', slug: 'workflow', count: 4 },
-  { name: 'Business Growth', slug: 'business', count: 3 },
-  { name: 'Client Management', slug: 'clients', count: 2 },
-  { name: 'Technology', slug: 'tech', count: 3 },
+  { name: 'Business Growth', slug: 'business', count: 6 },
+  { name: 'Client Management', slug: 'clients', count: 3 },
+  { name: 'Technology', slug: 'tech', count: 2 },
 ]
 
 const featuredPost = {
@@ -117,6 +117,78 @@ const blogPosts = [
     category: "Client Management",
     image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=300&fit=crop",
     tags: ["Communication", "Clients", "Projects"]
+  },
+  {
+    title: "Essential Tools Every Creative Freelancer Needs in 2024",
+    excerpt: "A comprehensive review of the must-have software, apps, and tools that can boost your productivity and streamline your creative workflow.",
+    slug: "essential-tools-creative-freelancer-2024",
+    author: "Sophie Chen",
+    authorImage: "https://images.unsplash.com/photo-1494790108755-2616b612b692?w=40&h=40&fit=crop&crop=face",
+    publishDate: "2024-11-28",
+    readTime: "11 min read",
+    category: "Technology",
+    image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&h=300&fit=crop",
+    tags: ["Tools", "Software", "Productivity"]
+  },
+  {
+    title: "Building a Strong Personal Brand as a Creative Professional",
+    excerpt: "Learn how to develop a compelling personal brand that attracts ideal clients and sets you apart from the competition.",
+    slug: "building-personal-brand-creative",
+    author: "Marcus Williams",
+    authorImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
+    publishDate: "2024-11-25",
+    readTime: "8 min read",
+    category: "Business Growth",
+    image: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&h=300&fit=crop",
+    tags: ["Branding", "Marketing", "Identity"]
+  },
+  {
+    title: "The Complete Guide to Freelance Contracts and Legal Protection",
+    excerpt: "Protect yourself and your business with essential contract templates, legal considerations, and best practices for freelance agreements.",
+    slug: "freelance-contracts-legal-guide",
+    author: "Rachel Park",
+    authorImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
+    publishDate: "2024-11-22",
+    readTime: "14 min read",
+    category: "Business Growth",
+    image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600&h=300&fit=crop",
+    tags: ["Legal", "Contracts", "Protection"]
+  },
+  {
+    title: "Maximizing Productivity with Creative Workflows and Automation",
+    excerpt: "Discover how to automate repetitive tasks, create efficient workflows, and focus more time on the creative work you love.",
+    slug: "productivity-creative-workflows-automation",
+    author: "Alex Thompson",
+    authorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
+    publishDate: "2024-11-20",
+    readTime: "10 min read",
+    category: "Workflow Tips",
+    image: "https://images.unsplash.com/photo-1434626881859-194d67b2b86f?w=600&h=300&fit=crop",
+    tags: ["Automation", "Workflow", "Efficiency"]
+  },
+  {
+    title: "Creating Multiple Revenue Streams as a Creative Freelancer",
+    excerpt: "Explore diverse income opportunities including passive income, digital products, courses, and recurring revenue models.",
+    slug: "multiple-revenue-streams-freelancer",
+    author: "Isabella Rodriguez",
+    authorImage: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=40&h=40&fit=crop&crop=face",
+    publishDate: "2024-11-18",
+    readTime: "13 min read",
+    category: "Business Growth",
+    image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=600&h=300&fit=crop",
+    tags: ["Revenue", "Passive Income", "Diversification"]
+  },
+  {
+    title: "Advanced Client Onboarding: Setting the Foundation for Success",
+    excerpt: "Master the art of client onboarding with proven frameworks that reduce project friction and exceed client expectations.",
+    slug: "advanced-client-onboarding-framework",
+    author: "Daniel Kim",
+    authorImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face",
+    publishDate: "2024-11-15",
+    readTime: "9 min read",
+    category: "Client Management",
+    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&h=300&fit=crop",
+    tags: ["Onboarding", "Process", "Client Success"]
   }
 ]
 
@@ -129,6 +201,28 @@ const stats = [
 
 export default function BlogPage() {
   const [isDemoOpen, setIsDemoOpen] = useState(false)
+  const [visiblePosts, setVisiblePosts] = useState(4)
+  const [email, setEmail] = useState('')
+  const [isSubscribed, setIsSubscribed] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleLoadMore = () => {
+    setIsLoading(true)
+    // Simulate loading delay
+    setTimeout(() => {
+      setVisiblePosts(prev => Math.min(prev + 4, blogPosts.length))
+      setIsLoading(false)
+    }, 500)
+  }
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (email.trim()) {
+      setIsSubscribed(true)
+      console.log('Newsletter signup:', email)
+      setEmail('')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -287,16 +381,29 @@ export default function BlogPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      <Input
-                        type="email"
-                        placeholder="Enter your email"
-                        suppressHydrationWarning
-                      />
-                      <Button className="w-full bg-indigo-600 hover:bg-indigo-700">
-                        Subscribe
-                      </Button>
-                    </div>
+                    {isSubscribed ? (
+                      <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                        <p className="text-sm">🎉 Thanks for subscribing! You'll receive our latest content in your inbox.</p>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleNewsletterSubmit} className="space-y-3">
+                        <Input
+                          type="email"
+                          placeholder="Enter your email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          suppressHydrationWarning
+                        />
+                        <Button 
+                          type="submit"
+                          className="w-full bg-indigo-600 hover:bg-indigo-700"
+                          disabled={!email.trim()}
+                        >
+                          Subscribe
+                        </Button>
+                      </form>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -311,7 +418,7 @@ export default function BlogPage() {
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-8">
-                  {blogPosts.map((post) => (
+                  {blogPosts.slice(0, visiblePosts).map((post) => (
                     <Card key={post.slug} className="overflow-hidden hover:shadow-lg transition-shadow">
                       <div className="relative h-48">
                         <Image
@@ -378,11 +485,18 @@ export default function BlogPage() {
                 </div>
 
                 {/* Load More Button */}
-                <div className="text-center mt-12">
-                  <Button variant="outline" size="lg">
-                    Load More Articles
-                  </Button>
-                </div>
+                {visiblePosts < blogPosts.length && (
+                  <div className="text-center mt-12">
+                    <Button 
+                      variant="outline" 
+                      size="lg"
+                      onClick={handleLoadMore}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? 'Loading...' : `Load More Articles (${blogPosts.length - visiblePosts} remaining)`}
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
