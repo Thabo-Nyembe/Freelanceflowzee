@@ -17,31 +17,57 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
   const [duration, setDuration] = useState(0)
   const videoRef = useRef<HTMLVideoElement>(null)
 
-  // Context7 best practice: useEffect with proper dependencies for video control
+  // Context7 best practice: useEffect with proper promise handling to prevent play/pause conflicts
   useEffect(() => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.play().catch(console.error)
-      } else {
-        videoRef.current.pause()
+    const video = videoRef.current
+    if (!video) return
+
+    // Prevent "play() request interrupted by pause()" error using Context7 patterns
+    if (isPlaying) {
+      const playPromise = video.play()
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          // Only log non-abort errors (Context7 pattern for handling interruptions)
+          if (error.name !== 'AbortError' && error.name !== 'NotAllowedError') {
+            console.warn('Video play failed:', error)
+          }
+        })
+      }
+    } else {
+      // Only pause if video is currently playing to avoid conflicts
+      if (!video.paused) {
+        video.pause()
       }
     }
   }, [isPlaying])
 
-  // Context7 pattern: Reset state when modal closes
+  // Context7 pattern: Reset state when modal closes with proper cleanup
   useEffect(() => {
     if (!isOpen) {
       setIsPlaying(false)
       setCurrentTime(0)
-      if (videoRef.current) {
-        videoRef.current.pause()
-        videoRef.current.currentTime = 0
+      const video = videoRef.current
+      if (video && !video.paused) {
+        video.pause()
+        // Small delay to ensure pause completes before resetting time
+        setTimeout(() => {
+          if (video) {
+            video.currentTime = 0
+          }
+        }, 100)
       }
     }
   }, [isOpen])
 
+  // Context7 pattern: Debounced toggle to prevent rapid clicking issues
   const togglePlayPause = () => {
-    setIsPlaying(!isPlaying)
+    const video = videoRef.current
+    if (!video) return
+    
+    // Only toggle if video is ready and not in a transitional state
+    if (video.readyState >= 1) {
+      setIsPlaying(!isPlaying)
+    }
   }
 
   const toggleMute = () => {
