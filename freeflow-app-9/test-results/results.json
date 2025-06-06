@@ -1,0 +1,310 @@
+{
+  "config": {
+    "configFile": "/Users/thabonyembe/Documents/freeflow-app-9/playwright.config.ts",
+    "rootDir": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": "/Users/thabonyembe/Documents/freeflow-app-9/tests/global-setup.ts",
+    "globalTeardown": "/Users/thabonyembe/Documents/freeflow-app-9/tests/global-teardown.ts",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {},
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "open": "never"
+        }
+      ],
+      [
+        "/Users/thabonyembe/Documents/freeflow-app-9/scripts/context7-reporter.js",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/results.json"
+        }
+      ],
+      [
+        "junit",
+        {
+          "outputFile": "test-results/junit.xml"
+        }
+      ],
+      [
+        "line",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 15000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/thabonyembe/Documents/freeflow-app-9/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/thabonyembe/Documents/freeflow-app-9/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/thabonyembe/Documents/freeflow-app-9/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/thabonyembe/Documents/freeflow-app-9/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "id": "Mobile Chrome",
+        "name": "Mobile Chrome",
+        "testDir": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/thabonyembe/Documents/freeflow-app-9/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "id": "Mobile Safari",
+        "name": "Mobile Safari",
+        "testDir": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "version": "1.41.2",
+    "workers": 4,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3001",
+      "reuseExistingServer": true,
+      "timeout": 120000,
+      "stdout": "ignore",
+      "stderr": "pipe"
+    }
+  },
+  "suites": [],
+  "errors": [
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 26,
+        "column": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:26\n\n\u001b[0m \u001b[90m 24 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 25 |\u001b[39m   test\u001b[33m.\u001b[39mdescribe(\u001b[32m'📱 Core Functionality'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 26 |\u001b[39m     test(\u001b[32m'should display all hero section elements'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 27 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 28 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 29 |\u001b[39m       \u001b[36mconst\u001b[39m heroElements \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mverifyHeroSection()\u001b[33m;\u001b[39m\u001b[0m"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 36,
+        "column": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:36\n\n\u001b[0m \u001b[90m 34 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 35 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 36 |\u001b[39m     test(\u001b[32m'should display all features section elements'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 37 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 38 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 39 |\u001b[39m       \u001b[36mconst\u001b[39m featuresElements \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mverifyFeaturesSection()\u001b[33m;\u001b[39m\u001b[0m"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 48,
+        "column": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:48\n\n\u001b[0m \u001b[90m 46 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 47 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 48 |\u001b[39m     test(\u001b[32m'should display all pricing section elements'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 49 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 50 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 51 |\u001b[39m       \u001b[36mconst\u001b[39m pricingElements \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mverifyPricingSection()\u001b[33m;\u001b[39m\u001b[0m"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 152,
+        "column": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:152\n\n\u001b[0m \u001b[90m 150 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 151 |\u001b[39m   test\u001b[33m.\u001b[39mdescribe(\u001b[32m'♿ Accessibility & SEO'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 152 |\u001b[39m     test(\u001b[32m'should have proper heading hierarchy'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 153 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 154 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 155 |\u001b[39m       \u001b[36mconst\u001b[39m accessibility \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mcheckAccessibility()\u001b[33m;\u001b[39m\u001b[0m"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 162,
+        "column": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:162\n\n\u001b[0m \u001b[90m 160 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 161 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 162 |\u001b[39m     test(\u001b[32m'should have proper button labels'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 163 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 164 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 165 |\u001b[39m       \u001b[36mconst\u001b[39m accessibility \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mcheckAccessibility()\u001b[33m;\u001b[39m\u001b[0m"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 172,
+        "column": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:172\n\n\u001b[0m \u001b[90m 170 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 171 |\u001b[39m   test\u001b[33m.\u001b[39mdescribe(\u001b[32m'📱 Responsive Design'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 172 |\u001b[39m     test(\u001b[32m'should be responsive on mobile viewport'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage\u001b[33m,\u001b[39m mobileViewport }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 173 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mpage\u001b[33m.\u001b[39msetViewportSize(mobileViewport)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 174 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 175 |\u001b[39m       \u001b[0m"
+    },
+    {
+      "message": "Test has unknown parameter \"mobileViewport\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 172,
+        "column": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:172\n\n\u001b[0m \u001b[90m 170 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 171 |\u001b[39m   test\u001b[33m.\u001b[39mdescribe(\u001b[32m'📱 Responsive Design'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 172 |\u001b[39m     test(\u001b[32m'should be responsive on mobile viewport'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage\u001b[33m,\u001b[39m mobileViewport }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 173 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mpage\u001b[33m.\u001b[39msetViewportSize(mobileViewport)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 174 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 175 |\u001b[39m       \u001b[0m"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 182,
+        "column": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:182\n\n\u001b[0m \u001b[90m 180 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 181 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 182 |\u001b[39m     test(\u001b[32m'should be responsive on tablet viewport'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 183 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mpage\u001b[33m.\u001b[39msetViewportSize({ width\u001b[33m:\u001b[39m \u001b[35m768\u001b[39m\u001b[33m,\u001b[39m height\u001b[33m:\u001b[39m \u001b[35m1024\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 184 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 185 |\u001b[39m       \u001b[0m"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 194,
+        "column": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:194\n\n\u001b[0m \u001b[90m 192 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 193 |\u001b[39m   test\u001b[33m.\u001b[39mdescribe(\u001b[32m'⚡ Performance'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 194 |\u001b[39m     test(\u001b[32m'should load within acceptable time'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 195 |\u001b[39m       \u001b[36mconst\u001b[39m loadTime \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mmeasureLoadTime()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 196 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 197 |\u001b[39m       expect(loadTime)\u001b[33m.\u001b[39mtoBeLessThan(\u001b[35m5000\u001b[39m)\u001b[33m;\u001b[39m \u001b[90m// 5 seconds\u001b[39m\u001b[0m"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 200,
+        "column": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:200\n\n\u001b[0m \u001b[90m 198 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 199 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 200 |\u001b[39m     test(\u001b[32m'should handle animations smoothly'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 201 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 202 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mwaitForAnimations()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 203 |\u001b[39m       \u001b[0m"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 210,
+        "column": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:210\n\n\u001b[0m \u001b[90m 208 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 209 |\u001b[39m   test\u001b[33m.\u001b[39mdescribe(\u001b[32m'🔄 Scrolling & Sections'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 210 |\u001b[39m     test(\u001b[32m'should scroll to features section'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 211 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 212 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mscrollToFeatures()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 213 |\u001b[39m       \u001b[0m"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 217,
+        "column": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:217\n\n\u001b[0m \u001b[90m 215 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 216 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 217 |\u001b[39m     test(\u001b[32m'should scroll to pricing section'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 218 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 219 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mscrollToPricing()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 220 |\u001b[39m       \u001b[0m"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 224,
+        "column": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:224\n\n\u001b[0m \u001b[90m 222 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 223 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 224 |\u001b[39m     test(\u001b[32m'should scroll to how it works section'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 225 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 226 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mscrollToHowItWorks()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 227 |\u001b[39m       \u001b[0m"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 233,
+        "column": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:233\n\n\u001b[0m \u001b[90m 231 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 232 |\u001b[39m   test\u001b[33m.\u001b[39mdescribe(\u001b[32m'🎯 Edge Cases'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 233 |\u001b[39m     test(\u001b[32m'should handle demo button click'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 234 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 235 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mclickWatchDemo()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 236 |\u001b[39m       \u001b[0m"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 241,
+        "column": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:241\n\n\u001b[0m \u001b[90m 239 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 240 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 241 |\u001b[39m     test(\u001b[32m'should handle pricing plan selections'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 242 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 243 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 244 |\u001b[39m       \u001b[90m// Test free plan\u001b[39m\u001b[0m"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 254,
+        "column": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:254\n\n\u001b[0m \u001b[90m 252 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 253 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 254 |\u001b[39m     test(\u001b[32m'should handle rapid navigation'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 255 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 256 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 257 |\u001b[39m       \u001b[90m// Rapid navigation test\u001b[39m\u001b[0m"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 269,
+        "column": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:269\n\n\u001b[0m \u001b[90m 267 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 268 |\u001b[39m   test\u001b[33m.\u001b[39mdescribe(\u001b[32m'🌐 Cross-browser Compatibility'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 269 |\u001b[39m     test(\u001b[32m'should display correctly in different viewports'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 270 |\u001b[39m       \u001b[36mconst\u001b[39m viewports \u001b[33m=\u001b[39m [\u001b[0m\n\u001b[0m \u001b[90m 271 |\u001b[39m         { width\u001b[33m:\u001b[39m \u001b[35m1920\u001b[39m\u001b[33m,\u001b[39m height\u001b[33m:\u001b[39m \u001b[35m1080\u001b[39m }\u001b[33m,\u001b[39m \u001b[90m// Desktop\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 272 |\u001b[39m         { width\u001b[33m:\u001b[39m \u001b[35m1366\u001b[39m\u001b[33m,\u001b[39m height\u001b[33m:\u001b[39m \u001b[35m768\u001b[39m }\u001b[33m,\u001b[39m  \u001b[90m// Laptop\u001b[39m\u001b[0m"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 288,
+        "column": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:288\n\n\u001b[0m \u001b[90m 286 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 287 |\u001b[39m   test\u001b[33m.\u001b[39mdescribe(\u001b[32m'🔒 Security & Privacy'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 288 |\u001b[39m     test(\u001b[32m'should not expose sensitive information'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 289 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 290 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 291 |\u001b[39m       \u001b[90m// Check page source for sensitive data\u001b[39m\u001b[0m"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 299,
+        "column": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:299\n\n\u001b[0m \u001b[90m 297 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 298 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 299 |\u001b[39m     test(\u001b[32m'should have secure links'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 300 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 301 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 302 |\u001b[39m       \u001b[90m// Check all external links have proper attributes\u001b[39m\u001b[0m"
+    }
+  ],
+  "stats": {
+    "startTime": "2025-06-06T19:42:08.200Z",
+    "duration": 4546.215,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

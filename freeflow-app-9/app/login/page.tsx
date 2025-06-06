@@ -51,7 +51,9 @@ function LoginForm() {
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="mx-auto w-full max-w-md space-y-6 rounded-lg border bg-card p-6 shadow-lg">
         <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold">Welcome to FreeflowZee</h1>
+          <Link href="/" className="inline-block">
+            <h1 className="text-3xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors cursor-pointer">FreeflowZee</h1>
+          </Link>
           <p className="text-muted-foreground">
             Sign in to your account to continue
           </p>
