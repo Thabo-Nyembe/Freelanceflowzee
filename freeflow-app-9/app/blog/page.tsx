@@ -21,7 +21,8 @@ import {
   Users,
   Lightbulb,
   Target,
-  Zap
+  Zap,
+  X
 } from 'lucide-react'
 
 const categories = [
@@ -205,6 +206,7 @@ export default function BlogPage() {
   const [email, setEmail] = useState('')
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
 
   const handleLoadMore = () => {
     setIsLoading(true)
@@ -223,6 +225,18 @@ export default function BlogPage() {
       setEmail('')
     }
   }
+
+  // Filter posts based on search term
+  const filteredPosts = blogPosts.filter(post => {
+    if (!searchTerm) return true
+    const term = searchTerm.toLowerCase()
+    return (
+      post.title.toLowerCase().includes(term) ||
+      post.excerpt.toLowerCase().includes(term) ||
+      post.category.toLowerCase().includes(term) ||
+      post.tags.some(tag => tag.toLowerCase().includes(term))
+    )
+  })
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -247,9 +261,21 @@ export default function BlogPage() {
               <Input
                 type="text"
                 placeholder="Search articles, tips, and guides..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-12 pr-4 py-3 text-lg bg-white border-gray-300 focus:border-indigo-500 rounded-lg shadow-sm"
                 suppressHydrationWarning
               />
+              {searchTerm && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              )}
             </div>
           </div>
         </section>
@@ -417,8 +443,14 @@ export default function BlogPage() {
                   </Button>
                 </div>
 
+                {searchTerm && (
+                  <div className="mb-4 text-sm text-gray-600">
+                    Found {filteredPosts.length} article{filteredPosts.length !== 1 ? 's' : ''} for "{searchTerm}"
+                  </div>
+                )}
+
                 <div className="grid md:grid-cols-2 gap-8">
-                  {blogPosts.slice(0, visiblePosts).map((post) => (
+                  {filteredPosts.slice(0, visiblePosts).map((post) => (
                     <Card key={post.slug} className="overflow-hidden hover:shadow-lg transition-shadow">
                       <div className="relative h-48">
                         <Image
@@ -485,7 +517,7 @@ export default function BlogPage() {
                 </div>
 
                 {/* Load More Button */}
-                {visiblePosts < blogPosts.length && (
+                {visiblePosts < filteredPosts.length && (
                   <div className="text-center mt-12">
                     <Button 
                       variant="outline" 
@@ -493,7 +525,25 @@ export default function BlogPage() {
                       onClick={handleLoadMore}
                       disabled={isLoading}
                     >
-                      {isLoading ? 'Loading...' : `Load More Articles (${blogPosts.length - visiblePosts} remaining)`}
+                      {isLoading ? 'Loading...' : `Load More Articles (${filteredPosts.length - visiblePosts} remaining)`}
+                    </Button>
+                  </div>
+                )}
+
+                {filteredPosts.length === 0 && searchTerm && (
+                  <div className="text-center py-16">
+                    <div className="text-gray-400 mb-4">
+                      <Search className="w-16 h-16 mx-auto" />
+                    </div>
+                    <h3 className="text-xl font-medium text-gray-900 mb-2">No articles found</h3>
+                    <p className="text-gray-600 mb-4">
+                      Try adjusting your search terms or browse all categories.
+                    </p>
+                    <Button 
+                      variant="outline"
+                      onClick={() => setSearchTerm('')}
+                    >
+                      Clear Search
                     </Button>
                   </div>
                 )}

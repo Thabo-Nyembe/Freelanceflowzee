@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, use } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -317,9 +317,9 @@ const blogPosts = {
 }
 
 interface BlogPostPageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 export default function BlogPostPage({ params }: BlogPostPageProps) {
@@ -327,7 +327,9 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [email, setEmail] = useState('')
   
-  const post = blogPosts[params.slug as keyof typeof blogPosts]
+  // Unwrap the Promise using React.use()
+  const { slug } = use(params)
+  const post = blogPosts[slug as keyof typeof blogPosts]
   
   if (!post) {
     notFound()
@@ -341,7 +343,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
   }
 
   const handleShare = (platform: string) => {
-    const url = `${window.location.origin}/blog/${params.slug}`
+    const url = `${window.location.origin}/blog/${slug}`
     const text = `Check out this article: ${post.title}`
     
     switch (platform) {
@@ -513,7 +515,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             
             <div className="grid md:grid-cols-3 gap-8">
               {Object.entries(blogPosts)
-                .filter(([slug]) => slug !== params.slug)
+                .filter(([postSlug]) => postSlug !== slug)
                 .slice(0, 3)
                 .map(([slug, relatedPost]) => (
                   <Card key={slug} className="overflow-hidden hover:shadow-lg transition-shadow">

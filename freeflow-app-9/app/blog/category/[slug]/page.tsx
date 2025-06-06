@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, use } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -211,9 +211,9 @@ const allBlogPosts = [
 ]
 
 interface CategoryPageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 export default function CategoryPage({ params }: CategoryPageProps) {
@@ -221,7 +221,9 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   
-  const category = categories[params.slug as keyof typeof categories]
+  // Unwrap the Promise using React.use()
+  const { slug } = use(params)
+  const category = categories[slug as keyof typeof categories]
   
   if (!category) {
     notFound()
@@ -229,7 +231,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
 
   // Filter posts based on category and search term
   const filteredPosts = allBlogPosts.filter(post => {
-    const matchesCategory = params.slug === 'all' || post.categorySlug === params.slug
+    const matchesCategory = slug === 'all' || post.categorySlug === slug
     const matchesSearch = searchTerm === '' || 
       post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -410,9 +412,9 @@ export default function CategoryPage({ params }: CategoryPageProps) {
             
             <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-4">
               {Object.entries(categories)
-                .filter(([slug]) => slug !== params.slug)
-                .map(([slug, cat]) => (
-                  <Link key={slug} href={`/blog/category/${slug}`}>
+                .filter(([catSlug]) => catSlug !== slug)
+                .map(([catSlug, cat]) => (
+                  <Link key={catSlug} href={`/blog/category/${catSlug}`}>
                     <Card className="hover:shadow-md transition-shadow text-center p-6">
                       <h4 className="font-medium text-gray-900 mb-2">{cat.name}</h4>
                       <p className="text-sm text-gray-600 mb-3">{cat.count} articles</p>
