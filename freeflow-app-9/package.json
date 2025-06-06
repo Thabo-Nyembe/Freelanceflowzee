@@ -46,9 +46,23 @@
     "test:performance": "playwright test --grep '@performance'",
     "test:accessibility": "playwright test --grep '@accessibility'",
     "test:report": "playwright show-report",
-    "test:trace": "playwright show-trace"
+    "test:trace": "playwright show-trace",
+    "test:comprehensive": "node scripts/comprehensive-test.js",
+    "test:comprehensive:verbose": "node scripts/comprehensive-test.js --verbose",
+    "test:comprehensive:build": "node scripts/comprehensive-test.js --build-only",
+    "test:comprehensive:fix": "node scripts/comprehensive-test.js --fix-only",
+    "test:fix-all": "node scripts/fix-all-test-issues.js",
+    "test:fix-critical": "node scripts/fix-critical-issues.js",
+    "test:context7": "node scripts/context7-test-integration.js",
+    "test:analyze": "node scripts/context7-test-integration.js analyze",
+    "test:unified": "npm run test:fix-all && npm run test:comprehensive",
+    "test:unified-runner": "node scripts/unified-test-runner.js",
+    "test:final": "node scripts/unified-test-runner.js",
+    "test:production-ready": "npm run test:fix-all && node scripts/unified-test-runner.js"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.825.0",
+    "@aws-sdk/s3-request-presigner": "^3.825.0",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
@@ -104,9 +118,11 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.6",
+    "web-vitals": "^5.0.2",
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.3.3",
     "@playwright/test": "1.41.2",
     "@types/node": "^22",
     "@types/react": "^19",

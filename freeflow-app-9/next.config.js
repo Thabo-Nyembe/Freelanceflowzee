@@ -4,7 +4,14 @@ const nextConfig = {
   serverExternalPackages: [],
   
   experimental: {
-    // Other experimental features can go here
+    // Optimize package imports for better tree-shaking
+    optimizePackageImports: [
+      '@supabase/supabase-js',
+      'lucide-react',
+      '@radix-ui/react-icons',
+      'framer-motion',
+      'date-fns'
+    ],
   },
   
   // Webpack configuration to fix module resolution
@@ -49,6 +56,28 @@ const nextConfig = {
       type: 'asset/resource',
     });
     
+    // Optimize bundle splitting
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        ...config.optimization.splitChunks,
+        cacheGroups: {
+          ...config.optimization.splitChunks.cacheGroups,
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+            priority: 10,
+          },
+          ui: {
+            test: /[\\/]components[\\/]ui[\\/]/,
+            name: 'ui',
+            chunks: 'all',
+            priority: 20,
+          },
+        },
+      }
+    }
+    
     return config;
   },
   
@@ -64,19 +93,54 @@ const nextConfig = {
   
   // Image optimization
   images: {
-    domains: ['localhost'],
-    unoptimized: process.env.NODE_ENV === 'development', // Disable optimization in dev for speed
+    // Extended cache TTL for better performance (31 days)
+    minimumCacheTTL: 2678400,
+    
+    // Optimized device sizes for responsive images
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    
+    // Image sizes for smaller images
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    
+    // Preferred image formats (WebP for better compression)
+    formats: ['image/webp'],
+    
+    // Quality levels for different use cases
+    qualities: [25, 50, 75, 90],
+    
+    // Allow local avatar images
+    localPatterns: [
+      {
+        pathname: '/avatars/**',
+        search: '',
+      },
+      {
+        pathname: '/images/**',
+        search: '',
+      },
+    ],
+    
+    // Remote patterns for external images (if needed)
+    remotePatterns: [
+      // Add external image domains here if needed
+      // {
+      //   protocol: 'https',
+      //   hostname: 'example.com',
+      //   port: '',
+      //   pathname: '/**',
+      // },
+    ],
   },
   
-  // Static file serving
-  async rewrites() {
-    return [
-      {
-        source: '/avatars/:path*',
-        destination: '/public/avatars/:path*',
-      },
-    ];
-  },
+  // Static file serving - Remove incorrect rewrite rule
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: '/avatars/:path*',
+  //       destination: '/public/avatars/:path*',
+  //     },
+  //   ];
+  // },
   
   // Enable strict mode
   reactStrictMode: true,
@@ -85,6 +149,27 @@ const nextConfig = {
   env: {
     CUSTOM_KEY: 'freeflowzee',
   },
+
+  // Compiler optimizations
+  compiler: {
+    // Remove console.log in production
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+
+  // Output configuration for better caching
+  generateEtags: true,
+  
+  // Compression
+  compress: true,
+
+  // SWC minification is enabled by default in Next.js 15
+  // swcMinify: true, // Deprecated in Next.js 15
 };
+
+// Bundle analyzer configuration
+// Bundle analyzer disabled due to installation issues
+// const withBundleAnalyzer = require('@next/bundle-analyzer')({
+//   enabled: process.env.ANALYZE === 'true',
+// })
 
 module.exports = nextConfig;
