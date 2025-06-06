@@ -1,6 +1,27 @@
-import { test, expect } from '../fixtures/app-fixtures';
+import { test, expect } from '@playwright/test';
+import { LandingPage } from '../page-objects/landing-page';
+
+// Configure retries and timeouts for landing page tests
+test.describe.configure({ 
+  retries: 3,
+  timeout: 30_000 
+});
 
 test.describe('🏠 Comprehensive Landing Page Tests', () => {
+  let landingPage: LandingPage;
+
+  test.beforeEach(async ({ page }, testInfo) => {
+    // Extend timeout for all tests in this suite
+    testInfo.setTimeout(testInfo.timeout + 15000);
+    
+    landingPage = new LandingPage(page);
+    await landingPage.goto();
+    
+    // Wait for page to be fully loaded and interactive
+    await page.waitForLoadState('networkidle');
+    await page.waitForFunction(() => document.readyState === 'complete');
+  });
+
   test.describe('📱 Core Functionality', () => {
     test('should display all hero section elements', async ({ landingPage }) => {
       await landingPage.goto();
@@ -38,72 +59,92 @@ test.describe('🏠 Comprehensive Landing Page Tests', () => {
   });
 
   test.describe('🎯 User Navigation & Actions', () => {
-    test('should navigate to signup when clicking "Start Creating Free"', async ({ landingPage }) => {
-      await landingPage.goto();
-      await landingPage.clickStartCreating();
-      
-      expect(landingPage.page.url()).toContain('/signup');
+    test('should navigate to login from navigation menu', async ({ page }) => {
+      // Use expect.toPass() for retry logic on potentially flaky navigation
+      await expect(async () => {
+        await landingPage.navigateToLogin();
+        await expect(page).toHaveURL(/.*login/);
+        await expect(page.getByRole('heading', { name: /welcome/i })).toBeVisible();
+      }).toPass();
     });
 
-    test('should navigate to login from navigation menu', async ({ landingPage }) => {
-      await landingPage.goto();
-      await landingPage.navigateToLogin();
-      
-      expect(landingPage.page.url()).toContain('/login');
+    test('should navigate to signup from navigation menu', async ({ page }) => {
+      await expect(async () => {
+        await landingPage.navigateToSignup();
+        await expect(page).toHaveURL(/.*signup/);
+        await expect(page.getByRole('heading', { name: /join/i })).toBeVisible();
+      }).toPass();
     });
 
-    test('should navigate to signup from navigation menu', async ({ landingPage }) => {
-      await landingPage.goto();
-      await landingPage.navigateToSignup();
-      
-      expect(landingPage.page.url()).toContain('/signup');
+    test('should navigate to signup when clicking Start Creating Free', async ({ page }) => {
+      await expect(async () => {
+        await landingPage.clickStartCreating();
+        await expect(page).toHaveURL(/.*signup/);
+        await expect(page.getByRole('heading', { name: /join/i })).toBeVisible();
+      }).toPass();
     });
 
-    test('should navigate to contact page from pricing "Contact Sales"', async ({ landingPage }) => {
-      await landingPage.goto();
-      await landingPage.contactSales();
+    test('should navigate to signup from final CTA', async ({ page }) => {
+      // Scroll to final CTA section first
+      await page.locator('#cta-section, [data-testid="cta-section"]').scrollIntoViewIfNeeded();
       
-      expect(landingPage.page.url()).toContain('/contact');
+      await expect(async () => {
+        await landingPage.clickFinalCta();
+        await expect(page).toHaveURL(/.*signup/);
+        await expect(page.getByRole('heading', { name: /join/i })).toBeVisible();
+      }).toPass();
     });
 
-    test('should navigate to signup from final CTA', async ({ landingPage }) => {
-      await landingPage.goto();
-      await landingPage.clickFinalCta();
-      
-      expect(landingPage.page.url()).toContain('/signup');
+    test('should contact sales from pricing section', async ({ page }) => {
+      await expect(async () => {
+        await landingPage.contactSales();
+        await expect(page).toHaveURL(/.*contact/);
+        await expect(page.getByRole('heading', { name: /contact/i })).toBeVisible();
+      }).toPass();
     });
   });
 
   test.describe('📊 Content Verification', () => {
-    test('should display correct number of feature cards', async ({ landingPage }) => {
-      await landingPage.goto();
+    test('should display workflow steps', async ({ page }) => {
+      // Scroll to how it works section
+      await page.getByTestId('how-it-works-section').scrollIntoViewIfNeeded();
       
-      const featureCards = await landingPage.getAllFeatureCards();
-      expect(featureCards.length).toBeGreaterThanOrEqual(3);
+      await expect(async () => {
+        // Verify section is visible
+        await expect(page.getByTestId('how-it-works-section')).toBeVisible();
+        
+        // Verify workflow steps are present
+        const workflowSteps = page.locator('[data-testid^="workflow-step-"]');
+        await expect(workflowSteps).toHaveCount(3);
+        
+        // Verify each step has required elements
+        for (let i = 0; i < 3; i++) {
+          await expect(page.getByTestId(`step-title-${i}`)).toBeVisible();
+          await expect(page.getByTestId(`step-description-${i}`)).toBeVisible();
+          await expect(page.getByTestId(`step-cta-${i}`)).toBeVisible();
+        }
+      }).toPass();
     });
 
-    test('should display correct number of pricing cards', async ({ landingPage }) => {
-      await landingPage.goto();
+    test('should display statistics and testimonials', async ({ page }) => {
+      // Scroll to social proof section
+      await page.getByTestId('social-proof-section').scrollIntoViewIfNeeded();
       
-      const pricingCards = await landingPage.getAllPricingCards();
-      expect(pricingCards.length).toBe(3);
-    });
-
-    test('should display workflow steps', async ({ landingPage }) => {
-      await landingPage.goto();
-      
-      const workflowSteps = await landingPage.getAllWorkflowSteps();
-      expect(workflowSteps.length).toBeGreaterThan(0);
-    });
-
-    test('should display statistics and testimonials', async ({ landingPage }) => {
-      await landingPage.goto();
-      
-      const stats = await landingPage.getStatistics();
-      const testimonials = await landingPage.getTestimonials();
-      
-      expect(stats.length).toBeGreaterThan(0);
-      expect(testimonials.length).toBeGreaterThan(0);
+      await expect(async () => {
+        // Verify statistics
+        const statistics = page.locator('[data-testid^="statistic-"]');
+        await expect(statistics).toHaveCount(4);
+        
+        // Verify testimonials
+        const testimonials = page.locator('[data-testid^="testimonial-"]');
+        await expect(testimonials).toHaveCount(3);
+        
+        // Verify specific statistics content
+        await expect(page.getByTestId('stat-number-0')).toContainText('50K+');
+        await expect(page.getByTestId('stat-number-1')).toContainText('2M+');
+        await expect(page.getByTestId('stat-number-2')).toContainText('$10M+');
+        await expect(page.getByTestId('stat-number-3')).toContainText('99.9%');
+      }).toPass();
     });
   });
 

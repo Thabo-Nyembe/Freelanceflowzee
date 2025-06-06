@@ -75,14 +75,14 @@ export class LandingPage {
     this.collaborationFeature = page.getByTestId('feature-card-1');
 
     // How it works section
-    this.howItWorksSection = page.locator('#how-it-works');
-    this.workflowSteps = page.locator('.grid.grid-cols-1.md\\:grid-cols-3.gap-8.relative > div');
-    this.learnMoreButtons = page.getByRole('button', { name: 'Get Started' });
+    this.howItWorksSection = page.getByTestId('how-it-works-section');
+    this.workflowSteps = page.locator('[data-testid^="workflow-step-"]');
+    this.learnMoreButtons = page.locator('[data-testid^="step-cta-"]');
 
     // Social proof section
-    this.socialProofSection = page.locator('#testimonials');
-    this.statistics = page.locator('.grid.grid-cols-2.md\\:grid-cols-4.gap-8 > div');
-    this.testimonials = page.locator('.grid.grid-cols-1.md\\:grid-cols-3.gap-8 > div').filter({ hasText: '"' });
+    this.socialProofSection = page.getByTestId('social-proof-section');
+    this.statistics = page.locator('[data-testid^="statistic-"]');
+    this.testimonials = page.locator('[data-testid^="testimonial-"]');
     this.customerLogos = page.locator('.flex.items-center.justify-center.gap-8');
 
     // Pricing section

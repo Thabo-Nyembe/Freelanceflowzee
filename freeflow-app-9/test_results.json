@@ -1,0 +1,296 @@
+
+> freeflowzee@0.1.0 test:e2e
+> NODE_OPTIONS='--max-old-space-size=8192' playwright test tests/e2e/comprehensive-landing.spec.ts --project=chromium --reporter=json
+
+🚀 Starting global test setup...
+✅ Test server is accessible
+✅ Global setup complete
+🧹 Running global test teardown...
+✅ Global teardown complete
+{
+  "config": {
+    "configFile": "/Users/thabonyembe/Documents/freeflow-app-9/playwright.config.ts",
+    "rootDir": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": "/Users/thabonyembe/Documents/freeflow-app-9/tests/global-setup.ts",
+    "globalTeardown": "/Users/thabonyembe/Documents/freeflow-app-9/tests/global-teardown.ts",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {},
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 15000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/thabonyembe/Documents/freeflow-app-9/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/thabonyembe/Documents/freeflow-app-9/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/thabonyembe/Documents/freeflow-app-9/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/thabonyembe/Documents/freeflow-app-9/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "id": "Mobile Chrome",
+        "name": "Mobile Chrome",
+        "testDir": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/thabonyembe/Documents/freeflow-app-9/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "id": "Mobile Safari",
+        "name": "Mobile Safari",
+        "testDir": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "version": "1.41.2",
+    "workers": 4,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3001",
+      "reuseExistingServer": true,
+      "timeout": 120000,
+      "stdout": "ignore",
+      "stderr": "pipe"
+    }
+  },
+  "suites": [],
+  "errors": [
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 26,
+        "column": 9
+      },
+      "snippet": "   at comprehensive-landing.spec.ts:26\n\n  24 |\n  25 |   test.describe('📱 Core Functionality', () => {\n> 26 |     test('should display all hero section elements', async ({ landingPage }) => {\n     |         ^\n  27 |       await landingPage.goto();\n  28 |       \n  29 |       const heroElements = await landingPage.verifyHeroSection();"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 36,
+        "column": 9
+      },
+      "snippet": "   at comprehensive-landing.spec.ts:36\n\n  34 |     });\n  35 |\n> 36 |     test('should display all features section elements', async ({ landingPage }) => {\n     |         ^\n  37 |       await landingPage.goto();\n  38 |       \n  39 |       const featuresElements = await landingPage.verifyFeaturesSection();"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 48,
+        "column": 9
+      },
+      "snippet": "   at comprehensive-landing.spec.ts:48\n\n  46 |     });\n  47 |\n> 48 |     test('should display all pricing section elements', async ({ landingPage }) => {\n     |         ^\n  49 |       await landingPage.goto();\n  50 |       \n  51 |       const pricingElements = await landingPage.verifyPricingSection();"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 152,
+        "column": 9
+      },
+      "snippet": "   at comprehensive-landing.spec.ts:152\n\n  150 |\n  151 |   test.describe('♿ Accessibility & SEO', () => {\n> 152 |     test('should have proper heading hierarchy', async ({ landingPage }) => {\n      |         ^\n  153 |       await landingPage.goto();\n  154 |       \n  155 |       const accessibility = await landingPage.checkAccessibility();"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 162,
+        "column": 9
+      },
+      "snippet": "   at comprehensive-landing.spec.ts:162\n\n  160 |     });\n  161 |\n> 162 |     test('should have proper button labels', async ({ landingPage }) => {\n      |         ^\n  163 |       await landingPage.goto();\n  164 |       \n  165 |       const accessibility = await landingPage.checkAccessibility();"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 172,
+        "column": 9
+      },
+      "snippet": "   at comprehensive-landing.spec.ts:172\n\n  170 |\n  171 |   test.describe('📱 Responsive Design', () => {\n> 172 |     test('should be responsive on mobile viewport', async ({ landingPage, mobileViewport }) => {\n      |         ^\n  173 |       await landingPage.page.setViewportSize(mobileViewport);\n  174 |       await landingPage.goto();\n  175 |       "
+    },
+    {
+      "message": "Test has unknown parameter \"mobileViewport\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 172,
+        "column": 9
+      },
+      "snippet": "   at comprehensive-landing.spec.ts:172\n\n  170 |\n  171 |   test.describe('📱 Responsive Design', () => {\n> 172 |     test('should be responsive on mobile viewport', async ({ landingPage, mobileViewport }) => {\n      |         ^\n  173 |       await landingPage.page.setViewportSize(mobileViewport);\n  174 |       await landingPage.goto();\n  175 |       "
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 182,
+        "column": 9
+      },
+      "snippet": "   at comprehensive-landing.spec.ts:182\n\n  180 |     });\n  181 |\n> 182 |     test('should be responsive on tablet viewport', async ({ landingPage }) => {\n      |         ^\n  183 |       await landingPage.page.setViewportSize({ width: 768, height: 1024 });\n  184 |       await landingPage.goto();\n  185 |       "
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 194,
+        "column": 9
+      },
+      "snippet": "   at comprehensive-landing.spec.ts:194\n\n  192 |\n  193 |   test.describe('⚡ Performance', () => {\n> 194 |     test('should load within acceptable time', async ({ landingPage }) => {\n      |         ^\n  195 |       const loadTime = await landingPage.measureLoadTime();\n  196 |       \n  197 |       expect(loadTime).toBeLessThan(5000); // 5 seconds"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 200,
+        "column": 9
+      },
+      "snippet": "   at comprehensive-landing.spec.ts:200\n\n  198 |     });\n  199 |\n> 200 |     test('should handle animations smoothly', async ({ landingPage }) => {\n      |         ^\n  201 |       await landingPage.goto();\n  202 |       await landingPage.waitForAnimations();\n  203 |       "
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 210,
+        "column": 9
+      },
+      "snippet": "   at comprehensive-landing.spec.ts:210\n\n  208 |\n  209 |   test.describe('🔄 Scrolling & Sections', () => {\n> 210 |     test('should scroll to features section', async ({ landingPage }) => {\n      |         ^\n  211 |       await landingPage.goto();\n  212 |       await landingPage.scrollToFeatures();\n  213 |       "
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 217,
+        "column": 9
+      },
+      "snippet": "   at comprehensive-landing.spec.ts:217\n\n  215 |     });\n  216 |\n> 217 |     test('should scroll to pricing section', async ({ landingPage }) => {\n      |         ^\n  218 |       await landingPage.goto();\n  219 |       await landingPage.scrollToPricing();\n  220 |       "
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 224,
+        "column": 9
+      },
+      "snippet": "   at comprehensive-landing.spec.ts:224\n\n  222 |     });\n  223 |\n> 224 |     test('should scroll to how it works section', async ({ landingPage }) => {\n      |         ^\n  225 |       await landingPage.goto();\n  226 |       await landingPage.scrollToHowItWorks();\n  227 |       "
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 233,
+        "column": 9
+      },
+      "snippet": "   at comprehensive-landing.spec.ts:233\n\n  231 |\n  232 |   test.describe('🎯 Edge Cases', () => {\n> 233 |     test('should handle demo button click', async ({ landingPage }) => {\n      |         ^\n  234 |       await landingPage.goto();\n  235 |       await landingPage.clickWatchDemo();\n  236 |       "
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 241,
+        "column": 9
+      },
+      "snippet": "   at comprehensive-landing.spec.ts:241\n\n  239 |     });\n  240 |\n> 241 |     test('should handle pricing plan selections', async ({ landingPage }) => {\n      |         ^\n  242 |       await landingPage.goto();\n  243 |       \n  244 |       // Test free plan"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 254,
+        "column": 9
+      },
+      "snippet": "   at comprehensive-landing.spec.ts:254\n\n  252 |     });\n  253 |\n> 254 |     test('should handle rapid navigation', async ({ landingPage }) => {\n      |         ^\n  255 |       await landingPage.goto();\n  256 |       \n  257 |       // Rapid navigation test"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 269,
+        "column": 9
+      },
+      "snippet": "   at comprehensive-landing.spec.ts:269\n\n  267 |\n  268 |   test.describe('🌐 Cross-browser Compatibility', () => {\n> 269 |     test('should display correctly in different viewports', async ({ landingPage }) => {\n      |         ^\n  270 |       const viewports = [\n  271 |         { width: 1920, height: 1080 }, // Desktop\n  272 |         { width: 1366, height: 768 },  // Laptop"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 288,
+        "column": 9
+      },
+      "snippet": "   at comprehensive-landing.spec.ts:288\n\n  286 |\n  287 |   test.describe('🔒 Security & Privacy', () => {\n> 288 |     test('should not expose sensitive information', async ({ landingPage }) => {\n      |         ^\n  289 |       await landingPage.goto();\n  290 |       \n  291 |       // Check page source for sensitive data"
+    },
+    {
+      "message": "Test has unknown parameter \"landingPage\".",
+      "location": {
+        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
+        "line": 299,
+        "column": 9
+      },
+      "snippet": "   at comprehensive-landing.spec.ts:299\n\n  297 |     });\n  298 |\n> 299 |     test('should have secure links', async ({ landingPage }) => {\n      |         ^\n  300 |       await landingPage.goto();\n  301 |       \n  302 |       // Check all external links have proper attributes"
+    }
+  ],
+  "stats": {
+    "startTime": "2025-06-06T18:11:42.607Z",
+    "duration": 4701.615,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

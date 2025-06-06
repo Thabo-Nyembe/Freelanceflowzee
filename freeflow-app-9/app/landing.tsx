@@ -216,35 +216,35 @@ function HowItWorksSection() {
   ]
 
   return (
-    <section id="how-it-works" className="py-24 bg-gradient-to-b from-gray-50 to-white">
+    <section id="how-it-works" data-testid="how-it-works-section" className="py-24 bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-20">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+          <h2 data-testid="how-it-works-title" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
             How it works
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p data-testid="how-it-works-subtitle" className="text-xl text-gray-600 max-w-3xl mx-auto">
             Three simple steps to transform your creative workflow
           </p>
         </div>
 
-        <div className="space-y-20">
+        <div data-testid="workflow-steps-container" className="space-y-20">
           {steps.map((step, index) => {
             const IconComponent = step.icon
             const isEven = index % 2 === 0
             
             return (
-              <div key={index} className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-12 lg:gap-20`}>
+              <div key={index} data-testid={`workflow-step-${index}`} className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-12 lg:gap-20`}>
                 <div className="flex-1 space-y-6">
                   <div className="flex items-center gap-4">
-                    <span className="text-6xl font-bold text-indigo-600/20">{step.number}</span>
+                    <span data-testid={`step-number-${index}`} className="text-6xl font-bold text-indigo-600/20">{step.number}</span>
                     <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center">
                       <IconComponent className="w-6 h-6 text-white" />
                     </div>
                   </div>
-                  <h3 className="text-3xl font-bold text-gray-900">{step.title}</h3>
-                  <p className="text-xl text-gray-600 leading-relaxed">{step.description}</p>
+                  <h3 data-testid={`step-title-${index}`} className="text-3xl font-bold text-gray-900">{step.title}</h3>
+                  <p data-testid={`step-description-${index}`} className="text-xl text-gray-600 leading-relaxed">{step.description}</p>
                   <Link href="/signup">
-                    <Button variant="outline" className="mt-4">
+                    <Button data-testid={`step-cta-${index}`} variant="outline" className="mt-4">
                       Get Started
                       <ChevronRight className="ml-2 w-4 h-4" />
                     </Button>
@@ -252,7 +252,7 @@ function HowItWorksSection() {
                 </div>
                 
                 <div className="flex-1">
-                  <div className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-8 aspect-video flex items-center justify-center">
+                  <div data-testid={`step-demo-${index}`} className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-8 aspect-video flex items-center justify-center">
                     <div className="text-center">
                       <IconComponent className="w-20 h-20 mx-auto mb-4 text-indigo-600" />
                       <p className="text-indigo-600 font-medium">Demo Preview</p>
@@ -305,31 +305,31 @@ function SocialProofSection() {
   ]
 
   return (
-    <section id="testimonials" className="py-24 bg-white">
+    <section id="testimonials" data-testid="social-proof-section" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+        <div data-testid="statistics-grid" className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
           {stats.map((stat, index) => (
-            <div key={index} className="text-center">
-              <div className="text-4xl lg:text-5xl font-bold text-indigo-600 mb-2">{stat.number}</div>
-              <div className="text-gray-600 font-medium">{stat.label}</div>
+            <div key={index} data-testid={`statistic-${index}`} className="text-center">
+              <div data-testid={`stat-number-${index}`} className="text-4xl lg:text-5xl font-bold text-indigo-600 mb-2">{stat.number}</div>
+              <div data-testid={`stat-label-${index}`} className="text-gray-600 font-medium">{stat.label}</div>
             </div>
           ))}
         </div>
 
         {/* Testimonials */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+          <h2 data-testid="testimonials-title" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
             Loved by creators worldwide
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p data-testid="testimonials-subtitle" className="text-xl text-gray-600 max-w-3xl mx-auto">
             Join thousands of creatives who've transformed their workflow
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div data-testid="testimonials-grid" className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
-            <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card key={index} data-testid={`testimonial-${index}`} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardContent className="p-8">
                 <div className="flex mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
@@ -337,14 +337,14 @@ function SocialProofSection() {
                   ))}
                 </div>
                 <Quote className="w-8 h-8 text-indigo-600/20 mb-4" />
-                <p className="text-gray-700 mb-6 leading-relaxed italic">
+                <p data-testid={`testimonial-quote-${index}`} className="text-gray-700 mb-6 leading-relaxed italic">
                   "{testimonial.quote}"
                 </p>
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full mr-4"></div>
                   <div>
-                    <div className="font-semibold text-gray-900">{testimonial.author}</div>
-                    <div className="text-sm text-gray-600">{testimonial.role}, {testimonial.company}</div>
+                    <div data-testid={`testimonial-author-${index}`} className="font-semibold text-gray-900">{testimonial.author}</div>
+                    <div data-testid={`testimonial-role-${index}`} className="text-sm text-gray-600">{testimonial.role}, {testimonial.company}</div>
                   </div>
                 </div>
               </CardContent>
