@@ -6,6 +6,11 @@ import { updateSession } from '@/lib/supabase/middleware'
 const authAttempts = new Map<string, { count: number; lastAttempt: number }>()
 
 function checkAuthRateLimit(ip: string): boolean {
+  // Skip rate limiting entirely in development for better UX
+  if (process.env.NODE_ENV === 'development') {
+    return true
+  }
+
   const now = Date.now()
   const attempt = authAttempts.get(ip)
 
@@ -20,8 +25,8 @@ function checkAuthRateLimit(ip: string): boolean {
     return true
   }
 
-  // Allow more attempts in development, fewer in production
-  const maxAttempts = process.env.NODE_ENV === 'development' ? 100 : 20
+  // Production-only rate limiting
+  const maxAttempts = 20
   if (attempt.count >= maxAttempts) {
     return false
   }
