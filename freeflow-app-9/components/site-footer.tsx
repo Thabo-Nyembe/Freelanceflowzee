@@ -34,11 +34,52 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
     window.location.href = 'tel:+15551234567'
   }
 
+  const handleAddressClick = () => {
+    // Open in Google Maps with the address
+    const address = encodeURIComponent('San Francisco, CA')
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${address}`
+    window.open(mapsUrl, '_blank', 'noopener,noreferrer')
+  }
+
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // Newsletter signup logic here
     alert('Thank you for subscribing to our newsletter!')
   }
+
+  // Social media links with real URLs
+  const socialLinks = [
+    { 
+      icon: Twitter, 
+      href: 'https://twitter.com/freelanceflowzee', 
+      label: 'Twitter',
+      handle: '@freelanceflowzee' 
+    },
+    { 
+      icon: Linkedin, 
+      href: 'https://linkedin.com/company/freelanceflowzee', 
+      label: 'LinkedIn',
+      handle: 'freelanceflowzee' 
+    },
+    { 
+      icon: Github, 
+      href: 'https://github.com/freelanceflowzee', 
+      label: 'GitHub',
+      handle: 'freelanceflowzee' 
+    },
+    { 
+      icon: Facebook, 
+      href: 'https://facebook.com/freelanceflowzee', 
+      label: 'Facebook',
+      handle: 'freelanceflowzee' 
+    },
+    { 
+      icon: Instagram, 
+      href: 'https://instagram.com/freelanceflowzee', 
+      label: 'Instagram',
+      handle: '@freelanceflowzee' 
+    },
+  ]
 
   if (variant === 'minimal') {
     return (
@@ -112,10 +153,18 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
                     <ExternalLink className="w-3 h-3" />
                   </div>
                 </Button>
-                <div className="flex items-center space-x-3 text-gray-400">
-                  <MapPin className="w-4 h-4" />
-                  <span className="text-sm">San Francisco, CA</span>
-                </div>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start h-auto p-0 text-gray-400 hover:text-white hover:bg-transparent"
+                  onClick={handleAddressClick}
+                  title="Open in Google Maps"
+                >
+                  <div className="flex items-center space-x-3">
+                    <MapPin className="w-4 h-4" />
+                    <span className="text-sm">San Francisco, CA</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </div>
+                </Button>
               </div>
             </div>
 
@@ -153,10 +202,10 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
               <ul className="space-y-4">
                 {[
                   { href: '/contact', label: 'Contact', icon: Mail },
-                  { href: '/contact', label: 'Support', icon: HelpCircle },
-                  { href: '#', label: 'Privacy Policy', icon: Shield },
-                  { href: '#', label: 'Terms of Service', icon: FileText },
-                  { href: '#', label: 'Blog' },
+                  { href: '/support', label: 'Support', icon: HelpCircle },
+                  { href: '/privacy', label: 'Privacy Policy', icon: Shield },
+                  { href: '/terms', label: 'Terms of Service', icon: FileText },
+                  { href: '/blog', label: 'Blog' },
                 ].map((item) => (
                   <li key={item.href}>
                     <Link 
@@ -202,18 +251,14 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
                 <div>
                   <h5 className="text-sm font-medium text-white mb-3">Follow Us</h5>
                   <div className="flex space-x-3">
-                    {[
-                      { icon: Twitter, href: '#', label: 'Twitter' },
-                      { icon: Linkedin, href: '#', label: 'LinkedIn' },
-                      { icon: Github, href: '#', label: 'GitHub' },
-                      { icon: Facebook, href: '#', label: 'Facebook' },
-                      { icon: Instagram, href: '#', label: 'Instagram' },
-                    ].map((social) => (
+                    {socialLinks.map((social) => (
                       <Link
                         key={social.label}
                         href={social.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="text-gray-400 hover:text-white transition-colors"
-                        title={social.label}
+                        title={`Follow us on ${social.label} (${social.handle})`}
                       >
                         <social.icon className="w-5 h-5" />
                       </Link>
@@ -231,11 +276,11 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
             <div className="flex items-center space-x-6 text-sm text-gray-400">
               <span>© 2024 FreeflowZee. All rights reserved.</span>
               <span className="hidden md:block">•</span>
-              <Link href="#" className="hover:text-white transition-colors">
+              <Link href="/privacy" className="hover:text-white transition-colors">
                 Privacy Policy
               </Link>
               <span className="hidden md:block">•</span>
-              <Link href="#" className="hover:text-white transition-colors">
+              <Link href="/terms" className="hover:text-white transition-colors">
                 Terms of Service
               </Link>
             </div>

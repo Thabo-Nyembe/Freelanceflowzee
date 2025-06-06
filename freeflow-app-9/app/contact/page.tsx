@@ -7,11 +7,13 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { DemoModal } from '@/components/demo-modal'
 import { Mail, Phone, MapPin, Send, ArrowLeft, ExternalLink } from 'lucide-react'
 
 export default function ContactPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [isDemoOpen, setIsDemoOpen] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -135,11 +137,13 @@ export default function ContactPage() {
                       Start Free Trial
                     </Button>
                   </Link>
-                  <Link href="/payment" className="w-full">
-                    <Button variant="outline" className="w-full">
-                      View Demo Project
-                    </Button>
-                  </Link>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => setIsDemoOpen(true)}
+                  >
+                    View Demo Project
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -293,6 +297,8 @@ export default function ContactPage() {
           </div>
         </div>
       </div>
+      
+      <DemoModal isOpen={isDemoOpen} onClose={() => setIsDemoOpen(false)} />
     </div>
   )
 } 

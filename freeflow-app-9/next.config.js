@@ -108,7 +108,7 @@ const nextConfig = {
     // Quality levels for different use cases
     qualities: [25, 50, 75, 90],
     
-    // Allow local avatar images
+    // Allow local avatar images and API placeholders
     localPatterns: [
       {
         pathname: '/avatars/**',
@@ -116,6 +116,10 @@ const nextConfig = {
       },
       {
         pathname: '/images/**',
+        search: '',
+      },
+      {
+        pathname: '/api/**',
         search: '',
       },
     ],
