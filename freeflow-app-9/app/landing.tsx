@@ -75,10 +75,12 @@ function HeroSection() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-            <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
-              Start Creating Free
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
+            <Link href="/signup">
+              <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                Start Creating Free
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </Link>
             
             <Button size="lg" variant="outline" className="border-2 border-gray-300 hover:border-indigo-300 px-8 py-4 text-lg font-semibold rounded-xl backdrop-blur-sm bg-white/80">
               <Play className="mr-2 w-5 h-5" />
@@ -154,7 +156,7 @@ function FeaturesSection() {
   ]
 
   return (
-    <section className="py-24 bg-white">
+    <section id="features" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-20">
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
@@ -214,7 +216,7 @@ function HowItWorksSection() {
   ]
 
   return (
-    <section className="py-24 bg-gradient-to-b from-gray-50 to-white">
+    <section id="how-it-works" className="py-24 bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-20">
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
@@ -241,10 +243,12 @@ function HowItWorksSection() {
                   </div>
                   <h3 className="text-3xl font-bold text-gray-900">{step.title}</h3>
                   <p className="text-xl text-gray-600 leading-relaxed">{step.description}</p>
-                  <Button variant="outline" className="mt-4">
-                    Learn more
-                    <ChevronRight className="ml-2 w-4 h-4" />
-                  </Button>
+                  <Link href="/signup">
+                    <Button variant="outline" className="mt-4">
+                      Get Started
+                      <ChevronRight className="ml-2 w-4 h-4" />
+                    </Button>
+                  </Link>
                 </div>
                 
                 <div className="flex-1">
@@ -301,7 +305,7 @@ function SocialProofSection() {
   ]
 
   return (
-    <section className="py-24 bg-white">
+    <section id="testimonials" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
@@ -401,7 +405,7 @@ function PricingSection() {
   ]
 
   return (
-    <section className="py-24 bg-gradient-to-b from-gray-50 to-white">
+    <section id="pricing" className="py-24 bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-20">
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
@@ -439,12 +443,14 @@ function PricingSection() {
                   ))}
                 </ul>
 
-                <Button 
-                  className={`w-full ${plan.popular ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-white border-2 border-gray-200 text-gray-900 hover:bg-gray-50'}`}
-                  size="lg"
-                >
-                  {plan.cta}
-                </Button>
+                <Link href={plan.name === 'Agency' ? '/contact' : '/signup'}>
+                  <Button 
+                    className={`w-full ${plan.popular ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-white border-2 border-gray-200 text-gray-900 hover:bg-gray-50'}`}
+                    size="lg"
+                  >
+                    {plan.cta}
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           ))}
@@ -473,13 +479,17 @@ function CTASection() {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-xl">
-            Start Free Today
-            <ArrowRight className="ml-2 w-5 h-5" />
-          </Button>
-          <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-indigo-600 px-8 py-4 text-lg font-semibold rounded-xl">
-            Talk to Sales
-          </Button>
+          <Link href="/signup">
+            <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-xl">
+              Start Free Today
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </Link>
+          <Link href="/contact">
+            <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-indigo-600 px-8 py-4 text-lg font-semibold rounded-xl">
+              Talk to Sales
+            </Button>
+          </Link>
         </div>
 
         <p className="text-indigo-200 mt-6 text-sm">
@@ -542,15 +552,14 @@ function Navigation() {
 // Main landing page component
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-      <h1 className="text-6xl font-bold text-center pt-32">
-        Create, Share & 
-        <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> Get Paid</span>
-      </h1>
-      <p className="text-xl text-center text-gray-600 mt-8 max-w-4xl mx-auto">
-        The all-in-one platform for creatives and freelancers. Upload your work, collaborate with clients, 
-        and get paid faster than ever before.
-      </p>
+    <div className="min-h-screen">
+      <Navigation />
+      <HeroSection />
+      <FeaturesSection />
+      <HowItWorksSection />
+      <SocialProofSection />
+      <PricingSection />
+      <CTASection />
     </div>
   )
 } 
