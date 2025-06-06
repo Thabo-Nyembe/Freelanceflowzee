@@ -184,7 +184,7 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
                   { href: '/#features', label: 'Features' },
                   { href: '/#how-it-works', label: 'How it Works' },
                   { href: '/#pricing', label: 'Pricing' },
-                  { href: '/payment', label: 'Demo Project', icon: ExternalLink },
+                  { href: '/demo', label: 'Demo Project', icon: ExternalLink },
                   { href: '/dashboard', label: 'Dashboard', icon: Home },
                 ].map((item) => (
                   <li key={item.href}>
