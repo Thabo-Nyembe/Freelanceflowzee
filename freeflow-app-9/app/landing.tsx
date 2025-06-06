@@ -205,6 +205,8 @@ function FeaturesSection() {
 
 // How it works section inspired by Dropbox's clean design
 function HowItWorksSection() {
+  const [isDemoOpen, setIsDemoOpen] = useState(false)
+  
   const steps = [
     {
       number: "01",
@@ -266,10 +268,15 @@ function HowItWorksSection() {
                 </div>
                 
                 <div className="flex-1">
-                  <div data-testid={`step-demo-${index}`} className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-8 aspect-video flex items-center justify-center">
+                  <div 
+                    data-testid={`step-demo-${index}`} 
+                    className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-8 aspect-video flex items-center justify-center cursor-pointer hover:from-indigo-200 hover:to-purple-200 transition-all duration-300 group"
+                    onClick={() => setIsDemoOpen(true)}
+                  >
                     <div className="text-center">
-                      <IconComponent className="w-20 h-20 mx-auto mb-4 text-indigo-600" />
-                      <p className="text-indigo-600 font-medium">Demo Preview</p>
+                      <IconComponent className="w-20 h-20 mx-auto mb-4 text-indigo-600 group-hover:scale-110 transition-transform duration-300" />
+                      <p className="text-indigo-600 font-medium group-hover:text-indigo-700">Demo Preview</p>
+                      <p className="text-indigo-500 text-sm mt-2 opacity-75">Click to watch</p>
                     </div>
                   </div>
                 </div>
@@ -278,6 +285,12 @@ function HowItWorksSection() {
           })}
         </div>
       </div>
+      
+      {/* Demo Modal */}
+      <DemoModal 
+        isOpen={isDemoOpen} 
+        onClose={() => setIsDemoOpen(false)} 
+      />
     </section>
   )
 }
