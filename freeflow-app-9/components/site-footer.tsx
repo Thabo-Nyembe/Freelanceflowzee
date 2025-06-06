@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -26,6 +27,8 @@ interface SiteFooterProps {
 }
 
 export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
+  const [email, setEmail] = useState('')
+  const [isSubscribed, setIsSubscribed] = useState(false)
   const handleEmailClick = () => {
     window.location.href = 'mailto:hello@freelanceflowzee.com?subject=Contact from FreeflowZee Website'
   }
@@ -43,8 +46,11 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Newsletter signup logic here
-    alert('Thank you for subscribing to our newsletter!')
+    if (email.trim()) {
+      setIsSubscribed(true)
+      console.log('Newsletter signup:', email)
+      setEmail('')
+    }
   }
 
   // Social media links with real URLs
@@ -231,21 +237,30 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
                 </p>
                 
                 {/* Newsletter Signup */}
-                <form onSubmit={handleNewsletterSubmit} className="space-y-3">
-                  <Input
-                    type="email"
-                    placeholder="Enter your email"
-                    className="bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-indigo-500"
-                    required
-                    suppressHydrationWarning
-                  />
-                  <Button 
-                    type="submit"
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
-                  >
-                    Subscribe
-                  </Button>
-                </form>
+                {isSubscribed ? (
+                  <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                    <p className="font-medium">🎉 Thanks for subscribing!</p>
+                    <p className="text-sm">You'll receive our latest content in your inbox.</p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleNewsletterSubmit} className="space-y-3">
+                    <Input
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-indigo-500"
+                      required
+                      suppressHydrationWarning
+                    />
+                    <Button 
+                      type="submit"
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                    >
+                      Subscribe
+                    </Button>
+                  </form>
+                )}
 
                 {/* Social Links */}
                 <div>

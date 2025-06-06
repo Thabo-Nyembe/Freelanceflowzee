@@ -37,11 +37,11 @@ const featuredPost = {
   excerpt: "Discover proven strategies to optimize your creative process, reduce time spent on administrative tasks, and focus more on what you love doing.",
   slug: "streamlining-creative-workflow-2024",
   author: "Sarah Johnson",
-  authorImage: "/api/placeholder/40/40",
+  authorImage: "https://images.unsplash.com/photo-1494790108755-2616b612b692?w=40&h=40&fit=crop&crop=face",
   publishDate: "2024-12-15",
   readTime: "8 min read",
   category: "Workflow Tips",
-  image: "/api/placeholder/800/400",
+  image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=400&fit=crop",
   featured: true
 }
 
@@ -51,11 +51,11 @@ const blogPosts = [
     excerpt: "Learn the fundamentals of pricing creative work, from hourly rates to project-based pricing strategies that maximize your value.",
     slug: "pricing-creative-services-guide",
     author: "Michael Chen",
-    authorImage: "/api/placeholder/40/40",
+    authorImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
     publishDate: "2024-12-12",
     readTime: "12 min read",
     category: "Business Growth",
-    image: "/api/placeholder/600/300",
+    image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&h=300&fit=crop",
     tags: ["Pricing", "Business", "Strategy"]
   },
   {
@@ -63,11 +63,11 @@ const blogPosts = [
     excerpt: "Discover the secrets to turning one-time clients into long-term partners who provide consistent work and referrals.",
     slug: "building-client-relationships",
     author: "Emily Rodriguez",
-    authorImage: "/api/placeholder/40/40",
+    authorImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
     publishDate: "2024-12-10",
     readTime: "6 min read",
     category: "Client Management",
-    image: "/api/placeholder/600/300",
+    image: "https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?w=600&h=300&fit=crop",
     tags: ["Clients", "Relationships", "Growth"]
   },
   {
@@ -75,11 +75,11 @@ const blogPosts = [
     excerpt: "Explore how AI is transforming the creative industry and learn how to leverage these tools while maintaining your unique creative voice.",
     slug: "future-creative-collaboration-ai",
     author: "David Park",
-    authorImage: "/api/placeholder/40/40",
+    authorImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face",
     publishDate: "2024-12-08",
     readTime: "10 min read",
     category: "Technology",
-    image: "/api/placeholder/600/300",
+    image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&h=300&fit=crop",
     tags: ["AI", "Technology", "Future"]
   },
   {
@@ -87,11 +87,11 @@ const blogPosts = [
     excerpt: "A step-by-step guide to growing your solo practice into a thriving creative agency, including team building and process optimization.",
     slug: "freelancer-to-agency-scaling",
     author: "Lisa Thompson",
-    authorImage: "/api/placeholder/40/40",
+    authorImage: "https://images.unsplash.com/photo-1494790108755-2616b612b692?w=40&h=40&fit=crop&crop=face",
     publishDate: "2024-12-05",
     readTime: "15 min read",
     category: "Business Growth",
-    image: "/api/placeholder/600/300",
+    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=300&fit=crop",
     tags: ["Scaling", "Agency", "Growth"]
   },
   {
@@ -99,11 +99,11 @@ const blogPosts = [
     excerpt: "Proven time management techniques specifically designed for creative work, including dealing with inspiration strikes and creative blocks.",
     slug: "time-management-creative-professionals",
     author: "James Wilson",
-    authorImage: "/api/placeholder/40/40",
+    authorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
     publishDate: "2024-12-03",
     readTime: "7 min read",
     category: "Workflow Tips",
-    image: "/api/placeholder/600/300",
+    image: "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=600&h=300&fit=crop",
     tags: ["Time Management", "Productivity", "Workflow"]
   },
   {
@@ -111,11 +111,11 @@ const blogPosts = [
     excerpt: "Essential communication strategies that prevent misunderstandings, reduce revisions, and keep projects on track from start to finish.",
     slug: "client-communication-best-practices",
     author: "Anna Martinez",
-    authorImage: "/api/placeholder/40/40",
+    authorImage: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=40&h=40&fit=crop&crop=face",
     publishDate: "2024-12-01",
     readTime: "9 min read",
     category: "Client Management",
-    image: "/api/placeholder/600/300",
+    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=300&fit=crop",
     tags: ["Communication", "Clients", "Projects"]
   }
 ]
