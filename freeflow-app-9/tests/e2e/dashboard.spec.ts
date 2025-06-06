@@ -8,7 +8,11 @@ test.describe('Dashboard Tests', () => {
     });
     
     await page.goto('/dashboard');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    // Wait for critical elements to be visible
+    await page.waitForSelector('[data-testid="dashboard-title"]', { timeout: 30000 }).catch(() => {
+      console.log('Dashboard title not found, continuing...');
+    });
   });
 
   test('should load dashboard page successfully', async ({ page }) => {
