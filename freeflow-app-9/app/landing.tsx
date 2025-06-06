@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { DemoModal } from '@/components/demo-modal'
+import { SiteHeader } from '@/components/site-header'
+import { SiteFooter } from '@/components/site-footer'
 import { 
   ArrowRight, 
   Upload, 
@@ -528,68 +530,21 @@ function CTASection() {
   )
 }
 
-// Navigation component
-function Navigation() {
-  const [isScrolled, setIsScrolled] = useState(false)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  return (
-    <nav data-testid="navigation" className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-md shadow-lg' : 'bg-transparent'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <Link href="/" className="text-2xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors cursor-pointer">
-                <span data-testid="nav-logo">FreeflowZee</span>
-              </Link>
-            </div>
-          </div>
-
-          <div className="hidden md:block">
-            <div data-testid="nav-menu" className="ml-10 flex items-baseline space-x-8">
-              <a data-testid="nav-features" href="#features" className="text-gray-700 hover:text-indigo-600 transition-colors">Features</a>
-              <a data-testid="nav-how-it-works" href="#how-it-works" className="text-gray-700 hover:text-indigo-600 transition-colors">How it works</a>
-              <a data-testid="nav-pricing" href="#pricing" className="text-gray-700 hover:text-indigo-600 transition-colors">Pricing</a>
-              <a data-testid="nav-testimonials" href="#testimonials" className="text-gray-700 hover:text-indigo-600 transition-colors">Reviews</a>
-            </div>
-          </div>
-
-          <div data-testid="nav-auth-buttons" className="flex items-center space-x-4">
-            <Link href="/login">
-              <Button data-testid="nav-login" variant="ghost" className="text-gray-700 hover:text-indigo-600">
-                Log in
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button data-testid="nav-signup" className="bg-indigo-600 hover:bg-indigo-700 text-white">
-                Sign up free
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    </nav>
-  )
-}
+// Legacy Navigation component - replaced with SiteHeader
+// Keeping for reference but no longer used
 
 // Main landing page component
 export default function LandingPage() {
   return (
     <div className="min-h-screen">
-      <Navigation />
+      <SiteHeader variant="transparent" />
       <HeroSection />
       <FeaturesSection />
       <HowItWorksSection />
       <SocialProofSection />
       <PricingSection />
       <CTASection />
+      <SiteFooter />
     </div>
   )
 } 

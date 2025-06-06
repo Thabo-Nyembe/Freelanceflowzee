@@ -10,7 +10,9 @@
     "grep": {},
     "grepInvert": null,
     "maxFailures": 0,
-    "metadata": {},
+    "metadata": {
+      "actualWorkers": 4
+    },
     "preserveOutput": "always",
     "reporter": [
       [
@@ -125,186 +127,2020 @@
       "stderr": "pipe"
     }
   },
-  "suites": [],
-  "errors": [
+  "suites": [
     {
-      "message": "Test has unknown parameter \"landingPage\".",
-      "location": {
-        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
-        "line": 26,
-        "column": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:26\n\n\u001b[0m \u001b[90m 24 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 25 |\u001b[39m   test\u001b[33m.\u001b[39mdescribe(\u001b[32m'📱 Core Functionality'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 26 |\u001b[39m     test(\u001b[32m'should display all hero section elements'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 27 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 28 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 29 |\u001b[39m       \u001b[36mconst\u001b[39m heroElements \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mverifyHeroSection()\u001b[33m;\u001b[39m\u001b[0m"
-    },
-    {
-      "message": "Test has unknown parameter \"landingPage\".",
-      "location": {
-        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
-        "line": 36,
-        "column": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:36\n\n\u001b[0m \u001b[90m 34 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 35 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 36 |\u001b[39m     test(\u001b[32m'should display all features section elements'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 37 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 38 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 39 |\u001b[39m       \u001b[36mconst\u001b[39m featuresElements \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mverifyFeaturesSection()\u001b[33m;\u001b[39m\u001b[0m"
-    },
-    {
-      "message": "Test has unknown parameter \"landingPage\".",
-      "location": {
-        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
-        "line": 48,
-        "column": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:48\n\n\u001b[0m \u001b[90m 46 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 47 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 48 |\u001b[39m     test(\u001b[32m'should display all pricing section elements'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 49 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 50 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 51 |\u001b[39m       \u001b[36mconst\u001b[39m pricingElements \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mverifyPricingSection()\u001b[33m;\u001b[39m\u001b[0m"
-    },
-    {
-      "message": "Test has unknown parameter \"landingPage\".",
-      "location": {
-        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
-        "line": 152,
-        "column": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:152\n\n\u001b[0m \u001b[90m 150 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 151 |\u001b[39m   test\u001b[33m.\u001b[39mdescribe(\u001b[32m'♿ Accessibility & SEO'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 152 |\u001b[39m     test(\u001b[32m'should have proper heading hierarchy'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 153 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 154 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 155 |\u001b[39m       \u001b[36mconst\u001b[39m accessibility \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mcheckAccessibility()\u001b[33m;\u001b[39m\u001b[0m"
-    },
-    {
-      "message": "Test has unknown parameter \"landingPage\".",
-      "location": {
-        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
-        "line": 162,
-        "column": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:162\n\n\u001b[0m \u001b[90m 160 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 161 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 162 |\u001b[39m     test(\u001b[32m'should have proper button labels'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 163 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 164 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 165 |\u001b[39m       \u001b[36mconst\u001b[39m accessibility \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mcheckAccessibility()\u001b[33m;\u001b[39m\u001b[0m"
-    },
-    {
-      "message": "Test has unknown parameter \"landingPage\".",
-      "location": {
-        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
-        "line": 172,
-        "column": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:172\n\n\u001b[0m \u001b[90m 170 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 171 |\u001b[39m   test\u001b[33m.\u001b[39mdescribe(\u001b[32m'📱 Responsive Design'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 172 |\u001b[39m     test(\u001b[32m'should be responsive on mobile viewport'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage\u001b[33m,\u001b[39m mobileViewport }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 173 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mpage\u001b[33m.\u001b[39msetViewportSize(mobileViewport)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 174 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 175 |\u001b[39m       \u001b[0m"
-    },
-    {
-      "message": "Test has unknown parameter \"mobileViewport\".",
-      "location": {
-        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
-        "line": 172,
-        "column": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:172\n\n\u001b[0m \u001b[90m 170 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 171 |\u001b[39m   test\u001b[33m.\u001b[39mdescribe(\u001b[32m'📱 Responsive Design'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 172 |\u001b[39m     test(\u001b[32m'should be responsive on mobile viewport'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage\u001b[33m,\u001b[39m mobileViewport }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 173 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mpage\u001b[33m.\u001b[39msetViewportSize(mobileViewport)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 174 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 175 |\u001b[39m       \u001b[0m"
-    },
-    {
-      "message": "Test has unknown parameter \"landingPage\".",
-      "location": {
-        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
-        "line": 182,
-        "column": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:182\n\n\u001b[0m \u001b[90m 180 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 181 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 182 |\u001b[39m     test(\u001b[32m'should be responsive on tablet viewport'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 183 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mpage\u001b[33m.\u001b[39msetViewportSize({ width\u001b[33m:\u001b[39m \u001b[35m768\u001b[39m\u001b[33m,\u001b[39m height\u001b[33m:\u001b[39m \u001b[35m1024\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 184 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 185 |\u001b[39m       \u001b[0m"
-    },
-    {
-      "message": "Test has unknown parameter \"landingPage\".",
-      "location": {
-        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
-        "line": 194,
-        "column": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:194\n\n\u001b[0m \u001b[90m 192 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 193 |\u001b[39m   test\u001b[33m.\u001b[39mdescribe(\u001b[32m'⚡ Performance'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 194 |\u001b[39m     test(\u001b[32m'should load within acceptable time'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 195 |\u001b[39m       \u001b[36mconst\u001b[39m loadTime \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mmeasureLoadTime()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 196 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 197 |\u001b[39m       expect(loadTime)\u001b[33m.\u001b[39mtoBeLessThan(\u001b[35m5000\u001b[39m)\u001b[33m;\u001b[39m \u001b[90m// 5 seconds\u001b[39m\u001b[0m"
-    },
-    {
-      "message": "Test has unknown parameter \"landingPage\".",
-      "location": {
-        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
-        "line": 200,
-        "column": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:200\n\n\u001b[0m \u001b[90m 198 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 199 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 200 |\u001b[39m     test(\u001b[32m'should handle animations smoothly'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 201 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 202 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mwaitForAnimations()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 203 |\u001b[39m       \u001b[0m"
-    },
-    {
-      "message": "Test has unknown parameter \"landingPage\".",
-      "location": {
-        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
-        "line": 210,
-        "column": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:210\n\n\u001b[0m \u001b[90m 208 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 209 |\u001b[39m   test\u001b[33m.\u001b[39mdescribe(\u001b[32m'🔄 Scrolling & Sections'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 210 |\u001b[39m     test(\u001b[32m'should scroll to features section'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 211 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 212 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mscrollToFeatures()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 213 |\u001b[39m       \u001b[0m"
-    },
-    {
-      "message": "Test has unknown parameter \"landingPage\".",
-      "location": {
-        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
-        "line": 217,
-        "column": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:217\n\n\u001b[0m \u001b[90m 215 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 216 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 217 |\u001b[39m     test(\u001b[32m'should scroll to pricing section'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 218 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 219 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mscrollToPricing()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 220 |\u001b[39m       \u001b[0m"
-    },
-    {
-      "message": "Test has unknown parameter \"landingPage\".",
-      "location": {
-        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
-        "line": 224,
-        "column": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:224\n\n\u001b[0m \u001b[90m 222 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 223 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 224 |\u001b[39m     test(\u001b[32m'should scroll to how it works section'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 225 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 226 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mscrollToHowItWorks()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 227 |\u001b[39m       \u001b[0m"
-    },
-    {
-      "message": "Test has unknown parameter \"landingPage\".",
-      "location": {
-        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
-        "line": 233,
-        "column": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:233\n\n\u001b[0m \u001b[90m 231 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 232 |\u001b[39m   test\u001b[33m.\u001b[39mdescribe(\u001b[32m'🎯 Edge Cases'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 233 |\u001b[39m     test(\u001b[32m'should handle demo button click'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 234 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 235 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mclickWatchDemo()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 236 |\u001b[39m       \u001b[0m"
-    },
-    {
-      "message": "Test has unknown parameter \"landingPage\".",
-      "location": {
-        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
-        "line": 241,
-        "column": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:241\n\n\u001b[0m \u001b[90m 239 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 240 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 241 |\u001b[39m     test(\u001b[32m'should handle pricing plan selections'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 242 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 243 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 244 |\u001b[39m       \u001b[90m// Test free plan\u001b[39m\u001b[0m"
-    },
-    {
-      "message": "Test has unknown parameter \"landingPage\".",
-      "location": {
-        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
-        "line": 254,
-        "column": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:254\n\n\u001b[0m \u001b[90m 252 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 253 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 254 |\u001b[39m     test(\u001b[32m'should handle rapid navigation'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 255 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 256 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 257 |\u001b[39m       \u001b[90m// Rapid navigation test\u001b[39m\u001b[0m"
-    },
-    {
-      "message": "Test has unknown parameter \"landingPage\".",
-      "location": {
-        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
-        "line": 269,
-        "column": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:269\n\n\u001b[0m \u001b[90m 267 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 268 |\u001b[39m   test\u001b[33m.\u001b[39mdescribe(\u001b[32m'🌐 Cross-browser Compatibility'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 269 |\u001b[39m     test(\u001b[32m'should display correctly in different viewports'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 270 |\u001b[39m       \u001b[36mconst\u001b[39m viewports \u001b[33m=\u001b[39m [\u001b[0m\n\u001b[0m \u001b[90m 271 |\u001b[39m         { width\u001b[33m:\u001b[39m \u001b[35m1920\u001b[39m\u001b[33m,\u001b[39m height\u001b[33m:\u001b[39m \u001b[35m1080\u001b[39m }\u001b[33m,\u001b[39m \u001b[90m// Desktop\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 272 |\u001b[39m         { width\u001b[33m:\u001b[39m \u001b[35m1366\u001b[39m\u001b[33m,\u001b[39m height\u001b[33m:\u001b[39m \u001b[35m768\u001b[39m }\u001b[33m,\u001b[39m  \u001b[90m// Laptop\u001b[39m\u001b[0m"
-    },
-    {
-      "message": "Test has unknown parameter \"landingPage\".",
-      "location": {
-        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
-        "line": 288,
-        "column": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:288\n\n\u001b[0m \u001b[90m 286 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 287 |\u001b[39m   test\u001b[33m.\u001b[39mdescribe(\u001b[32m'🔒 Security & Privacy'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 288 |\u001b[39m     test(\u001b[32m'should not expose sensitive information'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 289 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 290 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 291 |\u001b[39m       \u001b[90m// Check page source for sensitive data\u001b[39m\u001b[0m"
-    },
-    {
-      "message": "Test has unknown parameter \"landingPage\".",
-      "location": {
-        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-landing.spec.ts",
-        "line": 299,
-        "column": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive-landing.spec.ts:299\n\n\u001b[0m \u001b[90m 297 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 298 |\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 299 |\u001b[39m     test(\u001b[32m'should have secure links'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ landingPage }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 300 |\u001b[39m       \u001b[36mawait\u001b[39m landingPage\u001b[33m.\u001b[39mgoto()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 301 |\u001b[39m       \u001b[0m\n\u001b[0m \u001b[90m 302 |\u001b[39m       \u001b[90m// Check all external links have proper attributes\u001b[39m\u001b[0m"
+      "title": "dashboard.spec.ts",
+      "file": "dashboard.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Dashboard Tests",
+          "file": "dashboard.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should load dashboard page successfully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 2627,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:29:56.272Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-4c2e7ff257d9d2af0b71",
+              "file": "dashboard.spec.ts",
+              "line": 18,
+              "column": 7
+            },
+            {
+              "title": "should display dashboard stats",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "status": "passed",
+                      "duration": 2639,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:29:56.288Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-ff388be29932a66113bf",
+              "file": "dashboard.spec.ts",
+              "line": 23,
+              "column": 7
+            },
+            {
+              "title": "should have working navigation tabs",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "status": "passed",
+                      "duration": 2864,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:29:56.279Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-4096b459beaeebd23a8e",
+              "file": "dashboard.spec.ts",
+              "line": 30,
+              "column": 7
+            },
+            {
+              "title": "should display projects in Projects Hub",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "status": "passed",
+                      "duration": 2738,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:29:56.288Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-cd0c10f5ec5e33c470bb",
+              "file": "dashboard.spec.ts",
+              "line": 51,
+              "column": 7
+            },
+            {
+              "title": "should display team members with avatars",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "timedOut",
+                      "duration": 30000,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:4:8",
+                        "location": {
+                          "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                          "column": 8,
+                          "line": 4
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 2 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 3 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'Dashboard Tests'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 4 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 5 |\u001b[39m     \u001b[90m// Set test mode header\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 6 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39msetExtraHTTPHeaders({\u001b[0m\n\u001b[0m \u001b[90m 7 |\u001b[39m       \u001b[32m'x-test-mode'\u001b[39m\u001b[33m:\u001b[39m \u001b[32m'true'\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                            "column": 8,
+                            "line": 4
+                          },
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 2 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 3 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'Dashboard Tests'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 4 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 5 |\u001b[39m     \u001b[90m// Set test mode header\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 6 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39msetExtraHTTPHeaders({\u001b[0m\n\u001b[0m \u001b[90m 7 |\u001b[39m       \u001b[32m'x-test-mode'\u001b[39m\u001b[33m:\u001b[39m \u001b[32m'true'\u001b[39m\u001b[0m\n\n\u001b[2m    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:4:8\u001b[22m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                            "column": 16,
+                            "line": 62
+                          },
+                          "message": "Error: page.click: Test ended.\nCall log:\n  \u001b[2m- waiting for locator('[data-testid=\"team-tab\"]')\u001b[22m\n\n\n\u001b[0m \u001b[90m 60 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 61 |\u001b[39m   test(\u001b[32m'should display team members with avatars'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 62 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'[data-testid=\"team-tab\"]'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 63 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'[data-testid=\"team-hub\"]'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 64 |\u001b[39m     \u001b[0m\n\u001b[0m \u001b[90m 65 |\u001b[39m     \u001b[90m// Check team members\u001b[39m\u001b[0m\n\n\u001b[2m    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:62:16\u001b[22m"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "Dashboard title not found, continuing...\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:29:59.101Z",
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-display-team-members-with-avatars-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-display-team-members-with-avatars-chromium/video.webm"
+                        },
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-display-team-members-with-avatars-chromium/test-failed-2.png"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                        "column": 8,
+                        "line": 4
+                      }
+                    },
+                    {
+                      "workerIndex": 11,
+                      "status": "failed",
+                      "duration": 3881,
+                      "error": {
+                        "message": "Error: Test ended.\nBrowser logs:\n\n<launching> /Users/thabonyembe/Library/Caches/ms-playwright/chromium-1097/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --enable-features=NetworkService,NetworkServiceInProcess --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=ImprovedCookieControls,LazyFrameLoading,GlobalMediaControls,DestroyProfileOnBrowserClose,MediaRouter,DialMediaRouteProvider,AcceptCHFrame,AutoExpandDetailsElement,CertificateTransparencyComponentUpdater,AvoidUnnecessaryBeforeUnloadCheckSync,Translate,HttpsUpgrades,PaintHolding --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --enable-automation --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --enable-use-zoom-for-dsf=false --use-angle --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/var/folders/g0/h_vmczvs61jf4r7kzhq0ypg40000gn/T/playwright_chromiumdev_profile-3aMjMS --remote-debugging-pipe --no-startup-window\n<launched> pid=94881",
+                        "stack": "Error: Test ended.\nBrowser logs:\n\n<launching> /Users/thabonyembe/Library/Caches/ms-playwright/chromium-1097/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --enable-features=NetworkService,NetworkServiceInProcess --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=ImprovedCookieControls,LazyFrameLoading,GlobalMediaControls,DestroyProfileOnBrowserClose,MediaRouter,DialMediaRouteProvider,AcceptCHFrame,AutoExpandDetailsElement,CertificateTransparencyComponentUpdater,AvoidUnnecessaryBeforeUnloadCheckSync,Translate,HttpsUpgrades,PaintHolding --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --enable-automation --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --enable-use-zoom-for-dsf=false --use-angle --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/var/folders/g0/h_vmczvs61jf4r7kzhq0ypg40000gn/T/playwright_chromiumdev_profile-3aMjMS --remote-debugging-pipe --no-startup-window\n<launched> pid=94881\n"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: Test ended.\nBrowser logs:\n\n<launching> /Users/thabonyembe/Library/Caches/ms-playwright/chromium-1097/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --enable-features=NetworkService,NetworkServiceInProcess --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=ImprovedCookieControls,LazyFrameLoading,GlobalMediaControls,DestroyProfileOnBrowserClose,MediaRouter,DialMediaRouteProvider,AcceptCHFrame,AutoExpandDetailsElement,CertificateTransparencyComponentUpdater,AvoidUnnecessaryBeforeUnloadCheckSync,Translate,HttpsUpgrades,PaintHolding --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --enable-automation --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --enable-use-zoom-for-dsf=false --use-angle --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/var/folders/g0/h_vmczvs61jf4r7kzhq0ypg40000gn/T/playwright_chromiumdev_profile-3aMjMS --remote-debugging-pipe --no-startup-window\n<launched> pid=94881\n"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2025-06-06T20:30:36.238Z",
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-display-team-members-with-avatars-chromium-retry1/trace.zip"
+                        }
+                      ]
+                    },
+                    {
+                      "workerIndex": 13,
+                      "status": "passed",
+                      "duration": 2333,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 2,
+                      "startTime": "2025-06-06T20:30:40.525Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "flaky"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-e9e7164372d7cf3c054d",
+              "file": "dashboard.spec.ts",
+              "line": 61,
+              "column": 7
+            },
+            {
+              "title": "should handle new project button click",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "status": "timedOut",
+                      "duration": 30003,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:4:8",
+                        "location": {
+                          "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                          "column": 8,
+                          "line": 4
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 2 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 3 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'Dashboard Tests'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 4 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 5 |\u001b[39m     \u001b[90m// Set test mode header\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 6 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39msetExtraHTTPHeaders({\u001b[0m\n\u001b[0m \u001b[90m 7 |\u001b[39m       \u001b[32m'x-test-mode'\u001b[39m\u001b[33m:\u001b[39m \u001b[32m'true'\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                            "column": 8,
+                            "line": 4
+                          },
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 2 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 3 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'Dashboard Tests'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 4 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 5 |\u001b[39m     \u001b[90m// Set test mode header\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 6 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39msetExtraHTTPHeaders({\u001b[0m\n\u001b[0m \u001b[90m 7 |\u001b[39m       \u001b[32m'x-test-mode'\u001b[39m\u001b[33m:\u001b[39m \u001b[32m'true'\u001b[39m\u001b[0m\n\n\u001b[2m    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:4:8\u001b[22m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                            "column": 36,
+                            "line": 75
+                          },
+                          "message": "Error: \u001b[31mTimed out 5000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('[data-testid=\"new-project-button\"]')\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"new-project-button\"]')\u001b[22m\n\n\n\u001b[0m \u001b[90m 73 |\u001b[39m   test(\u001b[32m'should handle new project button click'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m 74 |\u001b[39m     \u001b[36mconst\u001b[39m newProjectButton \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'[data-testid=\"new-project-button\"]'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 75 |\u001b[39m     \u001b[36mawait\u001b[39m expect(newProjectButton)\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m                                    \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 76 |\u001b[39m     \u001b[36mawait\u001b[39m expect(newProjectButton)\u001b[33m.\u001b[39mtoBeEnabled()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 77 |\u001b[39m     \u001b[0m\n\u001b[0m \u001b[90m 78 |\u001b[39m     \u001b[90m// Click should be possible (actual navigation tested separately)\u001b[39m\u001b[0m\n\n\u001b[2m    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:75:36\u001b[22m"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "Dashboard title not found, continuing...\n"
+                        }
+                      ],
+                      "stderr": [
+                        {
+                          "text": "Internal error: fixture integrity at context\n"
+                        }
+                      ],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:29:59.110Z",
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-handle-new-project-button-click-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-handle-new-project-button-click-chromium/video.webm"
+                        },
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-handle-new-project-button-click-chromium/test-failed-2.png"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                        "column": 8,
+                        "line": 4
+                      }
+                    },
+                    {
+                      "workerIndex": 10,
+                      "status": "passed",
+                      "duration": 3495,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2025-06-06T20:30:36.120Z",
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-handle-new-project-button-click-chromium-retry1/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "flaky"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-8ed7d34955674a23e0eb",
+              "file": "dashboard.spec.ts",
+              "line": 73,
+              "column": 7
+            },
+            {
+              "title": "should be responsive on mobile",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "status": "failed",
+                      "duration": 159,
+                      "error": {
+                        "message": "Error: browser.newContext: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /Users/thabonyembe/Library/Caches/ms-playwright/chromium-1097/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --enable-features=NetworkService,NetworkServiceInProcess --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=ImprovedCookieControls,LazyFrameLoading,GlobalMediaControls,DestroyProfileOnBrowserClose,MediaRouter,DialMediaRouteProvider,AcceptCHFrame,AutoExpandDetailsElement,CertificateTransparencyComponentUpdater,AvoidUnnecessaryBeforeUnloadCheckSync,Translate,HttpsUpgrades,PaintHolding --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --enable-automation --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --enable-use-zoom-for-dsf=false --use-angle --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/var/folders/g0/h_vmczvs61jf4r7kzhq0ypg40000gn/T/playwright_chromiumdev_profile-Mtynjt --remote-debugging-pipe --no-startup-window\n<launched> pid=94761",
+                        "stack": "Error: browser.newContext: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /Users/thabonyembe/Library/Caches/ms-playwright/chromium-1097/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --enable-features=NetworkService,NetworkServiceInProcess --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=ImprovedCookieControls,LazyFrameLoading,GlobalMediaControls,DestroyProfileOnBrowserClose,MediaRouter,DialMediaRouteProvider,AcceptCHFrame,AutoExpandDetailsElement,CertificateTransparencyComponentUpdater,AvoidUnnecessaryBeforeUnloadCheckSync,Translate,HttpsUpgrades,PaintHolding --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --enable-automation --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --enable-use-zoom-for-dsf=false --use-angle --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/var/folders/g0/h_vmczvs61jf4r7kzhq0ypg40000gn/T/playwright_chromiumdev_profile-Mtynjt --remote-debugging-pipe --no-startup-window\n<launched> pid=94761\n"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browser.newContext: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /Users/thabonyembe/Library/Caches/ms-playwright/chromium-1097/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --enable-features=NetworkService,NetworkServiceInProcess --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=ImprovedCookieControls,LazyFrameLoading,GlobalMediaControls,DestroyProfileOnBrowserClose,MediaRouter,DialMediaRouteProvider,AcceptCHFrame,AutoExpandDetailsElement,CertificateTransparencyComponentUpdater,AvoidUnnecessaryBeforeUnloadCheckSync,Translate,HttpsUpgrades,PaintHolding --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --enable-automation --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --enable-use-zoom-for-dsf=false --use-angle --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/var/folders/g0/h_vmczvs61jf4r7kzhq0ypg40000gn/T/playwright_chromiumdev_profile-Mtynjt --remote-debugging-pipe --no-startup-window\n<launched> pid=94761\n"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:29:59.216Z",
+                      "attachments": []
+                    },
+                    {
+                      "workerIndex": 4,
+                      "status": "timedOut",
+                      "duration": 30002,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:4:8",
+                        "location": {
+                          "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                          "column": 8,
+                          "line": 4
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 2 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 3 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'Dashboard Tests'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 4 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 5 |\u001b[39m     \u001b[90m// Set test mode header\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 6 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39msetExtraHTTPHeaders({\u001b[0m\n\u001b[0m \u001b[90m 7 |\u001b[39m       \u001b[32m'x-test-mode'\u001b[39m\u001b[33m:\u001b[39m \u001b[32m'true'\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                            "column": 8,
+                            "line": 4
+                          },
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 2 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 3 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'Dashboard Tests'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 4 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 5 |\u001b[39m     \u001b[90m// Set test mode header\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 6 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39msetExtraHTTPHeaders({\u001b[0m\n\u001b[0m \u001b[90m 7 |\u001b[39m       \u001b[32m'x-test-mode'\u001b[39m\u001b[33m:\u001b[39m \u001b[32m'true'\u001b[39m\u001b[0m\n\n\u001b[2m    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:4:8\u001b[22m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                            "column": 71,
+                            "line": 85
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('[data-testid=\"dashboard-container\"]')\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"dashboard-container\"]')\u001b[22m\n\n\n\u001b[0m \u001b[90m 83 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39msetViewportSize({ width\u001b[33m:\u001b[39m \u001b[35m375\u001b[39m\u001b[33m,\u001b[39m height\u001b[33m:\u001b[39m \u001b[35m667\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 84 |\u001b[39m     \u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 85 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'[data-testid=\"dashboard-container\"]'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m                                                                       \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 86 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'[data-testid=\"dashboard-title\"]'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 87 |\u001b[39m     \u001b[0m\n\u001b[0m \u001b[90m 88 |\u001b[39m     \u001b[90m// Stats should stack on mobile\u001b[39m\u001b[0m\n\n\u001b[2m    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:85:71\u001b[22m"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "Dashboard title not found, continuing...\n"
+                        }
+                      ],
+                      "stderr": [
+                        {
+                          "text": "Internal error: fixture integrity at context\n"
+                        }
+                      ],
+                      "retry": 1,
+                      "startTime": "2025-06-06T20:29:59.582Z",
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-be-responsive-on-mobile-chromium-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-be-responsive-on-mobile-chromium-retry1/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-be-responsive-on-mobile-chromium-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                        "column": 8,
+                        "line": 4
+                      }
+                    },
+                    {
+                      "workerIndex": 6,
+                      "status": "passed",
+                      "duration": 1565,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 2,
+                      "startTime": "2025-06-06T20:30:30.533Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "flaky"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-ae1fdc8ca5b8d64cf268",
+              "file": "dashboard.spec.ts",
+              "line": 82,
+              "column": 7
+            },
+            {
+              "title": "should load team member avatars without 404 errors",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "status": "failed",
+                      "duration": 272,
+                      "error": {
+                        "message": "Error: browser.newContext: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /Users/thabonyembe/Library/Caches/ms-playwright/chromium-1097/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --enable-features=NetworkService,NetworkServiceInProcess --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=ImprovedCookieControls,LazyFrameLoading,GlobalMediaControls,DestroyProfileOnBrowserClose,MediaRouter,DialMediaRouteProvider,AcceptCHFrame,AutoExpandDetailsElement,CertificateTransparencyComponentUpdater,AvoidUnnecessaryBeforeUnloadCheckSync,Translate,HttpsUpgrades,PaintHolding --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --enable-automation --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --enable-use-zoom-for-dsf=false --use-angle --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/var/folders/g0/h_vmczvs61jf4r7kzhq0ypg40000gn/T/playwright_chromiumdev_profile-gLiNlI --remote-debugging-pipe --no-startup-window\n<launched> pid=94759",
+                        "stack": "Error: browser.newContext: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /Users/thabonyembe/Library/Caches/ms-playwright/chromium-1097/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --enable-features=NetworkService,NetworkServiceInProcess --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=ImprovedCookieControls,LazyFrameLoading,GlobalMediaControls,DestroyProfileOnBrowserClose,MediaRouter,DialMediaRouteProvider,AcceptCHFrame,AutoExpandDetailsElement,CertificateTransparencyComponentUpdater,AvoidUnnecessaryBeforeUnloadCheckSync,Translate,HttpsUpgrades,PaintHolding --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --enable-automation --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --enable-use-zoom-for-dsf=false --use-angle --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/var/folders/g0/h_vmczvs61jf4r7kzhq0ypg40000gn/T/playwright_chromiumdev_profile-gLiNlI --remote-debugging-pipe --no-startup-window\n<launched> pid=94759\n"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browser.newContext: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /Users/thabonyembe/Library/Caches/ms-playwright/chromium-1097/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --enable-features=NetworkService,NetworkServiceInProcess --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=ImprovedCookieControls,LazyFrameLoading,GlobalMediaControls,DestroyProfileOnBrowserClose,MediaRouter,DialMediaRouteProvider,AcceptCHFrame,AutoExpandDetailsElement,CertificateTransparencyComponentUpdater,AvoidUnnecessaryBeforeUnloadCheckSync,Translate,HttpsUpgrades,PaintHolding --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --enable-automation --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --enable-use-zoom-for-dsf=false --use-angle --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/var/folders/g0/h_vmczvs61jf4r7kzhq0ypg40000gn/T/playwright_chromiumdev_profile-gLiNlI --remote-debugging-pipe --no-startup-window\n<launched> pid=94759\n"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:29:59.339Z",
+                      "attachments": []
+                    },
+                    {
+                      "workerIndex": 5,
+                      "status": "timedOut",
+                      "duration": 29999,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                            "column": 16,
+                            "line": 102
+                          },
+                          "message": "Error: page.click: Test timeout of 30000ms exceeded.\nCall log:\n  \u001b[2m- waiting for locator('[data-testid=\"team-tab\"]')\u001b[22m\n\n\n\u001b[0m \u001b[90m 100 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 101 |\u001b[39m     \u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 102 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'[data-testid=\"team-tab\"]'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 103 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m2000\u001b[39m)\u001b[33m;\u001b[39m \u001b[90m// Wait for images to load\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 104 |\u001b[39m     \u001b[0m\n\u001b[0m \u001b[90m 105 |\u001b[39m     expect(failedRequests)\u001b[33m.\u001b[39mtoHaveLength(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\n\u001b[2m    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:102:16\u001b[22m"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2025-06-06T20:29:59.870Z",
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-load-team-member-avatars-without-404-errors-chromium-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-load-team-member-avatars-without-404-errors-chromium-retry1/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-load-team-member-avatars-without-404-errors-chromium-retry1/trace.zip"
+                        }
+                      ]
+                    },
+                    {
+                      "workerIndex": 7,
+                      "status": "failed",
+                      "duration": 2761,
+                      "error": {
+                        "message": "Error: page.click: Target page, context or browser has been closed",
+                        "stack": "Error: page.click: Target page, context or browser has been closed\n    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:102:16",
+                        "location": {
+                          "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                          "column": 16,
+                          "line": 102
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 100 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 101 |\u001b[39m     \u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 102 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'[data-testid=\"team-tab\"]'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 103 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m2000\u001b[39m)\u001b[33m;\u001b[39m \u001b[90m// Wait for images to load\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 104 |\u001b[39m     \u001b[0m\n\u001b[0m \u001b[90m 105 |\u001b[39m     expect(failedRequests)\u001b[33m.\u001b[39mtoHaveLength(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                            "column": 16,
+                            "line": 102
+                          },
+                          "message": "Error: page.click: Target page, context or browser has been closed\n\n\u001b[0m \u001b[90m 100 |\u001b[39m     })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 101 |\u001b[39m     \u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 102 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'[data-testid=\"team-tab\"]'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m     |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 103 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m2000\u001b[39m)\u001b[33m;\u001b[39m \u001b[90m// Wait for images to load\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 104 |\u001b[39m     \u001b[0m\n\u001b[0m \u001b[90m 105 |\u001b[39m     expect(failedRequests)\u001b[33m.\u001b[39mtoHaveLength(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\n\u001b[2m    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:102:16\u001b[22m"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "Dashboard title not found, continuing...\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 2,
+                      "startTime": "2025-06-06T20:30:30.800Z",
+                      "attachments": [],
+                      "errorLocation": {
+                        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                        "column": 16,
+                        "line": 102
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-5b166ef543faa4cdf827",
+              "file": "dashboard.spec.ts",
+              "line": 93,
+              "column": 7
+            },
+            {
+              "title": "should have proper accessibility labels",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "status": "passed",
+                      "duration": 1971,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:32.286Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-f53382e3a9cd15e0ff2a",
+              "file": "dashboard.spec.ts",
+              "line": 108,
+              "column": 7
+            },
+            {
+              "title": "should load dashboard page successfully",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 8,
+                      "status": "timedOut",
+                      "duration": 30000,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:4:8",
+                        "location": {
+                          "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                          "column": 8,
+                          "line": 4
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 2 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 3 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'Dashboard Tests'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 4 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 5 |\u001b[39m     \u001b[90m// Set test mode header\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 6 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39msetExtraHTTPHeaders({\u001b[0m\n\u001b[0m \u001b[90m 7 |\u001b[39m       \u001b[32m'x-test-mode'\u001b[39m\u001b[33m:\u001b[39m \u001b[32m'true'\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                            "column": 8,
+                            "line": 4
+                          },
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 2 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 3 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'Dashboard Tests'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 4 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 5 |\u001b[39m     \u001b[90m// Set test mode header\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 6 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39msetExtraHTTPHeaders({\u001b[0m\n\u001b[0m \u001b[90m 7 |\u001b[39m       \u001b[32m'x-test-mode'\u001b[39m\u001b[33m:\u001b[39m \u001b[32m'true'\u001b[39m\u001b[0m\n\n\u001b[2m    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:4:8\u001b[22m"
+                        },
+                        {
+                          "message": "Error: browserContext.newPage: Test ended.\n"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "Dashboard title not found, continuing...\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:33.979Z",
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox/video.webm"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                        "column": 8,
+                        "line": 4
+                      }
+                    },
+                    {
+                      "workerIndex": 24,
+                      "status": "timedOut",
+                      "duration": 30000,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:4:8",
+                        "location": {
+                          "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                          "column": 8,
+                          "line": 4
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 2 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 3 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'Dashboard Tests'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 4 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 5 |\u001b[39m     \u001b[90m// Set test mode header\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 6 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39msetExtraHTTPHeaders({\u001b[0m\n\u001b[0m \u001b[90m 7 |\u001b[39m       \u001b[32m'x-test-mode'\u001b[39m\u001b[33m:\u001b[39m \u001b[32m'true'\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                            "column": 8,
+                            "line": 4
+                          },
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 2 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 3 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'Dashboard Tests'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 4 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 5 |\u001b[39m     \u001b[90m// Set test mode header\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 6 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39msetExtraHTTPHeaders({\u001b[0m\n\u001b[0m \u001b[90m 7 |\u001b[39m       \u001b[32m'x-test-mode'\u001b[39m\u001b[33m:\u001b[39m \u001b[32m'true'\u001b[39m\u001b[0m\n\n\u001b[2m    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:4:8\u001b[22m"
+                        },
+                        {
+                          "message": "Error: browserContext.newPage: Test ended.\n"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "Dashboard title not found, continuing...\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2025-06-06T20:31:05.672Z",
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox-retry1/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                        "column": 8,
+                        "line": 4
+                      }
+                    },
+                    {
+                      "workerIndex": 26,
+                      "status": "timedOut",
+                      "duration": 30000,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:4:8",
+                        "location": {
+                          "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                          "column": 8,
+                          "line": 4
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 2 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 3 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'Dashboard Tests'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 4 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 5 |\u001b[39m     \u001b[90m// Set test mode header\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 6 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39msetExtraHTTPHeaders({\u001b[0m\n\u001b[0m \u001b[90m 7 |\u001b[39m       \u001b[32m'x-test-mode'\u001b[39m\u001b[33m:\u001b[39m \u001b[32m'true'\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                            "column": 8,
+                            "line": 4
+                          },
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 2 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 3 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'Dashboard Tests'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 4 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 5 |\u001b[39m     \u001b[90m// Set test mode header\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 6 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39msetExtraHTTPHeaders({\u001b[0m\n\u001b[0m \u001b[90m 7 |\u001b[39m       \u001b[32m'x-test-mode'\u001b[39m\u001b[33m:\u001b[39m \u001b[32m'true'\u001b[39m\u001b[0m\n\n\u001b[2m    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:4:8\u001b[22m"
+                        },
+                        {
+                          "message": "Error: browserContext.newPage: Test ended.\n"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "Dashboard title not found, continuing...\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 2,
+                      "startTime": "2025-06-06T20:31:37.076Z",
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox-retry2/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox-retry2/video.webm"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                        "column": 8,
+                        "line": 4
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-e3751828a314790d14e2",
+              "file": "dashboard.spec.ts",
+              "line": 18,
+              "column": 7
+            },
+            {
+              "title": "should display dashboard stats",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 9,
+                      "status": "passed",
+                      "duration": 2942,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:34.522Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-34b00fafe77b43d9be6d",
+              "file": "dashboard.spec.ts",
+              "line": 23,
+              "column": 7
+            },
+            {
+              "title": "should have working navigation tabs",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 9,
+                      "status": "passed",
+                      "duration": 2694,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:37.991Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-38b0db9565f64a0519ed",
+              "file": "dashboard.spec.ts",
+              "line": 30,
+              "column": 7
+            },
+            {
+              "title": "should display projects in Projects Hub",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 12,
+                      "status": "passed",
+                      "duration": 2287,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:40.186Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-3cfe30a8d34f2e057911",
+              "file": "dashboard.spec.ts",
+              "line": 51,
+              "column": 7
+            },
+            {
+              "title": "should display team members with avatars",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 9,
+                      "status": "passed",
+                      "duration": 2212,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:40.687Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-86925e68b7a0d5f68c5d",
+              "file": "dashboard.spec.ts",
+              "line": 61,
+              "column": 7
+            },
+            {
+              "title": "should handle new project button click",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 9,
+                      "status": "passed",
+                      "duration": 2972,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:42.901Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-db7298c8dc033bba10ae",
+              "file": "dashboard.spec.ts",
+              "line": 73,
+              "column": 7
+            },
+            {
+              "title": "should be responsive on mobile",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 14,
+                      "status": "passed",
+                      "duration": 1872,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:43.310Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-0037ad058f5bb014020e",
+              "file": "dashboard.spec.ts",
+              "line": 82,
+              "column": 7
+            },
+            {
+              "title": "should load team member avatars without 404 errors",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 12,
+                      "status": "passed",
+                      "duration": 3860,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:43.094Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-5b0b55e8478f634bfdc6",
+              "file": "dashboard.spec.ts",
+              "line": 93,
+              "column": 7
+            },
+            {
+              "title": "should have proper accessibility labels",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 9,
+                      "status": "passed",
+                      "duration": 1349,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:45.875Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-6fa05ee0945fed0911d5",
+              "file": "dashboard.spec.ts",
+              "line": 108,
+              "column": 7
+            },
+            {
+              "title": "should load dashboard page successfully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 15,
+                      "status": "passed",
+                      "duration": 2162,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:46.842Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-991c7538c614df5d4727",
+              "file": "dashboard.spec.ts",
+              "line": 18,
+              "column": 7
+            },
+            {
+              "title": "should display dashboard stats",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 16,
+                      "status": "passed",
+                      "duration": 1828,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:47.483Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-8d39992ee1f02b75864e",
+              "file": "dashboard.spec.ts",
+              "line": 23,
+              "column": 7
+            },
+            {
+              "title": "should have working navigation tabs",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 17,
+                      "status": "passed",
+                      "duration": 1776,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:47.943Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-9dbbfc8e3dd329339dd5",
+              "file": "dashboard.spec.ts",
+              "line": 30,
+              "column": 7
+            },
+            {
+              "title": "should display projects in Projects Hub",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 15,
+                      "status": "passed",
+                      "duration": 1756,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:49.556Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-a0049b7035fede83afc0",
+              "file": "dashboard.spec.ts",
+              "line": 51,
+              "column": 7
+            },
+            {
+              "title": "should display team members with avatars",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 16,
+                      "status": "passed",
+                      "duration": 1834,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:49.556Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-ca7f855876a54330071e",
+              "file": "dashboard.spec.ts",
+              "line": 61,
+              "column": 7
+            },
+            {
+              "title": "should handle new project button click",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 17,
+                      "status": "passed",
+                      "duration": 1437,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:49.890Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-95640049db88e025bb82",
+              "file": "dashboard.spec.ts",
+              "line": 73,
+              "column": 7
+            },
+            {
+              "title": "should be responsive on mobile",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 15,
+                      "status": "passed",
+                      "duration": 1437,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:51.315Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-364559eb9e108ee3e044",
+              "file": "dashboard.spec.ts",
+              "line": 82,
+              "column": 7
+            },
+            {
+              "title": "should load team member avatars without 404 errors",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 17,
+                      "status": "passed",
+                      "duration": 3509,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:51.329Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-8c53175ee1aa965d5d9c",
+              "file": "dashboard.spec.ts",
+              "line": 93,
+              "column": 7
+            },
+            {
+              "title": "should have proper accessibility labels",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 16,
+                      "status": "passed",
+                      "duration": 1383,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:51.392Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-7b07e7093e38a8e112b0",
+              "file": "dashboard.spec.ts",
+              "line": 108,
+              "column": 7
+            },
+            {
+              "title": "should load dashboard page successfully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 18,
+                      "status": "passed",
+                      "duration": 3983,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:53.011Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-2d0eea3f17eb2e032979",
+              "file": "dashboard.spec.ts",
+              "line": 18,
+              "column": 7
+            },
+            {
+              "title": "should display dashboard stats",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 19,
+                      "status": "passed",
+                      "duration": 3484,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:53.016Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-32c78f99fce1cff6f483",
+              "file": "dashboard.spec.ts",
+              "line": 23,
+              "column": 7
+            },
+            {
+              "title": "should have working navigation tabs",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 20,
+                      "status": "passed",
+                      "duration": 2147,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:55.121Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-1e4e29376f41c3827774",
+              "file": "dashboard.spec.ts",
+              "line": 30,
+              "column": 7
+            },
+            {
+              "title": "should display projects in Projects Hub",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 19,
+                      "status": "passed",
+                      "duration": 2533,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:56.746Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-52a869111f83706578e9",
+              "file": "dashboard.spec.ts",
+              "line": 51,
+              "column": 7
+            },
+            {
+              "title": "should display team members with avatars",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 18,
+                      "status": "passed",
+                      "duration": 2094,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:57.240Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-2edc425882e9567bad69",
+              "file": "dashboard.spec.ts",
+              "line": 61,
+              "column": 7
+            },
+            {
+              "title": "should handle new project button click",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 20,
+                      "status": "passed",
+                      "duration": 1933,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:57.440Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-09d2fc3539d2459ce13a",
+              "file": "dashboard.spec.ts",
+              "line": 73,
+              "column": 7
+            },
+            {
+              "title": "should be responsive on mobile",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 19,
+                      "status": "passed",
+                      "duration": 1702,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:59.282Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-c85b396b5a19e7b1536d",
+              "file": "dashboard.spec.ts",
+              "line": 82,
+              "column": 7
+            },
+            {
+              "title": "should load team member avatars without 404 errors",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 18,
+                      "status": "passed",
+                      "duration": 3829,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:59.336Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-cfe9755dba27eb9d4ab4",
+              "file": "dashboard.spec.ts",
+              "line": 93,
+              "column": 7
+            },
+            {
+              "title": "should have proper accessibility labels",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 20,
+                      "status": "passed",
+                      "duration": 1602,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:30:59.375Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-a3e05c34a0e00909eb58",
+              "file": "dashboard.spec.ts",
+              "line": 108,
+              "column": 7
+            },
+            {
+              "title": "should load dashboard page successfully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 22,
+                      "status": "passed",
+                      "duration": 1496,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:31:01.247Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-f18b948e71a5cd31e575",
+              "file": "dashboard.spec.ts",
+              "line": 18,
+              "column": 7
+            },
+            {
+              "title": "should display dashboard stats",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 21,
+                      "status": "passed",
+                      "duration": 1492,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:31:01.250Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-64a68ee5d51c3e758369",
+              "file": "dashboard.spec.ts",
+              "line": 23,
+              "column": 7
+            },
+            {
+              "title": "should have working navigation tabs",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 21,
+                      "status": "passed",
+                      "duration": 1854,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:31:02.936Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-a0f9f114870535cc92d2",
+              "file": "dashboard.spec.ts",
+              "line": 30,
+              "column": 7
+            },
+            {
+              "title": "should display projects in Projects Hub",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 22,
+                      "status": "passed",
+                      "duration": 1694,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:31:02.938Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-aba423206061dc340b82",
+              "file": "dashboard.spec.ts",
+              "line": 51,
+              "column": 7
+            },
+            {
+              "title": "should display team members with avatars",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 23,
+                      "status": "passed",
+                      "duration": 2621,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:31:03.393Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-ed43620d279ff56b7071",
+              "file": "dashboard.spec.ts",
+              "line": 61,
+              "column": 7
+            },
+            {
+              "title": "should handle new project button click",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 22,
+                      "status": "passed",
+                      "duration": 1721,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:31:04.633Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-5085b49da416525c1f11",
+              "file": "dashboard.spec.ts",
+              "line": 73,
+              "column": 7
+            },
+            {
+              "title": "should be responsive on mobile",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 21,
+                      "status": "passed",
+                      "duration": 1555,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:31:04.791Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-12d4b21f1f2e2079ad32",
+              "file": "dashboard.spec.ts",
+              "line": 82,
+              "column": 7
+            },
+            {
+              "title": "should load team member avatars without 404 errors",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 23,
+                      "status": "timedOut",
+                      "duration": 30001,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:4:8",
+                        "location": {
+                          "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                          "column": 8,
+                          "line": 4
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 2 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 3 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'Dashboard Tests'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 4 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 5 |\u001b[39m     \u001b[90m// Set test mode header\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 6 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39msetExtraHTTPHeaders({\u001b[0m\n\u001b[0m \u001b[90m 7 |\u001b[39m       \u001b[32m'x-test-mode'\u001b[39m\u001b[33m:\u001b[39m \u001b[32m'true'\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                            "column": 8,
+                            "line": 4
+                          },
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 2 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 3 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'Dashboard Tests'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 4 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 5 |\u001b[39m     \u001b[90m// Set test mode header\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 6 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39msetExtraHTTPHeaders({\u001b[0m\n\u001b[0m \u001b[90m 7 |\u001b[39m       \u001b[32m'x-test-mode'\u001b[39m\u001b[33m:\u001b[39m \u001b[32m'true'\u001b[39m\u001b[0m\n\n\u001b[2m    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:4:8\u001b[22m"
+                        },
+                        {
+                          "message": "Error: browserContext.newPage: Test ended.\n"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "Dashboard title not found, continuing...\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:31:06.170Z",
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-load-team-member-avatars-without-404-errors-Mobile-Safari/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-load-team-member-avatars-without-404-errors-Mobile-Safari/video.webm"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+                        "column": 8,
+                        "line": 4
+                      }
+                    },
+                    {
+                      "workerIndex": 25,
+                      "status": "passed",
+                      "duration": 4050,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2025-06-06T20:31:36.477Z",
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/dashboard-Dashboard-Tests-should-load-team-member-avatars-without-404-errors-Mobile-Safari-retry1/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "flaky"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-426b1dd4baead90de943",
+              "file": "dashboard.spec.ts",
+              "line": 93,
+              "column": 7
+            },
+            {
+              "title": "should have proper accessibility labels",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 21,
+                      "status": "passed",
+                      "duration": 1343,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-06T20:31:06.349Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "90cda532ab82d274b30b-ee729bc19ad99673568a",
+              "file": "dashboard.spec.ts",
+              "line": 108,
+              "column": 7
+            }
+          ]
+        }
+      ]
     }
   ],
+  "errors": [],
   "stats": {
-    "startTime": "2025-06-06T19:42:08.200Z",
-    "duration": 4546.215,
-    "expected": 0,
+    "startTime": "2025-06-06T20:29:50.957Z",
+    "duration": 136990.40300000002,
+    "expected": 39,
     "skipped": 0,
-    "unexpected": 0,
-    "flaky": 0
+    "unexpected": 2,
+    "flaky": 4
   }
 }

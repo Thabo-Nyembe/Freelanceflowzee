@@ -1,0 +1,387 @@
+[
+  {
+    "title": "should load dashboard page successfully",
+    "status": "passed",
+    "duration": 2627,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should display dashboard stats",
+    "status": "passed",
+    "duration": 2639,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should display projects in Projects Hub",
+    "status": "passed",
+    "duration": 2738,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should have working navigation tabs",
+    "status": "passed",
+    "duration": 2864,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should be responsive on mobile",
+    "status": "failed",
+    "duration": 159,
+    "error": "Error: browser.newContext: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /Users/thabonyembe/Library/Caches/ms-playwright/chromium-1097/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --enable-features=NetworkService,NetworkServiceInProcess --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=ImprovedCookieControls,LazyFrameLoading,GlobalMediaControls,DestroyProfileOnBrowserClose,MediaRouter,DialMediaRouteProvider,AcceptCHFrame,AutoExpandDetailsElement,CertificateTransparencyComponentUpdater,AvoidUnnecessaryBeforeUnloadCheckSync,Translate,HttpsUpgrades,PaintHolding --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --enable-automation --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --enable-use-zoom-for-dsf=false --use-angle --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/var/folders/g0/h_vmczvs61jf4r7kzhq0ypg40000gn/T/playwright_chromiumdev_profile-Mtynjt --remote-debugging-pipe --no-startup-window\n<launched> pid=94761",
+    "retry": 0
+  },
+  {
+    "title": "should load team member avatars without 404 errors",
+    "status": "failed",
+    "duration": 272,
+    "error": "Error: browser.newContext: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /Users/thabonyembe/Library/Caches/ms-playwright/chromium-1097/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --enable-features=NetworkService,NetworkServiceInProcess --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=ImprovedCookieControls,LazyFrameLoading,GlobalMediaControls,DestroyProfileOnBrowserClose,MediaRouter,DialMediaRouteProvider,AcceptCHFrame,AutoExpandDetailsElement,CertificateTransparencyComponentUpdater,AvoidUnnecessaryBeforeUnloadCheckSync,Translate,HttpsUpgrades,PaintHolding --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --enable-automation --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --enable-use-zoom-for-dsf=false --use-angle --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/var/folders/g0/h_vmczvs61jf4r7kzhq0ypg40000gn/T/playwright_chromiumdev_profile-gLiNlI --remote-debugging-pipe --no-startup-window\n<launched> pid=94759",
+    "retry": 0
+  },
+  {
+    "title": "should be responsive on mobile",
+    "status": "timedOut",
+    "duration": 30002,
+    "error": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+    "retry": 1
+  },
+  {
+    "title": "should load team member avatars without 404 errors",
+    "status": "timedOut",
+    "duration": 29999,
+    "error": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+    "retry": 1
+  },
+  {
+    "title": "should be responsive on mobile",
+    "status": "passed",
+    "duration": 1565,
+    "error": null,
+    "retry": 2
+  },
+  {
+    "title": "should load team member avatars without 404 errors",
+    "status": "failed",
+    "duration": 2761,
+    "error": "Error: page.click: Target page, context or browser has been closed",
+    "retry": 2
+  },
+  {
+    "title": "should have proper accessibility labels",
+    "status": "passed",
+    "duration": 1971,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should handle new project button click",
+    "status": "timedOut",
+    "duration": 30003,
+    "error": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+    "retry": 0
+  },
+  {
+    "title": "should display team members with avatars",
+    "status": "timedOut",
+    "duration": 30000,
+    "error": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+    "retry": 0
+  },
+  {
+    "title": "should display dashboard stats",
+    "status": "passed",
+    "duration": 2942,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should handle new project button click",
+    "status": "passed",
+    "duration": 3495,
+    "error": null,
+    "retry": 1
+  },
+  {
+    "title": "should display team members with avatars",
+    "status": "failed",
+    "duration": 3881,
+    "error": "Error: Test ended.\nBrowser logs:\n\n<launching> /Users/thabonyembe/Library/Caches/ms-playwright/chromium-1097/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --enable-features=NetworkService,NetworkServiceInProcess --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=ImprovedCookieControls,LazyFrameLoading,GlobalMediaControls,DestroyProfileOnBrowserClose,MediaRouter,DialMediaRouteProvider,AcceptCHFrame,AutoExpandDetailsElement,CertificateTransparencyComponentUpdater,AvoidUnnecessaryBeforeUnloadCheckSync,Translate,HttpsUpgrades,PaintHolding --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --enable-automation --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --enable-use-zoom-for-dsf=false --use-angle --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/var/folders/g0/h_vmczvs61jf4r7kzhq0ypg40000gn/T/playwright_chromiumdev_profile-3aMjMS --remote-debugging-pipe --no-startup-window\n<launched> pid=94881",
+    "retry": 1
+  },
+  {
+    "title": "should have working navigation tabs",
+    "status": "passed",
+    "duration": 2694,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should display team members with avatars",
+    "status": "passed",
+    "duration": 2212,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should display team members with avatars",
+    "status": "passed",
+    "duration": 2333,
+    "error": null,
+    "retry": 2
+  },
+  {
+    "title": "should display projects in Projects Hub",
+    "status": "passed",
+    "duration": 2287,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should handle new project button click",
+    "status": "passed",
+    "duration": 2972,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should be responsive on mobile",
+    "status": "passed",
+    "duration": 1872,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should load team member avatars without 404 errors",
+    "status": "passed",
+    "duration": 3860,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should have proper accessibility labels",
+    "status": "passed",
+    "duration": 1349,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should load dashboard page successfully",
+    "status": "passed",
+    "duration": 2162,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should display dashboard stats",
+    "status": "passed",
+    "duration": 1828,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should have working navigation tabs",
+    "status": "passed",
+    "duration": 1776,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should display projects in Projects Hub",
+    "status": "passed",
+    "duration": 1756,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should handle new project button click",
+    "status": "passed",
+    "duration": 1437,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should display team members with avatars",
+    "status": "passed",
+    "duration": 1834,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should be responsive on mobile",
+    "status": "passed",
+    "duration": 1437,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should have proper accessibility labels",
+    "status": "passed",
+    "duration": 1383,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should load team member avatars without 404 errors",
+    "status": "passed",
+    "duration": 3509,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should display dashboard stats",
+    "status": "passed",
+    "duration": 3484,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should load dashboard page successfully",
+    "status": "passed",
+    "duration": 3983,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should have working navigation tabs",
+    "status": "passed",
+    "duration": 2147,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should display projects in Projects Hub",
+    "status": "passed",
+    "duration": 2533,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should display team members with avatars",
+    "status": "passed",
+    "duration": 2094,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should handle new project button click",
+    "status": "passed",
+    "duration": 1933,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should have proper accessibility labels",
+    "status": "passed",
+    "duration": 1602,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should be responsive on mobile",
+    "status": "passed",
+    "duration": 1702,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should display dashboard stats",
+    "status": "passed",
+    "duration": 1492,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should load dashboard page successfully",
+    "status": "passed",
+    "duration": 1496,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should load team member avatars without 404 errors",
+    "status": "passed",
+    "duration": 3829,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should display projects in Projects Hub",
+    "status": "passed",
+    "duration": 1694,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should have working navigation tabs",
+    "status": "passed",
+    "duration": 1854,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should load dashboard page successfully",
+    "status": "timedOut",
+    "duration": 30000,
+    "error": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+    "retry": 0
+  },
+  {
+    "title": "should display team members with avatars",
+    "status": "passed",
+    "duration": 2621,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should be responsive on mobile",
+    "status": "passed",
+    "duration": 1555,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should handle new project button click",
+    "status": "passed",
+    "duration": 1721,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should have proper accessibility labels",
+    "status": "passed",
+    "duration": 1343,
+    "error": null,
+    "retry": 0
+  },
+  {
+    "title": "should load team member avatars without 404 errors",
+    "status": "timedOut",
+    "duration": 30001,
+    "error": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+    "retry": 0
+  },
+  {
+    "title": "should load dashboard page successfully",
+    "status": "timedOut",
+    "duration": 30000,
+    "error": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+    "retry": 1
+  },
+  {
+    "title": "should load team member avatars without 404 errors",
+    "status": "passed",
+    "duration": 4050,
+    "error": null,
+    "retry": 1
+  },
+  {
+    "title": "should load dashboard page successfully",
+    "status": "timedOut",
+    "duration": 30000,
+    "error": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+    "retry": 2
+  }
+]

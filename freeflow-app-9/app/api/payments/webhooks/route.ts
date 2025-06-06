@@ -2,14 +2,29 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { headers } from 'next/headers'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20',
-  typescript: true,
-})
+// Stripe MCP Best Practice: Initialize with proper error handling and environment validation
+let stripe: Stripe | null = null
+let endpointSecret: string | null = null
 
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
+// Initialize Stripe only if properly configured
+if (process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET) {
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2024-06-20',
+    typescript: true,
+  })
+  endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
+}
 
 export async function POST(request: NextRequest) {
+  // Check if Stripe is properly configured
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+    console.warn('Stripe not configured - webhook endpoint disabled')
+    return NextResponse.json(
+      { error: 'Payment system not configured' },
+      { status: 503 }
+    )
+  }
+
   const body = await request.text()
   const headersList = headers()
   const sig = headersList.get('stripe-signature')

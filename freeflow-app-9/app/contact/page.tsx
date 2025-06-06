@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Mail, Phone, MapPin, Send, ArrowLeft } from 'lucide-react'
+import { Mail, Phone, MapPin, Send, ArrowLeft, ExternalLink } from 'lucide-react'
 
 export default function ContactPage() {
   const [isLoading, setIsLoading] = useState(false)
@@ -24,6 +24,14 @@ export default function ContactPage() {
     setSuccess(true)
   }
 
+  const handleEmailClick = () => {
+    window.location.href = 'mailto:hello@freelanceflowzee.com?subject=Contact from FreeflowZee Website'
+  }
+
+  const handlePhoneClick = () => {
+    window.location.href = 'tel:+15551234567'
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
@@ -34,7 +42,9 @@ export default function ContactPage() {
               <ArrowLeft className="w-5 h-5 mr-2" />
               Back to Home
             </Link>
-            <span className="text-2xl font-bold text-indigo-600">FreeflowZee</span>
+            <Link href="/" className="text-2xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors">
+              FreeflowZee
+            </Link>
           </div>
         </div>
       </div>
@@ -62,26 +72,43 @@ export default function ContactPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex items-center space-x-4">
-                  <div className="p-3 bg-indigo-100 rounded-full">
-                    <Mail className="w-6 h-6 text-indigo-600" />
+                {/* Clickable Email */}
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start h-auto p-4 hover:bg-indigo-50 transition-colors group"
+                  onClick={handleEmailClick}
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className="p-3 bg-indigo-100 rounded-full group-hover:bg-indigo-200 transition-colors">
+                      <Mail className="w-6 h-6 text-indigo-600" />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">Email</p>
+                      <p className="text-gray-600 group-hover:text-indigo-500 transition-colors">hello@freelanceflowzee.com</p>
+                    </div>
+                    <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 ml-auto" />
                   </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">Email</p>
-                    <p className="text-gray-600">hello@freelanceflowzee.com</p>
-                  </div>
-                </div>
+                </Button>
                 
-                <div className="flex items-center space-x-4">
-                  <div className="p-3 bg-indigo-100 rounded-full">
-                    <Phone className="w-6 h-6 text-indigo-600" />
+                {/* Clickable Phone */}
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start h-auto p-4 hover:bg-indigo-50 transition-colors group"
+                  onClick={handlePhoneClick}
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className="p-3 bg-indigo-100 rounded-full group-hover:bg-indigo-200 transition-colors">
+                      <Phone className="w-6 h-6 text-indigo-600" />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">Phone</p>
+                      <p className="text-gray-600 group-hover:text-indigo-500 transition-colors">+1 (555) 123-4567</p>
+                    </div>
+                    <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 ml-auto" />
                   </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">Phone</p>
-                    <p className="text-gray-600">+1 (555) 123-4567</p>
-                  </div>
-                </div>
+                </Button>
                 
+                {/* Office Location */}
                 <div className="flex items-center space-x-4">
                   <div className="p-3 bg-indigo-100 rounded-full">
                     <MapPin className="w-6 h-6 text-indigo-600" />
@@ -99,6 +126,20 @@ export default function ContactPage() {
                     <p>Saturday: 10:00 AM - 4:00 PM PST</p>
                     <p>Sunday: Closed</p>
                   </div>
+                </div>
+
+                {/* Quick Action Buttons */}
+                <div className="pt-6 space-y-3">
+                  <Link href="/signup" className="w-full">
+                    <Button className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white">
+                      Start Free Trial
+                    </Button>
+                  </Link>
+                  <Link href="/payment" className="w-full">
+                    <Button variant="outline" className="w-full">
+                      View Demo Project
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>

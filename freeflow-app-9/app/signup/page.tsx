@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { UserPlus, Eye, EyeOff, Mail, Lock, User } from 'lucide-react'
+import { SiteHeader } from '@/components/site-header'
+import { SiteFooter } from '@/components/site-footer'
 
 export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false)
@@ -56,8 +58,10 @@ export default function SignUp() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
-      <Card className="w-full max-w-md shadow-xl border-0 bg-white/70 backdrop-blur-sm">
+    <div className="min-h-screen">
+      <SiteHeader variant="minimal" />
+      <div className="pt-16 min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+        <Card className="w-full max-w-md shadow-xl border-0 bg-white/70 backdrop-blur-sm">
         <CardHeader className="space-y-1 text-center">
           <Link href="/" className="inline-block mb-4">
             <div className="text-3xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors cursor-pointer">
@@ -215,6 +219,8 @@ export default function SignUp() {
           </div>
         </CardContent>
       </Card>
+      </div>
+      <SiteFooter variant="minimal" />
     </div>
   )
 } 

@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, AlertCircle } from 'lucide-react'
 import { login } from './actions'
+import { SiteHeader } from '@/components/site-header'
+import { SiteFooter } from '@/components/site-footer'
 
 function LoginForm() {
   const router = useRouter()
@@ -177,8 +179,14 @@ function LoginFallback() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<LoginFallback />}>
-      <LoginForm />
-    </Suspense>
+    <div className="min-h-screen">
+      <SiteHeader variant="minimal" />
+      <div className="pt-16">
+        <Suspense fallback={<LoginFallback />}>
+          <LoginForm />
+        </Suspense>
+      </div>
+      <SiteFooter variant="minimal" />
+    </div>
   )
 } 

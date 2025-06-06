@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
 // Initialize enhanced Stripe with latest API version
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_for_build'
+const stripe = new Stripe(stripeSecretKey, {
   apiVersion: '2024-06-20',
   typescript: true,
 })

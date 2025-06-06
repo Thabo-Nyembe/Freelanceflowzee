@@ -1,2 +1,329 @@
-<testsuites id="" name="" tests="0" failures="0" skipped="0" errors="0" time="0.009345000000000254">
+<testsuites id="" name="" tests="45" failures="2" skipped="0" errors="0" time="131.988663">
+<testsuite name="dashboard.spec.ts" timestamp="2025-06-06T20:29:55.997Z" hostname="chromium" tests="9" failures="1" skipped="0" time="147.309" errors="0">
+<testcase name="Dashboard Tests › should load dashboard page successfully" classname="dashboard.spec.ts" time="2.627">
+</testcase>
+<testcase name="Dashboard Tests › should display dashboard stats" classname="dashboard.spec.ts" time="2.639">
+</testcase>
+<testcase name="Dashboard Tests › should have working navigation tabs" classname="dashboard.spec.ts" time="2.864">
+</testcase>
+<testcase name="Dashboard Tests › should display projects in Projects Hub" classname="dashboard.spec.ts" time="2.738">
+</testcase>
+<testcase name="Dashboard Tests › should display team members with avatars" classname="dashboard.spec.ts" time="36.214">
+<system-out>
+<![CDATA[Dashboard title not found, continuing...
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-display-team-members-with-avatars-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-display-team-members-with-avatars-chromium/video.webm]]
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-display-team-members-with-avatars-chromium/test-failed-2.png]]
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-display-team-members-with-avatars-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Dashboard Tests › should handle new project button click" classname="dashboard.spec.ts" time="33.498">
+<system-out>
+<![CDATA[Dashboard title not found, continuing...
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-handle-new-project-button-click-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-handle-new-project-button-click-chromium/video.webm]]
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-handle-new-project-button-click-chromium/test-failed-2.png]]
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-handle-new-project-button-click-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[Internal error: fixture integrity at context
+]]>
+</system-err>
+</testcase>
+<testcase name="Dashboard Tests › should be responsive on mobile" classname="dashboard.spec.ts" time="31.726">
+<system-out>
+<![CDATA[Dashboard title not found, continuing...
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-be-responsive-on-mobile-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-be-responsive-on-mobile-chromium-retry1/video.webm]]
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-be-responsive-on-mobile-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[Internal error: fixture integrity at context
+]]>
+</system-err>
+</testcase>
+<testcase name="Dashboard Tests › should load team member avatars without 404 errors" classname="dashboard.spec.ts" time="33.032">
+<failure message="dashboard.spec.ts:93:7 should load team member avatars without 404 errors" type="FAILURE">
+<![CDATA[  [chromium] › dashboard.spec.ts:93:7 › Dashboard Tests › should load team member avatars without 404 errors 
+
+    Error: browser.newContext: Target page, context or browser has been closed
+    Browser logs:
+
+    <launching> /Users/thabonyembe/Library/Caches/ms-playwright/chromium-1097/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --enable-features=NetworkService,NetworkServiceInProcess --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=ImprovedCookieControls,LazyFrameLoading,GlobalMediaControls,DestroyProfileOnBrowserClose,MediaRouter,DialMediaRouteProvider,AcceptCHFrame,AutoExpandDetailsElement,CertificateTransparencyComponentUpdater,AvoidUnnecessaryBeforeUnloadCheckSync,Translate,HttpsUpgrades,PaintHolding --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --enable-automation --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --enable-use-zoom-for-dsf=false --use-angle --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/var/folders/g0/h_vmczvs61jf4r7kzhq0ypg40000gn/T/playwright_chromiumdev_profile-gLiNlI --remote-debugging-pipe --no-startup-window
+    <launched> pid=94759
+
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="team-tab"]')
+
+
+      100 |     });
+      101 |     
+    > 102 |     await page.click('[data-testid="team-tab"]');
+          |                ^
+      103 |     await page.waitForTimeout(2000); // Wait for images to load
+      104 |     
+      105 |     expect(failedRequests).toHaveLength(0);
+
+        at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:102:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/dashboard-Dashboard-Tests-should-load-team-member-avatars-without-404-errors-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/dashboard-Dashboard-Tests-should-load-team-member-avatars-without-404-errors-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/dashboard-Dashboard-Tests-should-load-team-member-avatars-without-404-errors-chromium-retry1/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/dashboard-Dashboard-Tests-should-load-team-member-avatars-without-404-errors-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.click: Target page, context or browser has been closed
+
+      100 |     });
+      101 |     
+    > 102 |     await page.click('[data-testid="team-tab"]');
+          |                ^
+      103 |     await page.waitForTimeout(2000); // Wait for images to load
+      104 |     
+      105 |     expect(failedRequests).toHaveLength(0);
+
+        at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:102:16
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-load-team-member-avatars-without-404-errors-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-load-team-member-avatars-without-404-errors-chromium-retry1/video.webm]]
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-load-team-member-avatars-without-404-errors-chromium-retry1/trace.zip]]
+Dashboard title not found, continuing...
+]]>
+</system-out>
+</testcase>
+<testcase name="Dashboard Tests › should have proper accessibility labels" classname="dashboard.spec.ts" time="1.971">
+</testcase>
+</testsuite>
+<testsuite name="dashboard.spec.ts" timestamp="2025-06-06T20:29:55.997Z" hostname="firefox" tests="9" failures="1" skipped="0" time="110.188" errors="0">
+<testcase name="Dashboard Tests › should load dashboard page successfully" classname="dashboard.spec.ts" time="90">
+<failure message="dashboard.spec.ts:18:7 should load dashboard page successfully" type="FAILURE">
+<![CDATA[  [firefox] › dashboard.spec.ts:18:7 › Dashboard Tests › should load dashboard page successfully ───
+
+    Test timeout of 30000ms exceeded while running "beforeEach" hook.
+
+      2 |
+      3 | test.describe('Dashboard Tests', () => {
+    > 4 |   test.beforeEach(async ({ page }) => {
+        |        ^
+      5 |     // Set test mode header
+      6 |     await page.setExtraHTTPHeaders({
+      7 |       'x-test-mode': 'true'
+
+        at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:4:8
+
+    Error: browserContext.newPage: Test ended.
+
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Test timeout of 30000ms exceeded while running "beforeEach" hook.
+
+      2 |
+      3 | test.describe('Dashboard Tests', () => {
+    > 4 |   test.beforeEach(async ({ page }) => {
+        |        ^
+      5 |     // Set test mode header
+      6 |     await page.setExtraHTTPHeaders({
+      7 |       'x-test-mode': 'true'
+
+        at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:4:8
+
+    Error: browserContext.newPage: Test ended.
+
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox-retry1/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Test timeout of 30000ms exceeded while running "beforeEach" hook.
+
+      2 |
+      3 | test.describe('Dashboard Tests', () => {
+    > 4 |   test.beforeEach(async ({ page }) => {
+        |        ^
+      5 |     // Set test mode header
+      6 |     await page.setExtraHTTPHeaders({
+      7 |       'x-test-mode': 'true'
+
+        at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts:4:8
+
+    Error: browserContext.newPage: Test ended.
+
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox-retry2/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox-retry2/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[Dashboard title not found, continuing...
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox/test-failed-1.png]]
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox/video.webm]]
+Dashboard title not found, continuing...
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox-retry1/video.webm]]
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox-retry1/trace.zip]]
+Dashboard title not found, continuing...
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox-retry2/test-failed-1.png]]
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-load-dashboard-page-successfully-firefox-retry2/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Dashboard Tests › should display dashboard stats" classname="dashboard.spec.ts" time="2.942">
+</testcase>
+<testcase name="Dashboard Tests › should have working navigation tabs" classname="dashboard.spec.ts" time="2.694">
+</testcase>
+<testcase name="Dashboard Tests › should display projects in Projects Hub" classname="dashboard.spec.ts" time="2.287">
+</testcase>
+<testcase name="Dashboard Tests › should display team members with avatars" classname="dashboard.spec.ts" time="2.212">
+</testcase>
+<testcase name="Dashboard Tests › should handle new project button click" classname="dashboard.spec.ts" time="2.972">
+</testcase>
+<testcase name="Dashboard Tests › should be responsive on mobile" classname="dashboard.spec.ts" time="1.872">
+</testcase>
+<testcase name="Dashboard Tests › should load team member avatars without 404 errors" classname="dashboard.spec.ts" time="3.86">
+</testcase>
+<testcase name="Dashboard Tests › should have proper accessibility labels" classname="dashboard.spec.ts" time="1.349">
+</testcase>
+</testsuite>
+<testsuite name="dashboard.spec.ts" timestamp="2025-06-06T20:29:55.997Z" hostname="webkit" tests="9" failures="0" skipped="0" time="17.122" errors="0">
+<testcase name="Dashboard Tests › should load dashboard page successfully" classname="dashboard.spec.ts" time="2.162">
+</testcase>
+<testcase name="Dashboard Tests › should display dashboard stats" classname="dashboard.spec.ts" time="1.828">
+</testcase>
+<testcase name="Dashboard Tests › should have working navigation tabs" classname="dashboard.spec.ts" time="1.776">
+</testcase>
+<testcase name="Dashboard Tests › should display projects in Projects Hub" classname="dashboard.spec.ts" time="1.756">
+</testcase>
+<testcase name="Dashboard Tests › should display team members with avatars" classname="dashboard.spec.ts" time="1.834">
+</testcase>
+<testcase name="Dashboard Tests › should handle new project button click" classname="dashboard.spec.ts" time="1.437">
+</testcase>
+<testcase name="Dashboard Tests › should be responsive on mobile" classname="dashboard.spec.ts" time="1.437">
+</testcase>
+<testcase name="Dashboard Tests › should load team member avatars without 404 errors" classname="dashboard.spec.ts" time="3.509">
+</testcase>
+<testcase name="Dashboard Tests › should have proper accessibility labels" classname="dashboard.spec.ts" time="1.383">
+</testcase>
+</testsuite>
+<testsuite name="dashboard.spec.ts" timestamp="2025-06-06T20:29:55.997Z" hostname="Mobile Chrome" tests="9" failures="0" skipped="0" time="23.307" errors="0">
+<testcase name="Dashboard Tests › should load dashboard page successfully" classname="dashboard.spec.ts" time="3.983">
+</testcase>
+<testcase name="Dashboard Tests › should display dashboard stats" classname="dashboard.spec.ts" time="3.484">
+</testcase>
+<testcase name="Dashboard Tests › should have working navigation tabs" classname="dashboard.spec.ts" time="2.147">
+</testcase>
+<testcase name="Dashboard Tests › should display projects in Projects Hub" classname="dashboard.spec.ts" time="2.533">
+</testcase>
+<testcase name="Dashboard Tests › should display team members with avatars" classname="dashboard.spec.ts" time="2.094">
+</testcase>
+<testcase name="Dashboard Tests › should handle new project button click" classname="dashboard.spec.ts" time="1.933">
+</testcase>
+<testcase name="Dashboard Tests › should be responsive on mobile" classname="dashboard.spec.ts" time="1.702">
+</testcase>
+<testcase name="Dashboard Tests › should load team member avatars without 404 errors" classname="dashboard.spec.ts" time="3.829">
+</testcase>
+<testcase name="Dashboard Tests › should have proper accessibility labels" classname="dashboard.spec.ts" time="1.602">
+</testcase>
+</testsuite>
+<testsuite name="dashboard.spec.ts" timestamp="2025-06-06T20:29:55.997Z" hostname="Mobile Safari" tests="9" failures="0" skipped="0" time="47.827" errors="0">
+<testcase name="Dashboard Tests › should load dashboard page successfully" classname="dashboard.spec.ts" time="1.496">
+</testcase>
+<testcase name="Dashboard Tests › should display dashboard stats" classname="dashboard.spec.ts" time="1.492">
+</testcase>
+<testcase name="Dashboard Tests › should have working navigation tabs" classname="dashboard.spec.ts" time="1.854">
+</testcase>
+<testcase name="Dashboard Tests › should display projects in Projects Hub" classname="dashboard.spec.ts" time="1.694">
+</testcase>
+<testcase name="Dashboard Tests › should display team members with avatars" classname="dashboard.spec.ts" time="2.621">
+</testcase>
+<testcase name="Dashboard Tests › should handle new project button click" classname="dashboard.spec.ts" time="1.721">
+</testcase>
+<testcase name="Dashboard Tests › should be responsive on mobile" classname="dashboard.spec.ts" time="1.555">
+</testcase>
+<testcase name="Dashboard Tests › should load team member avatars without 404 errors" classname="dashboard.spec.ts" time="34.051">
+<system-out>
+<![CDATA[Dashboard title not found, continuing...
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-load-team-member-avatars-without-404-errors-Mobile-Safari/test-failed-1.png]]
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-load-team-member-avatars-without-404-errors-Mobile-Safari/video.webm]]
+
+[[ATTACHMENT|dashboard-Dashboard-Tests-should-load-team-member-avatars-without-404-errors-Mobile-Safari-retry1/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Dashboard Tests › should have proper accessibility labels" classname="dashboard.spec.ts" time="1.343">
+</testcase>
+</testsuite>
 </testsuites>
