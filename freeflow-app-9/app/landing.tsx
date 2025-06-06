@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
+import { DemoModal } from '@/components/demo-modal'
 import { 
   ArrowRight, 
   Upload, 
@@ -39,6 +40,7 @@ import {
 // Hero section with animated gradient background
 function HeroSection() {
   const [isVisible, setIsVisible] = useState(false)
+  const [isDemoOpen, setIsDemoOpen] = useState(false)
 
   useEffect(() => {
     setIsVisible(true)
@@ -82,7 +84,13 @@ function HeroSection() {
               </Button>
             </Link>
             
-            <Button data-testid="hero-cta-demo" size="lg" variant="outline" className="border-2 border-gray-300 hover:border-indigo-300 px-8 py-4 text-lg font-semibold rounded-xl backdrop-blur-sm bg-white/80">
+            <Button 
+              data-testid="hero-cta-demo" 
+              size="lg" 
+              variant="outline" 
+              className="border-2 border-gray-300 hover:border-indigo-300 px-8 py-4 text-lg font-semibold rounded-xl backdrop-blur-sm bg-white/80"
+              onClick={() => setIsDemoOpen(true)}
+            >
               <Play className="mr-2 w-5 h-5" />
               Watch Demo
             </Button>
@@ -110,6 +118,12 @@ function HeroSection() {
           </div>
         </div>
       </div>
+
+      {/* Demo Modal */}
+      <DemoModal 
+        isOpen={isDemoOpen} 
+        onClose={() => setIsDemoOpen(false)} 
+      />
     </section>
   )
 }
@@ -519,7 +533,9 @@ function Navigation() {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <span data-testid="nav-logo" className="text-2xl font-bold text-indigo-600">FreeflowZee</span>
+              <Link href="/" className="text-2xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors cursor-pointer">
+                <span data-testid="nav-logo">FreeflowZee</span>
+              </Link>
             </div>
           </div>
 

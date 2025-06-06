@@ -53,6 +53,11 @@ export default function SignUp() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
       <Card className="w-full max-w-md shadow-xl border-0 bg-white/70 backdrop-blur-sm">
         <CardHeader className="space-y-1 text-center">
+          <Link href="/" className="inline-block mb-4">
+            <div className="text-3xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors cursor-pointer">
+              FreeflowZee
+            </div>
+          </Link>
           <div className="flex justify-center mb-4">
             <div className="p-3 bg-primary/10 rounded-full">
               <UserPlus className="h-8 w-8 text-primary" />
