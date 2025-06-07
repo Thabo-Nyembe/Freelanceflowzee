@@ -86,16 +86,17 @@ function HeroSection() {
               </Button>
             </Link>
             
-            <Button 
-              data-testid="hero-cta-demo" 
-              size="lg" 
-              variant="outline" 
-              className="border-2 border-gray-300 hover:border-indigo-300 px-8 py-4 text-lg font-semibold rounded-xl backdrop-blur-sm bg-white/80"
-              onClick={() => setIsDemoOpen(true)}
-            >
-              <Play className="mr-2 w-5 h-5" />
-              Watch Demo
-            </Button>
+            <Link href="/demo">
+              <Button 
+                data-testid="hero-cta-demo" 
+                size="lg" 
+                variant="outline" 
+                className="border-2 border-gray-300 hover:border-indigo-300 px-8 py-4 text-lg font-semibold rounded-xl backdrop-blur-sm bg-white/80"
+              >
+                <Play className="mr-2 w-5 h-5" />
+                Try Demo
+              </Button>
+            </Link>
           </div>
 
           {/* Social proof */}
@@ -188,17 +189,29 @@ function FeaturesSection() {
           {features.map((feature, index) => {
             const IconComponent = feature.icon
             return (
-              <Card key={index} data-testid={`feature-card-${index}`} className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50">
-                <CardContent className="p-8">
-                  <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                    <IconComponent className="w-7 h-7 text-white" />
-                  </div>
-                  <h3 data-testid={`feature-title-${index}`} className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                  <p data-testid={`feature-description-${index}`} className="text-gray-600 leading-relaxed">{feature.description}</p>
-                </CardContent>
-              </Card>
+              <Link key={index} href="/features">
+                <Card data-testid={`feature-card-${index}`} className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50 cursor-pointer">
+                  <CardContent className="p-8">
+                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                      <IconComponent className="w-7 h-7 text-white" />
+                    </div>
+                    <h3 data-testid={`feature-title-${index}`} className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
+                    <p data-testid={`feature-description-${index}`} className="text-gray-600 leading-relaxed">{feature.description}</p>
+                  </CardContent>
+                </Card>
+              </Link>
             )
           })}
+        </div>
+        
+        {/* Features CTA */}
+        <div className="text-center mt-16">
+          <Link href="/features">
+            <Button size="lg" variant="outline" className="px-8 py-4">
+              Explore All Features
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
@@ -261,30 +274,41 @@ function HowItWorksSection() {
                   </div>
                   <h3 data-testid={`step-title-${index}`} className="text-3xl font-bold text-gray-900">{step.title}</h3>
                   <p data-testid={`step-description-${index}`} className="text-xl text-gray-600 leading-relaxed">{step.description}</p>
-                  <Link href="/signup">
+                  <Link href={index === 0 ? "/how-it-works" : "/signup"}>
                     <Button data-testid={`step-cta-${index}`} variant="outline" className="mt-4">
-                      Get Started
+                      {index === 0 ? "Learn More" : "Get Started"}
                       <ChevronRight className="ml-2 w-4 h-4" />
                     </Button>
                   </Link>
                 </div>
                 
                 <div className="flex-1">
-                  <div 
-                    data-testid={`step-demo-${index}`} 
-                    className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-8 aspect-video flex items-center justify-center cursor-pointer hover:from-indigo-200 hover:to-purple-200 transition-all duration-300 group"
-                    onClick={() => setIsDemoOpen(true)}
-                  >
-                    <div className="text-center">
-                      <IconComponent className="w-20 h-20 mx-auto mb-4 text-indigo-600 group-hover:scale-110 transition-transform duration-300" />
-                      <p className="text-indigo-600 font-medium group-hover:text-indigo-700">Demo Preview</p>
-                      <p className="text-indigo-500 text-sm mt-2 opacity-75">Click to watch</p>
+                  <Link href="/demo">
+                    <div 
+                      data-testid={`step-demo-${index}`} 
+                      className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-8 aspect-video flex items-center justify-center cursor-pointer hover:from-indigo-200 hover:to-purple-200 transition-all duration-300 group"
+                    >
+                      <div className="text-center">
+                        <IconComponent className="w-20 h-20 mx-auto mb-4 text-indigo-600 group-hover:scale-110 transition-transform duration-300" />
+                        <p className="text-indigo-600 font-medium group-hover:text-indigo-700">Interactive Demo</p>
+                        <p className="text-indigo-500 text-sm mt-2 opacity-75">Click to try</p>
+                      </div>
                     </div>
-                  </div>
+                  </Link>
                 </div>
               </div>
             )
           })}
+        </div>
+        
+        {/* How It Works CTA */}
+        <div className="text-center mt-16">
+          <Link href="/how-it-works">
+            <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4">
+              See Complete Process
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </Link>
         </div>
       </div>
       
@@ -379,6 +403,16 @@ function SocialProofSection() {
               </CardContent>
             </Card>
           ))}
+        </div>
+        
+        {/* Testimonials CTA */}
+        <div className="text-center mt-16">
+          <Link href="/community">
+            <Button size="lg" variant="outline" className="px-8 py-4">
+              Join Our Community
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
@@ -487,9 +521,15 @@ function PricingSection() {
         </div>
 
         <div className="text-center mt-12">
-          <p data-testid="pricing-trial-info" className="text-gray-600">
+          <p data-testid="pricing-trial-info" className="text-gray-600 mb-6">
             All plans include 14-day free trial. No credit card required.
           </p>
+          <Link href="/payment">
+            <Button size="lg" variant="outline" className="px-8 py-4">
+              View All Pricing Options
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </Link>
         </div>
       </div>
     </section>

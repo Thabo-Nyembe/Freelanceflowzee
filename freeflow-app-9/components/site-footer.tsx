@@ -120,7 +120,7 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Content */}
         <div className="py-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
             {/* Company Info */}
             <div className="space-y-6">
               <div>
@@ -181,9 +181,9 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
               </h4>
               <ul className="space-y-4">
                 {[
-                  { href: '/#features', label: 'Features' },
-                  { href: '/#how-it-works', label: 'How it Works' },
-                  { href: '/#pricing', label: 'Pricing' },
+                  { href: '/features', label: 'Features' },
+                  { href: '/how-it-works', label: 'How it Works' },
+                  { href: '/payment', label: 'Pricing' },
                   { href: '/demo', label: 'Demo Project', icon: ExternalLink },
                   { href: '/dashboard', label: 'Dashboard', icon: Home },
                 ].map((item) => (
@@ -194,6 +194,31 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
                     >
                       {item.label}
                       {item.icon && <item.icon className="w-3 h-3 ml-1" />}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Resources Links */}
+            <div>
+              <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">
+                Resources
+              </h4>
+              <ul className="space-y-4">
+                {[
+                  { href: '/docs', label: 'Documentation' },
+                  { href: '/tutorials', label: 'Video Tutorials' },
+                  { href: '/api-docs', label: 'API Reference' },
+                  { href: '/community', label: 'Community' },
+                  { href: '/blog', label: 'Blog' },
+                ].map((item) => (
+                  <li key={item.href}>
+                    <Link 
+                      href={item.href}
+                      className="text-gray-400 hover:text-white transition-colors text-sm flex items-center"
+                    >
+                      {item.label}
                     </Link>
                   </li>
                 ))}
@@ -211,7 +236,6 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
                   { href: '/support', label: 'Support', icon: HelpCircle },
                   { href: '/privacy', label: 'Privacy Policy', icon: Shield },
                   { href: '/terms', label: 'Terms of Service', icon: FileText },
-                  { href: '/blog', label: 'Blog' },
                 ].map((item) => (
                   <li key={item.href}>
                     <Link 

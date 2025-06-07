@@ -88,9 +88,10 @@ export function SiteHeader({
   // Navigation items with proper Context7 structure
   const navigationItems = [
     { href: '/', label: 'Home', icon: Home },
-    { href: '/#features', label: 'Features' },
-    { href: '/#how-it-works', label: 'How it Works' },
-    { href: '/#pricing', label: 'Pricing' },
+    { href: '/features', label: 'Features' },
+    { href: '/how-it-works', label: 'How it Works' },
+    { href: '/payment', label: 'Pricing' },
+    { href: '/demo', label: 'Demo' },
     { href: '/contact', label: 'Contact', icon: Mail },
   ]
 
@@ -122,15 +123,63 @@ export function SiteHeader({
               >
                 {item.label}
               </Link>
-            )) : navigationItems.map((item) => (
-              <Link 
-                key={item.href}
-                href={item.href} 
-                className={getLinkClassName(item.href)}
-              >
-                {item.label}
-              </Link>
-            ))}
+            )) : (
+              <>
+                {navigationItems.slice(0, 4).map((item) => (
+                  <Link 
+                    key={item.href}
+                    href={item.href} 
+                    className={getLinkClassName(item.href)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                
+                {/* Resources Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className={`${getLinkClassName('/docs')} flex items-center space-x-1`}>
+                      <span>Resources</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link href="/docs" className="w-full">
+                        Documentation
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/tutorials" className="w-full">
+                        Video Tutorials
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/api-docs" className="w-full">
+                        API Reference
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/community" className="w-full">
+                        Community
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/support" className="w-full">
+                        Support
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                
+                <Link 
+                  href="/contact" 
+                  className={getLinkClassName('/contact')}
+                >
+                  Contact
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Right side - Contact, Auth buttons, or user menu */}

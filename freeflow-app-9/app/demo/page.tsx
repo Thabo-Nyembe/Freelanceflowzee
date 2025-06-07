@@ -1,4 +1,6 @@
-import { Metadata } from 'next'
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -19,16 +21,76 @@ import {
   Play,
   Image as ImageIcon,
   FileText,
-  Code
+  Code,
+  Pause,
+  Volume2,
+  VolumeX,
+  Maximize,
+  ThumbsUp,
+  MessageCircle,
+  Bookmark,
+  ExternalLink
 } from 'lucide-react'
 
-export const metadata: Metadata = {
-  title: 'Demo Project - FreeflowZee',
-  description: 'Experience how FreeflowZee works with this interactive demo project showcasing our platform\'s capabilities.',
-  keywords: ['demo', 'project', 'freelance', 'portfolio', 'showcase'],
+type PreviewItem = {
+  title: string
+  description: string
+  image: string
+}
+
+type PreviewItems = {
+  [key: string]: PreviewItem
 }
 
 export default function DemoPage() {
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [isMuted, setIsMuted] = useState(false)
+  const [isLiked, setIsLiked] = useState(false)
+  const [isBookmarked, setIsBookmarked] = useState(false)
+  const [likes, setLikes] = useState(89)
+  const [views, setViews] = useState(1247)
+  const [selectedPreview, setSelectedPreview] = useState('logo')
+  const [showComments, setShowComments] = useState(false)
+
+  const handlePlay = () => {
+    setIsPlaying(!isPlaying)
+    if (!isPlaying) {
+      setViews(prev => prev + 1)
+    }
+  }
+
+  const handleLike = () => {
+    setIsLiked(!isLiked)
+    setLikes(prev => isLiked ? prev - 1 : prev + 1)
+  }
+
+  const handleBookmark = () => {
+    setIsBookmarked(!isBookmarked)
+  }
+
+  const previewItems: PreviewItems = {
+    logo: {
+      title: 'Logo Variations',
+      description: 'Primary, secondary, and monogram versions',
+      image: '/api/placeholder/400/300'
+    },
+    brand: {
+      title: 'Brand Guidelines',
+      description: 'Color palette, typography, and usage rules',
+      image: '/api/placeholder/400/300'
+    },
+    social: {
+      title: 'Social Media Kit',
+      description: 'Profile pictures, cover photos, and post templates',
+      image: '/api/placeholder/400/300'
+    },
+    business: {
+      title: 'Business Cards',
+      description: 'Professional business card designs',
+      image: '/api/placeholder/400/300'
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <SiteHeader variant="minimal" />
@@ -45,22 +107,27 @@ export default function DemoPage() {
                 Brand Identity Design Package
               </h1>
               <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-                Experience how FreeflowZee works with this sample project. See how clients can view, 
+                Experience how FreeflowZee works with this fully interactive demo. See how clients can view, 
                 purchase, and download creative work seamlessly.
               </p>
               
-              {/* Project Stats */}
+              {/* Interactive Project Stats */}
               <div className="flex flex-wrap justify-center gap-6 mb-8">
                 <div className="flex items-center space-x-2 text-gray-600">
                   <Eye className="w-5 h-5" />
-                  <span>1,247 views</span>
+                  <span>{views.toLocaleString()} views</span>
                 </div>
+                <button 
+                  onClick={handleLike}
+                  className={`flex items-center space-x-2 transition-colors ${
+                    isLiked ? 'text-red-500' : 'text-gray-600 hover:text-red-500'
+                  }`}
+                >
+                  <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
+                  <span>{likes} likes</span>
+                </button>
                 <div className="flex items-center space-x-2 text-gray-600">
-                  <Heart className="w-5 h-5 text-red-500" />
-                  <span>89 likes</span>
-                </div>
-                <div className="flex items-center space-x-2 text-gray-600">
-                  <Star className="w-5 h-5 text-yellow-500" />
+                  <Star className="w-5 h-5 text-yellow-500 fill-current" />
                   <span>4.9 rating</span>
                 </div>
                 <div className="flex items-center space-x-2 text-gray-600">
@@ -68,21 +135,107 @@ export default function DemoPage() {
                   <span>156 downloads</span>
                 </div>
               </div>
+
+              {/* Interactive Action Buttons */}
+              <div className="flex flex-wrap justify-center gap-4 mb-8">
+                <button
+                  onClick={handleBookmark}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
+                    isBookmarked 
+                      ? 'bg-indigo-50 border-indigo-300 text-indigo-700' 
+                      : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
+                  <span>{isBookmarked ? 'Bookmarked' : 'Bookmark'}</span>
+                </button>
+                <button
+                  onClick={() => setShowComments(!showComments)}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg border bg-white border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Comments (12)</span>
+                </button>
+                <button className="flex items-center space-x-2 px-4 py-2 rounded-lg border bg-white border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                  <Share2 className="w-4 h-4" />
+                  <span>Share</span>
+                </button>
+              </div>
             </div>
 
-            {/* Project Preview */}
+            {/* Interactive Project Preview */}
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-12">
-              <div className="aspect-video bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+              <div className="relative aspect-video bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
                 <div className="text-center text-white">
-                  <Play className="w-16 h-16 mx-auto mb-4 opacity-80" />
-                  <p className="text-lg font-medium">Project Preview</p>
-                  <p className="text-sm opacity-80">Click to view full presentation</p>
+                  <button
+                    onClick={handlePlay}
+                    className="w-20 h-20 mx-auto mb-4 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
+                  >
+                    {isPlaying ? (
+                      <Pause className="w-8 h-8" />
+                    ) : (
+                      <Play className="w-8 h-8 ml-1" />
+                    )}
+                  </button>
+                  <p className="text-lg font-medium">
+                    {isPlaying ? 'Playing Project Preview' : 'Click to view full presentation'}
+                  </p>
+                  <p className="text-sm opacity-80">
+                    {isPlaying ? 'Brand Identity Showcase' : 'Interactive demo experience'}
+                  </p>
+                </div>
+                
+                {/* Video Controls */}
+                <div className="absolute bottom-4 right-4 flex space-x-2">
+                  <button
+                    onClick={() => setIsMuted(!isMuted)}
+                    className="p-2 bg-black/30 rounded-lg hover:bg-black/50 transition-colors"
+                  >
+                    {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                  </button>
+                  <button className="p-2 bg-black/30 rounded-lg hover:bg-black/50 transition-colors">
+                    <Maximize className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
               
-              {/* Project Info */}
+              {/* Interactive Preview Tabs */}
+              <div className="border-b border-gray-200">
+                <div className="flex overflow-x-auto">
+                  {Object.entries(previewItems).map(([key, item]) => (
+                    <button
+                      key={key}
+                      onClick={() => setSelectedPreview(key)}
+                      className={`px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                        selectedPreview === key
+                          ? 'border-indigo-500 text-indigo-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      {item.title}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Preview Content */}
               <div className="p-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div>
+                    <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center mb-4">
+                      <div className="text-center text-gray-500">
+                        <ImageIcon className="w-12 h-12 mx-auto mb-2" />
+                        <p className="text-sm">{previewItems[selectedPreview].title}</p>
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      {previewItems[selectedPreview].title}
+                    </h3>
+                    <p className="text-gray-600">
+                      {previewItems[selectedPreview].description}
+                    </p>
+                  </div>
+                  
                   <div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-4">Project Details</h3>
                     <div className="space-y-3">
@@ -103,26 +256,26 @@ export default function DemoPage() {
                         <span className="text-gray-600">100% Satisfaction Guaranteed</span>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4">What's Included</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-3">
-                        <ImageIcon className="w-5 h-5 text-indigo-500" />
-                        <span className="text-gray-600">Logo variations (5 formats)</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <FileText className="w-5 h-5 text-indigo-500" />
-                        <span className="text-gray-600">Brand guidelines PDF</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Code className="w-5 h-5 text-indigo-500" />
-                        <span className="text-gray-600">Source files (AI, PSD)</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Share2 className="w-5 h-5 text-indigo-500" />
-                        <span className="text-gray-600">Social media kit</span>
+
+                    <div className="mt-6">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-3">What's Included</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-3">
+                          <ImageIcon className="w-4 h-4 text-indigo-500" />
+                          <span className="text-sm text-gray-600">Logo variations (5 formats)</span>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <FileText className="w-4 h-4 text-indigo-500" />
+                          <span className="text-sm text-gray-600">Brand guidelines PDF</span>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <Code className="w-4 h-4 text-indigo-500" />
+                          <span className="text-sm text-gray-600">Source files (AI, PSD)</span>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <Share2 className="w-4 h-4 text-indigo-500" />
+                          <span className="text-sm text-gray-600">Social media kit</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -130,7 +283,41 @@ export default function DemoPage() {
               </div>
             </div>
 
-            {/* Pricing Options */}
+            {/* Comments Section */}
+            {showComments && (
+              <div className="bg-white rounded-2xl shadow-lg p-8 mb-12">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">Comments (12)</h3>
+                <div className="space-y-6">
+                  {[
+                    { name: 'Alex Chen', comment: 'Amazing work! The brand identity is so cohesive.', time: '2 hours ago' },
+                    { name: 'Maria Rodriguez', comment: 'Love the color palette choices. Very professional.', time: '5 hours ago' },
+                    { name: 'David Kim', comment: 'The logo variations are perfect for different use cases.', time: '1 day ago' }
+                  ].map((comment, index) => (
+                    <div key={index} className="flex space-x-4">
+                      <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                        {comment.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <span className="font-semibold text-gray-900">{comment.name}</span>
+                          <span className="text-sm text-gray-500">{comment.time}</span>
+                        </div>
+                        <p className="text-gray-700">{comment.comment}</p>
+                        <div className="flex items-center space-x-4 mt-2">
+                          <button className="flex items-center space-x-1 text-sm text-gray-500 hover:text-indigo-600">
+                            <ThumbsUp className="w-4 h-4" />
+                            <span>Like</span>
+                          </button>
+                          <button className="text-sm text-gray-500 hover:text-indigo-600">Reply</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Interactive Pricing Options */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
               <Card className="border-2 border-gray-200 hover:border-indigo-300 transition-colors">
                 <CardHeader>
@@ -144,7 +331,11 @@ export default function DemoPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-gray-900 mb-4">$0</div>
-                  <Button variant="outline" className="w-full mb-4">
+                  <Button 
+                    variant="outline" 
+                    className="w-full mb-4"
+                    onClick={() => alert('Preview access granted! You can now view all project details.')}
+                  >
                     <Eye className="w-4 h-4 mr-2" />
                     View Preview
                   </Button>
@@ -204,7 +395,11 @@ export default function DemoPage() {
                     $599
                     <span className="text-lg font-normal text-gray-500">/project</span>
                   </div>
-                  <Button variant="outline" className="w-full mb-4">
+                  <Button 
+                    variant="outline" 
+                    className="w-full mb-4"
+                    onClick={() => alert('Extended license selected! Redirecting to checkout...')}
+                  >
                     <DollarSign className="w-4 h-4 mr-2" />
                     Get Extended
                   </Button>
@@ -231,11 +426,13 @@ export default function DemoPage() {
                 <Link href="/signup">
                   <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700">
                     Start Creating
+                    <ExternalLink className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
                 <Link href="/contact">
                   <Button size="lg" variant="outline">
                     Contact Sales
+                    <ExternalLink className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
               </div>
