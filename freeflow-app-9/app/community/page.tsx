@@ -143,6 +143,18 @@ export default function CommunityPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [sortBy, setSortBy] = useState('recent')
+  const [showOnlineUsers, setShowOnlineUsers] = useState(false)
+  const [liveActivity, setLiveActivity] = useState([
+    { user: 'Alex T.', action: 'replied to', topic: 'Payment integration help', time: '2 min ago' },
+    { user: 'Sarah J.', action: 'created', topic: 'New feature suggestion', time: '5 min ago' },
+    { user: 'Mike C.', action: 'liked', topic: 'Welcome to the community', time: '8 min ago' }
+  ])
+  const [onlineUsers] = useState([
+    { name: 'Alex Thompson', avatar: 'AT', status: 'online' },
+    { name: 'Sarah Johnson', avatar: 'SJ', status: 'online' },
+    { name: 'Mike Chen', avatar: 'MC', status: 'away' },
+    { name: 'Lisa Wang', avatar: 'LW', status: 'online' }
+  ])
 
   const filteredTopics = recentTopics.filter(topic => {
     const matchesSearch = topic.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -212,7 +224,7 @@ export default function CommunityPage() {
             </div>
 
             {/* Community Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto mb-12">
               {communityStats.map((stat, index) => (
                 <div key={index} className="text-center">
                   <stat.icon className="w-8 h-8 text-indigo-600 mx-auto mb-2" />
@@ -220,6 +232,101 @@ export default function CommunityPage() {
                   <div className="text-gray-600">{stat.label}</div>
                 </div>
               ))}
+            </div>
+
+            {/* Live Activity & Online Users */}
+            <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              {/* Live Activity Feed */}
+              <Card className="bg-white shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <TrendingUp className="w-5 h-5 mr-2 text-green-500" />
+                    Live Activity
+                  </CardTitle>
+                  <CardDescription>Real-time community activity</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {liveActivity.map((activity, index) => (
+                      <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
+                          {activity.user.split(' ')[0][0]}{activity.user.split(' ')[1]?.[0] || ''}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm">
+                            <span className="font-semibold">{activity.user}</span> {activity.action}{' '}
+                            <span className="text-indigo-600 hover:underline cursor-pointer">
+                              {activity.topic}
+                            </span>
+                          </p>
+                          <p className="text-xs text-gray-500">{activity.time}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    className="w-full mt-4"
+                    onClick={() => setLiveActivity([
+                      { user: 'New User', action: 'joined', topic: 'the community', time: 'just now' },
+                      ...liveActivity.slice(0, 2)
+                    ])}
+                  >
+                    Refresh Activity
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Online Users */}
+              <Card className="bg-white shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Users className="w-5 h-5 mr-2 text-blue-500" />
+                      Online Users ({onlineUsers.filter(u => u.status === 'online').length})
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowOnlineUsers(!showOnlineUsers)}
+                    >
+                      {showOnlineUsers ? 'Hide' : 'Show'}
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>Community members currently online</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {showOnlineUsers && (
+                    <div className="space-y-3">
+                      {onlineUsers.map((user, index) => (
+                        <div key={index} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+                          <div className="relative">
+                            <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                              {user.avatar}
+                            </div>
+                            <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${
+                              user.status === 'online' ? 'bg-green-500' : 'bg-yellow-500'
+                            }`} />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900">{user.name}</p>
+                            <p className="text-xs text-gray-500 capitalize">{user.status}</p>
+                          </div>
+                          <Button variant="ghost" size="sm">
+                            <MessageSquare className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {!showOnlineUsers && (
+                    <div className="text-center py-8 text-gray-500">
+                      <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                      <p>Click "Show" to see online users</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>

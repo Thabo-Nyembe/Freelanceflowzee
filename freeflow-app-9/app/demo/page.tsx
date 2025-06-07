@@ -51,6 +51,14 @@ export default function DemoPage() {
   const [views, setViews] = useState(1247)
   const [selectedPreview, setSelectedPreview] = useState('logo')
   const [showComments, setShowComments] = useState(false)
+  const [showLiveChat, setShowLiveChat] = useState(false)
+  const [chatMessages, setChatMessages] = useState([
+    { user: 'Sarah (Designer)', message: 'Hi! I&apos;m here to answer any questions about this project.', time: '2 min ago' },
+    { user: 'You', message: 'This looks amazing! Can I see more color variations?', time: '1 min ago' }
+  ])
+  const [newMessage, setNewMessage] = useState('')
+  const [selectedColor, setSelectedColor] = useState('blue')
+  const [selectedStyle, setSelectedStyle] = useState('modern')
 
   const handlePlay = () => {
     setIsPlaying(!isPlaying)
@@ -159,6 +167,13 @@ export default function DemoPage() {
                 <button className="flex items-center space-x-2 px-4 py-2 rounded-lg border bg-white border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
                   <Share2 className="w-4 h-4" />
                   <span>Share</span>
+                </button>
+                <button
+                  onClick={() => setShowLiveChat(!showLiveChat)}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg border bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Live Chat</span>
                 </button>
               </div>
             </div>
@@ -316,6 +331,128 @@ export default function DemoPage() {
                 </div>
               </div>
             )}
+
+            {/* Live Chat Section */}
+            {showLiveChat && (
+              <div className="bg-white rounded-2xl shadow-lg p-8 mb-12">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">Live Chat with Designer</h3>
+                <div className="border rounded-lg p-4 h-64 overflow-y-auto mb-4 bg-gray-50">
+                  {chatMessages.map((msg, index) => (
+                    <div key={index} className={`mb-3 ${msg.user === 'You' ? 'text-right' : 'text-left'}`}>
+                      <div className={`inline-block p-3 rounded-lg max-w-xs ${
+                        msg.user === 'You' 
+                          ? 'bg-indigo-600 text-white' 
+                          : 'bg-white border border-gray-200'
+                      }`}>
+                        <p className="text-sm">{msg.message}</p>
+                        <p className={`text-xs mt-1 ${msg.user === 'You' ? 'text-indigo-200' : 'text-gray-500'}`}>
+                          {msg.user} • {msg.time}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Type your message..."
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && newMessage.trim()) {
+                        setChatMessages([...chatMessages, {
+                          user: 'You',
+                          message: newMessage,
+                          time: 'now'
+                        }])
+                        setNewMessage('')
+                        // Simulate designer response
+                        setTimeout(() => {
+                          setChatMessages(prev => [...prev, {
+                            user: 'Sarah (Designer)',
+                            message: 'Thanks for your question! I&apos;ll get back to you shortly.',
+                            time: 'now'
+                          }])
+                        }, 1000)
+                      }
+                    }}
+                  />
+                  <Button
+                    onClick={() => {
+                      if (newMessage.trim()) {
+                        setChatMessages([...chatMessages, {
+                          user: 'You',
+                          message: newMessage,
+                          time: 'now'
+                        }])
+                        setNewMessage('')
+                      }
+                    }}
+                    className="bg-indigo-600 hover:bg-indigo-700"
+                  >
+                    Send
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Project Customization */}
+            <div className="bg-white rounded-2xl shadow-lg p-8 mb-12">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">Customize This Project</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Color Scheme</h4>
+                  <div className="grid grid-cols-4 gap-3">
+                    {['blue', 'purple', 'green', 'red'].map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => setSelectedColor(color)}
+                        className={`w-12 h-12 rounded-lg border-2 transition-all ${
+                          selectedColor === color ? 'border-gray-900 scale-110' : 'border-gray-300'
+                        } ${
+                          color === 'blue' ? 'bg-blue-500' :
+                          color === 'purple' ? 'bg-purple-500' :
+                          color === 'green' ? 'bg-green-500' : 'bg-red-500'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Style</h4>
+                  <div className="space-y-2">
+                    {['modern', 'classic', 'minimal', 'bold'].map((style) => (
+                      <button
+                        key={style}
+                        onClick={() => setSelectedStyle(style)}
+                        className={`w-full p-3 text-left rounded-lg border transition-colors ${
+                          selectedStyle === style 
+                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700' 
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                      >
+                        <span className="font-medium capitalize">{style}</span>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {style === 'modern' && 'Clean lines and contemporary feel'}
+                          {style === 'classic' && 'Timeless and professional approach'}
+                          {style === 'minimal' && 'Simple and elegant design'}
+                          {style === 'bold' && 'Strong and impactful presence'}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 p-4 bg-indigo-50 rounded-lg">
+                <p className="text-indigo-800">
+                  <strong>Current Selection:</strong> {selectedColor.charAt(0).toUpperCase() + selectedColor.slice(1)} color scheme with {selectedStyle} style
+                </p>
+                <Button className="mt-3 bg-indigo-600 hover:bg-indigo-700">
+                  Request Custom Quote
+                </Button>
+              </div>
+            </div>
 
             {/* Interactive Pricing Options */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">

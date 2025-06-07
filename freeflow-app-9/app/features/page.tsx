@@ -178,6 +178,9 @@ const comparisonFeatures = [
 export default function FeaturesPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [activeFeature, setActiveFeature] = useState(0)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [showComparison, setShowComparison] = useState(false)
+  const [selectedTestimonial, setSelectedTestimonial] = useState(0)
 
   const handleDemo = (demo: string) => {
     switch (demo) {
@@ -198,15 +201,27 @@ export default function FeaturesPage() {
     }
   }
 
-  const filteredFeatures = selectedCategory === 'all' ? mainFeatures : 
-    mainFeatures.filter(feature => {
-      // Simple category filtering logic
+  const handleFeatureSearch = (term: string) => {
+    setSearchTerm(term)
+    setSelectedCategory('all')
+  }
+
+  const filteredFeatures = mainFeatures.filter(feature => {
+    const matchesCategory = selectedCategory === 'all' || (() => {
       switch (selectedCategory) {
         case 'core': return ['Smart File Management', 'Custom Branding'].includes(feature.title)
         case 'business': return ['Secure Sharing', 'Instant Payments'].includes(feature.title)
         default: return true
       }
-    })
+    })()
+    
+    const matchesSearch = searchTerm === '' || 
+      feature.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      feature.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      feature.features.some(f => f.toLowerCase().includes(searchTerm.toLowerCase()))
+    
+    return matchesCategory && matchesSearch
+  })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
@@ -244,6 +259,24 @@ export default function FeaturesPage() {
                   View Demo
                 </Button>
               </Link>
+            </div>
+
+            {/* Search Bar */}
+            <div className="max-w-md mx-auto mb-8">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search features..."
+                  value={searchTerm}
+                  onChange={(e) => handleFeatureSearch(e.target.value)}
+                  className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             {/* Feature Categories */}
@@ -357,7 +390,16 @@ export default function FeaturesPage() {
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 See how FreeflowZee stacks up against the competition.
               </p>
+              <Button
+                onClick={() => setShowComparison(!showComparison)}
+                variant="outline"
+                className="mt-4"
+              >
+                {showComparison ? 'Hide' : 'Show'} Detailed Comparison
+              </Button>
             </div>
+
+            {showComparison && (
 
             <div className="overflow-x-auto">
               <table className="w-full border-collapse bg-white rounded-lg shadow-sm">
@@ -399,6 +441,7 @@ export default function FeaturesPage() {
                 </tbody>
               </table>
             </div>
+            )}
           </div>
         </section>
 
@@ -412,9 +455,56 @@ export default function FeaturesPage() {
               </p>
             </div>
 
+            {/* Featured Testimonial */}
+            <div className="max-w-4xl mx-auto mb-12">
+              <Card className="bg-white shadow-xl">
+                <CardContent className="p-8 text-center">
+                  <div className="flex justify-center mb-4">
+                    {[...Array(testimonials[selectedTestimonial].rating)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
+                  <p className="text-xl text-gray-600 mb-6 italic">
+                    &ldquo;{testimonials[selectedTestimonial].content}&rdquo;
+                  </p>
+                  <div className="flex items-center justify-center">
+                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold mr-4">
+                      {testimonials[selectedTestimonial].avatar}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">{testimonials[selectedTestimonial].name}</p>
+                      <p className="text-sm text-gray-600">
+                        {testimonials[selectedTestimonial].role}, {testimonials[selectedTestimonial].company}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Testimonial Navigation */}
+            <div className="flex justify-center space-x-2 mb-8">
+              {testimonials.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedTestimonial(index)}
+                  className={`w-3 h-3 rounded-full transition-colors ${
+                    selectedTestimonial === index ? 'bg-blue-600' : 'bg-gray-300'
+                  }`}
+                />
+              ))}
+            </div>
+
+            {/* All Testimonials Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {testimonials.map((testimonial, index) => (
-                <Card key={index} className="bg-white hover:shadow-lg transition-shadow">
+                <Card 
+                  key={index} 
+                  className={`bg-white hover:shadow-lg transition-all cursor-pointer ${
+                    selectedTestimonial === index ? 'ring-2 ring-blue-500' : ''
+                  }`}
+                  onClick={() => setSelectedTestimonial(index)}
+                >
                   <CardContent className="p-6">
                     <div className="flex items-center mb-4">
                       {[...Array(testimonial.rating)].map((_, i) => (

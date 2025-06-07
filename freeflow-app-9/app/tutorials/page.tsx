@@ -142,6 +142,15 @@ export default function TutorialsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [sortBy, setSortBy] = useState('popular')
+  const [watchedTutorials, setWatchedTutorials] = useState<number[]>([1, 6])
+  const [currentlyWatching, setCurrentlyWatching] = useState<number | null>(null)
+  const [showLearningPath, setShowLearningPath] = useState(false)
+  const [userProgress, setUserProgress] = useState({
+    totalTutorials: tutorials.length,
+    completed: 2,
+    inProgress: 1,
+    timeSpent: '4h 32m'
+  })
 
   const filteredTutorials = tutorials.filter(tutorial => {
     const matchesSearch = tutorial.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -167,11 +176,31 @@ export default function TutorialsPage() {
   })
 
   const handleTutorialClick = (tutorial: typeof tutorials[0]) => {
-    alert(`Opening tutorial: ${tutorial.title}. Video player coming soon!`)
+    setCurrentlyWatching(tutorial.id)
+    if (!watchedTutorials.includes(tutorial.id)) {
+      setWatchedTutorials([...watchedTutorials, tutorial.id])
+      setUserProgress(prev => ({
+        ...prev,
+        completed: prev.completed + 1,
+        inProgress: Math.max(0, prev.inProgress - 1)
+      }))
+    }
+    alert(`Now watching: ${tutorial.title}. Interactive video player simulation!`)
   }
 
   const handleFeaturedClick = () => {
-    alert('Opening featured masterclass. Full video content coming soon!')
+    setCurrentlyWatching(0)
+    alert('Starting featured masterclass. Premium content simulation!')
+  }
+
+  const markAsWatched = (tutorialId: number) => {
+    if (!watchedTutorials.includes(tutorialId)) {
+      setWatchedTutorials([...watchedTutorials, tutorialId])
+      setUserProgress(prev => ({
+        ...prev,
+        completed: prev.completed + 1
+      }))
+    }
   }
 
   const getDifficultyColor = (difficulty: string) => {
@@ -228,7 +257,7 @@ export default function TutorialsPage() {
                 </div>
 
                 {/* Category Filters */}
-                <div className="flex flex-wrap justify-center gap-2">
+                <div className="flex flex-wrap justify-center gap-2 mb-6">
                   {tutorialCategories.map((category) => (
                     <button
                       key={category.id}
@@ -243,6 +272,58 @@ export default function TutorialsPage() {
                     </button>
                   ))}
                 </div>
+
+                {/* Learning Path Toggle */}
+                <div className="text-center">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowLearningPath(!showLearningPath)}
+                    className="bg-white hover:bg-purple-50 border-purple-300"
+                  >
+                    <BookOpen className="w-4 h-4 mr-2" />
+                    {showLearningPath ? 'Hide' : 'Show'} Learning Path
+                  </Button>
+                </div>
+
+                {/* Learning Path */}
+                {showLearningPath && (
+                  <div className="mt-8 max-w-2xl mx-auto">
+                    <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+                      <CardHeader>
+                        <CardTitle className="text-purple-800 text-center">Recommended Learning Path</CardTitle>
+                        <CardDescription className="text-center">Follow this sequence for the best learning experience</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {[
+                            { id: 1, title: "Getting Started with FreeflowZee", completed: watchedTutorials.includes(1) },
+                            { id: 6, title: "Security and Privacy Settings", completed: watchedTutorials.includes(6) },
+                            { id: 4, title: "Project Management Best Practices", completed: watchedTutorials.includes(4) },
+                            { id: 2, title: "Setting Up Payment Processing", completed: watchedTutorials.includes(2) },
+                            { id: 3, title: "Custom Branding and White Labeling", completed: watchedTutorials.includes(3) },
+                            { id: 5, title: "Analytics and Performance Tracking", completed: watchedTutorials.includes(5) }
+                          ].map((item, index) => (
+                            <div key={item.id} className={`flex items-center space-x-3 p-3 rounded-lg ${
+                              item.completed ? 'bg-green-50 border border-green-200' : 'bg-white border border-gray-200'
+                            }`}>
+                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-semibold ${
+                                item.completed ? 'bg-green-500 text-white' : 'bg-purple-500 text-white'
+                              }`}>
+                                {item.completed ? <CheckCircle className="w-4 h-4" /> : index + 1}
+                              </div>
+                              <span className={`flex-1 ${item.completed ? 'text-green-800' : 'text-gray-900'}`}>
+                                {item.title}
+                              </span>
+                              {item.completed && (
+                                <Badge className="bg-green-100 text-green-800">Completed</Badge>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -349,19 +430,42 @@ export default function TutorialsPage() {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {sortedTutorials.map((tutorial) => (
-                <Card key={tutorial.id} className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => handleTutorialClick(tutorial)}>
+                <Card key={tutorial.id} className={`hover:shadow-lg transition-all cursor-pointer group ${
+                  watchedTutorials.includes(tutorial.id) ? 'ring-2 ring-green-500' : ''
+                } ${currentlyWatching === tutorial.id ? 'ring-2 ring-purple-500' : ''}`} 
+                onClick={() => handleTutorialClick(tutorial)}>
                   <div className="relative">
                     <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-t-lg flex items-center justify-center">
                       <div className="text-center">
-                        <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-purple-700 transition-colors">
-                          <Play className="w-6 h-6 text-white ml-1" />
+                        <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 transition-colors ${
+                          watchedTutorials.includes(tutorial.id) 
+                            ? 'bg-green-600 group-hover:bg-green-700' 
+                            : 'bg-purple-600 group-hover:bg-purple-700'
+                        }`}>
+                          {watchedTutorials.includes(tutorial.id) ? (
+                            <CheckCircle className="w-6 h-6 text-white" />
+                          ) : (
+                            <Play className="w-6 h-6 text-white ml-1" />
+                          )}
                         </div>
-                        <p className="text-sm text-gray-600">Click to Play</p>
+                        <p className="text-sm text-gray-600">
+                          {watchedTutorials.includes(tutorial.id) ? 'Completed' : 'Click to Play'}
+                        </p>
                       </div>
                     </div>
                     <div className="absolute top-4 right-4 bg-black bg-opacity-75 text-white px-2 py-1 rounded text-sm">
                       {tutorial.duration}
                     </div>
+                    {watchedTutorials.includes(tutorial.id) && (
+                      <div className="absolute top-4 left-4 bg-green-500 text-white px-2 py-1 rounded text-sm">
+                        ✓ Watched
+                      </div>
+                    )}
+                    {currentlyWatching === tutorial.id && (
+                      <div className="absolute bottom-4 left-4 bg-purple-500 text-white px-2 py-1 rounded text-sm">
+                        Currently Watching
+                      </div>
+                    )}
                   </div>
                   
                   <CardHeader>
@@ -399,10 +503,30 @@ export default function TutorialsPage() {
                       )}
                     </div>
 
-                    <Button className="w-full group-hover:bg-purple-700 transition-colors">
-                      <Play className="w-4 h-4 mr-2" />
-                      Watch Tutorial
-                    </Button>
+                    <div className="flex space-x-2">
+                      <Button 
+                        className="flex-1 group-hover:bg-purple-700 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleTutorialClick(tutorial)
+                        }}
+                      >
+                        <Play className="w-4 h-4 mr-2" />
+                        {watchedTutorials.includes(tutorial.id) ? 'Rewatch' : 'Watch'}
+                      </Button>
+                      {!watchedTutorials.includes(tutorial.id) && (
+                        <Button 
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            markAsWatched(tutorial.id)
+                          }}
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               ))}
