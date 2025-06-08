@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { DemoModal } from '@/components/demo-modal'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
+import { VerificationReminder } from '@/components/verification-reminder'
 import { 
   ArrowRight, 
   Upload, 
@@ -578,6 +579,9 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen">
       <SiteHeader variant="transparent" />
+      <Suspense fallback={null}>
+        <VerificationReminder />
+      </Suspense>
       <HeroSection />
       <FeaturesSection />
       <HowItWorksSection />

@@ -2,28 +2,57 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { signup } from './actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { UserPlus, Eye, EyeOff, Mail, Lock, User } from 'lucide-react'
+import { UserPlus, Eye, EyeOff, Mail, Lock, User, Loader2 } from 'lucide-react'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
+import { createClient } from '@/lib/supabase/client'
 
 export default function SignUp() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [isHydrated, setIsHydrated] = useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+
+  const redirectTo = searchParams.get('redirect') || '/'
 
   // Handle hydration properly
   useEffect(() => {
     setIsHydrated(true)
   }, [])
+
+  // Check if user is already authenticated
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (user) {
+          // User is already authenticated, redirect to home or intended destination
+          router.push(redirectTo)
+          return
+        }
+      } catch (error) {
+        console.error('Auth check error:', error)
+      } finally {
+        setIsCheckingAuth(false)
+      }
+    }
+
+    checkAuth()
+  }, [router, redirectTo])
 
   const handleSubmit = async (formData: FormData) => {
     const password = formData.get('password') as string
@@ -57,6 +86,28 @@ export default function SignUp() {
     }
   }
 
+  // Show loading state while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen">
+        <SiteHeader variant="minimal" />
+        <div className="pt-16 min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+          <Card className="w-full max-w-md shadow-xl border-0 bg-white/70 backdrop-blur-sm">
+            <CardHeader className="space-y-1 text-center">
+              <div className="text-3xl font-bold text-indigo-600">FreeflowZee</div>
+              <CardDescription className="text-gray-600">
+                Checking authentication...
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen">
       <SiteHeader variant="minimal" />
@@ -79,6 +130,11 @@ export default function SignUp() {
           <CardDescription className="text-gray-600">
             Create your account to start managing your freelance business
           </CardDescription>
+          {redirectTo !== '/' && (
+            <p className="text-sm text-indigo-600">
+              You'll be redirected to {redirectTo} after signup
+            </p>
+          )}
         </CardHeader>
         <CardContent>
           <form action={handleSubmit} className="space-y-4" suppressHydrationWarning>
@@ -201,8 +257,8 @@ export default function SignUp() {
             <p className="text-sm text-gray-600">
               Already have an account?{' '}
               <Link 
-                href="/login" 
-                className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
+                href={`/login${redirectTo !== '/' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`}
+                className="font-medium text-primary hover:underline"
               >
                 Sign in here
               </Link>
@@ -212,13 +268,17 @@ export default function SignUp() {
           <div className="mt-4 text-center">
             <p className="text-xs text-gray-500">
               By creating an account, you agree to our{' '}
-              <Link href="/terms" className="text-blue-600 hover:underline">Terms of Service</Link>
-              {' '}and{' '}
-              <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>
+              <Link href="/terms" className="underline hover:text-gray-700">
+                Terms of Service
+              </Link>{' '}
+              and{' '}
+              <Link href="/privacy" className="underline hover:text-gray-700">
+                Privacy Policy
+              </Link>
             </p>
           </div>
         </CardContent>
-      </Card>
+        </Card>
       </div>
       <SiteFooter variant="minimal" />
     </div>

@@ -72,14 +72,16 @@ export async function updateSession(request: NextRequest) {
   if (!user && !isPublicRoute) {
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = '/login'
+    loginUrl.searchParams.set('redirect', request.nextUrl.pathname)
     return NextResponse.redirect(loginUrl)
   }
 
-  // If user is authenticated and trying to access auth pages, redirect to dashboard
-  if (user && (request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/signup'))) {
-    const dashboardUrl = request.nextUrl.clone()
-    dashboardUrl.pathname = '/'
-    return NextResponse.redirect(dashboardUrl)
+  // If user is authenticated and trying to access auth pages, redirect to home
+  if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup')) {
+    const homeUrl = request.nextUrl.clone()
+    homeUrl.pathname = '/'
+    // Preserve any query parameters (like verification_reminder)
+    return NextResponse.redirect(homeUrl)
   }
 
   return supabaseResponse

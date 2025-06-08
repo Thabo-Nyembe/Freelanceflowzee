@@ -1,25 +1,50 @@
 "use client"
 
-import { useState, useTransition, Suspense } from 'react'
+import { useState, useTransition, Suspense, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, AlertCircle } from 'lucide-react'
+import { Loader2, AlertCircle, CheckCircle } from 'lucide-react'
 import { login } from './actions'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
+import { createClient } from '@/lib/supabase/client'
 
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   
   // Get error from URL params (from server action redirects)
   const urlError = searchParams.get('error')
   const urlMessage = searchParams.get('message')
+  const redirectTo = searchParams.get('redirect') || '/'
+
+  // Check if user is already authenticated
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (user) {
+          // User is already authenticated, redirect to home or intended destination
+          router.push(redirectTo)
+          return
+        }
+      } catch (error) {
+        console.error('Auth check error:', error)
+      } finally {
+        setIsCheckingAuth(false)
+      }
+    }
+
+    checkAuth()
+  }, [router, redirectTo])
 
   const handleSubmit = async (formData: FormData) => {
     setError(null)
@@ -42,11 +67,30 @@ function LoginForm() {
       try {
         await login(formData)
         // If we reach here, there was no redirect (which means success)
-        router.push('/')
+        router.push(redirectTo)
       } catch (err) {
         setError('Login failed. Please try again.')
       }
     })
+  }
+
+  // Show loading state while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="mx-auto w-full max-w-md space-y-6 rounded-lg border bg-card p-6 shadow-lg">
+          <div className="space-y-2 text-center">
+            <h1 className="text-3xl font-bold text-indigo-600">FreeflowZee</h1>
+            <p className="text-muted-foreground">
+              Checking authentication...
+            </p>
+          </div>
+          <div className="flex justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -59,6 +103,11 @@ function LoginForm() {
           <p className="text-muted-foreground">
             Sign in to your account to continue
           </p>
+          {redirectTo !== '/' && (
+            <p className="text-sm text-indigo-600">
+              You'll be redirected to {redirectTo} after login
+            </p>
+          )}
         </div>
 
         {/* Display URL-based error/message */}
@@ -71,6 +120,7 @@ function LoginForm() {
 
         {urlMessage && (
           <Alert>
+            <CheckCircle className="h-4 w-4" />
             <AlertDescription>{decodeURIComponent(urlMessage)}</AlertDescription>
           </Alert>
         )}
@@ -138,7 +188,7 @@ function LoginForm() {
           <p className="text-sm text-muted-foreground">
             Don't have an account?{' '}
             <Link 
-              href="/signup" 
+              href={`/signup${redirectTo !== '/' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`}
               className="font-medium text-primary hover:underline"
             >
               Sign up here
