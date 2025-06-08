@@ -80,7 +80,7 @@ export async function login(formData: FormData) {
           // Clear rate limiting on successful login
           loginAttempts.delete(data.email.toLowerCase())
           revalidatePath('/', 'layout')
-          redirect('/?verification_reminder=true')
+          redirect('/dashboard?verification_reminder=true')
         }
         
         // If retry also fails, show helpful message
@@ -98,7 +98,7 @@ export async function login(formData: FormData) {
     loginAttempts.delete(data.email.toLowerCase())
 
     revalidatePath('/', 'layout')
-    redirect('/')
+    redirect('/dashboard')
   } catch (error: any) {
     // Check if this is a Next.js redirect error and re-throw it
     if (error?.digest?.startsWith('NEXT_REDIRECT')) {

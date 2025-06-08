@@ -40,8 +40,9 @@ export default function SignUp() {
         const { data: { user } } = await supabase.auth.getUser()
         
         if (user) {
-          // User is already authenticated, redirect to home or intended destination
-          router.push(redirectTo)
+          // User is already authenticated, redirect to dashboard or intended destination
+          const destination = redirectTo === '/' ? '/dashboard' : redirectTo
+          router.push(destination)
           return
         }
       } catch (error) {

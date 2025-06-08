@@ -32,8 +32,9 @@ function LoginForm() {
         const { data: { user } } = await supabase.auth.getUser()
         
         if (user) {
-          // User is already authenticated, redirect to home or intended destination
-          router.push(redirectTo)
+          // User is already authenticated, redirect to dashboard or intended destination
+          const destination = redirectTo === '/' ? '/dashboard' : redirectTo
+          router.push(destination)
           return
         }
       } catch (error) {
@@ -65,11 +66,13 @@ function LoginForm() {
     
     startTransition(async () => {
       try {
+        // Let the server action handle the redirect
         await login(formData)
-        // If we reach here, there was no redirect (which means success)
-        router.push(redirectTo)
-      } catch (err) {
-        setError('Login failed. Please try again.')
+      } catch (err: any) {
+        // Only handle actual errors, not redirects
+        if (err?.message && !err?.digest?.startsWith('NEXT_REDIRECT')) {
+          setError(err.message || 'Login failed. Please try again.')
+        }
       }
     })
   }

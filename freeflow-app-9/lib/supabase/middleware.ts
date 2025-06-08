@@ -76,12 +76,19 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // If user is authenticated and trying to access auth pages, redirect to home
+  // If user is authenticated and trying to access auth pages, redirect to dashboard
   if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup')) {
-    const homeUrl = request.nextUrl.clone()
-    homeUrl.pathname = '/'
+    const dashboardUrl = request.nextUrl.clone()
+    dashboardUrl.pathname = '/dashboard'
     // Preserve any query parameters (like verification_reminder)
-    return NextResponse.redirect(homeUrl)
+    return NextResponse.redirect(dashboardUrl)
+  }
+
+  // If user is authenticated and trying to access landing page, redirect to dashboard
+  if (user && request.nextUrl.pathname === '/') {
+    const dashboardUrl = request.nextUrl.clone()
+    dashboardUrl.pathname = '/dashboard'
+    return NextResponse.redirect(dashboardUrl)
   }
 
   return supabaseResponse

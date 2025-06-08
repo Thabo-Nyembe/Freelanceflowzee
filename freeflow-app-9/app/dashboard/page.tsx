@@ -1,12 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 // import { OptimizedAvatar } from '@/components/ui/optimized-image' // Temporarily disabled
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { VerificationReminder } from '@/components/verification-reminder'
 
 // Mock data for dashboard
 const mockProjects = [
@@ -53,7 +55,12 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6" data-testid="dashboard-container">
+    <div className="space-y-6" data-testid="dashboard-container">
+      {/* Verification Reminder */}
+      <Suspense fallback={null}>
+        <VerificationReminder />
+      </Suspense>
+      
       {/* Dashboard Header */}
       <div className="flex items-center justify-between">
         <div>
