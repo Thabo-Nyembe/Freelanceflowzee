@@ -1,284 +1,431 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Switch } from "@/components/ui/switch"
+import { Separator } from "@/components/ui/separator"
 import {
-  X,
-  Check,
-  Clock,
-  DollarSign,
+  Bell,
   MessageSquare,
-  FileText,
-  Users,
-  AlertCircle,
-  CheckCircle,
-  Info,
-  Eye,
+  DollarSign,
+  Calendar,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Settings,
+  Mark,
+  MoreHorizontal,
+  Trash2,
+  User,
+  FolderOpen,
+  Star,
+  TrendingUp,
+  Mail,
+  Zap
 } from "lucide-react"
+import { cn } from "@/lib/utils"
 
-interface NotificationProps {
-  onNavigate: (screen: string, subTab?: string) => void
-}
+const notifications = [
+  {
+    id: "1",
+    type: "payment",
+    title: "Payment Received",
+    message: "You received $2,500 from TechCorp Inc. for Brand Identity project",
+    time: "2 minutes ago",
+    read: false,
+    icon: DollarSign,
+    color: "text-green-600 bg-green-100",
+    avatar: "TC"
+  },
+  {
+    id: "2", 
+    type: "message",
+    title: "New Message",
+    message: "Alice Smith commented on your Brand Identity Overhaul project",
+    time: "15 minutes ago",
+    read: false,
+    icon: MessageSquare,
+    color: "text-blue-600 bg-blue-100",
+    avatar: "AS"
+  },
+  {
+    id: "3",
+    type: "deadline",
+    title: "Deadline Reminder",
+    message: "Mobile App Wireframes project is due tomorrow",
+    time: "1 hour ago",
+    read: true,
+    icon: Calendar,
+    color: "text-amber-600 bg-amber-100",
+    avatar: null
+  },
+  {
+    id: "4",
+    type: "achievement",
+    title: "Achievement Unlocked",
+    message: "You've completed 100+ projects! You're now a Top Performer",
+    time: "3 hours ago",
+    read: true,
+    icon: Star,
+    color: "text-purple-600 bg-purple-100",
+    avatar: null
+  },
+  {
+    id: "5",
+    type: "system",
+    title: "System Update",
+    message: "New features available: Enhanced project collaboration tools",
+    time: "1 day ago",
+    read: true,
+    icon: Zap,
+    color: "text-indigo-600 bg-indigo-100",
+    avatar: null
+  }
+]
 
-export function Notifications({ onNavigate }: NotificationProps) {
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: "payment",
-      title: "Payment Received",
-      message: "Acme Corp has completed the escrow payment for Brand Identity project",
-      amount: 5000,
-      time: "2 minutes ago",
-      read: false,
-      priority: "high",
-      action: { screen: "financial", subTab: "escrow" },
-      icon: DollarSign,
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-50",
-    },
-    {
-      id: 2,
-      type: "client_feedback",
-      title: "New Client Feedback",
-      message: "Tech Startup Inc. left comments on the website mockups",
-      time: "15 minutes ago",
-      read: false,
-      priority: "medium",
-      action: { screen: "projects", subTab: "collaboration" },
-      icon: MessageSquare,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-    },
-    {
-      id: 3,
-      type: "deadline",
-      title: "Project Deadline Approaching",
-      message: "Brand Identity for Acme Corp is due in 2 days",
-      time: "1 hour ago",
-      read: false,
-      priority: "high",
-      action: { screen: "projects", subTab: "tracking" },
-      icon: Clock,
-      color: "text-amber-600",
-      bgColor: "bg-amber-50",
-    },
-    {
-      id: 4,
-      type: "team",
-      title: "Team Meeting Reminder",
-      message: "Design review meeting starts in 30 minutes",
-      time: "2 hours ago",
-      read: true,
-      priority: "medium",
-      action: { screen: "team", subTab: "calendar" },
-      icon: Users,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
-    },
-    {
-      id: 5,
-      type: "gallery",
-      title: "Gallery Unlocked",
-      message: "Fashion Brand gallery has been unlocked and is ready for download",
-      time: "3 hours ago",
-      read: true,
-      priority: "low",
-      action: { screen: "client-zone" },
-      icon: Eye,
-      color: "text-indigo-600",
-      bgColor: "bg-indigo-50",
-    },
-    {
-      id: 6,
-      type: "invoice",
-      title: "Invoice Sent",
-      message: "Invoice #INV-005 has been sent to Creative Agency",
-      time: "5 hours ago",
-      read: true,
-      priority: "low",
-      action: { screen: "financial", subTab: "invoices" },
-      icon: FileText,
-      color: "text-slate-600",
-      bgColor: "bg-slate-50",
-    },
-  ])
+const activities = [
+  {
+    id: "1",
+    action: "completed",
+    subject: "Brand Identity Overhaul",
+    time: "2 hours ago",
+    icon: CheckCircle2,
+    color: "text-green-600"
+  },
+  {
+    id: "2",
+    action: "uploaded files to",
+    subject: "Mobile App Wireframes",
+    time: "4 hours ago", 
+    icon: FolderOpen,
+    color: "text-blue-600"
+  },
+  {
+    id: "3",
+    action: "received payment for",
+    subject: "E-commerce Website",
+    time: "1 day ago",
+    icon: DollarSign,
+    color: "text-green-600"
+  },
+  {
+    id: "4",
+    action: "started working on",
+    subject: "Marketing Campaign Design",
+    time: "2 days ago",
+    icon: Clock,
+    color: "text-purple-600"
+  }
+]
 
-  const unreadCount = notifications.filter((n) => !n.read).length
+export function Notifications() {
+  const [notificationSettings, setNotificationSettings] = useState({
+    desktop: true,
+    email: true,
+    mobile: false,
+    marketing: false
+  })
+  
+  const [selectedTab, setSelectedTab] = useState("all")
+  const [markAllRead, setMarkAllRead] = useState(false)
 
-  const markAsRead = (id: number) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
+  const unreadCount = notifications.filter(n => !n.read).length
+
+  const handleMarkAsRead = (id: string) => {
+    // Here you would update the notification status
+    console.log("Marking as read:", id)
   }
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+  const handleMarkAllAsRead = () => {
+    setMarkAllRead(true)
+    console.log("Marking all as read")
   }
 
-  const deleteNotification = (id: number) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id))
+  const handleDelete = (id: string) => {
+    console.log("Deleting notification:", id)
   }
 
-  const handleNotificationClick = (notification: any) => {
-    markAsRead(notification.id)
-    if (notification.action) {
-      onNavigate(notification.action.screen, notification.action.subTab)
-    }
-  }
-
-  const getPriorityIcon = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return <AlertCircle className="h-4 w-4 text-red-500" />
-      case "medium":
-        return <Info className="h-4 w-4 text-amber-500" />
-      default:
-        return <CheckCircle className="h-4 w-4 text-green-500" />
-    }
-  }
+  const filteredNotifications = selectedTab === "all" 
+    ? notifications 
+    : notifications.filter(n => n.type === selectedTab)
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-light text-slate-800">Notifications</h2>
-          <p className="text-lg text-slate-500 mt-1">Stay updated with your projects and clients</p>
+          <h1 className="text-2xl font-bold">Notifications</h1>
+          <p className="text-slate-600">
+            {unreadCount > 0 ? `You have ${unreadCount} unread notifications` : "You're all caught up!"}
+          </p>
         </div>
-        <div className="flex space-x-3">
-          <Button
-            variant="outline"
-            className="border-purple-200 text-purple-600 hover:bg-purple-50"
-            onClick={markAllAsRead}
-          >
-            <Check className="h-4 w-4 mr-2" />
-            Mark All Read
+        <div className="flex items-center gap-2">
+          {unreadCount > 0 && (
+            <Button variant="outline" onClick={handleMarkAllAsRead}>
+              Mark All as Read
+            </Button>
+          )}
+          <Button variant="outline" size="icon">
+            <Settings className="h-4 w-4" />
           </Button>
-          <Badge className="bg-purple-100 text-purple-700 text-lg px-3 py-1">{unreadCount} unread</Badge>
         </div>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200/50 hover:shadow-lg transition-all duration-300">
-          <CardContent className="p-6 text-center">
-            <DollarSign className="h-8 w-8 text-emerald-600 mx-auto mb-3" />
-            <p className="text-3xl font-light text-emerald-800 mb-1">3</p>
-            <p className="text-sm text-emerald-600">Payment Updates</p>
-          </CardContent>
-        </Card>
+      {/* Notification Tabs */}
+      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="all" className="relative">
+            All
+            {unreadCount > 0 && (
+              <Badge variant="destructive" className="ml-2 px-1.5 py-0.5 text-xs h-5 min-w-[20px]">
+                {unreadCount}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="payment">Payments</TabsTrigger>
+          <TabsTrigger value="message">Messages</TabsTrigger>
+          <TabsTrigger value="deadline">Deadlines</TabsTrigger>
+          <TabsTrigger value="system">System</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
+        </TabsList>
 
-        <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200/50 hover:shadow-lg transition-all duration-300">
-          <CardContent className="p-6 text-center">
-            <MessageSquare className="h-8 w-8 text-blue-600 mx-auto mb-3" />
-            <p className="text-3xl font-light text-blue-800 mb-1">5</p>
-            <p className="text-sm text-blue-600">Client Messages</p>
-          </CardContent>
-        </Card>
+        <TabsContent value="all" className="space-y-4">
+          <NotificationsList 
+            notifications={filteredNotifications}
+            onMarkAsRead={handleMarkAsRead}
+            onDelete={handleDelete}
+          />
+        </TabsContent>
 
-        <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200/50 hover:shadow-lg transition-all duration-300">
-          <CardContent className="p-6 text-center">
-            <Clock className="h-8 w-8 text-amber-600 mx-auto mb-3" />
-            <p className="text-3xl font-light text-amber-800 mb-1">2</p>
-            <p className="text-sm text-amber-600">Deadlines</p>
-          </CardContent>
-        </Card>
+        <TabsContent value="payment" className="space-y-4">
+          <NotificationsList 
+            notifications={filteredNotifications}
+            onMarkAsRead={handleMarkAsRead}
+            onDelete={handleDelete}
+          />
+        </TabsContent>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200/50 hover:shadow-lg transition-all duration-300">
-          <CardContent className="p-6 text-center">
-            <Users className="h-8 w-8 text-purple-600 mx-auto mb-3" />
-            <p className="text-3xl font-light text-purple-800 mb-1">4</p>
-            <p className="text-sm text-purple-600">Team Updates</p>
-          </CardContent>
-        </Card>
-      </div>
+        <TabsContent value="message" className="space-y-4">
+          <NotificationsList 
+            notifications={filteredNotifications}
+            onMarkAsRead={handleMarkAsRead}
+            onDelete={handleDelete}
+          />
+        </TabsContent>
 
-      {/* Notifications List */}
-      <Card className="bg-white/70 backdrop-blur-sm border-slate-200/50 hover:shadow-lg transition-all duration-300">
+        <TabsContent value="deadline" className="space-y-4">
+          <NotificationsList 
+            notifications={filteredNotifications}
+            onMarkAsRead={handleMarkAsRead}
+            onDelete={handleDelete}
+          />
+        </TabsContent>
+
+        <TabsContent value="system" className="space-y-4">
+          <NotificationsList 
+            notifications={filteredNotifications}
+            onMarkAsRead={handleMarkAsRead}
+            onDelete={handleDelete}
+          />
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Notification Preferences</CardTitle>
+              <CardDescription>Choose how and when you want to receive notifications</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="font-medium">Desktop Notifications</Label>
+                  <p className="text-sm text-slate-600">Show notifications in your browser</p>
+                </div>
+                <Switch 
+                  checked={notificationSettings.desktop}
+                  onCheckedChange={(checked) => 
+                    setNotificationSettings(prev => ({...prev, desktop: checked}))
+                  }
+                />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="font-medium">Email Notifications</Label>
+                  <p className="text-sm text-slate-600">Receive important updates via email</p>
+                </div>
+                <Switch 
+                  checked={notificationSettings.email}
+                  onCheckedChange={(checked) => 
+                    setNotificationSettings(prev => ({...prev, email: checked}))
+                  }
+                />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="font-medium">Mobile Push Notifications</Label>
+                  <p className="text-sm text-slate-600">Get notified on your mobile device</p>
+                </div>
+                <Switch 
+                  checked={notificationSettings.mobile}
+                  onCheckedChange={(checked) => 
+                    setNotificationSettings(prev => ({...prev, mobile: checked}))
+                  }
+                />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="font-medium">Marketing Emails</Label>
+                  <p className="text-sm text-slate-600">Receive promotional content and tips</p>
+                </div>
+                <Switch 
+                  checked={notificationSettings.marketing}
+                  onCheckedChange={(checked) => 
+                    setNotificationSettings(prev => ({...prev, marketing: checked}))
+                  }
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Activity Feed */}
+      <Card>
         <CardHeader>
-          <CardTitle className="text-xl font-semibold text-slate-800">Recent Notifications</CardTitle>
+          <CardTitle>Recent Activity</CardTitle>
+          <CardDescription>Your recent actions and updates</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {notifications.map((notification) => {
-              const IconComponent = notification.icon
-              return (
-                <div
-                  key={notification.id}
-                  className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer hover:shadow-md ${
-                    notification.read
-                      ? "bg-slate-50/50 border-slate-200/50"
-                      : `${notification.bgColor} border-current/20`
-                  }`}
-                  onClick={() => handleNotificationClick(notification)}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${notification.bgColor}`}>
-                      <IconComponent className={`h-6 w-6 ${notification.color}`} />
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <h4 className={`font-semibold ${notification.read ? "text-slate-600" : "text-slate-800"}`}>
-                            {notification.title}
-                          </h4>
-                          {!notification.read && <div className="w-2 h-2 bg-purple-500 rounded-full"></div>}
-                          {getPriorityIcon(notification.priority)}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-slate-500">{notification.time}</span>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-slate-400 hover:text-slate-600"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              deleteNotification(notification.id)
-                            }}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      <p className={`text-sm mb-2 ${notification.read ? "text-slate-500" : "text-slate-700"}`}>
-                        {notification.message}
-                      </p>
-
-                      {notification.amount && (
-                        <div className="flex items-center gap-2">
-                          <Badge className="bg-emerald-100 text-emerald-700">
-                            +${notification.amount.toLocaleString()}
-                          </Badge>
-                        </div>
-                      )}
-
-                      <div className="flex items-center gap-2 mt-3">
-                        <Button size="sm" variant="outline" className="border-slate-200 text-slate-600">
-                          View Details
-                        </Button>
-                        {!notification.read && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-purple-600 hover:bg-purple-50"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              markAsRead(notification.id)
-                            }}
-                          >
-                            Mark as Read
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+            {activities.map((activity) => (
+              <div key={activity.id} className="flex items-center gap-3 p-3 rounded-lg border border-slate-100">
+                <div className={cn("p-2 rounded-full", 
+                  activity.color === "text-green-600" ? "bg-green-100" :
+                  activity.color === "text-blue-600" ? "bg-blue-100" :
+                  activity.color === "text-purple-600" ? "bg-purple-100" : "bg-slate-100"
+                )}>
+                  <activity.icon className={cn("h-4 w-4", activity.color)} />
                 </div>
-              )
-            })}
+                <div className="flex-1">
+                  <p className="text-sm">
+                    You <span className="font-medium">{activity.action}</span>{" "}
+                    <span className="font-medium text-blue-600">{activity.subject}</span>
+                  </p>
+                  <p className="text-xs text-slate-500">{activity.time}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+function NotificationsList({ 
+  notifications, 
+  onMarkAsRead, 
+  onDelete 
+}: { 
+  notifications: typeof notifications
+  onMarkAsRead: (id: string) => void
+  onDelete: (id: string) => void 
+}) {
+  return (
+    <div className="space-y-3">
+      {notifications.length === 0 ? (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Bell className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-slate-600 mb-2">No notifications</h3>
+            <p className="text-slate-500">You're all caught up! New notifications will appear here.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        notifications.map((notification) => (
+          <Card key={notification.id} className={cn(
+            "transition-all duration-200 hover:shadow-md",
+            !notification.read && "border-blue-200 bg-blue-50/30"
+          )}>
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                {/* Icon or Avatar */}
+                <div className={cn("p-2 rounded-full", notification.color)}>
+                  {notification.avatar ? (
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="text-xs">
+                        {notification.avatar}
+                      </AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    <notification.icon className="h-4 w-4" />
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <h4 className={cn(
+                        "font-medium",
+                        !notification.read ? "text-slate-900" : "text-slate-700"
+                      )}>
+                        {notification.title}
+                      </h4>
+                      <p className="text-sm text-slate-600 mt-1">
+                        {notification.message}
+                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-xs text-slate-500">{notification.time}</span>
+                        {!notification.read && (
+                          <Badge variant="secondary" className="text-xs px-2 py-0">
+                            New
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-1">
+                      {!notification.read && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => onMarkAsRead(notification.id)}
+                        >
+                          <CheckCircle2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => onDelete(notification.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))
+      )}
+    </div>
+  )
+}
+
+function Label({ children, className, ...props }: React.LabelHTMLAttributes<HTMLLabelElement>) {
+  return (
+    <label className={cn("text-sm font-medium leading-none", className)} {...props}>
+      {children}
+    </label>
   )
 }

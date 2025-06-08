@@ -1,372 +1,387 @@
 "use client"
 
-import React from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Progress } from "@/components/ui/progress"
 import {
-  DollarSign,
-  FolderOpen,
-  CheckCircle,
-  Clock,
   TrendingUp,
+  DollarSign,
   Users,
-  MessageSquare,
+  FolderOpen,
   Calendar,
+  Clock,
+  Star,
   ArrowUpRight,
-  ArrowDownRight
-} from 'lucide-react'
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  BarChart,
-  Bar
-} from 'recharts'
+  Plus,
+  MessageSquare,
+  CheckCircle2,
+  AlertTriangle,
+  FileText,
+  Activity
+} from "lucide-react"
+import { cn } from "@/lib/utils"
 
-interface DashboardOverviewProps {
-  earnings: number
-  activeProjects: number
-  completedProjects: number
-  pendingPayments: number
-  recentActivities: Array<{
-    id: string
-    type: string
-    description: string
-    timestamp: string
-  }>
+// Mock data for the dashboard
+const dashboardData = {
+  metrics: {
+    totalEarnings: 47500,
+    monthlyEarnings: 12500,
+    growth: 15.2,
+    pendingInvoices: 8750,
+    activeProjects: 12,
+    teamMembers: 15,
+    completedTasks: 134,
+    totalClients: 28
+  },
+  recentProjects: [
+    {
+      id: "1",
+      title: "Brand Identity Overhaul",
+      client: "TechCorp Inc.",
+      progress: 85,
+      status: "in-progress",
+      dueDate: "2024-03-20",
+      budget: 25000,
+      team: ["JD", "AS", "BW"]
+    },
+    {
+      id: "2", 
+      title: "Mobile App Wireframes",
+      client: "Innovate LLC",
+      progress: 60,
+      status: "review",
+      dueDate: "2024-03-15",
+      budget: 15000,
+      team: ["JD", "MW"]
+    },
+    {
+      id: "3",
+      title: "Website Redesign",
+      client: "StartupXYZ", 
+      progress: 30,
+      status: "planning",
+      dueDate: "2024-04-01",
+      budget: 18000,
+      team: ["AS", "BW", "JW"]
+    }
+  ],
+  recentActivity: [
+    {
+      id: "1",
+      type: "feedback",
+      message: "New feedback on Brand Identity project",
+      time: "2 minutes ago",
+      avatar: "TC"
+    },
+    {
+      id: "2",
+      type: "payment",
+      message: "Payment received from Innovate LLC",
+      time: "1 hour ago",
+      avatar: "IL"
+    },
+    {
+      id: "3",
+      type: "project",
+      message: "Mobile App Wireframes moved to review",
+      time: "3 hours ago",
+      avatar: "JD"
+    },
+    {
+      id: "4",
+      type: "team",
+      message: "Alice Smith joined the team",
+      time: "1 day ago",
+      avatar: "AS"
+    }
+  ],
+  upcomingTasks: [
+    {
+      id: "1",
+      title: "Complete logo variations",
+      project: "Brand Identity Overhaul",
+      dueDate: "Today",
+      priority: "high"
+    },
+    {
+      id: "2",
+      title: "Client presentation prep",
+      project: "Mobile App Wireframes", 
+      dueDate: "Tomorrow",
+      priority: "medium"
+    },
+    {
+      id: "3",
+      title: "Review wireframes",
+      project: "Website Redesign",
+      dueDate: "Mar 18",
+      priority: "low"
+    }
+  ]
 }
 
-// Mock data for charts
-const earningsData = [
-  { month: 'Jan', earnings: 4500, projects: 3 },
-  { month: 'Feb', earnings: 7200, projects: 5 },
-  { month: 'Mar', earnings: 6800, projects: 4 },
-  { month: 'Apr', earnings: 9100, projects: 6 },
-  { month: 'May', earnings: 12300, projects: 8 },
-  { month: 'Jun', earnings: 15750, projects: 7 },
-]
+const statusColors = {
+  "in-progress": "bg-blue-100 text-blue-800",
+  "review": "bg-yellow-100 text-yellow-800",
+  "planning": "bg-gray-100 text-gray-800",
+  "completed": "bg-green-100 text-green-800"
+}
 
-const projectStatusData = [
-  { name: 'Completed', value: 12, color: '#22c55e' },
-  { name: 'In Progress', value: 5, color: '#3b82f6' },
-  { name: 'On Hold', value: 2, color: '#f59e0b' },
-  { name: 'Planning', value: 3, color: '#8b5cf6' },
-]
+const priorityColors = {
+  "high": "border-l-red-500",
+  "medium": "border-l-yellow-500", 
+  "low": "border-l-green-500"
+}
 
-const weeklyActivity = [
-  { day: 'Mon', hours: 8, tasks: 12 },
-  { day: 'Tue', hours: 6, tasks: 8 },
-  { day: 'Wed', hours: 9, tasks: 15 },
-  { day: 'Thu', hours: 7, tasks: 10 },
-  { day: 'Fri', hours: 8, tasks: 11 },
-  { day: 'Sat', hours: 4, tasks: 5 },
-  { day: 'Sun', hours: 2, tasks: 2 },
-]
+const activityIcons = {
+  feedback: MessageSquare,
+  payment: DollarSign,
+  project: FolderOpen,
+  team: Users
+}
 
-export function DashboardOverview({
-  earnings,
-  activeProjects,
-  completedProjects,
-  pendingPayments,
-  recentActivities
-}: DashboardOverviewProps) {
-  const totalProjects = activeProjects + completedProjects
-  const completionRate = totalProjects > 0 ? (completedProjects / totalProjects) * 100 : 0
+export function DashboardOverview() {
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // Simulate loading
+    const timer = setTimeout(() => setIsLoading(false), 1000)
+    return () => clearTimeout(timer)
+  }, [])
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+    }).format(amount)
+  }
+
+  const formatDate = (dateString: string) => {
+    if (dateString === "Today" || dateString === "Tomorrow") return dateString
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8">
-      {/* Welcome Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome back! Here's what's happening with your freelance business.
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Welcome back, John! 👋
+          </h1>
+          <p className="text-slate-600 mt-1">
+            Here's what's happening with your creative workspace today.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button>
-            <Calendar className="mr-2 h-4 w-4" />
-            Schedule Meeting
-          </Button>
-          <Button variant="outline">
-            <MessageSquare className="mr-2 h-4 w-4" />
-            Send Update
-          </Button>
-        </div>
+        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+          <Plus className="w-4 h-4 mr-2" />
+          New Project
+        </Button>
       </div>
 
       {/* Key Metrics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${earnings.toLocaleString()}</div>
-            <div className="flex items-center text-xs text-muted-foreground">
-              <ArrowUpRight className="mr-1 h-3 w-3 text-green-600" />
-              +12.5% from last month
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
-            <FolderOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{activeProjects}</div>
-            <div className="flex items-center text-xs text-muted-foreground">
-              <ArrowUpRight className="mr-1 h-3 w-3 text-green-600" />
-              +2 new this week
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{completionRate.toFixed(1)}%</div>
-            <Progress value={completionRate} className="mt-2" />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Payments</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{pendingPayments}</div>
-            <div className="flex items-center text-xs text-muted-foreground">
-              <ArrowDownRight className="mr-1 h-3 w-3 text-red-600" />
-              -1 from last week
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts Row */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        {/* Earnings Chart */}
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Earnings Overview</CardTitle>
-            <CardDescription>Your earnings over the last 6 months</CardDescription>
-          </CardHeader>
-          <CardContent className="pl-2">
-            <ResponsiveContainer width="100%" height={350}>
-              <AreaChart data={earningsData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip 
-                  formatter={(value, name) => [
-                    name === 'earnings' ? `$${value}` : value,
-                    name === 'earnings' ? 'Earnings' : 'Projects'
-                  ]}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="earnings" 
-                  stroke="#8884d8" 
-                  fill="#8884d8" 
-                  fillOpacity={0.6}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Project Status Chart */}
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>Project Status</CardTitle>
-            <CardDescription>Distribution of your current projects</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={350}>
-              <PieChart>
-                <Pie
-                  data={projectStatusData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={120}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {projectStatusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              {projectStatusData.map((item, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <div 
-                    className="h-3 w-3 rounded-full" 
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <span className="text-sm text-muted-foreground">
-                    {item.name}: {item.value}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Weekly Activity and Recent Activity */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Weekly Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Weekly Activity</CardTitle>
-            <CardDescription>Hours worked and tasks completed this week</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={weeklyActivity}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="day" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="hours" fill="#3b82f6" name="Hours" />
-                <Bar dataKey="tasks" fill="#10b981" name="Tasks" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Recent Activity Feed */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Latest updates from your projects</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivities.slice(0, 5).map((activity) => (
-                <div key={activity.id} className="flex items-start gap-3">
-                  <div className="flex-shrink-0">
-                    {activity.type === 'project' && (
-                      <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                        <FolderOpen className="h-4 w-4 text-blue-600" />
-                      </div>
-                    )}
-                    {activity.type === 'feedback' && (
-                      <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                        <MessageSquare className="h-4 w-4 text-green-600" />
-                      </div>
-                    )}
-                    {activity.type === 'payment' && (
-                      <div className="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center">
-                        <DollarSign className="h-4 w-4 text-yellow-600" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {activity.description}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {activity.timestamp}
-                    </p>
-                  </div>
-                </div>
-              ))}
-              
-              {recentActivities.length === 0 && (
-                <div className="text-center py-6">
-                  <MessageSquare className="mx-auto h-12 w-12 text-gray-400" />
-                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
-                    No recent activity
-                  </h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Start working on projects to see activity here.
-                  </p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">This Month</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Revenue</span>
-                <span className="text-sm font-medium">$12,450</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Projects</span>
-                <span className="text-sm font-medium">7</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Hours</span>
-                <span className="text-sm font-medium">156</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Top Client</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-3">
-              <Avatar>
-                <AvatarImage src="/avatars/client-1.jpg" />
-                <AvatarFallback>TC</AvatarFallback>
-              </Avatar>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-100">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">TechCorp Inc.</p>
-                <p className="text-xs text-muted-foreground">$8,500 total</p>
+                <p className="text-sm font-medium text-emerald-600">Total Earnings</p>
+                <p className="text-2xl font-bold text-emerald-900">
+                  {formatCurrency(dashboardData.metrics.totalEarnings)}
+                </p>
+                <p className="text-xs text-emerald-600 flex items-center mt-1">
+                  <TrendingUp className="w-3 h-3 mr-1" />
+                  +{dashboardData.metrics.growth}% this month
+                </p>
+              </div>
+              <div className="h-12 w-12 bg-emerald-500 rounded-lg flex items-center justify-center">
+                <DollarSign className="w-6 h-6 text-white" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Next Deadline</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <p className="text-sm font-medium">E-commerce Website</p>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline">Due in 3 days</Badge>
-                <Badge variant="secondary">High Priority</Badge>
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-100">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-blue-600">Active Projects</p>
+                <p className="text-2xl font-bold text-blue-900">
+                  {dashboardData.metrics.activeProjects}
+                </p>
+                <p className="text-xs text-blue-600 flex items-center mt-1">
+                  <Activity className="w-3 h-3 mr-1" />
+                  3 due this week
+                </p>
+              </div>
+              <div className="h-12 w-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                <FolderOpen className="w-6 h-6 text-white" />
               </div>
             </div>
           </CardContent>
         </Card>
+
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-violet-100">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-purple-600">Team Members</p>
+                <p className="text-2xl font-bold text-purple-900">
+                  {dashboardData.metrics.teamMembers}
+                </p>
+                <p className="text-xs text-purple-600 flex items-center mt-1">
+                  <Users className="w-3 h-3 mr-1" />
+                  2 new this month
+                </p>
+              </div>
+              <div className="h-12 w-12 bg-purple-500 rounded-lg flex items-center justify-center">
+                <Users className="w-6 h-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-50 to-amber-100">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-orange-600">Pending</p>
+                <p className="text-2xl font-bold text-orange-900">
+                  {formatCurrency(dashboardData.metrics.pendingInvoices)}
+                </p>
+                <p className="text-xs text-orange-600 flex items-center mt-1">
+                  <Clock className="w-3 h-3 mr-1" />
+                  4 invoices pending
+                </p>
+              </div>
+              <div className="h-12 w-12 bg-orange-500 rounded-lg flex items-center justify-center">
+                <FileText className="w-6 h-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Recent Projects */}
+        <div className="lg:col-span-2">
+          <Card className="border-0 shadow-lg">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl font-semibold">Recent Projects</CardTitle>
+                <Button variant="ghost" size="sm">
+                  View All <ArrowUpRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {dashboardData.recentProjects.map((project) => (
+                <div key={project.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h4 className="font-medium text-slate-900">{project.title}</h4>
+                      <Badge className={cn("text-xs", statusColors[project.status as keyof typeof statusColors])}>
+                        {project.status}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-slate-600 mb-3">{project.client}</p>
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between text-xs text-slate-600 mb-1">
+                          <span>Progress</span>
+                          <span>{project.progress}%</span>
+                        </div>
+                        <Progress value={project.progress} className="h-2" />
+                      </div>
+                      <div className="flex -space-x-2">
+                        {project.team.map((member, idx) => (
+                          <Avatar key={idx} className="h-6 w-6 ring-2 ring-white">
+                            <AvatarFallback className="text-xs bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+                              {member}
+                            </AvatarFallback>
+                          </Avatar>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right ml-4">
+                    <p className="text-sm font-medium text-slate-900">{formatCurrency(project.budget)}</p>
+                    <p className="text-xs text-slate-500">{formatDate(project.dueDate)}</p>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Upcoming Tasks */}
+          <Card className="border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">Upcoming Tasks</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {dashboardData.upcomingTasks.map((task) => (
+                <div key={task.id} className={cn("p-3 border-l-4 bg-slate-50 rounded-r-lg", priorityColors[task.priority as keyof typeof priorityColors])}>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h5 className="font-medium text-slate-900 text-sm">{task.title}</h5>
+                      <p className="text-xs text-slate-600 mt-1">{task.project}</p>
+                    </div>
+                    <span className="text-xs text-slate-500">{task.dueDate}</span>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Recent Activity */}
+          <Card className="border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">Recent Activity</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {dashboardData.recentActivity.map((activity) => {
+                const Icon = activityIcons[activity.type as keyof typeof activityIcons]
+                return (
+                  <div key={activity.id} className="flex items-center gap-3">
+                    <div className="h-8 w-8 bg-slate-100 rounded-full flex items-center justify-center">
+                      <Icon className="w-4 h-4 text-slate-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-slate-900">{activity.message}</p>
+                      <p className="text-xs text-slate-500">{activity.time}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )

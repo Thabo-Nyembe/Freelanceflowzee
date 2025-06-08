@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -24,17 +24,117 @@ import {
   Plus,
   X,
   Send,
+  CheckCircle2,
+  Circle,
+  Star,
+  MapPin,
+  Users,
+  Target,
+  TrendingUp
 } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+const todayData = {
+  schedule: [
+    {
+      id: "1",
+      time: "09:00",
+      title: "Client Call - TechCorp Branding",
+      type: "meeting",
+      duration: "1h",
+      status: "completed"
+    },
+    {
+      id: "2", 
+      time: "10:30",
+      title: "Design Review Session",
+      type: "work",
+      duration: "2h",
+      status: "in-progress"
+    },
+    {
+      id: "3",
+      time: "14:00",
+      title: "Team Standup",
+      type: "meeting",
+      duration: "30m",
+      status: "upcoming"
+    },
+    {
+      id: "4",
+      time: "15:30",
+      title: "Focus Work - Mobile App Wireframes",
+      type: "work",
+      duration: "3h",
+      status: "upcoming"
+    }
+  ],
+  tasks: [
+    {
+      id: "1",
+      title: "Complete logo variations for TechCorp",
+      priority: "high",
+      estimated: "2h",
+      completed: false,
+      project: "Brand Identity Overhaul"
+    },
+    {
+      id: "2",
+      title: "Review and update wireframes",
+      priority: "medium", 
+      estimated: "1.5h",
+      completed: true,
+      project: "Mobile App Design"
+    },
+    {
+      id: "3",
+      title: "Prepare client presentation",
+      priority: "high",
+      estimated: "1h",
+      completed: false,
+      project: "Website Redesign"
+    },
+    {
+      id: "4",
+      title: "Team feedback incorporation", 
+      priority: "low",
+      estimated: "30m",
+      completed: false,
+      project: "Brand Identity Overhaul"
+    }
+  ],
+  stats: {
+    completedTasks: 3,
+    totalTasks: 8,
+    hoursWorked: 5.5,
+    plannedHours: 8,
+    meetingsToday: 2,
+    focusTimeLeft: 2.5
+  }
+}
+
+const priorityColors = {
+  high: "bg-red-100 text-red-800 border-red-200",
+  medium: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  low: "bg-green-100 text-green-800 border-green-200"
+}
+
+const statusColors = {
+  completed: "text-green-600",
+  "in-progress": "text-blue-600", 
+  upcoming: "text-slate-600"
+}
+
+const typeIcons = {
+  meeting: Users,
+  work: Target
+}
 
 export function MyDayToday() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [showReminderForm, setShowReminderForm] = useState(false)
   const [showEmailForm, setShowEmailForm] = useState(false)
-  const [reminders, setReminders] = useState([
-    { id: 1, title: "Follow up with Acme Corp", time: "2:00 PM", priority: "high" },
-    { id: 2, title: "Send invoice to Tech Startup", time: "4:30 PM", priority: "medium" },
-    { id: 3, title: "Review brand guidelines", time: "Tomorrow 9:00 AM", priority: "low" },
-  ])
+  const [selectedTask, setSelectedTask] = useState<string | null>(null)
 
   const refreshPlan = () => {
     setIsGenerating(true)
@@ -42,6 +142,22 @@ export function MyDayToday() {
       setIsGenerating(false)
     }, 1500)
   }
+
+  const toggleTask = (taskId: string) => {
+    // In a real app, this would update the task status
+    console.log("Toggle task:", taskId)
+  }
+
+  const formatTime = (time: string) => {
+    const [hours, minutes] = time.split(":")
+    const hour = parseInt(hours)
+    const ampm = hour >= 12 ? "PM" : "AM"
+    const displayHour = hour % 12 || 12
+    return `${displayHour}:${minutes} ${ampm}`
+  }
+
+  const progressPercentage = (todayData.stats.completedTasks / todayData.stats.totalTasks) * 100
+  const hoursProgress = (todayData.stats.hoursWorked / todayData.stats.plannedHours) * 100
 
   return (
     <div className="space-y-8">
@@ -256,7 +372,7 @@ export function MyDayToday() {
                   <span className="text-slate-600">Tasks Completed</span>
                   <span className="text-slate-800 font-medium">2/6</span>
                 </div>
-                <Progress value={33} className="h-2" />
+                <Progress value={progressPercentage} className="h-2" />
               </div>
 
               <div className="space-y-2">
@@ -264,7 +380,7 @@ export function MyDayToday() {
                   <span className="text-slate-600">Hours Tracked</span>
                   <span className="text-slate-800 font-medium">3.5/8</span>
                 </div>
-                <Progress value={44} className="h-2" />
+                <Progress value={hoursProgress} className="h-2" />
               </div>
 
               <div className="space-y-2">
@@ -296,20 +412,20 @@ export function MyDayToday() {
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
-              {reminders.map((reminder) => (
-                <div key={reminder.id} className="flex items-center gap-3 p-3 rounded-lg bg-white/50">
+              {todayData.tasks.map((task) => (
+                <div key={task.id} className="flex items-center gap-3 p-3 rounded-lg bg-white/50">
                   <div
                     className={`w-3 h-3 rounded-full ${
-                      reminder.priority === "high"
+                      task.priority === "high"
                         ? "bg-red-400"
-                        : reminder.priority === "medium"
+                        : task.priority === "medium"
                           ? "bg-amber-400"
                           : "bg-blue-400"
                     }`}
                   ></div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-slate-800 text-sm">{reminder.title}</h4>
-                    <p className="text-xs text-slate-500">{reminder.time}</p>
+                    <h4 className="font-medium text-slate-800 text-sm">{task.title}</h4>
+                    <p className="text-xs text-slate-500">{task.estimated}</p>
                   </div>
                   <Button size="sm" variant="ghost" className="text-slate-400 hover:text-slate-600">
                     <X className="h-4 w-4" />
