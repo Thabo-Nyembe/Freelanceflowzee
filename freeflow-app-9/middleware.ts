@@ -2,6 +2,37 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
+// Define public routes that don't require authentication
+const publicRoutes = [
+  '/',
+  '/landing',
+  '/login',
+  '/signup',
+  '/features',
+  '/how-it-works',
+  '/docs',
+  '/tutorials',
+  '/community',
+  '/api-docs',
+  '/demo',
+  '/support',
+  '/contact',
+  '/payment',
+  '/blog',
+  '/newsletter',
+  '/privacy',
+  '/terms'
+]
+
+// Define protected routes that require authentication (when not in demo mode)
+const protectedRoutes = [
+  '/dashboard',
+  '/projects',
+  '/analytics',
+  '/feedback',
+  '/settings'
+]
+
 // Rate limiting for auth endpoints
 const authAttempts = new Map<string, { count: number; lastAttempt: number }>()
 
@@ -37,6 +68,8 @@ function checkAuthRateLimit(ip: string): boolean {
 }
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  
   // Check for test environment or development bypass
   const isTestEnv = 
     request.headers.get('x-test-mode') === 'true' ||
@@ -55,6 +88,30 @@ export async function middleware(request: NextRequest) {
   if (isDevBypass) {
     console.log('🔧 Development bypass detected - skipping rate limiting')
     return await updateSession(request)
+  }
+
+  // Check for demo mode configuration
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  
+  const isSupabaseConfigured = supabaseUrl && 
+                              supabaseAnonKey && 
+                              !supabaseUrl.includes('placeholder') &&
+                              !supabaseUrl.includes('your-project-url')
+
+  // If Supabase is not configured (demo mode), allow access to all routes
+  if (!isSupabaseConfigured) {
+    console.log('🔧 Middleware: Running in demo mode - allowing all routes')
+    
+    // Special handling for demo mode redirects
+    if (pathname === '/login' || pathname === '/signup') {
+      const redirect = request.nextUrl.searchParams.get('redirect')
+      if (redirect && protectedRoutes.includes(redirect)) {
+        return NextResponse.redirect(new URL(redirect, request.url))
+      }
+    }
+    
+    return NextResponse.next()
   }
 
   // Get client IP for rate limiting
@@ -76,5 +133,16 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|avatars).*)'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - avatars (avatar images)
+     * - public folder assets
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|avatars|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|json|txt|xml|js|css)$).*)' 
+  ],
 } 
