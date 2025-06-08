@@ -7,10 +7,10 @@ import { InvoiceCreator } from "@/components/invoice-creator"
 import { Shield, FileText } from "lucide-react"
 
 interface FinancialHubProps {
-  onNavigate: (screen: string, subTab?: string) => void
+  onNavigate?: (screen: string, subTab?: string) => void
 }
 
-export function FinancialHub({ onNavigate }: FinancialHubProps) {
+export function FinancialHub({ onNavigate = () => {} }: FinancialHubProps) {
   const [activeTab, setActiveTab] = useState("escrow")
 
   return (

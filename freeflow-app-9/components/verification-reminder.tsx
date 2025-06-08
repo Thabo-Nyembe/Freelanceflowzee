@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Mail, X, CheckCircle } from 'lucide-react'
-import { resendVerification } from '@/app/login/actions'
+import { resendVerification } from '@/app/(auth)/login/actions'
 
 export function VerificationReminder() {
   const searchParams = useSearchParams()

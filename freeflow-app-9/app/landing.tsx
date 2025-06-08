@@ -4,11 +4,15 @@ import React, { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { DemoModal } from '@/components/demo-modal'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { VerificationReminder } from '@/components/verification-reminder'
+import { Gallery } from '@/components/gallery'
+import { FinancialHub } from '@/components/financial-hub'
+import { FeedbackSystem } from '@/components/feedback-system'
 import { 
   ArrowRight, 
   Upload, 
@@ -37,7 +41,9 @@ import {
   Smartphone,
   Sparkles,
   ChevronRight,
-  Quote
+  Quote,
+  CreditCard,
+  Image as ImageIcon
 } from 'lucide-react'
 
 // Hero section with animated gradient background
@@ -322,6 +328,24 @@ function HowItWorksSection() {
   )
 }
 
+// Interactive Features Section with tabbed interface
+function InteractiveFeaturesSection() {
+  return (
+    <section className="py-24 bg-gradient-to-b from-white to-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+            Experience FreeflowZee in Action
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Interactive features coming soon! Gallery, Financial Hub, and Feedback System demos.
+          </p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // Social proof section
 function SocialProofSection() {
   const testimonials = [
@@ -372,15 +396,6 @@ function SocialProofSection() {
         </div>
 
         {/* Testimonials */}
-        <div className="text-center mb-16">
-          <h2 data-testid="testimonials-title" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-            Loved by creators worldwide
-          </h2>
-          <p data-testid="testimonials-subtitle" className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Join thousands of creatives who've transformed their workflow
-          </p>
-        </div>
-
         <div data-testid="testimonials-grid" className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
             <Card key={index} data-testid={`testimonial-${index}`} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
@@ -585,6 +600,7 @@ export default function LandingPage() {
       <HeroSection />
       <FeaturesSection />
       <HowItWorksSection />
+      <InteractiveFeaturesSection />
       <SocialProofSection />
       <PricingSection />
       <CTASection />
