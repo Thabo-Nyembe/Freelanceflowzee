@@ -121,6 +121,19 @@ export default function SupportPage() {
     message: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showLiveChat, setShowLiveChat] = useState(false)
+  const [chatMessages, setChatMessages] = useState([
+    { sender: 'Support', message: 'Hi! How can I help you today?', time: '2:34 PM' },
+    { sender: 'You', message: 'I need help with payment setup', time: '2:35 PM' },
+    { sender: 'Support', message: 'I\'d be happy to help! Let me guide you through the payment setup process.', time: '2:35 PM' }
+  ])
+  const [newMessage, setNewMessage] = useState('')
+  const [supportStatus] = useState({
+    online: true,
+    responseTime: '< 2 minutes',
+    queuePosition: 0,
+    agentName: 'Sarah Johnson'
+  })
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -148,9 +161,29 @@ export default function SupportPage() {
 
   const handleChannelClick = (channel: typeof supportChannels[0]) => {
     if (channel.title === "Live Chat") {
-      alert('Live chat feature coming soon! For now, please use email or phone support.')
+      setShowLiveChat(true)
     } else {
       window.open(channel.href, '_blank')
+    }
+  }
+
+  const sendMessage = () => {
+    if (newMessage.trim()) {
+      setChatMessages([...chatMessages, {
+        sender: 'You',
+        message: newMessage,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }])
+      setNewMessage('')
+      
+      // Simulate support response
+      setTimeout(() => {
+        setChatMessages(prev => [...prev, {
+          sender: 'Support',
+          message: 'Thanks for your message! Let me help you with that.',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }])
+      }, 1500)
     }
   }
 
@@ -406,6 +439,100 @@ export default function SupportPage() {
                     {isSubmitting ? 'Sending...' : 'Send Message'}
                   </Button>
                 </form>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        {/* Live Chat Interface */}
+        {showLiveChat && (
+          <div className="fixed bottom-4 right-4 w-96 h-96 bg-white rounded-lg shadow-2xl border border-gray-200 z-50">
+            <div className="flex items-center justify-between p-4 bg-indigo-600 text-white rounded-t-lg">
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                <span className="font-medium">Live Chat - {supportStatus.agentName}</span>
+              </div>
+              <button 
+                onClick={() => setShowLiveChat(false)}
+                className="text-white hover:text-gray-200"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="h-64 overflow-y-auto p-4 space-y-3">
+              {chatMessages.map((msg, index) => (
+                <div key={index} className={`flex ${msg.sender === 'You' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-xs p-3 rounded-lg ${
+                    msg.sender === 'You' 
+                      ? 'bg-indigo-600 text-white' 
+                      : 'bg-gray-100 text-gray-900'
+                  }`}>
+                    <p className="text-sm">{msg.message}</p>
+                    <p className="text-xs opacity-75 mt-1">{msg.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="p-4 border-t border-gray-200">
+              <div className="flex space-x-2">
+                <Input
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type your message..."
+                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                  className="flex-1"
+                  suppressHydrationWarning
+                />
+                <Button onClick={sendMessage} size="sm">
+                  Send
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Support Status Dashboard */}
+        <section className="py-8 bg-indigo-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Card className="bg-white shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <div className={`w-3 h-3 rounded-full mr-2 ${supportStatus.online ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                  Support Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  <div className="text-center">
+                    <div className={`text-2xl font-bold ${supportStatus.online ? 'text-green-600' : 'text-red-600'}`}>
+                      {supportStatus.online ? 'Online' : 'Offline'}
+                    </div>
+                    <div className="text-sm text-gray-600">Support Team</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">{supportStatus.responseTime}</div>
+                    <div className="text-sm text-gray-600">Avg Response</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-600">{supportStatus.queuePosition}</div>
+                    <div className="text-sm text-gray-600">Queue Position</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-orange-600">24/7</div>
+                    <div className="text-sm text-gray-600">Availability</div>
+                  </div>
+                </div>
+                <div className="mt-6 text-center">
+                  <Button 
+                    onClick={() => setShowLiveChat(true)}
+                    className="bg-indigo-600 hover:bg-indigo-700"
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Start Live Chat
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
