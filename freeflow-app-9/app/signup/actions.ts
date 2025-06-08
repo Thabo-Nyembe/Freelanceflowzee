@@ -54,7 +54,11 @@ export async function signup(formData: FormData) {
 
     revalidatePath('/', 'layout')
     redirect('/login?message=Account created successfully! Please check your email to confirm your account.')
-  } catch (error) {
+  } catch (error: any) {
+    // Check if this is a Next.js redirect error and re-throw it
+    if (error?.digest?.startsWith('NEXT_REDIRECT')) {
+      throw error
+    }
     console.error('Unexpected signup error:', error)
     return { error: 'An unexpected error occurred. Please try again.' }
   }
