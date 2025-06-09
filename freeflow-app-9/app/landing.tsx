@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { SiteHeader } from '@/components/navigation/site-header'
-import { SiteFooter } from '@/components/navigation/site-footer'
+import { SiteHeader } from '@/components/site-header'
+import { SiteFooter } from '@/components/site-footer'
 import { 
   ArrowRight, 
   Upload, 
@@ -35,6 +35,7 @@ import {
   Smartphone,
   Sparkles,
   ChevronRight,
+  ChevronLeft,
   Quote
 } from 'lucide-react'
 
@@ -321,38 +322,66 @@ function FeaturesSection() {
   )
 }
 
-// How It Works section with step-by-step process
+// How It Works section with interactive video display and navigation
 function HowItWorksSection() {
+  const [activeStep, setActiveStep] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(false)
+
   const steps = [
     {
       number: "01",
       title: "Create Account",
       description: "Sign up as a creator or access as a client. Choose your path based on your needs.",
       icon: Users,
-      color: "from-indigo-500 to-blue-600"
+      color: "from-indigo-500 to-blue-600",
+      videoUrl: "/videos/step-1-account.mp4",
+      thumbnail: "/images/step-1-thumbnail.jpg"
     },
     {
       number: "02", 
       title: "Upload & Organize",
       description: "Creators upload projects and organize them. Clients get secure access links.",
       icon: Upload,
-      color: "from-purple-500 to-pink-600"
+      color: "from-purple-500 to-pink-600",
+      videoUrl: "/videos/step-2-upload.mp4",
+      thumbnail: "/images/step-2-thumbnail.jpg"
     },
     {
       number: "03",
       title: "Collaborate & Preview",
       description: "Real-time collaboration tools. Clients can preview content before purchasing.",
       icon: MessageSquare,
-      color: "from-green-500 to-emerald-600"
+      color: "from-green-500 to-emerald-600",
+      videoUrl: "/videos/step-3-collaborate.mp4",
+      thumbnail: "/images/step-3-thumbnail.jpg"
     },
     {
       number: "04",
       title: "Get Paid & Download",
       description: "Secure payments processed instantly. Immediate access to premium content.",
       icon: Download,
-      color: "from-yellow-500 to-orange-600"
+      color: "from-yellow-500 to-orange-600",
+      videoUrl: "/videos/step-4-payment.mp4",
+      thumbnail: "/images/step-4-thumbnail.jpg"
     }
   ]
+
+  const currentStep = steps[activeStep]
+  const IconComponent = currentStep.icon
+
+  const handlePlayVideo = () => {
+    setIsPlaying(!isPlaying)
+  }
+
+  const goToPrevious = () => {
+    setActiveStep((prev) => (prev > 0 ? prev - 1 : steps.length - 1))
+    setIsPlaying(false)
+  }
+
+  const goToNext = () => {
+    setActiveStep((prev) => (prev < steps.length - 1 ? prev + 1 : 0))
+    setIsPlaying(false)
+  }
 
   return (
     <section className="py-24 bg-white">
@@ -367,24 +396,144 @@ function HowItWorksSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Interactive Video Display */}
+        <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl p-8 mb-16 shadow-2xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Video Display */}
+            <div className="relative">
+              <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl overflow-hidden shadow-lg">
+                <div className={`relative w-full h-full bg-gradient-to-br ${currentStep.color} flex items-center justify-center group cursor-pointer`}
+                     onClick={handlePlayVideo}>
+                  
+                  {!isPlaying ? (
+                    <div className="text-center text-white">
+                      <div className="w-20 h-20 mx-auto mb-4 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-all duration-300 group-hover:scale-110">
+                        <Play className="w-8 h-8 ml-1" />
+                      </div>
+                      <p className="text-lg font-medium">Click to view {currentStep.title}</p>
+                      <p className="text-sm opacity-80">Interactive demo experience</p>
+                    </div>
+                  ) : (
+                    <div className="text-center text-white">
+                      <div className="w-20 h-20 mx-auto mb-4 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
+                        <IconComponent className="w-10 h-10" />
+                      </div>
+                      <p className="text-lg font-medium">Playing: {currentStep.title}</p>
+                      <p className="text-sm opacity-80">Step {currentStep.number} Demo</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Navigation Controls */}
+              <div className="absolute inset-y-0 left-0 flex items-center">
+                <button
+                  onClick={goToPrevious}
+                  className="group -ml-4 p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+                >
+                  <ChevronLeft className="w-6 h-6 text-gray-600 group-hover:text-indigo-600" />
+                </button>
+              </div>
+
+              <div className="absolute inset-y-0 right-0 flex items-center">
+                <button
+                  onClick={goToNext}
+                  className="group -mr-4 p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+                >
+                  <ChevronRight className="w-6 h-6 text-gray-600 group-hover:text-indigo-600" />
+                </button>
+              </div>
+
+              {/* Step Indicators */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                {steps.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setActiveStep(index)
+                      setIsPlaying(false)
+                    }}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      index === activeStep 
+                        ? 'bg-white scale-125' 
+                        : 'bg-white/50 hover:bg-white/70'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Step Details */}
+            <div className="space-y-8">
+              <div className="flex items-center gap-4">
+                <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${currentStep.color} flex items-center justify-center shadow-lg`}>
+                  <IconComponent className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-gray-400 mb-1">{currentStep.number}</div>
+                  <h3 className="text-3xl font-bold text-gray-900">{currentStep.title}</h3>
+                </div>
+              </div>
+              
+              <p className="text-xl text-gray-600 leading-relaxed">
+                {currentStep.description}
+              </p>
+
+              <div className="flex gap-4">
+                <Button 
+                  onClick={handlePlayVideo}
+                  className={`bg-gradient-to-r ${currentStep.color} hover:opacity-90 text-white px-6 py-3`}
+                >
+                  <Play className="w-4 h-4 mr-2" />
+                  {isPlaying ? 'Replay Demo' : 'Watch Demo'}
+                </Button>
+                <Button variant="outline" className="px-6 py-3">
+                  <ArrowRight className="w-4 h-4 mr-2" />
+                  Try This Step
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* All Steps Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {steps.map((step, index) => {
-            const IconComponent = step.icon
+            const StepIcon = step.icon
+            const isActive = index === activeStep
+            
             return (
-              <div key={index} className="relative text-center group">
+              <div 
+                key={index} 
+                className={`relative text-center group cursor-pointer transition-all duration-300 ${
+                  isActive ? 'scale-105' : 'hover:scale-102'
+                }`}
+                onClick={() => {
+                  setActiveStep(index)
+                  setIsPlaying(false)
+                }}
+              >
                 {/* Connecting line */}
                 {index < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-gray-200 to-gray-300 z-0"></div>
+                  <div className={`hidden lg:block absolute top-16 left-full w-full h-0.5 transition-all duration-300 ${
+                    isActive ? 'bg-gradient-to-r from-indigo-500 to-purple-500' : 'bg-gradient-to-r from-gray-200 to-gray-300'
+                  } z-0`}></div>
                 )}
                 
                 <div className="relative z-10">
-                  <div className={`w-20 h-20 mx-auto rounded-full bg-gradient-to-br ${step.color} mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                    <IconComponent className="w-10 h-10 text-white" />
+                  <div className={`w-20 h-20 mx-auto rounded-full bg-gradient-to-br ${step.color} mb-6 flex items-center justify-center transition-all duration-300 shadow-lg ${
+                    isActive ? 'scale-110 shadow-xl' : 'group-hover:scale-105'
+                  } ${isActive ? 'ring-4 ring-indigo-200' : ''}`}>
+                    <StepIcon className="w-10 h-10 text-white" />
                   </div>
                   
-                  <div className="text-sm font-bold text-gray-400 mb-2">{step.number}</div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">{step.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{step.description}</p>
+                  <div className={`text-sm font-bold mb-2 transition-colors duration-300 ${
+                    isActive ? 'text-indigo-600' : 'text-gray-400'
+                  }`}>{step.number}</div>
+                  <h3 className={`text-xl font-bold mb-3 transition-colors duration-300 ${
+                    isActive ? 'text-indigo-900' : 'text-gray-900'
+                  }`}>{step.title}</h3>
+                  <p className="text-gray-600 leading-relaxed text-sm">{step.description}</p>
                 </div>
               </div>
             )
