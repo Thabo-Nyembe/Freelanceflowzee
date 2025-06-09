@@ -1,18 +1,12 @@
 'use client'
 
-import React, { useState, useEffect, Suspense } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { DemoModal } from '@/components/demo-modal'
-import { SiteHeader } from '@/components/site-header'
-import { SiteFooter } from '@/components/site-footer'
-import { VerificationReminder } from '@/components/verification-reminder'
-import { Gallery } from '@/components/gallery'
-import { FinancialHub } from '@/components/financial-hub'
-import { FeedbackSystem } from '@/components/feedback-system'
+import { Card, CardContent } from '@/components/ui/card'
+import { SiteHeader } from '@/components/navigation/site-header'
+import { SiteFooter } from '@/components/navigation/site-footer'
 import { 
   ArrowRight, 
   Upload, 
@@ -41,16 +35,12 @@ import {
   Smartphone,
   Sparkles,
   ChevronRight,
-  Quote,
-  CreditCard,
-  Image as ImageIcon,
-  User
+  Quote
 } from 'lucide-react'
 
 // Hero section with animated gradient background
 function HeroSection() {
   const [isVisible, setIsVisible] = useState(false)
-  const [isDemoOpen, setIsDemoOpen] = useState(false)
 
   useEffect(() => {
     setIsVisible(true)
@@ -85,63 +75,46 @@ function HeroSection() {
             and get paid faster than ever before.
           </p>
 
-          {/* CTA Buttons */}
-          <div data-testid="hero-cta-buttons" className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
-            {/* User Login - For Creators/Freelancers */}
-            <div className="flex flex-col items-center space-y-3">
-              <div className="text-sm font-medium text-gray-700 mb-1">For Creators & Freelancers</div>
-              <Link href="/login?redirect=/dashboard">
-                <Button data-testid="hero-creator-login" size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 min-w-[200px]">
-                  <User className="mr-2 w-5 h-5" />
-                  Creator Login
-                </Button>
-              </Link>
-              <div className="text-xs text-gray-500">Manage projects, get paid</div>
-            </div>
-
-            {/* Watch Demo - For Everyone */}
-            <div className="flex flex-col items-center space-y-3">
-              <div className="text-sm font-medium text-gray-700 mb-1">Not Sure? Try First</div>
-              <Link href="/demo">
-                <Button 
-                  data-testid="hero-cta-demo" 
-                  size="lg" 
-                  variant="outline" 
-                  className="border-2 border-gray-300 hover:border-indigo-300 px-8 py-4 text-lg font-semibold rounded-xl backdrop-blur-sm bg-white/80 min-w-[200px]"
-                >
-                  <Play className="mr-2 w-5 h-5" />
-                  Watch Demo
-                </Button>
-              </Link>
-              <div className="text-xs text-gray-500">See how it works</div>
-            </div>
-
-            {/* Client Access - For Project Viewers */}
-            <div className="flex flex-col items-center space-y-3">
-              <div className="text-sm font-medium text-gray-700 mb-1">For Clients</div>
-              <Link href="/payment">
-                <Button 
-                  data-testid="hero-client-access" 
-                  size="lg" 
-                  variant="outline" 
-                  className="border-2 border-purple-300 hover:border-purple-400 hover:bg-purple-50 px-8 py-4 text-lg font-semibold rounded-xl backdrop-blur-sm bg-white/80 min-w-[200px]"
-                >
-                  <Eye className="mr-2 w-5 h-5" />
-                  Client Access
-                </Button>
-              </Link>
-              <div className="text-xs text-gray-500">Login & preview content</div>
-            </div>
-          </div>
-
-          {/* Secondary Actions */}
-          <div data-testid="hero-secondary-actions" className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-            <Link href="/signup">
-              <Button data-testid="hero-signup" variant="ghost" className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 px-6 py-2 font-medium">
-                New Creator? Sign Up Free
-                <ArrowRight className="ml-2 w-4 h-4" />
+          {/* Three Main CTA Buttons */}
+          <div data-testid="hero-cta-buttons" className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+            <Link href="/login?redirect=/dashboard">
+              <Button data-testid="creator-login-button" size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                Creator Login
+                <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
+            
+            <Link href="/demo">
+              <Button 
+                data-testid="watch-demo-button" 
+                size="lg" 
+                variant="outline" 
+                className="border-2 border-gray-300 hover:border-indigo-300 px-8 py-4 text-lg font-semibold rounded-xl backdrop-blur-sm bg-white/80"
+              >
+                <Play className="mr-2 w-5 h-5" />
+                Watch Demo
+              </Button>
+            </Link>
+
+            <Link href="/payment">
+              <Button data-testid="client-access-button" size="lg" variant="secondary" className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                Client Access
+                <Eye className="ml-2 w-5 h-5" />
+              </Button>
+            </Link>
+          </div>
+
+          {/* User Types Description */}
+          <div className="mb-16 text-center">
+            <p className="text-sm text-gray-500 mb-4">Not sure which one you are?</p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center text-sm">
+              <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                <strong className="text-indigo-600">Creators:</strong> Freelancers, designers, agencies managing projects
+              </div>
+              <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                <strong className="text-purple-600">Clients:</strong> Businesses looking to view and download project files
+              </div>
+            </div>
           </div>
 
           {/* Social proof */}
@@ -166,12 +139,109 @@ function HeroSection() {
           </div>
         </div>
       </div>
+    </section>
+  )
+}
 
-      {/* Demo Modal */}
-      <DemoModal 
-        isOpen={isDemoOpen} 
-        onClose={() => setIsDemoOpen(false)} 
-      />
+// User Types Section
+function UserTypesSection() {
+  return (
+    <section className="py-24 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+            Two Types of 
+            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> Users</span>
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            FreeflowZee serves both creators who build projects and clients who access them.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Creators Card */}
+          <Card className="group hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-indigo-50 to-indigo-100">
+            <CardContent className="p-8">
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <Users className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">For Creators</h3>
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                Freelancers, designers, and agencies who create and manage client projects.
+              </p>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-indigo-600 mr-3" />
+                  Dashboard with 9 comprehensive tabs
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-indigo-600 mr-3" />
+                  Project management tools
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-indigo-600 mr-3" />
+                  Client collaboration features
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-indigo-600 mr-3" />
+                  Payment processing & invoicing
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-indigo-600 mr-3" />
+                  Analytics and reporting
+                </li>
+              </ul>
+              <Link href="/login?redirect=/dashboard">
+                <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg">
+                  Creator Login
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Clients Card */}
+          <Card className="group hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-purple-50 to-purple-100">
+            <CardContent className="p-8">
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <Eye className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">For Clients</h3>
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                Businesses and individuals who want to view and download project deliverables.
+              </p>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-purple-600 mr-3" />
+                  Access projects with secure login
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-purple-600 mr-3" />
+                  Preview content before purchasing
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-purple-600 mr-3" />
+                  Secure payment processing
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-purple-600 mr-3" />
+                  Download premium content
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-purple-600 mr-3" />
+                  Direct creator communication
+                </li>
+              </ul>
+              <Link href="/payment">
+                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg">
+                  View Projects
+                  <Eye className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </section>
   )
 }
@@ -218,7 +288,7 @@ function FeaturesSection() {
   ]
 
   return (
-    <section id="features" data-testid="features-section" className="py-24 bg-white">
+    <section id="features" data-testid="features-section" className="py-24 bg-gradient-to-br from-gray-50 to-indigo-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-20">
           <h2 data-testid="features-title" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
@@ -234,348 +304,151 @@ function FeaturesSection() {
           {features.map((feature, index) => {
             const IconComponent = feature.icon
             return (
-              <Link key={index} href="/features">
-                <Card data-testid={`feature-card-${index}`} className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50 cursor-pointer">
-                  <CardContent className="p-8">
-                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                      <IconComponent className="w-7 h-7 text-white" />
-                    </div>
-                    <h3 data-testid={`feature-title-${index}`} className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                    <p data-testid={`feature-description-${index}`} className="text-gray-600 leading-relaxed">{feature.description}</p>
-                  </CardContent>
-                </Card>
-              </Link>
-            )
-          })}
-        </div>
-        
-        {/* Features CTA */}
-        <div className="text-center mt-16">
-          <Link href="/features">
-            <Button size="lg" variant="outline" className="px-8 py-4">
-              Explore All Features
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </Link>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// User types section - explains the difference between creators and clients
-function UserTypesSection() {
-  const userTypes = [
-    {
-      title: "For Creators & Freelancers",
-      description: "You're the one creating content, managing projects, and getting paid for your work.",
-      icon: User,
-      color: "from-indigo-500 to-purple-600",
-      features: [
-        "Upload and organize projects",
-        "Collaborate with clients",
-        "Get paid automatically",
-        "Track project analytics",
-        "Manage your portfolio"
-      ],
-      cta: "Creator Login",
-      href: "/login?redirect=/dashboard",
-      bgColor: "bg-indigo-50",
-      testId: "creator-type"
-    },
-    {
-      title: "For Clients & Viewers", 
-      description: "You're viewing, reviewing, or purchasing content that creators have shared with you.",
-      icon: Eye,
-      color: "from-purple-500 to-pink-600",
-      features: [
-        "View shared projects",
-        "Provide feedback & comments",
-        "Make secure payments",
-        "Download approved files",
-        "Track project progress"
-      ],
-      cta: "Access Projects",
-      href: "/payment",
-      bgColor: "bg-purple-50",
-      testId: "client-type"
-    }
-  ]
-
-  return (
-    <section data-testid="user-types-section" className="py-24 bg-gradient-to-b from-white to-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-20">
-          <h2 data-testid="user-types-title" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-            Choose your path to 
-            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> success</span>
-          </h2>
-          <p data-testid="user-types-subtitle" className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Whether you're creating content or accessing it, we've designed the perfect experience for your needs.
-          </p>
-        </div>
-
-        <div data-testid="user-types-grid" className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {userTypes.map((type, index) => {
-            const IconComponent = type.icon
-            return (
-              <Card key={index} data-testid={type.testId} className={`${type.bgColor} border-0 hover:shadow-2xl transition-all duration-300 transform hover:scale-105`}>
-                <CardContent className="p-10">
-                  <div className="text-center mb-8">
-                    <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${type.color} mb-6 flex items-center justify-center mx-auto`}>
-                      <IconComponent className="w-10 h-10 text-white" />
-                    </div>
-                    <h3 data-testid={`${type.testId}-title`} className="text-2xl font-bold text-gray-900 mb-4">{type.title}</h3>
-                    <p data-testid={`${type.testId}-description`} className="text-gray-600 leading-relaxed">{type.description}</p>
+              <Card key={index} data-testid={`feature-card-${index}`} className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50">
+                <CardContent className="p-8">
+                  <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                    <IconComponent className="w-7 h-7 text-white" />
                   </div>
-
-                  <ul data-testid={`${type.testId}-features`} className="space-y-3 mb-8">
-                    {type.features.map((feature, i) => (
-                      <li key={i} className="flex items-center">
-                        <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
-                        <span className="text-gray-700">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link href={type.href}>
-                    <Button 
-                      data-testid={`${type.testId}-cta`}
-                      className={`w-full bg-gradient-to-r ${type.color} text-white hover:shadow-lg transform hover:scale-105 transition-all duration-200`}
-                      size="lg"
-                    >
-                      <IconComponent className="mr-2 w-5 h-5" />
-                      {type.cta}
-                      <ArrowRight className="ml-2 w-5 h-5" />
-                    </Button>
-                  </Link>
+                  <h3 data-testid={`feature-title-${index}`} className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
+                  <p data-testid={`feature-description-${index}`} className="text-gray-600 leading-relaxed">{feature.description}</p>
                 </CardContent>
               </Card>
             )
           })}
         </div>
-
-        {/* Additional help */}
-        <div className="text-center mt-16">
-          <p data-testid="user-types-help" className="text-gray-600 mb-6">
-            Not sure which one you are? 
-          </p>
-          <Link href="/demo">
-            <Button variant="outline" size="lg" className="px-8 py-4">
-              <Play className="mr-2 w-5 h-5" />
-              Watch Demo to Learn More
-            </Button>
-          </Link>
-        </div>
       </div>
     </section>
   )
 }
 
-// How it works section inspired by Dropbox's clean design
+// How It Works section with step-by-step process
 function HowItWorksSection() {
-  const [isDemoOpen, setIsDemoOpen] = useState(false)
-  
   const steps = [
     {
       number: "01",
-      title: "Upload Your Work",
-      description: "Drag and drop files, folders, or entire projects. We handle the rest.",
-      icon: Upload,
-      image: "/demo-upload.jpg"
+      title: "Create Account",
+      description: "Sign up as a creator or access as a client. Choose your path based on your needs.",
+      icon: Users,
+      color: "from-indigo-500 to-blue-600"
     },
     {
       number: "02", 
-      title: "Collaborate & Get Feedback",
-      description: "Share with clients, get real-time feedback, and make revisions together.",
-      icon: MessageSquare,
-      image: "/demo-feedback.jpg"
+      title: "Upload & Organize",
+      description: "Creators upload projects and organize them. Clients get secure access links.",
+      icon: Upload,
+      color: "from-purple-500 to-pink-600"
     },
     {
       number: "03",
-      title: "Deliver & Get Paid",
-      description: "Send final deliverables and receive payment automatically.",
-      icon: Award,
-      image: "/demo-payment.jpg"
+      title: "Collaborate & Preview",
+      description: "Real-time collaboration tools. Clients can preview content before purchasing.",
+      icon: MessageSquare,
+      color: "from-green-500 to-emerald-600"
+    },
+    {
+      number: "04",
+      title: "Get Paid & Download",
+      description: "Secure payments processed instantly. Immediate access to premium content.",
+      icon: Download,
+      color: "from-yellow-500 to-orange-600"
     }
   ]
 
   return (
-    <section id="how-it-works" data-testid="how-it-works-section" className="py-24 bg-gradient-to-b from-gray-50 to-white">
+    <section className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-20">
-          <h2 data-testid="how-it-works-title" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-            How it works
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+            How 
+            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> It Works</span>
           </h2>
-          <p data-testid="how-it-works-subtitle" className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Three simple steps to transform your creative workflow
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Simple, streamlined process for both creators and clients. Get started in minutes.
           </p>
         </div>
 
-        <div data-testid="workflow-steps-container" className="space-y-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {steps.map((step, index) => {
             const IconComponent = step.icon
-            const isEven = index % 2 === 0
-            
             return (
-              <div key={index} data-testid={`workflow-step-${index}`} className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-12 lg:gap-20`}>
-                <div className="flex-1 space-y-6">
-                  <div className="flex items-center gap-4">
-                    <span data-testid={`step-number-${index}`} className="text-6xl font-bold text-indigo-600/20">{step.number}</span>
-                    <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center">
-                      <IconComponent className="w-6 h-6 text-white" />
-                    </div>
-                  </div>
-                  <h3 data-testid={`step-title-${index}`} className="text-3xl font-bold text-gray-900">{step.title}</h3>
-                  <p data-testid={`step-description-${index}`} className="text-xl text-gray-600 leading-relaxed">{step.description}</p>
-                  <Link href={index === 0 ? "/how-it-works" : "/signup"}>
-                    <Button data-testid={`step-cta-${index}`} variant="outline" className="mt-4">
-                      {index === 0 ? "Learn More" : "Get Started"}
-                      <ChevronRight className="ml-2 w-4 h-4" />
-                    </Button>
-                  </Link>
-                </div>
+              <div key={index} className="relative text-center group">
+                {/* Connecting line */}
+                {index < steps.length - 1 && (
+                  <div className="hidden lg:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-gray-200 to-gray-300 z-0"></div>
+                )}
                 
-                <div className="flex-1">
-                  <Link href="/demo">
-                    <div 
-                      data-testid={`step-demo-${index}`} 
-                      className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-8 aspect-video flex items-center justify-center cursor-pointer hover:from-indigo-200 hover:to-purple-200 transition-all duration-300 group"
-                    >
-                      <div className="text-center">
-                        <IconComponent className="w-20 h-20 mx-auto mb-4 text-indigo-600 group-hover:scale-110 transition-transform duration-300" />
-                        <p className="text-indigo-600 font-medium group-hover:text-indigo-700">Interactive Demo</p>
-                        <p className="text-indigo-500 text-sm mt-2 opacity-75">Click to try</p>
-                      </div>
-                    </div>
-                  </Link>
+                <div className="relative z-10">
+                  <div className={`w-20 h-20 mx-auto rounded-full bg-gradient-to-br ${step.color} mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                    <IconComponent className="w-10 h-10 text-white" />
+                  </div>
+                  
+                  <div className="text-sm font-bold text-gray-400 mb-2">{step.number}</div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">{step.title}</h3>
+                  <p className="text-gray-600 leading-relaxed">{step.description}</p>
                 </div>
               </div>
             )
           })}
         </div>
-        
-        {/* How It Works CTA */}
-        <div className="text-center mt-16">
-          <Link href="/how-it-works">
-            <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4">
-              See Complete Process
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </Link>
-        </div>
-      </div>
-      
-      {/* Demo Modal */}
-      <DemoModal 
-        isOpen={isDemoOpen} 
-        onClose={() => setIsDemoOpen(false)} 
-      />
-    </section>
-  )
-}
-
-// Interactive Features Section with tabbed interface
-function InteractiveFeaturesSection() {
-  return (
-    <section className="py-24 bg-gradient-to-b from-white to-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-            Experience FreeflowZee in Action
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Interactive features coming soon! Gallery, Financial Hub, and Feedback System demos.
-          </p>
-        </div>
       </div>
     </section>
   )
 }
 
-// Social proof section
+// Social Proof section with testimonials
 function SocialProofSection() {
   const testimonials = [
     {
-      quote: "FreeflowZee transformed how I work with clients. Projects that used to take weeks now take days.",
+      quote: "FreeflowZee has revolutionized how I work with clients. The payment system is seamless and the collaboration tools are amazing.",
       author: "Sarah Chen",
-      role: "UI/UX Designer",
-      company: "Design Studio Co.",
-      avatar: "/avatars/sarah.jpg",
-      rating: 5
+      role: "Freelance Designer",
+      avatar: "SC"
     },
     {
-      quote: "The payment system is a game-changer. I get paid faster and can focus on what I love - creating.",
-      author: "Marcus Johnson",
-      role: "Freelance Developer", 
-      company: "CodeCraft LLC",
-      avatar: "/avatars/marcus.jpg",
-      rating: 5
+      quote: "As a client, I love how easy it is to preview work and make payments. The whole process is smooth and professional.",
+      author: "Michael Torres",
+      role: "Marketing Director",
+      avatar: "MT"  
     },
     {
-      quote: "Client collaboration has never been this smooth. Everyone knows exactly what's needed.",
-      author: "Elena Rodriguez",
-      role: "Brand Designer",
-      company: "Creative Minds",
-      avatar: "/avatars/elena.jpg", 
-      rating: 5
+      quote: "The analytics dashboard gives me insights I never had before. I can see exactly how my projects are performing.",
+      author: "Emma Johnson",
+      role: "Creative Agency Owner",
+      avatar: "EJ"
     }
   ]
 
-  const stats = [
-    { number: "50K+", label: "Active Creators" },
-    { number: "2M+", label: "Files Shared" },
-    { number: "$10M+", label: "Paid to Creators" },
-    { number: "99.9%", label: "Uptime" }
-  ]
-
   return (
-    <section id="testimonials" data-testid="social-proof-section" className="py-24 bg-white">
+    <section className="py-24 bg-gradient-to-br from-indigo-50 to-purple-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Stats */}
-        <div data-testid="statistics-grid" className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
-          {stats.map((stat, index) => (
-            <div key={index} data-testid={`statistic-${index}`} className="text-center">
-              <div data-testid={`stat-number-${index}`} className="text-4xl lg:text-5xl font-bold text-indigo-600 mb-2">{stat.number}</div>
-              <div data-testid={`stat-label-${index}`} className="text-gray-600 font-medium">{stat.label}</div>
-            </div>
-          ))}
+        <div className="text-center mb-20">
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+            Trusted by 
+            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> Thousands</span>
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            See what our users are saying about their experience with FreeflowZee.
+          </p>
         </div>
 
-        {/* Testimonials */}
-        <div data-testid="testimonials-grid" className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
-            <Card key={index} data-testid={`testimonial-${index}`} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card key={index} className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
               <CardContent className="p-8">
-                <div className="flex mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <Quote className="w-8 h-8 text-indigo-600/20 mb-4" />
-                <p data-testid={`testimonial-quote-${index}`} className="text-gray-700 mb-6 leading-relaxed italic">
-                  "{testimonial.quote}"
-                </p>
+                <Quote className="w-10 h-10 text-indigo-300 mb-4" />
+                <p className="text-gray-700 leading-relaxed mb-6 italic">"{testimonial.quote}"</p>
                 <div className="flex items-center">
-                  <div className="w-12 h-12 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full mr-4"></div>
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold mr-4">
+                    {testimonial.avatar}
+                  </div>
                   <div>
-                    <div data-testid={`testimonial-author-${index}`} className="font-semibold text-gray-900">{testimonial.author}</div>
-                    <div data-testid={`testimonial-role-${index}`} className="text-sm text-gray-600">{testimonial.role}, {testimonial.company}</div>
+                    <div className="font-bold text-gray-900">{testimonial.author}</div>
+                    <div className="text-gray-600 text-sm">{testimonial.role}</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
           ))}
-        </div>
-        
-        {/* Testimonials CTA */}
-        <div className="text-center mt-16">
-          <Link href="/community">
-            <Button size="lg" variant="outline" className="px-8 py-4">
-              Join Our Community
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </Link>
         </div>
       </div>
     </section>
@@ -588,25 +461,25 @@ function PricingSection() {
     {
       name: "Starter",
       price: "Free",
-      description: "Perfect for trying out FreeflowZee",
+      description: "Perfect for getting started",
       features: [
-        "5GB storage",
-        "3 active projects",
-        "Basic collaboration tools",
+        "Up to 3 projects",
+        "1GB storage",
+        "Basic analytics",
         "Email support"
       ],
-      cta: "Get Started Free",
+      cta: "Get Started",
       popular: false
     },
     {
       name: "Professional", 
-      price: "$19",
-      description: "For serious creatives and freelancers",
+      price: "$29",
+      period: "/month",
+      description: "For growing businesses",
       features: [
-        "100GB storage",
         "Unlimited projects",
-        "Advanced collaboration",
-        "Payment processing",
+        "100GB storage", 
+        "Advanced analytics",
         "Priority support",
         "Custom branding"
       ],
@@ -614,15 +487,14 @@ function PricingSection() {
       popular: true
     },
     {
-      name: "Agency",
-      price: "$49",
-      description: "For teams and agencies",
+      name: "Enterprise",
+      price: "Custom",
+      description: "For large organizations",
       features: [
-        "500GB storage", 
-        "Team management",
-        "White-label solutions",
-        "Advanced analytics",
-        "Dedicated support",
+        "Everything in Pro",
+        "Unlimited storage",
+        "API access",
+        "24/7 phone support",
         "Custom integrations"
       ],
       cta: "Contact Sales",
@@ -631,124 +503,90 @@ function PricingSection() {
   ]
 
   return (
-    <section id="pricing" data-testid="pricing-section" className="py-24 bg-gradient-to-b from-gray-50 to-white">
+    <section className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-20">
-          <h2 data-testid="pricing-title" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-            Simple, transparent pricing
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+            Simple 
+            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> Pricing</span>
           </h2>
-          <p data-testid="pricing-subtitle" className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Choose the plan that fits your needs. Upgrade or downgrade at any time.
           </p>
         </div>
 
-        <div data-testid="pricing-plans" className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {plans.map((plan, index) => (
-            <Card key={index} data-testid={`pricing-card-${plan.name.toLowerCase()}`} className={`relative border-2 ${plan.popular ? 'border-indigo-500 shadow-2xl scale-105' : 'border-gray-200'} hover:shadow-xl transition-all duration-300`}>
+            <Card key={index} className={`relative group transition-all duration-300 border-0 ${plan.popular ? 'ring-2 ring-indigo-600 shadow-2xl scale-105' : 'hover:shadow-xl'} bg-gradient-to-br from-white to-gray-50`}>
               {plan.popular && (
-                <Badge data-testid="pricing-popular-badge" className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-indigo-600 text-white px-6 py-1">
+                <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-indigo-600 text-white">
                   Most Popular
                 </Badge>
               )}
               <CardContent className="p-8">
-                <div className="text-center mb-8">
-                  <h3 data-testid={`pricing-plan-name-${plan.name.toLowerCase()}`} className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                  <div className="mb-4">
-                    <span data-testid={`pricing-plan-price-${plan.name.toLowerCase()}`} className="text-5xl font-bold text-gray-900">{plan.price}</span>
-                    {plan.price !== "Free" && <span className="text-gray-600">/month</span>}
-                  </div>
-                  <p data-testid={`pricing-plan-description-${plan.name.toLowerCase()}`} className="text-gray-600">{plan.description}</p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                <div className="mb-4">
+                  <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
+                  {plan.period && <span className="text-gray-600">{plan.period}</span>}
                 </div>
-
-                <ul data-testid={`pricing-features-${plan.name.toLowerCase()}`} className="space-y-3 mb-8">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-center">
-                      <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
-                      <span className="text-gray-700">{feature}</span>
+                <p className="text-gray-600 mb-6">{plan.description}</p>
+                <ul className="space-y-3 mb-8">
+                  {plan.features.map((feature, featureIndex) => (
+                    <li key={featureIndex} className="flex items-center text-gray-700">
+                      <CheckCircle className="w-5 h-5 text-indigo-600 mr-3" />
+                      {feature}
                     </li>
                   ))}
                 </ul>
-
-                <Link href={plan.name === 'Agency' ? '/contact' : '/signup'}>
-                  <Button 
-                    data-testid={`pricing-cta-${plan.name.toLowerCase()}`}
-                    className={`w-full ${plan.popular ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-white border-2 border-gray-200 text-gray-900 hover:bg-gray-50'}`}
-                    size="lg"
-                  >
-                    {plan.cta}
-                  </Button>
-                </Link>
+                <Button className={`w-full font-semibold py-3 rounded-lg ${plan.popular ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-900'}`}>
+                  {plan.cta}
+                </Button>
               </CardContent>
             </Card>
           ))}
         </div>
-
-        <div className="text-center mt-12">
-          <p data-testid="pricing-trial-info" className="text-gray-600 mb-6">
-            All plans include 14-day free trial. No credit card required.
-          </p>
-          <Link href="/payment">
-            <Button size="lg" variant="outline" className="px-8 py-4">
-              View All Pricing Options
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </Link>
-        </div>
       </div>
     </section>
   )
 }
 
-// CTA section
+// Final CTA section
 function CTASection() {
   return (
-    <section data-testid="cta-section" className="py-24 bg-gradient-to-r from-indigo-600 to-purple-600">
-      <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-        <h2 data-testid="cta-title" className="text-4xl sm:text-5xl font-bold text-white mb-6">
-          Ready to transform your workflow?
+    <section className="py-24 bg-gradient-to-br from-indigo-600 to-purple-700">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
+          Ready to Get Started?
         </h2>
-        <p data-testid="cta-subtitle" className="text-xl text-indigo-100 mb-10 leading-relaxed">
-          Join 50,000+ creators who've already made the switch to faster, smarter project management.
+        <p className="text-xl text-indigo-100 mb-12 max-w-2xl mx-auto">
+          Join thousands of creators and clients who trust FreeflowZee for their project management and collaboration needs.
         </p>
-        
-        <div data-testid="cta-buttons" className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link href="/signup">
-            <Button data-testid="cta-primary" size="lg" className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-xl">
-              Start Free Today
+            <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-xl">
+              Start Creating Free
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </Link>
           <Link href="/contact">
-            <Button data-testid="cta-sales" size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-indigo-600 px-8 py-4 text-lg font-semibold rounded-xl">
-              Talk to Sales
+            <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white/10 px-8 py-4 text-lg font-semibold rounded-xl">
+              Contact Sales
             </Button>
           </Link>
         </div>
-
-        <p data-testid="cta-disclaimer" className="text-indigo-200 mt-6 text-sm">
-          No credit card required • 14-day free trial • Cancel anytime
-        </p>
       </div>
     </section>
   )
 }
 
-// Legacy Navigation component - replaced with SiteHeader
-// Keeping for reference but no longer used
-
-// Main landing page component
 export default function LandingPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white">
       <SiteHeader variant="transparent" />
-      <Suspense fallback={null}>
-        <VerificationReminder />
-      </Suspense>
       <HeroSection />
-      <FeaturesSection />
       <UserTypesSection />
+      <FeaturesSection />
       <HowItWorksSection />
-      <InteractiveFeaturesSection />
       <SocialProofSection />
       <PricingSection />
       <CTASection />

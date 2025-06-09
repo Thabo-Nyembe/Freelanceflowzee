@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import LandingPage from './landing'
 import { Suspense } from 'react'
+import LandingPage from './landing'
 
 export default async function HomePage() {
   // Check for demo mode or if Supabase is not configured
