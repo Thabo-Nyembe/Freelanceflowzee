@@ -5,14 +5,11 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { DemoModal } from '@/components/demo-modal'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { VerificationReminder } from '@/components/verification-reminder'
-import { Gallery } from '@/components/gallery'
-import { FinancialHub } from '@/components/financial-hub'
-import { FeedbackSystem } from '@/components/feedback-system'
 import { 
   ArrowRight, 
   Upload, 
@@ -41,10 +38,7 @@ import {
   Smartphone,
   Sparkles,
   ChevronRight,
-  Quote,
-  CreditCard,
-  Image as ImageIcon,
-  User
+  Quote, CreditCard, Image as ImageIcon, MessageCircle
 } from 'lucide-react'
 
 // Hero section with animated gradient background
@@ -86,60 +80,23 @@ function HeroSection() {
           </p>
 
           {/* CTA Buttons */}
-          <div data-testid="hero-cta-buttons" className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
-            {/* User Login - For Creators/Freelancers */}
-            <div className="flex flex-col items-center space-y-3">
-              <div className="text-sm font-medium text-gray-700 mb-1">For Creators & Freelancers</div>
-              <Link href="/login?redirect=/dashboard">
-                <Button data-testid="hero-creator-login" size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 min-w-[200px]">
-                  <User className="mr-2 w-5 h-5" />
-                  Creator Login
-                </Button>
-              </Link>
-              <div className="text-xs text-gray-500">Manage projects, get paid</div>
-            </div>
-
-            {/* Watch Demo - For Everyone */}
-            <div className="flex flex-col items-center space-y-3">
-              <div className="text-sm font-medium text-gray-700 mb-1">Not Sure? Try First</div>
-              <Link href="/demo">
-                <Button 
-                  data-testid="hero-cta-demo" 
-                  size="lg" 
-                  variant="outline" 
-                  className="border-2 border-gray-300 hover:border-indigo-300 px-8 py-4 text-lg font-semibold rounded-xl backdrop-blur-sm bg-white/80 min-w-[200px]"
-                >
-                  <Play className="mr-2 w-5 h-5" />
-                  Watch Demo
-                </Button>
-              </Link>
-              <div className="text-xs text-gray-500">See how it works</div>
-            </div>
-
-            {/* Client Access - For Project Viewers */}
-            <div className="flex flex-col items-center space-y-3">
-              <div className="text-sm font-medium text-gray-700 mb-1">For Clients</div>
-              <Link href="/payment">
-                <Button 
-                  data-testid="hero-client-access" 
-                  size="lg" 
-                  variant="outline" 
-                  className="border-2 border-purple-300 hover:border-purple-400 hover:bg-purple-50 px-8 py-4 text-lg font-semibold rounded-xl backdrop-blur-sm bg-white/80 min-w-[200px]"
-                >
-                  <Eye className="mr-2 w-5 h-5" />
-                  Client Access
-                </Button>
-              </Link>
-              <div className="text-xs text-gray-500">Login & preview content</div>
-            </div>
-          </div>
-
-          {/* Secondary Actions */}
-          <div data-testid="hero-secondary-actions" className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+          <div data-testid="hero-cta-buttons" className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
             <Link href="/signup">
-              <Button data-testid="hero-signup" variant="ghost" className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 px-6 py-2 font-medium">
-                New Creator? Sign Up Free
-                <ArrowRight className="ml-2 w-4 h-4" />
+              <Button data-testid="hero-cta-primary" size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                Start Creating Free
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </Link>
+            
+            <Link href="/demo">
+              <Button 
+                data-testid="hero-cta-demo" 
+                size="lg" 
+                variant="outline" 
+                className="border-2 border-gray-300 hover:border-indigo-300 px-8 py-4 text-lg font-semibold rounded-xl backdrop-blur-sm bg-white/80"
+              >
+                <Play className="mr-2 w-5 h-5" />
+                Try Demo
               </Button>
             </Link>
           </div>
@@ -263,110 +220,26 @@ function FeaturesSection() {
   )
 }
 
-// User types section - explains the difference between creators and clients
-function UserTypesSection() {
-  const userTypes = [
-    {
-      title: "For Creators & Freelancers",
-      description: "You're the one creating content, managing projects, and getting paid for your work.",
-      icon: User,
-      color: "from-indigo-500 to-purple-600",
-      features: [
-        "Upload and organize projects",
-        "Collaborate with clients",
-        "Get paid automatically",
-        "Track project analytics",
-        "Manage your portfolio"
-      ],
-      cta: "Creator Login",
-      href: "/login?redirect=/dashboard",
-      bgColor: "bg-indigo-50",
-      testId: "creator-type"
-    },
-    {
-      title: "For Clients & Viewers", 
-      description: "You're viewing, reviewing, or purchasing content that creators have shared with you.",
-      icon: Eye,
-      color: "from-purple-500 to-pink-600",
-      features: [
-        "View shared projects",
-        "Provide feedback & comments",
-        "Make secure payments",
-        "Download approved files",
-        "Track project progress"
-      ],
-      cta: "Access Projects",
-      href: "/payment",
-      bgColor: "bg-purple-50",
-      testId: "client-type"
-    }
-  ]
 
+// Interactive Features Section with Gallery, Client Feedback, and Finance Hub
+function InteractiveFeaturesSection() {
   return (
-    <section data-testid="user-types-section" className="py-24 bg-gradient-to-b from-white to-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-20">
-          <h2 data-testid="user-types-title" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-            Choose your path to 
-            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> success</span>
-          </h2>
-          <p data-testid="user-types-subtitle" className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Whether you're creating content or accessing it, we've designed the perfect experience for your needs.
-          </p>
-        </div>
-
-        <div data-testid="user-types-grid" className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {userTypes.map((type, index) => {
-            const IconComponent = type.icon
-            return (
-              <Card key={index} data-testid={type.testId} className={`${type.bgColor} border-0 hover:shadow-2xl transition-all duration-300 transform hover:scale-105`}>
-                <CardContent className="p-10">
-                  <div className="text-center mb-8">
-                    <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${type.color} mb-6 flex items-center justify-center mx-auto`}>
-                      <IconComponent className="w-10 h-10 text-white" />
-                    </div>
-                    <h3 data-testid={`${type.testId}-title`} className="text-2xl font-bold text-gray-900 mb-4">{type.title}</h3>
-                    <p data-testid={`${type.testId}-description`} className="text-gray-600 leading-relaxed">{type.description}</p>
-                  </div>
-
-                  <ul data-testid={`${type.testId}-features`} className="space-y-3 mb-8">
-                    {type.features.map((feature, i) => (
-                      <li key={i} className="flex items-center">
-                        <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
-                        <span className="text-gray-700">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link href={type.href}>
-                    <Button 
-                      data-testid={`${type.testId}-cta`}
-                      className={`w-full bg-gradient-to-r ${type.color} text-white hover:shadow-lg transform hover:scale-105 transition-all duration-200`}
-                      size="lg"
-                    >
-                      <IconComponent className="mr-2 w-5 h-5" />
-                      {type.cta}
-                      <ArrowRight className="ml-2 w-5 h-5" />
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
-
-        {/* Additional help */}
-        <div className="text-center mt-16">
-          <p data-testid="user-types-help" className="text-gray-600 mb-6">
-            Not sure which one you are? 
-          </p>
-          <Link href="/demo">
-            <Button variant="outline" size="lg" className="px-8 py-4">
-              <Play className="mr-2 w-5 h-5" />
-              Watch Demo to Learn More
-            </Button>
-          </Link>
-        </div>
+    <section className="py-24 bg-gradient-to-br from-slate-50 to-blue-50">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">Interactive Features</h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">Experience the full power of FreeflowZee with our interactive gallery, client feedback system, and comprehensive finance hub.</p>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">Experience the full power of FreeflowZee with our interactive gallery, client feedback system, and comprehensive finance hub.</p>
+        <Tabs defaultValue="gallery" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsTrigger value="gallery" className="flex items-center gap-2"><ImageIcon className="h-4 w-4" />Gallery Showcase</TabsTrigger>
+            <TabsTrigger value="gallery" className="flex items-center gap-2"><ImageIcon className="h-4 w-4" />Gallery Showcase</TabsTrigger>
+            <TabsTrigger value="feedback" className="flex items-center gap-2"><MessageCircle className="h-4 w-4" />Client Feedback</TabsTrigger>
+            <TabsTrigger value="feedback" className="flex items-center gap-2"><MessageCircle className="h-4 w-4" />Client Feedback</TabsTrigger>
+          <TabsContent value="gallery"><Card className="border-0 shadow-xl"><CardHeader><CardTitle className="flex items-center gap-2"><ImageIcon className="h-5 w-5" />Project Gallery & Showcase</CardTitle></CardHeader><CardContent><div>Gallery Component</div></CardContent></Card></TabsContent>
+          <TabsContent value="feedback"><Card className="border-0 shadow-xl"><CardHeader><CardTitle className="flex items-center gap-2"><MessageCircle className="h-5 w-5" />Real-time Client Feedback</CardTitle></CardHeader><CardContent><div>Feedback System Component</div></CardContent></Card></TabsContent>
+          <TabsContent value="finance"><Card className="border-0 shadow-xl"><CardHeader><CardTitle className="flex items-center gap-2"><CreditCard className="h-5 w-5" />Financial Management Hub</CardTitle></CardHeader><CardContent><div>Financial Hub Component</div></CardContent></Card></TabsContent>
+        </Tabs>
       </div>
     </section>
   )
@@ -475,30 +348,12 @@ function HowItWorksSection() {
   )
 }
 
-// Interactive Features Section with tabbed interface
-function InteractiveFeaturesSection() {
-  return (
-    <section className="py-24 bg-gradient-to-b from-white to-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-            Experience FreeflowZee in Action
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Interactive features coming soon! Gallery, Financial Hub, and Feedback System demos.
-          </p>
-        </div>
-      </div>
-    </section>
-  )
-}
-
 // Social proof section
 function SocialProofSection() {
   const testimonials = [
     {
       quote: "FreeflowZee transformed how I work with clients. Projects that used to take weeks now take days.",
-      author: "Sarah Chen",
+      quote: "FreeflowZee transformed how I work with clients. Projects that used to take weeks now take days.",
       role: "UI/UX Designer",
       company: "Design Studio Co.",
       avatar: "/avatars/sarah.jpg",
@@ -506,7 +361,7 @@ function SocialProofSection() {
     },
     {
       quote: "The payment system is a game-changer. I get paid faster and can focus on what I love - creating.",
-      author: "Marcus Johnson",
+      quote: "The payment system is a game-changer. I get paid faster and can focus on what I love - creating.",
       role: "Freelance Developer", 
       company: "CodeCraft LLC",
       avatar: "/avatars/marcus.jpg",
@@ -543,6 +398,15 @@ function SocialProofSection() {
         </div>
 
         {/* Testimonials */}
+        <div className="text-center mb-16">
+          <h2 data-testid="testimonials-title" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+            Loved by creators worldwide
+          </h2>
+          <p data-testid="testimonials-subtitle" className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Join thousands of creatives who've transformed their workflow
+          </p>
+        </div>
+
         <div data-testid="testimonials-grid" className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
             <Card key={index} data-testid={`testimonial-${index}`} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
@@ -552,7 +416,7 @@ function SocialProofSection() {
                     <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                   ))}
                 </div>
-                <Quote className="w-8 h-8 text-indigo-600/20 mb-4" />
+                <Quote, CreditCard, Image as ImageIcon, MessageCircle className="w-8 h-8 text-indigo-600/20 mb-4" />
                 <p data-testid={`testimonial-quote-${index}`} className="text-gray-700 mb-6 leading-relaxed italic">
                   "{testimonial.quote}"
                 </p>
@@ -746,9 +610,8 @@ export default function LandingPage() {
       </Suspense>
       <HeroSection />
       <FeaturesSection />
-      <UserTypesSection />
-      <HowItWorksSection />
       <InteractiveFeaturesSection />
+      <HowItWorksSection />
       <SocialProofSection />
       <PricingSection />
       <CTASection />

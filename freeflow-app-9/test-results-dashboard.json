@@ -1,0 +1,4761 @@
+🚀 Starting global test setup...
+✅ Test server is accessible
+✅ Global setup complete
+🧹 Running global test teardown...
+✅ Global teardown complete
+{
+  "config": {
+    "configFile": "/Users/thabonyembe/Documents/freeflow-app-9/playwright.config.ts",
+    "rootDir": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": "/Users/thabonyembe/Documents/freeflow-app-9/tests/global-setup.ts",
+    "globalTeardown": "/Users/thabonyembe/Documents/freeflow-app-9/tests/global-teardown.ts",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 5,
+    "metadata": {
+      "actualWorkers": 4
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 15000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/thabonyembe/Documents/freeflow-app-9/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/thabonyembe/Documents/freeflow-app-9/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/thabonyembe/Documents/freeflow-app-9/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/thabonyembe/Documents/freeflow-app-9/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "id": "Mobile Chrome",
+        "name": "Mobile Chrome",
+        "testDir": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/thabonyembe/Documents/freeflow-app-9/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "id": "Mobile Safari",
+        "name": "Mobile Safari",
+        "testDir": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "version": "1.41.2",
+    "workers": 4,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3001",
+      "reuseExistingServer": true,
+      "timeout": 120000,
+      "stdout": "ignore",
+      "stderr": "pipe"
+    }
+  },
+  "suites": [
+    {
+      "title": "comprehensive-dashboard.spec.ts",
+      "file": "comprehensive-dashboard.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "🎛️ Comprehensive Dashboard Tests",
+          "file": "comprehensive-dashboard.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [],
+          "suites": [
+            {
+              "title": "📊 Dashboard Core Elements",
+              "file": "comprehensive-dashboard.spec.ts",
+              "line": 11,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should display all dashboard elements",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "status": "timedOut",
+                          "duration": 30001,
+                          "error": {
+                            "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+                            "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts:4:8",
+                            "location": {
+                              "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts",
+                              "column": 8,
+                              "line": 4
+                            },
+                            "snippet": "  2 |\n  3 | test.describe('🎛️ Comprehensive Dashboard Tests', () => {\n> 4 |   test.beforeEach(async ({ dashboardPage, authPage, testUser }) => {\n    |        ^\n  5 |     // Ensure user is logged in before each test\n  6 |     await authPage.gotoLogin();\n  7 |     await authPage.attemptLogin(testUser.email, testUser.password, true);"
+                          },
+                          "errors": [
+                            {
+                              "location": {
+                                "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts",
+                                "column": 8,
+                                "line": 4
+                              },
+                              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n  2 |\n  3 | test.describe('🎛️ Comprehensive Dashboard Tests', () => {\n> 4 |   test.beforeEach(async ({ dashboardPage, authPage, testUser }) => {\n    |        ^\n  5 |     // Ensure user is logged in before each test\n  6 |     await authPage.gotoLogin();\n  7 |     await authPage.attemptLogin(testUser.email, testUser.password, true);\n\n    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts:4:8"
+                            },
+                            {
+                              "location": {
+                                "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/fixtures/app-fixtures.ts",
+                                "column": 57,
+                                "line": 144
+                              },
+                              "message": "Error: locator.click: Test ended.\nCall log:\n  \u001b[2m- waiting for getByRole('button', { name: 'Sign In' })\u001b[22m\n\n\n   at ../fixtures/app-fixtures.ts:144\n\n  142 |     await page.getByLabel('Email').fill(testUser.email);\n  143 |     await page.getByLabel('Password').fill(testUser.password);\n> 144 |     await page.getByRole('button', { name: 'Sign In' }).click();\n      |                                                         ^\n  145 |     \n  146 |     // Wait for dashboard to load\n  147 |     await page.waitForURL('**/dashboard**');\n\n    at Object.authenticatedPage (/Users/thabonyembe/Documents/freeflow-app-9/tests/fixtures/app-fixtures.ts:144:57)"
+                            }
+                          ],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-06-09T21:26:03.167Z",
+                          "attachments": [
+                            {
+                              "name": "screenshot",
+                              "contentType": "image/png",
+                              "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/comprehensive-dashboard-🎛️-Comprehensive-Dash-a2ff4--Elements-should-display-all-dashboard-elements-chromium/test-failed-1.png"
+                            }
+                          ],
+                          "errorLocation": {
+                            "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts",
+                            "column": 8,
+                            "line": 4
+                          }
+                        },
+                        {
+                          "workerIndex": 6,
+                          "status": "interrupted",
+                          "duration": 1551,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 1,
+                          "startTime": "2025-06-09T21:26:33.602Z",
+                          "attachments": [
+                            {
+                              "name": "trace",
+                              "contentType": "application/zip",
+                              "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/comprehensive-dashboard-🎛️-Comprehensive-Dash-a2ff4--Elements-should-display-all-dashboard-elements-chromium-retry1/trace.zip"
+                            }
+                          ]
+                        }
+                      ],
+                      "status": "flaky"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-a57cc76fed6dccd9b649",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 12,
+                  "column": 9
+                },
+                {
+                  "title": "should display stats cards with data",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "status": "timedOut",
+                          "duration": 29999,
+                          "error": {
+                            "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+                            "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts:4:8",
+                            "location": {
+                              "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts",
+                              "column": 8,
+                              "line": 4
+                            },
+                            "snippet": "  2 |\n  3 | test.describe('🎛️ Comprehensive Dashboard Tests', () => {\n> 4 |   test.beforeEach(async ({ dashboardPage, authPage, testUser }) => {\n    |        ^\n  5 |     // Ensure user is logged in before each test\n  6 |     await authPage.gotoLogin();\n  7 |     await authPage.attemptLogin(testUser.email, testUser.password, true);"
+                          },
+                          "errors": [
+                            {
+                              "location": {
+                                "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts",
+                                "column": 8,
+                                "line": 4
+                              },
+                              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n  2 |\n  3 | test.describe('🎛️ Comprehensive Dashboard Tests', () => {\n> 4 |   test.beforeEach(async ({ dashboardPage, authPage, testUser }) => {\n    |        ^\n  5 |     // Ensure user is logged in before each test\n  6 |     await authPage.gotoLogin();\n  7 |     await authPage.attemptLogin(testUser.email, testUser.password, true);\n\n    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts:4:8"
+                            },
+                            {
+                              "location": {
+                                "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/fixtures/app-fixtures.ts",
+                                "column": 57,
+                                "line": 144
+                              },
+                              "message": "Error: locator.click: Test ended.\nCall log:\n  \u001b[2m- waiting for getByRole('button', { name: 'Sign In' })\u001b[22m\n\n\n   at ../fixtures/app-fixtures.ts:144\n\n  142 |     await page.getByLabel('Email').fill(testUser.email);\n  143 |     await page.getByLabel('Password').fill(testUser.password);\n> 144 |     await page.getByRole('button', { name: 'Sign In' }).click();\n      |                                                         ^\n  145 |     \n  146 |     // Wait for dashboard to load\n  147 |     await page.waitForURL('**/dashboard**');\n\n    at Object.authenticatedPage (/Users/thabonyembe/Documents/freeflow-app-9/tests/fixtures/app-fixtures.ts:144:57)"
+                            }
+                          ],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-06-09T21:26:03.155Z",
+                          "attachments": [
+                            {
+                              "name": "screenshot",
+                              "contentType": "image/png",
+                              "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/comprehensive-dashboard-🎛️-Comprehensive-Dash-eb576-e-Elements-should-display-stats-cards-with-data-chromium/test-failed-1.png"
+                            }
+                          ],
+                          "errorLocation": {
+                            "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts",
+                            "column": 8,
+                            "line": 4
+                          }
+                        },
+                        {
+                          "workerIndex": 4,
+                          "status": "interrupted",
+                          "duration": 1759,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 1,
+                          "startTime": "2025-06-09T21:26:33.599Z",
+                          "attachments": [
+                            {
+                              "name": "trace",
+                              "contentType": "application/zip",
+                              "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/comprehensive-dashboard-🎛️-Comprehensive-Dash-eb576-e-Elements-should-display-stats-cards-with-data-chromium-retry1/trace.zip"
+                            }
+                          ]
+                        }
+                      ],
+                      "status": "flaky"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-73b05cb146feb3ca6d0d",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 21,
+                  "column": 9
+                },
+                {
+                  "title": "should display user profile elements",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 2,
+                          "status": "timedOut",
+                          "duration": 30000,
+                          "error": {
+                            "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+                            "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts:4:8",
+                            "location": {
+                              "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts",
+                              "column": 8,
+                              "line": 4
+                            },
+                            "snippet": "  2 |\n  3 | test.describe('🎛️ Comprehensive Dashboard Tests', () => {\n> 4 |   test.beforeEach(async ({ dashboardPage, authPage, testUser }) => {\n    |        ^\n  5 |     // Ensure user is logged in before each test\n  6 |     await authPage.gotoLogin();\n  7 |     await authPage.attemptLogin(testUser.email, testUser.password, true);"
+                          },
+                          "errors": [
+                            {
+                              "location": {
+                                "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts",
+                                "column": 8,
+                                "line": 4
+                              },
+                              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n  2 |\n  3 | test.describe('🎛️ Comprehensive Dashboard Tests', () => {\n> 4 |   test.beforeEach(async ({ dashboardPage, authPage, testUser }) => {\n    |        ^\n  5 |     // Ensure user is logged in before each test\n  6 |     await authPage.gotoLogin();\n  7 |     await authPage.attemptLogin(testUser.email, testUser.password, true);\n\n    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts:4:8"
+                            },
+                            {
+                              "location": {
+                                "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/fixtures/app-fixtures.ts",
+                                "column": 57,
+                                "line": 144
+                              },
+                              "message": "Error: locator.click: Test ended.\nCall log:\n  \u001b[2m- waiting for getByRole('button', { name: 'Sign In' })\u001b[22m\n\n\n   at ../fixtures/app-fixtures.ts:144\n\n  142 |     await page.getByLabel('Email').fill(testUser.email);\n  143 |     await page.getByLabel('Password').fill(testUser.password);\n> 144 |     await page.getByRole('button', { name: 'Sign In' }).click();\n      |                                                         ^\n  145 |     \n  146 |     // Wait for dashboard to load\n  147 |     await page.waitForURL('**/dashboard**');\n\n    at Object.authenticatedPage (/Users/thabonyembe/Documents/freeflow-app-9/tests/fixtures/app-fixtures.ts:144:57)"
+                            }
+                          ],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-06-09T21:26:03.153Z",
+                          "attachments": [
+                            {
+                              "name": "screenshot",
+                              "contentType": "image/png",
+                              "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/comprehensive-dashboard-🎛️-Comprehensive-Dash-7b0d7-e-Elements-should-display-user-profile-elements-chromium/test-failed-1.png"
+                            }
+                          ],
+                          "errorLocation": {
+                            "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts",
+                            "column": 8,
+                            "line": 4
+                          }
+                        },
+                        {
+                          "workerIndex": 5,
+                          "status": "interrupted",
+                          "duration": 1337,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 1,
+                          "startTime": "2025-06-09T21:26:33.599Z",
+                          "attachments": [
+                            {
+                              "name": "trace",
+                              "contentType": "application/zip",
+                              "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/comprehensive-dashboard-🎛️-Comprehensive-Dash-7b0d7-e-Elements-should-display-user-profile-elements-chromium-retry1/trace.zip"
+                            }
+                          ]
+                        }
+                      ],
+                      "status": "flaky"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-0bdb729982285bd4e614",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 32,
+                  "column": 9
+                },
+                {
+                  "title": "should display all dashboard elements",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-246915a38b3d07feba4e",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 12,
+                  "column": 9
+                },
+                {
+                  "title": "should display stats cards with data",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-feba4f99d4bcaea7cd0c",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 21,
+                  "column": 9
+                },
+                {
+                  "title": "should display user profile elements",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-81b1439918e338b5daef",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 32,
+                  "column": 9
+                },
+                {
+                  "title": "should display all dashboard elements",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-d84095e8afb5eb2b935e",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 12,
+                  "column": 9
+                },
+                {
+                  "title": "should display stats cards with data",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-dbd02a1418305931a4e8",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 21,
+                  "column": 9
+                },
+                {
+                  "title": "should display user profile elements",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-eb84c11405b2147ddc51",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 32,
+                  "column": 9
+                },
+                {
+                  "title": "should display all dashboard elements",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-4f1d1fdf3559bf169b2f",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 12,
+                  "column": 9
+                },
+                {
+                  "title": "should display stats cards with data",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-4a03cad82f7dd5bdad12",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 21,
+                  "column": 9
+                },
+                {
+                  "title": "should display user profile elements",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-5ce2c1e63d471d9f2f07",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 32,
+                  "column": 9
+                },
+                {
+                  "title": "should display all dashboard elements",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-98e26ca2c2ef6a1b0aa1",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 12,
+                  "column": 9
+                },
+                {
+                  "title": "should display stats cards with data",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-4dae9b865516ff69c786",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 21,
+                  "column": 9
+                },
+                {
+                  "title": "should display user profile elements",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-854aed55c45cd47ba742",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 32,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "🧭 Navigation & Routing",
+              "file": "comprehensive-dashboard.spec.ts",
+              "line": 40,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should navigate to projects hub",
+                  "ok": false,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [
+                        {
+                          "workerIndex": 3,
+                          "status": "timedOut",
+                          "duration": 29999,
+                          "error": {
+                            "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+                            "stack": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts:4:8",
+                            "location": {
+                              "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts",
+                              "column": 8,
+                              "line": 4
+                            },
+                            "snippet": "  2 |\n  3 | test.describe('🎛️ Comprehensive Dashboard Tests', () => {\n> 4 |   test.beforeEach(async ({ dashboardPage, authPage, testUser }) => {\n    |        ^\n  5 |     // Ensure user is logged in before each test\n  6 |     await authPage.gotoLogin();\n  7 |     await authPage.attemptLogin(testUser.email, testUser.password, true);"
+                          },
+                          "errors": [
+                            {
+                              "location": {
+                                "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts",
+                                "column": 8,
+                                "line": 4
+                              },
+                              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n  2 |\n  3 | test.describe('🎛️ Comprehensive Dashboard Tests', () => {\n> 4 |   test.beforeEach(async ({ dashboardPage, authPage, testUser }) => {\n    |        ^\n  5 |     // Ensure user is logged in before each test\n  6 |     await authPage.gotoLogin();\n  7 |     await authPage.attemptLogin(testUser.email, testUser.password, true);\n\n    at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts:4:8"
+                            },
+                            {
+                              "location": {
+                                "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/fixtures/app-fixtures.ts",
+                                "column": 57,
+                                "line": 144
+                              },
+                              "message": "Error: locator.click: Test ended.\nCall log:\n  \u001b[2m- waiting for getByRole('button', { name: 'Sign In' })\u001b[22m\n\n\n   at ../fixtures/app-fixtures.ts:144\n\n  142 |     await page.getByLabel('Email').fill(testUser.email);\n  143 |     await page.getByLabel('Password').fill(testUser.password);\n> 144 |     await page.getByRole('button', { name: 'Sign In' }).click();\n      |                                                         ^\n  145 |     \n  146 |     // Wait for dashboard to load\n  147 |     await page.waitForURL('**/dashboard**');\n\n    at Object.authenticatedPage (/Users/thabonyembe/Documents/freeflow-app-9/tests/fixtures/app-fixtures.ts:144:57)"
+                            }
+                          ],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-06-09T21:26:03.166Z",
+                          "attachments": [
+                            {
+                              "name": "screenshot",
+                              "contentType": "image/png",
+                              "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/comprehensive-dashboard-🎛️-Comprehensive-Dash-03980-igation-Routing-should-navigate-to-projects-hub-chromium/test-failed-1.png"
+                            }
+                          ],
+                          "errorLocation": {
+                            "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/comprehensive-dashboard.spec.ts",
+                            "column": 8,
+                            "line": 4
+                          }
+                        },
+                        {
+                          "workerIndex": 7,
+                          "status": "failed",
+                          "duration": 1103,
+                          "error": {
+                            "message": "Error: locator.fill: Target page, context or browser has been closed\nCall log:\n  \u001b[2m- waiting for getByLabel('Email')\u001b[22m\n\u001b[2m  -   locator resolved to <input id=\"email\" required=\"\" type=\"email\" name=\"email\"…/>\u001b[22m\n\u001b[2m  - elementHandle.fill(\"test@example.com\")\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and editable\u001b[22m\n",
+                            "stack": "Error: locator.fill: Target page, context or browser has been closed\nCall log:\n  \u001b[2m- waiting for getByLabel('Email')\u001b[22m\n\u001b[2m  -   locator resolved to <input id=\"email\" required=\"\" type=\"email\" name=\"email\"…/>\u001b[22m\n\u001b[2m  - elementHandle.fill(\"test@example.com\")\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and editable\u001b[22m\n\n    at Object.authenticatedPage (/Users/thabonyembe/Documents/freeflow-app-9/tests/fixtures/app-fixtures.ts:142:36)",
+                            "location": {
+                              "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/fixtures/app-fixtures.ts",
+                              "column": 36,
+                              "line": 142
+                            },
+                            "snippet": "   at ../fixtures/app-fixtures.ts:142\n\n  140 |     \n  141 |     // Perform login\n> 142 |     await page.getByLabel('Email').fill(testUser.email);\n      |                                    ^\n  143 |     await page.getByLabel('Password').fill(testUser.password);\n  144 |     await page.getByRole('button', { name: 'Sign In' }).click();\n  145 |     "
+                          },
+                          "errors": [
+                            {
+                              "location": {
+                                "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/fixtures/app-fixtures.ts",
+                                "column": 36,
+                                "line": 142
+                              },
+                              "message": "Error: locator.fill: Target page, context or browser has been closed\nCall log:\n  \u001b[2m- waiting for getByLabel('Email')\u001b[22m\n\u001b[2m  -   locator resolved to <input id=\"email\" required=\"\" type=\"email\" name=\"email\"…/>\u001b[22m\n\u001b[2m  - elementHandle.fill(\"test@example.com\")\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and editable\u001b[22m\n\n\n   at ../fixtures/app-fixtures.ts:142\n\n  140 |     \n  141 |     // Perform login\n> 142 |     await page.getByLabel('Email').fill(testUser.email);\n      |                                    ^\n  143 |     await page.getByLabel('Password').fill(testUser.password);\n  144 |     await page.getByRole('button', { name: 'Sign In' }).click();\n  145 |     \n\n    at Object.authenticatedPage (/Users/thabonyembe/Documents/freeflow-app-9/tests/fixtures/app-fixtures.ts:142:36)"
+                            }
+                          ],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 1,
+                          "startTime": "2025-06-09T21:26:33.612Z",
+                          "attachments": [
+                            {
+                              "name": "trace",
+                              "contentType": "application/zip",
+                              "path": "/Users/thabonyembe/Documents/freeflow-app-9/test-results/comprehensive-dashboard-🎛️-Comprehensive-Dash-03980-igation-Routing-should-navigate-to-projects-hub-chromium-retry1/trace.zip"
+                            }
+                          ],
+                          "errorLocation": {
+                            "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/fixtures/app-fixtures.ts",
+                            "column": 36,
+                            "line": 142
+                          }
+                        }
+                      ],
+                      "status": "unexpected"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-4a6f9512bfd76ffee184",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 41,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to team hub",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-7f151ba099f24f0fe688",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 52,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to community tab",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-0501a8db1aed29757fa6",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 62,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to analytics section",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-be0775ec74a896499e1c",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 68,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to settings",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-7114c07a93fcfd0aafb2",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 74,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to projects hub",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-8c82cd0e9f7266c709ca",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 41,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to team hub",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-e4b20a0c92660bf11fc6",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 52,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to community tab",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-22678622e7adb286e312",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 62,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to analytics section",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-b0e81a1b4e8e6f58ebd7",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 68,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to settings",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-f765965da8aef04fa194",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 74,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to projects hub",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-524cb346794f79171f43",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 41,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to team hub",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-7dcd140487a14a830e11",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 52,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to community tab",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-668fce7ffde9ea1c3f8f",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 62,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to analytics section",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-2b1b1ac6681ddb607595",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 68,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to settings",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-e17ec52eb178368c2cf7",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 74,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to projects hub",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-23e5d589d5731fc22db4",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 41,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to team hub",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-11e18c38f7c5f3c4508a",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 52,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to community tab",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-9e41d9dc7cf4690e23c7",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 62,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to analytics section",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-dd8556102bcd53d65d69",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 68,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to settings",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-5c76f6eeffe3d19e1fb1",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 74,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to projects hub",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-20945f6549842e440237",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 41,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to team hub",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-238892e61ba62e5622e3",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 52,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to community tab",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-eca88eac2a5dba51edeb",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 62,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to analytics section",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-6aa3e706db144da5c0be",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 68,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to settings",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-958fdb93c822fe0baf4f",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 74,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "🚀 Quick Actions",
+              "file": "comprehensive-dashboard.spec.ts",
+              "line": 81,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should open new project modal",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-977c58410a9c9cdb9fbc",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 82,
+                  "column": 9
+                },
+                {
+                  "title": "should open file upload modal",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-87543f81a938c4b96119",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 88,
+                  "column": 9
+                },
+                {
+                  "title": "should open team invite modal",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-81c46070a1913b7ed46b",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 94,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to invoice creation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-8d352c7c557e9b0a6373",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 100,
+                  "column": 9
+                },
+                {
+                  "title": "should open new project modal",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-3d3bfa748f39194e32f9",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 82,
+                  "column": 9
+                },
+                {
+                  "title": "should open file upload modal",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-64d8810608461130968a",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 88,
+                  "column": 9
+                },
+                {
+                  "title": "should open team invite modal",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-fb3a04702cc10abbab40",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 94,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to invoice creation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-b7405683330a541b6102",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 100,
+                  "column": 9
+                },
+                {
+                  "title": "should open new project modal",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-fbd18a06957fbf424ef6",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 82,
+                  "column": 9
+                },
+                {
+                  "title": "should open file upload modal",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-364efcc98ae38be486f3",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 88,
+                  "column": 9
+                },
+                {
+                  "title": "should open team invite modal",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-6059380286b40f94bf25",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 94,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to invoice creation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-86aa74b97505636361ef",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 100,
+                  "column": 9
+                },
+                {
+                  "title": "should open new project modal",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-f719e24ee7a136820461",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 82,
+                  "column": 9
+                },
+                {
+                  "title": "should open file upload modal",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-e0e4577ec5e8584911a1",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 88,
+                  "column": 9
+                },
+                {
+                  "title": "should open team invite modal",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-5c2e54e0235c86f10db5",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 94,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to invoice creation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-4def2d7b0aa56e3e4c1d",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 100,
+                  "column": 9
+                },
+                {
+                  "title": "should open new project modal",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-08c5bd3bdeb8b732e65a",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 82,
+                  "column": 9
+                },
+                {
+                  "title": "should open file upload modal",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-6349c054a7fd41f17f36",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 88,
+                  "column": 9
+                },
+                {
+                  "title": "should open team invite modal",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-16ebb01cf868cdb525a4",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 94,
+                  "column": 9
+                },
+                {
+                  "title": "should navigate to invoice creation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-b87eae1be4b9cda90fa6",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 100,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "📋 Project Management",
+              "file": "comprehensive-dashboard.spec.ts",
+              "line": 107,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should search projects",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-eaf1aa26a8c1cc31ac99",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 108,
+                  "column": 9
+                },
+                {
+                  "title": "should filter projects by status",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-f3ac3f794d2d991c5912",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 116,
+                  "column": 9
+                },
+                {
+                  "title": "should sort projects",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-f97d777292a04e0f3d3f",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 123,
+                  "column": 9
+                },
+                {
+                  "title": "should get project count",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-5a535fb63542bc1409b8",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 130,
+                  "column": 9
+                },
+                {
+                  "title": "should get project names",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-2e4194e3b84b8cbdee1d",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 136,
+                  "column": 9
+                },
+                {
+                  "title": "should search projects",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-0e242e7fb86d4bea9576",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 108,
+                  "column": 9
+                },
+                {
+                  "title": "should filter projects by status",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-8c558e24f40a17d5837d",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 116,
+                  "column": 9
+                },
+                {
+                  "title": "should sort projects",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-dfa01691ca384e2e17cc",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 123,
+                  "column": 9
+                },
+                {
+                  "title": "should get project count",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-91da4ae7605a91e4581e",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 130,
+                  "column": 9
+                },
+                {
+                  "title": "should get project names",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-4cbb3ab66f89dc9853cb",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 136,
+                  "column": 9
+                },
+                {
+                  "title": "should search projects",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-1175a04b5f35af4c51ec",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 108,
+                  "column": 9
+                },
+                {
+                  "title": "should filter projects by status",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-f3d152cf2ca8bb6215ac",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 116,
+                  "column": 9
+                },
+                {
+                  "title": "should sort projects",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-a7e395ead9a7e140fe91",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 123,
+                  "column": 9
+                },
+                {
+                  "title": "should get project count",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-2e85e269cb1b938f2879",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 130,
+                  "column": 9
+                },
+                {
+                  "title": "should get project names",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-87fecf0cad090bc4f2d9",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 136,
+                  "column": 9
+                },
+                {
+                  "title": "should search projects",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-09acbf1b739bbaa0b609",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 108,
+                  "column": 9
+                },
+                {
+                  "title": "should filter projects by status",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-d41224e167190bf5d83c",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 116,
+                  "column": 9
+                },
+                {
+                  "title": "should sort projects",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-66a09bce591f7036a912",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 123,
+                  "column": 9
+                },
+                {
+                  "title": "should get project count",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-ffe2acbbc5ca4e764707",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 130,
+                  "column": 9
+                },
+                {
+                  "title": "should get project names",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-296796c2aec93d82eb64",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 136,
+                  "column": 9
+                },
+                {
+                  "title": "should search projects",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-5bacc05ef73d9fe6d791",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 108,
+                  "column": 9
+                },
+                {
+                  "title": "should filter projects by status",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-37f8f8214020db01f2c0",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 116,
+                  "column": 9
+                },
+                {
+                  "title": "should sort projects",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-18dd0f554255396e9082",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 123,
+                  "column": 9
+                },
+                {
+                  "title": "should get project count",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-d8f905425fab22bad227",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 130,
+                  "column": 9
+                },
+                {
+                  "title": "should get project names",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-50b24d1f0dffc55a9e65",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 136,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "👥 Team Management",
+              "file": "comprehensive-dashboard.spec.ts",
+              "line": 143,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should get team member count",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-47ab79ae61d58de01048",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 144,
+                  "column": 9
+                },
+                {
+                  "title": "should get team member names",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-a143d23d3e5bf9639043",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 150,
+                  "column": 9
+                },
+                {
+                  "title": "should add team member",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-14b931a7069b9afa0630",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 156,
+                  "column": 9
+                },
+                {
+                  "title": "should get team member count",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-089673bda2ebdaa3fd03",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 144,
+                  "column": 9
+                },
+                {
+                  "title": "should get team member names",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-1988706c774da716c542",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 150,
+                  "column": 9
+                },
+                {
+                  "title": "should add team member",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-6bb70fb2eff04da5bbc0",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 156,
+                  "column": 9
+                },
+                {
+                  "title": "should get team member count",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-f50fff1c8c0de71c867d",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 144,
+                  "column": 9
+                },
+                {
+                  "title": "should get team member names",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-a44e55d53a000311e3d9",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 150,
+                  "column": 9
+                },
+                {
+                  "title": "should add team member",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-94fa0492a2ec40499a06",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 156,
+                  "column": 9
+                },
+                {
+                  "title": "should get team member count",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-76b8ce1dc0b03e461055",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 144,
+                  "column": 9
+                },
+                {
+                  "title": "should get team member names",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-e76eeda61d793a04da8c",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 150,
+                  "column": 9
+                },
+                {
+                  "title": "should add team member",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-d426b5e655db5622bb44",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 156,
+                  "column": 9
+                },
+                {
+                  "title": "should get team member count",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-4e554b18a7f9c1847410",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 144,
+                  "column": 9
+                },
+                {
+                  "title": "should get team member names",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-ed75bc142b7c63b48bf1",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 150,
+                  "column": 9
+                },
+                {
+                  "title": "should add team member",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-8c4f4afbe0c73e799f4b",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 156,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "💬 Community Features",
+              "file": "comprehensive-dashboard.spec.ts",
+              "line": 165,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should create community post",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-d22db4363c173339f1d4",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 166,
+                  "column": 9
+                },
+                {
+                  "title": "should like community post",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-2f8e6350fe9a5483cb5c",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 173,
+                  "column": 9
+                },
+                {
+                  "title": "should comment on community post",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-5498c18fc962007493e0",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 183,
+                  "column": 9
+                },
+                {
+                  "title": "should create community post",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-01505239a786db10b418",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 166,
+                  "column": 9
+                },
+                {
+                  "title": "should like community post",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-4c7cfc08478ae5cc36ad",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 173,
+                  "column": 9
+                },
+                {
+                  "title": "should comment on community post",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-096fd201060acd70c264",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 183,
+                  "column": 9
+                },
+                {
+                  "title": "should create community post",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-663bf357fe3adf900d8a",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 166,
+                  "column": 9
+                },
+                {
+                  "title": "should like community post",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-69d9af47f1e4f8805d4d",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 173,
+                  "column": 9
+                },
+                {
+                  "title": "should comment on community post",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-66027b88386d94acf3df",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 183,
+                  "column": 9
+                },
+                {
+                  "title": "should create community post",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-d48e53f73fb4cc48f5f1",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 166,
+                  "column": 9
+                },
+                {
+                  "title": "should like community post",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-0db4080cea75c79f5cdc",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 173,
+                  "column": 9
+                },
+                {
+                  "title": "should comment on community post",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-a02cb586d43997d329c4",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 183,
+                  "column": 9
+                },
+                {
+                  "title": "should create community post",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-19a4ca1baeb2a107749a",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 166,
+                  "column": 9
+                },
+                {
+                  "title": "should like community post",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-dae98a30e373e9a224fd",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 173,
+                  "column": 9
+                },
+                {
+                  "title": "should comment on community post",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-ee8108703618a7264eac",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 183,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "📱 Responsive Design",
+              "file": "comprehensive-dashboard.spec.ts",
+              "line": 193,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should be responsive across different viewports",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-051098a60e4ed32cc42a",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 194,
+                  "column": 9
+                },
+                {
+                  "title": "should be responsive across different viewports",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-29c9cb9ad2bd3aaf7184",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 194,
+                  "column": 9
+                },
+                {
+                  "title": "should be responsive across different viewports",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-831b8e5ca9166b557749",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 194,
+                  "column": 9
+                },
+                {
+                  "title": "should be responsive across different viewports",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-1c0f91844e584143e76c",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 194,
+                  "column": 9
+                },
+                {
+                  "title": "should be responsive across different viewports",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-14411218fd826471c0ac",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 194,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "⚡ Performance",
+              "file": "comprehensive-dashboard.spec.ts",
+              "line": 209,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should load dashboard within acceptable time",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-fdb5986e0c55515a56dc",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 210,
+                  "column": 9
+                },
+                {
+                  "title": "should load dashboard within acceptable time",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-c1574001f97d25b2e459",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 210,
+                  "column": 9
+                },
+                {
+                  "title": "should load dashboard within acceptable time",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-efed5ae9eacb9583e10e",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 210,
+                  "column": 9
+                },
+                {
+                  "title": "should load dashboard within acceptable time",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-1f50c1c1e47117f07b18",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 210,
+                  "column": 9
+                },
+                {
+                  "title": "should load dashboard within acceptable time",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-b5ae82c6c9894ff8d1ea",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 210,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "🔄 Modal Management",
+              "file": "comprehensive-dashboard.spec.ts",
+              "line": 217,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should dismiss modals with escape key",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-6d7c8ce74a4cf6362d52",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 218,
+                  "column": 9
+                },
+                {
+                  "title": "should handle multiple modal interactions",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-7cbb5c12a30e4bbd0d2c",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 226,
+                  "column": 9
+                },
+                {
+                  "title": "should dismiss modals with escape key",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-d09ea164555ddd87d222",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 218,
+                  "column": 9
+                },
+                {
+                  "title": "should handle multiple modal interactions",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-20c8f9684fdc034db98d",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 226,
+                  "column": 9
+                },
+                {
+                  "title": "should dismiss modals with escape key",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-56cd93102c71108f2b6e",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 218,
+                  "column": 9
+                },
+                {
+                  "title": "should handle multiple modal interactions",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-301b8559b3bcbfea747b",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 226,
+                  "column": 9
+                },
+                {
+                  "title": "should dismiss modals with escape key",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-6059c32fde5dc7a36acc",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 218,
+                  "column": 9
+                },
+                {
+                  "title": "should handle multiple modal interactions",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-cb254985269f26f1361c",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 226,
+                  "column": 9
+                },
+                {
+                  "title": "should dismiss modals with escape key",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-84f606e36c54a909a654",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 218,
+                  "column": 9
+                },
+                {
+                  "title": "should handle multiple modal interactions",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-2bcb5da9a2a1e9ab02c0",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 226,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "🔍 Search & Filter Functionality",
+              "file": "comprehensive-dashboard.spec.ts",
+              "line": 243,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should handle empty search results",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-777105f1a829fc143c54",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 244,
+                  "column": 9
+                },
+                {
+                  "title": "should clear search filters",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-d0c30e03a6cd51de176a",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 255,
+                  "column": 9
+                },
+                {
+                  "title": "should handle empty search results",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-46d412d1fba780b99509",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 244,
+                  "column": 9
+                },
+                {
+                  "title": "should clear search filters",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-55416a4a44c38e597361",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 255,
+                  "column": 9
+                },
+                {
+                  "title": "should handle empty search results",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-b4fc4bd465fe8e3d3f2a",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 244,
+                  "column": 9
+                },
+                {
+                  "title": "should clear search filters",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-e309132e7886df9fc05a",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 255,
+                  "column": 9
+                },
+                {
+                  "title": "should handle empty search results",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-932f31c6cf1a1af8aee5",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 244,
+                  "column": 9
+                },
+                {
+                  "title": "should clear search filters",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-175ee5f7a61d0e16f59c",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 255,
+                  "column": 9
+                },
+                {
+                  "title": "should handle empty search results",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-cbc858bf20e33b6452e0",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 244,
+                  "column": 9
+                },
+                {
+                  "title": "should clear search filters",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-1a4abf97437ef19304b2",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 255,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "🔐 Security & Authentication",
+              "file": "comprehensive-dashboard.spec.ts",
+              "line": 272,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should handle session timeout",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-7ce4609945c2ec8685bd",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 273,
+                  "column": 9
+                },
+                {
+                  "title": "should protect against XSS in user content",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-57862ea5adcfbde1eef5",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 282,
+                  "column": 9
+                },
+                {
+                  "title": "should handle session timeout",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-2544362a5ecf11df07ea",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 273,
+                  "column": 9
+                },
+                {
+                  "title": "should protect against XSS in user content",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-fef6ef2aa3e966b3cded",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 282,
+                  "column": 9
+                },
+                {
+                  "title": "should handle session timeout",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-8309dc5137babb6e4ad5",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 273,
+                  "column": 9
+                },
+                {
+                  "title": "should protect against XSS in user content",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-dd4d12bd13906d3855e3",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 282,
+                  "column": 9
+                },
+                {
+                  "title": "should handle session timeout",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-33d0d82b0d351a6d31a2",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 273,
+                  "column": 9
+                },
+                {
+                  "title": "should protect against XSS in user content",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-ae688b184a46e1774d6f",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 282,
+                  "column": 9
+                },
+                {
+                  "title": "should handle session timeout",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-d7e0becd1b1ebeef7db2",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 273,
+                  "column": 9
+                },
+                {
+                  "title": "should protect against XSS in user content",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-6c876e2eefd635f8b9a9",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 282,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "🎯 Edge Cases",
+              "file": "comprehensive-dashboard.spec.ts",
+              "line": 293,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should handle rapid navigation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-20932a3b2ba2b5b2e76e",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 294,
+                  "column": 9
+                },
+                {
+                  "title": "should handle concurrent operations",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-30e71d84fbcc96b05dc5",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 306,
+                  "column": 9
+                },
+                {
+                  "title": "should handle network interruption simulation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-06ce4c69f7dcba920314",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 320,
+                  "column": 9
+                },
+                {
+                  "title": "should handle rapid navigation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-205b32ca18cc9bba3ef9",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 294,
+                  "column": 9
+                },
+                {
+                  "title": "should handle concurrent operations",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-dabab9971b613d4daaff",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 306,
+                  "column": 9
+                },
+                {
+                  "title": "should handle network interruption simulation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-f66484288a90665efd0d",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 320,
+                  "column": 9
+                },
+                {
+                  "title": "should handle rapid navigation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-a86e51e73807c5318bb6",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 294,
+                  "column": 9
+                },
+                {
+                  "title": "should handle concurrent operations",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-1e6877200ffaeede093e",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 306,
+                  "column": 9
+                },
+                {
+                  "title": "should handle network interruption simulation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-9fc046480e94503767f2",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 320,
+                  "column": 9
+                },
+                {
+                  "title": "should handle rapid navigation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-8e2d09beda9f2ab27bd4",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 294,
+                  "column": 9
+                },
+                {
+                  "title": "should handle concurrent operations",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-a3490b3f8a3f0563c9b2",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 306,
+                  "column": 9
+                },
+                {
+                  "title": "should handle network interruption simulation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-db223e8de4518d53b27b",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 320,
+                  "column": 9
+                },
+                {
+                  "title": "should handle rapid navigation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-21a47adc7dfb960abafe",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 294,
+                  "column": 9
+                },
+                {
+                  "title": "should handle concurrent operations",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-058b943bf0543cfad8a0",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 306,
+                  "column": 9
+                },
+                {
+                  "title": "should handle network interruption simulation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-77bad2392348751080d7",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 320,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "📊 Data Management",
+              "file": "comprehensive-dashboard.spec.ts",
+              "line": 335,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should handle empty states",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-b6836c474fd1b0f458b7",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 336,
+                  "column": 9
+                },
+                {
+                  "title": "should handle large datasets",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-f45f27cd29bd65c6f93d",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 347,
+                  "column": 9
+                },
+                {
+                  "title": "should handle empty states",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-55d49b9832e653917d90",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 336,
+                  "column": 9
+                },
+                {
+                  "title": "should handle large datasets",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-b6efe9f94b9586acf59d",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 347,
+                  "column": 9
+                },
+                {
+                  "title": "should handle empty states",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-e45243729c215e6b89a2",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 336,
+                  "column": 9
+                },
+                {
+                  "title": "should handle large datasets",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-ab9239f2eaeda90a0e5d",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 347,
+                  "column": 9
+                },
+                {
+                  "title": "should handle empty states",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-8387d46740e02159fa05",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 336,
+                  "column": 9
+                },
+                {
+                  "title": "should handle large datasets",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-1934cb9432de9e6c8513",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 347,
+                  "column": 9
+                },
+                {
+                  "title": "should handle empty states",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-1ca7d0d704fe0bb3bc94",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 336,
+                  "column": 9
+                },
+                {
+                  "title": "should handle large datasets",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-64a237183ceb476a1acb",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 347,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "🔄 User Session Management",
+              "file": "comprehensive-dashboard.spec.ts",
+              "line": 360,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should maintain state across page refreshes",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-35cc572b60100d8ff973",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 361,
+                  "column": 9
+                },
+                {
+                  "title": "should handle logout properly",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-6f38ea5b75c50f233ab6",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 371,
+                  "column": 9
+                },
+                {
+                  "title": "should maintain state across page refreshes",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-1f0c71b04bed34c8eb9d",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 361,
+                  "column": 9
+                },
+                {
+                  "title": "should handle logout properly",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-9916f104f281942c4b9c",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 371,
+                  "column": 9
+                },
+                {
+                  "title": "should maintain state across page refreshes",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-50be79a75db35af46db9",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 361,
+                  "column": 9
+                },
+                {
+                  "title": "should handle logout properly",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-c1609926099153d5a39e",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 371,
+                  "column": 9
+                },
+                {
+                  "title": "should maintain state across page refreshes",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-661b40b375327e5c943e",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 361,
+                  "column": 9
+                },
+                {
+                  "title": "should handle logout properly",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-d41b474843f5c7f89289",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 371,
+                  "column": 9
+                },
+                {
+                  "title": "should maintain state across page refreshes",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-7b292a73cf309f87cab3",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 361,
+                  "column": 9
+                },
+                {
+                  "title": "should handle logout properly",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-d4316a3d2059582b3f37",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 371,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "♿ Accessibility",
+              "file": "comprehensive-dashboard.spec.ts",
+              "line": 378,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should have proper keyboard navigation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-e7d1fce2b5307922af84",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 379,
+                  "column": 9
+                },
+                {
+                  "title": "should have proper ARIA labels",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-76f70f72e4f9d5968c40",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 393,
+                  "column": 9
+                },
+                {
+                  "title": "should have proper keyboard navigation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-d3a41bfa7b077aaa530d",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 379,
+                  "column": 9
+                },
+                {
+                  "title": "should have proper ARIA labels",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-32d968f2519a7210b2d2",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 393,
+                  "column": 9
+                },
+                {
+                  "title": "should have proper keyboard navigation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-afe0a967c72e2744d812",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 379,
+                  "column": 9
+                },
+                {
+                  "title": "should have proper ARIA labels",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-6bca51f00505b5594361",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 393,
+                  "column": 9
+                },
+                {
+                  "title": "should have proper keyboard navigation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-05f2eb62f2f5f41f51ab",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 379,
+                  "column": 9
+                },
+                {
+                  "title": "should have proper ARIA labels",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-a28fb59879b94bb70cca",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 393,
+                  "column": 9
+                },
+                {
+                  "title": "should have proper keyboard navigation",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-1def1c0a665f3c7a777a",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 379,
+                  "column": 9
+                },
+                {
+                  "title": "should have proper ARIA labels",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-2ed381595b99ed8c0887",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 393,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "🎨 UI/UX Quality",
+              "file": "comprehensive-dashboard.spec.ts",
+              "line": 403,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "should have consistent styling",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-e75f6792a620c2e4ae24",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 404,
+                  "column": 9
+                },
+                {
+                  "title": "should handle loading states",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-5c15b198024111683cb6",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 413,
+                  "column": 9
+                },
+                {
+                  "title": "should have consistent styling",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-e027b62629794e8804c6",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 404,
+                  "column": 9
+                },
+                {
+                  "title": "should handle loading states",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-3f485684c4a04d99d5df",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 413,
+                  "column": 9
+                },
+                {
+                  "title": "should have consistent styling",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-e8b237f99a3a1021a752",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 404,
+                  "column": 9
+                },
+                {
+                  "title": "should handle loading states",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "webkit",
+                      "projectName": "webkit",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-0b35cdbc0e04e1f1df10",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 413,
+                  "column": 9
+                },
+                {
+                  "title": "should have consistent styling",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-f7f814498261e33e4caa",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 404,
+                  "column": 9
+                },
+                {
+                  "title": "should handle loading states",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Chrome",
+                      "projectName": "Mobile Chrome",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-f9ea5a65c040651fc892",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 413,
+                  "column": 9
+                },
+                {
+                  "title": "should have consistent styling",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-54adb21c9d16222b899c",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 404,
+                  "column": 9
+                },
+                {
+                  "title": "should handle loading states",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "Mobile Safari",
+                      "projectName": "Mobile Safari",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "16e8e095986a497091c8-e7c8432b45714fd88431",
+                  "file": "comprehensive-dashboard.spec.ts",
+                  "line": 413,
+                  "column": 9
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-06-09T21:25:59.154Z",
+    "duration": 36448.177,
+    "expected": 0,
+    "skipped": 206,
+    "unexpected": 1,
+    "flaky": 3
+  }
+}

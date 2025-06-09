@@ -9,24 +9,31 @@ import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard,
+  Calendar,
   FolderOpen,
-  BarChart3,
-  MessageSquare,
+  Users,
+  CreditCard,
+  FileText,
+  Globe,
+  User,
+  Bell,
   Settings,
   LogOut,
   Menu,
   X,
-  User,
-  Bell,
   Search
 } from 'lucide-react'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'My Day', href: '/dashboard/my-day', icon: Calendar },
   { name: 'Projects', href: '/projects', icon: FolderOpen },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-  { name: 'Feedback', href: '/feedback', icon: MessageSquare },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Team', href: '/dashboard/team', icon: Users },
+  { name: 'Financial', href: '/dashboard/financial', icon: CreditCard },
+  { name: 'Files', href: '/dashboard/files', icon: FileText },
+  { name: 'Community', href: '/dashboard/community', icon: Globe },
+  { name: 'Profile', href: '/dashboard/profile', icon: User },
+  { name: 'Notifications', href: '/dashboard/notifications', icon: Bell, notificationCount: 3 },
 ]
 
 export function DashboardNav() {
@@ -108,7 +115,7 @@ export function DashboardNav() {
                   <Link
                     href={item.href}
                     className={`
-                      group flex gap-x-3 rounded-md p-3 text-sm leading-6 font-medium transition-colors
+                      group flex gap-x-3 rounded-md p-3 text-sm leading-6 font-medium transition-colors relative
                       ${isActive
                         ? 'bg-blue-50 text-blue-600'
                         : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
@@ -121,6 +128,14 @@ export function DashboardNav() {
                       }`}
                     />
                     {item.name}
+                    {item.notificationCount && item.notificationCount > 0 && (
+                      <Badge 
+                        variant="destructive" 
+                        className="ml-auto h-5 w-5 p-0 text-xs flex items-center justify-center"
+                      >
+                        {item.notificationCount}
+                      </Badge>
+                    )}
                   </Link>
                 </li>
               )
@@ -174,7 +189,7 @@ export function DashboardNav() {
                         href={item.href}
                         onClick={() => setIsMobileMenuOpen(false)}
                         className={`
-                          group flex gap-x-3 rounded-md p-3 text-sm leading-6 font-medium transition-colors
+                          group flex gap-x-3 rounded-md p-3 text-sm leading-6 font-medium transition-colors relative
                           ${isActive
                             ? 'bg-blue-50 text-blue-600'
                             : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
@@ -187,6 +202,14 @@ export function DashboardNav() {
                           }`}
                         />
                         {item.name}
+                        {item.notificationCount && item.notificationCount > 0 && (
+                          <Badge 
+                            variant="destructive" 
+                            className="ml-auto h-5 w-5 p-0 text-xs flex items-center justify-center"
+                          >
+                            {item.notificationCount}
+                          </Badge>
+                        )}
                       </Link>
                     </li>
                   )
