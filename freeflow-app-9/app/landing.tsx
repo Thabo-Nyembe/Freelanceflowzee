@@ -41,10 +41,12 @@ import {
   Calendar,
   Rocket,
   Target,
-  User
+  User,
+  Crown,
+  Gem
 } from 'lucide-react'
 
-// Hero section with animated gradient background
+// Luxury Hero section with sophisticated gradients and premium spacing
 function HeroSection() {
   const [isVisible, setIsVisible] = useState(false)
 
@@ -53,40 +55,54 @@ function HeroSection() {
   }, [])
 
   return (
-    <section data-testid="hero-section" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-1000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-2000"></div>
+    <section data-testid="hero-section" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Luxury gradient background with sophisticated colors */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40">
+        {/* Premium floating elements */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-rose-200/20 to-pink-200/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-violet-200/20 to-purple-200/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-gradient-to-r from-blue-200/15 to-indigo-200/15 rounded-full blur-3xl animate-pulse delay-2000"></div>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div className={`transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-          {/* Badge */}
-          <Badge data-testid="hero-badge" variant="secondary" className="mb-8 bg-white/80 backdrop-blur-sm border border-white/20 px-6 py-2 text-sm font-medium">
-            <Sparkles className="w-4 h-4 mr-2" />
-            New: AI-Powered Project Analytics
-          </Badge>
+      {/* Glass texture overlay */}
+      <div className="absolute inset-0 bg-white/30 backdrop-blur-[100px]"></div>
 
-          {/* Main heading */}
-          <h1 data-testid="hero-title" className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 mb-8 leading-tight">
-            Create, Share & 
-            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> Get Paid</span>
+      <div className="relative z-10 max-w-6xl mx-auto px-8 text-center">
+        <div className={`transform transition-all duration-1500 ease-out ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+          
+          {/* Premium badge */}
+          <div className="mb-12">
+            <Badge data-testid="hero-badge" className="bg-white/60 backdrop-blur-xl border border-white/40 px-8 py-3 text-sm font-medium text-slate-700 shadow-lg rounded-full">
+              <Crown className="w-4 h-4 mr-2 text-amber-500" />
+              Premium Creative Platform
+            </Badge>
+          </div>
+
+          {/* Elegant main heading */}
+          <h1 data-testid="hero-title" className="text-6xl sm:text-7xl lg:text-8xl font-light text-slate-800 mb-12 leading-[0.95] tracking-tight">
+            Create.
+            <br />
+            <span className="font-extralight bg-gradient-to-r from-rose-400 via-violet-400 to-indigo-400 bg-clip-text text-transparent">Collaborate.</span>
+            <br />
+            Prosper.
           </h1>
 
-          {/* Subheading */}
-          <p data-testid="hero-subtitle" className="text-xl sm:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
-            The all-in-one platform for creatives and freelancers. Upload your work, collaborate with clients, 
-            and get paid faster than ever before.
+          {/* Refined subheading */}
+          <p data-testid="hero-subtitle" className="text-xl sm:text-2xl text-slate-600 mb-16 max-w-3xl mx-auto leading-relaxed font-light">
+            The sophisticated platform where creativity meets commerce. 
+            Seamlessly manage projects, delight clients, and scale your creative business.
           </p>
 
-          {/* Three Main CTA Buttons */}
-          <div data-testid="hero-cta-buttons" className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+          {/* Premium CTA section */}
+          <div data-testid="hero-cta-buttons" className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-20">
             <Link href="/login?redirect=/dashboard">
-              <Button data-testid="creator-login-button" size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
-                Creator Login
-                <ArrowRight className="ml-2 w-5 h-5" />
+              <Button 
+                data-testid="creator-login-button" 
+                size="lg" 
+                className="bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 text-white px-12 py-6 text-lg font-light rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-[1.02] transition-all duration-300 border border-white/20"
+              >
+                Start Creating
+                <ArrowRight className="ml-3 w-5 h-5" />
               </Button>
             </Link>
             
@@ -95,107 +111,46 @@ function HeroSection() {
                 data-testid="watch-demo-button" 
                 size="lg" 
                 variant="outline" 
-                className="border-2 border-gray-300 hover:border-indigo-300 px-8 py-4 text-lg font-semibold rounded-xl backdrop-blur-sm bg-white/80"
+                className="border-2 border-slate-200 hover:border-slate-300 bg-white/70 backdrop-blur-xl px-12 py-6 text-lg font-light rounded-2xl text-slate-700 hover:bg-white/80 transition-all duration-300"
               >
-                <Play className="mr-2 w-5 h-5" />
+                <Play className="mr-3 w-5 h-5" />
                 Watch Demo
               </Button>
             </Link>
+          </div>
 
+          {/* Elegant client access */}
+          <div className="mb-16">
+            <p className="text-sm text-slate-500 mb-6 font-light">Existing client?</p>
             <Link href="/payment">
-              <Button data-testid="client-access-button" size="lg" variant="secondary" className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
-                Client Access
-                <Eye className="ml-2 w-5 h-5" />
+              <Button 
+                data-testid="client-access-button" 
+                variant="ghost" 
+                className="text-slate-600 hover:text-slate-800 px-8 py-3 text-base font-light rounded-xl hover:bg-white/50 backdrop-blur-sm transition-all duration-300"
+              >
+                <Eye className="mr-2 w-4 h-4" />
+                Access Your Projects
               </Button>
             </Link>
           </div>
 
-          {/* User Types Description */}
-          <div className="mb-16 text-center">
-            <p className="text-sm text-gray-500 mb-4">Not sure which one you are?</p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center text-sm">
-              <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                <strong className="text-indigo-600">Creators:</strong> Freelancers, designers, agencies managing projects
+          {/* Minimalist social proof */}
+          <div data-testid="hero-social-proof" className="flex flex-col sm:flex-row items-center justify-center gap-12 text-slate-500">
+            <div className="flex items-center gap-3">
+              <div className="flex -space-x-2">
+                <div className="w-10 h-10 bg-gradient-to-br from-rose-300 to-pink-300 rounded-full border-2 border-white shadow-lg"></div>
+                <div className="w-10 h-10 bg-gradient-to-br from-violet-300 to-purple-300 rounded-full border-2 border-white shadow-lg"></div>
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-300 to-indigo-300 rounded-full border-2 border-white shadow-lg"></div>
               </div>
-              <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                <strong className="text-purple-600">Clients:</strong> Businesses looking to view and download project files
-              </div>
+              <span className="text-sm font-light">Trusted by 50,000+ creatives</span>
             </div>
-          </div>
-
-          {/* Quick Feature Access */}
-          <div className="mb-16">
-            <p className="text-sm text-gray-500 mb-6 text-center">Quick access to all our features (all 100% complete):</p>
-            <div className="flex flex-wrap justify-center gap-3">
-              <Link href="/features">
-                <Button variant="outline" className="bg-white/80 backdrop-blur-sm border border-gray-300 hover:border-indigo-300 text-sm">
-                  <Sparkles className="mr-2 w-4 h-4" />
-                  All Features
-                </Button>
-              </Link>
-              <Link href="/dashboard/escrow">
-                <Button variant="outline" className="bg-white/80 backdrop-blur-sm border border-gray-300 hover:border-indigo-300 text-sm">
-                  <Shield className="mr-2 w-4 h-4" />
-                  Escrow System
-                </Button>
-              </Link>
-              <Link href="/dashboard/bookings">
-                <Button variant="outline" className="bg-white/80 backdrop-blur-sm border border-gray-300 hover:border-indigo-300 text-sm">
-                  <Calendar className="mr-2 w-4 h-4" />
-                  Calendar
-                </Button>
-              </Link>
-              <Link href="/dashboard/financial">
-                <Button variant="outline" className="bg-white/80 backdrop-blur-sm border border-gray-300 hover:border-indigo-300 text-sm">
-                  <DollarSign className="mr-2 w-4 h-4" />
-                  Invoicing
-                </Button>
-              </Link>
-              <Link href="/dashboard/project-tracker">
-                <Button variant="outline" className="bg-white/80 backdrop-blur-sm border border-gray-300 hover:border-indigo-300 text-sm">
-                  <Target className="mr-2 w-4 h-4" />
-                  Projects
-                </Button>
-              </Link>
-              <Link href="/dashboard/gallery">
-                <Button variant="outline" className="bg-white/80 backdrop-blur-sm border border-gray-300 hover:border-indigo-300 text-sm">
-                  <Camera className="mr-2 w-4 h-4" />
-                  Gallery
-                </Button>
-              </Link>
-              <Link href="/dashboard/collaboration">
-                <Button variant="outline" className="bg-white/80 backdrop-blur-sm border border-gray-300 hover:border-indigo-300 text-sm">
-                  <MessageSquare className="mr-2 w-4 h-4" />
-                  Collaboration
-                </Button>
-              </Link>
-              <Link href="/dashboard/cv-portfolio">
-                <Button variant="outline" className="bg-white/80 backdrop-blur-sm border border-gray-300 hover:border-indigo-300 text-sm">
-                  <User className="mr-2 w-4 h-4" />
-                  Portfolio
-                </Button>
-              </Link>
-            </div>
-          </div>
-
-          {/* Social proof */}
-          <div data-testid="hero-social-proof" className="flex flex-col sm:flex-row items-center justify-center gap-8 text-gray-500">
-            <div className="flex items-center">
-              <div className="flex -space-x-2 mr-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-red-400 rounded-full border-2 border-white"></div>
-                <div className="w-8 h-8 bg-gradient-to-r from-indigo-400 to-blue-400 rounded-full border-2 border-white"></div>
-                <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full border-2 border-white"></div>
-                <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full border-2 border-white"></div>
-              </div>
-              <span className="text-sm font-medium">50,000+ creators trust us</span>
-            </div>
-            <div className="flex items-center">
-              <div className="flex mr-2">
+            <div className="flex items-center gap-2">
+              <div className="flex">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  <Star key={i} className="w-4 h-4 fill-amber-300 text-amber-300" />
                 ))}
               </div>
-              <span className="text-sm font-medium">4.9/5 rating</span>
+              <span className="text-sm font-light">4.9/5 rating</span>
             </div>
           </div>
         </div>
@@ -204,459 +159,129 @@ function HeroSection() {
   )
 }
 
-// User Types Section
-function UserTypesSection() {
-  return (
-    <section className="py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-            Two Types of 
-            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> Users</span>
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            FreeflowZee serves both creators who build projects and clients who access them.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Creators Card */}
-          <Card className="group hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-indigo-50 to-indigo-100">
-            <CardContent className="p-8">
-              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <Users className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">For Creators</h3>
-              <p className="text-gray-600 mb-6 leading-relaxed">
-                Freelancers, designers, and agencies who create and manage client projects.
-              </p>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center text-gray-700">
-                  <CheckCircle className="w-5 h-5 text-indigo-600 mr-3" />
-                  Dashboard with 9 comprehensive tabs
-                </li>
-                <li className="flex items-center text-gray-700">
-                  <CheckCircle className="w-5 h-5 text-indigo-600 mr-3" />
-                  Project management tools
-                </li>
-                <li className="flex items-center text-gray-700">
-                  <CheckCircle className="w-5 h-5 text-indigo-600 mr-3" />
-                  Client collaboration features
-                </li>
-                <li className="flex items-center text-gray-700">
-                  <CheckCircle className="w-5 h-5 text-indigo-600 mr-3" />
-                  Payment processing & invoicing
-                </li>
-                <li className="flex items-center text-gray-700">
-                  <CheckCircle className="w-5 h-5 text-indigo-600 mr-3" />
-                  Analytics and reporting
-                </li>
-              </ul>
-              <Link href="/login?redirect=/dashboard">
-                <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg">
-                  Creator Login
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          {/* Clients Card */}
-          <Card className="group hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-purple-50 to-purple-100">
-            <CardContent className="p-8">
-              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <Eye className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">For Clients</h3>
-              <p className="text-gray-600 mb-6 leading-relaxed">
-                Businesses and individuals who want to view and download project deliverables.
-              </p>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center text-gray-700">
-                  <CheckCircle className="w-5 h-5 text-purple-600 mr-3" />
-                  Access projects with secure login
-                </li>
-                <li className="flex items-center text-gray-700">
-                  <CheckCircle className="w-5 h-5 text-purple-600 mr-3" />
-                  Preview content before purchasing
-                </li>
-                <li className="flex items-center text-gray-700">
-                  <CheckCircle className="w-5 h-5 text-purple-600 mr-3" />
-                  Secure payment processing
-                </li>
-                <li className="flex items-center text-gray-700">
-                  <CheckCircle className="w-5 h-5 text-purple-600 mr-3" />
-                  Download premium content
-                </li>
-                <li className="flex items-center text-gray-700">
-                  <CheckCircle className="w-5 h-5 text-purple-600 mr-3" />
-                  Direct creator communication
-                </li>
-              </ul>
-              <Link href="/payment">
-                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg">
-                  View Projects
-                  <Eye className="ml-2 w-5 h-5" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// Features section inspired by WeTransfer's simplicity
+// Sophisticated features section with luxury cards
 function FeaturesSection() {
   const features = [
     {
-      icon: Upload,
-      title: "Upload Anything",
-      description: "Share files up to 10GB with lightning-fast uploads. Support for all major file types.",
-      color: "from-blue-500 to-indigo-600"
+      icon: Shield,
+      title: "Secure Escrow",
+      description: "Premium payment protection with intelligent milestone tracking",
+      color: "from-emerald-100 to-teal-100"
     },
     {
       icon: Users,
       title: "Client Collaboration",
-      description: "Real-time feedback, comments, and approvals. Keep everyone in sync.",
-      color: "from-purple-500 to-pink-600"
-    },
-    {
-      icon: DollarSign,
-      title: "Get Paid Fast",
-      description: "Automated invoicing and payment processing. Get paid in days, not months.",
-      color: "from-green-500 to-emerald-600"
-    },
-    {
-      icon: Shield,
-      title: "Enterprise Security",
-      description: "Bank-level encryption and compliance. Your work is always protected.",
-      color: "from-red-500 to-pink-600"
+      description: "Elegant real-time feedback and approval workflows",
+      color: "from-blue-100 to-indigo-100"
     },
     {
       icon: BarChart3,
-      title: "Analytics & Insights",
-      description: "Track engagement, monitor performance, and optimize your workflow.",
-      color: "from-yellow-500 to-orange-600"
+      title: "Project Analytics",
+      description: "Beautiful insights and performance tracking",
+      color: "from-violet-100 to-purple-100"
     },
     {
-      icon: Zap,
-      title: "Lightning Fast",
-      description: "Built for speed. Upload, share, and collaborate without waiting.",
-      color: "from-indigo-500 to-purple-600"
+      icon: Crown,
+      title: "Premium Gallery",
+      description: "Stunning portfolio showcase with professional presentation",
+      color: "from-amber-100 to-orange-100"
+    },
+    {
+      icon: DollarSign,
+      title: "Smart Invoicing",
+      description: "Automated billing with sophisticated tax calculations",
+      color: "from-rose-100 to-pink-100"
+    },
+    {
+      icon: Sparkles,
+      title: "AI Assistant",
+      description: "Intelligent project optimization and content generation",
+      color: "from-cyan-100 to-blue-100"
     }
   ]
 
   return (
-    <section id="features" data-testid="features-section" className="py-24 bg-gradient-to-br from-gray-50 to-indigo-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-32 bg-gradient-to-b from-white to-slate-50/50">
+      <div className="max-w-7xl mx-auto px-8">
         <div className="text-center mb-20">
-          <h2 data-testid="features-title" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-            Everything you need to 
-            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> succeed</span>
+          <h2 className="text-5xl font-light text-slate-800 mb-6">
+            Everything you need to
+            <span className="block bg-gradient-to-r from-rose-400 to-violet-400 bg-clip-text text-transparent font-extralight">
+              create brilliantly
+            </span>
           </h2>
-          <p data-testid="features-subtitle" className="text-xl text-gray-600 max-w-3xl mx-auto">
-            From upload to payment, we've built every tool you need to run your creative business efficiently.
+          <p className="text-xl text-slate-600 font-light max-w-2xl mx-auto">
+            Thoughtfully designed tools that adapt to your creative workflow
           </p>
         </div>
 
-        <div data-testid="features-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => {
-            const IconComponent = feature.icon
-            return (
-              <Card key={index} data-testid={`feature-card-${index}`} className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50">
-                <CardContent className="p-8">
-                  <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                    <IconComponent className="w-7 h-7 text-white" />
-                  </div>
-                  <h3 data-testid={`feature-title-${index}`} className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                  <p data-testid={`feature-description-${index}`} className="text-gray-600 leading-relaxed">{feature.description}</p>
-                </CardContent>
-              </Card>
-            )
-          })}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {features.map((feature, index) => (
+            <Card key={index} className="group bg-white/60 backdrop-blur-xl border border-white/40 rounded-3xl p-8 hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+              <CardContent className="p-0">
+                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                  <feature.icon className="w-8 h-8 text-slate-700" />
+                </div>
+                <h3 className="text-xl font-light text-slate-800 mb-3">{feature.title}</h3>
+                <p className="text-slate-600 font-light leading-relaxed">{feature.description}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     </section>
   )
 }
 
-// How It Works section with interactive video display and navigation
+// Luxury how it works section
 function HowItWorksSection() {
-  const [activeStep, setActiveStep] = useState(0)
-  const [isPlaying, setIsPlaying] = useState(false)
-
   const steps = [
     {
-      number: "01",
-      title: "Create Account",
-      description: "Sign up as a creator or access as a client. Choose your path based on your needs.",
-      icon: Users,
-      color: "from-indigo-500 to-blue-600",
-      videoUrl: "/videos/step-1-account.mp4",
-      thumbnail: "/images/step-1-thumbnail.jpg"
-    },
-    {
-      number: "02", 
+      step: "01",
       title: "Upload & Organize",
-      description: "Creators upload projects and organize them. Clients get secure access links.",
-      icon: Upload,
-      color: "from-purple-500 to-pink-600",
-      videoUrl: "/videos/step-2-upload.mp4",
-      thumbnail: "/images/step-2-thumbnail.jpg"
+      description: "Seamlessly upload your creative work to our secure, professional platform",
+      icon: Upload
     },
     {
-      number: "03",
-      title: "Collaborate & Preview",
-      description: "Real-time collaboration tools. Clients can preview content before purchasing.",
-      icon: MessageSquare,
-      color: "from-green-500 to-emerald-600",
-      videoUrl: "/videos/step-3-collaborate.mp4",
-      thumbnail: "/images/step-3-thumbnail.jpg"
+      step: "02", 
+      title: "Collaborate & Refine",
+      description: "Engage with clients through elegant feedback tools and real-time collaboration",
+      icon: MessageSquare
     },
     {
-      number: "04",
-      title: "Get Paid & Download",
-      description: "Secure payments processed instantly. Immediate access to premium content.",
-      icon: Download,
-      color: "from-yellow-500 to-orange-600",
-      videoUrl: "/videos/step-4-payment.mp4",
-      thumbnail: "/images/step-4-thumbnail.jpg"
-    }
-  ]
-
-  const currentStep = steps[activeStep]
-  const IconComponent = currentStep.icon
-
-  const handlePlayVideo = () => {
-    setIsPlaying(!isPlaying)
-  }
-
-  const goToPrevious = () => {
-    setActiveStep((prev) => (prev > 0 ? prev - 1 : steps.length - 1))
-    setIsPlaying(false)
-  }
-
-  const goToNext = () => {
-    setActiveStep((prev) => (prev < steps.length - 1 ? prev + 1 : 0))
-    setIsPlaying(false)
-  }
-
-  return (
-    <section className="py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-20">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-            How 
-            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> It Works</span>
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Simple, streamlined process for both creators and clients. Get started in minutes.
-          </p>
-        </div>
-
-        {/* Interactive Video Display */}
-        <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl p-8 mb-16 shadow-2xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Video Display */}
-            <div className="relative">
-              <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl overflow-hidden shadow-lg">
-                <div className={`relative w-full h-full bg-gradient-to-br ${currentStep.color} flex items-center justify-center group cursor-pointer`}
-                     onClick={handlePlayVideo}>
-                  
-                  {!isPlaying ? (
-                    <div className="text-center text-white">
-                      <div className="w-20 h-20 mx-auto mb-4 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-all duration-300 group-hover:scale-110">
-                        <Play className="w-8 h-8 ml-1" />
-                      </div>
-                      <p className="text-lg font-medium">Click to view {currentStep.title}</p>
-                      <p className="text-sm opacity-80">Interactive demo experience</p>
-                    </div>
-                  ) : (
-                    <div className="text-center text-white">
-                      <div className="w-20 h-20 mx-auto mb-4 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
-                        <IconComponent className="w-10 h-10" />
-                      </div>
-                      <p className="text-lg font-medium">Playing: {currentStep.title}</p>
-                      <p className="text-sm opacity-80">Step {currentStep.number} Demo</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Navigation Controls */}
-              <div className="absolute inset-y-0 left-0 flex items-center">
-                <button
-                  onClick={goToPrevious}
-                  className="group -ml-4 p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
-                >
-                  <ChevronLeft className="w-6 h-6 text-gray-600 group-hover:text-indigo-600" />
-                </button>
-              </div>
-
-              <div className="absolute inset-y-0 right-0 flex items-center">
-                <button
-                  onClick={goToNext}
-                  className="group -mr-4 p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
-                >
-                  <ChevronRight className="w-6 h-6 text-gray-600 group-hover:text-indigo-600" />
-                </button>
-              </div>
-
-              {/* Step Indicators */}
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                {steps.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      setActiveStep(index)
-                      setIsPlaying(false)
-                    }}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                      index === activeStep 
-                        ? 'bg-white scale-125' 
-                        : 'bg-white/50 hover:bg-white/70'
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Step Details */}
-            <div className="space-y-8">
-              <div className="flex items-center gap-4">
-                <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${currentStep.color} flex items-center justify-center shadow-lg`}>
-                  <IconComponent className="w-8 h-8 text-white" />
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-gray-400 mb-1">{currentStep.number}</div>
-                  <h3 className="text-3xl font-bold text-gray-900">{currentStep.title}</h3>
-                </div>
-              </div>
-              
-              <p className="text-xl text-gray-600 leading-relaxed">
-                {currentStep.description}
-              </p>
-
-              <div className="flex gap-4">
-                <Button 
-                  onClick={handlePlayVideo}
-                  className={`bg-gradient-to-r ${currentStep.color} hover:opacity-90 text-white px-6 py-3`}
-                >
-                  <Play className="w-4 h-4 mr-2" />
-                  {isPlaying ? 'Replay Demo' : 'Watch Demo'}
-                </Button>
-                <Button variant="outline" className="px-6 py-3">
-                  <ArrowRight className="w-4 h-4 mr-2" />
-                  Try This Step
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* All Steps Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {steps.map((step, index) => {
-            const StepIcon = step.icon
-            const isActive = index === activeStep
-            
-            return (
-              <div 
-                key={index} 
-                className={`relative text-center group cursor-pointer transition-all duration-300 ${
-                  isActive ? 'scale-105' : 'hover:scale-102'
-                }`}
-                onClick={() => {
-                  setActiveStep(index)
-                  setIsPlaying(false)
-                }}
-              >
-                {/* Connecting line */}
-                {index < steps.length - 1 && (
-                  <div className={`hidden lg:block absolute top-16 left-full w-full h-0.5 transition-all duration-300 ${
-                    isActive ? 'bg-gradient-to-r from-indigo-500 to-purple-500' : 'bg-gradient-to-r from-gray-200 to-gray-300'
-                  } z-0`}></div>
-                )}
-                
-                <div className="relative z-10">
-                  <div className={`w-20 h-20 mx-auto rounded-full bg-gradient-to-br ${step.color} mb-6 flex items-center justify-center transition-all duration-300 shadow-lg ${
-                    isActive ? 'scale-110 shadow-xl' : 'group-hover:scale-105'
-                  } ${isActive ? 'ring-4 ring-indigo-200' : ''}`}>
-                    <StepIcon className="w-10 h-10 text-white" />
-                  </div>
-                  
-                  <div className={`text-sm font-bold mb-2 transition-colors duration-300 ${
-                    isActive ? 'text-indigo-600' : 'text-gray-400'
-                  }`}>{step.number}</div>
-                  <h3 className={`text-xl font-bold mb-3 transition-colors duration-300 ${
-                    isActive ? 'text-indigo-900' : 'text-gray-900'
-                  }`}>{step.title}</h3>
-                  <p className="text-gray-600 leading-relaxed text-sm">{step.description}</p>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// Social Proof section with testimonials
-function SocialProofSection() {
-  const testimonials = [
-    {
-      quote: "FreeflowZee has revolutionized how I work with clients. The payment system is seamless and the collaboration tools are amazing.",
-      author: "Sarah Chen",
-      role: "Freelance Designer",
-      avatar: "SC"
-    },
-    {
-      quote: "As a client, I love how easy it is to preview work and make payments. The whole process is smooth and professional.",
-      author: "Michael Torres",
-      role: "Marketing Director",
-      avatar: "MT"  
-    },
-    {
-      quote: "The analytics dashboard gives me insights I never had before. I can see exactly how my projects are performing.",
-      author: "Emma Johnson",
-      role: "Creative Agency Owner",
-      avatar: "EJ"
+      step: "03",
+      title: "Deliver & Prosper",
+      description: "Complete projects with confidence using our secure escrow and payment system",
+      icon: Crown
     }
   ]
 
   return (
-    <section className="py-24 bg-gradient-to-br from-indigo-50 to-purple-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-32 bg-gradient-to-b from-slate-50/50 to-white">
+      <div className="max-w-6xl mx-auto px-8">
         <div className="text-center mb-20">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-            Trusted by 
-            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> Thousands</span>
+          <h2 className="text-5xl font-light text-slate-800 mb-6">
+            Crafted for
+            <span className="block bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent font-extralight">
+              creative excellence
+            </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            See what our users are saying about their experience with FreeflowZee.
-          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {testimonials.map((testimonial, index) => (
-            <Card key={index} className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
-              <CardContent className="p-8">
-                <Quote className="w-10 h-10 text-indigo-300 mb-4" />
-                <p className="text-gray-700 leading-relaxed mb-6 italic">"{testimonial.quote}"</p>
-                <div className="flex items-center">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold mr-4">
-                    {testimonial.avatar}
-                  </div>
-                  <div>
-                    <div className="font-bold text-gray-900">{testimonial.author}</div>
-                    <div className="text-gray-600 text-sm">{testimonial.role}</div>
-                  </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          {steps.map((step, index) => (
+            <div key={index} className="text-center group">
+              <div className="relative mb-8">
+                <div className="w-24 h-24 mx-auto bg-gradient-to-br from-white to-slate-50 rounded-3xl border border-slate-200 flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-all duration-500 group-hover:scale-110">
+                  <step.icon className="w-10 h-10 text-slate-700" />
                 </div>
-              </CardContent>
-            </Card>
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-rose-400 to-violet-400 rounded-xl flex items-center justify-center text-white text-xs font-light">
+                  {step.step}
+                </div>
+              </div>
+              <h3 className="text-2xl font-light text-slate-800 mb-4">{step.title}</h3>
+              <p className="text-slate-600 font-light leading-relaxed max-w-sm mx-auto">{step.description}</p>
+            </div>
           ))}
         </div>
       </div>
@@ -664,122 +289,92 @@ function SocialProofSection() {
   )
 }
 
-// Pricing section
+// Minimal pricing section
 function PricingSection() {
-  const plans = [
-    {
-      name: "Starter",
-      price: "Free",
-      description: "Perfect for getting started",
-      features: [
-        "Up to 3 projects",
-        "1GB storage",
-        "Basic analytics",
-        "Email support"
-      ],
-      cta: "Get Started",
-      popular: false
-    },
-    {
-      name: "Professional", 
-      price: "$29",
-      period: "/month",
-      description: "For growing businesses",
-      features: [
-        "Unlimited projects",
-        "100GB storage", 
-        "Advanced analytics",
-        "Priority support",
-        "Custom branding"
-      ],
-      cta: "Start Free Trial",
-      popular: true
-    },
-    {
-      name: "Enterprise",
-      price: "Custom",
-      description: "For large organizations",
-      features: [
-        "Everything in Pro",
-        "Unlimited storage",
-        "API access",
-        "24/7 phone support",
-        "Custom integrations"
-      ],
-      cta: "Contact Sales",
-      popular: false
-    }
-  ]
-
   return (
-    <section className="py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-20">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-            Simple 
-            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> Pricing</span>
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Choose the plan that fits your needs. Upgrade or downgrade at any time.
-          </p>
-        </div>
+    <section className="py-32 bg-gradient-to-b from-white to-slate-50/30">
+      <div className="max-w-4xl mx-auto px-8 text-center">
+        <h2 className="text-5xl font-light text-slate-800 mb-6">
+          Simple,
+          <span className="block bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent font-extralight">
+            transparent pricing
+          </span>
+        </h2>
+        
+        <p className="text-xl text-slate-600 font-light mb-16">
+          One platform, endless possibilities. No hidden fees, no surprises.
+        </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {plans.map((plan, index) => (
-            <Card key={index} className={`relative group transition-all duration-300 border-0 ${plan.popular ? 'ring-2 ring-indigo-600 shadow-2xl scale-105' : 'hover:shadow-xl'} bg-gradient-to-br from-white to-gray-50`}>
-              {plan.popular && (
-                <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-indigo-600 text-white">
-                  Most Popular
-                </Badge>
-              )}
-              <CardContent className="p-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                <div className="mb-4">
-                  <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
-                  {plan.period && <span className="text-gray-600">{plan.period}</span>}
+        <Card className="bg-white/60 backdrop-blur-xl border border-white/40 rounded-3xl p-12 shadow-2xl max-w-md mx-auto">
+          <CardContent className="p-0 text-center">
+            <div className="mb-8">
+              <div className="text-5xl font-light text-slate-800 mb-2">$29</div>
+              <div className="text-slate-600 font-light">per month</div>
+            </div>
+            
+            <div className="space-y-4 mb-8 text-left">
+              {[
+                "Unlimited projects & clients",
+                "Advanced collaboration tools", 
+                "Secure escrow & payments",
+                "AI-powered analytics",
+                "Premium support"
+              ].map((feature, index) => (
+                <div key={index} className="flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                  <span className="text-slate-700 font-light">{feature}</span>
                 </div>
-                <p className="text-gray-600 mb-6">{plan.description}</p>
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-center text-gray-700">
-                      <CheckCircle className="w-5 h-5 text-indigo-600 mr-3" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <Button className={`w-full font-semibold py-3 rounded-lg ${plan.popular ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-900'}`}>
-                  {plan.cta}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              ))}
+            </div>
+
+            <Button className="w-full bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 text-white py-4 rounded-2xl font-light text-lg shadow-xl">
+              Start Free Trial
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </section>
   )
 }
 
-// Final CTA section
+// Elegant CTA section
 function CTASection() {
   return (
-    <section className="py-24 bg-gradient-to-br from-indigo-600 to-purple-700">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
-          Ready to Get Started?
+    <section className="py-32 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800 relative overflow-hidden">
+      {/* Subtle background elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-rose-500/10 to-violet-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="relative z-10 max-w-4xl mx-auto px-8 text-center">
+        <h2 className="text-5xl font-light text-white mb-6">
+          Ready to elevate
+          <span className="block bg-gradient-to-r from-rose-400 to-violet-400 bg-clip-text text-transparent font-extralight">
+            your creative business?
+          </span>
         </h2>
-        <p className="text-xl text-indigo-100 mb-12 max-w-2xl mx-auto">
-          Join thousands of creators and clients who trust FreeflowZee for their project management and collaboration needs.
+        
+        <p className="text-xl text-slate-300 font-light mb-12 max-w-2xl mx-auto">
+          Join thousands of creatives who trust FreeflowZee to manage their most important projects.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link href="/signup">
-            <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-xl">
-              Start Creating Free
-              <ArrowRight className="ml-2 w-5 h-5" />
+
+        <div className="flex flex-col sm:flex-row gap-6 justify-center">
+          <Link href="/login?redirect=/dashboard">
+            <Button size="lg" className="bg-white text-slate-800 hover:bg-slate-50 px-12 py-6 text-lg font-light rounded-2xl shadow-2xl">
+              Get Started Free
+              <ArrowRight className="ml-3 w-5 h-5" />
             </Button>
           </Link>
-          <Link href="/contact">
-            <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white/10 px-8 py-4 text-lg font-semibold rounded-xl">
-              Contact Sales
+          
+          <Link href="/demo">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-xl px-12 py-6 text-lg font-light rounded-2xl"
+            >
+              <Play className="mr-3 w-5 h-5" />
+              Watch Demo
             </Button>
           </Link>
         </div>
@@ -788,15 +383,14 @@ function CTASection() {
   )
 }
 
+// Main landing page component
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
       <SiteHeader variant="transparent" />
       <HeroSection />
-      <UserTypesSection />
       <FeaturesSection />
       <HowItWorksSection />
-      <SocialProofSection />
       <PricingSection />
       <CTASection />
       <SiteFooter />

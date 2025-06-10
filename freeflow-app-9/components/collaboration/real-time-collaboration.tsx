@@ -32,7 +32,15 @@ import {
   Pin,
   Star,
   Wifi,
-  WifiOff
+  WifiOff,
+  Phone,
+  PhoneOff,
+  Mic,
+  MicOff,
+  Camera,
+  CameraOff,
+  Monitor,
+  MonitorOff
 } from 'lucide-react'
 
 interface User {
@@ -294,6 +302,13 @@ export function RealTimeCollaborationSystem() {
   const [showNotifications, setShowNotifications] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
 
+  const [isCallInProgress, setIsCallInProgress] = useState(false)
+  const [callType, setCallType] = useState<'audio' | 'video' | null>(null)
+  const [isMuted, setIsMuted] = useState(false)
+  const [isCameraOn, setIsCameraOn] = useState(true)
+  const [isScreenSharing, setIsScreenSharing] = useState(false)
+  const [callDuration, setCallDuration] = useState(0)
+
   // Simulate WebSocket connection
   useEffect(() => {
     const simulateWebSocket = () => {
@@ -451,6 +466,48 @@ export function RealTimeCollaborationSystem() {
 
   const unreadCount = notifications.filter(n => !n.isRead).length
   const getUserById = (id: string) => connectedUsers.find(u => u.id === id) || currentUser
+
+  // Call management functions
+  const startCall = (type: 'audio' | 'video') => {
+    setCallType(type)
+    setIsCallInProgress(true)
+    setCallDuration(0)
+    
+    // Simulate call connection and timer
+    const timer = setInterval(() => {
+      setCallDuration(prev => prev + 1)
+    }, 1000)
+    
+    // Store timer ID for cleanup
+    // In production, this would be real WebRTC implementation
+  }
+
+  const endCall = () => {
+    setIsCallInProgress(false)
+    setCallType(null)
+    setCallDuration(0)
+    setIsMuted(false)
+    setIsCameraOn(true)
+    setIsScreenSharing(false)
+  }
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted)
+  }
+
+  const toggleCamera = () => {
+    setIsCameraOn(!isCameraOn)
+  }
+
+  const toggleScreenShare = () => {
+    setIsScreenSharing(!isScreenSharing)
+  }
+
+  const formatCallDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  }
 
   return (
     <div className="space-y-8">
@@ -746,10 +803,28 @@ export function RealTimeCollaborationSystem() {
                       />
                       
                       <div className="flex justify-between items-center">
-                        <span className="text-xs text-gray-500">
-                          {selectedFile.type === 'video' && 'Comment will be added at current timestamp'}
-                          {selectedFile.type === 'image' && 'Click on image to add position-specific comments'}
-                        </span>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => startCall('audio')}
+                            size="sm"
+                            variant="outline"
+                            className="border-green-200 text-green-600 hover:bg-green-50"
+                            disabled={isCallInProgress}
+                          >
+                            <Phone className="h-4 w-4 mr-1" />
+                            Audio Call
+                          </Button>
+                          <Button
+                            onClick={() => startCall('video')}
+                            size="sm"
+                            variant="outline"
+                            className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                            disabled={isCallInProgress}
+                          >
+                            <Video className="h-4 w-4 mr-1" />
+                            Video Call
+                          </Button>
+                        </div>
                         <Button
                           onClick={handleAddComment}
                           disabled={!newComment.trim()}

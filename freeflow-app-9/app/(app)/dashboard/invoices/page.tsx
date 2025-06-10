@@ -24,6 +24,21 @@ interface InvoiceItem {
   amount: number
 }
 
+interface InvoiceTemplate {
+  id: string
+  name: string
+  description: string
+  category: 'modern' | 'classic' | 'creative' | 'elegant'
+  primaryColor: string
+  secondaryColor: string
+  fontFamily: string
+  layout: 'standard' | 'minimal' | 'detailed' | 'compact'
+  headerStyle: 'logo-left' | 'logo-center' | 'logo-right'
+  showDividers: boolean
+  showBackground: boolean
+  customCss?: string
+}
+
 interface Invoice {
   id: string
   number: string
@@ -44,14 +59,88 @@ interface Invoice {
   notes?: string
   terms?: string
   currency: string
+  template: InvoiceTemplate
+  customization: {
+    logoUrl?: string
+    brandColors?: {
+      primary: string
+      secondary: string
+    }
+    paymentTerms?: string
+    lateFees?: string
+    additionalFields?: Array<{
+      label: string
+      value: string
+    }>
+  }
 }
+
+// Invoice Templates
+const invoiceTemplates: InvoiceTemplate[] = [
+  {
+    id: 'modern-minimal',
+    name: 'Modern Minimal',
+    description: 'Clean and contemporary design with elegant typography',
+    category: 'modern',
+    primaryColor: '#3B82F6',
+    secondaryColor: '#E5E7EB',
+    fontFamily: 'Inter',
+    layout: 'minimal',
+    headerStyle: 'logo-left',
+    showDividers: true,
+    showBackground: false
+  },
+  {
+    id: 'classic-business',
+    name: 'Classic Business',
+    description: 'Traditional professional template perfect for corporate clients',
+    category: 'classic',
+    primaryColor: '#1F2937',
+    secondaryColor: '#F3F4F6',
+    fontFamily: 'Arial',
+    layout: 'standard',
+    headerStyle: 'logo-center',
+    showDividers: true,
+    showBackground: true
+  },
+  {
+    id: 'creative-studio',
+    name: 'Creative Studio',
+    description: 'Bold and artistic design for creative professionals',
+    category: 'creative',
+    primaryColor: '#8B5CF6',
+    secondaryColor: '#F3E8FF',
+    fontFamily: 'Poppins',
+    layout: 'detailed',
+    headerStyle: 'logo-right',
+    showDividers: false,
+    showBackground: true
+  },
+  {
+    id: 'elegant-professional',
+    name: 'Elegant Professional',
+    description: 'Sophisticated design with luxury aesthetic',
+    category: 'elegant',
+    primaryColor: '#059669',
+    secondaryColor: '#ECFDF5',
+    fontFamily: 'Crimson Text',
+    layout: 'compact',
+    headerStyle: 'logo-left',
+    showDividers: true,
+    showBackground: false
+  }
+]
 
 export default function InvoicesPage() {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showPreviewModal, setShowPreviewModal] = useState(false)
+  const [showTemplateModal, setShowTemplateModal] = useState(false)
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
+  const [selectedTemplate, setSelectedTemplate] = useState<InvoiceTemplate>(invoiceTemplates[0])
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [templateHistory, setTemplateHistory] = useState<{[invoiceId: string]: string}>({})
+  const [previewMode, setPreviewMode] = useState<'form' | 'template' | 'preview'>('form')
 
   const [invoices] = useState<Invoice[]>([
     {

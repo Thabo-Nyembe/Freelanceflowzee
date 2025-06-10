@@ -184,201 +184,251 @@ export function DashboardOverview() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
+    <div className="space-y-12">
+      {/* Luxury Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Welcome back, John! 👋
+          <h1 className="text-4xl font-thin text-slate-800 tracking-tight">
+            Welcome back,
+            <span className="block bg-gradient-to-r from-rose-400 via-violet-400 to-indigo-400 bg-clip-text text-transparent font-extralight mt-1">
+              John
+            </span>
           </h1>
-          <p className="text-slate-600 mt-1">
-            Here's what's happening with your creative workspace today.
+          <p className="text-xl text-slate-600 font-light mt-4 leading-relaxed">
+            Your creative workspace is thriving. Here's today's overview.
           </p>
         </div>
-        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-          <Plus className="w-4 h-4 mr-2" />
+        <Button className="bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 text-white px-8 py-4 rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-[1.02] transition-all duration-300 border border-white/20">
+          <Plus className="w-5 h-5 mr-3" />
           New Project
         </Button>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-100">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-emerald-600">Total Earnings</p>
-                <p className="text-2xl font-bold text-emerald-900">
-                  {formatCurrency(dashboardData.metrics.totalEarnings)}
-                </p>
-                <p className="text-xs text-emerald-600 flex items-center mt-1">
-                  <TrendingUp className="w-3 h-3 mr-1" />
-                  +{dashboardData.metrics.growth}% this month
-                </p>
+      {/* Luxury Metrics Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <Card className="bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl shadow-xl shadow-black/5 p-8 hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+          <CardContent className="p-0">
+            <div className="flex items-center justify-between mb-6">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
+                <DollarSign className="w-7 h-7 text-emerald-700" />
               </div>
-              <div className="h-12 w-12 bg-emerald-500 rounded-lg flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-white" />
+              <div className="flex items-center text-emerald-600 text-sm font-light">
+                <TrendingUp className="w-4 h-4 mr-1" />
+                +{dashboardData.metrics.growth}%
               </div>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-sm font-light text-slate-500 uppercase tracking-wider">Total Earnings</h3>
+              <p className="text-3xl font-light text-slate-800 tracking-tight">
+                {formatCurrency(dashboardData.metrics.totalEarnings)}
+              </p>
+              <p className="text-sm text-slate-600 font-light">
+                {formatCurrency(dashboardData.metrics.monthlyEarnings)} this month
+              </p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-100">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-blue-600">Active Projects</p>
-                <p className="text-2xl font-bold text-blue-900">
-                  {dashboardData.metrics.activeProjects}
-                </p>
-                <p className="text-xs text-blue-600 flex items-center mt-1">
-                  <Activity className="w-3 h-3 mr-1" />
-                  3 due this week
-                </p>
+        <Card className="bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl shadow-xl shadow-black/5 p-8 hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+          <CardContent className="p-0">
+            <div className="flex items-center justify-between mb-6">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+                <FolderOpen className="w-7 h-7 text-blue-700" />
               </div>
-              <div className="h-12 w-12 bg-blue-500 rounded-lg flex items-center justify-center">
-                <FolderOpen className="w-6 h-6 text-white" />
-              </div>
+              <Badge className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 rounded-full text-xs font-light">
+                Active
+              </Badge>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-sm font-light text-slate-500 uppercase tracking-wider">Active Projects</h3>
+              <p className="text-3xl font-light text-slate-800 tracking-tight">
+                {dashboardData.metrics.activeProjects}
+              </p>
+              <p className="text-sm text-slate-600 font-light">
+                {dashboardData.metrics.completedTasks} tasks completed
+              </p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-violet-100">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-purple-600">Team Members</p>
-                <p className="text-2xl font-bold text-purple-900">
-                  {dashboardData.metrics.teamMembers}
-                </p>
-                <p className="text-xs text-purple-600 flex items-center mt-1">
-                  <Users className="w-3 h-3 mr-1" />
-                  2 new this month
-                </p>
+        <Card className="bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl shadow-xl shadow-black/5 p-8 hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+          <CardContent className="p-0">
+            <div className="flex items-center justify-between mb-6">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center">
+                <Users className="w-7 h-7 text-violet-700" />
               </div>
-              <div className="h-12 w-12 bg-purple-500 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-white" />
-              </div>
+              <Badge className="bg-violet-100 text-violet-700 border-violet-200 px-3 py-1 rounded-full text-xs font-light">
+                Growing
+              </Badge>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-sm font-light text-slate-500 uppercase tracking-wider">Team & Clients</h3>
+              <p className="text-3xl font-light text-slate-800 tracking-tight">
+                {dashboardData.metrics.totalClients}
+              </p>
+              <p className="text-sm text-slate-600 font-light">
+                {dashboardData.metrics.teamMembers} team members
+              </p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-50 to-amber-100">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-orange-600">Pending</p>
-                <p className="text-2xl font-bold text-orange-900">
-                  {formatCurrency(dashboardData.metrics.pendingInvoices)}
-                </p>
-                <p className="text-xs text-orange-600 flex items-center mt-1">
-                  <Clock className="w-3 h-3 mr-1" />
-                  4 invoices pending
-                </p>
+        <Card className="bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl shadow-xl shadow-black/5 p-8 hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+          <CardContent className="p-0">
+            <div className="flex items-center justify-between mb-6">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
+                <Clock className="w-7 h-7 text-amber-700" />
               </div>
-              <div className="h-12 w-12 bg-orange-500 rounded-lg flex items-center justify-center">
-                <FileText className="w-6 h-6 text-white" />
-              </div>
+              <Badge className="bg-amber-100 text-amber-700 border-amber-200 px-3 py-1 rounded-full text-xs font-light">
+                Pending
+              </Badge>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-sm font-light text-slate-500 uppercase tracking-wider">Pending Payments</h3>
+              <p className="text-3xl font-light text-slate-800 tracking-tight">
+                {formatCurrency(dashboardData.metrics.pendingInvoices)}
+              </p>
+              <p className="text-sm text-slate-600 font-light">
+                3 invoices outstanding
+              </p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Main Content Grid */}
+      {/* Luxury Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Recent Projects */}
         <div className="lg:col-span-2">
-          <Card className="border-0 shadow-lg">
-            <CardHeader>
+          <Card className="bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl shadow-xl shadow-black/5">
+            <CardHeader className="p-8 pb-6">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-xl font-semibold">Recent Projects</CardTitle>
-                <Button variant="ghost" size="sm">
-                  View All <ArrowUpRight className="w-4 h-4 ml-1" />
+                <CardTitle className="text-2xl font-light text-slate-800">Recent Projects</CardTitle>
+                <Button variant="ghost" className="text-slate-600 hover:text-slate-800 px-4 py-2 rounded-xl hover:bg-white/50 backdrop-blur-sm transition-all duration-300">
+                  View All
+                  <ArrowUpRight className="w-4 h-4 ml-2" />
                 </Button>
               </div>
+              <CardDescription className="text-slate-600 font-light">
+                Track progress and manage your active creative projects
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {dashboardData.recentProjects.map((project) => (
-                <div key={project.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h4 className="font-medium text-slate-900">{project.title}</h4>
-                      <Badge className={cn("text-xs", statusColors[project.status as keyof typeof statusColors])}>
-                        {project.status}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-slate-600 mb-3">{project.client}</p>
-                    <div className="flex items-center gap-4">
+            <CardContent className="p-8 pt-0">
+              <div className="space-y-6">
+                {dashboardData.recentProjects.map((project) => (
+                  <div key={project.id} className="group p-6 rounded-2xl border border-slate-100 hover:border-slate-200 hover:bg-white/50 transition-all duration-300">
+                    <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <div className="flex items-center justify-between text-xs text-slate-600 mb-1">
-                          <span>Progress</span>
-                          <span>{project.progress}%</span>
-                        </div>
-                        <Progress value={project.progress} className="h-2" />
+                        <h4 className="font-medium text-slate-800 mb-1 group-hover:text-slate-900 transition-colors">
+                          {project.title}
+                        </h4>
+                        <p className="text-sm text-slate-600 font-light">{project.client}</p>
                       </div>
-                      <div className="flex -space-x-2">
-                        {project.team.map((member, idx) => (
-                          <Avatar key={idx} className="h-6 w-6 ring-2 ring-white">
-                            <AvatarFallback className="text-xs bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                              {member}
-                            </AvatarFallback>
-                          </Avatar>
-                        ))}
+                      <div className="flex items-center space-x-3">
+                        <Badge className={cn("px-3 py-1 text-xs font-light rounded-full", statusColors[project.status as keyof typeof statusColors])}>
+                          {project.status.replace('-', ' ')}
+                        </Badge>
+                        <span className="text-sm font-medium text-slate-800">
+                          {formatCurrency(project.budget)}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600 font-light">Progress</span>
+                        <span className="text-sm font-medium text-slate-800">{project.progress}%</span>
+                      </div>
+                      <Progress value={project.progress} className="h-2 bg-slate-100" />
+                      
+                      <div className="flex items-center justify-between pt-2">
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="w-4 h-4 text-slate-500" />
+                          <span className="text-sm text-slate-600 font-light">Due {formatDate(project.dueDate)}</span>
+                        </div>
+                        <div className="flex -space-x-2">
+                          {project.team.map((member, index) => (
+                            <Avatar key={index} className="w-8 h-8 border-2 border-white">
+                              <AvatarFallback className="text-xs bg-gradient-to-br from-slate-100 to-slate-200 text-slate-700">
+                                {member}
+                              </AvatarFallback>
+                            </Avatar>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className="text-right ml-4">
-                    <p className="text-sm font-medium text-slate-900">{formatCurrency(project.budget)}</p>
-                    <p className="text-xs text-slate-500">{formatDate(project.dueDate)}</p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Upcoming Tasks */}
-          <Card className="border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">Upcoming Tasks</CardTitle>
+        {/* Activity & Tasks Sidebar */}
+        <div className="space-y-8">
+          {/* Recent Activity */}
+          <Card className="bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl shadow-xl shadow-black/5">
+            <CardHeader className="p-6 pb-4">
+              <CardTitle className="text-xl font-light text-slate-800">Recent Activity</CardTitle>
+              <CardDescription className="text-slate-600 font-light">
+                Latest updates from your workspace
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {dashboardData.upcomingTasks.map((task) => (
-                <div key={task.id} className={cn("p-3 border-l-4 bg-slate-50 rounded-r-lg", priorityColors[task.priority as keyof typeof priorityColors])}>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h5 className="font-medium text-slate-900 text-sm">{task.title}</h5>
-                      <p className="text-xs text-slate-600 mt-1">{task.project}</p>
+            <CardContent className="p-6 pt-0">
+              <div className="space-y-4">
+                {dashboardData.recentActivity.map((activity) => {
+                  const IconComponent = activityIcons[activity.type as keyof typeof activityIcons]
+                  return (
+                    <div key={activity.id} className="flex items-start space-x-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center flex-shrink-0">
+                        <IconComponent className="w-4 h-4 text-slate-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-slate-800 font-light leading-relaxed">
+                          {activity.message}
+                        </p>
+                        <p className="text-xs text-slate-500 font-light mt-1">
+                          {activity.time}
+                        </p>
+                      </div>
                     </div>
-                    <span className="text-xs text-slate-500">{task.dueDate}</span>
-                  </div>
-                </div>
-              ))}
+                  )
+                })}
+              </div>
             </CardContent>
           </Card>
 
-          {/* Recent Activity */}
-          <Card className="border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">Recent Activity</CardTitle>
+          {/* Upcoming Tasks */}
+          <Card className="bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl shadow-xl shadow-black/5">
+            <CardHeader className="p-6 pb-4">
+              <CardTitle className="text-xl font-light text-slate-800">Upcoming Tasks</CardTitle>
+              <CardDescription className="text-slate-600 font-light">
+                Your focus for the next few days
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {dashboardData.recentActivity.map((activity) => {
-                const Icon = activityIcons[activity.type as keyof typeof activityIcons]
-                return (
-                  <div key={activity.id} className="flex items-center gap-3">
-                    <div className="h-8 w-8 bg-slate-100 rounded-full flex items-center justify-center">
-                      <Icon className="w-4 h-4 text-slate-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-slate-900">{activity.message}</p>
-                      <p className="text-xs text-slate-500">{activity.time}</p>
+            <CardContent className="p-6 pt-0">
+              <div className="space-y-4">
+                {dashboardData.upcomingTasks.map((task) => (
+                  <div key={task.id} className={cn("p-4 rounded-xl border-l-4 bg-white/50", priorityColors[task.priority as keyof typeof priorityColors])}>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="text-sm font-medium text-slate-800 mb-1">
+                          {task.title}
+                        </h4>
+                        <p className="text-xs text-slate-600 font-light mb-2">
+                          {task.project}
+                        </p>
+                        <p className="text-xs text-slate-500 font-light">
+                          Due: {task.dueDate}
+                        </p>
+                      </div>
+                      <Badge variant="outline" className="text-xs font-light">
+                        {task.priority}
+                      </Badge>
                     </div>
                   </div>
-                )
-              })}
+                ))}
+              </div>
             </CardContent>
           </Card>
         </div>

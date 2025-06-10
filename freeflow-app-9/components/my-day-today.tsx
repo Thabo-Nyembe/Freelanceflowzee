@@ -1,12 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useReducer } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import {
   Calendar,
   Clock,
@@ -30,87 +33,214 @@ import {
   MapPin,
   Users,
   Target,
-  TrendingUp
+  TrendingUp,
+  Brain,
+  Refresh2,
+  AlertTriangle,
+  BarChart3,
+  Edit,
+  Trash2,
+  Clock3
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-const todayData = {
-  schedule: [
-    {
-      id: "1",
-      time: "09:00",
-      title: "Client Call - TechCorp Branding",
-      type: "meeting",
-      duration: "1h",
-      status: "completed"
-    },
-    {
-      id: "2", 
-      time: "10:30",
-      title: "Design Review Session",
-      type: "work",
-      duration: "2h",
-      status: "in-progress"
-    },
-    {
-      id: "3",
-      time: "14:00",
-      title: "Team Standup",
-      type: "meeting",
-      duration: "30m",
-      status: "upcoming"
-    },
-    {
-      id: "4",
-      time: "15:30",
-      title: "Focus Work - Mobile App Wireframes",
-      type: "work",
-      duration: "3h",
-      status: "upcoming"
-    }
-  ],
-  tasks: [
-    {
-      id: "1",
-      title: "Complete logo variations for TechCorp",
-      priority: "high",
-      estimated: "2h",
-      completed: false,
-      project: "Brand Identity Overhaul"
-    },
-    {
-      id: "2",
-      title: "Review and update wireframes",
-      priority: "medium", 
-      estimated: "1.5h",
-      completed: true,
-      project: "Mobile App Design"
-    },
-    {
-      id: "3",
-      title: "Prepare client presentation",
-      priority: "high",
-      estimated: "1h",
-      completed: false,
-      project: "Website Redesign"
-    },
-    {
-      id: "4",
-      title: "Team feedback incorporation", 
-      priority: "low",
-      estimated: "30m",
-      completed: false,
-      project: "Brand Identity Overhaul"
-    }
-  ],
-  stats: {
-    completedTasks: 3,
-    totalTasks: 8,
-    hoursWorked: 5.5,
-    plannedHours: 8,
-    meetingsToday: 2,
-    focusTimeLeft: 2.5
+// Types for reminders and email state management
+interface Reminder {
+  id: string
+  title: string
+  description: string
+  time: string
+  priority: 'low' | 'medium' | 'high' | 'urgent'
+  completed: boolean
+  estimatedDuration: string
+  project?: string
+  type: 'task' | 'meeting' | 'deadline' | 'followup'
+}
+
+interface Email {
+  id: string
+  to: string
+  subject: string
+  content: string
+  scheduled: boolean
+  scheduledTime?: string
+  sent: boolean
+  sentTime?: string
+  priority: 'normal' | 'high'
+  template?: string
+}
+
+interface MyDayState {
+  reminders: Reminder[]
+  emails: Email[]
+  emailConnected: boolean
+  showReminderModal: boolean
+  showEmailModal: boolean
+  editingReminder: Reminder | null
+  editingEmail: Email | null
+}
+
+type MyDayAction = 
+  | { type: 'ADD_REMINDER'; reminder: Reminder }
+  | { type: 'UPDATE_REMINDER'; id: string; reminder: Partial<Reminder> }
+  | { type: 'DELETE_REMINDER'; id: string }
+  | { type: 'TOGGLE_REMINDER'; id: string }
+  | { type: 'ADD_EMAIL'; email: Email }
+  | { type: 'UPDATE_EMAIL'; id: string; email: Partial<Email> }
+  | { type: 'DELETE_EMAIL'; id: string }
+  | { type: 'SEND_EMAIL'; id: string }
+  | { type: 'SET_REMINDER_MODAL'; show: boolean; reminder?: Reminder }
+  | { type: 'SET_EMAIL_MODAL'; show: boolean; email?: Email }
+
+// Reducer for managing My Day state using Context7 patterns
+function myDayReducer(state: MyDayState, action: MyDayAction): MyDayState {
+  switch (action.type) {
+    case 'ADD_REMINDER':
+      return {
+        ...state,
+        reminders: [...state.reminders, action.reminder],
+        showReminderModal: false
+      }
+    case 'UPDATE_REMINDER':
+      return {
+        ...state,
+        reminders: state.reminders.map(r => 
+          r.id === action.id ? { ...r, ...action.reminder } : r
+        ),
+        showReminderModal: false
+      }
+    case 'DELETE_REMINDER':
+      return {
+        ...state,
+        reminders: state.reminders.filter(r => r.id !== action.id)
+      }
+    case 'TOGGLE_REMINDER':
+      return {
+        ...state,
+        reminders: state.reminders.map(r => 
+          r.id === action.id ? { ...r, completed: !r.completed } : r
+        )
+      }
+    case 'ADD_EMAIL':
+      return {
+        ...state,
+        emails: [...state.emails, action.email],
+        showEmailModal: false
+      }
+    case 'UPDATE_EMAIL':
+      return {
+        ...state,
+        emails: state.emails.map(e => 
+          e.id === action.id ? { ...e, ...action.email } : e
+        ),
+        showEmailModal: false
+      }
+    case 'DELETE_EMAIL':
+      return {
+        ...state,
+        emails: state.emails.filter(e => e.id !== action.id)
+      }
+    case 'SEND_EMAIL':
+      return {
+        ...state,
+        emails: state.emails.map(e => 
+          e.id === action.id ? { ...e, sent: true, sentTime: new Date().toISOString() } : e
+        )
+      }
+    case 'SET_REMINDER_MODAL':
+      return {
+        ...state,
+        showReminderModal: action.show,
+        editingReminder: action.reminder || null
+      }
+    case 'SET_EMAIL_MODAL':
+      return {
+        ...state,
+        showEmailModal: action.show,
+        editingEmail: action.email || null
+      }
+    default:
+      return state
   }
+}
+
+// Initial state with sample data
+const initialState: MyDayState = {
+  reminders: [
+    {
+      id: '1',
+      title: 'Complete logo variations for TechCorp',
+      description: 'Finalize the logo variations and prepare for client presentation',
+      time: '10:00',
+      priority: 'high',
+      completed: false,
+      estimatedDuration: '2h',
+      project: 'TechCorp Brand Identity',
+      type: 'task'
+    },
+    {
+      id: '2',
+      title: 'Review and update wireframes',
+      description: 'Update wireframes based on client feedback from yesterday',
+      time: '14:30',
+      priority: 'medium',
+      completed: false,
+      estimatedDuration: '1.5h',
+      project: 'E-commerce Platform',
+      type: 'task'
+    },
+    {
+      id: '3',
+      title: 'Prepare client presentation',
+      description: 'Organize presentation materials for tomorrow\'s client meeting',
+      time: '16:00',
+      priority: 'high',
+      completed: false,
+      estimatedDuration: '1h',
+      project: 'Fashion Brand Campaign',
+      type: 'meeting'
+    },
+    {
+      id: '4',
+      title: 'Team feedback incorporation',
+      description: 'Implement team suggestions on the mobile app design',
+      time: '17:00',
+      priority: 'medium',
+      completed: false,
+      estimatedDuration: '30m',
+      project: 'Mobile App Design',
+      type: 'followup'
+    }
+  ],
+  emails: [
+    {
+      id: '1',
+      to: 'client@techcorp.com',
+      subject: 'Logo Design Update - Ready for Review',
+      content: 'Hi there,\n\nI\'ve completed the logo variations as discussed. Please find the files attached for your review.\n\nBest regards,\nJohn',
+      scheduled: true,
+      scheduledTime: '09:00',
+      sent: false,
+      priority: 'high',
+      template: 'client_update'
+    },
+    {
+      id: '2',
+      to: 'team@agency.com',
+      subject: 'Project Status Update',
+      content: 'Team,\n\nHere\'s the weekly project status update...\n\nBest,\nJohn',
+      scheduled: true,
+      scheduledTime: '17:30',
+      sent: false,
+      priority: 'normal',
+      template: 'team_update'
+    }
+  ],
+  emailConnected: true,
+  showReminderModal: false,
+  showEmailModal: false,
+  editingReminder: null,
+  editingEmail: null
 }
 
 const priorityColors = {
@@ -131,33 +261,97 @@ const typeIcons = {
 }
 
 export function MyDayToday() {
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [showReminderForm, setShowReminderForm] = useState(false)
-  const [showEmailForm, setShowEmailForm] = useState(false)
-  const [selectedTask, setSelectedTask] = useState<string | null>(null)
+  const [state, dispatch] = useReducer(myDayReducer, initialState)
+  const [newReminder, setNewReminder] = useState({
+    title: '',
+    description: '',
+    time: '',
+    priority: 'medium' as const,
+    estimatedDuration: '',
+    project: '',
+    type: 'task' as const
+  })
+  const [newEmail, setNewEmail] = useState({
+    to: '',
+    subject: '',
+    content: '',
+    scheduled: false,
+    scheduledTime: '',
+    priority: 'normal' as const,
+    template: ''
+  })
 
-  const refreshPlan = () => {
-    setIsGenerating(true)
-    setTimeout(() => {
-      setIsGenerating(false)
-    }, 1500)
+  const currentTime = new Date()
+  const currentHour = currentTime.getHours()
+  const greeting = currentHour < 12 ? 'Good morning' : currentHour < 17 ? 'Good afternoon' : 'Good evening'
+
+  const getPriorityColor = (priority: string) => {
+    const colors = {
+      low: 'bg-blue-100 text-blue-700 border-blue-200',
+      medium: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+      high: 'bg-orange-100 text-orange-700 border-orange-200',
+      urgent: 'bg-red-100 text-red-700 border-red-200'
+    }
+    return colors[priority as keyof typeof colors] || colors.medium
   }
 
-  const toggleTask = (taskId: string) => {
-    // In a real app, this would update the task status
-    console.log("Toggle task:", taskId)
+  const getTypeIcon = (type: string) => {
+    const icons = {
+      task: Target,
+      meeting: Users,
+      deadline: AlertTriangle,
+      followup: MessageSquare
+    }
+    const IconComponent = icons[type as keyof typeof icons] || Target
+    return <IconComponent className="h-4 w-4" />
   }
 
-  const formatTime = (time: string) => {
-    const [hours, minutes] = time.split(":")
-    const hour = parseInt(hours)
-    const ampm = hour >= 12 ? "PM" : "AM"
-    const displayHour = hour % 12 || 12
-    return `${displayHour}:${minutes} ${ampm}`
+  const handleAddReminder = () => {
+    if (!newReminder.title || !newReminder.time) return
+
+    const reminder: Reminder = {
+      id: Date.now().toString(),
+      ...newReminder,
+      completed: false
+    }
+
+    dispatch({ type: 'ADD_REMINDER', reminder })
+    setNewReminder({
+      title: '',
+      description: '',
+      time: '',
+      priority: 'medium',
+      estimatedDuration: '',
+      project: '',
+      type: 'task'
+    })
   }
 
-  const progressPercentage = (todayData.stats.completedTasks / todayData.stats.totalTasks) * 100
-  const hoursProgress = (todayData.stats.hoursWorked / todayData.stats.plannedHours) * 100
+  const handleAddEmail = () => {
+    if (!newEmail.to || !newEmail.subject) return
+
+    const email: Email = {
+      id: Date.now().toString(),
+      ...newEmail,
+      sent: false
+    }
+
+    dispatch({ type: 'ADD_EMAIL', email })
+    setNewEmail({
+      to: '',
+      subject: '',
+      content: '',
+      scheduled: false,
+      scheduledTime: '',
+      priority: 'normal',
+      template: ''
+    })
+  }
+
+  const completedTasks = state.reminders.filter(r => r.completed).length
+  const totalTasks = state.reminders.length
+  const scheduledEmails = state.emails.filter(e => e.scheduled && !e.sent).length
+  const sentEmails = state.emails.filter(e => e.sent).length
 
   return (
     <div className="space-y-8">
@@ -170,27 +364,17 @@ export function MyDayToday() {
           <Button
             variant="outline"
             className="border-purple-200 text-purple-600 hover:bg-purple-50"
-            onClick={() => setShowEmailForm(true)}
+            onClick={() => dispatch({ type: 'SET_EMAIL_MODAL', show: true })}
           >
             <Mail className="h-4 w-4 mr-2" />
             Email Integration
           </Button>
           <Button
-            onClick={refreshPlan}
+            onClick={() => dispatch({ type: 'SET_REMINDER_MODAL', show: true })}
             className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
-            disabled={isGenerating}
           >
-            {isGenerating ? (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4 mr-2" />
-                Refresh Plan
-              </>
-            )}
+            <Plus className="h-4 w-4 mr-2" />
+            Add Reminder
           </Button>
         </div>
       </div>
@@ -207,7 +391,7 @@ export function MyDayToday() {
               <p className="text-slate-600 leading-relaxed">
                 I've analyzed your schedule, deadlines, and priorities. Today looks busy with the Acme Corp project
                 deadline approaching. I've optimized your day to balance client work, creative time, and necessary
-                meetings. You have 3 reminders set and 2 emails scheduled to send.
+                meetings. You have {state.reminders.length} reminders set and {scheduledEmails} emails scheduled to send.
               </p>
             </div>
           </div>
@@ -370,9 +554,9 @@ export function MyDayToday() {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-600">Tasks Completed</span>
-                  <span className="text-slate-800 font-medium">2/6</span>
+                  <span className="text-slate-800 font-medium">{completedTasks}/{totalTasks}</span>
                 </div>
-                <Progress value={progressPercentage} className="h-2" />
+                <Progress value={(completedTasks / totalTasks) * 100} className="h-2" />
               </div>
 
               <div className="space-y-2">
@@ -380,7 +564,7 @@ export function MyDayToday() {
                   <span className="text-slate-600">Hours Tracked</span>
                   <span className="text-slate-800 font-medium">3.5/8</span>
                 </div>
-                <Progress value={hoursProgress} className="h-2" />
+                <Progress value={75} className="h-2" />
               </div>
 
               <div className="space-y-2">
@@ -401,35 +585,185 @@ export function MyDayToday() {
                   <Bell className="h-5 w-5" />
                   Reminders
                 </CardTitle>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-amber-200 text-amber-600 hover:bg-amber-50"
-                  onClick={() => setShowReminderForm(true)}
+                <Dialog 
+                  open={state.showReminderModal} 
+                  onOpenChange={(open) => dispatch({ type: 'SET_REMINDER_MODAL', show: open })}
                 >
-                  <Plus className="h-4 w-4" />
-                </Button>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="outline" className="border-amber-200 text-amber-600 hover:bg-amber-50">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Add New Reminder</DialogTitle>
+                      <DialogDescription>
+                        Create a new reminder with priority and time estimation.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="reminder-title">Title</Label>
+                        <Input
+                          id="reminder-title"
+                          value={newReminder.title}
+                          onChange={(e) => setNewReminder(prev => ({ ...prev, title: e.target.value }))}
+                          placeholder="Enter reminder title"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="reminder-description">Description</Label>
+                        <Textarea
+                          id="reminder-description"
+                          value={newReminder.description}
+                          onChange={(e) => setNewReminder(prev => ({ ...prev, description: e.target.value }))}
+                          placeholder="Enter description"
+                          rows={2}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="reminder-time">Time</Label>
+                          <Input
+                            id="reminder-time"
+                            type="time"
+                            value={newReminder.time}
+                            onChange={(e) => setNewReminder(prev => ({ ...prev, time: e.target.value }))}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="reminder-duration">Duration</Label>
+                          <Input
+                            id="reminder-duration"
+                            value={newReminder.estimatedDuration}
+                            onChange={(e) => setNewReminder(prev => ({ ...prev, estimatedDuration: e.target.value }))}
+                            placeholder="e.g., 1h 30m"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="reminder-priority">Priority</Label>
+                          <Select 
+                            value={newReminder.priority} 
+                            onValueChange={(value) => setNewReminder(prev => ({ ...prev, priority: value as any }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select priority" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="low">Low</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="high">High</SelectItem>
+                              <SelectItem value="urgent">Urgent</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="reminder-type">Type</Label>
+                          <Select 
+                            value={newReminder.type} 
+                            onValueChange={(value) => setNewReminder(prev => ({ ...prev, type: value as any }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="task">Task</SelectItem>
+                              <SelectItem value="meeting">Meeting</SelectItem>
+                              <SelectItem value="deadline">Deadline</SelectItem>
+                              <SelectItem value="followup">Follow-up</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="reminder-project">Project (Optional)</Label>
+                        <Input
+                          id="reminder-project"
+                          value={newReminder.project}
+                          onChange={(e) => setNewReminder(prev => ({ ...prev, project: e.target.value }))}
+                          placeholder="Associated project"
+                        />
+                      </div>
+                      <div className="flex justify-end space-x-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => dispatch({ type: 'SET_REMINDER_MODAL', show: false })}
+                        >
+                          Cancel
+                        </Button>
+                        <Button onClick={handleAddReminder}>
+                          Add Reminder
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
-              {todayData.tasks.map((task) => (
-                <div key={task.id} className="flex items-center gap-3 p-3 rounded-lg bg-white/50">
-                  <div
-                    className={`w-3 h-3 rounded-full ${
-                      task.priority === "high"
-                        ? "bg-red-400"
-                        : task.priority === "medium"
-                          ? "bg-amber-400"
-                          : "bg-blue-400"
-                    }`}
-                  ></div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-slate-800 text-sm">{task.title}</h4>
-                    <p className="text-xs text-slate-500">{task.estimated}</p>
+              {state.reminders.map((reminder) => (
+                <div
+                  key={reminder.id}
+                  className={`p-3 rounded-lg border transition-all duration-200 ${
+                    reminder.completed ? 'bg-green-50 border-green-200' : 'bg-slate-50 border-slate-200'
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className={`font-medium text-sm ${
+                          reminder.completed ? 'line-through text-slate-500' : 'text-slate-800'
+                        }`}>
+                          {reminder.title}
+                        </h4>
+                        <Badge className={`text-xs ${getPriorityColor(reminder.priority)}`}>
+                          {getTypeIcon(reminder.type)}
+                        </Badge>
+                      </div>
+                      {reminder.description && (
+                        <p className="text-xs text-slate-600 mb-2">{reminder.description}</p>
+                      )}
+                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <Clock className="h-3 w-3" />
+                        <span>{reminder.time}</span>
+                        {reminder.estimatedDuration && (
+                          <>
+                            <span>•</span>
+                            <span>{reminder.estimatedDuration}</span>
+                          </>
+                        )}
+                      </div>
+                      {reminder.project && (
+                        <Badge className="mt-2 text-xs bg-blue-100 text-blue-700">
+                          {reminder.project}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => dispatch({ type: 'TOGGLE_REMINDER', id: reminder.id })}
+                        className="h-6 w-6 p-0"
+                      >
+                        {reminder.completed ? (
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <Circle className="h-4 w-4 text-slate-400" />
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => dispatch({ type: 'DELETE_REMINDER', id: reminder.id })}
+                        className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
-                  <Button size="sm" variant="ghost" className="text-slate-400 hover:text-slate-600">
-                    <X className="h-4 w-4" />
-                  </Button>
                 </div>
               ))}
             </CardContent>
@@ -446,8 +780,10 @@ export function MyDayToday() {
             <CardContent className="space-y-4">
               <div className="p-3 rounded-lg bg-white/50">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <h4 className="font-medium text-slate-800 text-sm">Connected</h4>
+                  <div className={`w-2 h-2 rounded-full ${state.emailConnected ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                  <h4 className="font-medium text-slate-800 text-sm">
+                    {state.emailConnected ? 'Connected' : 'Disconnected'}
+                  </h4>
                 </div>
                 <p className="text-xs text-slate-600">john.doe@email.com</p>
               </div>
@@ -455,22 +791,116 @@ export function MyDayToday() {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-600">Scheduled Emails</span>
-                  <span className="text-slate-800 font-medium">2</span>
+                  <span className="text-slate-800 font-medium">{scheduledEmails}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-600">Sent Today</span>
-                  <span className="text-slate-800 font-medium">5</span>
+                  <span className="text-slate-800 font-medium">{sentEmails}</span>
                 </div>
               </div>
 
-              <Button
-                size="sm"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                onClick={() => setShowEmailForm(true)}
+              <Dialog 
+                open={state.showEmailModal} 
+                onOpenChange={(open) => dispatch({ type: 'SET_EMAIL_MODAL', show: open })}
               >
-                <Send className="h-4 w-4 mr-2" />
-                Compose Email
-              </Button>
+                <DialogTrigger asChild>
+                  <Button className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600">
+                    <Send className="h-4 w-4 mr-2" />
+                    Compose Email
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Compose Email</DialogTitle>
+                    <DialogDescription>
+                      Create and schedule emails with smart templates.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="email-to">To</Label>
+                        <Input
+                          id="email-to"
+                          value={newEmail.to}
+                          onChange={(e) => setNewEmail(prev => ({ ...prev, to: e.target.value }))}
+                          placeholder="recipient@email.com"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="email-template">Template</Label>
+                        <Select 
+                          value={newEmail.template} 
+                          onValueChange={(value) => setNewEmail(prev => ({ ...prev, template: value }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select template" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="client_update">Client Update</SelectItem>
+                            <SelectItem value="team_update">Team Update</SelectItem>
+                            <SelectItem value="project_status">Project Status</SelectItem>
+                            <SelectItem value="follow_up">Follow Up</SelectItem>
+                            <SelectItem value="custom">Custom</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="email-subject">Subject</Label>
+                      <Input
+                        id="email-subject"
+                        value={newEmail.subject}
+                        onChange={(e) => setNewEmail(prev => ({ ...prev, subject: e.target.value }))}
+                        placeholder="Email subject"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email-content">Content</Label>
+                      <Textarea
+                        id="email-content"
+                        value={newEmail.content}
+                        onChange={(e) => setNewEmail(prev => ({ ...prev, content: e.target.value }))}
+                        placeholder="Email content"
+                        rows={4}
+                      />
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="email-scheduled"
+                          checked={newEmail.scheduled}
+                          onChange={(e) => setNewEmail(prev => ({ ...prev, scheduled: e.target.checked }))}
+                          className="rounded"
+                        />
+                        <Label htmlFor="email-scheduled" className="text-sm">Schedule for later</Label>
+                      </div>
+                      {newEmail.scheduled && (
+                        <div>
+                          <Input
+                            type="time"
+                            value={newEmail.scheduledTime}
+                            onChange={(e) => setNewEmail(prev => ({ ...prev, scheduledTime: e.target.value }))}
+                            className="w-32"
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => dispatch({ type: 'SET_EMAIL_MODAL', show: false })}
+                      >
+                        Cancel
+                      </Button>
+                      <Button onClick={handleAddEmail}>
+                        {newEmail.scheduled ? 'Schedule Email' : 'Send Now'}
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
 
@@ -513,82 +943,6 @@ export function MyDayToday() {
           </Card>
         </div>
       </div>
-
-      {/* Reminder Form Modal */}
-      {showReminderForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="w-96 bg-white">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-semibold text-slate-800">Add Reminder</CardTitle>
-                <Button size="sm" variant="ghost" onClick={() => setShowReminderForm(false)}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Input placeholder="Reminder title" className="bg-white border-slate-200" />
-              <Input type="datetime-local" className="bg-white border-slate-200" />
-              <select className="w-full p-2 border border-slate-200 rounded-md bg-white">
-                <option value="low">Low Priority</option>
-                <option value="medium">Medium Priority</option>
-                <option value="high">High Priority</option>
-              </select>
-              <div className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={() => setShowReminderForm(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  className="flex-1 bg-amber-600 hover:bg-amber-700 text-white"
-                  onClick={() => setShowReminderForm(false)}
-                >
-                  Add Reminder
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Email Form Modal */}
-      {showEmailForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="w-[600px] bg-white">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-semibold text-slate-800">Compose Email</CardTitle>
-                <Button size="sm" variant="ghost" onClick={() => setShowEmailForm(false)}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Input placeholder="To: client@email.com" className="bg-white border-slate-200" />
-              <Input placeholder="Subject" className="bg-white border-slate-200" />
-              <Textarea placeholder="Email content..." className="bg-white border-slate-200 min-h-[150px]" />
-              <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2 text-sm text-slate-600">
-                  <input type="checkbox" className="rounded" />
-                  Schedule for later
-                </label>
-                <Input type="datetime-local" className="bg-white border-slate-200 flex-1" />
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={() => setShowEmailForm(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                  onClick={() => setShowEmailForm(false)}
-                >
-                  <Send className="h-4 w-4 mr-2" />
-                  Send Email
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   )
 }

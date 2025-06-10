@@ -243,120 +243,105 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40">
+      {/* Luxury floating background elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-rose-200/10 to-pink-200/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-violet-200/10 to-purple-200/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-gradient-to-r from-blue-200/8 to-indigo-200/8 rounded-full blur-3xl animate-pulse delay-2000"></div>
+      </div>
+
+      {/* Glass overlay for premium texture */}
+      <div className="fixed inset-0 bg-white/20 backdrop-blur-[100px] pointer-events-none"></div>
+
       {/* Main Navigation */}
-      <MainNavigation 
-        user={mockUser} 
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
+      <div className="relative z-10">
+        <MainNavigation 
+          user={mockUser} 
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
+      </div>
       
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        {/* Welcome Header */}
-        <div className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="relative z-10 container mx-auto px-8 py-12 max-w-7xl">
+        {/* Luxury Welcome Header */}
+        <div className="mb-16">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                Welcome to FreeflowZee
+              <h1 className="text-6xl font-thin text-slate-800 mb-6 tracking-tight leading-tight">
+                Welcome back,
+                <span className="block bg-gradient-to-r from-rose-400 via-violet-400 to-indigo-400 bg-clip-text text-transparent font-extralight mt-2">
+                  {mockUser.user_metadata?.full_name?.split(' ')[0] || 'Creator'}
+                </span>
               </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-300">
-                Your complete freelance management platform
+              <p className="text-xl text-slate-600 font-light max-w-2xl leading-relaxed">
+                Your creative workspace awaits. Track progress, collaborate with clients, and build extraordinary experiences.
               </p>
             </div>
             
-            {/* Quick Stats */}
-            <div className="flex flex-wrap gap-4">
-              <Card className="bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-500 rounded-lg">
-                      <FolderOpen className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Active Projects</p>
-                      <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{mockData.activeProjects}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-500 rounded-lg">
-                      <DollarSign className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-green-600 dark:text-green-400 font-medium">Total Earnings</p>
-                      <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                        ${mockData.earnings.toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            {/* Premium action buttons */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button className="bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 text-white px-8 py-4 rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-[1.02] transition-all duration-300 border border-white/20">
+                <Plus className="mr-2 w-5 h-5" />
+                New Project
+              </Button>
+              <Button variant="outline" className="border-2 border-slate-200 hover:border-slate-300 bg-white/70 backdrop-blur-xl px-8 py-4 rounded-2xl text-slate-700 hover:bg-white/80 transition-all duration-300">
+                <Search className="mr-2 w-5 h-5" />
+                Search
+              </Button>
             </div>
           </div>
         </div>
 
-        {/* Main Tabs Interface */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          {/* Tab Navigation */}
-          <div className="bg-white/70 backdrop-blur-sm rounded-xl p-2 border border-white/20 shadow-lg">
-            <TabsList className="grid w-full grid-cols-7 bg-transparent">
-              {tabConfig.map((tab) => {
-                const IconComponent = tab.icon;
-                return (
-                  <TabsTrigger
-                    key={tab.value}
-                    value={tab.value}
-                    className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md transition-all duration-200"
-                  >
-                    <IconComponent className="h-4 w-4" />
-                    <span className="hidden sm:inline">{tab.label}</span>
-                    {tab.value === 'feedback' && notifications > 0 && (
-                      <Badge variant="destructive" className="h-5 w-5 p-0 text-xs flex items-center justify-center">
-                        {notifications}
-                      </Badge>
-                    )}
-                  </TabsTrigger>
-                );
-              })}
-            </TabsList>
-          </div>
+        {/* Premium Navigation Tabs */}
+        <Tabs 
+          value={activeTab} 
+          onValueChange={setActiveTab} 
+          className="w-full"
+        >
+          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7 mb-12 bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl p-2 shadow-xl shadow-black/5">
+            {tabConfig.map((tab) => {
+              const IconComponent = tab.icon;
+              return (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="flex items-center justify-center gap-2 text-sm font-light rounded-2xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-slate-800 data-[state=active]:to-slate-700 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-white/50 text-slate-600 py-3 px-4"
+                >
+                  <IconComponent className="w-4 h-4" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
 
-          {/* Tab Content */}
-          <div className="bg-white/70 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg">
-            <div className="p-6">
-              {tabConfig.map((tab) => (
-                <TabsContent key={tab.value} value={tab.value} className="mt-0">
-                  {renderTabContent(tab.value)}
+          {/* Tab Content with luxury styling */}
+          <div className="min-h-[600px]">
+            {tabConfig.map((tab) => {
+              const ComponentToRender = tab.component;
+              return (
+                <TabsContent 
+                  key={tab.value} 
+                  value={tab.value} 
+                  className="focus:outline-none"
+                >
+                  <div className="bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl shadow-xl shadow-black/5 p-8">
+                    <ComponentToRender 
+                      data={mockData}
+                      activeProjects={mockData.projects.filter(p => p.status === 'active')}
+                      completedProjects={mockData.projects.filter(p => p.status === 'completed')}
+                      recentActivities={mockData.recentActivities}
+                      earnings={mockData.earnings}
+                      pendingPayments={mockData.pendingPayments}
+                      notifications={notifications}
+                    />
+                  </div>
                 </TabsContent>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </Tabs>
-
-        {/* Quick Action Buttons */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Button className="h-16 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white">
-            <Plus className="h-5 w-5 mr-2" />
-            New Project
-          </Button>
-          <Button className="h-16 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white">
-            <Bell className="h-5 w-5 mr-2" />
-            Send Update
-          </Button>
-          <Button className="h-16 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white">
-            <DollarSign className="h-5 w-5 mr-2" />
-            Create Invoice
-          </Button>
-          <Button className="h-16 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white">
-            <Users className="h-5 w-5 mr-2" />
-            Invite Team
-          </Button>
-        </div>
       </div>
     </div>
   );
