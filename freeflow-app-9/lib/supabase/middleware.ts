@@ -56,7 +56,8 @@ export async function updateSession(request: NextRequest) {
   const publicRoutes = [
     '/login', '/signup', '/', '/landing', '/payment', '/contact', '/support', 
     '/privacy', '/terms', '/blog', '/newsletter', '/demo', '/community', 
-    '/features', '/how-it-works', '/docs', '/tutorials', '/api-docs', '/unified'
+    '/features', '/how-it-works', '/docs', '/tutorials', '/api-docs', '/unified',
+    '/book-appointment'
   ]
   const isPublicRoute = publicRoutes.some(route => 
     request.nextUrl.pathname === route || 

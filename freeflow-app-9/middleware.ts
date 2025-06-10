@@ -21,7 +21,8 @@ const publicRoutes = [
   '/blog',
   '/newsletter',
   '/privacy',
-  '/terms'
+  '/terms',
+  '/book-appointment'
 ]
 
 // Define protected routes that require authentication (when not in demo mode)
