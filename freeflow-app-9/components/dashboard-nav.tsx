@@ -21,13 +21,16 @@ import {
   LogOut,
   Menu,
   X,
-  Search
+  Search,
+  Shield,
+  DollarSign
 } from 'lucide-react'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'My Day', href: '/dashboard/my-day', icon: Calendar },
   { name: 'Projects', href: '/projects', icon: FolderOpen },
+  { name: 'Escrow', href: '/dashboard/escrow', icon: Shield },
   { name: 'Team', href: '/dashboard/team', icon: Users },
   { name: 'Financial', href: '/dashboard/financial', icon: CreditCard },
   { name: 'Files', href: '/dashboard/files', icon: FileText },
