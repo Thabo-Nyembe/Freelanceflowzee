@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useReducer } from 'react'
+import React, { useState, useReducer } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import { FeatureNavigation } from '@/components/navigation/feature-navigation'
 import { 
   DollarSign, 
   Shield, 
@@ -430,6 +431,16 @@ export default function EscrowPage() {
           {state.error}
         </div>
       )}
+
+      {/* Cross-Feature Navigation */}
+      <div className="mt-12 pt-8 border-t border-gray-200">
+        <FeatureNavigation 
+          currentFeature="escrow"
+          variant="compact"
+          title="Access Other Features"
+          subtitle="Navigate to other platform features"
+        />
+      </div>
     </div>
   )
 } 

@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
+import { useEnhancedAI } from '@/lib/ai/enhanced-ai-service'
 import { 
   Sparkles,
   Bot,
@@ -202,21 +203,64 @@ export default function AIAssistantPage() {
     }
 
     setChatMessages(prev => [...prev, userMessage])
+    const inputToProcess = currentInput
     setCurrentInput('')
     setIsTyping(true)
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      // Use the working AI API endpoint
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: inputToProcess,
+          context: {
+            userId: 'demo-user',
+            sessionId: Date.now().toString(),
+            projectData: null,
+            clientData: null,
+            performanceMetrics: null,
+            preferences: null
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('API request failed')
+      }
+
+      const data = await response.json()
+      
+      if (data.success && data.response) {
+        const aiResponse: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          type: 'assistant',
+          content: data.response.content,
+          timestamp: new Date(),
+          suggestions: data.response.suggestions,
+          actionItems: data.response.actionItems
+        }
+        
+        setChatMessages(prev => [...prev, aiResponse])
+      } else {
+        throw new Error('Invalid API response')
+      }
+    } catch (error) {
+      console.error('AI response error:', error)
+      // Fallback to basic response
       const aiResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: getAIResponse(currentInput),
+        content: getAIResponse(inputToProcess),
         timestamp: new Date(),
-        actionItems: getActionItems(currentInput)
+        actionItems: getActionItems(inputToProcess)
       }
       setChatMessages(prev => [...prev, aiResponse])
+    } finally {
       setIsTyping(false)
-    }, 1500)
+    }
   }
 
   const getAIResponse = (input: string): string => {

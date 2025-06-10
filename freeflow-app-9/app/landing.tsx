@@ -36,7 +36,12 @@ import {
   Sparkles,
   ChevronRight,
   ChevronLeft,
-  Quote
+  Quote,
+  LayoutDashboard,
+  Calendar,
+  Rocket,
+  Target,
+  User
 } from 'lucide-react'
 
 // Hero section with animated gradient background
@@ -77,7 +82,7 @@ function HeroSection() {
           </p>
 
           {/* Three Main CTA Buttons */}
-          <div data-testid="hero-cta-buttons" className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+          <div data-testid="hero-cta-buttons" className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
             <Link href="/login?redirect=/dashboard">
               <Button data-testid="creator-login-button" size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
                 Creator Login
@@ -115,6 +120,61 @@ function HeroSection() {
               <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                 <strong className="text-purple-600">Clients:</strong> Businesses looking to view and download project files
               </div>
+            </div>
+          </div>
+
+          {/* Quick Feature Access */}
+          <div className="mb-16">
+            <p className="text-sm text-gray-500 mb-6 text-center">Quick access to all our features (all 100% complete):</p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link href="/features">
+                <Button variant="outline" className="bg-white/80 backdrop-blur-sm border border-gray-300 hover:border-indigo-300 text-sm">
+                  <Sparkles className="mr-2 w-4 h-4" />
+                  All Features
+                </Button>
+              </Link>
+              <Link href="/dashboard/escrow">
+                <Button variant="outline" className="bg-white/80 backdrop-blur-sm border border-gray-300 hover:border-indigo-300 text-sm">
+                  <Shield className="mr-2 w-4 h-4" />
+                  Escrow System
+                </Button>
+              </Link>
+              <Link href="/dashboard/bookings">
+                <Button variant="outline" className="bg-white/80 backdrop-blur-sm border border-gray-300 hover:border-indigo-300 text-sm">
+                  <Calendar className="mr-2 w-4 h-4" />
+                  Calendar
+                </Button>
+              </Link>
+              <Link href="/dashboard/financial">
+                <Button variant="outline" className="bg-white/80 backdrop-blur-sm border border-gray-300 hover:border-indigo-300 text-sm">
+                  <DollarSign className="mr-2 w-4 h-4" />
+                  Invoicing
+                </Button>
+              </Link>
+              <Link href="/dashboard/project-tracker">
+                <Button variant="outline" className="bg-white/80 backdrop-blur-sm border border-gray-300 hover:border-indigo-300 text-sm">
+                  <Target className="mr-2 w-4 h-4" />
+                  Projects
+                </Button>
+              </Link>
+              <Link href="/dashboard/gallery">
+                <Button variant="outline" className="bg-white/80 backdrop-blur-sm border border-gray-300 hover:border-indigo-300 text-sm">
+                  <Camera className="mr-2 w-4 h-4" />
+                  Gallery
+                </Button>
+              </Link>
+              <Link href="/dashboard/collaboration">
+                <Button variant="outline" className="bg-white/80 backdrop-blur-sm border border-gray-300 hover:border-indigo-300 text-sm">
+                  <MessageSquare className="mr-2 w-4 h-4" />
+                  Collaboration
+                </Button>
+              </Link>
+              <Link href="/dashboard/cv-portfolio">
+                <Button variant="outline" className="bg-white/80 backdrop-blur-sm border border-gray-300 hover:border-indigo-300 text-sm">
+                  <User className="mr-2 w-4 h-4" />
+                  Portfolio
+                </Button>
+              </Link>
             </div>
           </div>
 

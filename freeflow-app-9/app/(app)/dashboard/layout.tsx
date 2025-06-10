@@ -8,6 +8,9 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
+  // Enable demo mode in development
+  const isDemoMode = process.env.NODE_ENV === 'development'
+  
   // Check for demo mode or if Supabase is not configured
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -17,9 +20,9 @@ export default async function DashboardLayout({
                               !supabaseUrl.includes('placeholder') &&
                               !supabaseUrl.includes('your-project-url')
 
-  // If Supabase is not configured, allow dashboard access in demo mode
-  if (!isSupabaseConfigured) {
-    console.log('🔧 Dashboard running in demo mode - Supabase not configured')
+  // If in demo mode or Supabase is not configured, allow dashboard access
+  if (isDemoMode || !isSupabaseConfigured) {
+    console.log('🔧 Dashboard running in demo mode - Authentication bypassed for development')
     return (
       <div className="min-h-screen bg-gray-50">
         <Suspense fallback={<div className="p-4">Loading navigation...</div>}>
@@ -27,12 +30,13 @@ export default async function DashboardLayout({
         </Suspense>
         <main className="lg:pl-64">
           <div className="px-4 sm:px-6 lg:px-8 py-8">
-            <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-blue-800 text-sm">
-                🔧 <strong>Demo Mode:</strong> Dashboard is running in demo mode. 
-                Configure Supabase environment variables for full authentication.
-              </p>
-            </div>
+            {isDemoMode && (
+              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-blue-800 text-sm">
+                  🔧 <strong>Development Demo Mode:</strong> Dashboard is accessible without authentication for development purposes.
+                </p>
+              </div>
+            )}
             {children}
           </div>
         </main>

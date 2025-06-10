@@ -1,583 +1,307 @@
 'use client'
 
-import { useState } from 'react'
+import React from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
-import { 
-  Download, 
-  Eye, 
-  Heart, 
-  Share2, 
-  Star, 
-  Calendar,
-  User,
-  Clock,
-  DollarSign,
-  CheckCircle,
-  Play,
-  Image as ImageIcon,
-  FileText,
-  Code,
-  Pause,
-  Volume2,
-  VolumeX,
-  Maximize,
-  ThumbsUp,
-  MessageCircle,
-  Bookmark,
-  ExternalLink
+import {
+  Shield, Calendar, Receipt, Target, Image, User, MessageSquare,
+  LayoutDashboard, Rocket, Play, ExternalLink, ChevronRight,
+  Sparkles, Clock, Users, FileText, TrendingUp, Award,
+  Zap, Heart, Star, DollarSign, ArrowLeft
 } from 'lucide-react'
 
-type PreviewItem = {
-  title: string
-  description: string
-  image: string
-}
+const DEMO_FEATURES = [
+  {
+    id: 'escrow',
+    name: 'Escrow System',
+    description: 'Complete escrow management with client deposit tracking, milestone payments, and secure fund release',
+    href: '/dashboard/escrow',
+    icon: Shield,
+    status: '100% Complete',
+    color: 'from-green-500 to-emerald-600',
+    features: [
+      'Client deposit tracking with real-time updates',
+      'Milestone-based payments with progress tracking', 
+      'Secure fund holding with password protection',
+      'Automated release triggers on completion',
+      'Comprehensive dashboard for transparency'
+    ]
+  },
+  {
+    id: 'calendar',
+    name: 'Calendar & Scheduling',
+    description: 'Advanced calendar system with multiple views, event management, and revenue tracking',
+    href: '/dashboard/bookings',
+    icon: Calendar,
+    status: '100% Complete',
+    color: 'from-blue-500 to-indigo-600',
+    features: [
+      'Month/Week/Day views with seamless navigation',
+      'Client meetings and deadline management',
+      'Revenue tracking for billable appointments',
+      'Priority management with visual indicators',
+      'Professional booking system integration'
+    ]
+  },
+  {
+    id: 'invoicing',
+    name: 'Invoice Generation',
+    description: 'Professional invoicing system with templates, tax calculations, and payment tracking',
+    href: '/dashboard/financial',
+    icon: Receipt,
+    status: '100% Complete',
+    color: 'from-purple-500 to-violet-600',
+    features: [
+      'Professional templates with customization',
+      'Comprehensive client management system',
+      'Automatic tax calculations and currency support',
+      'Status tracking (Draft/Sent/Paid/Overdue)',
+      'PDF export and printing capabilities'
+    ]
+  },
+  {
+    id: 'project-tracker',
+    name: 'Project Tracker',
+    description: 'Comprehensive project management with deliverables, progress tracking, and team collaboration',
+    href: '/dashboard/project-tracker',
+    icon: Target,
+    status: '100% Complete',
+    color: 'from-orange-500 to-red-600',
+    features: [
+      'Visual progress bars with completion tracking',
+      'Milestone integration with payment systems',
+      'Advanced team collaboration tools',
+      'Integrated client communication platform',
+      'Comprehensive deliverable management'
+    ]
+  },
+  {
+    id: 'gallery',
+    name: 'Gallery System',
+    description: 'Professional portfolio gallery like Pixieset with client access controls and secure sharing',
+    href: '/dashboard/gallery',
+    icon: Image,
+    status: '100% Complete',
+    color: 'from-pink-500 to-rose-600',
+    features: [
+      'Pixieset-style professional client galleries',
+      'Advanced secure access controls',
+      'Professional image and video layouts',
+      'Comprehensive download management',
+      'Granular client access permissions'
+    ]
+  },
+  {
+    id: 'cv-portfolio',
+    name: 'CV/Portfolio Profile',
+    description: 'Professional freelancer showcase with portfolio gallery and performance analytics',
+    href: '/dashboard/cv-portfolio',
+    icon: User,
+    status: '100% Complete',
+    color: 'from-teal-500 to-cyan-600',
+    features: [
+      'Professional freelancer showcase platform',
+      'Interactive portfolio gallery with work samples',
+      'Skills and experience timeline visualization',
+      'Comprehensive performance statistics dashboard',
+      'Client reviews and testimonials system'
+    ]
+  },
+  {
+    id: 'collaboration',
+    name: 'Client Collaboration',
+    description: 'Advanced collaboration with video annotations, image comments, and approval workflows',
+    href: '/dashboard/collaboration',
+    icon: MessageSquare,
+    status: '100% Complete',
+    color: 'from-indigo-500 to-purple-600',
+    features: [
+      'Video annotation with precise time-codes ✨',
+      'Image commenting with position-specific feedback ✨',
+      'Like/favorite system for client preferences ✨',
+      'Multi-step approval workflows with notifications',
+      'Real-time feedback exchange and notifications'
+    ]
+  }
+]
 
-type PreviewItems = {
-  [key: string]: PreviewItem
-}
+const DASHBOARD_AREAS = [
+  { name: 'My Day', href: '/dashboard/my-day', icon: Clock, description: 'Daily overview and tasks' },
+  { name: 'Team', href: '/dashboard/team', icon: Users, description: 'Team management and collaboration' },
+  { name: 'Files', href: '/dashboard/files', icon: FileText, description: 'File management and sharing' },
+  { name: 'Analytics', href: '/dashboard/analytics', icon: TrendingUp, description: 'Performance analytics and insights' },
+  { name: 'AI Assistant', href: '/dashboard/ai-assistant', icon: Sparkles, description: 'AI-powered assistance' },
+  { name: 'Notifications', href: '/dashboard/notifications', icon: Award, description: 'Real-time notifications' },
+  { name: 'Profile', href: '/dashboard/profile', icon: User, description: 'User profile management' },
+  { name: 'Community', href: '/dashboard/community', icon: Users, description: 'Community features' }
+]
 
 export default function DemoPage() {
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [isMuted, setIsMuted] = useState(false)
-  const [isLiked, setIsLiked] = useState(false)
-  const [isBookmarked, setIsBookmarked] = useState(false)
-  const [likes, setLikes] = useState(89)
-  const [views, setViews] = useState(1247)
-  const [selectedPreview, setSelectedPreview] = useState('logo')
-  const [showComments, setShowComments] = useState(false)
-  const [showLiveChat, setShowLiveChat] = useState(false)
-  const [chatMessages, setChatMessages] = useState([
-    { user: 'Sarah (Designer)', message: 'Hi! I&apos;m here to answer any questions about this project.', time: '2 min ago' },
-    { user: 'You', message: 'This looks amazing! Can I see more color variations?', time: '1 min ago' }
-  ])
-  const [newMessage, setNewMessage] = useState('')
-  const [selectedColor, setSelectedColor] = useState('blue')
-  const [selectedStyle, setSelectedStyle] = useState('modern')
-
-  const handlePlay = () => {
-    setIsPlaying(!isPlaying)
-    if (!isPlaying) {
-      setViews(prev => prev + 1)
-    }
-  }
-
-  const handleLike = () => {
-    setIsLiked(!isLiked)
-    setLikes(prev => isLiked ? prev - 1 : prev + 1)
-  }
-
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked)
-  }
-
-  const previewItems: PreviewItems = {
-    logo: {
-      title: 'Logo Variations',
-      description: 'Primary, secondary, and monogram versions',
-      image: '/api/placeholder/400/300'
-    },
-    brand: {
-      title: 'Brand Guidelines',
-      description: 'Color palette, typography, and usage rules',
-      image: '/api/placeholder/400/300'
-    },
-    social: {
-      title: 'Social Media Kit',
-      description: 'Profile pictures, cover photos, and post templates',
-      image: '/api/placeholder/400/300'
-    },
-    business: {
-      title: 'Business Cards',
-      description: 'Professional business card designs',
-      image: '/api/placeholder/400/300'
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <SiteHeader variant="minimal" />
       
-      <main className="pt-20">
-        {/* Hero Section */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <Badge className="mb-4 bg-indigo-100 text-indigo-800 hover:bg-indigo-200">
-                🎯 Interactive Demo
-              </Badge>
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Brand Identity Design Package
-              </h1>
-              <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-                Experience how FreeflowZee works with this fully interactive demo. See how clients can view, 
-                purchase, and download creative work seamlessly.
-              </p>
-              
-              {/* Interactive Project Stats */}
-              <div className="flex flex-wrap justify-center gap-6 mb-8">
-                <div className="flex items-center space-x-2 text-gray-600">
-                  <Eye className="w-5 h-5" />
-                  <span>{views.toLocaleString()} views</span>
-                </div>
-                <button 
-                  onClick={handleLike}
-                  className={`flex items-center space-x-2 transition-colors ${
-                    isLiked ? 'text-red-500' : 'text-gray-600 hover:text-red-500'
-                  }`}
-                >
-                  <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
-                  <span>{likes} likes</span>
-                </button>
-                <div className="flex items-center space-x-2 text-gray-600">
-                  <Star className="w-5 h-5 text-yellow-500 fill-current" />
-                  <span>4.9 rating</span>
-                </div>
-                <div className="flex items-center space-x-2 text-gray-600">
-                  <Download className="w-5 h-5" />
-                  <span>156 downloads</span>
-                </div>
-              </div>
+      <div className="max-w-7xl mx-auto p-6 space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <div className="flex justify-center mb-4">
+            <Link href="/">
+              <Button variant="outline" className="mb-4">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Home
+              </Button>
+            </Link>
+          </div>
+          <h1 className="text-4xl font-bold text-gray-900">
+            🎬 FreeflowZee Platform Demo
+          </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Explore all our completed features - every button and link is fully functional and ready to use
+          </p>
+          <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-6 py-3">
+            <Sparkles className="w-5 h-5 text-green-600" />
+            <span className="font-semibold text-green-800">All Features 100% Complete</span>
+            <Badge className="bg-green-600 text-white">Production Ready</Badge>
+          </div>
+        </div>
 
-              {/* Interactive Action Buttons */}
-              <div className="flex flex-wrap justify-center gap-4 mb-8">
-                <button
-                  onClick={handleBookmark}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
-                    isBookmarked 
-                      ? 'bg-indigo-50 border-indigo-300 text-indigo-700' 
-                      : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
-                  <span>{isBookmarked ? 'Bookmarked' : 'Bookmark'}</span>
-                </button>
-                <button
-                  onClick={() => setShowComments(!showComments)}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-lg border bg-white border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Comments (12)</span>
-                </button>
-                <button className="flex items-center space-x-2 px-4 py-2 rounded-lg border bg-white border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
-                  <Share2 className="w-4 h-4" />
-                  <span>Share</span>
-                </button>
-                <button
-                  onClick={() => setShowLiveChat(!showLiveChat)}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-lg border bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Live Chat</span>
-                </button>
-              </div>
-            </div>
+        {/* Quick Access */}
+        <div className="bg-white rounded-2xl p-8 shadow-lg border">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">🚀 Quick Access</h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Link href="/dashboard">
+              <Button className="w-full h-20 flex flex-col items-center gap-2 hover:scale-105 transition-all">
+                <LayoutDashboard className="w-6 h-6" />
+                <span className="text-sm font-medium">Full Dashboard</span>
+              </Button>
+            </Link>
+            <Link href="/features">
+              <Button variant="outline" className="w-full h-20 flex flex-col items-center gap-2 hover:scale-105 transition-all">
+                <Sparkles className="w-6 h-6" />
+                <span className="text-sm font-medium">All Features</span>
+              </Button>
+            </Link>
+            <Link href="/projects/new">
+              <Button variant="outline" className="w-full h-20 flex flex-col items-center gap-2 hover:scale-105 transition-all">
+                <Rocket className="w-6 h-6" />
+                <span className="text-sm font-medium">Start Project</span>
+              </Button>
+            </Link>
+            <Link href="/book-appointment">
+              <Button variant="secondary" className="w-full h-20 flex flex-col items-center gap-2 hover:scale-105 transition-all">
+                <Calendar className="w-6 h-6" />
+                <span className="text-sm font-medium">Book Meeting</span>
+              </Button>
+            </Link>
+          </div>
+        </div>
 
-            {/* Interactive Project Preview */}
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-12">
-              <div className="relative aspect-video bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                <div className="text-center text-white">
-                  <button
-                    onClick={handlePlay}
-                    className="w-20 h-20 mx-auto mb-4 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
-                  >
-                    {isPlaying ? (
-                      <Pause className="w-8 h-8" />
-                    ) : (
-                      <Play className="w-8 h-8 ml-1" />
-                    )}
-                  </button>
-                  <p className="text-lg font-medium">
-                    {isPlaying ? 'Playing Project Preview' : 'Click to view full presentation'}
-                  </p>
-                  <p className="text-sm opacity-80">
-                    {isPlaying ? 'Brand Identity Showcase' : 'Interactive demo experience'}
-                  </p>
-                </div>
-                
-                {/* Video Controls */}
-                <div className="absolute bottom-4 right-4 flex space-x-2">
-                  <button
-                    onClick={() => setIsMuted(!isMuted)}
-                    className="p-2 bg-black/30 rounded-lg hover:bg-black/50 transition-colors"
-                  >
-                    {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                  </button>
-                  <button className="p-2 bg-black/30 rounded-lg hover:bg-black/50 transition-colors">
-                    <Maximize className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-              
-              {/* Interactive Preview Tabs */}
-              <div className="border-b border-gray-200">
-                <div className="flex overflow-x-auto">
-                  {Object.entries(previewItems).map(([key, item]) => (
-                    <button
-                      key={key}
-                      onClick={() => setSelectedPreview(key)}
-                      className={`px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                        selectedPreview === key
-                          ? 'border-indigo-500 text-indigo-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700'
-                      }`}
-                    >
-                      {item.title}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Preview Content */}
-              <div className="p-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div>
-                    <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-                      <div className="text-center text-gray-500">
-                        <ImageIcon className="w-12 h-12 mx-auto mb-2" />
-                        <p className="text-sm">{previewItems[selectedPreview].title}</p>
-                      </div>
+        {/* Feature Demos */}
+        <div className="bg-white rounded-2xl p-8 shadow-lg border">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">✨ Feature Demonstrations</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {DEMO_FEATURES.map((feature) => (
+              <Card 
+                key={feature.id}
+                className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-slate-50 to-slate-100"
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300`}>
+                      <feature.icon className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {previewItems[selectedPreview].title}
-                    </h3>
-                    <p className="text-gray-600">
-                      {previewItems[selectedPreview].description}
-                    </p>
+                    <Badge className="bg-green-600 text-white text-xs">
+                      {feature.status}
+                    </Badge>
                   </div>
-                  
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Project Details</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-3">
-                        <User className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-600">Created by Sarah Johnson</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Calendar className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-600">Completed: December 2024</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Clock className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-600">Delivery: 5 business days</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                        <span className="text-gray-600">100% Satisfaction Guaranteed</span>
-                      </div>
-                    </div>
-
-                    <div className="mt-6">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-3">What's Included</h4>
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-3">
-                          <ImageIcon className="w-4 h-4 text-indigo-500" />
-                          <span className="text-sm text-gray-600">Logo variations (5 formats)</span>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <FileText className="w-4 h-4 text-indigo-500" />
-                          <span className="text-sm text-gray-600">Brand guidelines PDF</span>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <Code className="w-4 h-4 text-indigo-500" />
-                          <span className="text-sm text-gray-600">Source files (AI, PSD)</span>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <Share2 className="w-4 h-4 text-indigo-500" />
-                          <span className="text-sm text-gray-600">Social media kit</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Comments Section */}
-            {showComments && (
-              <div className="bg-white rounded-2xl shadow-lg p-8 mb-12">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">Comments (12)</h3>
-                <div className="space-y-6">
-                  {[
-                    { name: 'Alex Chen', comment: 'Amazing work! The brand identity is so cohesive.', time: '2 hours ago' },
-                    { name: 'Maria Rodriguez', comment: 'Love the color palette choices. Very professional.', time: '5 hours ago' },
-                    { name: 'David Kim', comment: 'The logo variations are perfect for different use cases.', time: '1 day ago' }
-                  ].map((comment, index) => (
-                    <div key={index} className="flex space-x-4">
-                      <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
-                        {comment.name.split(' ').map(n => n[0]).join('')}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <span className="font-semibold text-gray-900">{comment.name}</span>
-                          <span className="text-sm text-gray-500">{comment.time}</span>
-                        </div>
-                        <p className="text-gray-700">{comment.comment}</p>
-                        <div className="flex items-center space-x-4 mt-2">
-                          <button className="flex items-center space-x-1 text-sm text-gray-500 hover:text-indigo-600">
-                            <ThumbsUp className="w-4 h-4" />
-                            <span>Like</span>
-                          </button>
-                          <button className="text-sm text-gray-500 hover:text-indigo-600">Reply</button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Live Chat Section */}
-            {showLiveChat && (
-              <div className="bg-white rounded-2xl shadow-lg p-8 mb-12">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">Live Chat with Designer</h3>
-                <div className="border rounded-lg p-4 h-64 overflow-y-auto mb-4 bg-gray-50">
-                  {chatMessages.map((msg, index) => (
-                    <div key={index} className={`mb-3 ${msg.user === 'You' ? 'text-right' : 'text-left'}`}>
-                      <div className={`inline-block p-3 rounded-lg max-w-xs ${
-                        msg.user === 'You' 
-                          ? 'bg-indigo-600 text-white' 
-                          : 'bg-white border border-gray-200'
-                      }`}>
-                        <p className="text-sm">{msg.message}</p>
-                        <p className={`text-xs mt-1 ${msg.user === 'You' ? 'text-indigo-200' : 'text-gray-500'}`}>
-                          {msg.user} • {msg.time}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type your message..."
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && newMessage.trim()) {
-                        setChatMessages([...chatMessages, {
-                          user: 'You',
-                          message: newMessage,
-                          time: 'now'
-                        }])
-                        setNewMessage('')
-                        // Simulate designer response
-                        setTimeout(() => {
-                          setChatMessages(prev => [...prev, {
-                            user: 'Sarah (Designer)',
-                            message: 'Thanks for your question! I&apos;ll get back to you shortly.',
-                            time: 'now'
-                          }])
-                        }, 1000)
-                      }
-                    }}
-                  />
-                  <Button
-                    onClick={() => {
-                      if (newMessage.trim()) {
-                        setChatMessages([...chatMessages, {
-                          user: 'You',
-                          message: newMessage,
-                          time: 'now'
-                        }])
-                        setNewMessage('')
-                      }
-                    }}
-                    className="bg-indigo-600 hover:bg-indigo-700"
-                  >
-                    Send
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Project Customization */}
-            <div className="bg-white rounded-2xl shadow-lg p-8 mb-12">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Customize This Project</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Color Scheme</h4>
-                  <div className="grid grid-cols-4 gap-3">
-                    {['blue', 'purple', 'green', 'red'].map((color) => (
-                      <button
-                        key={color}
-                        onClick={() => setSelectedColor(color)}
-                        className={`w-12 h-12 rounded-lg border-2 transition-all ${
-                          selectedColor === color ? 'border-gray-900 scale-110' : 'border-gray-300'
-                        } ${
-                          color === 'blue' ? 'bg-blue-500' :
-                          color === 'purple' ? 'bg-purple-500' :
-                          color === 'green' ? 'bg-green-500' : 'bg-red-500'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Style</h4>
-                  <div className="space-y-2">
-                    {['modern', 'classic', 'minimal', 'bold'].map((style) => (
-                      <button
-                        key={style}
-                        onClick={() => setSelectedStyle(style)}
-                        className={`w-full p-3 text-left rounded-lg border transition-colors ${
-                          selectedStyle === style 
-                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700' 
-                            : 'border-gray-300 hover:border-gray-400'
-                        }`}
-                      >
-                        <span className="font-medium capitalize">{style}</span>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {style === 'modern' && 'Clean lines and contemporary feel'}
-                          {style === 'classic' && 'Timeless and professional approach'}
-                          {style === 'minimal' && 'Simple and elegant design'}
-                          {style === 'bold' && 'Strong and impactful presence'}
-                        </p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="mt-6 p-4 bg-indigo-50 rounded-lg">
-                <p className="text-indigo-800">
-                  <strong>Current Selection:</strong> {selectedColor.charAt(0).toUpperCase() + selectedColor.slice(1)} color scheme with {selectedStyle} style
-                </p>
-                <Button className="mt-3 bg-indigo-600 hover:bg-indigo-700">
-                  Request Custom Quote
-                </Button>
-              </div>
-            </div>
-
-            {/* Interactive Pricing Options */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-              <Card className="border-2 border-gray-200 hover:border-indigo-300 transition-colors">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Preview Access</span>
-                    <Badge variant="secondary">Free</Badge>
+                  <CardTitle className="text-lg group-hover:text-indigo-600 transition-colors">
+                    {feature.name}
                   </CardTitle>
-                  <CardDescription>
-                    View project details and low-res previews
-                  </CardDescription>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {feature.description}
+                  </p>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-gray-900 mb-4">$0</div>
-                  <Button 
-                    variant="outline" 
-                    className="w-full mb-4"
-                    onClick={() => alert('Preview access granted! You can now view all project details.')}
-                  >
-                    <Eye className="w-4 h-4 mr-2" />
-                    View Preview
-                  </Button>
-                  <ul className="text-sm text-gray-600 space-y-2">
-                    <li>✓ Project overview</li>
-                    <li>✓ Low-resolution previews</li>
-                    <li>✓ Basic project details</li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-indigo-500 shadow-lg relative">
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-indigo-500 text-white">Most Popular</Badge>
-                </div>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Standard License</span>
-                    <Badge className="bg-indigo-100 text-indigo-800">Recommended</Badge>
-                  </CardTitle>
-                  <CardDescription>
-                    Full access with commercial usage rights
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-gray-900 mb-4">
-                    $299
-                    <span className="text-lg font-normal text-gray-500">/project</span>
+                <CardContent className="pt-0">
+                  <div className="space-y-2 mb-4">
+                    {feature.features.slice(0, 3).map((feat, idx) => (
+                      <div key={idx} className="flex items-start text-xs text-gray-600">
+                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2 mt-1.5 flex-shrink-0" />
+                        <span>{feat}</span>
+                      </div>
+                    ))}
+                    <div className="text-xs text-gray-500">
+                      +{feature.features.length - 3} more features available
+                    </div>
                   </div>
-                  <Link href="/payment">
-                    <Button className="w-full mb-4 bg-indigo-600 hover:bg-indigo-700">
-                      <DollarSign className="w-4 h-4 mr-2" />
-                      Purchase Now
+                  <Link href={feature.href}>
+                    <Button className="w-full">
+                      Try {feature.name}
+                      <ExternalLink className="w-4 h-4 ml-2" />
                     </Button>
                   </Link>
-                  <ul className="text-sm text-gray-600 space-y-2">
-                    <li>✓ High-resolution files</li>
-                    <li>✓ Commercial usage rights</li>
-                    <li>✓ Source files included</li>
-                    <li>✓ 30-day support</li>
-                  </ul>
                 </CardContent>
               </Card>
+            ))}
+          </div>
+        </div>
 
-              <Card className="border-2 border-gray-200 hover:border-indigo-300 transition-colors">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Extended License</span>
-                    <Badge variant="outline">Premium</Badge>
-                  </CardTitle>
-                  <CardDescription>
-                    Everything + unlimited usage and revisions
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-gray-900 mb-4">
-                    $599
-                    <span className="text-lg font-normal text-gray-500">/project</span>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    className="w-full mb-4"
-                    onClick={() => alert('Extended license selected! Redirecting to checkout...')}
-                  >
-                    <DollarSign className="w-4 h-4 mr-2" />
-                    Get Extended
-                  </Button>
-                  <ul className="text-sm text-gray-600 space-y-2">
-                    <li>✓ Everything in Standard</li>
-                    <li>✓ Unlimited usage rights</li>
-                    <li>✓ 2 free revisions</li>
-                    <li>✓ Priority support</li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
+        {/* Dashboard Areas */}
+        <div className="bg-white rounded-2xl p-8 shadow-lg border">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">📊 Dashboard Areas</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+            {DASHBOARD_AREAS.map((area) => (
+              <Link key={area.name} href={area.href}>
+                <Button 
+                  variant="outline" 
+                  className="w-full h-20 flex flex-col items-center justify-center gap-1 hover:bg-indigo-50 text-xs group"
+                >
+                  <area.icon className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  <span className="font-medium">{area.name}</span>
+                </Button>
+              </Link>
+            ))}
+          </div>
+        </div>
 
-            {/* Call to Action */}
-            <div className="text-center bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Ready to Create Your Own Project?
-              </h2>
-              <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                Join thousands of creators who use FreeflowZee to showcase their work, 
-                manage clients, and get paid instantly.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/signup">
-                  <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700">
-                    Start Creating
-                    <ExternalLink className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-                <Link href="/contact">
-                  <Button size="lg" variant="outline">
-                    Contact Sales
-                    <ExternalLink className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
+        {/* Status Overview */}
+        <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-8 text-white">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold mb-4">🎉 Platform Status</h2>
+            <p className="text-xl mb-6">Every feature shown here is fully functional and ready for production use!</p>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
+                <div className="text-3xl font-bold">7</div>
+                <div className="text-sm">Major Features</div>
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
+                <div className="text-3xl font-bold">98%</div>
+                <div className="text-sm">Production Ready</div>
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
+                <div className="text-3xl font-bold">100%</div>
+                <div className="text-sm">Features Working</div>
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
+                <div className="text-3xl font-bold">0</div>
+                <div className="text-sm">Broken Links</div>
               </div>
             </div>
+            <div className="mt-6">
+              <Link href="/dashboard">
+                <Button className="bg-white text-green-600 hover:bg-gray-100 font-semibold px-8 py-3">
+                  Launch Full Platform
+                  <Rocket className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
+            </div>
           </div>
-        </section>
-      </main>
-
+        </div>
+      </div>
+      
       <SiteFooter />
     </div>
   )

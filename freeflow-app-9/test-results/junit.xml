@@ -1,0 +1,531 @@
+<testsuites id="" name="" tests="45" failures="2" skipped="40" errors="0" time="17.965781">
+<testsuite name="basic-signup.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="chromium" tests="1" failures="0" skipped="0" time="4.597" errors="0">
+<testcase name="Basic Signup Flow Tests › should load the signup page correctly" classname="basic-signup.spec.ts" time="4.597">
+<system-out>
+<![CDATA[✅ Signup page loaded successfully with all form elements
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="dashboard-simple.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="chromium" tests="1" failures="1" skipped="0" time="16.1" errors="0">
+<testcase name="Dashboard Simple Test › should load the dashboard page" classname="dashboard-simple.spec.ts" time="16.1">
+<failure message="dashboard-simple.spec.ts:5:7 should load the dashboard page" type="FAILURE">
+<![CDATA[  [chromium] › dashboard-simple.spec.ts:5:7 › Dashboard Simple Test › should load the dashboard page 
+
+    Error: Timed out 5000ms waiting for expect(locator).toHaveURL(expected)
+
+    Locator: locator(':root')
+    Expected pattern: /login/
+    Received string:  "http://localhost:3001/dashboard"
+    Call log:
+      - expect.toHaveURL with timeout 5000ms
+      - waiting for locator(':root')
+      -   locator resolved to <html lang="en">…</html>
+      -   unexpected value "http://localhost:3001/dashboard"
+      -   locator resolved to <html lang="en">…</html>
+      -   unexpected value "http://localhost:3001/dashboard"
+      -   locator resolved to <html lang="en">…</html>
+      -   unexpected value "http://localhost:3001/dashboard"
+      -   locator resolved to <html lang="en">…</html>
+      -   unexpected value "http://localhost:3001/dashboard"
+      -   locator resolved to <html lang="en">…</html>
+      -   unexpected value "http://localhost:3001/dashboard"
+      -   locator resolved to <html lang="en">…</html>
+      -   unexpected value "http://localhost:3001/dashboard"
+      -   locator resolved to <html lang="en">…</html>
+      -   unexpected value "http://localhost:3001/dashboard"
+      -   locator resolved to <html lang="en">…</html>
+      -   unexpected value "http://localhost:3001/dashboard"
+      -   locator resolved to <html lang="en">…</html>
+      -   unexpected value "http://localhost:3001/dashboard"
+
+
+       7 |     
+       8 |     // Should redirect to login
+    >  9 |     await expect(page).toHaveURL(/login/);
+         |                        ^
+      10 |     
+      11 |     // Check if login page loads
+      12 |     await expect(page.locator('input[type="email"]')).toBeVisible();
+
+        at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard-simple.spec.ts:9:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/dashboard-simple-Dashboard-Simple-Test-should-load-the-dashboard-page-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/dashboard-simple-Dashboard-Simple-Test-should-load-the-dashboard-page-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: Timed out 5000ms waiting for expect(locator).toHaveURL(expected)
+
+    Locator: locator(':root')
+    Expected pattern: /login/
+    Received string:  "http://localhost:3001/dashboard"
+    Call log:
+      - expect.toHaveURL with timeout 5000ms
+      - waiting for locator(':root')
+      -   locator resolved to <html lang="en">…</html>
+      -   unexpected value "http://localhost:3001/dashboard"
+      -   locator resolved to <html lang="en">…</html>
+      -   unexpected value "http://localhost:3001/dashboard"
+      -   locator resolved to <html lang="en">…</html>
+      -   unexpected value "http://localhost:3001/dashboard"
+      -   locator resolved to <html lang="en">…</html>
+      -   unexpected value "http://localhost:3001/dashboard"
+      -   locator resolved to <html lang="en">…</html>
+      -   unexpected value "http://localhost:3001/dashboard"
+      -   locator resolved to <html lang="en">…</html>
+      -   unexpected value "http://localhost:3001/dashboard"
+      -   locator resolved to <html lang="en">…</html>
+      -   unexpected value "http://localhost:3001/dashboard"
+      -   locator resolved to <html lang="en">…</html>
+      -   unexpected value "http://localhost:3001/dashboard"
+
+
+       7 |     
+       8 |     // Should redirect to login
+    >  9 |     await expect(page).toHaveURL(/login/);
+         |                        ^
+      10 |     
+      11 |     // Check if login page loads
+      12 |     await expect(page.locator('input[type="email"]')).toBeVisible();
+
+        at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard-simple.spec.ts:9:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/dashboard-simple-Dashboard-Simple-Test-should-load-the-dashboard-page-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/dashboard-simple-Dashboard-Simple-Test-should-load-the-dashboard-page-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/dashboard-simple-Dashboard-Simple-Test-should-load-the-dashboard-page-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/dashboard-simple-Dashboard-Simple-Test-should-load-the-dashboard-page-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|dashboard-simple-Dashboard-Simple-Test-should-load-the-dashboard-page-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|dashboard-simple-Dashboard-Simple-Test-should-load-the-dashboard-page-chromium/video.webm]]
+
+[[ATTACHMENT|dashboard-simple-Dashboard-Simple-Test-should-load-the-dashboard-page-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|dashboard-simple-Dashboard-Simple-Test-should-load-the-dashboard-page-chromium-retry1/video.webm]]
+
+[[ATTACHMENT|dashboard-simple-Dashboard-Simple-Test-should-load-the-dashboard-page-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="dashboard.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="chromium" tests="1" failures="0" skipped="1" time="17.373" errors="0">
+<testcase name="Dashboard Tests › should load dashboard page successfully" classname="dashboard.spec.ts" time="17.373">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="freeflowzee-comprehensive-test-suite.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="chromium" tests="5" failures="1" skipped="2" time="22.773" errors="0">
+<testcase name="🏠 Landing Page &amp; Navigation System › should load landing page with all essential elements" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="7.796">
+<failure message="freeflowzee-comprehensive-test-suite.spec.ts:36:7 should load landing page with all essential elements" type="FAILURE">
+<![CDATA[  [chromium] › freeflowzee-comprehensive-test-suite.spec.ts:36:7 › 🏠 Landing Page & Navigation System › should load landing page with all essential elements 
+
+    Error: expect.toBeVisible: Error: strict mode violation: getByRole('link', { name: 'Creator Login' }) resolved to 2 elements:
+        1) <a href="/login?redirect=/dashboard">…</a> aka getByTestId('hero-cta-buttons').getByRole('link', { name: 'Creator Login' })
+        2) <a href="/login?redirect=/dashboard">…</a> aka getByRole('link', { name: 'Creator Login' }).nth(1)
+
+    Call log:
+      - expect.toBeVisible with timeout 5000ms
+      - waiting for getByRole('link', { name: 'Creator Login' })
+
+
+      42 |     
+      43 |     // Verify main CTAs are present
+    > 44 |     await expect(page.getByRole('link', { name: 'Creator Login' })).toBeVisible()
+         |                                                                     ^
+      45 |     await expect(page.getByRole('link', { name: 'Client Access' })).toBeVisible()
+      46 |     await expect(page.getByRole('link', { name: 'Watch Demo' })).toBeVisible()
+      47 |     
+
+        at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/freeflowzee-comprehensive-test-suite.spec.ts:44:69
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/freeflowzee-comprehensive-test-suite-🏠-Landin-bf8a6-d-load-landing-page-with-all-essential-elements-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/freeflowzee-comprehensive-test-suite-🏠-Landin-bf8a6-d-load-landing-page-with-all-essential-elements-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: expect.toBeVisible: Error: strict mode violation: getByRole('link', { name: 'Creator Login' }) resolved to 2 elements:
+        1) <a href="/login?redirect=/dashboard">…</a> aka getByTestId('hero-cta-buttons').getByRole('link', { name: 'Creator Login' })
+        2) <a href="/login?redirect=/dashboard">…</a> aka getByRole('link', { name: 'Creator Login' }).nth(1)
+
+    Call log:
+      - expect.toBeVisible with timeout 5000ms
+      - waiting for getByRole('link', { name: 'Creator Login' })
+
+
+      42 |     
+      43 |     // Verify main CTAs are present
+    > 44 |     await expect(page.getByRole('link', { name: 'Creator Login' })).toBeVisible()
+         |                                                                     ^
+      45 |     await expect(page.getByRole('link', { name: 'Client Access' })).toBeVisible()
+      46 |     await expect(page.getByRole('link', { name: 'Watch Demo' })).toBeVisible()
+      47 |     
+
+        at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/freeflowzee-comprehensive-test-suite.spec.ts:44:69
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/freeflowzee-comprehensive-test-suite-🏠-Landin-bf8a6-d-load-landing-page-with-all-essential-elements-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/freeflowzee-comprehensive-test-suite-🏠-Landin-bf8a6-d-load-landing-page-with-all-essential-elements-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/freeflowzee-comprehensive-test-suite-🏠-Landin-bf8a6-d-load-landing-page-with-all-essential-elements-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/freeflowzee-comprehensive-test-suite-🏠-Landin-bf8a6-d-load-landing-page-with-all-essential-elements-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: expect.toBeVisible: Error: strict mode violation: getByRole('link', { name: 'Creator Login' }) resolved to 2 elements:
+        1) <a href="/login?redirect=/dashboard">…</a> aka getByTestId('hero-cta-buttons').getByRole('link', { name: 'Creator Login' })
+        2) <a href="/login?redirect=/dashboard">…</a> aka getByRole('link', { name: 'Creator Login' }).nth(1)
+
+    Call log:
+      - expect.toBeVisible with timeout 5000ms
+      - waiting for getByRole('link', { name: 'Creator Login' })
+
+
+      42 |     
+      43 |     // Verify main CTAs are present
+    > 44 |     await expect(page.getByRole('link', { name: 'Creator Login' })).toBeVisible()
+         |                                                                     ^
+      45 |     await expect(page.getByRole('link', { name: 'Client Access' })).toBeVisible()
+      46 |     await expect(page.getByRole('link', { name: 'Watch Demo' })).toBeVisible()
+      47 |     
+
+        at /Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/freeflowzee-comprehensive-test-suite.spec.ts:44:69
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/freeflowzee-comprehensive-test-suite-🏠-Landin-bf8a6-d-load-landing-page-with-all-essential-elements-chromium-retry2/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/freeflowzee-comprehensive-test-suite-🏠-Landin-bf8a6-d-load-landing-page-with-all-essential-elements-chromium-retry2/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+🎉 FreeflowZee Comprehensive Test Suite Complete!
+📊 Summary:
+   • Landing Page & Navigation ✅
+   • Authentication System ✅
+   • Client Payment System ✅
+   • Public Pages ✅
+   • Dashboard Navigation ✅
+   • Responsive Design ✅
+   • Performance & Security ✅
+   • External Links ✅
+   • Edge Cases ✅
+🚀 Application Status: Production Ready!
+
+[[ATTACHMENT|freeflowzee-comprehensive-test-suite-🏠-Landin-bf8a6-d-load-landing-page-with-all-essential-elements-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|freeflowzee-comprehensive-test-suite-🏠-Landin-bf8a6-d-load-landing-page-with-all-essential-elements-chromium/video.webm]]
+
+🎉 FreeflowZee Comprehensive Test Suite Complete!
+📊 Summary:
+   • Landing Page & Navigation ✅
+   • Authentication System ✅
+   • Client Payment System ✅
+   • Public Pages ✅
+   • Dashboard Navigation ✅
+   • Responsive Design ✅
+   • Performance & Security ✅
+   • External Links ✅
+   • Edge Cases ✅
+🚀 Application Status: Production Ready!
+
+[[ATTACHMENT|freeflowzee-comprehensive-test-suite-🏠-Landin-bf8a6-d-load-landing-page-with-all-essential-elements-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|freeflowzee-comprehensive-test-suite-🏠-Landin-bf8a6-d-load-landing-page-with-all-essential-elements-chromium-retry1/video.webm]]
+
+[[ATTACHMENT|freeflowzee-comprehensive-test-suite-🏠-Landin-bf8a6-d-load-landing-page-with-all-essential-elements-chromium-retry1/trace.zip]]
+
+🎉 FreeflowZee Comprehensive Test Suite Complete!
+📊 Summary:
+   • Landing Page & Navigation ✅
+   • Authentication System ✅
+   • Client Payment System ✅
+   • Public Pages ✅
+   • Dashboard Navigation ✅
+   • Responsive Design ✅
+   • Performance & Security ✅
+   • External Links ✅
+   • Edge Cases ✅
+🚀 Application Status: Production Ready!
+
+[[ATTACHMENT|freeflowzee-comprehensive-test-suite-🏠-Landin-bf8a6-d-load-landing-page-with-all-essential-elements-chromium-retry2/test-failed-1.png]]
+
+[[ATTACHMENT|freeflowzee-comprehensive-test-suite-🏠-Landin-bf8a6-d-load-landing-page-with-all-essential-elements-chromium-retry2/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="💳 Client Payment System › should load payment page with project details" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0.929">
+<system-out>
+<![CDATA[Access levels may have different structure
+✅ Payment page loads with project details
+
+🎉 FreeflowZee Comprehensive Test Suite Complete!
+📊 Summary:
+   • Landing Page & Navigation ✅
+   • Authentication System ✅
+   • Client Payment System ✅
+   • Public Pages ✅
+   • Dashboard Navigation ✅
+   • Responsive Design ✅
+   • Performance & Security ✅
+   • External Links ✅
+   • Edge Cases ✅
+🚀 Application Status: Production Ready!
+]]>
+</system-out>
+</testcase>
+<testcase name="📄 Public Pages › should load all public pages without errors" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="12.73">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="📄 Public Pages › should load footer pages" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="⚡ Performance &amp; Security › should load pages within reasonable time" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="1.318">
+<system-out>
+<![CDATA[✅ Page loaded in 924ms
+
+🎉 FreeflowZee Comprehensive Test Suite Complete!
+📊 Summary:
+   • Landing Page & Navigation ✅
+   • Authentication System ✅
+   • Client Payment System ✅
+   • Public Pages ✅
+   • Dashboard Navigation ✅
+   • Responsive Design ✅
+   • Performance & Security ✅
+   • External Links ✅
+   • Edge Cases ✅
+🚀 Application Status: Production Ready!
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="payment-comprehensive.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="chromium" tests="1" failures="0" skipped="1" time="4.818" errors="0">
+<testcase name="Payment System Comprehensive Tests › should load payment page with all access methods" classname="payment-comprehensive.spec.ts" time="4.818">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="basic-signup.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="firefox" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Basic Signup Flow Tests › should load the signup page correctly" classname="basic-signup.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="dashboard-simple.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="firefox" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Dashboard Simple Test › should load the dashboard page" classname="dashboard-simple.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="dashboard.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="firefox" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Dashboard Tests › should load dashboard page successfully" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="freeflowzee-comprehensive-test-suite.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="firefox" tests="5" failures="0" skipped="5" time="0" errors="0">
+<testcase name="🏠 Landing Page &amp; Navigation System › should load landing page with all essential elements" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="💳 Client Payment System › should load payment page with project details" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="📄 Public Pages › should load all public pages without errors" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="📄 Public Pages › should load footer pages" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="⚡ Performance &amp; Security › should load pages within reasonable time" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="payment-comprehensive.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="firefox" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Payment System Comprehensive Tests › should load payment page with all access methods" classname="payment-comprehensive.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="basic-signup.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="webkit" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Basic Signup Flow Tests › should load the signup page correctly" classname="basic-signup.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="dashboard-simple.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="webkit" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Dashboard Simple Test › should load the dashboard page" classname="dashboard-simple.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="dashboard.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="webkit" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Dashboard Tests › should load dashboard page successfully" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="freeflowzee-comprehensive-test-suite.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="webkit" tests="5" failures="0" skipped="5" time="0" errors="0">
+<testcase name="🏠 Landing Page &amp; Navigation System › should load landing page with all essential elements" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="💳 Client Payment System › should load payment page with project details" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="📄 Public Pages › should load all public pages without errors" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="📄 Public Pages › should load footer pages" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="⚡ Performance &amp; Security › should load pages within reasonable time" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="payment-comprehensive.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="webkit" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Payment System Comprehensive Tests › should load payment page with all access methods" classname="payment-comprehensive.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="basic-signup.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="Mobile Chrome" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Basic Signup Flow Tests › should load the signup page correctly" classname="basic-signup.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="dashboard-simple.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="Mobile Chrome" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Dashboard Simple Test › should load the dashboard page" classname="dashboard-simple.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="dashboard.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="Mobile Chrome" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Dashboard Tests › should load dashboard page successfully" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="freeflowzee-comprehensive-test-suite.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="Mobile Chrome" tests="5" failures="0" skipped="5" time="0" errors="0">
+<testcase name="🏠 Landing Page &amp; Navigation System › should load landing page with all essential elements" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="💳 Client Payment System › should load payment page with project details" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="📄 Public Pages › should load all public pages without errors" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="📄 Public Pages › should load footer pages" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="⚡ Performance &amp; Security › should load pages within reasonable time" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="payment-comprehensive.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="Mobile Chrome" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Payment System Comprehensive Tests › should load payment page with all access methods" classname="payment-comprehensive.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="basic-signup.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="Mobile Safari" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Basic Signup Flow Tests › should load the signup page correctly" classname="basic-signup.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="dashboard-simple.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="Mobile Safari" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Dashboard Simple Test › should load the dashboard page" classname="dashboard-simple.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="dashboard.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="Mobile Safari" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Dashboard Tests › should load dashboard page successfully" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="freeflowzee-comprehensive-test-suite.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="Mobile Safari" tests="5" failures="0" skipped="5" time="0" errors="0">
+<testcase name="🏠 Landing Page &amp; Navigation System › should load landing page with all essential elements" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="💳 Client Payment System › should load payment page with project details" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="📄 Public Pages › should load all public pages without errors" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="📄 Public Pages › should load footer pages" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="⚡ Performance &amp; Security › should load pages within reasonable time" classname="freeflowzee-comprehensive-test-suite.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="payment-comprehensive.spec.ts" timestamp="2025-06-10T20:36:55.800Z" hostname="Mobile Safari" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Payment System Comprehensive Tests › should load payment page with all access methods" classname="payment-comprehensive.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+</testsuites>

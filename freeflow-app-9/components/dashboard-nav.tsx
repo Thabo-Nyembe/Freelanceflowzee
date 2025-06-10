@@ -272,7 +272,7 @@ export function DashboardNav({ className }: DashboardNavProps) {
                 <Sparkles className="h-4 w-4 text-white" />
               </div>
               <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                FreeflowT
+                FreeflowZee
               </span>
             </div>
           </div>
@@ -344,7 +344,7 @@ export function DashboardNav({ className }: DashboardNavProps) {
               </div>
               <div>
                 <h1 className="font-bold text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  FreeflowT
+                  FreeflowZee
                 </h1>
                 <p className="text-xs text-gray-500">Modern Freelance Platform</p>
               </div>

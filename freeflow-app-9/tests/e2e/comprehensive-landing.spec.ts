@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures/app-fixtures';
 import { LandingPage } from '../page-objects/landing-page';
 
 // Configure retries and timeouts for landing page tests
@@ -8,14 +8,9 @@ test.describe.configure({
 });
 
 test.describe('🏠 Comprehensive Landing Page Tests', () => {
-  let landingPage: LandingPage;
-
   test.beforeEach(async ({ page }, testInfo) => {
     // Extend timeout for all tests in this suite
     testInfo.setTimeout(testInfo.timeout + 15000);
-    
-    landingPage = new LandingPage(page);
-    await landingPage.goto();
     
     // Wait for page to be fully loaded and interactive
     await page.waitForLoadState('networkidle');
