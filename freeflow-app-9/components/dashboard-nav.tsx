@@ -60,24 +60,24 @@ const navigation = [
     icon: LayoutDashboard, 
     color: 'text-blue-600',
     bgColor: 'bg-blue-50',
-    description: 'Overview & analytics'
+    description: 'Overview & insights'
   },
   { 
-    name: 'My Day', 
+    name: 'My Day Today', 
     href: '/dashboard/my-day', 
     icon: Calendar, 
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-    description: 'Today\'s schedule'
+    color: 'text-rose-600',
+    bgColor: 'bg-rose-50',
+    description: 'AI-powered daily planning',
+    badge: 'AI'
   },
   { 
     name: 'Projects', 
-    href: '/projects', 
+    href: '/dashboard/projects', 
     icon: FolderOpen, 
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-    description: 'Manage projects',
-    badge: '12'
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-50',
+    description: 'Manage your work'
   },
   { 
     name: 'Project Tracker', 
@@ -85,32 +85,63 @@ const navigation = [
     icon: Target, 
     color: 'text-orange-600',
     bgColor: 'bg-orange-50',
-    description: 'Track progress'
+    description: 'Track project progress'
+  },
+  { 
+    name: 'Escrow', 
+    href: '/dashboard/escrow', 
+    icon: Shield, 
+    color: 'text-emerald-600',
+    bgColor: 'bg-emerald-50',
+    description: 'Secure payment protection'
+  },
+  { 
+    name: 'Collaboration', 
+    href: '/dashboard/collaboration', 
+    icon: Users, 
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50',
+    description: 'Work together seamlessly'
   },
   { 
     name: 'Time Tracking', 
     href: '/dashboard/time-tracking', 
     icon: Clock, 
-    color: 'text-indigo-600',
-    bgColor: 'bg-indigo-50',
-    description: 'Monitor hours'
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-50',
+    description: 'Track billable hours'
+  },
+  { 
+    name: 'Invoices', 
+    href: '/dashboard/invoices', 
+    icon: Receipt, 
+    color: 'text-green-600',
+    bgColor: 'bg-green-50',
+    description: 'Billing & payments'
+  },
+  { 
+    name: 'Calendar', 
+    href: '/dashboard/calendar', 
+    icon: CalendarDays, 
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50',
+    description: 'Schedule & appointments'
+  },
+  { 
+    name: 'Bookings', 
+    href: '/dashboard/bookings', 
+    icon: Calendar, 
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-50',
+    description: 'Appointment scheduling'
   },
   { 
     name: 'Clients', 
     href: '/dashboard/clients', 
     icon: UserCheck, 
-    color: 'text-pink-600',
-    bgColor: 'bg-pink-50',
-    description: 'Client relationships'
-  },
-  { 
-    name: 'Bookings', 
-    href: '/dashboard/bookings', 
-    icon: CalendarDays, 
     color: 'text-indigo-600',
     bgColor: 'bg-indigo-50',
-    description: 'Manage appointments',
-    badge: '5'
+    description: 'Client relationships'
   },
   { 
     name: 'Team', 
@@ -177,6 +208,15 @@ const navigation = [
     color: 'text-violet-600',
     bgColor: 'bg-violet-50',
     description: 'Connect & collaborate'
+  },
+  { 
+    name: 'Client Zone', 
+    href: '/dashboard/client-zone', 
+    icon: Shield, 
+    color: 'text-indigo-600',
+    bgColor: 'bg-indigo-50',
+    description: 'Elegant client galleries with escrow integration',
+    badge: 'NEW'
   },
   { 
     name: 'Profile', 
