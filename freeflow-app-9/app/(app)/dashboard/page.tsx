@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -140,6 +141,7 @@ const mockData = {
 };
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [notifications, setNotifications] = useState(3);
 
@@ -158,45 +160,69 @@ export default function DashboardPage() {
       value: 'dashboard',
       label: 'Dashboard',
       icon: LayoutDashboard,
-      component: DashboardOverview
+      component: DashboardOverview,
+      route: '/dashboard'
+    },
+    {
+      value: 'my-day',
+      label: 'My Day',
+      icon: Calendar,
+      component: null,
+      route: '/dashboard/my-day',
+      badge: 'AI'
     },
     {
       value: 'projects',
       label: 'Projects',
       icon: FolderOpen,
-      component: ProjectsHub
+      component: ProjectsHub,
+      route: '/dashboard/projects-hub'
     },
     {
       value: 'feedback',
       label: 'Feedback',
       icon: MessageSquare,
-      component: UniversalFeedbackHub
+      component: UniversalFeedbackHub,
+      route: '/dashboard/collaboration'
     },
     {
       value: 'financial',
       label: 'Financial',
       icon: DollarSign,
-      component: FinancialHub
+      component: FinancialHub,
+      route: '/dashboard/financial-hub'
     },
     {
       value: 'team',
       label: 'Team',
       icon: Users,
-      component: TeamHub
+      component: TeamHub,
+      route: '/dashboard/team-hub'
     },
     {
       value: 'files',
       label: 'Files',
       icon: FileText,
-      component: FilesHub
+      component: FilesHub,
+      route: '/dashboard/files-hub'
     },
     {
       value: 'community',
       label: 'Community',
       icon: Globe,
-      component: CommunityTab
+      component: CommunityTab,
+      route: '/dashboard/community'
     }
   ];
+
+  const handleTabChange = (tabValue: string) => {
+    const tab = tabConfig.find(t => t.value === tabValue);
+    if (tab?.route && tab.route !== '/dashboard') {
+      router.push(tab.route);
+    } else {
+      setActiveTab(tabValue);
+    }
+  };
 
   const renderTabContent = (tabValue: string) => {
     const tab = tabConfig.find(t => t.value === tabValue);
@@ -282,13 +308,25 @@ export default function DashboardPage() {
             
             {/* Premium action buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button className="bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 text-white px-8 py-4 rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-[1.02] transition-all duration-300 border border-white/20">
+              <Button 
+                className="bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 text-white px-8 py-4 rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-[1.02] transition-all duration-300 border border-white/20"
+                onClick={() => router.push('/projects/new')}
+              >
                 <Plus className="mr-2 w-5 h-5" />
                 New Project
               </Button>
-              <Button variant="outline" className="border-2 border-slate-200 hover:border-slate-300 bg-white/70 backdrop-blur-xl px-8 py-4 rounded-2xl text-slate-700 hover:bg-white/80 transition-all duration-300">
-                <Search className="mr-2 w-5 h-5" />
-                Search
+              <Button 
+                variant="outline" 
+                className="border-2 border-slate-200 hover:border-slate-300 bg-white/70 backdrop-blur-xl px-8 py-4 rounded-2xl text-slate-700 hover:bg-white/80 transition-all duration-300 relative"
+                onClick={() => router.push('/dashboard/notifications')}
+              >
+                <Bell className="mr-2 w-5 h-5" />
+                Notifications
+                {notifications > 0 && (
+                  <Badge variant="destructive" className="absolute -top-2 -right-2 h-6 w-6 p-0 text-xs flex items-center justify-center">
+                    {notifications}
+                  </Badge>
+                )}
               </Button>
             </div>
           </div>
@@ -297,7 +335,7 @@ export default function DashboardPage() {
         {/* Premium Navigation Tabs */}
         <Tabs 
           value={activeTab} 
-          onValueChange={setActiveTab} 
+          onValueChange={handleTabChange} 
           className="w-full"
         >
           <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7 mb-12 bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl p-2 shadow-xl shadow-black/5">

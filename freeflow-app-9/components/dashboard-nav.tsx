@@ -59,14 +59,19 @@ import {
   CheckCircle,
   Info,
   ExternalLink,
-  MoreHorizontal
+  MoreHorizontal,
+  Filter,
+  Plus,
+  Timer,
+  Bookmark,
+  Activity
 } from 'lucide-react'
 
 // ========================================
-// CONSOLIDATED NAVIGATION STRUCTURE
+// ENHANCED CONSOLIDATED NAVIGATION STRUCTURE
 // ========================================
 
-// Main navigation hubs with consolidated features
+// Main navigation hubs with consolidated features and better organization
 const consolidatedNavigation = [
   { 
     name: 'Dashboard', 
@@ -75,7 +80,8 @@ const consolidatedNavigation = [
     color: 'text-blue-600',
     bgColor: 'bg-blue-50',
     description: 'Overview & insights',
-    notifications: 0
+    notifications: 0,
+    testId: 'dashboard-nav'
   },
   { 
     name: 'My Day Today', 
@@ -85,7 +91,8 @@ const consolidatedNavigation = [
     bgColor: 'bg-rose-50',
     description: 'AI-powered daily planning',
     badge: 'AI',
-    notifications: 3
+    notifications: 3,
+    testId: 'my-day-nav'
   },
   { 
     name: 'Projects Hub', 
@@ -95,12 +102,13 @@ const consolidatedNavigation = [
     bgColor: 'bg-purple-50',
     description: 'Projects • Collaboration • Client Delivery',
     subTabs: [
-      { name: 'Project Tracking', href: '/dashboard/project-tracker', icon: Target },
-      { name: 'Client Collaboration', href: '/dashboard/collaboration', icon: MessageSquare },
-      { name: 'Client Zone Gallery', href: '/dashboard/client-zone', icon: Eye }
+      { name: 'Project Tracking', href: '/dashboard/project-tracker', icon: Target, description: 'Track project progress' },
+      { name: 'Client Collaboration', href: '/dashboard/collaboration', icon: MessageSquare, description: 'Chat & feedback' },
+      { name: 'Client Zone Gallery', href: '/dashboard/client-zone', icon: Eye, description: 'Client project access' }
     ],
     notifications: 5,
-    isHub: true
+    isHub: true,
+    testId: 'projects-hub-nav'
   },
   { 
     name: 'Team Hub', 
@@ -110,11 +118,13 @@ const consolidatedNavigation = [
     bgColor: 'bg-cyan-50',
     description: 'Team • Shared Calendar',
     subTabs: [
-      { name: 'Team Members', href: '/dashboard/team', icon: UserCheck },
-      { name: 'Shared Calendar', href: '/dashboard/calendar', icon: CalendarDays }
+      { name: 'Team Members', href: '/dashboard/team', icon: UserCheck, description: 'Manage team members' },
+      { name: 'Shared Calendar', href: '/dashboard/calendar', icon: CalendarDays, description: 'Team events & meetings' },
+      { name: 'Time Tracking', href: '/dashboard/time-tracking', icon: Timer, description: 'Track work hours' }
     ],
     notifications: 2,
-    isHub: true
+    isHub: true,
+    testId: 'team-hub-nav'
   },
   { 
     name: 'Financial Hub', 
@@ -122,13 +132,15 @@ const consolidatedNavigation = [
     icon: DollarSign, 
     color: 'text-emerald-600',
     bgColor: 'bg-emerald-50',
-    description: 'Escrow • Invoices',
+    description: 'Escrow • Invoices • Analytics',
     subTabs: [
-      { name: 'Escrow System', href: '/dashboard/escrow', icon: Shield },
-      { name: 'Invoices', href: '/dashboard/invoices', icon: Receipt }
+      { name: 'Escrow System', href: '/dashboard/escrow', icon: Shield, description: 'Payment protection' },
+      { name: 'Invoices', href: '/dashboard/invoices', icon: Receipt, description: 'Billing & invoicing' },
+      { name: 'Financial Analytics', href: '/dashboard/analytics', icon: PieChart, description: 'Financial insights' }
     ],
     notifications: 1,
-    isHub: true
+    isHub: true,
+    testId: 'financial-hub-nav'
   },
   { 
     name: 'Files Hub', 
@@ -138,11 +150,13 @@ const consolidatedNavigation = [
     bgColor: 'bg-indigo-50',
     description: 'Cloud Storage • Portfolio Gallery',
     subTabs: [
-      { name: 'Cloud Storage', href: '/dashboard/cloud-storage', icon: Cloud, badge: '10GB' },
-      { name: 'Portfolio Gallery', href: '/dashboard/gallery', icon: Image }
+      { name: 'Cloud Storage', href: '/dashboard/cloud-storage', icon: Cloud, badge: '10GB', description: 'File management' },
+      { name: 'Portfolio Gallery', href: '/dashboard/gallery', icon: Image, description: 'Showcase work' },
+      { name: 'CV Portfolio', href: '/dashboard/cv-portfolio', icon: Bookmark, description: 'Professional CV' }
     ],
     notifications: 0,
-    isHub: true
+    isHub: true,
+    testId: 'files-hub-nav'
   },
   { 
     name: 'Profile', 
@@ -151,7 +165,8 @@ const consolidatedNavigation = [
     color: 'text-gray-600',
     bgColor: 'bg-gray-50',
     description: 'Settings & preferences',
-    notifications: 0
+    notifications: 0,
+    testId: 'profile-nav'
   },
   { 
     name: 'Notifications', 
@@ -161,17 +176,18 @@ const consolidatedNavigation = [
     bgColor: 'bg-red-50',
     description: 'Stay up to date',
     notifications: 8,
-    badge: '8'
+    badge: '8',
+    testId: 'notifications-nav'
   }
 ]
 
 // ========================================
-// NOTIFICATION SYSTEM
+// COMPREHENSIVE NOTIFICATION SYSTEM
 // ========================================
 
 interface Notification {
   id: string
-  type: 'payment' | 'project' | 'team' | 'client' | 'system'
+  type: 'payment' | 'project' | 'team' | 'client' | 'system' | 'deadline'
   title: string
   message: string
   timestamp: string
@@ -179,9 +195,11 @@ interface Notification {
   priority: 'high' | 'medium' | 'low'
   actionUrl?: string
   actionLabel?: string
+  icon?: React.ComponentType<{ className?: string }>
+  color?: string
 }
 
-// Mock notifications data with smart routing
+// Enhanced mock notifications data with smart routing
 const mockNotifications: Notification[] = [
   {
     id: '1',
@@ -192,51 +210,100 @@ const mockNotifications: Notification[] = [
     read: false,
     priority: 'high',
     actionUrl: '/dashboard/escrow',
-    actionLabel: 'View Escrow'
+    actionLabel: 'View Escrow',
+    icon: DollarSign,
+    color: 'text-emerald-600'
   },
   {
     id: '2',
     type: 'client',
     title: 'New Client Feedback',
-    message: 'Sarah Johnson left feedback on your logo design',
+    message: 'Sarah Johnson left feedback on your logo designs',
     timestamp: '15 minutes ago',
     read: false,
-    priority: 'medium',
+    priority: 'high',
     actionUrl: '/dashboard/collaboration',
-    actionLabel: 'View Feedback'
+    actionLabel: 'View Feedback',
+    icon: MessageSquare,
+    color: 'text-purple-600'
   },
   {
     id: '3',
-    type: 'project',
-    title: 'Project Milestone Completed',
-    message: 'Website Design Phase 1 has been marked as complete',
+    type: 'deadline',
+    title: 'Project Deadline Approaching',
+    message: 'Website mockups due in 2 hours for TechCorp project',
     timestamp: '1 hour ago',
     read: false,
-    priority: 'medium',
-    actionUrl: '/dashboard/projects-hub',
-    actionLabel: 'View Project'
+    priority: 'high',
+    actionUrl: '/dashboard/project-tracker',
+    actionLabel: 'View Project',
+    icon: Clock,
+    color: 'text-red-600'
   },
   {
     id: '4',
     type: 'team',
     title: 'Team Meeting Reminder',
-    message: 'Weekly standup meeting starts in 30 minutes',
+    message: 'Weekly standup in 30 minutes',
     timestamp: '2 hours ago',
     read: true,
-    priority: 'low',
-    actionUrl: '/dashboard/team-hub',
-    actionLabel: 'Join Meeting'
+    priority: 'medium',
+    actionUrl: '/dashboard/calendar',
+    actionLabel: 'View Calendar',
+    icon: Users,
+    color: 'text-cyan-600'
   },
   {
     id: '5',
-    type: 'system',
-    title: 'Storage Almost Full',
-    message: 'Your cloud storage is 85% full. Consider upgrading.',
+    type: 'project',
+    title: 'Project Milestone Completed',
+    message: 'Mobile app design phase completed successfully',
     timestamp: '3 hours ago',
     read: true,
+    priority: 'medium',
+    actionUrl: '/dashboard/project-tracker',
+    actionLabel: 'View Progress',
+    icon: CheckCircle,
+    color: 'text-green-600'
+  },
+  {
+    id: '6',
+    type: 'system',
+    title: 'Backup Completed',
+    message: 'All project files backed up to cloud storage',
+    timestamp: '6 hours ago',
+    read: true,
     priority: 'low',
-    actionUrl: '/dashboard/files-hub',
-    actionLabel: 'Manage Storage'
+    actionUrl: '/dashboard/cloud-storage',
+    actionLabel: 'View Files',
+    icon: Cloud,
+    color: 'text-blue-600'
+  },
+  {
+    id: '7',
+    type: 'client',
+    title: 'New Project Request',
+    message: 'WebFlow Agency wants to discuss new branding project',
+    timestamp: '1 day ago',
+    read: false,
+    priority: 'medium',
+    actionUrl: '/dashboard/projects-hub',
+    actionLabel: 'View Request',
+    icon: Briefcase,
+    color: 'text-orange-600'
+  },
+  {
+    id: '8',
+    type: 'payment',
+    title: 'Invoice Paid',
+    message: 'Invoice #INV-2024-001 has been paid ($1,200)',
+    timestamp: '2 days ago',
+    read: true,
+    priority: 'low',
+    actionUrl: '/dashboard/invoices',
+    actionLabel: 'View Invoice',
+    icon: Receipt,
+    color: 'text-green-600'
   }
 ]
 
@@ -248,6 +315,7 @@ interface NotificationState {
   notifications: Notification[]
   unreadCount: number
   selectedType: string
+  isExpanded: boolean
 }
 
 type NotificationAction = 
@@ -255,48 +323,51 @@ type NotificationAction =
   | { type: 'MARK_ALL_READ' }
   | { type: 'DELETE'; id: string }
   | { type: 'SET_FILTER'; filter: string }
+  | { type: 'TOGGLE_EXPANDED' }
+  | { type: 'REFRESH_NOTIFICATIONS' }
 
 const notificationReducer = (state: NotificationState, action: NotificationAction): NotificationState => {
   switch (action.type) {
     case 'MARK_READ':
-      return {
-        ...state,
-        notifications: state.notifications.map(n => 
-          n.id === action.id ? { ...n, read: true } : n
-        ),
-        unreadCount: state.notifications.filter(n => 
-          !n.read && n.id !== action.id
-        ).length
-      }
-    
-    case 'MARK_ALL_READ':
-      return {
-        ...state,
-        notifications: state.notifications.map(n => ({ ...n, read: true })),
-        unreadCount: 0
-      }
-    
-    case 'DELETE':
-      const updatedNotifications = state.notifications.filter(n => n.id !== action.id)
+      const updatedNotifications = state.notifications.map(n => 
+        n.id === action.id ? { ...n, read: true } : n
+      )
       return {
         ...state,
         notifications: updatedNotifications,
         unreadCount: updatedNotifications.filter(n => !n.read).length
       }
-    
-    case 'SET_FILTER':
+    case 'MARK_ALL_READ':
+      const allReadNotifications = state.notifications.map(n => ({ ...n, read: true }))
       return {
         ...state,
-        selectedType: action.filter
+        notifications: allReadNotifications,
+        unreadCount: 0
       }
-    
+    case 'DELETE':
+      const filteredNotifications = state.notifications.filter(n => n.id !== action.id)
+      return {
+        ...state,
+        notifications: filteredNotifications,
+        unreadCount: filteredNotifications.filter(n => !n.read).length
+      }
+    case 'SET_FILTER':
+      return { ...state, selectedType: action.filter }
+    case 'TOGGLE_EXPANDED':
+      return { ...state, isExpanded: !state.isExpanded }
+    case 'REFRESH_NOTIFICATIONS':
+      return {
+        ...state,
+        notifications: mockNotifications,
+        unreadCount: mockNotifications.filter(n => !n.read).length
+      }
     default:
       return state
   }
 }
 
 // ========================================
-// MAIN COMPONENT
+// MAIN DASHBOARD NAVIGATION COMPONENT
 // ========================================
 
 interface DashboardNavProps {
@@ -307,123 +378,131 @@ export function DashboardNav({ className }: DashboardNavProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [expandedHubs, setExpandedHubs] = useState<string[]>([])
-  const [showNotifications, setShowNotifications] = useState(false)
-  
-  // Initialize notification state
+  const [expandedHubs, setExpandedHubs] = useState<Set<string>>(new Set())
+
+  // Notification state management
   const [notificationState, dispatch] = useReducer(notificationReducer, {
     notifications: mockNotifications,
     unreadCount: mockNotifications.filter(n => !n.read).length,
-    selectedType: 'all'
+    selectedType: 'all',
+    isExpanded: false
   })
+
+  // Auto-refresh notifications
+  useEffect(() => {
+    const interval = setInterval(() => {
+      dispatch({ type: 'REFRESH_NOTIFICATIONS' })
+    }, 30000) // Refresh every 30 seconds
+
+    return () => clearInterval(interval)
+  }, [])
 
   const handleNotificationClick = (notification: Notification) => {
     // Mark as read
     dispatch({ type: 'MARK_READ', id: notification.id })
     
-    // Close dropdown
-    setShowNotifications(false)
-    
     // Navigate to action URL
     if (notification.actionUrl) {
       router.push(notification.actionUrl)
+      setIsMobileMenuOpen(false)
     }
   }
 
   const toggleHub = (hubName: string) => {
-    setExpandedHubs(prev => 
-      prev.includes(hubName) 
-        ? prev.filter(h => h !== hubName)
-        : [...prev, hubName]
-    )
+    const newExpanded = new Set(expandedHubs)
+    if (newExpanded.has(hubName)) {
+      newExpanded.delete(hubName)
+    } else {
+      newExpanded.add(hubName)
+    }
+    setExpandedHubs(newExpanded)
   }
 
   const getActiveSection = () => {
-    return consolidatedNavigation.find(item => 
-      item.href === pathname || 
-      (item.subTabs && item.subTabs.some(sub => sub.href === pathname))
-    )
+    const activeItem = consolidatedNavigation.find(item => {
+      if (item.href === pathname) return true
+      if (item.subTabs) {
+        return item.subTabs.some(subTab => subTab.href === pathname)
+      }
+      return false
+    })
+    return activeItem?.name || 'Dashboard'
   }
 
-  const activeSection = getActiveSection()
-
   const NavItem = ({ item }: { item: any }) => {
-    const isActive = pathname === item.href
-    const isHubExpanded = expandedHubs.includes(item.name)
-    const hasActiveSubTab = item.subTabs?.some((sub: any) => pathname === sub.href)
-    
+    const isActive = pathname === item.href || 
+      (item.subTabs && item.subTabs.some((subTab: any) => pathname === subTab.href))
+    const isExpanded = expandedHubs.has(item.name)
+    const Icon = item.icon
+
     return (
-      <div className="space-y-1" data-testid={`nav-item-${item.name.toLowerCase().replace(/\s+/g, '-')}`}>
+      <div className="space-y-1" data-testid={item.testId}>
         <Button
           variant={isActive ? "default" : "ghost"}
           className={cn(
-            "w-full justify-start gap-3 h-12 text-left font-medium transition-all duration-200",
+            "w-full justify-start gap-3 h-12 px-4 group transition-all duration-200",
             isActive 
-              ? `${item.color} bg-gradient-to-r ${item.bgColor} shadow-md border-l-4 border-current` 
-              : "text-gray-600 hover:text-gray-900 hover:bg-gray-50",
-            hasActiveSubTab && !isActive && "bg-gray-50 text-gray-900"
+              ? "bg-gradient-to-r from-gray-900 to-gray-700 text-white shadow-lg hover:shadow-xl" 
+              : "text-gray-700 hover:text-gray-900 hover:bg-gray-100 hover:shadow-md"
           )}
           onClick={() => {
             if (item.isHub) {
               toggleHub(item.name)
             } else {
               router.push(item.href)
+              setIsMobileMenuOpen(false)
             }
-            setIsMobileMenuOpen(false)
           }}
         >
           <div className={cn(
             "p-2 rounded-lg transition-colors",
-            isActive ? item.bgColor : "bg-gray-100"
+            isActive ? "bg-white/20" : item.bgColor
           )}>
-            <item.icon className={cn(
-              "h-4 w-4",
-              isActive ? item.color : "text-gray-600"
+            <Icon className={cn(
+              "h-4 w-4 transition-colors",
+              isActive ? "text-white" : item.color
             )} />
           </div>
           
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="truncate">{item.name}</span>
-              {item.badge && (
-                <Badge 
-                  variant="secondary" 
-                  className={cn(
-                    "text-xs px-2 py-0.5",
-                    item.badge === 'AI' && "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
-                  )}
-                >
-                  {item.badge}
-                </Badge>
-              )}
+          <div className="flex-1 text-left">
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-sm">{item.name}</span>
+              <div className="flex items-center gap-2">
+                {item.badge && (
+                  <Badge 
+                    variant={isActive ? "secondary" : "outline"} 
+                    className="text-xs px-2 py-0.5"
+                  >
+                    {item.badge}
+                  </Badge>
+                )}
+                {item.notifications > 0 && (
+                  <Badge 
+                    variant="destructive" 
+                    className="h-5 w-5 p-0 text-xs flex items-center justify-center"
+                  >
+                    {item.notifications}
+                  </Badge>
+                )}
+                {item.isHub && (
+                  <ChevronDown className={cn(
+                    "h-4 w-4 transition-transform",
+                    isExpanded ? "rotate-180" : ""
+                  )} />
+                )}
+              </div>
             </div>
-            <p className="text-xs text-gray-500 truncate">{item.description}</p>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            {item.notifications > 0 && (
-              <Badge 
-                variant="destructive" 
-                className="h-5 min-w-[20px] text-xs px-1.5"
-                data-testid={`notification-badge-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
-              >
-                {item.notifications}
-              </Badge>
-            )}
-            
-            {item.isHub && (
-              <ChevronRight 
-                className={cn(
-                  "h-4 w-4 transition-transform duration-200",
-                  isHubExpanded && "rotate-90"
-                )} 
-              />
-            )}
+            <p className={cn(
+              "text-xs mt-0.5 truncate",
+              isActive ? "text-white/80" : "text-gray-500"
+            )}>
+              {item.description}
+            </p>
           </div>
         </Button>
 
-        {/* Sub-tabs for hubs */}
-        {item.isHub && isHubExpanded && item.subTabs && (
+        {/* Sub-tabs */}
+        {item.isHub && isExpanded && item.subTabs && (
           <div className="ml-4 space-y-1 border-l-2 border-gray-200 pl-4" data-testid={`sub-tabs-${item.name.toLowerCase().replace(/\s+/g, '-')}`}>
             {item.subTabs.map((subTab: any) => {
               const isSubActive = pathname === subTab.href
@@ -434,7 +513,7 @@ export function DashboardNav({ className }: DashboardNavProps) {
                   variant={isSubActive ? "default" : "ghost"}
                   size="sm"
                   className={cn(
-                    "w-full justify-start gap-2 h-9 text-sm",
+                    "w-full justify-start gap-2 h-10 text-sm group",
                     isSubActive 
                       ? "bg-gradient-to-r from-gray-900 to-gray-700 text-white shadow-sm" 
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
@@ -446,7 +525,17 @@ export function DashboardNav({ className }: DashboardNavProps) {
                   data-testid={`sub-tab-${subTab.name.toLowerCase().replace(/\s+/g, '-')}`}
                 >
                   <subTab.icon className="h-3.5 w-3.5" />
-                  <span className="truncate">{subTab.name}</span>
+                  <div className="flex-1 text-left">
+                    <span className="truncate">{subTab.name}</span>
+                    {subTab.description && (
+                      <p className={cn(
+                        "text-xs truncate",
+                        isSubActive ? "text-white/70" : "text-gray-400"
+                      )}>
+                        {subTab.description}
+                      </p>
+                    )}
+                  </div>
                   {subTab.badge && (
                     <Badge variant="outline" className="text-xs px-1.5 py-0.5 ml-auto">
                       {subTab.badge}
@@ -461,288 +550,346 @@ export function DashboardNav({ className }: DashboardNavProps) {
     )
   }
 
+  // Enhanced Notification Item Component
   const NotificationItem = ({ notification }: { notification: Notification }) => {
-    const Icon = notification.type === 'payment' ? DollarSign :
-                notification.type === 'project' ? Target :
-                notification.type === 'team' ? Users :
-                notification.type === 'client' ? MessageSquare :
-                Bell
-
-    const priorityColor = notification.priority === 'high' ? 'text-red-600' :
-                         notification.priority === 'medium' ? 'text-yellow-600' :
-                         'text-gray-600'
+    const Icon = notification.icon || Bell
+    const priorityColors = {
+      high: 'border-l-red-500 bg-red-50',
+      medium: 'border-l-yellow-500 bg-yellow-50',
+      low: 'border-l-blue-500 bg-blue-50'
+    }
 
     return (
-      <DropdownMenuItem
+      <div 
         className={cn(
-          "flex-col items-start gap-2 p-3 cursor-pointer",
-          !notification.read && "bg-blue-50"
+          "p-4 border-l-4 hover:bg-gray-50 cursor-pointer transition-colors group",
+          priorityColors[notification.priority],
+          !notification.read ? 'bg-blue-50/50' : 'bg-white'
         )}
         onClick={() => handleNotificationClick(notification)}
-        data-testid={`notification-${notification.id}`}
       >
-        <div className="flex items-start gap-3 w-full">
-          <div className={cn("p-1.5 rounded-lg", notification.read ? "bg-gray-100" : "bg-blue-100")}>
-            <Icon className={cn("h-4 w-4", notification.read ? "text-gray-600" : priorityColor)} />
+        <div className="flex items-start gap-3">
+          <div className={cn(
+            "p-2 rounded-lg",
+            notification.read ? 'bg-gray-100' : 'bg-white shadow-sm'
+          )}>
+            <Icon className={cn("h-4 w-4", notification.color || 'text-gray-600')} />
           </div>
           
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center justify-between mb-1">
               <h4 className={cn(
-                "font-medium text-sm truncate",
-                !notification.read && "text-gray-900"
+                "text-sm font-medium truncate",
+                !notification.read ? 'text-gray-900' : 'text-gray-700'
               )}>
                 {notification.title}
               </h4>
-              <span className="text-xs text-gray-500 shrink-0">
-                {notification.timestamp}
-              </span>
+              {!notification.read && (
+                <div className="w-2 h-2 bg-blue-600 rounded-full ml-2 flex-shrink-0" />
+              )}
             </div>
             
-            <p className={cn(
-              "text-xs mt-1 line-clamp-2",
-              notification.read ? "text-gray-500" : "text-gray-700"
-            )}>
+            <p className="text-sm text-gray-600 mb-2 line-clamp-2">
               {notification.message}
             </p>
             
-            {notification.actionLabel && (
-              <div className="flex items-center gap-1 mt-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-500">{notification.timestamp}</span>
+              {notification.actionLabel && (
                 <Button 
                   size="sm" 
                   variant="outline" 
-                  className="h-6 text-xs px-2"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleNotificationClick(notification)
-                  }}
+                  className="h-6 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   {notification.actionLabel}
-                  <ExternalLink className="h-3 w-3 ml-1" />
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
-      </DropdownMenuItem>
+      </div>
     )
   }
 
-  return (
-    <nav className={cn(
-      "fixed left-0 top-0 z-50 h-full w-80 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0",
-      isMobileMenuOpen ? "translate-x-0" : "-translate-x-full",
-      "lg:static lg:transform-none",
-      className
-    )} data-testid="dashboard-navigation">
-      {/* Mobile overlay */}
-      {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-          data-testid="mobile-overlay"
-        />
-      )}
+  const notificationTypes = [
+    { value: 'all', label: 'All', count: notificationState.notifications.length },
+    { value: 'payment', label: 'Payments', count: notificationState.notifications.filter(n => n.type === 'payment').length },
+    { value: 'project', label: 'Projects', count: notificationState.notifications.filter(n => n.type === 'project').length },
+    { value: 'client', label: 'Clients', count: notificationState.notifications.filter(n => n.type === 'client').length },
+    { value: 'team', label: 'Team', count: notificationState.notifications.filter(n => n.type === 'team').length },
+    { value: 'deadline', label: 'Deadlines', count: notificationState.notifications.filter(n => n.type === 'deadline').length }
+  ]
 
-      {/* Mobile header */}
-      <div className="lg:hidden flex items-center justify-between p-4 border-b border-gray-200">
-        <h2 className="font-bold text-lg">Navigation</h2>
+  const filteredNotifications = notificationState.selectedType === 'all' 
+    ? notificationState.notifications 
+    : notificationState.notifications.filter(n => n.type === notificationState.selectedType)
+
+  return (
+    <div className={cn("h-full bg-gradient-to-b from-gray-50 to-white", className)}>
+      {/* Mobile Header */}
+      <div className="lg:hidden flex items-center justify-between p-4 border-b bg-white">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          data-testid="mobile-menu-toggle"
+          className="p-2"
         >
           {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
+        
+        <h1 className="font-semibold text-lg">{getActiveSection()}</h1>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="relative p-2">
+              <Bell className="h-5 w-5" />
+              {notificationState.unreadCount > 0 && (
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs flex items-center justify-center"
+                >
+                  {notificationState.unreadCount}
+                </Badge>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-80">
+            <DropdownMenuLabel className="flex items-center justify-between">
+              <span>Notifications</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => dispatch({ type: 'MARK_ALL_READ' })}
+                className="h-6 text-xs"
+              >
+                Mark all read
+              </Button>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <div className="max-h-96 overflow-y-auto">
+              {filteredNotifications.slice(0, 5).map((notification) => (
+                <DropdownMenuItem key={notification.id} className="p-0">
+                  <NotificationItem notification={notification} />
+                </DropdownMenuItem>
+              ))}
+              {filteredNotifications.length > 5 && (
+                <DropdownMenuItem>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full"
+                    onClick={() => router.push('/dashboard/notifications')}
+                  >
+                    View all {filteredNotifications.length} notifications
+                  </Button>
+                </DropdownMenuItem>
+              )}
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
-      {/* Navigation Content */}
+      {/* Desktop Sidebar Navigation */}
       <div className={cn(
-        "flex flex-col h-full",
-        "lg:block",
-        isMobileMenuOpen ? "block" : "hidden lg:block"
+        "hidden lg:flex flex-col h-full w-72 border-r bg-white shadow-lg",
+        "transform transition-transform duration-300 ease-in-out"
       )}>
         {/* Header */}
-        <div className="hidden lg:flex items-center gap-3 p-6 border-b border-gray-200/50">
-          <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
-            <Rocket className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h2 className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              FreeflowZee
-            </h2>
-            <p className="text-xs text-gray-500">Professional Dashboard</p>
+        <div className="p-6 border-b bg-gradient-to-r from-gray-900 to-gray-800">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
+              <Sparkles className="h-6 w-6 text-gray-900" />
+            </div>
+            <div>
+              <h1 className="font-bold text-lg text-white">FreeflowZee</h1>
+              <p className="text-sm text-gray-300">Freelancer Hub</p>
+            </div>
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="p-4 border-b border-gray-200/50">
-          <div className="grid grid-cols-3 gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="justify-start text-xs"
-              onClick={() => router.push('/projects/new')}
-              data-testid="quick-add-project"
-            >
-              <Target className="h-3 w-3 mr-1" />
-              Project
+        {/* Quick Actions Bar */}
+        <div className="p-4 border-b bg-gray-50">
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" className="flex-1 h-8">
+              <Search className="h-3 w-3 mr-1" />
+              Search
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="justify-start text-xs"
-              onClick={() => router.push('/dashboard/calendar')}
-              data-testid="quick-calendar"
-            >
-              <Calendar className="h-3 w-3 mr-1" />
-              Calendar
+            <Button size="sm" variant="outline" className="h-8 w-8 p-0">
+              <Plus className="h-3 w-3" />
             </Button>
-            <DropdownMenu open={showNotifications} onOpenChange={setShowNotifications}>
+            <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="justify-start text-xs relative"
-                  data-testid="notifications-dropdown-trigger"
-                >
-                  <Bell className="h-3 w-3 mr-1" />
-                  Alerts
+                <Button size="sm" variant="outline" className="h-8 w-8 p-0 relative">
+                  <Bell className="h-3 w-3" />
                   {notificationState.unreadCount > 0 && (
-                    <Badge 
-                      variant="destructive" 
-                      className="absolute -top-2 -right-2 h-5 min-w-[20px] text-xs px-1"
-                    >
-                      {notificationState.unreadCount}
-                    </Badge>
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full" />
                   )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent 
-                className="w-96 max-h-96 overflow-y-auto" 
-                align="start"
-                data-testid="notifications-dropdown"
-              >
+              <DropdownMenuContent align="end" className="w-96">
                 <DropdownMenuLabel className="flex items-center justify-between">
-                  <span>Notifications</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => dispatch({ type: 'MARK_ALL_READ' })}
-                    className="h-6 text-xs"
-                    data-testid="mark-all-read"
-                  >
-                    Mark all read
-                  </Button>
+                  <span>Notifications ({notificationState.unreadCount} unread)</span>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => dispatch({ type: 'MARK_ALL_READ' })}
+                      className="h-6 text-xs"
+                    >
+                      Mark all read
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => router.push('/dashboard/notifications')}
+                      className="h-6 text-xs"
+                    >
+                      View all
+                    </Button>
+                  </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 
-                {notificationState.notifications.length === 0 ? (
-                  <div className="p-8 text-center text-gray-500">
-                    <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">No notifications</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2 p-2">
-                    {notificationState.notifications.slice(0, 5).map((notification) => (
-                      <NotificationItem key={notification.id} notification={notification} />
-                    ))}
-                    
-                    {notificationState.notifications.length > 5 && (
-                      <DropdownMenuItem
-                        className="justify-center text-blue-600 font-medium"
-                        onClick={() => {
-                          setShowNotifications(false)
-                          router.push('/dashboard/notifications')
-                        }}
-                        data-testid="view-all-notifications"
+                {/* Notification Filters */}
+                <div className="p-2">
+                  <div className="flex flex-wrap gap-1">
+                    {notificationTypes.map((type) => (
+                      <Button
+                        key={type.value}
+                        variant={notificationState.selectedType === type.value ? "default" : "ghost"}
+                        size="sm"
+                        className="h-6 text-xs"
+                        onClick={() => dispatch({ type: 'SET_FILTER', filter: type.value })}
                       >
-                        View all {notificationState.notifications.length} notifications
-                      </DropdownMenuItem>
-                    )}
+                        {type.label} {type.count > 0 && `(${type.count})`}
+                      </Button>
+                    ))}
                   </div>
-                )}
+                </div>
+                
+                <DropdownMenuSeparator />
+                <div className="max-h-96 overflow-y-auto">
+                  {filteredNotifications.slice(0, 8).map((notification) => (
+                    <DropdownMenuItem key={notification.id} className="p-0">
+                      <NotificationItem notification={notification} />
+                    </DropdownMenuItem>
+                  ))}
+                  {filteredNotifications.length === 0 && (
+                    <div className="p-8 text-center text-gray-500">
+                      <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p>No notifications in this category</p>
+                    </div>
+                  )}
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
 
-        {/* Main Navigation */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-2" data-testid="main-navigation">
-          {consolidatedNavigation.map((item) => (
-            <NavItem key={item.name} item={item} />
-          ))}
+        {/* Navigation Items */}
+        <div className="flex-1 p-4 overflow-y-auto">
+          <div className="space-y-2">
+            {consolidatedNavigation.map((item) => (
+              <NavItem key={item.name} item={item} />
+            ))}
+          </div>
         </div>
 
-        {/* Current Context */}
-        {activeSection && (
-          <div className="p-4 border-t border-gray-200/50 bg-gray-50/50">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <activeSection.icon className="h-4 w-4" />
-              <span className="font-medium">{activeSection.name}</span>
-              {activeSection.notifications > 0 && (
-                <Badge variant="outline" className="text-xs">
-                  {activeSection.notifications} updates
-                </Badge>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* User Menu */}
-        <div className="p-4 border-t border-gray-200/50">
+        {/* User Profile Footer */}
+        <div className="p-4 border-t bg-gray-50">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                className="w-full justify-start p-2 h-auto"
-                data-testid="user-menu-trigger"
-              >
-                <Avatar className="h-8 w-8 mr-3">
-                  <AvatarImage src="/avatars/user.jpg" alt="User" />
-                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-sm">
+              <Button variant="ghost" className="w-full justify-start gap-3 h-12 p-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src="/avatars/user.jpg" />
+                  <AvatarFallback className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
                     JD
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 text-left">
-                  <div className="font-medium text-sm">John Doe</div>
-                  <div className="text-xs text-gray-500">Creative Director</div>
+                  <p className="text-sm font-medium">John Doe</p>
+                  <p className="text-xs text-gray-500">john@freeflowzee.com</p>
                 </div>
-                <MoreHorizontal className="h-4 w-4" />
+                <Settings className="h-4 w-4 text-gray-400" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" data-testid="user-menu">
+            <DropdownMenuContent align="start" className="w-56">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
                   <User className="mr-2 h-4 w-4" />
-                  Profile Settings
+                  Profile
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push('/dashboard/notifications')}>
                   <Bell className="mr-2 h-4 w-4" />
                   Notifications
                   {notificationState.unreadCount > 0 && (
-                    <Badge variant="destructive" className="ml-auto">
+                    <Badge variant="destructive" className="ml-auto h-5 w-5 p-0 text-xs">
                       {notificationState.unreadCount}
                     </Badge>
                   )}
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Settings className="mr-2 h-4 w-4" />
-                  Preferences
+                  Settings
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-red-600">
                 <LogOut className="mr-2 h-4 w-4" />
-                Sign out
+                Log out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
-    </nav>
+
+      {/* Mobile Slide-out Navigation */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden fixed inset-0 z-50">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm" 
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          
+          {/* Slide-out Menu */}
+          <div className="absolute left-0 top-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out">
+            {/* Mobile Header */}
+            <div className="p-4 border-b bg-gradient-to-r from-gray-900 to-gray-800">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                    <Sparkles className="h-5 w-5 text-gray-900" />
+                  </div>
+                  <div>
+                    <h1 className="font-bold text-white">FreeflowZee</h1>
+                    <p className="text-xs text-gray-300">Freelancer Hub</p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-white p-2"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Mobile Navigation */}
+            <div className="p-4 h-full overflow-y-auto">
+              <div className="space-y-2">
+                {consolidatedNavigation.map((item) => (
+                  <NavItem key={item.name} item={item} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
