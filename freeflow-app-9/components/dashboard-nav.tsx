@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useReducer } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   LayoutDashboard,
   Calendar,
@@ -47,20 +48,34 @@ import {
   Award,
   TrendingUp,
   ChevronRight,
+  ChevronDown,
   Sparkles,
   Rocket,
-  Cloud
+  Cloud,
+  Eye,
+  Download,
+  Star,
+  AlertCircle,
+  CheckCircle,
+  Info,
+  ExternalLink,
+  MoreHorizontal
 } from 'lucide-react'
 
-// Framework7-inspired navigation structure
-const navigation = [
+// ========================================
+// CONSOLIDATED NAVIGATION STRUCTURE
+// ========================================
+
+// Main navigation hubs with consolidated features
+const consolidatedNavigation = [
   { 
     name: 'Dashboard', 
     href: '/dashboard', 
     icon: LayoutDashboard, 
     color: 'text-blue-600',
     bgColor: 'bg-blue-50',
-    description: 'Overview & insights'
+    description: 'Overview & insights',
+    notifications: 0
   },
   { 
     name: 'My Day Today', 
@@ -69,180 +84,220 @@ const navigation = [
     color: 'text-rose-600',
     bgColor: 'bg-rose-50',
     description: 'AI-powered daily planning',
-    badge: 'AI'
+    badge: 'AI',
+    notifications: 3
   },
   { 
-    name: 'Projects', 
-    href: '/dashboard/projects', 
+    name: 'Projects Hub', 
+    href: '/dashboard/projects-hub', 
     icon: FolderOpen, 
     color: 'text-purple-600',
     bgColor: 'bg-purple-50',
-    description: 'Manage your work'
+    description: 'Projects • Collaboration • Client Delivery',
+    subTabs: [
+      { name: 'Project Tracking', href: '/dashboard/project-tracker', icon: Target },
+      { name: 'Client Collaboration', href: '/dashboard/collaboration', icon: MessageSquare },
+      { name: 'Client Zone Gallery', href: '/dashboard/client-zone', icon: Eye }
+    ],
+    notifications: 5,
+    isHub: true
   },
   { 
-    name: 'Project Tracker', 
-    href: '/dashboard/project-tracker', 
-    icon: Target, 
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
-    description: 'Track project progress'
-  },
-  { 
-    name: 'Escrow', 
-    href: '/dashboard/escrow', 
-    icon: Shield, 
-    color: 'text-emerald-600',
-    bgColor: 'bg-emerald-50',
-    description: 'Secure payment protection'
-  },
-  { 
-    name: 'Collaboration', 
-    href: '/dashboard/collaboration', 
-    icon: Users, 
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-    description: 'Work together seamlessly'
-  },
-  { 
-    name: 'Time Tracking', 
-    href: '/dashboard/time-tracking', 
-    icon: Clock, 
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
-    description: 'Track billable hours'
-  },
-  { 
-    name: 'Invoices', 
-    href: '/dashboard/invoices', 
-    icon: Receipt, 
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-    description: 'Billing & payments'
-  },
-  { 
-    name: 'Calendar', 
-    href: '/dashboard/calendar', 
-    icon: CalendarDays, 
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-    description: 'Schedule & appointments'
-  },
-  { 
-    name: 'Bookings', 
-    href: '/dashboard/bookings', 
-    icon: Calendar, 
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-    description: 'Appointment scheduling'
-  },
-  { 
-    name: 'Clients', 
-    href: '/dashboard/clients', 
-    icon: UserCheck, 
-    color: 'text-indigo-600',
-    bgColor: 'bg-indigo-50',
-    description: 'Client relationships'
-  },
-  { 
-    name: 'Team', 
-    href: '/dashboard/team', 
+    name: 'Team Hub', 
+    href: '/dashboard/team-hub', 
     icon: Users, 
     color: 'text-cyan-600',
     bgColor: 'bg-cyan-50',
-    description: 'Team management'
+    description: 'Team • Shared Calendar',
+    subTabs: [
+      { name: 'Team Members', href: '/dashboard/team', icon: UserCheck },
+      { name: 'Shared Calendar', href: '/dashboard/calendar', icon: CalendarDays }
+    ],
+    notifications: 2,
+    isHub: true
   },
   { 
-    name: 'Financial', 
-    href: '/dashboard/financial', 
+    name: 'Financial Hub', 
+    href: '/dashboard/financial-hub', 
     icon: DollarSign, 
     color: 'text-emerald-600',
     bgColor: 'bg-emerald-50',
-    description: 'Revenue & invoices'
+    description: 'Escrow • Invoices',
+    subTabs: [
+      { name: 'Escrow System', href: '/dashboard/escrow', icon: Shield },
+      { name: 'Invoices', href: '/dashboard/invoices', icon: Receipt }
+    ],
+    notifications: 1,
+    isHub: true
   },
   { 
-    name: 'Files', 
-    href: '/dashboard/files', 
+    name: 'Files Hub', 
+    href: '/dashboard/files-hub', 
     icon: Archive, 
-    color: 'text-gray-600',
-    bgColor: 'bg-gray-50',
-    description: 'Document storage'
-  },
-  { 
-    name: 'Cloud Storage', 
-    href: '/dashboard/cloud-storage', 
-    icon: Cloud, 
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-    description: 'Cloud file management & sharing',
-    badge: '10GB'
-  },
-  { 
-    name: 'AI Assistant', 
-    href: '/dashboard/ai-assistant', 
-    icon: Sparkles, 
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-    description: 'Smart insights & automation',
-    badge: 'AI'
-  },
-  { 
-    name: 'Workflow Builder', 
-    href: '/dashboard/workflow-builder', 
-    icon: Zap, 
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-    description: 'Create custom automations'
-  },
-  { 
-    name: 'Analytics', 
-    href: '/dashboard/analytics', 
-    icon: TrendingUp, 
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-    description: 'Business insights'
-  },
-  { 
-    name: 'Community', 
-    href: '/dashboard/community', 
-    icon: MessageSquare, 
-    color: 'text-violet-600',
-    bgColor: 'bg-violet-50',
-    description: 'Connect & collaborate'
-  },
-  { 
-    name: 'Client Zone', 
-    href: '/dashboard/client-zone', 
-    icon: Shield, 
     color: 'text-indigo-600',
     bgColor: 'bg-indigo-50',
-    description: 'Elegant client galleries with escrow integration',
-    badge: 'NEW'
+    description: 'Cloud Storage • Portfolio Gallery',
+    subTabs: [
+      { name: 'Cloud Storage', href: '/dashboard/cloud-storage', icon: Cloud, badge: '10GB' },
+      { name: 'Portfolio Gallery', href: '/dashboard/gallery', icon: Image }
+    ],
+    notifications: 0,
+    isHub: true
   },
   { 
     name: 'Profile', 
     href: '/dashboard/profile', 
     icon: User, 
-    color: 'text-slate-600',
-    bgColor: 'bg-slate-50',
-    description: 'Account settings'
+    color: 'text-gray-600',
+    bgColor: 'bg-gray-50',
+    description: 'Settings & preferences',
+    notifications: 0
   },
   { 
     name: 'Notifications', 
     href: '/dashboard/notifications', 
     icon: Bell, 
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-50',
-    description: 'Stay updated',
-    badge: '3'
+    color: 'text-red-600',
+    bgColor: 'bg-red-50',
+    description: 'Stay up to date',
+    notifications: 8,
+    badge: '8'
   }
 ]
 
-const quickActions = [
-  { name: 'New Project', icon: FolderOpen, href: '/projects/new', color: 'text-blue-600' },
-  { name: 'Add Client', icon: UserCheck, href: '/dashboard/clients?action=new', color: 'text-green-600' },
-  { name: 'Create Invoice', icon: Receipt, href: '/dashboard/financial?action=invoice', color: 'text-purple-600' },
-  { name: 'Start Timer', icon: Clock, href: '/dashboard/time-tracking?action=start', color: 'text-orange-600' }
+// ========================================
+// NOTIFICATION SYSTEM
+// ========================================
+
+interface Notification {
+  id: string
+  type: 'payment' | 'project' | 'team' | 'client' | 'system'
+  title: string
+  message: string
+  timestamp: string
+  read: boolean
+  priority: 'high' | 'medium' | 'low'
+  actionUrl?: string
+  actionLabel?: string
+}
+
+// Mock notifications data with smart routing
+const mockNotifications: Notification[] = [
+  {
+    id: '1',
+    type: 'payment',
+    title: 'Escrow Payment Received',
+    message: 'Payment of $2,500 secured in escrow for Brand Identity Project',
+    timestamp: '2 minutes ago',
+    read: false,
+    priority: 'high',
+    actionUrl: '/dashboard/escrow',
+    actionLabel: 'View Escrow'
+  },
+  {
+    id: '2',
+    type: 'client',
+    title: 'New Client Feedback',
+    message: 'Sarah Johnson left feedback on your logo design',
+    timestamp: '15 minutes ago',
+    read: false,
+    priority: 'medium',
+    actionUrl: '/dashboard/collaboration',
+    actionLabel: 'View Feedback'
+  },
+  {
+    id: '3',
+    type: 'project',
+    title: 'Project Milestone Completed',
+    message: 'Website Design Phase 1 has been marked as complete',
+    timestamp: '1 hour ago',
+    read: false,
+    priority: 'medium',
+    actionUrl: '/dashboard/projects-hub',
+    actionLabel: 'View Project'
+  },
+  {
+    id: '4',
+    type: 'team',
+    title: 'Team Meeting Reminder',
+    message: 'Weekly standup meeting starts in 30 minutes',
+    timestamp: '2 hours ago',
+    read: true,
+    priority: 'low',
+    actionUrl: '/dashboard/team-hub',
+    actionLabel: 'Join Meeting'
+  },
+  {
+    id: '5',
+    type: 'system',
+    title: 'Storage Almost Full',
+    message: 'Your cloud storage is 85% full. Consider upgrading.',
+    timestamp: '3 hours ago',
+    read: true,
+    priority: 'low',
+    actionUrl: '/dashboard/files-hub',
+    actionLabel: 'Manage Storage'
+  }
 ]
+
+// ========================================
+// NOTIFICATION STATE MANAGEMENT
+// ========================================
+
+interface NotificationState {
+  notifications: Notification[]
+  unreadCount: number
+  selectedType: string
+}
+
+type NotificationAction = 
+  | { type: 'MARK_READ'; id: string }
+  | { type: 'MARK_ALL_READ' }
+  | { type: 'DELETE'; id: string }
+  | { type: 'SET_FILTER'; filter: string }
+
+const notificationReducer = (state: NotificationState, action: NotificationAction): NotificationState => {
+  switch (action.type) {
+    case 'MARK_READ':
+      return {
+        ...state,
+        notifications: state.notifications.map(n => 
+          n.id === action.id ? { ...n, read: true } : n
+        ),
+        unreadCount: state.notifications.filter(n => 
+          !n.read && n.id !== action.id
+        ).length
+      }
+    
+    case 'MARK_ALL_READ':
+      return {
+        ...state,
+        notifications: state.notifications.map(n => ({ ...n, read: true })),
+        unreadCount: 0
+      }
+    
+    case 'DELETE':
+      const updatedNotifications = state.notifications.filter(n => n.id !== action.id)
+      return {
+        ...state,
+        notifications: updatedNotifications,
+        unreadCount: updatedNotifications.filter(n => !n.read).length
+      }
+    
+    case 'SET_FILTER':
+      return {
+        ...state,
+        selectedType: action.filter
+      }
+    
+    default:
+      return state
+  }
+}
+
+// ========================================
+// MAIN COMPONENT
+// ========================================
 
 interface DashboardNavProps {
   className?: string
@@ -250,254 +305,444 @@ interface DashboardNavProps {
 
 export function DashboardNav({ className }: DashboardNavProps) {
   const pathname = usePathname()
-  const [isMobileOpen, setIsMobileOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [notifications, setNotifications] = useState(3)
+  const router = useRouter()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [expandedHubs, setExpandedHubs] = useState<string[]>([])
+  const [showNotifications, setShowNotifications] = useState(false)
+  
+  // Initialize notification state
+  const [notificationState, dispatch] = useReducer(notificationReducer, {
+    notifications: mockNotifications,
+    unreadCount: mockNotifications.filter(n => !n.read).length,
+    selectedType: 'all'
+  })
 
-  useEffect(() => {
-    setIsMobileOpen(false)
-  }, [pathname])
+  const handleNotificationClick = (notification: Notification) => {
+    // Mark as read
+    dispatch({ type: 'MARK_READ', id: notification.id })
+    
+    // Close dropdown
+    setShowNotifications(false)
+    
+    // Navigate to action URL
+    if (notification.actionUrl) {
+      router.push(notification.actionUrl)
+    }
+  }
 
-  const filteredNavigation = navigation.filter(item =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const toggleHub = (hubName: string) => {
+    setExpandedHubs(prev => 
+      prev.includes(hubName) 
+        ? prev.filter(h => h !== hubName)
+        : [...prev, hubName]
+    )
+  }
+
+  const getActiveSection = () => {
+    return consolidatedNavigation.find(item => 
+      item.href === pathname || 
+      (item.subTabs && item.subTabs.some(sub => sub.href === pathname))
+    )
+  }
+
+  const activeSection = getActiveSection()
 
   const NavItem = ({ item }: { item: any }) => {
-    const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
+    const isActive = pathname === item.href
+    const isHubExpanded = expandedHubs.includes(item.name)
+    const hasActiveSubTab = item.subTabs?.some((sub: any) => pathname === sub.href)
     
     return (
-      <Link
-        href={item.href}
-        className={cn(
-          'group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-gray-50',
-          isActive 
-            ? 'bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 shadow-sm border border-blue-100' 
-            : 'text-gray-700 hover:text-gray-900'
-        )}
-      >
-        <div className={cn(
-          'p-2 rounded-lg transition-all duration-200',
-          isActive 
-            ? `${item.bgColor} ${item.color}` 
-            : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
-        )}>
-          <item.icon className="h-4 w-4" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between">
-            <span className="truncate">{item.name}</span>
-            {item.badge && (
-              <Badge variant="secondary" className="ml-2 px-2 py-0.5 text-xs">
-                {item.badge}
+      <div className="space-y-1" data-testid={`nav-item-${item.name.toLowerCase().replace(/\s+/g, '-')}`}>
+        <Button
+          variant={isActive ? "default" : "ghost"}
+          className={cn(
+            "w-full justify-start gap-3 h-12 text-left font-medium transition-all duration-200",
+            isActive 
+              ? `${item.color} bg-gradient-to-r ${item.bgColor} shadow-md border-l-4 border-current` 
+              : "text-gray-600 hover:text-gray-900 hover:bg-gray-50",
+            hasActiveSubTab && !isActive && "bg-gray-50 text-gray-900"
+          )}
+          onClick={() => {
+            if (item.isHub) {
+              toggleHub(item.name)
+            } else {
+              router.push(item.href)
+            }
+            setIsMobileMenuOpen(false)
+          }}
+        >
+          <div className={cn(
+            "p-2 rounded-lg transition-colors",
+            isActive ? item.bgColor : "bg-gray-100"
+          )}>
+            <item.icon className={cn(
+              "h-4 w-4",
+              isActive ? item.color : "text-gray-600"
+            )} />
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="truncate">{item.name}</span>
+              {item.badge && (
+                <Badge 
+                  variant="secondary" 
+                  className={cn(
+                    "text-xs px-2 py-0.5",
+                    item.badge === 'AI' && "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+                  )}
+                >
+                  {item.badge}
+                </Badge>
+              )}
+            </div>
+            <p className="text-xs text-gray-500 truncate">{item.description}</p>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {item.notifications > 0 && (
+              <Badge 
+                variant="destructive" 
+                className="h-5 min-w-[20px] text-xs px-1.5"
+                data-testid={`notification-badge-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
+              >
+                {item.notifications}
               </Badge>
             )}
+            
+            {item.isHub && (
+              <ChevronRight 
+                className={cn(
+                  "h-4 w-4 transition-transform duration-200",
+                  isHubExpanded && "rotate-90"
+                )} 
+              />
+            )}
           </div>
-          {!isMobileOpen && (
-            <p className="text-xs text-gray-500 truncate">{item.description}</p>
-          )}
-        </div>
-        {isActive && (
-          <ChevronRight className="h-4 w-4 text-blue-600" />
+        </Button>
+
+        {/* Sub-tabs for hubs */}
+        {item.isHub && isHubExpanded && item.subTabs && (
+          <div className="ml-4 space-y-1 border-l-2 border-gray-200 pl-4" data-testid={`sub-tabs-${item.name.toLowerCase().replace(/\s+/g, '-')}`}>
+            {item.subTabs.map((subTab: any) => {
+              const isSubActive = pathname === subTab.href
+              
+              return (
+                <Button
+                  key={subTab.name}
+                  variant={isSubActive ? "default" : "ghost"}
+                  size="sm"
+                  className={cn(
+                    "w-full justify-start gap-2 h-9 text-sm",
+                    isSubActive 
+                      ? "bg-gradient-to-r from-gray-900 to-gray-700 text-white shadow-sm" 
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  )}
+                  onClick={() => {
+                    router.push(subTab.href)
+                    setIsMobileMenuOpen(false)
+                  }}
+                  data-testid={`sub-tab-${subTab.name.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  <subTab.icon className="h-3.5 w-3.5" />
+                  <span className="truncate">{subTab.name}</span>
+                  {subTab.badge && (
+                    <Badge variant="outline" className="text-xs px-1.5 py-0.5 ml-auto">
+                      {subTab.badge}
+                    </Badge>
+                  )}
+                </Button>
+              )
+            })}
+          </div>
         )}
-      </Link>
+      </div>
+    )
+  }
+
+  const NotificationItem = ({ notification }: { notification: Notification }) => {
+    const Icon = notification.type === 'payment' ? DollarSign :
+                notification.type === 'project' ? Target :
+                notification.type === 'team' ? Users :
+                notification.type === 'client' ? MessageSquare :
+                Bell
+
+    const priorityColor = notification.priority === 'high' ? 'text-red-600' :
+                         notification.priority === 'medium' ? 'text-yellow-600' :
+                         'text-gray-600'
+
+    return (
+      <DropdownMenuItem
+        className={cn(
+          "flex-col items-start gap-2 p-3 cursor-pointer",
+          !notification.read && "bg-blue-50"
+        )}
+        onClick={() => handleNotificationClick(notification)}
+        data-testid={`notification-${notification.id}`}
+      >
+        <div className="flex items-start gap-3 w-full">
+          <div className={cn("p-1.5 rounded-lg", notification.read ? "bg-gray-100" : "bg-blue-100")}>
+            <Icon className={cn("h-4 w-4", notification.read ? "text-gray-600" : priorityColor)} />
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <h4 className={cn(
+                "font-medium text-sm truncate",
+                !notification.read && "text-gray-900"
+              )}>
+                {notification.title}
+              </h4>
+              <span className="text-xs text-gray-500 shrink-0">
+                {notification.timestamp}
+              </span>
+            </div>
+            
+            <p className={cn(
+              "text-xs mt-1 line-clamp-2",
+              notification.read ? "text-gray-500" : "text-gray-700"
+            )}>
+              {notification.message}
+            </p>
+            
+            {notification.actionLabel && (
+              <div className="flex items-center gap-1 mt-2">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="h-6 text-xs px-2"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleNotificationClick(notification)
+                  }}
+                >
+                  {notification.actionLabel}
+                  <ExternalLink className="h-3 w-3 ml-1" />
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </DropdownMenuItem>
     )
   }
 
   return (
-    <>
-      {/* Mobile Header */}
-      <div className="lg:hidden bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsMobileOpen(!isMobileOpen)}
-              className="lg:hidden"
-            >
-              {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <Sparkles className="h-4 w-4 text-white" />
-              </div>
-              <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                FreeflowZee
-              </span>
-            </div>
+    <nav className={cn(
+      "fixed left-0 top-0 z-50 h-full w-80 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0",
+      isMobileMenuOpen ? "translate-x-0" : "-translate-x-full",
+      "lg:static lg:transform-none",
+      className
+    )} data-testid="dashboard-navigation">
+      {/* Mobile overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+          data-testid="mobile-overlay"
+        />
+      )}
+
+      {/* Mobile header */}
+      <div className="lg:hidden flex items-center justify-between p-4 border-b border-gray-200">
+        <h2 className="font-bold text-lg">Navigation</h2>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          data-testid="mobile-menu-toggle"
+        >
+          {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </Button>
+      </div>
+
+      {/* Navigation Content */}
+      <div className={cn(
+        "flex flex-col h-full",
+        "lg:block",
+        isMobileMenuOpen ? "block" : "hidden lg:block"
+      )}>
+        {/* Header */}
+        <div className="hidden lg:flex items-center gap-3 p-6 border-b border-gray-200/50">
+          <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
+            <Rocket className="h-6 w-6 text-white" />
           </div>
-          
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="relative">
-              <Bell className="h-5 w-5" />
-              {notifications > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500">
-                  {notifications}
-                </Badge>
-              )}
+          <div>
+            <h2 className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              FreeflowZee
+            </h2>
+            <p className="text-xs text-gray-500">Professional Dashboard</p>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="p-4 border-b border-gray-200/50">
+          <div className="grid grid-cols-3 gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="justify-start text-xs"
+              onClick={() => router.push('/projects/new')}
+              data-testid="quick-add-project"
+            >
+              <Target className="h-3 w-3 mr-1" />
+              Project
             </Button>
-            
-            <DropdownMenu>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="justify-start text-xs"
+              onClick={() => router.push('/dashboard/calendar')}
+              data-testid="quick-calendar"
+            >
+              <Calendar className="h-3 w-3 mr-1" />
+              Calendar
+            </Button>
+            <DropdownMenu open={showNotifications} onOpenChange={setShowNotifications}>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="/avatars/john.jpg" alt="Profile" />
-                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-sm">
-                      JD
-                    </AvatarFallback>
-                  </Avatar>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="justify-start text-xs relative"
+                  data-testid="notifications-dropdown-trigger"
+                >
+                  <Bell className="h-3 w-3 mr-1" />
+                  Alerts
+                  {notificationState.unreadCount > 0 && (
+                    <Badge 
+                      variant="destructive" 
+                      className="absolute -top-2 -right-2 h-5 min-w-[20px] text-xs px-1"
+                    >
+                      {notificationState.unreadCount}
+                    </Badge>
+                  )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">John Doe</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      john@example.com
-                    </p>
-                  </div>
+              <DropdownMenuContent 
+                className="w-96 max-h-96 overflow-y-auto" 
+                align="start"
+                data-testid="notifications-dropdown"
+              >
+                <DropdownMenuLabel className="flex items-center justify-between">
+                  <span>Notifications</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => dispatch({ type: 'MARK_ALL_READ' })}
+                    className="h-6 text-xs"
+                    data-testid="mark-all-read"
+                  >
+                    Mark all read
+                  </Button>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
+                
+                {notificationState.notifications.length === 0 ? (
+                  <div className="p-8 text-center text-gray-500">
+                    <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No notifications</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 p-2">
+                    {notificationState.notifications.slice(0, 5).map((notification) => (
+                      <NotificationItem key={notification.id} notification={notification} />
+                    ))}
+                    
+                    {notificationState.notifications.length > 5 && (
+                      <DropdownMenuItem
+                        className="justify-center text-blue-600 font-medium"
+                        onClick={() => {
+                          setShowNotifications(false)
+                          router.push('/dashboard/notifications')
+                        }}
+                        data-testid="view-all-notifications"
+                      >
+                        View all {notificationState.notifications.length} notifications
+                      </DropdownMenuItem>
+                    )}
+                  </div>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
-      </div>
 
-      {/* Sidebar */}
-      <div className={cn(
-        'fixed inset-y-0 left-0 z-40 w-80 bg-white/95 backdrop-blur-sm border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0',
-        isMobileOpen ? 'translate-x-0' : '-translate-x-full',
-        className
-      )}>
-        <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="p-6 border-b border-gray-100">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                <Sparkles className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <h1 className="font-bold text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  FreeflowZee
-                </h1>
-                <p className="text-xs text-gray-500">Modern Freelance Platform</p>
-              </div>
-            </div>
+        {/* Main Navigation */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-2" data-testid="main-navigation">
+          {consolidatedNavigation.map((item) => (
+            <NavItem key={item.name} item={item} />
+          ))}
+        </div>
 
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search features..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+        {/* Current Context */}
+        {activeSection && (
+          <div className="p-4 border-t border-gray-200/50 bg-gray-50/50">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <activeSection.icon className="h-4 w-4" />
+              <span className="font-medium">{activeSection.name}</span>
+              {activeSection.notifications > 0 && (
+                <Badge variant="outline" className="text-xs">
+                  {activeSection.notifications} updates
+                </Badge>
+              )}
             </div>
           </div>
+        )}
 
-          {/* Navigation */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-2">
-            <div className="space-y-1">
-              {filteredNavigation.map((item) => (
-                <NavItem key={item.name} item={item} />
-              ))}
-            </div>
-
-            {/* Quick Actions */}
-            <div className="mt-8 pt-6 border-t border-gray-100">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                Quick Actions
-              </h3>
-              <div className="grid grid-cols-2 gap-2">
-                {quickActions.map((action) => (
-                  <Link
-                    key={action.name}
-                    href={action.href}
-                    className="flex flex-col items-center gap-2 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors group"
-                  >
-                    <div className={cn('p-2 rounded-lg bg-white shadow-sm', action.color)}>
-                      <action.icon className="h-4 w-4" />
-                    </div>
-                    <span className="text-xs font-medium text-gray-700 text-center group-hover:text-gray-900">
-                      {action.name}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* User Profile */}
-          <div className="p-4 border-t border-gray-100">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-100">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src="/avatars/john.jpg" alt="Profile" />
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                  JD
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">John Doe</p>
-                <p className="text-xs text-gray-500 truncate">Premium Account</p>
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <Settings className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end">
-                  <DropdownMenuItem>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile Settings</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Shield className="mr-2 h-4 w-4" />
-                    <span>Privacy & Security</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Award className="mr-2 h-4 w-4" />
-                    <span>Upgrade Plan</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Sign Out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
+        {/* User Menu */}
+        <div className="p-4 border-t border-gray-200/50">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start p-2 h-auto"
+                data-testid="user-menu-trigger"
+              >
+                <Avatar className="h-8 w-8 mr-3">
+                  <AvatarImage src="/avatars/user.jpg" alt="User" />
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-sm">
+                    JD
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 text-left">
+                  <div className="font-medium text-sm">John Doe</div>
+                  <div className="text-xs text-gray-500">Creative Director</div>
+                </div>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" data-testid="user-menu">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
+                  <User className="mr-2 h-4 w-4" />
+                  Profile Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/dashboard/notifications')}>
+                  <Bell className="mr-2 h-4 w-4" />
+                  Notifications
+                  {notificationState.unreadCount > 0 && (
+                    <Badge variant="destructive" className="ml-auto">
+                      {notificationState.unreadCount}
+                    </Badge>
+                  )}
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Preferences
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-red-600">
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
-
-      {/* Mobile overlay */}
-      {isMobileOpen && (
-        <div
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
-          onClick={() => setIsMobileOpen(false)}
-        />
-      )}
-    </>
+    </nav>
   )
 }
-
-export default DashboardNav 
