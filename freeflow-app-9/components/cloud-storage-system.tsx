@@ -97,11 +97,11 @@ const SUBSCRIPTION_PLANS = {
     name: 'Pro',
     price: 9.99,
     storage: 100 * 1024 * 1024 * 1024, // 100GB
-    shareLimit: 1024 * 1024 * 1024, // 1GB
+    shareLimit: 200 * 1024 * 1024 * 1024, // 200GB
     features: [
       '100 GB cloud storage',
       'Upload files of any size',
-      'Share files up to 1 GB',
+      'Share files up to 200 GB',
       'Advanced file management',
       'Team collaboration tools',
       'Priority support',
