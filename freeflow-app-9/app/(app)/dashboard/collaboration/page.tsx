@@ -3,6 +3,7 @@
 import React from 'react'
 import { RealTimeCollaborationSystem } from '@/components/collaboration/real-time-collaboration'
 import { EnhancedCollaborationChat } from '@/components/collaboration/enhanced-collaboration-chat'
+import { UniversalPinpointFeedback } from '@/components/collaboration/universal-pinpoint-feedback'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -13,7 +14,9 @@ import {
   Settings,
   Phone,
   Camera,
-  Mic
+  Mic,
+  Target,
+  Sparkles
 } from 'lucide-react'
 
 // Mock data for demonstration
@@ -49,12 +52,64 @@ const connectedUsers = [
   }
 ]
 
+// Sample project files for UPF demo
+const sampleProjectFiles = [
+  {
+    id: 'file_1',
+    name: 'Brand Animation.mp4',
+    type: 'video' as const,
+    url: '/videos/brand-animation.mp4',
+    thumbnail: '/images/video-thumb-1.jpg',
+    metadata: {
+      duration: 45,
+      dimensions: { width: 1920, height: 1080 }
+    }
+  },
+  {
+    id: 'file_2',
+    name: 'Homepage Mockup.jpg',
+    type: 'image' as const,
+    url: '/images/homepage-mockup.jpg',
+    metadata: {
+      dimensions: { width: 1440, height: 2560 }
+    }
+  },
+  {
+    id: 'file_3',
+    name: 'Brand Guidelines.pdf',
+    type: 'pdf' as const,
+    url: '/documents/brand-guidelines.pdf',
+    metadata: {
+      pageCount: 24
+    }
+  },
+  {
+    id: 'file_4',
+    name: 'Component Library.tsx',
+    type: 'code' as const,
+    url: '/code/component-library.tsx',
+    metadata: {
+      language: 'typescript'
+    }
+  }
+]
+
 const sampleImage = "/images/design-preview.jpg"
 
 export default function CollaborationPage() {
   const handleCommentAdd = (content: string, position?: { x: number; y: number }) => {
     console.log('New comment added:', { content, position })
     // In a real app, this would save to the database
+  }
+
+  const handleUPFCommentAdd = (comment: any) => {
+    console.log('UPF comment added:', comment)
+    // In a real app, this would save to the database via API
+  }
+
+  const handleUPFCommentUpdate = (commentId: string, updates: any) => {
+    console.log('UPF comment updated:', { commentId, updates })
+    // In a real app, this would update via API
   }
 
   return (
@@ -75,8 +130,12 @@ export default function CollaborationPage() {
       </div>
 
       {/* Collaboration Tabs */}
-      <Tabs defaultValue="chat" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs defaultValue="upf" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="upf" className="flex items-center gap-2">
+            <Target className="h-4 w-4" />
+            Universal Feedback
+          </TabsTrigger>
           <TabsTrigger value="chat" className="flex items-center gap-2">
             <MessageCircle className="h-4 w-4" />
             Enhanced Chat
@@ -94,6 +153,19 @@ export default function CollaborationPage() {
             Settings
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="upf" className="space-y-0">
+          <div className="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 rounded-xl p-1">
+            <UniversalPinpointFeedback
+              projectId="project_demo_123"
+              files={sampleProjectFiles}
+              currentUser={currentUser}
+              onCommentAdd={handleUPFCommentAdd}
+              onCommentUpdate={handleUPFCommentUpdate}
+              className="bg-white/70 backdrop-blur-sm rounded-lg p-6"
+            />
+          </div>
+        </TabsContent>
 
         <TabsContent value="chat" className="space-y-0">
           <EnhancedCollaborationChat
@@ -169,6 +241,93 @@ export default function CollaborationPage() {
                   <option>Standard Quality</option>
                   <option>Low Bandwidth</option>
                 </select>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">AI Analysis</label>
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Enable AI-powered feedback analysis</span>
+                  </label>
+                </div>
+                <p className="text-xs text-gray-500">
+                  AI will automatically categorize and provide insights on feedback comments
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">Voice Notes</label>
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Enable voice note recording</span>
+                  </label>
+                </div>
+                <p className="text-xs text-gray-500">
+                  Allow voice notes in feedback comments for better communication
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* UPF Feature Overview Card */}
+          <Card className="bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200/50">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-purple-800 flex items-center gap-2">
+                <Sparkles className="h-5 w-5" />
+                Universal Pinpoint Feedback Features
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium text-purple-700">Multi-Media Support</h4>
+                  <ul className="text-sm text-purple-600 space-y-1">
+                    <li>• Images with pixel-perfect positioning</li>
+                    <li>• Videos with timestamp comments</li>
+                    <li>• PDFs with page-specific feedback</li>
+                    <li>• Code files with line annotations</li>
+                  </ul>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="font-medium text-purple-700">AI-Powered Features</h4>
+                  <ul className="text-sm text-purple-600 space-y-1">
+                    <li>• Automatic feedback categorization</li>
+                    <li>• Priority assessment</li>
+                    <li>• Theme extraction</li>
+                    <li>• Effort estimation</li>
+                  </ul>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="font-medium text-purple-700">Voice & Media</h4>
+                  <ul className="text-sm text-purple-600 space-y-1">
+                    <li>• Voice note recording</li>
+                    <li>• Audio waveform visualization</li>
+                    <li>• Screen recording comments</li>
+                    <li>• File attachments</li>
+                  </ul>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="font-medium text-purple-700">Collaboration Tools</h4>
+                  <ul className="text-sm text-purple-600 space-y-1">
+                    <li>• Real-time reactions</li>
+                    <li>• Threaded discussions</li>
+                    <li>• @mention notifications</li>
+                    <li>• Status tracking</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="p-3 bg-white/60 rounded-lg border border-purple-200">
+                <p className="text-sm text-purple-700">
+                  <strong>What sets UPF apart:</strong> One unified commenting system that works seamlessly 
+                  across all file types with AI-powered insights, voice recording capabilities, and 
+                  intelligent feedback summarization.
+                </p>
               </div>
             </CardContent>
           </Card>
