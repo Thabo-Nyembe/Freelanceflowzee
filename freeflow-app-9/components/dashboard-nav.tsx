@@ -48,7 +48,8 @@ import {
   TrendingUp,
   ChevronRight,
   Sparkles,
-  Rocket
+  Rocket,
+  Cloud
 } from 'lucide-react'
 
 // Framework7-inspired navigation structure
@@ -134,6 +135,15 @@ const navigation = [
     color: 'text-gray-600',
     bgColor: 'bg-gray-50',
     description: 'Document storage'
+  },
+  { 
+    name: 'Cloud Storage', 
+    href: '/dashboard/cloud-storage', 
+    icon: Cloud, 
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50',
+    description: 'Cloud file management & sharing',
+    badge: '10GB'
   },
   { 
     name: 'AI Assistant', 
