@@ -22,7 +22,10 @@ const publicRoutes = [
   '/newsletter',
   '/privacy',
   '/terms',
-  '/book-appointment'
+  '/book-appointment',
+  '/community-showcase',
+  '/enhanced-collaboration-demo',
+  '/media-preview-demo'
 ]
 
 // Define protected routes that require authentication (when not in demo mode)
@@ -83,6 +86,12 @@ export async function middleware(request: NextRequest) {
 
   if (isTestEnv) {
     console.log('🧪 Test environment detected - skipping auth middleware')
+    return NextResponse.next()
+  }
+
+  // Check if current path is a public route - allow immediate access
+  if (publicRoutes.includes(pathname)) {
+    console.log(`🌐 Public route detected: ${pathname} - allowing access`)
     return NextResponse.next()
   }
 

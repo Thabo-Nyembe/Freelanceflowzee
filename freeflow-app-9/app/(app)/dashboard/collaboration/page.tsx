@@ -4,6 +4,8 @@ import React from 'react'
 import { RealTimeCollaborationSystem } from '@/components/collaboration/real-time-collaboration'
 import { EnhancedCollaborationChat } from '@/components/collaboration/enhanced-collaboration-chat'
 import { UniversalPinpointFeedback } from '@/components/collaboration/universal-pinpoint-feedback'
+import UniversalMediaPreviews from '@/components/collaboration/universal-media-previews'
+import { EnhancedClientCollaboration } from '@/components/collaboration/enhanced-client-collaboration'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -16,7 +18,10 @@ import {
   Camera,
   Mic,
   Target,
-  Sparkles
+  Sparkles,
+  MessageSquare,
+  Eye,
+  Image
 } from 'lucide-react'
 
 // Mock data for demonstration
@@ -130,29 +135,50 @@ export default function CollaborationPage() {
       </div>
 
       {/* Collaboration Tabs */}
-      <Tabs defaultValue="upf" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+      <Tabs defaultValue="client-collab" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-7 bg-white/60 backdrop-blur-xl border-white/20">
+          <TabsTrigger value="client-collab" className="flex items-center gap-2">
+            <Target className="w-4 h-4" />
+            Client Collaboration
+          </TabsTrigger>
           <TabsTrigger value="upf" className="flex items-center gap-2">
-            <Target className="h-4 w-4" />
+            <MessageSquare className="w-4 h-4" />
             Universal Feedback
           </TabsTrigger>
+          <TabsTrigger value="previews" className="flex items-center gap-2">
+            <Eye className="w-4 h-4" />
+            Media Previews
+          </TabsTrigger>
           <TabsTrigger value="chat" className="flex items-center gap-2">
-            <MessageCircle className="h-4 w-4" />
+            <MessageCircle className="w-4 h-4" />
             Enhanced Chat
           </TabsTrigger>
-          <TabsTrigger value="video" className="flex items-center gap-2">
-            <Video className="h-4 w-4" />
-            Video Calls
+          <TabsTrigger value="calls" className="flex items-center gap-2">
+            <Phone className="w-4 h-4" />
+            Voice & Video
           </TabsTrigger>
-          <TabsTrigger value="collaboration" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Real-time Collab
+          <TabsTrigger value="gallery" className="flex items-center gap-2">
+            <Image className="w-4 h-4" />
+            Gallery
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
+            <Settings className="w-4 h-4" />
             Settings
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="client-collab" className="space-y-0">
+          <div className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-xl p-1">
+            <EnhancedClientCollaboration
+              projectId="project_demo_123"
+              currentUser={currentUser}
+              onCommentAdd={(comment) => console.log('Client comment added:', comment)}
+              onCommentUpdate={(id, updates) => console.log('Client comment updated:', { id, updates })}
+              onFileApproval={(fileId, status) => console.log('File approval:', { fileId, status })}
+              className="bg-white/70 backdrop-blur-sm rounded-lg p-6"
+            />
+          </div>
+        </TabsContent>
 
         <TabsContent value="upf" className="space-y-0">
           <div className="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 rounded-xl p-1">
@@ -167,6 +193,10 @@ export default function CollaborationPage() {
           </div>
         </TabsContent>
 
+        <TabsContent value="previews" className="space-y-0">
+          <UniversalMediaPreviews />
+        </TabsContent>
+
         <TabsContent value="chat" className="space-y-0">
           <EnhancedCollaborationChat
             currentUser={currentUser}
@@ -176,7 +206,7 @@ export default function CollaborationPage() {
           />
         </TabsContent>
 
-        <TabsContent value="video" className="space-y-6">
+        <TabsContent value="calls" className="space-y-6">
           <Card className="bg-white/70 backdrop-blur-sm border-slate-200/50">
             <CardHeader>
               <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
@@ -208,8 +238,8 @@ export default function CollaborationPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="collaboration" className="space-y-0">
-          <RealTimeCollaborationSystem />
+        <TabsContent value="gallery" className="space-y-0">
+          {/* Implementation of gallery content */}
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">

@@ -178,7 +178,7 @@ const mockAIInsights: AIInsight[] = [
     id: 'insight_3',
     type: 'health',
     title: 'Break Reminder',
-    description: 'You\\'ve been working for 2.5 hours. Take a 15-minute break to maintain productivity.',
+    description: "You've been working for 2.5 hours. Take a 15-minute break to maintain productivity.",
     actionable: true,
     priority: 'high'
   }

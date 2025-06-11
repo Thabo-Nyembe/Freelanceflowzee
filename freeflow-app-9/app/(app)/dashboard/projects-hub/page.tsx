@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
+import { UniversalPinpointFeedbackSystem } from '@/components/collaboration/universal-pinpoint-feedback-system'
+import UniversalMediaPreviewsEnhanced from '@/components/collaboration/universal-media-previews-enhanced'
 import { 
   Target, 
   MessageSquare, 
@@ -373,11 +375,32 @@ export default function ProjectsHubPage() {
 
           {/* Collaboration Tab */}
           <TabsContent value="collaboration" className="space-y-6 mt-6">
+            {/* Universal Pinpoint Feedback Integration */}
+            <UniversalPinpointFeedbackSystem 
+              projectId="current-project"
+              currentUser={{
+                id: "user_1",
+                name: "John Designer",
+                avatar: "/avatars/john.jpg",
+                role: "freelancer"
+              }}
+              className="mb-8"
+            />
+
+            {/* Enhanced Media Previews */}
+            <Card className="p-6">
+              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <Eye className="h-5 w-5 text-purple-600" />
+                Enhanced Media Preview Samples
+              </h3>
+              <UniversalMediaPreviewsEnhanced />
+            </Card>
+            
             <Card className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-semibold flex items-center gap-2">
                   <MessageSquare className="h-6 w-6 text-blue-600" />
-                  Client Collaboration
+                  Recent Activity
                 </h2>
                 <Link href="/dashboard/collaboration">
                   <Button variant="outline" className="gap-2">
