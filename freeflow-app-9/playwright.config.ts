@@ -16,10 +16,8 @@ export default defineConfig({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['html', { open: 'never' }],
-    ['./scripts/context7-reporter.js'],
     ['json', { outputFile: 'test-results/results.json' }],
-    ['junit', { outputFile: 'test-results/junit.xml' }],
-    ['line']
+    ['junit', { outputFile: 'test-results/junit.xml' }]
   ],
   
   /* Shared settings for all the projects below. */
@@ -48,33 +46,152 @@ export default defineConfig({
     }
   },
 
-  /* Configure projects for major browsers */
+  /* Configure projects for comprehensive responsive testing */
   projects: [
+    /* Desktop browsers with various resolutions */
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: 'desktop-chrome-1920',
+      use: { 
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1920, height: 1080 }
+      },
     },
     {
-      name: 'firefox',
+      name: 'desktop-chrome-1366',
+      use: { 
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1366, height: 768 }
+      },
+    },
+    {
+      name: 'desktop-firefox',
       use: { ...devices['Desktop Firefox'] },
     },
     {
-      name: 'webkit',
+      name: 'desktop-webkit',
       use: { ...devices['Desktop Safari'] },
     },
+    
+    /* Large tablets */
     {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
+      name: 'tablet-ipad-pro',
+      use: { 
+        ...devices['iPad Pro'],
+        isMobile: true,
+        hasTouch: true
+      },
     },
     {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
+      name: 'tablet-surface-pro',
+      use: { 
+        viewport: { width: 1368, height: 912 },
+        deviceScaleFactor: 1.5,
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        isMobile: true,
+        hasTouch: true
+      },
+    },
+    
+    /* Standard tablets */
+    {
+      name: 'tablet-ipad',
+      use: { 
+        ...devices['iPad'],
+        isMobile: true,
+        hasTouch: true
+      },
+    },
+    {
+      name: 'tablet-android',
+      use: { 
+        viewport: { width: 800, height: 1280 },
+        deviceScaleFactor: 2,
+        userAgent: 'Mozilla/5.0 (Linux; Android 11; SM-T970) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        isMobile: true,
+        hasTouch: true
+      },
+    },
+    
+    /* Large mobile phones */
+    {
+      name: 'mobile-iphone-14-pro-max',
+      use: { 
+        ...devices['iPhone 14 Pro Max'],
+        isMobile: true,
+        hasTouch: true
+      },
+    },
+    {
+      name: 'mobile-pixel-7-pro',
+      use: { 
+        ...devices['Pixel 7'],
+        viewport: { width: 412, height: 915 },
+        isMobile: true,
+        hasTouch: true
+      },
+    },
+    
+    /* Standard mobile phones */
+    {
+      name: 'mobile-iphone-13',
+      use: { 
+        ...devices['iPhone 13'],
+        isMobile: true,
+        hasTouch: true
+      },
+    },
+    {
+      name: 'mobile-samsung-galaxy',
+      use: { 
+        ...devices['Galaxy S8'],
+        isMobile: true,
+        hasTouch: true
+      },
+    },
+    
+    /* Small mobile phones */
+    {
+      name: 'mobile-iphone-se',
+      use: { 
+        ...devices['iPhone SE'],
+        isMobile: true,
+        hasTouch: true
+      },
+    },
+    {
+      name: 'mobile-small-android',
+      use: { 
+        viewport: { width: 320, height: 568 },
+        deviceScaleFactor: 2,
+        userAgent: 'Mozilla/5.0 (Linux; Android 10; SM-A205U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
+        isMobile: true,
+        hasTouch: true
+      },
+    },
+    
+    /* Ultra-wide and portrait orientations */
+    {
+      name: 'ultrawide-desktop',
+      use: { 
+        ...devices['Desktop Chrome'],
+        viewport: { width: 2560, height: 1440 }
+      },
+    },
+    {
+      name: 'tablet-portrait',
+      use: { 
+        viewport: { width: 768, height: 1024 },
+        deviceScaleFactor: 2,
+        userAgent: 'Mozilla/5.0 (iPad; CPU OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1',
+        isMobile: true,
+        hasTouch: true
+      },
     },
   ],
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run dev',
+    command: 'PORT=3001 npm run dev',
     url: 'http://localhost:3001',
     reuseExistingServer: !process.env.CI,
     timeout: 120000,

@@ -28,7 +28,7 @@ const publicRoutes = [
   '/media-preview-demo'
 ]
 
-// Define protected routes that require authentication (when not in demo mode)
+// Define protected routes that require authentication
 const protectedRoutes = [
   '/dashboard',
   '/projects',
@@ -74,15 +74,10 @@ function checkAuthRateLimit(ip: string): boolean {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   
-  // Check for test environment or development bypass
+  // Check for test environment (Playwright testing only)
   const isTestEnv = 
     request.headers.get('x-test-mode') === 'true' ||
-    request.headers.get('user-agent')?.includes('Playwright') ||
-    process.env.NODE_ENV === 'test'
-
-  const isDevBypass = 
-    process.env.NODE_ENV === 'development' && 
-    request.headers.get('x-dev-bypass') === 'true'
+    request.headers.get('user-agent')?.includes('Playwright')
 
   if (isTestEnv) {
     console.log('🧪 Test environment detected - skipping auth middleware')
@@ -95,33 +90,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Check for development bypass header (for specific development needs)
+  const isDevBypass = 
+    process.env.NODE_ENV === 'development' && 
+    request.headers.get('x-dev-bypass') === 'true'
+
   if (isDevBypass) {
     console.log('🔧 Development bypass detected - skipping rate limiting')
     return await updateSession(request)
-  }
-
-  // Check for demo mode configuration
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  
-  const isSupabaseConfigured = supabaseUrl && 
-                              supabaseAnonKey && 
-                              !supabaseUrl.includes('placeholder') &&
-                              !supabaseUrl.includes('your-project-url')
-
-  // If Supabase is not configured (demo mode), allow access to all routes
-  if (!isSupabaseConfigured) {
-    console.log('🔧 Middleware: Running in demo mode - allowing all routes')
-    
-    // Special handling for demo mode redirects
-    if (pathname === '/login' || pathname === '/signup') {
-      const redirect = request.nextUrl.searchParams.get('redirect')
-      if (redirect && protectedRoutes.includes(redirect)) {
-        return NextResponse.redirect(new URL(redirect, request.url))
-      }
-    }
-    
-    return NextResponse.next()
   }
 
   // Get client IP for rate limiting
@@ -139,6 +115,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // ALWAYS use authentication - no more demo mode bypass
+  console.log(`🔐 Protected route detected: ${pathname} - checking authentication`)
   return await updateSession(request)
 }
 

@@ -57,29 +57,35 @@ function HeroSection() {
   return (
     <section data-testid="hero-section" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Luxury gradient background with sophisticated colors */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40">
-        {/* Premium floating elements */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-rose-200/20 to-pink-200/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-violet-200/20 to-purple-200/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-gradient-to-r from-blue-200/15 to-indigo-200/15 rounded-full blur-3xl animate-pulse delay-2000"></div>
+      <div className="absolute inset-0 luxury-gradient">
+        {/* Premium floating elements - responsive sizes */}
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 bg-gradient-to-r from-rose-200/20 to-pink-200/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 bg-gradient-to-r from-violet-200/20 to-purple-200/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 right-1/3 w-40 h-40 sm:w-56 sm:h-56 lg:w-64 lg:h-64 bg-gradient-to-r from-blue-200/15 to-indigo-200/15 rounded-full blur-3xl animate-pulse delay-2000"></div>
       </div>
 
       {/* Glass texture overlay */}
       <div className="absolute inset-0 bg-white/30 backdrop-blur-[100px]"></div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-8 text-center">
+      <div className="relative z-10 container-responsive text-center">
         <div className={`transform transition-all duration-1500 ease-out ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
           
-          {/* Premium badge */}
-          <div className="mb-12">
-            <Badge data-testid="hero-badge" className="bg-white/60 backdrop-blur-xl border border-white/40 px-8 py-3 text-sm font-medium text-slate-700 shadow-lg rounded-full">
+          {/* Premium badge - responsive */}
+          <div className="mb-8 sm:mb-12">
+            <Badge data-testid="hero-badge" className="bg-white/60 backdrop-blur-xl border border-white/40 px-4 py-2 sm:px-8 sm:py-3 text-sm sm:text-base font-medium text-slate-700 shadow-lg rounded-full">
               <Crown className="w-4 h-4 mr-2 text-amber-500" />
               Premium Creative Platform
             </Badge>
           </div>
 
-          {/* Elegant main heading */}
-          <h1 data-testid="hero-title" className="text-6xl sm:text-7xl lg:text-8xl font-light text-slate-800 mb-12 leading-[0.95] tracking-tight">
+          {/* Elegant main heading - fully responsive */}
+          <h1 data-testid="hero-title" className="
+            text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 
+            font-light text-slate-800 
+            mb-8 sm:mb-12 
+            leading-[0.95] tracking-tight
+            px-4 sm:px-0
+          ">
             Create.
             <br />
             <span className="font-extralight bg-gradient-to-r from-rose-400 via-violet-400 to-indigo-400 bg-clip-text text-transparent">Collaborate.</span>
@@ -87,19 +93,43 @@ function HeroSection() {
             Prosper.
           </h1>
 
-          {/* Refined subheading */}
-          <p data-testid="hero-subtitle" className="text-xl sm:text-2xl text-slate-600 mb-16 max-w-3xl mx-auto leading-relaxed font-light">
+          {/* Refined subheading - responsive */}
+          <p data-testid="hero-subtitle" className="
+            text-lg sm:text-xl md:text-2xl 
+            text-slate-600 
+            mb-12 sm:mb-16 
+            max-w-3xl mx-auto 
+            leading-relaxed font-light
+            px-4 sm:px-6 lg:px-0
+          ">
             The sophisticated platform where creativity meets commerce. 
             Seamlessly manage projects, delight clients, and scale your creative business.
           </p>
 
-          {/* Premium CTA section */}
-          <div data-testid="hero-cta-buttons" className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-20">
+          {/* Premium CTA section - mobile-first responsive */}
+          <div data-testid="hero-cta-buttons" className="
+            flex flex-col sm:flex-row 
+            gap-4 sm:gap-6 
+            justify-center items-center 
+            mb-16 sm:mb-20
+            px-4 sm:px-0
+          ">
             <Link href="/login?redirect=/dashboard">
               <Button 
                 data-testid="creator-login-button" 
                 size="lg" 
-                className="bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 text-white px-12 py-6 text-lg font-light rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-[1.02] transition-all duration-300 border border-white/20"
+                className="
+                  button-touch
+                  bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 
+                  text-white 
+                  px-8 sm:px-12 py-4 sm:py-6 
+                  text-lg sm:text-xl font-light 
+                  rounded-2xl shadow-2xl hover:shadow-3xl 
+                  transform hover:scale-[1.02] 
+                  transition-all duration-300 
+                  border border-white/20
+                  w-full sm:w-auto
+                "
               >
                 Start Creating
                 <ArrowRight className="ml-3 w-5 h-5" />
@@ -111,7 +141,17 @@ function HeroSection() {
                 data-testid="watch-demo-button" 
                 size="lg" 
                 variant="outline" 
-                className="border-2 border-slate-200 hover:border-slate-300 bg-white/70 backdrop-blur-xl px-12 py-6 text-lg font-light rounded-2xl text-slate-700 hover:bg-white/80 transition-all duration-300"
+                className="
+                  button-touch
+                  border-2 border-slate-200 hover:border-slate-300 
+                  bg-white/70 backdrop-blur-xl 
+                  px-8 sm:px-12 py-4 sm:py-6 
+                  text-lg sm:text-xl font-light 
+                  rounded-2xl 
+                  text-slate-700 hover:bg-white/80 
+                  transition-all duration-300
+                  w-full sm:w-auto
+                "
               >
                 <Play className="mr-3 w-5 h-5" />
                 Watch Demo
@@ -119,14 +159,21 @@ function HeroSection() {
             </Link>
           </div>
 
-          {/* Elegant client access */}
-          <div className="mb-16">
-            <p className="text-sm text-slate-500 mb-6 font-light">Existing client?</p>
+          {/* Elegant client access - responsive */}
+          <div className="mb-12 sm:mb-16 px-4 sm:px-0">
+            <p className="text-sm sm:text-base text-slate-500 mb-4 sm:mb-6 font-light">Existing client?</p>
             <Link href="/payment">
               <Button 
                 data-testid="client-access-button" 
                 variant="ghost" 
-                className="text-slate-600 hover:text-slate-800 px-8 py-3 text-base font-light rounded-xl hover:bg-white/50 backdrop-blur-sm transition-all duration-300"
+                className="
+                  text-slate-600 hover:text-slate-800 
+                  px-6 sm:px-8 py-3 sm:py-4 
+                  text-base sm:text-lg font-light 
+                  rounded-xl hover:bg-white/50 backdrop-blur-sm 
+                  transition-all duration-300
+                  touch-target
+                "
               >
                 <Eye className="mr-2 w-4 h-4" />
                 Access Your Projects
@@ -134,15 +181,21 @@ function HeroSection() {
             </Link>
           </div>
 
-          {/* Minimalist social proof */}
-          <div data-testid="hero-social-proof" className="flex flex-col sm:flex-row items-center justify-center gap-12 text-slate-500">
+          {/* Minimalist social proof - responsive */}
+          <div data-testid="hero-social-proof" className="
+            flex flex-col sm:flex-row 
+            items-center justify-center 
+            gap-8 sm:gap-12 
+            text-slate-500
+            px-4 sm:px-0
+          ">
             <div className="flex items-center gap-3">
               <div className="flex -space-x-2">
                 <div className="w-10 h-10 bg-gradient-to-br from-rose-300 to-pink-300 rounded-full border-2 border-white shadow-lg"></div>
                 <div className="w-10 h-10 bg-gradient-to-br from-violet-300 to-purple-300 rounded-full border-2 border-white shadow-lg"></div>
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-300 to-indigo-300 rounded-full border-2 border-white shadow-lg"></div>
               </div>
-              <span className="text-sm font-light">Trusted by 50,000+ creatives</span>
+              <span className="text-sm sm:text-base font-light">Trusted by 50,000+ creatives</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="flex">
@@ -150,7 +203,7 @@ function HeroSection() {
                   <Star key={i} className="w-4 h-4 fill-amber-300 text-amber-300" />
                 ))}
               </div>
-              <span className="text-sm font-light">4.9/5 rating</span>
+              <span className="text-sm sm:text-base font-light">4.9/5 rating</span>
             </div>
           </div>
         </div>

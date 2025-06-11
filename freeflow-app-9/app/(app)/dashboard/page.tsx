@@ -1,33 +1,30 @@
 "use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { DashboardOverview } from '@/components/dashboard/dashboard-overview';
-import { ProjectsHub } from '@/components/hubs/projects-hub';
-import { UniversalFeedbackHub } from '@/components/hubs/universal-feedback-hub';
-import { FinancialHub } from '@/components/hubs/financial-hub';
-import { TeamHub } from '@/components/hubs/team-hub';
-import { FilesHub } from '@/components/hubs/files-hub';
-import { CommunityTab } from '@/components/community-tab';
-import { MainNavigation } from '@/components/navigation/main-navigation';
-import {
-  LayoutDashboard,
-  FolderOpen,
+import { useState, useEffect } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { 
+  DollarSign, 
+  Users, 
+  Briefcase, 
+  Clock,
+  Shield,
+  Zap,
+  Eye,
+  Download,
   MessageSquare,
-  DollarSign,
-  Users,
-  FileText,
-  Globe,
-  Settings,
-  Bell,
-  Search,
+  Calendar,
+  Award,
+  Activity,
+  ArrowRight,
   Plus,
-  Calendar
-} from 'lucide-react';
+  Bell,
+  ChevronRight,
+  Target,
+  Wallet
+} from 'lucide-react'
 
 // Mock data - in a real app, this would come from your database/API
 const mockData = {
@@ -142,245 +139,344 @@ const mockData = {
 };
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [notifications, setNotifications] = useState(3);
+  const [isLoading, setIsLoading] = useState(true)
+  const [currentTime, setCurrentTime] = useState(new Date())
 
-  // Mock user for demo mode
-  const mockUser = {
-    id: 'demo-user',
-    email: 'demo@freeflowzee.com',
-    user_metadata: {
-      full_name: 'Demo User',
-      avatar_url: undefined
-    }
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1000);
+    const clockTimer = setInterval(() => setCurrentTime(new Date()), 1000);
+    
+    return () => {
+      clearTimeout(timer);
+      clearInterval(clockTimer);
+    };
+  }, []);
 
-  const tabConfig = [
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-8 h-8 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin"></div>
+          <p className="text-sm text-gray-500">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Sample data
+  const stats = [
     {
-      value: 'dashboard',
-      label: 'Dashboard',
-      icon: LayoutDashboard,
-      component: DashboardOverview,
-      route: '/dashboard'
-    },
-    {
-      value: 'my-day',
-      label: 'My Day',
-      icon: Calendar,
-      component: null,
-      route: '/dashboard/my-day',
-      badge: 'AI'
-    },
-    {
-      value: 'projects',
-      label: 'Projects',
-      icon: FolderOpen,
-      component: ProjectsHub,
-      route: '/dashboard/projects-hub'
-    },
-    {
-      value: 'feedback',
-      label: 'Feedback',
-      icon: MessageSquare,
-      component: UniversalFeedbackHub,
-      route: '/dashboard/collaboration'
-    },
-    {
-      value: 'financial',
-      label: 'Financial',
+      title: 'Total Earnings',
+      value: '$47,850',
+      change: '+12.5%',
+      trend: 'up',
       icon: DollarSign,
-      component: FinancialHub,
-      route: '/dashboard/financial-hub'
+      color: 'text-emerald-600',
+      bgColor: 'bg-emerald-50',
+      description: 'This month'
     },
     {
-      value: 'team',
-      label: 'Team',
+      title: 'Active Projects',
+      value: '8',
+      change: '+2',
+      trend: 'up',
+      icon: Briefcase,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      description: 'Currently working'
+    },
+    {
+      title: 'Happy Clients',
+      value: '32',
+      change: '+5',
+      trend: 'up',
       icon: Users,
-      component: TeamHub,
-      route: '/dashboard/team-hub'
+      color: 'text-violet-600',
+      bgColor: 'bg-violet-50',
+      description: 'All time'
     },
     {
-      value: 'files',
-      label: 'Files',
-      icon: FileText,
-      component: FilesHub,
-      route: '/dashboard/files-hub'
-    },
-    {
-      value: 'community',
-      label: 'Community',
-      icon: Globe,
-      component: CommunityTab,
-      route: '/dashboard/community'
+      title: 'Completion Rate',
+      value: '94%',
+      change: '+2%',
+      trend: 'up',
+      icon: Target,
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-50',
+      description: 'Success rate'
     }
   ];
 
-  const handleTabChange = (tabValue: string) => {
-    const tab = tabConfig.find(t => t.value === tabValue);
-    if (tab?.route && tab.route !== '/dashboard') {
-      router.push(tab.route);
-    } else {
-      setActiveTab(tabValue);
+  const recentProjects = [
+    {
+      id: 1,
+      name: 'Brand Identity Design',
+      client: 'TechStart Inc.',
+      progress: 85,
+      status: 'In Progress',
+      dueDate: '2025-01-15',
+      priority: 'High',
+      earnings: '$3,200'
+    },
+    {
+      id: 2,
+      name: 'Mobile App UI',
+      client: 'Digital Solutions',
+      progress: 60,
+      status: 'Review',
+      dueDate: '2025-01-20',
+      priority: 'Medium',
+      earnings: '$4,500'
+    },
+    {
+      id: 3,
+      name: 'Website Redesign',
+      client: 'Creative Agency',
+      progress: 95,
+      status: 'Final Review',
+      dueDate: '2025-01-12',
+      priority: 'High',
+      earnings: '$2,800'
     }
-  };
+  ];
 
-  const renderTabContent = (tabValue: string) => {
-    const tab = tabConfig.find(t => t.value === tabValue);
-    if (!tab) return null;
-
-    const TabComponent = tab.component as any;
-    
-    switch (tabValue) {
-      case 'dashboard':
-        return (
-          <TabComponent
-            earnings={mockData.earnings}
-            activeProjects={mockData.activeProjects}
-            completedProjects={mockData.completedProjects}
-            pendingPayments={mockData.pendingPayments}
-            recentActivities={mockData.recentActivities}
-          />
-        );
-      case 'financial':
-        return (
-          <TabComponent
-            earnings={mockData.earnings}
-            projects={mockData.projects}
-            userId="user-1"
-          />
-        );
-      case 'files':
-        return (
-          <TabComponent
-            projects={mockData.projects}
-            userId="user-1"
-          />
-        );
-      case 'community':
-        return <TabComponent />;
-      default:
-        return (
-          <TabComponent 
-            projects={mockData.projects}
-            userId="user-1"
-          />
-        );
+  const notificationsData = [
+    {
+      id: 1,
+      title: 'Payment Received',
+      message: 'TechStart Inc. sent $1,600 for milestone completion',
+      time: '2 hours ago',
+      type: 'payment',
+      icon: DollarSign,
+      color: 'text-emerald-600'
+    },
+    {
+      id: 2,
+      title: 'Project Feedback',
+      message: 'Digital Solutions left feedback on Mobile App UI',
+      time: '4 hours ago',
+      type: 'feedback',
+      icon: MessageSquare,
+      color: 'text-blue-600'
+    },
+    {
+      id: 3,
+      title: 'Deadline Reminder',
+      message: 'Website Redesign due in 2 days',
+      time: '6 hours ago',
+      type: 'deadline',
+      icon: Clock,
+      color: 'text-amber-600'
     }
-  };
+  ];
+
+  const quickActions = [
+    {
+      title: 'Start New Project',
+      description: 'Create a new project workspace',
+      icon: Plus,
+      color: 'text-violet-600',
+      bgColor: 'bg-violet-50',
+      action: () => console.log('Start new project')
+    },
+    {
+      title: 'Invoice Client',
+      description: 'Generate and send invoices',
+      icon: Wallet,
+      color: 'text-emerald-600',
+      bgColor: 'bg-emerald-50',
+      action: () => console.log('Create invoice')
+    },
+    {
+      title: 'Upload Files',
+      description: 'Share files with clients',
+      icon: Download,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      action: () => console.log('Upload files')
+    },
+    {
+      title: 'Schedule Meeting',
+      description: 'Book client consultations',
+      icon: Calendar,
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-50',
+      action: () => console.log('Schedule meeting')
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40">
-      {/* Luxury floating background elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-rose-200/10 to-pink-200/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-violet-200/10 to-purple-200/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-gradient-to-r from-blue-200/8 to-indigo-200/8 rounded-full blur-3xl animate-pulse delay-2000"></div>
-      </div>
-
-      {/* Glass overlay for premium texture */}
-      <div className="fixed inset-0 bg-white/20 backdrop-blur-[100px] pointer-events-none"></div>
-
-      {/* Main Navigation */}
-      <div className="relative z-10">
-        <MainNavigation 
-          user={mockUser} 
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
-      </div>
-      
-      {/* Main Content */}
-      <div className="relative z-10 container mx-auto px-8 py-12 max-w-7xl">
-        {/* Luxury Welcome Header */}
-        <div className="mb-16">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-            <div>
-              <h1 className="text-6xl font-thin text-slate-800 mb-6 tracking-tight leading-tight">
-                Welcome back,
-                <span className="block bg-gradient-to-r from-rose-400 via-violet-400 to-indigo-400 bg-clip-text text-transparent font-extralight mt-2">
-                  {mockUser.user_metadata?.full_name?.split(' ')[0] || 'Creator'}
-                </span>
-              </h1>
-              <p className="text-xl text-slate-600 font-light max-w-2xl leading-relaxed">
-                Your creative workspace awaits. Track progress, collaborate with clients, and build extraordinary experiences.
-              </p>
-            </div>
-            
-            {/* Premium action buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button 
-                className="bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 text-white px-8 py-4 rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-[1.02] transition-all duration-300 border border-white/20"
-                onClick={() => router.push('/projects/new')}
-              >
-                <Plus className="mr-2 w-5 h-5" />
-                New Project
-              </Button>
-              <Button 
-                variant="outline" 
-                className="border-2 border-slate-200 hover:border-slate-300 bg-white/70 backdrop-blur-xl px-8 py-4 rounded-2xl text-slate-700 hover:bg-white/80 transition-all duration-300 relative"
-                onClick={() => router.push('/dashboard/notifications')}
-              >
-                <Bell className="mr-2 w-5 h-5" />
-                Notifications
-                {notifications > 0 && (
-                  <Badge variant="destructive" className="absolute -top-2 -right-2 h-6 w-6 p-0 text-xs flex items-center justify-center">
-                    {notifications}
-                  </Badge>
-                )}
-              </Button>
-            </div>
+    <div className="space-y-6 sm:space-y-8">
+      {/* Header Section - Responsive */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="heading-responsive">Welcome back!</h1>
+          <p className="text-responsive text-gray-600 mt-2">
+            Here's what's happening with your projects today.
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div className="text-mobile sm:text-desktop text-gray-500">
+            {currentTime.toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}
           </div>
+          <Button className="button-touch w-full sm:w-auto">
+            <Plus className="w-4 h-4 mr-2" />
+            New Project
+          </Button>
+        </div>
+      </div>
+
+      {/* Stats Cards - Responsive Grid */}
+      <div className="grid-responsive">
+        {stats.map((stat, index) => {
+          const Icon = stat.icon
+          return (
+            <Card key={index} className="card-responsive hover:scale-[1.02] transition-transform duration-200">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-mobile sm:text-desktop font-medium">
+                  {stat.title}
+                </CardTitle>
+                <div className={`p-2 rounded-xl ${stat.bgColor}`}>
+                  <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${stat.color}`} />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl sm:text-3xl font-bold">{stat.value}</div>
+                <div className="flex items-center space-x-2 mt-1">
+                  <span className="text-xs sm:text-sm text-emerald-600 font-medium">
+                    {stat.change}
+                  </span>
+                  <span className="text-xs sm:text-sm text-gray-500">
+                    {stat.description}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
+      </div>
+
+      {/* Main Content Grid - Mobile-First */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+        
+        {/* Recent Projects - Takes 2 columns on desktop */}
+        <div className="lg:col-span-2">
+          <Card className="card-responsive">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Briefcase className="w-5 h-5" />
+                Recent Projects
+              </CardTitle>
+              <Button variant="ghost" size="sm" className="text-responsive">
+                View All
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {recentProjects.map((project) => (
+                <div key={project.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                  <div className="flex-1 space-y-2 sm:space-y-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <h4 className="font-medium text-responsive">{project.name}</h4>
+                      <Badge variant="outline" className="text-xs w-fit">
+                        {project.status}
+                      </Badge>
+                    </div>
+                    <p className="text-mobile text-gray-600">{project.client}</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                      <div className="flex items-center space-x-2 text-mobile">
+                        <span>Progress:</span>
+                        <Progress value={project.progress} className="w-16 sm:w-20" />
+                        <span className="text-xs">{project.progress}%</span>
+                      </div>
+                      <span className="text-mobile text-gray-500">Due: {project.dueDate}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between sm:justify-end mt-3 sm:mt-0 sm:ml-4">
+                    <span className="font-semibold text-responsive text-emerald-600">
+                      {project.earnings}
+                    </span>
+                    <Button variant="ghost" size="sm" className="ml-2 touch-target">
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Premium Navigation Tabs */}
-        <Tabs 
-          value={activeTab} 
-          onValueChange={handleTabChange} 
-          className="w-full"
-        >
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7 mb-12 bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl p-2 shadow-xl shadow-black/5">
-            {tabConfig.map((tab) => {
-              const IconComponent = tab.icon;
-              return (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className="flex items-center justify-center gap-2 text-sm font-light rounded-2xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-slate-800 data-[state=active]:to-slate-700 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-white/50 text-slate-600 py-3 px-4"
-                >
-                  <IconComponent className="w-4 h-4" />
-                  <span className="hidden sm:inline">{tab.label}</span>
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
+        {/* Sidebar Content */}
+        <div className="space-y-6">
+          
+          {/* Quick Actions */}
+          <Card className="card-responsive">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5" />
+                Quick Actions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 lg:grid-cols-1 gap-3">
+              {quickActions.map((action, index) => {
+                const Icon = action.icon
+                return (
+                  <Button
+                    key={index}
+                    variant="ghost"
+                    onClick={action.action}
+                    className="h-auto p-4 justify-start text-left touch-target"
+                  >
+                    <div className={`p-2 rounded-xl ${action.bgColor} mr-3`}>
+                      <Icon className={`w-4 h-4 ${action.color}`} />
+                    </div>
+                    <div className="hidden lg:block">
+                      <div className="font-medium text-sm">{action.title}</div>
+                      <div className="text-xs text-gray-500">{action.description}</div>
+                    </div>
+                    <div className="lg:hidden font-medium text-sm">{action.title}</div>
+                  </Button>
+                )
+              })}
+            </CardContent>
+          </Card>
 
-          {/* Tab Content with luxury styling */}
-          <div className="min-h-[600px]">
-            {tabConfig.map((tab) => {
-              const ComponentToRender = tab.component;
-              return (
-                <TabsContent 
-                  key={tab.value} 
-                  value={tab.value} 
-                  className="focus:outline-none"
-                >
-                  <div className="bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl shadow-xl shadow-black/5 p-8">
-                    <ComponentToRender 
-                      data={mockData}
-                      activeProjects={mockData.projects.filter(p => p.status === 'active')}
-                      completedProjects={mockData.projects.filter(p => p.status === 'completed')}
-                      recentActivities={mockData.recentActivities}
-                      earnings={mockData.earnings}
-                      pendingPayments={mockData.pendingPayments}
-                      notifications={notifications}
-                    />
+          {/* Recent Notifications */}
+          <Card className="card-responsive">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5" />
+                Recent Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {notificationsData.map((notification) => {
+                const Icon = notification.icon
+                return (
+                  <div key={notification.id} className="flex items-start space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors">
+                    <div className={`p-2 rounded-lg bg-gray-100`}>
+                      <Icon className={`w-4 h-4 ${notification.color}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-medium truncate">{notification.title}</h4>
+                      <p className="text-xs text-gray-600 mt-1 line-clamp-2">{notification.message}</p>
+                      <span className="text-xs text-gray-500 mt-1">{notification.time}</span>
+                    </div>
                   </div>
-                </TabsContent>
-              );
-            })}
-          </div>
-        </Tabs>
+                )
+              })}
+              <Button variant="ghost" size="sm" className="w-full mt-3 text-responsive">
+                View All Notifications
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

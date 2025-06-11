@@ -206,19 +206,17 @@ export function SiteHeader({
               </Button>
             </div>
 
-            {/* Mobile menu button */}
+            {/* Mobile Menu Button */}
             <div className="md:hidden">
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={getButtonClassName()}
+                className={`${getButtonClassName()} button-touch`}
+                aria-label="Toggle mobile menu"
+                data-testid="mobile-menu"
               >
-                {isMobileMenuOpen ? (
-                  <X className="h-6 w-6" />
-                ) : (
-                  <Menu className="h-6 w-6" />
-                )}
+                {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </Button>
             </div>
 
@@ -295,53 +293,92 @@ export function SiteHeader({
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-white">
+          <div className="md:hidden mobile-only" data-testid="mobile-menu-content">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-200 shadow-lg">
               {user ? userNavigationItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`block px-3 py-2 rounded-md text-base font-medium ${
-                    pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
-                      ? 'text-indigo-600 bg-indigo-50'
-                      : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50'
-                  }`}
+                  className="block px-3 py-3 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md transition-colors button-touch"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  <div className="flex items-center">
-                    {item.icon && <item.icon className="w-4 h-4 mr-2" />}
-                    {item.label}
+                  <div className="flex items-center space-x-3">
+                    {item.icon && <item.icon className="w-5 h-5" />}
+                    <span>{item.label}</span>
                   </div>
                 </Link>
-              )) : navigationItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`block px-3 py-2 rounded-md text-base font-medium ${
-                    pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
-                      ? 'text-indigo-600 bg-indigo-50'
-                      : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50'
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <div className="flex items-center">
-                    {item.icon && <item.icon className="w-4 h-4 mr-2" />}
-                    {item.label}
+              )) : (
+                <>
+                  {navigationItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="block px-3 py-3 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md transition-colors button-touch"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <div className="flex items-center space-x-3">
+                        {item.icon && <item.icon className="w-5 h-5" />}
+                        <span>{item.label}</span>
+                      </div>
+                    </Link>
+                  ))}
+                  
+                  {/* Mobile Resources Section */}
+                  <div className="px-3 py-2">
+                    <div className="text-sm font-medium text-gray-500 mb-2">Resources</div>
+                    <div className="space-y-1">
+                      <Link
+                        href="/docs"
+                        className="block py-2 text-sm text-gray-700 hover:text-indigo-600"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Documentation
+                      </Link>
+                      <Link
+                        href="/tutorials"
+                        className="block py-2 text-sm text-gray-700 hover:text-indigo-600"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Video Tutorials
+                      </Link>
+                      <Link
+                        href="/api-docs"
+                        className="block py-2 text-sm text-gray-700 hover:text-indigo-600"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        API Reference
+                      </Link>
+                      <Link
+                        href="/community"
+                        className="block py-2 text-sm text-gray-700 hover:text-indigo-600"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Community
+                      </Link>
+                      <Link
+                        href="/support"
+                        className="block py-2 text-sm text-gray-700 hover:text-indigo-600"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Support
+                      </Link>
+                    </div>
                   </div>
-                </Link>
-              ))}
+                </>
+              )}
               
               {/* Mobile Contact Actions */}
-              <div className="border-t border-gray-200 pt-4">
-                <div className="flex space-x-2 px-3">
+              <div className="px-3 py-2 border-t border-gray-200">
+                <div className="text-sm font-medium text-gray-500 mb-2">Contact</div>
+                <div className="flex space-x-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      handleEmailClick()
-                      setIsMobileMenuOpen(false)
+                      handleEmailClick();
+                      setIsMobileMenuOpen(false);
                     }}
-                    className="flex-1"
+                    className="flex-1 button-touch"
                   >
                     <Mail className="w-4 h-4 mr-2" />
                     Email
@@ -350,10 +387,10 @@ export function SiteHeader({
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      handlePhoneClick()
-                      setIsMobileMenuOpen(false)
+                      handlePhoneClick();
+                      setIsMobileMenuOpen(false);
                     }}
-                    className="flex-1"
+                    className="flex-1 button-touch"
                   >
                     <Phone className="w-4 h-4 mr-2" />
                     Call
@@ -361,24 +398,18 @@ export function SiteHeader({
                 </div>
               </div>
               
-              {/* Mobile Auth Actions */}
+              {/* Mobile Auth Buttons */}
               {showAuthButtons && !user && (
-                <div className="border-t border-gray-200 pt-4 space-y-2 px-3">
-                  <Link href="/login" className="block">
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      Log in
+                <div className="px-3 py-2 border-t border-gray-200 space-y-2">
+                  <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start button-touch">
+                      <User className="w-4 h-4 mr-2" />
+                      Sign In
                     </Button>
                   </Link>
-                  <Link href="/signup" className="block">
-                    <Button 
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      Get Started
+                  <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button className="w-full button-touch">
+                      Get Started Free
                     </Button>
                   </Link>
                 </div>

@@ -136,7 +136,7 @@ function LoginForm() {
           </Alert>
         )}
 
-        <form action={handleSubmit} className="space-y-4" suppressHydrationWarning>
+        <form action={handleSubmit} className="form-responsive" suppressHydrationWarning>
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
               Email:
@@ -147,7 +147,7 @@ function LoginForm() {
               type="email" 
               required 
               disabled={isPending}
-              className="w-full"
+              className="w-full form-control-touch"
               placeholder="Enter your email"
               autoComplete="email"
               suppressHydrationWarning
@@ -163,7 +163,7 @@ function LoginForm() {
               type="password" 
               required 
               disabled={isPending}
-              className="w-full"
+              className="w-full form-control-touch"
               placeholder="Enter your password"
               autoComplete="current-password"
               suppressHydrationWarning
@@ -173,7 +173,7 @@ function LoginForm() {
             <Button 
               type="submit"
               disabled={isPending}
-              className="w-full"
+              className="w-full button-touch"
             >
               {isPending ? (
                 <>
