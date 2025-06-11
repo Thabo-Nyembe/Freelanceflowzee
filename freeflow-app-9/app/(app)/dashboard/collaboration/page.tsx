@@ -8,6 +8,7 @@ import { UniversalMediaPreviews } from '@/components/collaboration/universal-med
 import { EnhancedClientCollaboration } from '@/components/collaboration/enhanced-client-collaboration'
 import { AIDesignAssistant } from '@/components/collaboration/ai-powered-design-assistant'
 import { AdvancedClientPortal } from '@/components/collaboration/advanced-client-portal'
+import { EnhancedGallery } from '@/components/portfolio/enhanced-gallery'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -26,7 +27,8 @@ import {
   Image,
   Brain,
   Palette2,
-  UserCheck
+  UserCheck,
+  FolderOpen
 } from 'lucide-react'
 
 // Mock data for demonstration
@@ -163,7 +165,7 @@ export default function CollaborationPage() {
             Voice & Video
           </TabsTrigger>
           <TabsTrigger value="gallery" className="flex items-center gap-2">
-            <Image className="w-4 h-4" />
+            <FolderOpen className="w-4 h-4" />
             Gallery
           </TabsTrigger>
           <TabsTrigger value="ai-assistant" className="flex items-center gap-2">
@@ -252,7 +254,15 @@ export default function CollaborationPage() {
         </TabsContent>
 
         <TabsContent value="gallery" className="space-y-0">
-          {/* Implementation of gallery content */}
+          <div className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 rounded-xl p-1">
+            <EnhancedGallery
+              showCollections={true}
+              allowUpload={true}
+              showAnalytics={true}
+              mode="portfolio"
+              className="bg-white/70 backdrop-blur-sm rounded-lg p-6"
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="ai-assistant" className="space-y-0">
