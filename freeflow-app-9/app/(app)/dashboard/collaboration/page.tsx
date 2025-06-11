@@ -9,6 +9,7 @@ import { EnhancedClientCollaboration } from '@/components/collaboration/enhanced
 import { AIDesignAssistant } from '@/components/collaboration/ai-powered-design-assistant'
 import { AdvancedClientPortal } from '@/components/collaboration/advanced-client-portal'
 import { EnhancedGallery } from '@/components/portfolio/enhanced-gallery'
+import { AIOpenAIIntegration } from '@/components/collaboration/ai-openai-integration'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -143,7 +144,7 @@ export default function CollaborationPage() {
 
       {/* Collaboration Tabs */}
       <Tabs defaultValue="client-collab" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-9 bg-white/60 backdrop-blur-xl border-white/20">
+        <TabsList className="grid w-full grid-cols-10 bg-white/60 backdrop-blur-xl border-white/20">
           <TabsTrigger value="client-collab" className="flex items-center gap-2">
             <Target className="w-4 h-4" />
             Client Collaboration
@@ -171,6 +172,10 @@ export default function CollaborationPage() {
           <TabsTrigger value="ai-assistant" className="flex items-center gap-2">
             <Brain className="w-4 h-4" />
             AI Assistant
+          </TabsTrigger>
+          <TabsTrigger value="openai-integration" className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4" />
+            OpenAI Integration
           </TabsTrigger>
           <TabsTrigger value="client-portal" className="flex items-center gap-2">
             <UserCheck className="w-4 h-4" />
@@ -291,6 +296,12 @@ export default function CollaborationPage() {
               }}
               className="bg-white/70 backdrop-blur-sm rounded-lg p-6"
             />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="openai-integration" className="space-y-0">
+          <div className="bg-gradient-to-br from-violet-50 via-purple-50 to-indigo-50 rounded-xl p-1">
+            <AIOpenAIIntegration />
           </div>
         </TabsContent>
 
