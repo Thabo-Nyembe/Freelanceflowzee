@@ -25,7 +25,8 @@ import {
   Settings,
   Bell,
   Search,
-  Plus
+  Plus,
+  Calendar
 } from 'lucide-react';
 
 // Mock data - in a real app, this would come from your database/API

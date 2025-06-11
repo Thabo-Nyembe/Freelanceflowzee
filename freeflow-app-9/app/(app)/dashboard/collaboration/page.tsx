@@ -4,8 +4,10 @@ import React from 'react'
 import { RealTimeCollaborationSystem } from '@/components/collaboration/real-time-collaboration'
 import { EnhancedCollaborationChat } from '@/components/collaboration/enhanced-collaboration-chat'
 import { UniversalPinpointFeedback } from '@/components/collaboration/universal-pinpoint-feedback'
-import UniversalMediaPreviews from '@/components/collaboration/universal-media-previews'
+import { UniversalMediaPreviews } from '@/components/collaboration/universal-media-previews'
 import { EnhancedClientCollaboration } from '@/components/collaboration/enhanced-client-collaboration'
+import { AIDesignAssistant } from '@/components/collaboration/ai-powered-design-assistant'
+import { AdvancedClientPortal } from '@/components/collaboration/advanced-client-portal'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -21,7 +23,10 @@ import {
   Sparkles,
   MessageSquare,
   Eye,
-  Image
+  Image,
+  Brain,
+  Palette2,
+  UserCheck
 } from 'lucide-react'
 
 // Mock data for demonstration
@@ -136,7 +141,7 @@ export default function CollaborationPage() {
 
       {/* Collaboration Tabs */}
       <Tabs defaultValue="client-collab" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7 bg-white/60 backdrop-blur-xl border-white/20">
+        <TabsList className="grid w-full grid-cols-9 bg-white/60 backdrop-blur-xl border-white/20">
           <TabsTrigger value="client-collab" className="flex items-center gap-2">
             <Target className="w-4 h-4" />
             Client Collaboration
@@ -160,6 +165,14 @@ export default function CollaborationPage() {
           <TabsTrigger value="gallery" className="flex items-center gap-2">
             <Image className="w-4 h-4" />
             Gallery
+          </TabsTrigger>
+          <TabsTrigger value="ai-assistant" className="flex items-center gap-2">
+            <Brain className="w-4 h-4" />
+            AI Assistant
+          </TabsTrigger>
+          <TabsTrigger value="client-portal" className="flex items-center gap-2">
+            <UserCheck className="w-4 h-4" />
+            Client Portal
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="w-4 h-4" />
@@ -240,6 +253,35 @@ export default function CollaborationPage() {
 
         <TabsContent value="gallery" className="space-y-0">
           {/* Implementation of gallery content */}
+        </TabsContent>
+
+        <TabsContent value="ai-assistant" className="space-y-0">
+          <div className="bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 rounded-xl p-1">
+            <AIDesignAssistant
+              projectId="project_demo_123"
+              currentFile={sampleProjectFiles[0]}
+              onSuggestionApply={(suggestion) => {
+                console.log('Applying AI suggestion:', suggestion)
+                // In a real app, this would apply the suggestion to the design
+              }}
+              className="bg-white/70 backdrop-blur-sm rounded-lg p-6"
+            />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="client-portal" className="space-y-0">
+          <div className="bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 rounded-xl p-1">
+            <AdvancedClientPortal
+              projectId="project_demo_123"
+              clientId="client_demo_456"
+              initialAccessLevel="preview"
+              onUpgradeAccess={(level) => {
+                console.log('Upgrading access to:', level)
+                // In a real app, this would trigger payment flow
+              }}
+              className="bg-white/70 backdrop-blur-sm rounded-lg p-6"
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">

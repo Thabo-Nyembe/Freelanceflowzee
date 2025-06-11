@@ -490,7 +490,7 @@ const ScreenshotPreview = () => {
   )
 }
 
-export default function UniversalMediaPreviews() {
+export function UniversalMediaPreviews() {
   const [selectedMediaType, setSelectedMediaType] = useState('image')
   
   const renderPreview = () => {
