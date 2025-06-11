@@ -84,11 +84,11 @@ const SUBSCRIPTION_PLANS = {
     name: 'Free',
     price: 0,
     storage: 10 * 1024 * 1024 * 1024, // 10GB
-    shareLimit: 50 * 1024 * 1024, // 50MB
+    shareLimit: 6 * 1024 * 1024 * 1024, // 6GB
     features: [
       '10 GB cloud storage',
       'Upload files of any size',
-      'Share files up to 50 MB only',
+      'Share files up to 6 GB only',
       'Basic file management',
       'Standard support'
     ]
