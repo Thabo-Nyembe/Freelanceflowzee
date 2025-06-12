@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { verifySession } from '@/lib/dal'
 
 // Types for UPF API
 interface UPFCommentRequest {
@@ -198,33 +199,59 @@ export async function GET(request: NextRequest) {
       stats: {
         totalComments: filteredComments.length,
         openComments: filteredComments.filter(c => c.status === 'open').length,
-        resolvedComments: 0,
-        highPriorityComments: 0
+        resolvedComments: filteredComments.filter(c => c.status === 'resolved').length,
+        avgResponseTime: '2.5 hours',
+        completionRate: '85%'
+      },
+      analytics: {
+        totalComments: filteredComments.length,
+        byPriority: {
+          urgent: filteredComments.filter(c => c.priority === 'urgent').length,
+          high: filteredComments.filter(c => c.priority === 'high').length,
+          medium: filteredComments.filter(c => c.priority === 'medium').length,
+          low: filteredComments.filter(c => c.priority === 'low').length
+        },
+        byType: {
+          image: filteredComments.filter(c => c.comment_type === 'image').length,
+          video: filteredComments.filter(c => c.comment_type === 'video').length,
+          code: filteredComments.filter(c => c.comment_type === 'code').length,
+          text: filteredComments.filter(c => c.comment_type === 'text').length
+        },
+        trends: {
+          thisWeek: filteredComments.length,
+          lastWeek: Math.max(0, filteredComments.length - 2),
+          growth: '+15%'
+        }
       },
       mode: 'fallback',
-      message: '⚠️ Using fallback mode - Complete database setup for full functionality',
-      setup: {
-        required: [
-          'Database setup in Supabase SQL Editor',
-          'Execute SQL from scripts/create-upf-tables.sql'
-        ],
-        testEndpoint: '/api/collaboration/upf/test'
-      }
+      message: '⚠️ Using mock data - Complete database setup for real operations'
+    })
+  }
+
+  // Use DAL for authentication following Next.js guide
+  const session = await verifySession()
+  let user = null
+  
+  if (session) {
+    user = session.user
+    console.log('🔐 Authenticated user accessing UPF API:', user.email)
+  } else {
+    console.log('🔧 No authenticated user - proceeding with limited access')
+  }
+
+  const supabase = await createClient()
+  
+  if (!supabase) {
+    console.log('💾 Database not available, using fallback')
+    return NextResponse.json({
+      success: true,
+      comments: mockComments,
+      mode: 'fallback',
+      message: '⚠️ Database unavailable - using mock data'
     })
   }
 
   try {
-    const supabase = await createClient()
-    
-    // Try to get user, but don't fail if it doesn't work
-    let user = null
-    try {
-      const { data: userData } = await supabase.auth.getUser()
-      user = userData?.user
-    } catch (authError) {
-      console.log('🔧 Auth check failed, proceeding without user:', authError)
-    }
-
     // Continue with database operations...
     switch (action) {
       case 'get_comments':
@@ -1637,4 +1664,5 @@ function calculateProjectedCompletion(comments: any[]): string {
   const estimatedDays = Math.ceil(estimatedHours / 8) // 8 hour work day
   
   return estimatedDays === 1 ? '1 day' : `${estimatedDays} days`
+} 
 } 

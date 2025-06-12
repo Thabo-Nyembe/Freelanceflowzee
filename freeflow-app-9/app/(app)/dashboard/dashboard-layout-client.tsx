@@ -1,18 +1,43 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, createContext, useContext, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { DashboardNav } from '@/components/dashboard-nav'
 import { DashboardBreadcrumbs } from '@/components/dashboard-breadcrumbs'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { LogOut } from 'lucide-react'
 
-interface DashboardLayoutClientProps {
-  children: React.ReactNode
-  user: any
+interface User {
+  id: string
+  email: string
+  user_metadata: {
+    full_name?: string
+    role?: string
+  }
 }
 
-export function DashboardLayoutClient({ children, user }: DashboardLayoutClientProps) {
+interface DashboardContextType {
+  user: User
+}
+
+const DashboardContext = createContext<DashboardContextType | null>(null)
+
+export function useDashboard() {
+  const context = useContext(DashboardContext)
+  if (!context) {
+    throw new Error('useDashboard must be used within DashboardLayoutClient')
+  }
+  return context
+}
+
+interface DashboardLayoutClientProps {
+  user: User
+  children: ReactNode
+}
+
+export function DashboardLayoutClient({ user, children }: DashboardLayoutClientProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const router = useRouter()
   const supabase = createClient()
@@ -21,34 +46,50 @@ export function DashboardLayoutClient({ children, user }: DashboardLayoutClientP
     try {
       await supabase.auth.signOut()
       router.push('/login')
+      router.refresh()
     } catch (error) {
       console.error('Logout error:', error)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40">
-      {/* Skip to content link for accessibility */}
-      <a 
-        href="#main-content" 
-        className="skip-to-content"
-        tabIndex={1}
-      >
-        Skip to main content
-      </a>
-      
-      <DashboardNav />
-      
-      <main 
-        id="main-content"
-        className="dashboard-main"
-        tabIndex={-1}
-      >
-        <div className="dashboard-content">
-          <DashboardBreadcrumbs />
-          {children}
+    <DashboardContext.Provider value={{ user }}>
+      <div className="min-h-screen bg-background">
+        {/* Skip to content link for accessibility */}
+        <a 
+          href="#main-content" 
+          className="skip-to-content"
+          tabIndex={1}
+        >
+          Skip to main content
+        </a>
+        
+        <DashboardNav />
+        
+        <main 
+          id="main-content"
+          className="dashboard-main"
+          tabIndex={-1}
+        >
+          <div className="dashboard-content">
+            <DashboardBreadcrumbs />
+            {children}
+          </div>
+        </main>
+        
+        {/* Logout functionality available globally */}
+        <div className="fixed bottom-4 right-4 z-50">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleLogout}
+            className="bg-white/80 backdrop-blur-sm border-gray-200 hover:bg-white"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Logout
+          </Button>
         </div>
-      </main>
-    </div>
+      </div>
+    </DashboardContext.Provider>
   )
 } 

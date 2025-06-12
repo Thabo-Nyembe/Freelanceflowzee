@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { verifySession, getUser } from '@/lib/dal'
 import { DashboardNav } from '@/components/dashboard-nav'
 import { Suspense } from 'react'
 import { DashboardBreadcrumbs } from '@/components/dashboard-breadcrumbs'
@@ -42,17 +42,36 @@ export default async function DashboardLayout({
     )
   }
 
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
+  // Use DAL for authentication following Next.js guide
+  const session = await verifySession()
+  
+  if (!session) {
+    console.log('🔐 No valid session found - redirecting to login')
     redirect('/login')
   }
 
-  console.log('🔧 Dashboard running in demo mode - Authentication bypassed for development')
+  // Get user data through DAL
+  const user = await getUser()
+  
+  if (!user) {
+    console.log('🔐 No user data found - redirecting to login')
+    redirect('/login')
+  }
+
+  console.log('🔐 Authenticated user accessing dashboard:', user.email)
+
+  // Convert DAL user format to expected format for client component
+  const clientUser = {
+    id: user.id,
+    email: user.email,
+    user_metadata: { 
+      full_name: user.name,
+      role: user.role 
+    }
+  }
 
   return (
-    <DashboardLayoutClient user={user}>
+    <DashboardLayoutClient user={clientUser}>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40">
         <DashboardNav />
         <main className="dashboard-main">

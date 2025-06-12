@@ -22,52 +22,34 @@ function log(message, color = 'reset') {
   console.log(`${colors[color]}${message}${colors.reset}`);
 }
 
-function createEnvFile() {
-  const envPath = path.join(process.cwd(), '.env.local');
-  
-  const envContent = `# Supabase Configuration
-# Replace with your actual Supabase project credentials
-NEXT_PUBLIC_SUPABASE_URL=https://rxkunedfjccggovbmbnx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4a3VuZWRmamNjZ2dvdmJtYm54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2NDY2MTcsImV4cCI6MjA2NDIyMjYxN30.L2Fax_SYBf0i0-HdcUUudQpO1ktREpgMvnqmNuVr3s0
+const envPath = path.join(process.cwd(), '.env.local');
 
-# Service Key (Keep secret, only use server-side)
-SUPABASE_SERVICE_ROLE_KEY=sbp_7275d8493dd8478f4d0f1c73598ca7794be9b094
+const envContent = `# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=https://zozfeysmzonzvrelyhyf.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvemZleXNtem9uenZyZWx5aGpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0NzY0NDQsImV4cCI6MjA2NDA1MjQ0NH0.3O11VF8z3--02c30k2Cv2-tEghS0dam_ykzuUhNTjH0
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvemZleXNtem9uenZyZWx5aGpmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODQ3NjQ0NCwiZXhwIjoyMDY0MDUyNDQ0fQ.Oqh7EhNfb53G
 
-# Other environment variables
-# NEXTAUTH_SECRET=your_nextauth_secret
-# NEXTAUTH_URL=http://localhost:3000
+# Application Configuration
+NEXTAUTH_SECRET=your-secret-key-here-${Math.random().toString(36).substring(2, 15)}
+NEXTAUTH_URL=http://localhost:3000
+
+# Demo Mode (set to false for production)
+DEMO_MODE=false
 `;
 
-  try {
-    if (fs.existsSync(envPath)) {
-      log('⚠️  .env.local already exists. Creating backup...', 'yellow');
-      fs.copyFileSync(envPath, `${envPath}.backup`);
-      log('✅ Backup created at .env.local.backup', 'green');
-    }
-    
-    fs.writeFileSync(envPath, envContent);
-    log('✅ .env.local file created successfully!', 'green');
-    log('🔧 Supabase environment variables configured', 'blue');
-    log('', 'reset');
-    log('Your Supabase configuration:', 'blue');
-    log('• Project URL: https://rxkunedfjccggovbmbnx.supabase.co', 'reset');
-    log('• Anon Key: Configured ✓', 'reset');
-    log('', 'reset');
-    log('🚀 You can now run: pnpm run context7:dev', 'green');
-    
-  } catch (error) {
-    log(`❌ Error creating .env.local: ${error.message}`, 'red');
-    log('', 'reset');
-    log('Manual setup instructions:', 'yellow');
-    log('1. Create a file named .env.local in the project root', 'reset');
-    log('2. Add the following content:', 'reset');
-    log('', 'reset');
-    log(envContent, 'blue');
-  }
-}
-
-log('🔧 FreeflowZee Environment Setup', 'blue');
-log('===============================', 'blue');
-log('', 'reset');
-
-createEnvFile(); 
+try {
+  fs.writeFileSync(envPath, envContent);
+  log('✅ Environment file created successfully at .env.local', 'green');
+  log('🔧 Supabase credentials configured', 'blue');
+  log('🚀 You can now restart your development server', 'green');
+  log('', 'reset');
+  log('Test credentials:', 'blue');
+  log('Email: thabo@kaleidocraft.co.za', 'reset');
+  log('Password: password1234', 'reset');
+} catch (error) {
+  log(`❌ Error creating environment file: ${error.message}`, 'red');
+  log('', 'reset');
+  log('Please manually create .env.local with the following content:', 'yellow');
+  log('', 'reset');
+  log(envContent, 'blue');
+} 

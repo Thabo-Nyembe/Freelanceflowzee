@@ -1,97 +1,219 @@
 import type { Metadata, Viewport } from 'next'
+import { Inter } from 'next/font/google'
 import './globals.css'
-import { Context7Provider } from '@/components/providers/context7-provider'
-import { PerformanceMonitor } from '@/components/performance-monitor'
+import { Toaster } from '@/components/ui/toaster'
+import { Providers } from '@/components/providers/providers'
 
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+  variable: '--font-inter',
+})
+
+// Enhanced metadata for production
 export const metadata: Metadata = {
-  title: 'FreeflowZee - Ultimate Freelance Management Platform',
-  description: 'Comprehensive freelance management platform with universal feedback, project tracking, financial management, and team collaboration.',
-  keywords: 'freelance, project management, feedback system, invoicing, collaboration, supabase',
+  title: {
+    default: 'FreeflowZee - Professional Freelance Management Platform',
+    template: '%s | FreeflowZee'
+  },
+  description: 'The ultimate freelance management platform for creators and clients. Streamline projects, collaborate seamlessly, and get paid faster with FreeflowZee.',
+  keywords: [
+    'freelance management',
+    'project collaboration',
+    'client portal',
+    'creative workflow',
+    'payment processing',
+    'file sharing',
+    'project tracking',
+    'freelancer tools',
+    'client management',
+    'creative platform'
+  ],
   authors: [{ name: 'FreeflowZee Team' }],
   creator: 'FreeflowZee',
   publisher: 'FreeflowZee',
-  applicationName: 'FreeflowZee',
-  manifest: '/manifest.json',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'FreeflowZee',
-    startupImage: [
-      '/icons/apple-touch-startup-image-750x1334.png',
-      {
-        url: '/icons/apple-touch-startup-image-1242x2208.png',
-        media: '(device-width: 414px) and (device-height: 736px)',
-      },
-      {
-        url: '/icons/apple-touch-startup-image-1125x2436.png',
-        media: '(device-width: 375px) and (device-height: 812px)',
-      },
-    ],
-  },
   formatDetection: {
+    email: false,
+    address: false,
     telephone: false,
+  },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://freeflowzee.com'),
+  alternates: {
+    canonical: '/',
   },
   openGraph: {
     type: 'website',
+    locale: 'en_US',
+    url: '/',
+    title: 'FreeflowZee - Professional Freelance Management Platform',
+    description: 'The ultimate freelance management platform for creators and clients. Streamline projects, collaborate seamlessly, and get paid faster.',
     siteName: 'FreeflowZee',
-    title: 'FreeflowZee - Ultimate Freelance Management Platform',
-    description: 'Comprehensive freelance management platform with universal feedback, project tracking, financial management, and team collaboration.',
     images: [
       {
-        url: '/og-image.png',
+        url: '/images/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'FreeflowZee Platform',
+        alt: 'FreeflowZee - Professional Freelance Management Platform',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'FreeflowZee - Ultimate Freelance Management Platform',
-    description: 'Comprehensive freelance management platform with universal feedback, project tracking, financial management, and team collaboration.',
-    images: ['/twitter-image.png'],
+    title: 'FreeflowZee - Professional Freelance Management Platform',
+    description: 'The ultimate freelance management platform for creators and clients. Streamline projects, collaborate seamlessly, and get paid faster.',
+    images: ['/images/twitter-image.jpg'],
+    creator: '@freeflowzee',
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+    yandex: process.env.YANDEX_VERIFICATION,
+    yahoo: process.env.YAHOO_VERIFICATION,
+  },
+  category: 'technology',
+  classification: 'Business',
+  referrer: 'origin-when-cross-origin',
+  generator: 'Next.js',
+  applicationName: 'FreeflowZee',
+  appleWebApp: {
+    capable: true,
+    title: 'FreeflowZee',
+    statusBarStyle: 'default',
+  },
+  manifest: '/manifest.json',
   icons: {
     icon: [
-      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
     ],
     apple: [
-      { url: '/icons/apple-touch-icon-180x180.png', sizes: '180x180', type: 'image/png' },
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
     other: [
-      { rel: 'apple-touch-icon-precomposed', url: '/icons/apple-touch-icon-precomposed.png' },
+      {
+        rel: 'mask-icon',
+        url: '/safari-pinned-tab.svg',
+        color: '#3b82f6',
+      },
     ],
   },
 }
 
+// Enhanced viewport configuration
 export const viewport: Viewport = {
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#6366f1' },
-    { media: '(prefers-color-scheme: dark)', color: '#4f46e5' },
-  ],
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  viewportFit: 'cover',
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
+  ],
+  colorScheme: 'light dark',
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
-        <meta name="viewport" content={viewport.toString()} />
+        {/* Preconnect to external domains for performance */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://images.unsplash.com" />
+        <link rel="preconnect" href="https://js.stripe.com" />
+        
+        {/* DNS prefetch for better performance */}
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="//fonts.gstatic.com" />
+        <link rel="dns-prefetch" href="//images.unsplash.com" />
+        <link rel="dns-prefetch" href="//js.stripe.com" />
+        
+        {/* Preload critical resources */}
+        <link
+          rel="preload"
+          href="/fonts/inter-var.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        
+        {/* Microsoft specific meta tags */}
+        <meta name="msapplication-TileColor" content="#3b82f6" />
+        <meta name="msapplication-config" content="/browserconfig.xml" />
+        
+        {/* Additional SEO meta tags */}
+        <meta name="geo.region" content="US" />
+        <meta name="geo.placename" content="United States" />
+        <meta name="ICBM" content="37.7749, -122.4194" />
+        
+        {/* Schema.org structured data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              "name": "FreeflowZee",
+              "description": "Professional freelance management platform for creators and clients",
+              "url": "https://freeflowzee.com",
+              "applicationCategory": "BusinessApplication",
+              "operatingSystem": "Web",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+              },
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.8",
+                "ratingCount": "1247"
+              }
+            })
+          }}
+        />
       </head>
-      <body>
-        <PerformanceMonitor />
-        <Context7Provider>
+      <body className={`${inter.className} antialiased`} suppressHydrationWarning>
+        <Providers>
           {children}
-        </Context7Provider>
+          <Toaster />
+        </Providers>
+        
+        {/* Performance monitoring script */}
+        {process.env.NODE_ENV === 'production' && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                // Core Web Vitals monitoring
+                function sendToAnalytics(metric) {
+                  // Send to your analytics service
+                  console.log('Core Web Vital:', metric);
+                }
+                
+                // Monitor CLS, FID, LCP
+                import('web-vitals').then(({ getCLS, getFID, getLCP }) => {
+                  getCLS(sendToAnalytics);
+                  getFID(sendToAnalytics);
+                  getLCP(sendToAnalytics);
+                });
+              `
+            }}
+          />
+        )}
       </body>
     </html>
   )

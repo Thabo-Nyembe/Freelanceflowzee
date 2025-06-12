@@ -10,9 +10,10 @@ export async function createClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('Missing Supabase environment variables')
-    throw new Error('Supabase configuration is missing')
+  // Handle demo mode or missing configuration
+  if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder')) {
+    console.log('🔧 Supabase not configured - running in demo mode')
+    return null
   }
 
   try {
@@ -42,12 +43,13 @@ export async function createClient() {
 
     // Verify the client was created properly
     if (!client || !client.auth) {
-      throw new Error('Failed to create Supabase client')
+      console.error('Failed to create Supabase client - invalid client object')
+      return null
     }
 
     return client
   } catch (error) {
     console.error('Error creating Supabase client:', error)
-    throw new Error('Failed to initialize Supabase client')
+    return null
   }
 } 

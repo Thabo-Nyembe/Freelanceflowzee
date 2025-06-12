@@ -1,18 +1,16 @@
 'use client'
 
-import React, { useState, useRef, useCallback } from 'react'
+import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
-  MessageSquare, Pin, Play, Pause, Volume2, RotateCw, ZoomIn, ZoomOut,
-  SkipBack, SkipForward, Maximize2, Code, FileText, Camera, Pencil, 
-  Square, Circle, Eraser, Heart, MessageCircle, Share, Send, Eye, 
-  VolumeX, Volume1, ChevronLeft, ChevronRight, Download, MoreHorizontal
+  MessageSquare, Play, Pause, Volume2, RotateCw, ZoomIn, ZoomOut,
+  FileText, Code, Camera, Pencil, Square, Circle, Eraser, Heart,
+  MessageCircle, Share, Send, Eye, VolumeX, Volume1, ChevronLeft,
+  ChevronRight, Download, MoreHorizontal
 } from 'lucide-react'
 
 // Sample media files data
@@ -107,6 +105,11 @@ const sampleComments = {
   ]
 }
 
+interface CommentPosition {
+  x: number
+  y: number
+}
+
 export default function UniversalMediaPreviewsEnhanced() {
   const [selectedFile, setSelectedFile] = useState(mediaFiles[0])
   const [selectedMediaType, setSelectedMediaType] = useState('image')
@@ -115,7 +118,7 @@ export default function UniversalMediaPreviewsEnhanced() {
   const [volume, setVolume] = useState(50)
   const [zoom, setZoom] = useState(100)
   const [rotation, setRotation] = useState(0)
-  const [newCommentPosition, setNewCommentPosition] = useState(null)
+  const [newCommentPosition, setNewCommentPosition] = useState<CommentPosition | null>(null)
   const [showingComments, setShowingComments] = useState(true)
 
   const handleMediaTypeChange = (type: string) => {
@@ -573,7 +576,7 @@ export default function UniversalMediaPreviewsEnhanced() {
                         <span className="bg-yellow-900/30 px-1 rounded">
                           <span className="text-purple-400">const</span>
                           <span className="text-blue-400"> handleClick</span>
-                          <span className="text-gray-100"> = () => &#123;</span>
+                          <span className="text-gray-100"> = () {`=>`} {`{`}</span>
                         </span>
                         {/* Comment indicator */}
                         <div className="absolute right-0 top-0 w-3 h-3 bg-orange-500 rounded-full border border-gray-700 group-hover:bg-orange-400 transition-colors"></div>
@@ -602,7 +605,7 @@ export default function UniversalMediaPreviewsEnhanced() {
                       
                       <div className="flex">
                         <span className="text-gray-500 w-8">25</span>
-                        <span className="text-gray-100">&#125;</span>
+                        <span className="text-gray-100">{`}`}</span>
                       </div>
                       
                       <div className="flex">
@@ -635,13 +638,13 @@ export default function UniversalMediaPreviewsEnhanced() {
                       
                       <div className="flex">
                         <span className="text-gray-500 w-8">46</span>
-                        <span className="text-gray-100 ml-4">&lt;</span>
+                        <span className="text-gray-100 ml-4">{`<`}</span>
                         <span className="text-red-400">div</span>
                         <span className="text-gray-100"> </span>
                         <span className="text-blue-400">className</span>
                         <span className="text-gray-100">=</span>
                         <span className="text-green-400">"container"</span>
-                        <span className="text-gray-100">&gt;</span>
+                        <span className="text-gray-100">{`>`}</span>
                       </div>
                     </div>
                   </div>

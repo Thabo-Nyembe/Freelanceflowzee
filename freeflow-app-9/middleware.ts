@@ -115,7 +115,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // ALWAYS use authentication - no more demo mode bypass
+  // Use authentication for protected routes
   console.log(`🔐 Protected route detected: ${pathname} - checking authentication`)
   return await updateSession(request)
 }

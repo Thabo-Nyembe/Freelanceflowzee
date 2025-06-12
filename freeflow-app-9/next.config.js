@@ -1,89 +1,99 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Server external packages for Next.js 15
-  serverExternalPackages: [],
-  
-  experimental: {
-    // Package import optimizations for better tree-shaking
-    optimizePackageImports: [
-      '@supabase/supabase-js',
-      'lucide-react',
-      '@radix-ui/react-icons',
-      'framer-motion',
-      'date-fns'
-    ],
-    
-    // Turbopack-specific configuration
-    turbo: {
-      // Path aliases for Turbopack
-      resolveAlias: {
-        '@': './',
-        '@/components': './components',
-        '@/lib': './lib',
-        '@/utils': './utils',
-        '@/hooks': './hooks',
-        '@/types': './types',
-        '@/app': './app',
-        '@/styles': './styles',
-        '@/public': './public',
-      },
-    },
-  },
+  // Production optimizations
+  reactStrictMode: true,
+  poweredByHeader: false,
+  generateEtags: true,
+  compress: true,
   
   // Image optimization
   images: {
+    domains: ['images.unsplash.com', 'placehold.co'],
     minimumCacheTTL: 2678400,
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     formats: ['image/webp'],
-    
-    localPatterns: [
-      {
-        pathname: '/avatars/**',
-        search: '',
-      },
-      {
-        pathname: '/images/**',
-        search: '',
-      },
-      {
-        pathname: '/api/**',
-        search: '',
-      },
-    ],
-    
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
-        port: '',
         pathname: '/**',
       },
       {
         protocol: 'https',
         hostname: 'placehold.co',
-        port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      }
     ],
   },
-  
-  // React strict mode
-  reactStrictMode: true,
-  
+
+  // Media file handling
+  webpack: (config) => {
+    // Handle media files
+    config.module.rules.push({
+      test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
+      use: {
+        loader: 'file-loader',
+        options: {
+          publicPath: '/_next/static/media/',
+          outputPath: 'static/media/',
+          name: '[name].[hash].[ext]',
+        },
+      },
+    })
+
+    return config
+  },
+
   // Environment variables
   env: {
-    CUSTOM_KEY: 'freeflowzee',
+    NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
   },
 
-  // Compiler optimizations
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+  // Security headers
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: `
+              default-src 'self';
+              script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com;
+              style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+              img-src 'self' blob: data: https://images.unsplash.com https://placehold.co https://*.supabase.co;
+              font-src 'self' https://fonts.gstatic.com;
+              media-src 'self' blob: data:;
+              connect-src 'self' https://*.supabase.co https://api.stripe.com;
+              frame-src 'self' https://js.stripe.com https://hooks.stripe.com;
+            `.replace(/\s+/g, ' ').trim(),
+          },
+        ],
+      },
+    ]
   },
+}
 
-  // Output configuration
-  generateEtags: true,
-  compress: true,
-};
-
-module.exports = nextConfig; 
+module.exports = nextConfig
