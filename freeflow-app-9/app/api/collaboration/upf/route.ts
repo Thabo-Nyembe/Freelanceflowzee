@@ -1664,3 +1664,4 @@ function calculateProjectedCompletion(comments: any[]): string {
   const estimatedDays = Math.ceil(estimatedHours / 8) // 8 hour work day
   
   return estimatedDays === 1 ? '1 day' : `${estimatedDays} days`
+}

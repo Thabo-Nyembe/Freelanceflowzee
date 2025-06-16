@@ -1,4 +1,3 @@
-'use client'
 
 import React from 'react'
 import { EnhancedFileStorage } from '@/components/storage/enhanced-file-storage'

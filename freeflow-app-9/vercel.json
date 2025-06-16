@@ -48,7 +48,6 @@
   
   "env": {
     "STARTUP_MODE": "true",
-    "STORAGE_PROVIDER": "wasabi-first",
-    "VERCEL_TOKEN": "@vercel-token"
+    "STORAGE_PROVIDER": "wasabi-first"
   }
 } 
