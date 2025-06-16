@@ -2,16 +2,18 @@
 
 import React from 'react'
 import { EnhancedFileStorage } from '@/components/storage/enhanced-file-storage'
+import { StorageDashboard } from '@/components/storage/storage-dashboard'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Multi-Cloud Storage | FreeflowZee',
+  description: 'Manage your files across Wasabi and Supabase with intelligent cost optimization',
+}
 
 export default function StoragePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50 to-blue-50 p-6">
-      <EnhancedFileStorage 
-        showAnalytics={true}
-        allowUpload={true}
-        mode="personal"
-        className="max-w-7xl mx-auto"
-      />
+    <div className="container mx-auto py-6">
+      <StorageDashboard />
     </div>
   )
 } 

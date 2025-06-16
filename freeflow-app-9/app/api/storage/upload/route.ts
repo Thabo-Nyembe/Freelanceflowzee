@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import path from 'path'
+import { multiCloudStorage } from '@/lib/storage/multi-cloud-storage'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -56,131 +57,88 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
     const file = formData.get('file') as File
-    const projectId = formData.get('projectId') as string
-    const overwrite = formData.get('overwrite') === 'true'
+    const folder = formData.get('folder') as string
+    const publicRead = formData.get('publicRead') === 'true'
+    const tags = formData.get('tags') ? JSON.parse(formData.get('tags') as string) : undefined
+    const metadata = formData.get('metadata') ? JSON.parse(formData.get('metadata') as string) : undefined
 
-    // Validate required fields
     if (!file) {
-      return NextResponse.json(
-        { success: false, error: 'No file provided' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
-    if (!projectId) {
-      return NextResponse.json(
-        { success: false, error: 'Project ID is required' },
-        { status: 400 }
-      )
+    // Validate file size (max 100MB)
+    if (file.size > 100 * 1024 * 1024) {
+      return NextResponse.json({ error: 'File size exceeds 100MB limit' }, { status: 400 })
     }
 
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { success: false, error: 'File size exceeds maximum allowed size of 100MB' },
-        { status: 400 }
-      )
+    // Validate file type
+    const allowedTypes = [
+      'image/', 'video/', 'audio/', 'application/pdf', 'application/zip',
+      'application/x-zip-compressed', 'text/', 'application/json'
+    ]
+    
+    const isAllowedType = allowedTypes.some(type => file.type.startsWith(type))
+    if (!isAllowedType) {
+      return NextResponse.json({ error: 'File type not allowed' }, { status: 400 })
     }
 
-    // Validate file type for security
-    if (!isFileTypeAllowed(file.name, file.type)) {
-      return NextResponse.json(
-        { success: false, error: 'File type not allowed for security reasons' },
-        { status: 400 }
-      )
-    }
-
-    // Sanitize filename
-    const sanitizedFilename = sanitizeFilename(file.name)
-    const filePath = `${projectId}/${sanitizedFilename}`
-
-    // Check if file already exists
-    let fileExists = false
-    try {
-      const { data: existingFile } = await supabase.storage
-        .from('project-files')
-        .list(projectId, {
-          search: sanitizedFilename
-        })
-      
-      fileExists = existingFile && existingFile.length > 0
-    } catch (error) {
-      // If error checking existence, proceed with upload
-      console.log('Error checking file existence:', error)
-    }
-
-    // Convert File to buffer for upload
-    const fileBuffer = await file.arrayBuffer()
-
-    let uploadResult
-    if (fileExists && overwrite) {
-      // Update existing file
-      uploadResult = await supabase.storage
-        .from('project-files')
-        .update(filePath, fileBuffer, {
-          cacheControl: '3600',
-          upsert: true,
-          contentType: file.type
-        })
-    } else {
-      // Upload new file
-      uploadResult = await supabase.storage
-        .from('project-files')
-        .upload(filePath, fileBuffer, {
-          cacheControl: '3600',
-          upsert: false,
-          contentType: file.type
-        })
-    }
-
-    if (uploadResult.error) {
-      console.error('Upload error:', uploadResult.error)
-      return NextResponse.json(
-        { success: false, error: 'Failed to upload file' },
-        { status: 500 }
-      )
-    }
-
-    // Generate signed URL for the uploaded file
-    const { data: signedUrlData } = await supabase.storage
-      .from('project-files')
-      .createSignedUrl(filePath, 3600)
-
-    const responseData = {
-      id: uploadResult.data.path,
-      filename: sanitizedFilename,
-      size: file.size,
-      mimeType: file.type,
-      url: signedUrlData?.signedUrl || `/api/storage/download/${sanitizedFilename}?projectId=${projectId}`,
-      projectId: projectId,
-      uploadedAt: new Date().toISOString()
-    }
-
-    if (fileExists && overwrite) {
-      responseData.overwritten = true
-    }
+    const result = await multiCloudStorage.upload(
+      file,
+      file.name,
+      file.type,
+      {
+        folder,
+        publicRead,
+        tags,
+        metadata,
+        cacheControl: '3600'
+      }
+    )
 
     return NextResponse.json({
       success: true,
-      message: 'File uploaded successfully',
-      data: responseData
+      file: result,
+      message: `File uploaded successfully to ${result.provider}`,
+      costOptimized: result.provider === 'wasabi' ? 'Up to 80% cost savings!' : 'Fast access optimized'
     })
 
   } catch (error) {
     console.error('Upload error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Upload failed' },
-      { status: 500 }
-    )
+    return NextResponse.json({
+      error: error instanceof Error ? error.message : 'Upload failed'
+    }, { status: 500 })
   }
 }
 
-export async function GET() {
-  return NextResponse.json({
-    success: true,
-    message: 'Storage upload endpoint is working',
-    maxSize: '100MB',
-    allowedTypes: ALLOWED_MIME_TYPES,
-    blockedExtensions: BLOCKED_EXTENSIONS
-  })
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const provider = searchParams.get('provider') as 'supabase' | 'wasabi' | undefined
+    const folder = searchParams.get('folder') || undefined
+    const limit = parseInt(searchParams.get('limit') || '20')
+    const offset = parseInt(searchParams.get('offset') || '0')
+
+    const files = await multiCloudStorage.listFiles({
+      provider,
+      folder,
+      limit,
+      offset
+    })
+
+    return NextResponse.json({
+      success: true,
+      files,
+      pagination: {
+        limit,
+        offset,
+        total: files.length
+      }
+    })
+
+  } catch (error) {
+    console.error('List files error:', error)
+    return NextResponse.json({
+      error: error instanceof Error ? error.message : 'Failed to list files'
+    }, { status: 500 })
+  }
 }

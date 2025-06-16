@@ -88,6 +88,7 @@ const navigationItems = [
   { href: '/dashboard/collaboration', title: 'Collaboration', icon: MessageSquare },
   { href: '/dashboard/escrow', title: 'Escrow System', icon: Shield },
   { href: '/dashboard/files-hub', title: 'Files Hub', icon: FolderOpen },
+  { href: '/dashboard/storage', title: 'Multi-Cloud Storage', icon: Cloud },
   { href: '/dashboard/community', title: 'Community Hub', icon: Users },
   { href: '/dashboard/ai-design', title: 'AI Design Assistant', icon: Cpu },
   { href: '/dashboard/client-portal', title: 'Client Portal', icon: UserCheck },
