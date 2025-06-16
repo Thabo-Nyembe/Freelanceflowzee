@@ -384,7 +384,7 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
                   Our intelligent system automatically routes files to the most cost-effective storage provider:
                 </p>
                 <ul className="text-sm text-blue-700 space-y-1">
-                  <li>• Large files (>10MB) → Wasabi (80% cost savings)</li>
+                  <li>• Large files (&gt;10MB) → Wasabi (80% cost savings)</li>
                   <li>• Videos and archives → Wasabi (long-term storage)</li>
                   <li>• Small frequently accessed files → Supabase (fast access)</li>
                   <li>• Backup files → Wasabi (cost-effective archival)</li>
