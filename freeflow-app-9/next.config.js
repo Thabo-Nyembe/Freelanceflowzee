@@ -6,6 +6,9 @@ const nextConfig = {
   generateEtags: true,
   compress: true,
   
+  // External packages for server components (moved from experimental)
+  serverExternalPackages: ['@aws-sdk/client-s3', '@aws-sdk/s3-request-presigner', '@aws-sdk/lib-storage'],
+  
   // Image optimization
   images: {
     domains: ['images.unsplash.com', 'placehold.co'],
@@ -103,10 +106,6 @@ const nextConfig = {
   typescript: {
     // Temporarily ignore TypeScript build errors for deployment
     ignoreBuildErrors: true,
-  },
-
-  experimental: {
-    serverComponentsExternalPackages: ['@aws-sdk/client-s3'],
   },
 }
 

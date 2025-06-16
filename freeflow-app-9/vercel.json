@@ -12,11 +12,6 @@
       "maxDuration": 10
     }
   },
-  "build": {
-    "env": {
-      "SKIP_BUILD_STATIC_GENERATION": "1"
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
