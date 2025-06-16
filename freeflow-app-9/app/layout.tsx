@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
 import { Providers } from '@/components/providers/providers'
+import { Analytics } from '@vercel/analytics/next'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -192,24 +193,14 @@ export default function RootLayout({
           {children}
           <Toaster />
         </Providers>
+        <Analytics />
         
         {/* Performance monitoring script */}
         {process.env.NODE_ENV === 'production' && (
           <script
             dangerouslySetInnerHTML={{
               __html: `
-                // Core Web Vitals monitoring
-                function sendToAnalytics(metric) {
-                  // Send to your analytics service
-                  console.log('Core Web Vital:', metric);
-                }
-                
-                // Monitor CLS, FID, LCP
-                import('web-vitals').then(({ getCLS, getFID, getLCP }) => {
-                  getCLS(sendToAnalytics);
-                  getFID(sendToAnalytics);
-                  getLCP(sendToAnalytics);
-                });
+                // Add performance monitoring here if needed
               `
             }}
           />
