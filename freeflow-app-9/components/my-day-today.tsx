@@ -35,7 +35,6 @@ import {
   Target,
   TrendingUp,
   Brain,
-  Refresh2,
   AlertTriangle,
   BarChart3,
   Edit,

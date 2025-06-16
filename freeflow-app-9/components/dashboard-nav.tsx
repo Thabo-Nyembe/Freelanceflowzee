@@ -293,11 +293,12 @@ const notificationReducer = (state: NotificationState, action: NotificationActio
 
 interface DashboardNavProps {
   className?: string
-  onLogout: () => void
-  user: any
+  onLogout?: () => void
+  user?: any
+  setOpen?: (open: boolean) => void
 }
 
-export function DashboardNav({ className, onLogout, user }: DashboardNavProps) {
+export function DashboardNav({ className, onLogout, user, setOpen }: DashboardNavProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();

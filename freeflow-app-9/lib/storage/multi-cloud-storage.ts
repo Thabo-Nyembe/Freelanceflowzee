@@ -441,12 +441,12 @@ class MultiCloudStorage {
 
     // Check optimization status
     const analytics = await this.getAnalytics();
-    const optimizationStatus = analytics.potential_savings > 1 ? 'needs_attention' : 'optimal';
+    const optimizationStatus = analytics.potentialSavings > 1 ? 'needs_attention' : 'optimal';
 
     return {
       supabase: { status: supabaseStatus, cost_per_gb: 0.021 },
       wasabi: { status: wasabiStatus, cost_per_gb: 0.0059 },
-      optimization: { status: optimizationStatus, potential_savings: analytics.potential_savings },
+      optimization: { status: optimizationStatus, potential_savings: analytics.potentialSavings },
       startup_mode: STARTUP_MODE
     };
   }

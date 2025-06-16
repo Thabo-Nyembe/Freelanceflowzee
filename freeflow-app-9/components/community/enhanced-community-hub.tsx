@@ -299,7 +299,7 @@ const EnhancedCommunityHub = () => {
         <div>
           <h4 className="text-sm font-semibold text-gray-700 mb-2">Specialties</h4>
           <div className="flex flex-wrap gap-1">
-            {creator.specialties.map((specialty, index) => (
+            {creator.specialties.map((specialty: string, index: number) => (
               <Badge key={index} variant="outline" className="text-xs">
                 {specialty}
               </Badge>
@@ -327,7 +327,7 @@ const EnhancedCommunityHub = () => {
 
         {/* Badges */}
         <div className="flex flex-wrap gap-1">
-          {creator.badges.map((badge, index) => (
+          {creator.badges.map((badge: string, index: number) => (
             <Badge key={index} variant="default" className="text-xs bg-gradient-to-r from-purple-500 to-pink-500">
               {badge}
             </Badge>
@@ -342,7 +342,7 @@ const EnhancedCommunityHub = () => {
           <div>
             <h4 className="text-sm font-semibold text-gray-700 mb-2">Portfolio Preview</h4>
             <div className="grid grid-cols-3 gap-2">
-              {creator.portfolio.slice(0, 3).map((item, index) => (
+              {creator.portfolio.slice(0, 3).map((item: any, index: number) => (
                 <div key={index} className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                   {item.type === 'image' ? (
                     <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">

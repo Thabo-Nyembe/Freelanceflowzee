@@ -183,7 +183,7 @@ type TeamAction =
   | { type: 'SET_SEARCH_QUERY'; query: string }
   | { type: 'SET_SKILL_FILTER'; skill: string }
   | { type: 'SET_STATUS_FILTER'; status: string }
-  | { type: 'SET_FILE_TYPE_FILTER'; type: string }
+  | { type: 'SET_FILE_TYPE_FILTER'; fileType: string }
   | { type: 'SET_CURRENT_VIEW'; view: 'team' | 'files' | 'collaborations' }
   | { type: 'ADD_TEAM_MEMBER'; member: TeamMember }
   | { type: 'UPDATE_TEAM_MEMBER'; id: string; member: Partial<TeamMember> }
@@ -787,7 +787,7 @@ export function TeamCollaborationHub() {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xl font-semibold text-slate-800">Project Files & Adobe Integration</CardTitle>
                 <div className="flex gap-3">
-                  <Select value={state.fileTypeFilter} onValueChange={(value) => dispatch({ type: 'SET_FILE_TYPE_FILTER', type: value })}>
+                  <Select value={state.fileTypeFilter} onValueChange={(value) => dispatch({ type: 'SET_FILE_TYPE_FILTER', fileType: value })}>
                     <SelectTrigger className="w-40">
                       <SelectValue placeholder="File Type" />
                     </SelectTrigger>

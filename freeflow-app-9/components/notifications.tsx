@@ -17,7 +17,7 @@ import {
   CheckCircle2,
   Clock,
   Settings,
-  Mark,
+  CheckCircle,
   MoreHorizontal,
   Trash2,
   User,
@@ -28,6 +28,19 @@ import {
   Zap
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+
+// Define custom notification type to avoid conflicts
+interface NotificationItem {
+  id: string
+  type: string
+  title: string
+  message: string
+  time: string
+  read: boolean
+  icon: any
+  color: string
+  avatar: string | null
+}
 
 const notifications = [
   {
@@ -166,7 +179,7 @@ export function Notifications() {
         <div className="flex items-center gap-2">
           {unreadCount > 0 && (
             <Button variant="outline" onClick={handleMarkAllAsRead}>
-              Mark All as Read
+              CheckCircle All as Read
             </Button>
           )}
           <Button variant="outline" size="icon">

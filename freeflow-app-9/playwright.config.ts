@@ -4,6 +4,7 @@ import { defineConfig, devices } from '@playwright/test';
  * @see https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
+  timeout: 60000,
   testDir: './tests/e2e',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -22,23 +23,6 @@ export default defineConfig({
   
   /* Shared settings for all the projects below. */
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:3001',
-    
-    /* Collect trace when retrying the failed test. */
-    trace: 'on-first-retry',
-    
-    /* Take screenshot on failure */
-    screenshot: 'only-on-failure',
-    
-    /* Record video on failure */
-    video: 'retain-on-failure',
-    
-    /* Timeout for each action */
-    actionTimeout: 30000,
-    
-    /* Global timeout for each test */
-    timeout: 60000,
     
     /* Extra HTTP headers */
     extraHTTPHeaders: {

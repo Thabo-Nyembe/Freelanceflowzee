@@ -53,8 +53,8 @@ interface InvoiceTemplate {
 interface InvoiceCustomization {
   logoUrl?: string
   brandColors?: {
-    primary: string
-    secondary: string
+    primary?: string
+    secondary?: string
   }
   paymentTerms?: string
   lateFees?: string

@@ -8,7 +8,7 @@ import {
   useElements,
   useStripe,
   PaymentRequestButtonElement,
-  usePaymentRequest
+  PaymentElement
 } from '@stripe/react-stripe-js'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
