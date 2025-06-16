@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const metric = searchParams.get('metric') || 'all'
 
     // Get authorization headers
-    const headersList = headers()
+    const headersList = await headers()
     const authorization = headersList.get('authorization')
 
     // Validate request

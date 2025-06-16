@@ -28,7 +28,15 @@ interface NotificationRequest {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
+    
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -464,7 +472,15 @@ export async function GET(request: NextRequest) {
     const projectId = searchParams.get('projectId')
     const userId = searchParams.get('userId')
 
-    const supabase = createClient()
+    const supabase = await createClient()
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
+    
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -580,7 +596,7 @@ async function getNotifications(supabase: any, userId: string, user: any) {
     )
   }
 
-  const unreadCount = notifications?.filter(n => !n.is_read).length || 0
+  const unreadCount = notifications?.filter((n: any) => !n.is_read).length || 0
 
   return NextResponse.json({
     notifications: notifications || [],

@@ -1,5 +1,21 @@
 import { multiCloudStorage } from './multi-cloud-storage';
 
+// Define proper types instead of using 'any'
+interface FileMetadata {
+  size: number;
+  provider: 'supabase' | 'wasabi';
+  type?: string;
+  realtime?: boolean;
+  temporary?: boolean;
+}
+
+interface StorageFile {
+  size: number;
+  provider: 'supabase' | 'wasabi';
+  mimeType: string;
+  metadata?: FileMetadata;
+}
+
 // PAID TIER OPTIMIZATION CONFIGURATION
 // Leverage paid features for maximum efficiency and cost savings
 
@@ -97,22 +113,28 @@ export const PAID_TIER_CONFIG = {
     }
   },
 
-  // COST TARGETS (Paid tier optimized)
+  // Cost targets with Pro tier budgets
   costTargets: {
     monthly: {
-      vercel: 20,                 // $20/month Vercel Pro
-      supabase: 25,               // $25/month Supabase Pro
-      wasabi: 15,                 // $15/month Wasabi (lots of storage!)
-      total: 60,                  // $60/month total budget
+      vercel: 20,      // Pro plan
+      supabase: 25,    // Pro plan  
+      wasabi: 10,      // Bulk storage
+      total: 55,       // Total monthly budget
     },
     
-    // Cost alerts
-    alerts: {
-      vercel: 18,                 // Alert at $18 (90% of budget)
-      supabase: 22,               // Alert at $22 (88% of budget)
-      wasabi: 12,                 // Alert at $12 (80% of budget)
-      total: 50,                  // Alert at $50 (83% of budget)
+    // Per-GB targets
+    storage: {
+      supabase: 0.125, // Pro tier rate
+      wasabi: 0.0059,  // Wasabi rate
+      savings: 0.95,   // 95% savings target vs enterprise
     }
+  },
+
+  // Monitoring and alerts for paid tier
+  monitoring: {
+    budgetAlerts: [0.7, 0.85, 0.95], // Alert at 70%, 85%, 95% budget
+    utilizationAlerts: [0.8, 0.9],   // Alert at 80%, 90% resource usage
+    optimizationSchedule: 'weekly',   // Auto-optimization frequency
   }
 };
 
@@ -123,7 +145,7 @@ export class PaidTierOptimizer {
    * Paid tier optimized file routing
    * More aggressive than startup mode, leveraging paid tier limits
    */
-  static shouldUseWasabi(fileSize: number, mimeType: string, metadata?: any): boolean {
+  static shouldUseWasabi(fileSize: number, mimeType: string, metadata?: FileMetadata): boolean {
     // PAID TIER STRATEGY: Use Supabase Pro limits efficiently, route bulk to Wasabi
     
     // Keep only tiny essential files on Supabase (we have Pro limits but still want savings)
@@ -156,7 +178,7 @@ export class PaidTierOptimizer {
   /**
    * Calculate paid tier savings vs standard enterprise cloud
    */
-  static calculatePaidTierSavings(files: any[]): {
+  static calculatePaidTierSavings(files: StorageFile[]): {
     currentCost: number;
     standardEnterpriseCost: number;
     monthlySavings: number;
@@ -257,7 +279,7 @@ export class PaidTierOptimizer {
     else if (budgetUsed >= 70) status = 'efficient';
     
     // Generate recommendations
-    const recommendations = [];
+    const recommendations: string[] = [];
     
     if (status === 'over_budget') {
       recommendations.push('🚨 Over budget! Move more files to Wasabi immediately');
@@ -283,7 +305,7 @@ export class PaidTierOptimizer {
     }
     
     // Calculate enterprise savings
-    const files = []; // Would get actual file list
+    const files: StorageFile[] = []; // Would get actual file list from analytics
     const savings = this.calculatePaidTierSavings(files);
     
     return {

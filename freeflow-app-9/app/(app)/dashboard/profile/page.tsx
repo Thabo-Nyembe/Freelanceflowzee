@@ -48,7 +48,7 @@ export default function ProfilePage() {
     pushNotifications: true
   })
 
-  const handleNotificationChange = (key: string) => {
+  const handleNotificationChange = (key: keyof typeof notifications) => {
     setNotifications(prev => ({
       ...prev,
       [key]: !prev[key]
@@ -77,7 +77,7 @@ export default function ProfilePage() {
               <div className="text-center">
                 <div className="relative inline-block">
                   <Avatar className="w-24 h-24 mx-auto">
-                    <AvatarImage src={profile.avatar} />
+                    <AvatarImage src={profile.avatar ?? undefined} />
                     <AvatarFallback className="bg-blue-100 text-blue-600 text-2xl font-bold">
                       {profile.name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>

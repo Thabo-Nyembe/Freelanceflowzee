@@ -80,7 +80,15 @@ interface ClientPreference {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
+    
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -902,7 +910,15 @@ export async function GET(request: NextRequest) {
     const projectId = searchParams.get('projectId')
     const fileId = searchParams.get('fileId')
 
-    const supabase = createClient()
+    const supabase = await createClient()
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
+    
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

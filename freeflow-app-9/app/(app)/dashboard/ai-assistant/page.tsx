@@ -24,7 +24,6 @@ import {
   User,
   Zap,
   Brain,
-  Magic,
   Wand2,
   Star,
   ThumbsUp,

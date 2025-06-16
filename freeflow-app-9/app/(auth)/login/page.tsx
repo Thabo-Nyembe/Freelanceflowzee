@@ -29,6 +29,12 @@ function LoginForm() {
     const checkAuth = async () => {
       try {
         const supabase = createClient()
+        
+        if (!supabase) {
+          setIsCheckingAuth(false)
+          return
+        }
+        
         const { data: { user } } = await supabase.auth.getUser()
         
         if (user) {

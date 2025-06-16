@@ -177,7 +177,30 @@ export default function InvoicesPage() {
       tax: 675,
       total: 8175,
       notes: 'Thank you for your business!',
-      terms: 'Payment due within 15 days'
+      terms: 'Payment due within 15 days',
+      template: {
+        id: 'modern-blue',
+        name: 'Modern Blue',
+        description: 'Clean, modern template with blue accents',
+        category: 'modern',
+        primaryColor: '#3B82F6',
+        secondaryColor: '#F3F4F6',
+        fontFamily: 'Inter',
+        layout: 'standard',
+        headerStyle: 'logo-left',
+        showDividers: true,
+        showBackground: false
+      },
+      customization: {
+        logoUrl: '',
+        brandColors: {
+          primary: '#3B82F6',
+          secondary: '#F3F4F6'
+        },
+        paymentTerms: 'Payment due within 15 days',
+        lateFees: '1.5% per month on overdue amounts',
+        additionalFields: []
+      }
     },
     {
       id: '2',
@@ -206,7 +229,30 @@ export default function InvoicesPage() {
       tax: 270,
       total: 3270,
       notes: 'Pleasure working with you!',
-      terms: 'Payment due within 15 days'
+      terms: 'Payment due within 15 days',
+      template: {
+        id: 'elegant-purple',
+        name: 'Elegant Purple',
+        description: 'Professional template with purple styling',
+        category: 'elegant',
+        primaryColor: '#7C3AED',
+        secondaryColor: '#F5F3FF',
+        fontFamily: 'Georgia',
+        layout: 'detailed',
+        headerStyle: 'logo-center',
+        showDividers: true,
+        showBackground: true
+      },
+      customization: {
+        logoUrl: '',
+        brandColors: {
+          primary: '#7C3AED',
+          secondary: '#F5F3FF'
+        },
+        paymentTerms: 'Payment due within 15 days',
+        lateFees: '1.5% per month on overdue amounts',
+        additionalFields: []
+      }
     },
     {
       id: '3',
@@ -242,7 +288,30 @@ export default function InvoicesPage() {
       tax: 207,
       total: 2507,
       notes: 'Payment reminder sent.',
-      terms: 'Payment due within 15 days'
+      terms: 'Payment due within 15 days',
+      template: {
+        id: 'classic-green',
+        name: 'Classic Green',
+        description: 'Traditional template with green accents',
+        category: 'classic',
+        primaryColor: '#059669',
+        secondaryColor: '#ECFDF5',
+        fontFamily: 'Times New Roman',
+        layout: 'minimal',
+        headerStyle: 'logo-right',
+        showDividers: false,
+        showBackground: false
+      },
+      customization: {
+        logoUrl: '',
+        brandColors: {
+          primary: '#059669',
+          secondary: '#ECFDF5'
+        },
+        paymentTerms: 'Payment due within 15 days',
+        lateFees: '1.5% per month on overdue amounts',
+        additionalFields: []
+      }
     }
   ])
 

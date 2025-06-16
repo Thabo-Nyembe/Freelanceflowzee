@@ -407,7 +407,7 @@ export function EnhancedClientCollaboration({
       content: state.commentContent,
       type: state.voiceBlob ? 'voice' : state.screenBlob ? 'screen' : 'text',
       fileType: state.activeFile?.type || 'image',
-      position: state.selectedPosition,
+      position: state.selectedPosition || undefined,
       status: 'pending',
       priority: 'medium',
       category: 'design',

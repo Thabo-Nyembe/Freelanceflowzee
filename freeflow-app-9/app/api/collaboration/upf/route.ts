@@ -2,6 +2,23 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { verifySession } from '@/lib/dal'
 
+// Comment interface for type safety
+interface Comment {
+  id?: string
+  file_id: string
+  project_id?: string
+  user_id?: string
+  content: string
+  comment_type: 'image' | 'video' | 'code' | 'audio' | 'doc' | 'text'
+  position_data?: any
+  priority: 'low' | 'medium' | 'high' | 'urgent'
+  status: 'open' | 'resolved' | 'in_progress'
+  created_at?: string
+  updated_at?: string
+  voice_note_url?: string
+  ai_analysis?: any
+}
+
 // Types for UPF API
 interface UPFCommentRequest {
   fileId: string
@@ -110,6 +127,14 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient()
+    
+    if (!supabase) {
+      return NextResponse.json({
+        success: false,
+        error: 'Database connection failed',
+        message: 'Unable to connect to database'
+      }, { status: 500 })
+    }
     
     // Handle different POST actions...
     const { action } = body
@@ -1051,9 +1076,9 @@ async function getComments(supabase: any, fileId: string | null, user: any) {
     total: comments?.length || 0,
     aiInsights,
     stats: {
-      open: comments?.filter(c => c.status === 'open').length || 0,
-      resolved: comments?.filter(c => c.status === 'resolved').length || 0,
-      highPriority: comments?.filter(c => c.priority === 'high' || c.priority === 'urgent').length || 0
+      open: comments?.filter((c: any) => c.status === 'open').length || 0,
+      resolved: comments?.filter((c: any) => c.status === 'resolved').length || 0,
+      highPriority: comments?.filter((c: any) => c.priority === 'high' || c.priority === 'urgent').length || 0
     }
   })
 }
@@ -1113,22 +1138,22 @@ async function getCommentAnalytics(supabase: any, projectId: string | null, user
   const stats = {
     totalComments: analytics?.length || 0,
     byStatus: {
-      open: analytics?.filter(c => c.status === 'open').length || 0,
-      resolved: analytics?.filter(c => c.status === 'resolved').length || 0,
-      in_progress: analytics?.filter(c => c.status === 'in_progress').length || 0
+      open: analytics?.filter((c: any) => c.status === 'open').length || 0,
+      resolved: analytics?.filter((c: any) => c.status === 'resolved').length || 0,
+      in_progress: analytics?.filter((c: any) => c.status === 'in_progress').length || 0
     },
     byPriority: {
-      urgent: analytics?.filter(c => c.priority === 'urgent').length || 0,
-      high: analytics?.filter(c => c.priority === 'high').length || 0,
-      medium: analytics?.filter(c => c.priority === 'medium').length || 0,
-      low: analytics?.filter(c => c.priority === 'low').length || 0
+      urgent: analytics?.filter((c: any) => c.priority === 'urgent').length || 0,
+      high: analytics?.filter((c: any) => c.priority === 'high').length || 0,
+      medium: analytics?.filter((c: any) => c.priority === 'medium').length || 0,
+      low: analytics?.filter((c: any) => c.priority === 'low').length || 0
     },
     byType: {
-      image: analytics?.filter(c => c.comment_type === 'image').length || 0,
-      video: analytics?.filter(c => c.comment_type === 'video').length || 0,
-      code: analytics?.filter(c => c.comment_type === 'code').length || 0,
-      doc: analytics?.filter(c => c.comment_type === 'doc').length || 0,
-      text: analytics?.filter(c => c.comment_type === 'text').length || 0
+      image: analytics?.filter((c: any) => c.comment_type === 'image').length || 0,
+      video: analytics?.filter((c: any) => c.comment_type === 'video').length || 0,
+      code: analytics?.filter((c: any) => c.comment_type === 'code').length || 0,
+      doc: analytics?.filter((c: any) => c.comment_type === 'doc').length || 0,
+      text: analytics?.filter((c: any) => c.comment_type === 'text').length || 0
     }
   }
 
@@ -1217,7 +1242,7 @@ function extractCommentThemes(comments: any[]): string[] {
   }, {} as Record<string, number>)
 
   return Object.entries(themeCount)
-    .sort(([,a], [,b]) => b - a)
+    .sort(([,a], [,b]) => (b as number) - (a as number))
     .slice(0, 3)
     .map(([theme]) => theme)
 }

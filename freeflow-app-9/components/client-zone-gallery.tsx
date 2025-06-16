@@ -127,7 +127,7 @@ interface UnlockMethod {
 
 type ClientGalleryAction =
   | { type: 'SET_GALLERIES'; payload: ClientGallery[] }
-  | { type: 'SELECT_GALLERY'; payload: string }
+  | { type: 'SELECT_GALLERY'; payload: string | null }
   | { type: 'SET_VIEW_MODE'; payload: 'grid' | 'list' }
   | { type: 'SET_FILTER_STATUS'; payload: 'all' | 'locked' | 'unlocked' | 'pending' }
   | { type: 'SET_SEARCH_QUERY'; payload: string }

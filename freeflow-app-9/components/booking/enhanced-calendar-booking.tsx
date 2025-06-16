@@ -470,6 +470,7 @@ export function EnhancedCalendarBooking({
       const newRequest: BookingRequest = {
         id: `req_${Date.now()}`,
         ...state.bookingForm,
+        budget: state.bookingForm.budget ?? undefined,
         serviceId: state.selectedService.id,
         slotId: state.selectedSlot.id,
         requirements: state.selectedService.requirements,

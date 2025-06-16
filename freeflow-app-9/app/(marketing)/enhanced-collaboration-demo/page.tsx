@@ -62,6 +62,13 @@ export default function EnhancedCollaborationDemo() {
     role: 'client' as const
   }
 
+  const mockGalleryUser = {
+    id: 'current_user',
+    name: 'Alex Thompson',
+    avatar: '/avatars/alex.jpg',
+    role: 'owner' as const
+  }
+
   const mockGalleryItems = [
     {
       id: 'item1',
@@ -362,7 +369,7 @@ export default function EnhancedCollaborationDemo() {
                       items={mockGalleryItems}
                       settings={mockGallerySettings}
                       analytics={mockAnalytics}
-                      currentUser={mockCurrentUser}
+                      currentUser={mockGalleryUser}
                       isOwnerView={true}
                     />
                   </CardContent>

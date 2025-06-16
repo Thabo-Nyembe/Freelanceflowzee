@@ -489,7 +489,7 @@ export function UniversalPinpointFeedback({
       userAvatar: currentUser.avatar,
       content: state.commentContent,
       type: state.commentType,
-      position: state.selectedPosition,
+      position: state.selectedPosition || undefined,
       status: 'open',
       priority: state.commentPriority,
       createdAt: new Date().toISOString(),

@@ -495,7 +495,7 @@ export function EnhancedCollaborationSystem({
                       key={annotation.id}
                       className="absolute top-4 right-4 bg-blue-500 text-white p-2 rounded-lg cursor-pointer"
                       style={{
-                        display: Math.abs(currentTime - annotation.timestamp) < 2 ? 'block' : 'none'
+                        display: 'timestamp' in annotation && Math.abs(currentTime - annotation.timestamp) < 2 ? 'block' : 'none'
                       }}
                       onClick={() => setSelectedAnnotation(annotation.id)}
                     >
@@ -702,8 +702,8 @@ export function EnhancedCollaborationSystem({
                           </div>
                           
                           <span className="text-xs text-gray-500">
-                            {fileType === 'video' ? formatTime(annotation.timestamp) : 
-                             `${annotation.position.x.toFixed(1)}%, ${annotation.position.y.toFixed(1)}%`}
+                            {fileType === 'video' && 'timestamp' in annotation ? formatTime(annotation.timestamp) : 
+                             'position' in annotation ? `${annotation.position.x.toFixed(1)}%, ${annotation.position.y.toFixed(1)}%` : ''}
                           </span>
                         </div>
                         
@@ -729,7 +729,7 @@ export function EnhancedCollaborationSystem({
                             })}
                           </div>
                           
-                          {fileType === 'video' && (
+                          {fileType === 'video' && 'timestamp' in annotation && (
                             <Button
                               variant="ghost"
                               size="sm"

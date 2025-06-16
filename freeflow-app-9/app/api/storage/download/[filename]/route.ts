@@ -12,7 +12,7 @@ interface DownloadParams {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: DownloadParams }
+  { params }: { params: Promise<DownloadParams> }
 ): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url)
@@ -27,7 +27,7 @@ export async function GET(
       }, { status: 400 })
     }
 
-    const { filename } = params
+    const { filename } = await params
     if (!filename) {
       return NextResponse.json({
         success: false,
@@ -157,7 +157,7 @@ export async function GET(
 // Generate signed download URL without actually downloading
 export async function POST(
   request: NextRequest,
-  { params }: { params: DownloadParams }
+  { params }: { params: Promise<DownloadParams> }
 ): Promise<NextResponse> {
   try {
     const body = await request.json()
@@ -170,7 +170,7 @@ export async function POST(
       }, { status: 400 })
     }
 
-    const { filename } = params
+    const { filename } = await params
     if (!filename) {
       return NextResponse.json({
         success: false,

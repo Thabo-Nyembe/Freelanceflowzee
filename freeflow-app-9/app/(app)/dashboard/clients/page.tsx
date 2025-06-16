@@ -51,7 +51,8 @@ import {
   Send,
   Download,
   ArrowUpRight,
-  CheckCircle2
+  CheckCircle2,
+  Crosshair
 } from 'lucide-react'
 
 // Framework7-inspired color palette for client management
@@ -165,7 +166,7 @@ const clientStats = [
     title: 'Active Projects',
     value: '23',
     change: '+8%',
-    icon: Target,
+    icon: Crosshair,
     color: 'text-green-600',
     bgColor: 'bg-green-50',
     gradient: 'from-green-500 to-emerald-500'
@@ -532,7 +533,7 @@ export default function ModernClientsPage() {
                   </Card>
                   <Card>
                     <CardContent className="p-4 text-center">
-                      <Target className="h-8 w-8 mx-auto text-blue-600 mb-2" />
+                      <Crosshair className="h-8 w-8 mx-auto text-blue-600 mb-2" />
                       <div className="text-2xl font-bold text-blue-600">
                         {selectedClient.totalProjects}
                       </div>

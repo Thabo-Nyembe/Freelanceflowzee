@@ -250,12 +250,12 @@ const EnhancedCommunityHub = () => {
      creator.specialties.some(s => s.toLowerCase().includes(searchTerm.toLowerCase())))
   )
 
-  const formatTime = (duration) => {
+  const formatTime = (duration: string): string => {
     const parts = duration.split(':')
     return parts.length === 2 ? duration : `${Math.floor(parseInt(duration.split(':')[0]) / 60)}:${(parseInt(duration.split(':')[0]) % 60).toString().padStart(2, '0')}`
   }
 
-  const CreatorCard = ({ creator }) => (
+  const CreatorCard = ({ creator }: { creator: any }) => (
     <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
@@ -264,7 +264,7 @@ const EnhancedCommunityHub = () => {
               <Avatar className="w-16 h-16 border-2 border-white shadow-lg">
                 <AvatarImage src={creator.avatar} alt={creator.name} />
                 <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white font-semibold text-lg">
-                  {creator.name.split(' ').map(n => n[0]).join('')}
+                  {creator.name.split(' ').map((n: string) => n[0]).join('')}
                 </AvatarFallback>
               </Avatar>
               {creator.online && (

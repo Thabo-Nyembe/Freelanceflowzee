@@ -9,7 +9,7 @@ const MOCK_SERVICES: BookingService[] = [
     description: 'Comprehensive project consultation and planning session',
     duration: 90,
     price: 15000, // $150.00 in cents
-    category: 'Consultation',
+    category: 'consultation',
     freelancerId: 'user1',
     isActive: true,
     maxAdvanceBooking: 30,
@@ -31,7 +31,7 @@ const MOCK_SERVICES: BookingService[] = [
     description: 'Professional review and feedback session for design concepts',
     duration: 60,
     price: 12000, // $120.00 in cents
-    category: 'Review',
+    category: 'review',
     freelancerId: 'user1',
     isActive: true,
     maxAdvanceBooking: 14,
@@ -53,7 +53,7 @@ const MOCK_SERVICES: BookingService[] = [
     description: 'Hands-on development session with technical guidance',
     duration: 120,
     price: 25000, // $250.00 in cents
-    category: 'Workshop',
+    category: 'workshop',
     freelancerId: 'user1',
     isActive: true,
     maxAdvanceBooking: 21,
@@ -73,7 +73,7 @@ const MOCK_SERVICES: BookingService[] = [
     description: 'Comprehensive technical audit of your website, application, or codebase. Identify performance issues, security vulnerabilities, and optimization opportunities.',
     duration: 90,
     price: 18000, // $180.00 in cents
-    category: 'Audit',
+    category: 'other',
     freelancerId: 'user1',
     isActive: true,
     maxAdvanceBooking: 7,
@@ -92,7 +92,7 @@ const MOCK_SERVICES: BookingService[] = [
     description: 'Fast-paced question and answer session for urgent technical questions or quick consultations. Perfect for immediate guidance.',
     duration: 30,
     price: 8000, // $80.00 in cents
-    category: 'Quick Help',
+    category: 'other',
     freelancerId: 'user1',
     isActive: true,
     maxAdvanceBooking: 3,

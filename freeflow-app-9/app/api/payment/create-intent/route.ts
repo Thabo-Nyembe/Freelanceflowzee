@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     }
 
     const stripe = new Stripe(STRIPE_SECRET_KEY, {
-      apiVersion: '2024-12-18.acacia',
+      apiVersion: '2025-05-28.basil',
     })
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { 
         error: 'Failed to create payment intent',
-        details: isDevelopment ? error.message : undefined
+        details: isDevelopment ? (error instanceof Error ? error.message : 'Unknown error') : undefined
       },
       { status: 500 }
     )

@@ -5,6 +5,13 @@ export async function GET() {
   try {
     const supabase = await createClient()
     
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection failed' },
+        { status: 500 }
+      )
+    }
+    
     // Get current user
     const {
       data: { user },
@@ -37,6 +44,13 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection failed' },
+        { status: 500 }
+      )
+    }
     
     // Get current user
     const {

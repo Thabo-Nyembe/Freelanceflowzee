@@ -324,8 +324,8 @@ export function AdvancedClientPortal({
   }
 
   const canAccess = (fileAccessLevel: string) => {
-    const levels = { guest: 1, preview: 2, premium: 3 }
-    return levels[state.accessLevel] >= levels[fileAccessLevel]
+    const levels: Record<string, number> = { guest: 1, preview: 2, premium: 3 }
+    return levels[state.accessLevel] >= (levels[fileAccessLevel] || 0)
   }
 
   if (!state.selectedProject) {

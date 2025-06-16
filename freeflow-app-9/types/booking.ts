@@ -1,3 +1,7 @@
+// Status type exports for API usage
+export type BookingStatus = 'pending' | 'confirmed' | 'paid' | 'in-progress' | 'completed' | 'cancelled' | 'no-show'
+export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded'
+
 export interface BookingService {
   id: string
   title: string
@@ -5,6 +9,7 @@ export interface BookingService {
   duration: number // in minutes
   price: number // in cents
   category: 'consultation' | 'design' | 'development' | 'strategy' | 'review' | 'workshop' | 'other'
+  freelancerId: string
   isActive: boolean
   maxAdvanceBooking: number // days in advance
   bufferTime: number // minutes between bookings
@@ -14,6 +19,9 @@ export interface BookingService {
   meetingUrl?: string
   isRecurring?: boolean
   maxBookingsPerDay?: number
+  availability?: {
+    [key: string]: { start: string; end: string }
+  }
 }
 
 export interface TimeSlot {
@@ -35,6 +43,7 @@ export interface Booking {
   clientId: string
   clientEmail: string
   clientName: string
+  clientPhone?: string
   freelancerId: string
   serviceId: string
   timeSlotId: string

@@ -1,11 +1,10 @@
 'use client'
 
-import React, { useState, createContext, useContext, ReactNode } from 'react'
+import { createContext, useContext, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { DashboardNav } from '@/components/dashboard-nav'
 import { DashboardBreadcrumbs } from '@/components/dashboard-breadcrumbs'
 import { createClient } from '@/lib/supabase/client'
-import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { LogOut } from 'lucide-react'
 
@@ -38,12 +37,15 @@ interface DashboardLayoutClientProps {
 }
 
 export function DashboardLayoutClient({ user, children }: DashboardLayoutClientProps) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
   const handleLogout = async () => {
     try {
+      if (!supabase) {
+        console.error('Supabase client not available')
+        return
+      }
       await supabase.auth.signOut()
       router.push('/login')
       router.refresh()
@@ -59,12 +61,12 @@ export function DashboardLayoutClient({ user, children }: DashboardLayoutClientP
         <a 
           href="#main-content" 
           className="skip-to-content"
-          tabIndex={1}
+          tabIndex={0}
         >
           Skip to main content
         </a>
         
-        <DashboardNav />
+        <DashboardNav onLogout={handleLogout} user={user} />
         
         <main 
           id="main-content"

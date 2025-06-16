@@ -4,7 +4,7 @@ import Stripe from 'stripe'
 // Initialize enhanced Stripe with latest API version
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_for_build'
 const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: '2024-06-20',
+  apiVersion: '2025-05-28.basil',
   typescript: true,
 })
 
@@ -72,12 +72,9 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      const invoice = subscription.latest_invoice as Stripe.Invoice
-      const paymentIntent = invoice.payment_intent as Stripe.PaymentIntent
-
       return NextResponse.json({
         success: true,
-        client_secret: paymentIntent.client_secret,
+        client_secret: (subscription.latest_invoice as Stripe.Invoice & { payment_intent?: Stripe.PaymentIntent })?.payment_intent?.client_secret,
         subscription_id: subscription.id,
         customer_id: customerId,
         publishable_key: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,

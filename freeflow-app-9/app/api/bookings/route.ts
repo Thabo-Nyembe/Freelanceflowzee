@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { BookingService, Booking, BookingStatus, PaymentStatus } from '@/types/booking'
-import StripeEnhancedService from '@/lib/stripe-enhanced-v2'
+import { BookingService, Booking } from '@/types/booking'
+import { stripeEnhanced } from '@/lib/stripe-enhanced-v2'
+import { createClient } from '@/lib/supabase/server'
 
-// Initialize Stripe service
-const stripeService = new StripeEnhancedService()
+// Use the exported instance
+const stripeService = stripeEnhanced
 
 // Mock services data - in production, this would come from a database
 const MOCK_SERVICES: BookingService[] = [
@@ -13,10 +14,12 @@ const MOCK_SERVICES: BookingService[] = [
     description: 'Comprehensive project consultation and planning session',
     duration: 90,
     price: 15000, // $150.00 in cents
-    category: 'Consultation',
+    category: 'consultation',
     freelancerId: 'user1',
     isActive: true,
     maxAdvanceBooking: 30,
+    bufferTime: 15,
+    tags: ['strategy', 'planning', 'consultation'],
     requirements: ['Project brief', 'Business goals document'],
     availability: {
       monday: { start: '09:00', end: '17:00' },
@@ -32,10 +35,12 @@ const MOCK_SERVICES: BookingService[] = [
     description: 'Review and feedback session for design deliverables',
     duration: 60,
     price: 12000, // $120.00 in cents
-    category: 'Review',
+    category: 'review',
     freelancerId: 'user1',
     isActive: true,
     maxAdvanceBooking: 14,
+    bufferTime: 10,
+    tags: ['design', 'review', 'feedback'],
     requirements: ['Design files', 'Revision notes'],
     availability: {
       monday: { start: '10:00', end: '16:00' },
@@ -51,10 +56,12 @@ const MOCK_SERVICES: BookingService[] = [
     description: 'Hands-on development session and technical guidance',
     duration: 120,
     price: 25000, // $250.00 in cents
-    category: 'Workshop',
+    category: 'workshop',
     freelancerId: 'user1',
     isActive: true,
     maxAdvanceBooking: 21,
+    bufferTime: 20,
+    tags: ['development', 'workshop', 'technical'],
     requirements: ['Development environment setup', 'Code repository access'],
     availability: {
       monday: { start: '09:00', end: '15:00' },
@@ -65,32 +72,32 @@ const MOCK_SERVICES: BookingService[] = [
 ]
 
 // Mock bookings storage - in production, this would be a database
-let MOCK_BOOKINGS: Booking[] = [
+const MOCK_BOOKINGS: Booking[] = [
   {
     id: 'booking-1',
-    serviceId: 'service-1',
-    freelancerId: 'user1',
-    clientName: 'John Smith',
+    clientId: 'client1',
     clientEmail: 'john@example.com',
+    clientName: 'John Smith',
     clientPhone: '+1 (555) 123-4567',
-    timeSlot: {
-      id: 'slot-1',
-      startTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-      endTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 90 * 60 * 1000).toISOString(),
-      isAvailable: false,
-      serviceId: 'service-1',
-      freelancerId: 'user1'
-    },
-    status: BookingStatus.CONFIRMED,
-    paymentStatus: PaymentStatus.PAID,
+    freelancerId: 'user1',
+    serviceId: 'service-1',
+    timeSlotId: 'slot-1',
+    status: 'confirmed',
+    paymentStatus: 'paid',
+    paymentIntentId: 'pi_1234567890',
+    startTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+    endTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 90 * 60 * 1000).toISOString(),
     totalAmount: 15000,
     notes: 'Looking forward to discussing the new e-commerce project',
     requirements: ['Project brief', 'Business goals document'],
     createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date().toISOString(),
-    stripePaymentIntentId: 'pi_1234567890'
+    updatedAt: new Date().toISOString()
   }
 ]
+
+// Use inline type definitions
+type BookingStatus = 'pending' | 'confirmed' | 'paid' | 'in-progress' | 'completed' | 'cancelled' | 'no-show'
+type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded'
 
 // POST: Create a new booking with Stripe payment
 export async function POST(request: NextRequest) {
@@ -190,28 +197,23 @@ export async function POST(request: NextRequest) {
     const bookingId = `booking-${Date.now()}`
     const newBooking: Booking = {
       id: bookingId,
+      clientId: customerResult.customer?.id || 'unknown-client',
       serviceId,
       freelancerId: service.freelancerId,
       clientName,
       clientEmail,
       clientPhone,
-      timeSlot: {
-        id: timeSlotId,
-        startTime,
-        endTime,
-        isAvailable: false,
-        serviceId,
-        freelancerId: service.freelancerId
-      },
-      status: BookingStatus.PENDING,
-      paymentStatus: PaymentStatus.PENDING,
+      timeSlotId,
+      status: 'pending',
+      paymentStatus: 'pending',
+      startTime,
+      endTime,
       totalAmount: service.price,
       notes,
       requirements,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      stripePaymentIntentId: paymentResult.paymentIntent?.id,
-      stripeCustomerId: customerResult.customer?.id
+      paymentIntentId: paymentResult.paymentIntent?.id
     }
 
     // Add to mock storage
@@ -326,7 +328,7 @@ export async function PUT(request: NextRequest) {
       booking.status = status
       
       // Auto-confirm if payment is successful
-      if (status === BookingStatus.CONFIRMED && booking.paymentStatus === PaymentStatus.PAID) {
+      if (status === 'confirmed' && booking.paymentStatus === 'paid') {
         // In a real app, you might send confirmation emails here
         console.log(`Booking ${bookingId} confirmed for ${booking.clientEmail}`)
       }
@@ -336,12 +338,12 @@ export async function PUT(request: NextRequest) {
       booking.paymentStatus = paymentStatus
       
       // Auto-confirm booking if payment succeeds
-      if (paymentStatus === PaymentStatus.PAID && booking.status === BookingStatus.PENDING) {
-        booking.status = BookingStatus.CONFIRMED
+      if (paymentStatus === 'paid' && booking.status === 'pending') {
+        booking.status = 'confirmed'
       }
     }
     
-    if (stripePaymentIntentId) booking.stripePaymentIntentId = stripePaymentIntentId
+    if (stripePaymentIntentId) booking.paymentIntentId = stripePaymentIntentId
     booking.updatedAt = new Date().toISOString()
 
     // Update in mock storage

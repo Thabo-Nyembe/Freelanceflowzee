@@ -27,6 +27,10 @@ export async function createProject(formData: FormData): Promise<CreateProjectRe
   try {
     const supabase = await createClient()
     
+    if (!supabase) {
+      return { error: 'Database connection not available' }
+    }
+    
     // Get current user
     const {
       data: { user },

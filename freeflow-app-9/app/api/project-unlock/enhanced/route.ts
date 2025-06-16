@@ -42,7 +42,15 @@ function generateFileHash(content: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection failed' },
+        { status: 500 }
+      )
+    }
+    
     const { data: { user } } = await supabase.auth.getUser()
 
     const body = await request.json()
@@ -475,7 +483,15 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection failed' },
+        { status: 500 }
+      )
+    }
+    
     const { data: { user } } = await supabase.auth.getUser()
 
     switch (action) {

@@ -10,7 +10,7 @@ import {
   MessageSquare, Play, Pause, Volume2, RotateCw, ZoomIn, ZoomOut,
   FileText, Code, Camera, Pencil, Square, Circle, Eraser, Heart,
   MessageCircle, Share, Send, Eye, VolumeX, Volume1, ChevronLeft,
-  ChevronRight, Download, MoreHorizontal
+  ChevronRight, Download, MoreHorizontal, SkipBack, SkipForward
 } from 'lucide-react'
 
 // Sample media files data

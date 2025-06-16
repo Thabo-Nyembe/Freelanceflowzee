@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const { searchParams } = new URL(request.url)
     const token = searchParams.get('token')
     const expires = searchParams.get('expires')
-    const projectSlug = params.slug
+    const { slug: projectSlug } = await params
 
     if (!token) {
       return NextResponse.json(

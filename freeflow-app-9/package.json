@@ -163,6 +163,7 @@
     "@playwright/test": "1.41.2",
     "@types/node": "^22",
     "@types/react": "^19",
+    "@types/react-big-calendar": "^1.16.2",
     "@types/react-dom": "^19",
     "postcss": "^8",
     "sass": "^1.89.2",

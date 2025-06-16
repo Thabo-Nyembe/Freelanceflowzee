@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import UniversalMediaPreviews from './universal-media-previews'
+// import UniversalMediaPreviews from './universal-media-previews'
 import { 
   Star, 
   Users, 
@@ -182,7 +182,23 @@ export default function CommunityShowcase() {
                 </p>
               </CardHeader>
               <CardContent>
-                <UniversalMediaPreviews />
+                <div className="space-y-4">
+                  <div className="bg-gradient-to-r from-violet-50 to-rose-50 p-6 rounded-lg">
+                    <h3 className="font-semibold text-slate-800 mb-2">🎯 Multi-Media Feedback Demo</h3>
+                    <p className="text-slate-600 text-sm">Click anywhere on images, videos, documents, or code to add pinpoint comments with AI-powered insights.</p>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="aspect-square bg-gradient-to-br from-rose-100 to-pink-100 rounded-lg flex items-center justify-center">
+                      <Image className="w-8 h-8 text-rose-500" />
+                    </div>
+                    <div className="aspect-square bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center">
+                      <Video className="w-8 h-8 text-blue-500" />
+                    </div>
+                    <div className="aspect-square bg-gradient-to-br from-purple-100 to-violet-100 rounded-lg flex items-center justify-center">
+                      <FileText className="w-8 h-8 text-purple-500" />
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 

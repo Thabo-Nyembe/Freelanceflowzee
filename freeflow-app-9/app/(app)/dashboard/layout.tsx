@@ -1,8 +1,6 @@
 import { redirect } from 'next/navigation'
 import { verifySession, getUser } from '@/lib/dal'
-import { DashboardNav } from '@/components/dashboard-nav'
 import { Suspense } from 'react'
-import { DashboardBreadcrumbs } from '@/components/dashboard-breadcrumbs'
 import { DashboardLoading } from '@/components/dashboard-loading'
 import { DashboardLayoutClient } from './dashboard-layout-client'
 import { headers } from 'next/headers'
@@ -27,17 +25,9 @@ export default async function DashboardLayout({
     
     return (
       <DashboardLayoutClient user={mockUser}>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40">
-          <DashboardNav />
-          <main className="dashboard-main">
-            <div className="dashboard-content">
-              <Suspense fallback={<DashboardLoading />}>
-                <DashboardBreadcrumbs />
-                {children}
-              </Suspense>
-            </div>
-          </main>
-        </div>
+        <Suspense fallback={<DashboardLoading />}>
+          {children}
+        </Suspense>
       </DashboardLayoutClient>
     )
   }
@@ -63,7 +53,7 @@ export default async function DashboardLayout({
   // Convert DAL user format to expected format for client component
   const clientUser = {
     id: user.id,
-    email: user.email,
+    email: user.email || 'unknown@example.com', // Fallback for undefined email
     user_metadata: { 
       full_name: user.name,
       role: user.role 
@@ -72,17 +62,9 @@ export default async function DashboardLayout({
 
   return (
     <DashboardLayoutClient user={clientUser}>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40">
-        <DashboardNav />
-        <main className="dashboard-main">
-          <div className="dashboard-content">
-            <Suspense fallback={<DashboardLoading />}>
-              <DashboardBreadcrumbs />
-              {children}
-            </Suspense>
-          </div>
-        </main>
-      </div>
+      <Suspense fallback={<DashboardLoading />}>
+        {children}
+      </Suspense>
     </DashboardLayoutClient>
   )
 } 

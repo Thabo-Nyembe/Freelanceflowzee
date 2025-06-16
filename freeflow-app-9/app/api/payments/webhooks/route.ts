@@ -9,7 +9,7 @@ let endpointSecret: string | null = null
 // Initialize Stripe only if properly configured
 if (process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET) {
   stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2024-06-20',
+    apiVersion: '2025-05-28.basil',
     typescript: true,
   })
   endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.text()
-  const headersList = headers()
+  const headersList = await headers()
   const sig = headersList.get('stripe-signature')
 
   if (!sig) {
@@ -37,10 +37,18 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  if (!stripe || !endpointSecret) {
+    console.error('Stripe not properly initialized')
+    return NextResponse.json(
+      { error: 'Payment system not initialized' },
+      { status: 500 }
+    )
+  }
+
   let event: Stripe.Event
 
   try {
-    event = stripe.webhooks.constructEvent(body, sig, endpointSecret)
+    event = stripe!.webhooks.constructEvent(body, sig, endpointSecret!)
   } catch (err) {
     console.error(`Webhook signature verification failed:`, err)
     return NextResponse.json(
@@ -186,8 +194,8 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   
   try {
     // Update subscription status if applicable
-    if (invoice.subscription) {
-      await updateSubscriptionStatus(invoice.subscription as string, 'active')
+    if ((invoice as any).subscription) {
+      await updateSubscriptionStatus((invoice as any).subscription as string, 'active')
     }
 
     // Log invoice payment
@@ -197,7 +205,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
       amount: invoice.amount_paid,
       currency: invoice.currency,
       customer_id: invoice.customer as string,
-      subscription_id: invoice.subscription as string,
+      subscription_id: (invoice as any).subscription as string,
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
@@ -210,8 +218,8 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   
   try {
     // Update subscription status if applicable
-    if (invoice.subscription) {
-      await updateSubscriptionStatus(invoice.subscription as string, 'past_due')
+    if ((invoice as any).subscription) {
+      await updateSubscriptionStatus((invoice as any).subscription as string, 'past_due')
     }
 
     // Log invoice payment failure
@@ -221,7 +229,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
       amount: invoice.amount_due,
       currency: invoice.currency,
       customer_id: invoice.customer as string,
-      subscription_id: invoice.subscription as string,
+      subscription_id: (invoice as any).subscription as string,
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
@@ -238,9 +246,9 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       subscription_id: subscription.id,
       customer_id: subscription.customer as string,
       status: subscription.status,
-      current_period_start: new Date(subscription.current_period_start * 1000),
-      current_period_end: new Date(subscription.current_period_end * 1000),
-      trial_end: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
+      current_period_start: new Date((subscription as any).current_period_start * 1000),
+      current_period_end: new Date((subscription as any).current_period_end * 1000),
+      trial_end: (subscription as any).trial_end ? new Date((subscription as any).trial_end * 1000) : null,
     })
   } catch (error) {
     console.error('Error handling subscription creation:', error)
@@ -254,8 +262,8 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     // Update subscription record in your database
     await updateSubscriptionRecord(subscription.id, {
       status: subscription.status,
-      current_period_start: new Date(subscription.current_period_start * 1000),
-      current_period_end: new Date(subscription.current_period_end * 1000),
+      current_period_start: new Date((subscription as any).current_period_start * 1000),
+      current_period_end: new Date((subscription as any).current_period_end * 1000),
     })
   } catch (error) {
     console.error('Error handling subscription update:', error)

@@ -11,6 +11,10 @@ export default async function CreateProjectPage() {
     // In production mode, check authentication
     const supabase = await createClient()
     
+    if (!supabase) {
+      redirect('/login?error=database-connection')
+    }
+    
     const {
       data: { user },
     } = await supabase.auth.getUser()

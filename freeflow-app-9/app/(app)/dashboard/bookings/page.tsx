@@ -2,11 +2,11 @@
 
 import React, { useState, useMemo } from 'react'
 import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar'
-import format from 'date-fns/format'
-import parse from 'date-fns/parse'
-import startOfWeek from 'date-fns/startOfWeek'
-import getDay from 'date-fns/getDay'
-import enUS from 'date-fns/locale/en-US'
+import { format } from 'date-fns/format'
+import { parse } from 'date-fns/parse'
+import { startOfWeek } from 'date-fns/startOfWeek'
+import { getDay } from 'date-fns/getDay'
+import { enUS } from 'date-fns/locale/en-US'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -73,6 +73,7 @@ const mockServices: BookingService[] = [
     duration: 60,
     price: 15000,
     category: 'consultation',
+    freelancerId: 'user1',
     isActive: true,
     maxAdvanceBooking: 30,
     bufferTime: 15,
@@ -87,6 +88,7 @@ const mockServices: BookingService[] = [
     duration: 45,
     price: 12000,
     category: 'review',
+    freelancerId: 'user1',
     isActive: true,
     maxAdvanceBooking: 14,
     bufferTime: 10,

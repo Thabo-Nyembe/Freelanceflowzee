@@ -8,15 +8,16 @@ export async function GET() {
       multiCloudStorage.healthCheck()
     ]);
 
-    // Calculate cost savings insights
+    // Calculate cost savings insights using the correct properties
+    const supabaseCost = (analytics.supabaseSize / 1e9) * 0.021; // $0.021/GB/month
     const insights = {
       monthlySavings: analytics.potentialSavings,
-      percentageSavings: analytics.supabaseSize > 0 
-        ? Math.round((analytics.potentialSavings / analytics.costBreakdown.supabaseCost) * 100)
+      percentageSavings: supabaseCost > 0 
+        ? Math.round((analytics.potentialSavings / supabaseCost) * 100)
         : 0,
       recommendedActions: [
-        analytics.supabaseFiles > 50 ? 'Consider moving large files to Wasabi for cost savings' : null,
-        analytics.wasabiFiles > 100 ? 'Excellent cost optimization with Wasabi usage!' : null,
+        analytics.totalFiles > 50 ? 'Consider moving large files to Wasabi for cost savings' : null,
+        analytics.wasabiSize > 0 ? 'Excellent cost optimization with Wasabi usage!' : null,
         analytics.totalSize > 1e10 ? 'Large storage usage - Wasabi can save up to 80%' : null
       ].filter(Boolean)
     };
@@ -27,10 +28,10 @@ export async function GET() {
       healthCheck,
       insights,
       status: {
-        overall: healthCheck.overall ? 'healthy' : 'degraded',
+        overall: healthCheck.supabase?.status === 'connected' && healthCheck.wasabi?.status === 'connected' ? 'healthy' : 'degraded',
         providers: {
-          supabase: healthCheck.supabase ? 'connected' : 'disconnected',
-          wasabi: healthCheck.wasabi ? 'connected' : 'disconnected'
+          supabase: healthCheck.supabase?.status === 'connected' ? 'connected' : 'disconnected',
+          wasabi: healthCheck.wasabi?.status === 'connected' ? 'connected' : 'disconnected'
         }
       }
     });
