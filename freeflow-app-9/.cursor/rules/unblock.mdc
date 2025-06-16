@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+[setup-env.js](mdc:scripts/setup-env.js)
