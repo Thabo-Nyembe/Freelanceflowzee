@@ -21,7 +21,8 @@ import {
   Award,
   Clock,
   Target,
-  Rocket
+  Rocket,
+  BookOpen
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -630,7 +631,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Interactive Contact Section */}
+      {/* Strategic Call-to-Action Section */}
       <section className="py-20 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center text-white mb-16">
@@ -642,8 +643,104 @@ export default function HomePage() {
             </p>
           </div>
           
-          <div className="bg-white rounded-2xl p-8 shadow-2xl">
-            <InteractiveContactSystem variant="compact" showMethods={false} />
+          {/* Three Strategic CTA Buttons */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Sales CTA */}
+            <Card className="group hover:shadow-2xl transition-all duration-500 border-0 bg-gradient-to-br from-white to-purple-50 hover:from-purple-50 hover:to-white">
+              <CardContent className="p-8 text-center">
+                <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-200 transition-colors">
+                  <Rocket className="w-8 h-8 text-purple-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Start Your Journey</h3>
+                <p className="text-gray-600 mb-6">
+                  Join 10,000+ professionals who've transformed their workflow with FreeflowZee's powerful platform.
+                </p>
+                <Button 
+                  size="lg" 
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg group-hover:shadow-xl transition-all"
+                  asChild
+                >
+                  <Link href="/signup">
+                    Start Free Trial
+                    <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </Button>
+                <p className="text-sm text-gray-500 mt-3">
+                  No credit card required • 14-day free trial
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Information CTA */}
+            <Card className="group hover:shadow-2xl transition-all duration-500 border-0 bg-gradient-to-br from-white to-indigo-50 hover:from-indigo-50 hover:to-white">
+              <CardContent className="p-8 text-center">
+                <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-indigo-200 transition-colors">
+                  <Users className="w-8 h-8 text-indigo-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">See It In Action</h3>
+                <p className="text-gray-600 mb-6">
+                  Experience the power of seamless project management with our interactive demo and live examples.
+                </p>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="w-full border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white shadow-lg group-hover:shadow-xl transition-all"
+                  asChild
+                >
+                  <Link href="/demo">
+                    Watch Live Demo
+                    <Play className="ml-2 w-5 h-5" />
+                  </Link>
+                </Button>
+                <p className="text-sm text-gray-500 mt-3">
+                  5-minute interactive walkthrough
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Brand Awareness CTA */}
+            <Card className="group hover:shadow-2xl transition-all duration-500 border-0 bg-gradient-to-br from-white to-gray-50 hover:from-gray-50 hover:to-white">
+              <CardContent className="p-8 text-center">
+                <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-gray-200 transition-colors">
+                  <Star className="w-8 h-8 text-gray-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Learn & Grow</h3>
+                <p className="text-gray-600 mb-6">
+                  Access our comprehensive resource library, tutorials, and join our thriving community of creators.
+                </p>
+                <Button 
+                  size="lg" 
+                  variant="ghost"
+                  className="w-full text-gray-700 hover:bg-gray-100 border-2 border-gray-300 hover:border-gray-400 shadow-lg group-hover:shadow-xl transition-all"
+                  asChild
+                >
+                  <Link href="/resources">
+                    Explore Resources
+                    <BookOpen className="ml-2 w-5 h-5" />
+                  </Link>
+                </Button>
+                <p className="text-sm text-gray-500 mt-3">
+                  Free guides • Tutorials • Community
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Bottom CTA */}
+          <div className="text-center mt-12">
+            <p className="text-white/80 mb-4">
+              Ready to take your freelance business to the next level?
+            </p>
+            <Button 
+              size="lg" 
+              className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+              asChild
+            >
+              <Link href="/contact">
+                Talk to Our Team
+                <MessageCircle className="ml-2 w-5 h-5" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
