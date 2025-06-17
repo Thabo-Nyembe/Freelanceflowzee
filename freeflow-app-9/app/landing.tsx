@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Input } from '@/components/ui/input'
 import { DemoModal } from '@/components/demo-modal'
 import { SiteHeader } from '@/components/navigation/site-header'
 import { SiteFooter } from '@/components/navigation/site-footer'
@@ -42,7 +43,14 @@ import {
   CreditCard,
   ImageIcon,
   MessageCircle,
-  Check
+  Check,
+  UserPlus,
+  CreditCard as PaymentIcon,
+  Settings,
+  Target,
+  Lightbulb,
+  Headphones,
+  ExternalLink
 } from 'lucide-react'
 
 // Hero section with animated gradient background
@@ -83,25 +91,37 @@ function HeroSection() {
             and get paid faster than ever before.
           </p>
 
-          {/* CTA Buttons */}
-          <div data-testid="hero-cta-buttons" className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-            <Link href="/signup">
-              <Button data-testid="hero-cta-primary" size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
-                Start Creating Free
+          {/* Main CTA Buttons - Updated with Creator/Client distinction */}
+          <div data-testid="hero-cta-buttons" className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+            <Link href="/login?redirect=/dashboard">
+              <Button data-testid="creator-login-button" size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                Creator Login
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
             
             <Button 
-              data-testid="hero-cta-demo" 
+              data-testid="watch-demo-button" 
               size="lg" 
               variant="outline" 
               className="border-2 border-gray-300 hover:border-indigo-300 px-8 py-4 text-lg font-semibold rounded-xl backdrop-blur-sm bg-white/80"
               onClick={() => setIsDemoOpen(true)}
             >
               <Play className="mr-2 w-5 h-5" />
-              Try Demo
+              Watch Demo
             </Button>
+            
+            <Link href="/payment">
+              <Button data-testid="view-projects-button" variant="outline" size="lg" className="px-8 py-4 text-lg border-purple-300 text-purple-600 hover:bg-purple-50 rounded-xl">
+                View Projects
+              </Button>
+            </Link>
+          </div>
+
+          {/* User Type Helper Section */}
+          <div className="mb-12 p-6 bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-200/50">
+            <p className="text-gray-600 mb-2 font-medium">Not Sure? Try First</p>
+            <p className="text-sm text-gray-500">See how FreeflowZee works</p>
           </div>
 
           {/* Social proof */}
@@ -132,6 +152,123 @@ function HeroSection() {
         isOpen={isDemoOpen} 
         onClose={() => setIsDemoOpen(false)} 
       />
+    </section>
+  )
+}
+
+// User Types Section to distinguish between creators and clients
+function UserTypesSection() {
+  return (
+    <section className="py-20 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-gray-900 mb-6">
+            Choose Your 
+            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> Experience</span>
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Whether you're a creator showcasing your work or a client reviewing projects, 
+            FreeflowZee has the perfect solution for you.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {/* For Creators */}
+          <Card className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-indigo-50">
+            <CardContent className="p-8 text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <UserPlus className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">For Creators & Freelancers</h3>
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                Showcase your portfolio, manage client projects, collaborate in real-time, 
+                and get paid faster than ever before.
+              </p>
+              <ul className="text-left space-y-3 mb-8">
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-indigo-500 mr-3 flex-shrink-0" />
+                  Upload and organize unlimited projects
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-indigo-500 mr-3 flex-shrink-0" />
+                  Real-time client collaboration tools
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-indigo-500 mr-3 flex-shrink-0" />
+                  Automated invoicing and payments
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-indigo-500 mr-3 flex-shrink-0" />
+                  Professional client presentations
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-indigo-500 mr-3 flex-shrink-0" />
+                  Comprehensive analytics dashboard
+                </li>
+              </ul>
+              <Link href="/signup">
+                <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3">
+                  Start Creating Free
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* For Clients */}
+          <Card className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-purple-50">
+            <CardContent className="p-8 text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Eye className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">For Clients & Businesses</h3>
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                Review work, provide feedback, approve deliverables, and make secure payments 
+                all in one professional platform.
+              </p>
+              <ul className="text-left space-y-3 mb-8">
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-purple-500 mr-3 flex-shrink-0" />
+                  Secure project access and previews
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-purple-500 mr-3 flex-shrink-0" />
+                  Real-time commenting and feedback
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-purple-500 mr-3 flex-shrink-0" />
+                  Secure payment processing
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-purple-500 mr-3 flex-shrink-0" />
+                  Download deliverables instantly
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <CheckCircle className="w-5 h-5 text-purple-500 mr-3 flex-shrink-0" />
+                  Professional client experience
+                </li>
+              </ul>
+              <Link href="/payment">
+                <Button variant="outline" className="w-full border-purple-300 text-purple-600 hover:bg-purple-50 py-3">
+                  Access Projects
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Help Section */}
+        <div className="text-center mt-12">
+          <p className="text-gray-600 mb-4">Still unsure which option is right for you?</p>
+          <Link href="/demo">
+            <Button variant="outline" className="px-6 py-2">
+              Explore Our Demo
+              <ExternalLink className="ml-2 w-4 h-4" />
+            </Button>
+          </Link>
+        </div>
+      </div>
     </section>
   )
 }
@@ -251,7 +388,13 @@ function InteractiveFeaturesSection() {
                 <div className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg p-8 text-center">
                   <Camera className="w-16 h-16 mx-auto mb-4 text-indigo-600" />
                   <h3 className="text-xl font-semibold mb-2">Interactive Gallery Demo</h3>
-                  <p className="text-gray-600">Showcase your work with beautiful galleries, custom layouts, and client-friendly viewing options.</p>
+                  <p className="text-gray-600 mb-4">Showcase your work with beautiful galleries, custom layouts, and client-friendly viewing options.</p>
+                  <Link href="/dashboard/gallery">
+                    <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                      Try Gallery Demo
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
@@ -268,7 +411,13 @@ function InteractiveFeaturesSection() {
                 <div className="bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg p-8 text-center">
                   <MessageSquare className="w-16 h-16 mx-auto mb-4 text-green-600" />
                   <h3 className="text-xl font-semibold mb-2">Live Feedback System</h3>
-                  <p className="text-gray-600">Get instant feedback with visual annotations, threaded comments, and approval workflows.</p>
+                  <p className="text-gray-600 mb-4">Get instant feedback with visual annotations, threaded comments, and approval workflows.</p>
+                  <Link href="/dashboard/collaboration">
+                    <Button className="bg-green-600 hover:bg-green-700 text-white">
+                      Try Feedback Demo
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
@@ -285,7 +434,13 @@ function InteractiveFeaturesSection() {
                 <div className="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-lg p-8 text-center">
                   <DollarSign className="w-16 h-16 mx-auto mb-4 text-orange-600" />
                   <h3 className="text-xl font-semibold mb-2">Complete Finance Suite</h3>
-                  <p className="text-gray-600">Manage invoices, track payments, and monitor your financial health with detailed analytics.</p>
+                  <p className="text-gray-600 mb-4">Manage invoices, track payments, and monitor your financial health with detailed analytics.</p>
+                  <Link href="/dashboard/financial-hub">
+                    <Button className="bg-orange-600 hover:bg-orange-700 text-white">
+                      Try Finance Demo
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
@@ -352,29 +507,55 @@ function HowItWorksSection() {
                   </div>
                   <h3 data-testid={`step-title-${index}`} className="text-3xl font-bold text-gray-900">{step.title}</h3>
                   <p data-testid={`step-description-${index}`} className="text-xl text-gray-600 leading-relaxed">{step.description}</p>
-                  <Button 
-                    data-testid={`step-cta-${index}`} 
-                    variant="outline" 
-                    className="mt-4 border-indigo-300 text-indigo-600 hover:bg-indigo-50"
-                    onClick={() => setIsDemoOpen(true)}
-                  >
-                    {index === 0 ? "Learn More" : "Try Demo"}
-                    <ChevronRight className="ml-2 w-4 h-4" />
-                  </Button>
+                  {index === 0 ? (
+                    <Link href="/dashboard/files-hub">
+                      <Button 
+                        data-testid={`step-cta-${index}`} 
+                        variant="outline" 
+                        className="mt-4 border-indigo-300 text-indigo-600 hover:bg-indigo-50"
+                      >
+                        Try Upload Demo
+                        <ChevronRight className="ml-2 w-4 h-4" />
+                      </Button>
+                    </Link>
+                  ) : index === 1 ? (
+                    <Link href="/dashboard/collaboration">
+                      <Button 
+                        data-testid={`step-cta-${index}`} 
+                        variant="outline" 
+                        className="mt-4 border-indigo-300 text-indigo-600 hover:bg-indigo-50"
+                      >
+                        Try Collaboration Demo
+                        <ChevronRight className="ml-2 w-4 h-4" />
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link href="/dashboard/escrow">
+                      <Button 
+                        data-testid={`step-cta-${index}`} 
+                        variant="outline" 
+                        className="mt-4 border-indigo-300 text-indigo-600 hover:bg-indigo-50"
+                      >
+                        Try Payment Demo
+                        <ChevronRight className="ml-2 w-4 h-4" />
+                      </Button>
+                    </Link>
+                  )}
                 </div>
                 
                 <div className="flex-1">
-                  <div 
-                    data-testid={`step-demo-${index}`} 
-                    className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-8 aspect-video flex items-center justify-center cursor-pointer hover:from-indigo-200 hover:to-purple-200 transition-all duration-300 group"
-                    onClick={() => setIsDemoOpen(true)}
-                  >
-                    <div className="text-center">
-                      <IconComponent className="w-20 h-20 mx-auto mb-4 text-indigo-600 group-hover:scale-110 transition-transform duration-300" />
-                      <p className="text-indigo-600 font-medium group-hover:text-indigo-700">Interactive Demo</p>
-                      <p className="text-indigo-500 text-sm mt-2 opacity-75">Click to try</p>
+                  <Link href={index === 0 ? "/dashboard/files-hub" : index === 1 ? "/dashboard/collaboration" : "/dashboard/escrow"}>
+                    <div 
+                      data-testid={`step-demo-${index}`} 
+                      className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-8 aspect-video flex items-center justify-center cursor-pointer hover:from-indigo-200 hover:to-purple-200 transition-all duration-300 group"
+                    >
+                      <div className="text-center">
+                        <IconComponent className="w-20 h-20 mx-auto mb-4 text-indigo-600 group-hover:scale-110 transition-transform duration-300" />
+                        <p className="text-indigo-600 font-medium group-hover:text-indigo-700">Interactive Demo</p>
+                        <p className="text-indigo-500 text-sm mt-2 opacity-75">Click to try</p>
+                      </div>
                     </div>
-                  </div>
+                  </Link>
                 </div>
               </div>
             )
@@ -624,6 +805,94 @@ function PricingSection() {
   )
 }
 
+// Newsletter Subscription Section
+function NewsletterSection() {
+  const [email, setEmail] = useState('')
+  const [isSubscribed, setIsSubscribed] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email) return
+
+    setIsLoading(true)
+    
+    try {
+      // Simulate API call - replace with actual newsletter API
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      setIsSubscribed(true)
+      setEmail('')
+    } catch (error) {
+      console.error('Newsletter subscription failed:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <section className="py-20 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-12 border border-white/20">
+          <h2 className="text-4xl font-bold text-white mb-6">
+            Stay Updated with FreeflowZee
+          </h2>
+          <p className="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
+            Get the latest updates, tips, and exclusive features delivered to your inbox. 
+            Join thousands of creators already in the loop.
+          </p>
+
+          {isSubscribed ? (
+            <div className="bg-green-500/20 border border-green-400/30 rounded-xl p-6">
+              <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">Welcome to the Community!</h3>
+              <p className="text-green-100">Check your email for a welcome message and exclusive tips.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubscribe} className="max-w-md mx-auto">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Input
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="flex-1 bg-white/20 border-white/30 text-white placeholder:text-white/70 focus:border-white/50"
+                  required
+                />
+                <Button 
+                  type="submit" 
+                  disabled={isLoading}
+                  className="bg-white text-indigo-900 hover:bg-gray-100 px-6 py-3 font-semibold whitespace-nowrap"
+                >
+                  {isLoading ? 'Subscribing...' : 'Subscribe'}
+                </Button>
+              </div>
+              <p className="text-sm text-purple-200 mt-4">
+                No spam, unsubscribe at any time. We respect your privacy.
+              </p>
+            </form>
+          )}
+
+          {/* Social Proof */}
+          <div className="mt-8 flex items-center justify-center space-x-8 text-purple-200">
+            <div className="flex items-center">
+              <Users className="w-5 h-5 mr-2" />
+              <span className="text-sm">12,000+ Subscribers</span>
+            </div>
+            <div className="flex items-center">
+              <Mail className="w-5 h-5 mr-2" />
+              <span className="text-sm">Weekly Updates</span>
+            </div>
+            <div className="flex items-center">
+              <Star className="w-5 h-5 mr-2" />
+              <span className="text-sm">Exclusive Content</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // CTA section with proper button colors
 function CTASection() {
   return (
@@ -663,11 +932,13 @@ export default function LandingPage() {
         <VerificationReminder />
       </Suspense>
       <HeroSection />
+      <UserTypesSection />
       <FeaturesSection />
       <InteractiveFeaturesSection />
       <HowItWorksSection />
       <SocialProofSection />
       <PricingSection />
+      <NewsletterSection />
       <CTASection />
       <SiteFooter />
     </div>
