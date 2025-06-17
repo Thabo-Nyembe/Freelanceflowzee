@@ -1621,3 +1621,70 @@ select:focus {
 .z-sidebar {
   z-index: 30;
 }
+
+/* ===================================== */
+/* COMPREHENSIVE BLACK BACKGROUND ELIMINATION */
+/* ===================================== */
+
+/* Force override all black backgrounds globally */
+*[class*="bg-black"] {
+  background: white !important;
+  color: var(--purple-700) !important;
+  border: 2px solid var(--purple-200) !important;
+}
+
+/* Force override all dark gray backgrounds */
+*[class*="bg-gray-900"], 
+*[class*="bg-slate-900"],
+*[class*="bg-neutral-900"],
+*[class*="bg-zinc-900"] {
+  background: white !important;
+  color: var(--purple-700) !important;
+  border: 2px solid var(--purple-200) !important;
+}
+
+/* Modal overlays - force white backgrounds */
+*[class*="bg-black/50"],
+*[class*="bg-black/60"], 
+*[class*="bg-black/70"],
+*[class*="bg-black/80"],
+*[class*="bg-black/90"] {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* Text visibility improvements */
+.text-white {
+  color: white !important;
+}
+
+/* Ensure tooltips are visible */
+[role="tooltip"] {
+  background: white !important;
+  color: var(--purple-700) !important;
+  border: 2px solid var(--purple-200) !important;
+  box-shadow: 0 4px 20px rgba(147, 51, 234, 0.1) !important;
+}
+
+/* Force code blocks to have proper backgrounds */
+pre, code {
+  background: white !important;
+  color: var(--purple-700) !important;
+  border: 2px solid var(--purple-200) !important;
+}
+
+/* Ensure all buttons have proper contrast */
+button[class*="bg-black"],
+button[class*="bg-gray-900"],
+.btn-dark {
+  background: var(--purple-600) !important;
+  color: white !important;
+  border: 2px solid var(--purple-700) !important;
+}
+
+button[class*="bg-black"]:hover,
+button[class*="bg-gray-900"]:hover,
+.btn-dark:hover {
+  background: var(--purple-700) !important;
+  color: white !important;
+}

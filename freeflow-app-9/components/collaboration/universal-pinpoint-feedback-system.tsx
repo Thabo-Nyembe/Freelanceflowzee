@@ -746,7 +746,7 @@ export function UniversalPinpointFeedbackSystem({
 
                 {/* 💻 Code Viewer */}
                 {state.activeFile.type === 'code' && (
-                  <div className="bg-slate-900 rounded-lg p-4 font-mono text-sm overflow-auto max-h-96">
+                  <div className="bg-white border-2 border-purple-200 rounded-lg p-4 font-mono text-sm overflow-auto max-h-96">
                     {/* Mock Code with Line Numbers */}
                     {Array.from({ length: 50 }, (_, i) => i + 1).map((lineNumber) => (
                       <div

@@ -586,7 +586,7 @@ export default function CommunityPage() {
                           {media.type === 'carousel' && (
                             <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 relative">
                               <div className="w-full h-full bg-gradient-to-br from-emerald-100 via-blue-100 to-violet-100"></div>
-                              <div className="absolute top-4 right-4 bg-black/50 text-white text-sm px-2 py-1 rounded-full">
+                              <div className="absolute top-4 right-4 bg-purple-600/90 backdrop-blur-sm text-white text-sm px-2 py-1 rounded-full">
                                 1 / {media.urls.length}
                               </div>
                             </div>
@@ -601,7 +601,7 @@ export default function CommunityPage() {
                                 </Button>
                               </div>
                               {media.duration && (
-                                <div className="absolute bottom-4 right-4 bg-black/70 text-white text-sm px-2 py-1 rounded">
+                                <div className="absolute bottom-4 right-4 bg-purple-600/90 backdrop-blur-sm text-white text-sm px-2 py-1 rounded">
                                   {Math.floor(media.duration / 60)}:{(media.duration % 60).toString().padStart(2, '0')}
                                 </div>
                               )}

@@ -431,7 +431,7 @@ const EnhancedCommunityHub = () => {
                   </div>
                   <p className="text-sm opacity-80">Video Content • {post.duration}</p>
                 </div>
-                <div className="absolute top-3 right-3 bg-black/50 px-2 py-1 rounded text-white text-xs">
+                <div className="absolute top-3 right-3 bg-purple-600/90 backdrop-blur-sm px-2 py-1 rounded text-white text-xs">
                   {post.duration}
                 </div>
               </div>
@@ -445,7 +445,7 @@ const EnhancedCommunityHub = () => {
                     <p className="text-sm opacity-80">Carousel {currentSlide + 1}/{post.mediaUrls?.length || 4}</p>
                   </div>
                 </div>
-                <div className="absolute top-3 right-3 bg-black/50 px-2 py-1 rounded text-white text-xs">
+                <div className="absolute top-3 right-3 bg-purple-600/90 backdrop-blur-sm px-2 py-1 rounded text-white text-xs">
                   {currentSlide + 1}/{post.mediaUrls?.length || 4}
                 </div>
                 <div className="absolute bottom-3 left-3 right-3 flex gap-1 justify-center">

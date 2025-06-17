@@ -357,7 +357,7 @@ const CodePreview = () => {
   ]
   
   return (
-    <div className="bg-slate-900 rounded-lg overflow-hidden">
+    <div className="bg-white border-2 border-purple-200 rounded-lg overflow-hidden">
       <div className="bg-slate-800 px-4 py-2 flex items-center gap-2">
         <div className="w-3 h-3 bg-red-500 rounded-full"></div>
         <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>

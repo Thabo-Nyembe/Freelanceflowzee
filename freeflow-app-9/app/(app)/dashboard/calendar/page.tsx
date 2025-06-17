@@ -418,7 +418,7 @@ export default function CalendarPage() {
 
       {/* Event Details Modal Placeholder */}
       {showEventModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-white/95 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <Card className="w-full max-w-md">
             <CardHeader>
               <div className="flex items-center justify-between">

@@ -332,7 +332,7 @@ export default function PricingPage() {
                   <Button 
                     className={`w-full mb-6 ${
                       plan.popular 
-                        ? 'bg-indigo-600 hover:bg-indigo-700' 
+                        ? 'bg-purple-600 hover:bg-purple-700 text-white' 
                         : 'bg-gray-900 hover:bg-gray-800'
                     }`}
                     asChild

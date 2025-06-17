@@ -457,7 +457,7 @@ export default function UniversalMediaPreviewsEnhanced() {
                   </div>
                 </div>
                 
-                <div className="border rounded-lg bg-white">
+                <div className="border rounded-lg bg-white border-purple-200 text-gray-900 overflow-hidden">
                   <div className="aspect-[8.5/11] p-8 bg-white text-gray-900">
                     <div className="space-y-6">
                       <div className="text-center border-b pb-4">
@@ -535,7 +535,7 @@ export default function UniversalMediaPreviewsEnhanced() {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">{selectedFile.name}</h3>
                 
-                <div className="border rounded-lg bg-gray-900 text-gray-100 overflow-hidden">
+                <div className="border rounded-lg bg-white border-purple-200 text-gray-900 overflow-hidden">
                   <div className="bg-gray-800 px-4 py-2 border-b border-gray-700 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="flex gap-1">

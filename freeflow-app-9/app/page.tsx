@@ -626,7 +626,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 
-                <Button className="w-full mb-6 bg-gray-900 hover:bg-gray-800" asChild>
+                <Button className="w-full mb-6 bg-purple-600 hover:bg-purple-700 text-white" asChild>
                   <Link href="/signup">
                     Start Free
                     <ArrowRight className="ml-2 w-4 h-4" />

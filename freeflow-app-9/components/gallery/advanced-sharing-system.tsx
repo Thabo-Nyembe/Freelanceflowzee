@@ -466,28 +466,18 @@ export function AdvancedGallerySharingSystem({
                 />
                 
                 {/* Overlay controls */}
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => setLightboxItem(item)}
-                  >
-                    <Eye className="h-4 w-4" />
+                <div className="absolute inset-0 bg-purple-100/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
+                  <Button size="sm" variant="secondary" className="bg-white/90 backdrop-blur-sm">
+                    <Eye className="w-4 h-4" />
                   </Button>
-                  
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => handleLike(item.id)}
-                  >
-                    <Heart className="h-4 w-4" />
+                  <Button size="sm" variant="secondary" className="bg-white/90 backdrop-blur-sm">
+                    <Heart className="w-4 h-4" />
                   </Button>
-                  
                   {settings.allowDownloads && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button size="sm" variant="secondary">
-                          <Download className="h-4 w-4" />
+                          <Download className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
@@ -772,7 +762,7 @@ export function AdvancedGallerySharingSystem({
                 variant="ghost"
                 size="sm"
                 onClick={() => setLightboxItem(null)}
-                className="absolute top-2 right-2 bg-black/50 text-white hover:bg-black/70"
+                className="absolute top-2 right-2 bg-purple-600/90 text-white hover:bg-purple-700/90 backdrop-blur-sm"
               >
                 <X className="h-4 w-4" />
               </Button>

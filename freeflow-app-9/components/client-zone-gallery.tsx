@@ -679,7 +679,7 @@ export function ClientZoneGallery() {
                         {allItems.map((item, index) => (
                           <div 
                             key={item.id}
-                            className="group relative aspect-square bg-gray-900 rounded-lg overflow-hidden cursor-pointer"
+                            className="group relative aspect-square bg-white border-2 border-purple-200 rounded-lg overflow-hidden cursor-pointer"
                             onClick={() => dispatch({ type: 'TOGGLE_LIGHTBOX', payload: { open: true, index } })}
                           >
                             <img 
