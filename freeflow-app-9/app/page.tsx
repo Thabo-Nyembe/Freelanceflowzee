@@ -157,19 +157,18 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
               <Button 
                 size="lg" 
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 group"
+                className="bg-purple-600 hover:bg-purple-700 px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
                 asChild
               >
-                <Link href="/signup">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <Link href="/login?redirect=/dashboard">
+                  Creator Login
                 </Link>
               </Button>
               
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="border-2 border-gray-300 hover:border-purple-500 px-8 py-4 text-lg font-semibold hover:bg-purple-50 transition-all duration-300 group"
+                className="border-purple-200 hover:border-purple-400 px-8 py-4 text-lg font-semibold hover:bg-purple-50 transition-all duration-300 group"
                 asChild
               >
                 <Link href="/demo">
@@ -179,13 +178,12 @@ export default function HomePage() {
               </Button>
               
               <Button 
-                variant="ghost" 
-                size="lg" 
-                className="text-gray-600 hover:text-purple-600 px-8 py-4 text-lg font-semibold hover:bg-white/50 transition-all duration-300"
+                size="lg"
+                className="bg-purple-600 hover:bg-purple-700 px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
                 asChild
               >
-                <Link href="/projects/demo">
-                  View Sample Project
+                <Link href="/projects">
+                  View Projects
                 </Link>
               </Button>
             </div>
