@@ -115,7 +115,7 @@ const structuredData = {
   "applicationCategory": "BusinessApplication"
 }
 
-export default function HomePage() {
+export default function LandingPage() {
   const [isDemoOpen, setIsDemoOpen] = useState(false)
 
   return (
