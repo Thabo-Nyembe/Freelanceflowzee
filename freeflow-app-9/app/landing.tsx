@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DemoModal } from '@/components/demo-modal'
 import { SiteHeader } from '@/components/navigation/site-header'
@@ -38,7 +38,11 @@ import {
   Smartphone,
   Sparkles,
   ChevronRight,
-  Quote
+  Quote,
+  CreditCard,
+  ImageIcon,
+  MessageCircle,
+  Check
 } from 'lucide-react'
 
 // Hero section with animated gradient background
@@ -88,17 +92,16 @@ function HeroSection() {
               </Button>
             </Link>
             
-            <Link href="/demo">
-              <Button 
-                data-testid="hero-cta-demo" 
-                size="lg" 
-                variant="outline" 
-                className="border-2 border-gray-300 hover:border-indigo-300 px-8 py-4 text-lg font-semibold rounded-xl backdrop-blur-sm bg-white/80"
-              >
-                <Play className="mr-2 w-5 h-5" />
-                Try Demo
-              </Button>
-            </Link>
+            <Button 
+              data-testid="hero-cta-demo" 
+              size="lg" 
+              variant="outline" 
+              className="border-2 border-gray-300 hover:border-indigo-300 px-8 py-4 text-lg font-semibold rounded-xl backdrop-blur-sm bg-white/80"
+              onClick={() => setIsDemoOpen(true)}
+            >
+              <Play className="mr-2 w-5 h-5" />
+              Try Demo
+            </Button>
           </div>
 
           {/* Social proof */}
@@ -133,44 +136,44 @@ function HeroSection() {
   )
 }
 
-// Features section inspired by WeTransfer's simplicity
+// Features section with working buttons and proper styling
 function FeaturesSection() {
   const features = [
     {
       icon: Upload,
-      title: "Upload Anything",
-      description: "Share files up to 10GB with lightning-fast uploads. Support for all major file types.",
-      color: "from-blue-500 to-indigo-600"
+      title: "Smart Upload System",
+      description: "Drag and drop any file type. Our AI organizes everything automatically with smart previews and version control.",
+      highlight: "AI-Powered"
     },
     {
       icon: Users,
-      title: "Client Collaboration",
-      description: "Real-time feedback, comments, and approvals. Keep everyone in sync.",
-      color: "from-purple-500 to-pink-600"
+      title: "Real-time Collaboration",
+      description: "Work together seamlessly with live editing, visual feedback, and instant notifications for team projects.",
+      highlight: "Live Editing"
     },
     {
       icon: DollarSign,
-      title: "Get Paid Fast",
-      description: "Automated invoicing and payment processing. Get paid in days, not months.",
-      color: "from-green-500 to-emerald-600"
+      title: "Instant Payments",
+      description: "Get paid faster with automated invoicing, secure payment processing, and real-time transaction tracking.",
+      highlight: "24hr Payouts"
     },
     {
       icon: Shield,
       title: "Enterprise Security",
-      description: "Bank-level encryption and compliance. Your work is always protected.",
-      color: "from-red-500 to-pink-600"
+      description: "Bank-level encryption, SOC 2 compliance, and advanced permission controls protect your creative assets.",
+      highlight: "SOC 2 Certified"
     },
     {
       icon: BarChart3,
-      title: "Analytics & Insights",
-      description: "Track engagement, monitor performance, and optimize your workflow.",
-      color: "from-yellow-500 to-orange-600"
+      title: "Analytics Dashboard",
+      description: "Track project performance, client engagement, and revenue with comprehensive insights and reporting.",
+      highlight: "Deep Insights"
     },
     {
       icon: Zap,
-      title: "Lightning Fast",
-      description: "Built for speed. Upload, share, and collaborate without waiting.",
-      color: "from-indigo-500 to-purple-600"
+      title: "Lightning Performance",
+      description: "Optimized for speed with CDN delivery, smart caching, and instant file access from anywhere in the world.",
+      highlight: "Global CDN"
     }
   ]
 
@@ -191,48 +194,133 @@ function FeaturesSection() {
           {features.map((feature, index) => {
             const IconComponent = feature.icon
             return (
-              <Link key={index} href="/features">
-                <Card data-testid={`feature-card-${index}`} className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50 cursor-pointer">
-                  <CardContent className="p-8">
-                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                      <IconComponent className="w-7 h-7 text-white" />
-                    </div>
-                    <h3 data-testid={`feature-title-${index}`} className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                    <p data-testid={`feature-description-${index}`} className="text-gray-600 leading-relaxed">{feature.description}</p>
-                  </CardContent>
-                </Card>
-              </Link>
+              <Card key={index} data-testid={`feature-${index}`} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 group hover:scale-[1.02]">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <IconComponent className="w-8 h-8 text-white" />
+                  </div>
+                  <Badge data-testid={`feature-highlight-${index}`} variant="secondary" className="mb-4 bg-indigo-100 text-indigo-700">
+                    {feature.highlight}
+                  </Badge>
+                  <h3 data-testid={`feature-title-${index}`} className="text-xl font-bold text-gray-900 mb-4">{feature.title}</h3>
+                  <p data-testid={`feature-description-${index}`} className="text-gray-600 leading-relaxed">{feature.description}</p>
+                </CardContent>
+              </Card>
             )
           })}
+        </div>
+        
+        {/* Features CTA */}
+        <div className="text-center mt-16">
+          <Link href="/features">
+            <Button size="lg" variant="outline" className="px-8 py-4 border-indigo-300 text-indigo-600 hover:bg-indigo-50">
+              Explore All Features
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
   )
 }
 
-// How it works section with step-by-step breakdown
+// Interactive Features Section with working tabs
+function InteractiveFeaturesSection() {
+  return (
+    <section className="py-24 bg-gradient-to-br from-slate-50 to-blue-50">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">Interactive Features</h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">Experience the full power of FreeflowZee with our interactive gallery, client feedback system, and comprehensive finance hub.</p>
+        </div>
+        <Tabs defaultValue="gallery" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsTrigger value="gallery" className="flex items-center gap-2"><ImageIcon className="h-4 w-4" />Gallery Showcase</TabsTrigger>
+            <TabsTrigger value="feedback" className="flex items-center gap-2"><MessageCircle className="h-4 w-4" />Client Feedback</TabsTrigger>
+            <TabsTrigger value="finance" className="flex items-center gap-2"><CreditCard className="h-4 w-4" />Finance Hub</TabsTrigger>
+          </TabsList>
+          <TabsContent value="gallery">
+            <Card className="border-0 shadow-xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ImageIcon className="h-5 w-5" />
+                  Project Gallery & Showcase
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg p-8 text-center">
+                  <Camera className="w-16 h-16 mx-auto mb-4 text-indigo-600" />
+                  <h3 className="text-xl font-semibold mb-2">Interactive Gallery Demo</h3>
+                  <p className="text-gray-600">Showcase your work with beautiful galleries, custom layouts, and client-friendly viewing options.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="feedback">
+            <Card className="border-0 shadow-xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5" />
+                  Real-time Client Feedback
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg p-8 text-center">
+                  <MessageSquare className="w-16 h-16 mx-auto mb-4 text-green-600" />
+                  <h3 className="text-xl font-semibold mb-2">Live Feedback System</h3>
+                  <p className="text-gray-600">Get instant feedback with visual annotations, threaded comments, and approval workflows.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="finance">
+            <Card className="border-0 shadow-xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  Financial Management Hub
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-lg p-8 text-center">
+                  <DollarSign className="w-16 h-16 mx-auto mb-4 text-orange-600" />
+                  <h3 className="text-xl font-semibold mb-2">Complete Finance Suite</h3>
+                  <p className="text-gray-600">Manage invoices, track payments, and monitor your financial health with detailed analytics.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </section>
+  )
+}
+
+// How it works section with working demo buttons
 function HowItWorksSection() {
+  const [isDemoOpen, setIsDemoOpen] = useState(false)
+  
   const steps = [
     {
       number: "01",
       title: "Upload Your Work",
-      description: "Drag and drop files, folders, or entire projects. Our AI automatically organizes everything.",
+      description: "Drag and drop files, folders, or entire projects. We handle the rest.",
       icon: Upload,
-      features: ["Bulk upload", "Auto-organization", "Version control", "Smart previews"]
+      image: "/demo-upload.jpg"
     },
     {
       number: "02", 
       title: "Collaborate & Get Feedback",
-      description: "Share with clients, collect feedback, and iterate. Real-time comments and approvals.",
+      description: "Share with clients, get real-time feedback, and make revisions together.",
       icon: MessageSquare,
-      features: ["Real-time feedback", "Visual annotations", "Approval workflows", "Version tracking"]
+      image: "/demo-feedback.jpg"
     },
     {
       number: "03",
       title: "Deliver & Get Paid",
-      description: "Finalize deliverables and get paid instantly. Automated invoicing and secure payments.",
-      icon: DollarSign,
-      features: ["Auto invoicing", "Instant payments", "Client portal", "Payment tracking"]
+      description: "Send final deliverables and receive payment automatically.",
+      icon: Award,
+      image: "/demo-payment.jpg"
     }
   ]
 
@@ -244,42 +332,47 @@ function HowItWorksSection() {
             How it works
           </h2>
           <p data-testid="how-it-works-subtitle" className="text-xl text-gray-600 max-w-3xl mx-auto">
-            From upload to payment in three simple steps. We've streamlined every part of the creative workflow.
+            Three simple steps to transform your creative workflow
           </p>
         </div>
 
-        <div className="space-y-20">
+        <div data-testid="workflow-steps-container" className="space-y-20">
           {steps.map((step, index) => {
             const IconComponent = step.icon
             const isEven = index % 2 === 0
             
             return (
-              <div key={index} className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-12 lg:gap-20`}>
+              <div key={index} data-testid={`workflow-step-${index}`} className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-12 lg:gap-20`}>
                 <div className="flex-1 space-y-6">
                   <div className="flex items-center gap-4">
-                    <span className="text-6xl font-bold text-indigo-600/20">{step.number}</span>
+                    <span data-testid={`step-number-${index}`} className="text-6xl font-bold text-indigo-600/20">{step.number}</span>
                     <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center">
                       <IconComponent className="w-6 h-6 text-white" />
                     </div>
                   </div>
-                  <h3 className="text-3xl font-bold text-gray-900">{step.title}</h3>
-                  <p className="text-xl text-gray-600 leading-relaxed">{step.description}</p>
-                  
-                  <div className="grid grid-cols-2 gap-3">
-                    {step.features.map((feature, featureIndex) => (
-                      <div key={featureIndex} className="flex items-center text-sm text-gray-600">
-                        <CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
-                        {feature}
-                      </div>
-                    ))}
-                  </div>
+                  <h3 data-testid={`step-title-${index}`} className="text-3xl font-bold text-gray-900">{step.title}</h3>
+                  <p data-testid={`step-description-${index}`} className="text-xl text-gray-600 leading-relaxed">{step.description}</p>
+                  <Button 
+                    data-testid={`step-cta-${index}`} 
+                    variant="outline" 
+                    className="mt-4 border-indigo-300 text-indigo-600 hover:bg-indigo-50"
+                    onClick={() => setIsDemoOpen(true)}
+                  >
+                    {index === 0 ? "Learn More" : "Try Demo"}
+                    <ChevronRight className="ml-2 w-4 h-4" />
+                  </Button>
                 </div>
                 
                 <div className="flex-1">
-                  <div className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-8 aspect-video flex items-center justify-center">
+                  <div 
+                    data-testid={`step-demo-${index}`} 
+                    className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-8 aspect-video flex items-center justify-center cursor-pointer hover:from-indigo-200 hover:to-purple-200 transition-all duration-300 group"
+                    onClick={() => setIsDemoOpen(true)}
+                  >
                     <div className="text-center">
-                      <IconComponent className="w-20 h-20 mx-auto mb-4 text-indigo-600" />
-                      <p className="text-indigo-600 font-medium">Interactive Demo</p>
+                      <IconComponent className="w-20 h-20 mx-auto mb-4 text-indigo-600 group-hover:scale-110 transition-transform duration-300" />
+                      <p className="text-indigo-600 font-medium group-hover:text-indigo-700">Interactive Demo</p>
+                      <p className="text-indigo-500 text-sm mt-2 opacity-75">Click to try</p>
                     </div>
                   </div>
                 </div>
@@ -287,74 +380,89 @@ function HowItWorksSection() {
             )
           })}
         </div>
+        
+        {/* How It Works CTA */}
+        <div className="text-center mt-16">
+          <Link href="/how-it-works">
+            <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4">
+              See Complete Process
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </Link>
+        </div>
       </div>
+      
+      {/* Demo Modal */}
+      <DemoModal 
+        isOpen={isDemoOpen} 
+        onClose={() => setIsDemoOpen(false)} 
+      />
     </section>
   )
 }
 
-// Social proof section with stats and testimonials
+// Social proof section with proper colors
 function SocialProofSection() {
-  const stats = [
-    { number: "50K+", label: "Active Creators", growth: "+23% this month" },
-    { number: "2M+", label: "Files Shared", growth: "Secure & organized" },
-    { number: "$10M+", label: "Paid to Creators", growth: "24hr processing" },
-    { number: "99.9%", label: "Uptime", growth: "Enterprise SLA" }
-  ]
-
   const testimonials = [
     {
-      quote: "FreeflowZee transformed how I work with clients. The feedback system alone saved me 10 hours per project.",
+      quote: "FreeflowZee transformed how I work with clients. Projects that used to take weeks now take days.",
       author: "Sarah Chen",
       role: "UI/UX Designer",
-      company: "Freelance",
-      avatar: "/avatars/sarah-chen.jpg",
+      company: "Design Studio Co.",
+      avatar: "/avatars/sarah.jpg",
       rating: 5
     },
     {
-      quote: "Getting paid used to take weeks. Now it's instant. This platform is a game-changer for freelancers.",
-      author: "Marcus Rodriguez",
-      role: "Video Producer",
-      company: "Motion Studio",
+      quote: "The payment system is a game-changer. I get paid faster and can focus on what I love - creating.",
+      author: "Marcus Johnson",
+      role: "Freelance Developer", 
+      company: "CodeCraft LLC",
       avatar: "/avatars/marcus.jpg",
       rating: 5
     },
     {
-      quote: "The collaboration features are incredible. Clients love how easy it is to review and approve work.",
-      author: "Emily Johnson",
-      role: "Graphic Designer",
-      company: "Creative Co.",
-      avatar: "/avatars/emily.jpg",
+      quote: "Client collaboration has never been this smooth. Everyone knows exactly what's needed.",
+      author: "Elena Rodriguez",
+      role: "Brand Designer",
+      company: "Creative Minds",
+      avatar: "/avatars/elena.jpg", 
       rating: 5
     }
   ]
 
+  const stats = [
+    { number: "50K+", label: "Active Creators" },
+    { number: "2M+", label: "Files Shared" },
+    { number: "$10M+", label: "Paid to Creators" },
+    { number: "99.9%", label: "Uptime" }
+  ]
+
   return (
-    <section data-testid="social-proof-section" className="py-24 bg-white">
+    <section id="testimonials" data-testid="social-proof-section" className="py-24 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+        <div data-testid="statistics-grid" className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
           {stats.map((stat, index) => (
-            <div key={index} className="text-center">
-              <div className="text-4xl lg:text-5xl font-bold text-indigo-600 mb-2">{stat.number}</div>
-              <div className="text-gray-900 font-semibold mb-1">{stat.label}</div>
-              <div className="text-sm text-gray-500">{stat.growth}</div>
+            <div key={index} data-testid={`statistic-${index}`} className="text-center">
+              <div data-testid={`stat-number-${index}`} className="text-4xl lg:text-5xl font-bold text-indigo-600 mb-2">{stat.number}</div>
+              <div data-testid={`stat-label-${index}`} className="text-gray-600 font-medium">{stat.label}</div>
             </div>
           ))}
         </div>
 
         {/* Testimonials */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+          <h2 data-testid="testimonials-title" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
             Loved by creators worldwide
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Join thousands of creative professionals who've transformed their workflow
+          <p data-testid="testimonials-subtitle" className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Join thousands of creatives who've transformed their workflow
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div data-testid="testimonials-grid" className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
-            <Card key={index} className="border-0 shadow-lg">
+            <Card key={index} data-testid={`testimonial-${index}`} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white">
               <CardContent className="p-8">
                 <div className="flex mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
@@ -362,113 +470,136 @@ function SocialProofSection() {
                   ))}
                 </div>
                 <Quote className="w-8 h-8 text-indigo-600/20 mb-4" />
-                <p className="text-gray-700 mb-6 leading-relaxed italic">"{testimonial.quote}"</p>
+                <p data-testid={`testimonial-quote-${index}`} className="text-gray-700 mb-6 leading-relaxed italic">
+                  "{testimonial.quote}"
+                </p>
                 <div className="flex items-center">
-                  <div className="w-12 h-12 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full mr-4 flex items-center justify-center text-white font-semibold">
-                    {testimonial.author.split(' ').map(n => n[0]).join('')}
-                  </div>
+                  <div className="w-12 h-12 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full mr-4"></div>
                   <div>
-                    <div className="font-semibold text-gray-900">{testimonial.author}</div>
-                    <div className="text-sm text-gray-600">{testimonial.role}</div>
+                    <div data-testid={`testimonial-author-${index}`} className="font-semibold text-gray-900">{testimonial.author}</div>
+                    <div data-testid={`testimonial-role-${index}`} className="text-sm text-gray-600">{testimonial.role}, {testimonial.company}</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
+        
+        {/* Testimonials CTA */}
+        <div className="text-center mt-16">
+          <Link href="/community">
+            <Button size="lg" variant="outline" className="px-8 py-4 border-indigo-300 text-indigo-600 hover:bg-indigo-50">
+              Join Our Community
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </Link>
+        </div>
       </div>
     </section>
   )
 }
 
-// Pricing section with clear value propositions
+// Pricing section with proper styling
 function PricingSection() {
   const plans = [
     {
       name: "Starter",
-      price: "Free",
+      price: "$0",
       period: "forever",
-      description: "Perfect for trying out the platform",
+      description: "Perfect for trying out FreeflowZee",
       features: [
         "Up to 3 projects",
-        "Basic file sharing",
+        "1GB storage",
+        "Basic client sharing",
         "Email support",
-        "5GB storage"
+        "Standard templates"
       ],
-      cta: "Start Free",
-      popular: false
+      cta: "Get Started Free",
+      highlight: false
     },
     {
       name: "Professional",
       price: "$29",
-      period: "per month",
-      description: "Everything freelancers need to scale",
+      period: "month",
+      description: "Best for freelancers and small agencies",
       features: [
         "Unlimited projects",
-        "Advanced collaboration",
-        "Priority support",
         "100GB storage",
+        "Advanced collaboration",
+        "Priority support", 
         "Custom branding",
+        "Payment processing",
         "Analytics dashboard"
       ],
       cta: "Start Free Trial",
-      popular: true
+      highlight: true
     },
     {
-      name: "Agency",
+      name: "Enterprise",
       price: "$99",
-      period: "per month",
-      description: "For teams and growing agencies",
+      period: "month",
+      description: "For teams and large organizations",
       features: [
         "Everything in Professional",
-        "Team collaboration",
-        "Advanced analytics",
-        "White-label solution",
         "1TB storage",
-        "Priority support"
+        "Team management",
+        "API access",
+        "Advanced security",
+        "Dedicated support",
+        "Custom integrations"
       ],
       cta: "Contact Sales",
-      popular: false
+      highlight: false
     }
   ]
 
   return (
-    <section id="pricing" data-testid="pricing-section" className="py-24 bg-gradient-to-b from-gray-50 to-white">
+    <section id="pricing" data-testid="pricing-section" className="py-24 bg-gradient-to-b from-white to-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-20">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+          <h2 data-testid="pricing-title" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
             Simple, transparent pricing
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Choose the plan that fits your needs. All plans include our core features with no hidden fees.
+          <p data-testid="pricing-subtitle" className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Choose the plan that fits your needs. Start free, upgrade anytime.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div data-testid="pricing-grid" className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {plans.map((plan, index) => (
-            <Card key={index} className={`relative ${plan.popular ? 'border-indigo-500 shadow-xl scale-105' : 'border-gray-200'} transition-all duration-300 hover:shadow-lg`}>
-              {plan.popular && (
-                <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-indigo-600 text-white px-4 py-1">
-                  Most Popular
-                </Badge>
-              )}
-              <CardHeader className="text-center pb-8">
-                <CardTitle className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</CardTitle>
-                <div className="mb-4">
-                  <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
-                  {plan.period !== "forever" && <span className="text-gray-600 ml-2">{plan.period}</span>}
+            <Card 
+              key={index} 
+              data-testid={`pricing-plan-${index}`} 
+              className={`relative border-2 ${plan.highlight ? 'border-indigo-500 shadow-xl scale-105' : 'border-gray-200'} hover:shadow-lg transition-all duration-300`}
+            >
+              {plan.highlight && (
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-indigo-600 text-white px-6 py-1">Most Popular</Badge>
                 </div>
-                <p className="text-gray-600">{plan.description}</p>
+              )}
+              
+              <CardHeader className="text-center pb-8">
+                <CardTitle data-testid={`plan-name-${index}`} className="text-2xl font-bold text-gray-900">{plan.name}</CardTitle>
+                <div className="mt-4">
+                  <span data-testid={`plan-price-${index}`} className="text-5xl font-bold text-gray-900">{plan.price}</span>
+                  <span data-testid={`plan-period-${index}`} className="text-gray-600">/{plan.period}</span>
+                </div>
+                <CardDescription data-testid={`plan-description-${index}`} className="text-lg mt-4">{plan.description}</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {plan.features.map((feature, featureIndex) => (
-                  <div key={featureIndex} className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
-                    <span className="text-gray-700">{feature}</span>
-                  </div>
-                ))}
+              
+              <CardContent>
+                <ul className="space-y-4 mb-8">
+                  {plan.features.map((feature, featureIndex) => (
+                    <li key={featureIndex} data-testid={`plan-feature-${index}-${featureIndex}`} className="flex items-center">
+                      <Check className="w-5 h-5 text-green-500 mr-3" />
+                      <span className="text-gray-700">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                
                 <Button 
-                  className={`w-full mt-8 ${plan.popular ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-900'}`}
+                  data-testid={`plan-cta-${index}`}
+                  className={`w-full ${plan.highlight ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-900 hover:bg-gray-800'}`}
                   size="lg"
                 >
                   {plan.cta}
@@ -477,11 +608,15 @@ function PricingSection() {
             </Card>
           ))}
         </div>
-
-        <div className="text-center mt-12">
-          <p className="text-gray-600 mb-4">All plans include 14-day free trial • No credit card required</p>
-          <Link href="/contact" className="text-indigo-600 hover:text-indigo-700 font-medium">
-            Need a custom plan? Contact us →
+        
+        {/* Pricing FAQ */}
+        <div className="text-center mt-16">
+          <p className="text-gray-600 mb-4">Questions about pricing?</p>
+          <Link href="/pricing">
+            <Button variant="outline" size="lg" className="border-indigo-300 text-indigo-600 hover:bg-indigo-50">
+              View Detailed Pricing
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
           </Link>
         </div>
       </div>
@@ -489,48 +624,31 @@ function PricingSection() {
   )
 }
 
-// Final CTA section with strong conversion focus
+// CTA section with proper button colors
 function CTASection() {
   return (
-    <section className="py-24 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden">
-      <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
-      </div>
-
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
-          Ready to transform your 
-          <span className="block text-yellow-300">creative workflow?</span>
+    <section data-testid="cta-section" className="py-24 bg-gradient-to-r from-indigo-600 to-purple-600">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 data-testid="cta-title" className="text-4xl sm:text-5xl font-bold text-white mb-6">
+          Ready to transform your creative workflow?
         </h2>
-        
-        <p className="text-xl text-indigo-100 mb-12 max-w-2xl mx-auto">
-          Join 50,000+ creative professionals who trust FreeflowZee to manage their projects and get paid faster.
+        <p data-testid="cta-subtitle" className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
+          Join thousands of creators who've streamlined their process and increased their income with FreeflowZee.
         </p>
-
-        <div className="flex flex-col sm:flex-row gap-6 justify-center">
+        <div data-testid="cta-buttons" className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link href="/signup">
-            <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-50 px-12 py-6 text-lg font-semibold rounded-xl shadow-2xl">
-              Start Free Trial
-              <ArrowRight className="ml-3 w-5 h-5" />
+            <Button data-testid="cta-signup-button" size="lg" className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-4">
+              Start Free Today
+              <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </Link>
-          
           <Link href="/demo">
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-xl px-12 py-6 text-lg font-semibold rounded-xl"
-            >
-              <Play className="mr-3 w-5 h-5" />
+            <Button data-testid="cta-demo-button" variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-indigo-600 px-8 py-4">
               Watch Demo
+              <Eye className="ml-2 w-5 h-5" />
             </Button>
           </Link>
         </div>
-
-        <p className="text-indigo-200 mt-8 text-sm">
-          Free 14-day trial • No credit card required • Cancel anytime
-        </p>
       </div>
     </section>
   )
@@ -539,10 +657,14 @@ function CTASection() {
 // Main landing page component
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen">
       <SiteHeader />
+      <Suspense fallback={null}>
+        <VerificationReminder />
+      </Suspense>
       <HeroSection />
       <FeaturesSection />
+      <InteractiveFeaturesSection />
       <HowItWorksSection />
       <SocialProofSection />
       <PricingSection />
