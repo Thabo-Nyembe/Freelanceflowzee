@@ -92,4 +92,6 @@ jspm_packages/
 .serverless
 
 # FuseBox cache
-.fusebox/
+.fusebox/playwright-temp.config.ts
+structure.txt
+test-results/
