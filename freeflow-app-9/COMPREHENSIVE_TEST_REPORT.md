@@ -1,9 +1,9 @@
 
 # 🧪 FreeflowZee Comprehensive Test Report
 
-**Generated:** 2025-06-16T22:28:58.531Z
-**Duration:** 0.4 minutes
-**Overall Pass Rate:** 0% (0/0)
+**Generated:** 2025-06-17T14:14:39.935Z
+**Duration:** 5.7 minutes
+**Overall Pass Rate:** 0.0% (0/560)
 
 ## 📊 Test Results Summary
 
@@ -17,11 +17,11 @@
 
 ### 📊 Dashboard Tests
 - **Status:** ❌ FAILED
-- **Results:** 0/0 passed (0%)
+- **Results:** 0/144 passed (0.0%)
 
 ### 💳 Payment Tests
 - **Status:** ❌ FAILED
-- **Results:** 0/0 passed (0%)
+- **Results:** 0/416 passed (0.0%)
 
 ### 🧪 E2E Tests
 - **Status:** ❌ FAILED
