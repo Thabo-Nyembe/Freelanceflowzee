@@ -4,10 +4,12 @@ import React, { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { DemoModal } from '@/components/demo-modal'
 import { SiteHeader } from '@/components/navigation/site-header'
 import { SiteFooter } from '@/components/navigation/site-footer'
+import { VerificationReminder } from '@/components/verification-reminder'
 import { 
   ArrowRight, 
   Upload, 
@@ -36,61 +38,51 @@ import {
   Smartphone,
   Sparkles,
   ChevronRight,
-  Quote,
-  CreditCard,
-  Image as ImageIcon,
-  MessageCircle,
-  Check,
-  Crown,
-  Target,
-  Brain,
-  Layers,
-  Lock,
-  Workflow
+  Quote
 } from 'lucide-react'
 
-// Enhanced Hero section with modern messaging and SEO optimization
+// Hero section with animated gradient background
 function HeroSection() {
   const [isVisible, setIsVisible] = useState(false)
+  const [isDemoOpen, setIsDemoOpen] = useState(false)
 
   useEffect(() => {
     setIsVisible(true)
   }, [])
 
   return (
-    <section data-testid="hero-section" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40">
+    <section data-testid="hero-section" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-r from-indigo-400/20 to-purple-400/20 rounded-full filter blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-pink-400/20 to-violet-400/20 rounded-full filter blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full filter blur-[100px] animate-pulse delay-500"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-1000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-2000"></div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className={`transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-          {/* SEO Optimized Badge */}
+          {/* Badge */}
           <Badge data-testid="hero-badge" variant="secondary" className="mb-8 bg-white/80 backdrop-blur-sm border border-white/20 px-6 py-2 text-sm font-medium">
-            <Crown className="w-4 h-4 mr-2 text-amber-500" />
-            #1 Platform for Creative Professionals
+            <Sparkles className="w-4 h-4 mr-2" />
+            New: AI-Powered Project Analytics
           </Badge>
 
-          {/* SEO-Optimized Main heading */}
-          <h1 data-testid="hero-title" className="text-5xl sm:text-6xl lg:text-7xl font-extralight tracking-tight">
-            <span className="block text-gray-900 mb-2">Create, Share &</span>
-            <span className="block bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent font-light">
-              Get Paid
-            </span>
+          {/* Main heading */}
+          <h1 data-testid="hero-title" className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 mb-8 leading-tight">
+            Create, Share & 
+            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> Get Paid</span>
           </h1>
 
-          {/* Enhanced SEO-focused subheading */}
-          <p data-testid="hero-subtitle" className="text-xl sm:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto font-light leading-relaxed">
-            The complete freelance management platform that helps creative professionals showcase work, collaborate with clients, and get paid faster — all with enterprise-grade security and AI-powered insights.
+          {/* Subheading */}
+          <p data-testid="hero-subtitle" className="text-xl sm:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
+            The all-in-one platform for creatives and freelancers. Upload your work, collaborate with clients, 
+            and get paid faster than ever before.
           </p>
 
-          {/* Enhanced CTA Buttons */}
-          <div data-testid="hero-cta-buttons" className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8">
-            <Link href="/login?redirect=/dashboard">
-              <Button data-testid="creator-login-button" size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 text-lg touch-target">
+          {/* CTA Buttons */}
+          <div data-testid="hero-cta-buttons" className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+            <Link href="/signup">
+              <Button data-testid="hero-cta-primary" size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
                 Start Creating Free
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
@@ -98,98 +90,87 @@ function HeroSection() {
             
             <Link href="/demo">
               <Button 
-                data-testid="watch-demo-button" 
-                variant="outline" 
+                data-testid="hero-cta-demo" 
                 size="lg" 
-                className="px-8 py-4 text-lg border-gray-300 touch-target"
+                variant="outline" 
+                className="border-2 border-gray-300 hover:border-indigo-300 px-8 py-4 text-lg font-semibold rounded-xl backdrop-blur-sm bg-white/80"
               >
                 <Play className="mr-2 w-5 h-5" />
-                Watch Demo
-              </Button>
-            </Link>
-            
-            <Link href="/payment">
-              <Button data-testid="view-projects-button" variant="outline" size="lg" className="px-8 py-4 text-lg border-indigo-300 text-indigo-600 hover:bg-indigo-50 touch-target">
-                <Eye className="mr-2 w-5 h-5" />
-                View Projects
+                Try Demo
               </Button>
             </Link>
           </div>
 
-          {/* Not Sure Section */}
-          <div className="mt-8 p-6 bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-200/50">
-            <p className="text-gray-600 mb-4">Not Sure? Try First</p>
-            <p className="text-sm text-gray-500">See how it works with our interactive demo</p>
-          </div>
-          
-          {/* Enhanced trust indicators */}
-          <div data-testid="hero-trust-indicators" className="pt-12">
-            <p className="text-sm text-gray-500 mb-6">Trusted by 50,000+ creative professionals worldwide</p>
-            <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
-              <div className="flex items-center gap-2">
-                <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                <span className="text-sm font-medium">4.9/5 Rating</span>
+          {/* Social proof */}
+          <div data-testid="hero-social-proof" className="flex flex-col sm:flex-row items-center justify-center gap-8 text-gray-500">
+            <div className="flex items-center">
+              <div className="flex -space-x-2 mr-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-red-400 rounded-full border-2 border-white"></div>
+                <div className="w-8 h-8 bg-gradient-to-r from-indigo-400 to-blue-400 rounded-full border-2 border-white"></div>
+                <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full border-2 border-white"></div>
+                <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full border-2 border-white"></div>
               </div>
-              <div className="flex items-center gap-2">
-                <Shield className="w-5 h-5 text-green-500" />
-                <span className="text-sm font-medium">SOC 2 Compliant</span>
+              <span className="text-sm font-medium">50,000+ creators trust us</span>
+            </div>
+            <div className="flex items-center">
+              <div className="flex mr-2">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                ))}
               </div>
-              <div className="flex items-center gap-2">
-                <Crown className="w-5 h-5 text-amber-500" />
-                <span className="text-sm font-medium">Award Winning</span>
-              </div>
+              <span className="text-sm font-medium">4.9/5 rating</span>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Demo Modal */}
+      <DemoModal 
+        isOpen={isDemoOpen} 
+        onClose={() => setIsDemoOpen(false)} 
+      />
     </section>
   )
 }
 
-// Enhanced Features section with better copy and Context7 patterns
+// Features section inspired by WeTransfer's simplicity
 function FeaturesSection() {
   const features = [
     {
-      icon: Brain,
-      title: "AI-Powered Project Intelligence",
-      description: "Smart automation that learns your workflow, suggests optimal pricing, and predicts project timelines with 95% accuracy.",
-      highlight: "95% accuracy",
-      category: "Intelligence"
+      icon: Upload,
+      title: "Upload Anything",
+      description: "Share files up to 10GB with lightning-fast uploads. Support for all major file types.",
+      color: "from-blue-500 to-indigo-600"
     },
     {
-      icon: MessageCircle,
-      title: "Real-time Collaboration Hub",
-      description: "Advanced commenting, approval workflows, and version control that eliminates revision chaos and keeps projects on track.",
-      highlight: "Zero email chains",
-      category: "Collaboration"
+      icon: Users,
+      title: "Client Collaboration",
+      description: "Real-time feedback, comments, and approvals. Keep everyone in sync.",
+      color: "from-purple-500 to-pink-600"
+    },
+    {
+      icon: DollarSign,
+      title: "Get Paid Fast",
+      description: "Automated invoicing and payment processing. Get paid in days, not months.",
+      color: "from-green-500 to-emerald-600"
     },
     {
       icon: Shield,
-      title: "Enterprise Security & Compliance",
-      description: "Bank-level encryption, SOC 2 compliance, and granular permission controls protect your valuable creative assets.",
-      highlight: "SOC 2 certified",
-      category: "Security"
-    },
-    {
-      icon: Zap,
-      title: "Lightning-Fast Payments",
-      description: "Automated invoicing, instant payment processing, and escrow protection ensure you get paid within 24 hours.",
-      highlight: "24hr payouts",
-      category: "Payments"
-    },
-    {
-      icon: Target,
-      title: "Client Experience Platform",
-      description: "Branded client portals, interactive galleries, and seamless handoff experiences that wow clients and win repeat business.",
-      highlight: "3x more referrals",
-      category: "Client Experience"
+      title: "Enterprise Security",
+      description: "Bank-level encryption and compliance. Your work is always protected.",
+      color: "from-red-500 to-pink-600"
     },
     {
       icon: BarChart3,
-      title: "Business Growth Analytics",
-      description: "Deep insights into profitability, client satisfaction, and market positioning to scale your creative business strategically.",
-      highlight: "Data-driven growth",
-      category: "Analytics"
+      title: "Analytics & Insights",
+      description: "Track engagement, monitor performance, and optimize your workflow.",
+      color: "from-yellow-500 to-orange-600"
+    },
+    {
+      icon: Zap,
+      title: "Lightning Fast",
+      description: "Built for speed. Upload, share, and collaborate without waiting.",
+      color: "from-indigo-500 to-purple-600"
     }
   ]
 
@@ -199,10 +180,10 @@ function FeaturesSection() {
         <div className="text-center mb-20">
           <h2 data-testid="features-title" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
             Everything you need to 
-            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> scale your creative business</span>
+            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> succeed</span>
           </h2>
           <p data-testid="features-subtitle" className="text-xl text-gray-600 max-w-3xl mx-auto">
-            From AI-powered project management to enterprise-grade security, FreeflowZee provides the complete toolkit for modern creative professionals.
+            From upload to payment, we've built every tool you need to run your creative business efficiently.
           </p>
         </div>
 
@@ -210,30 +191,17 @@ function FeaturesSection() {
           {features.map((feature, index) => {
             const IconComponent = feature.icon
             return (
-              <Card key={index} data-testid={`feature-${index}`} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 group hover:scale-[1.02]">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                      <IconComponent className="w-6 h-6 text-white" />
+              <Link key={index} href="/features">
+                <Card data-testid={`feature-card-${index}`} className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50 cursor-pointer">
+                  <CardContent className="p-8">
+                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                      <IconComponent className="w-7 h-7 text-white" />
                     </div>
-                    <Badge variant="secondary" className="text-xs bg-indigo-50 text-indigo-600">
-                      {feature.category}
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
-                    {feature.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-gray-600 leading-relaxed mb-4">
-                    {feature.description}
-                  </CardDescription>
-                  <div className="flex items-center text-sm font-medium text-indigo-600">
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    {feature.highlight}
-                  </div>
-                </CardContent>
-              </Card>
+                    <h3 data-testid={`feature-title-${index}`} className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
+                    <p data-testid={`feature-description-${index}`} className="text-gray-600 leading-relaxed">{feature.description}</p>
+                  </CardContent>
+                </Card>
+              </Link>
             )
           })}
         </div>
@@ -242,32 +210,29 @@ function FeaturesSection() {
   )
 }
 
-// Enhanced How It Works Section matching the screenshots
+// How it works section with step-by-step breakdown
 function HowItWorksSection() {
   const steps = [
     {
       number: "01",
       title: "Upload Your Work",
-      description: "Drag and drop files, folders, or entire projects. Our AI automatically organizes, tags, and creates smart previews for instant access.",
+      description: "Drag and drop files, folders, or entire projects. Our AI automatically organizes everything.",
       icon: Upload,
-      features: ["Bulk upload", "Auto-organization", "Smart previews", "Version control"],
-      cta: "Get Started"
+      features: ["Bulk upload", "Auto-organization", "Version control", "Smart previews"]
     },
     {
       number: "02", 
       title: "Collaborate & Get Feedback",
-      description: "Share with clients through branded portals, collect real-time feedback with visual annotations, and streamline approval workflows.",
+      description: "Share with clients, collect feedback, and iterate. Real-time comments and approvals.",
       icon: MessageSquare,
-      features: ["Visual feedback", "Approval workflows", "Real-time sync", "Client portals"],
-      cta: "See Demo"
+      features: ["Real-time feedback", "Visual annotations", "Approval workflows", "Version tracking"]
     },
     {
       number: "03",
       title: "Deliver & Get Paid",
-      description: "Send final deliverables through secure channels, automatically generate invoices, and receive payments with our escrow protection.",
-      icon: Award,
-      features: ["Secure delivery", "Auto invoicing", "Escrow protection", "24hr payouts"],
-      cta: "Start Earning"
+      description: "Finalize deliverables and get paid instantly. Automated invoicing and secure payments.",
+      icon: DollarSign,
+      features: ["Auto invoicing", "Instant payments", "Client portal", "Payment tracking"]
     }
   ]
 
@@ -279,28 +244,27 @@ function HowItWorksSection() {
             How it works
           </h2>
           <p data-testid="how-it-works-subtitle" className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Three simple steps to transform your creative workflow and accelerate your business growth
+            From upload to payment in three simple steps. We've streamlined every part of the creative workflow.
           </p>
         </div>
 
-        <div data-testid="workflow-steps-container" className="space-y-20">
+        <div className="space-y-20">
           {steps.map((step, index) => {
             const IconComponent = step.icon
             const isEven = index % 2 === 0
             
             return (
-              <div key={index} data-testid={`workflow-step-${index}`} className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-12 lg:gap-20`}>
+              <div key={index} className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-12 lg:gap-20`}>
                 <div className="flex-1 space-y-6">
                   <div className="flex items-center gap-4">
-                    <span data-testid={`step-number-${index}`} className="text-6xl font-bold text-indigo-600/20">{step.number}</span>
+                    <span className="text-6xl font-bold text-indigo-600/20">{step.number}</span>
                     <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center">
                       <IconComponent className="w-6 h-6 text-white" />
                     </div>
                   </div>
-                  <h3 data-testid={`step-title-${index}`} className="text-3xl font-bold text-gray-900">{step.title}</h3>
-                  <p data-testid={`step-description-${index}`} className="text-xl text-gray-600 leading-relaxed">{step.description}</p>
+                  <h3 className="text-3xl font-bold text-gray-900">{step.title}</h3>
+                  <p className="text-xl text-gray-600 leading-relaxed">{step.description}</p>
                   
-                  {/* Feature list */}
                   <div className="grid grid-cols-2 gap-3">
                     {step.features.map((feature, featureIndex) => (
                       <div key={featureIndex} className="flex items-center text-sm text-gray-600">
@@ -309,78 +273,27 @@ function HowItWorksSection() {
                       </div>
                     ))}
                   </div>
-                  
-                  <Button data-testid={`step-cta-${index}`} variant="outline" className="mt-4 touch-target">
-                    {step.cta}
-                    <ChevronRight className="ml-2 w-4 h-4" />
-                  </Button>
                 </div>
                 
                 <div className="flex-1">
-                  <Link href="/demo">
-                    <div 
-                      data-testid={`step-demo-${index}`} 
-                      className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-8 aspect-video flex items-center justify-center cursor-pointer hover:from-indigo-200 hover:to-purple-200 transition-all duration-300 group"
-                    >
-                      <div className="text-center">
-                        <IconComponent className="w-20 h-20 mx-auto mb-4 text-indigo-600 group-hover:scale-110 transition-transform duration-300" />
-                        <p className="text-indigo-600 font-medium group-hover:text-indigo-700">Demo Preview</p>
-                        <p className="text-indigo-500 text-sm mt-2 opacity-75">Click to explore</p>
-                      </div>
+                  <div className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-8 aspect-video flex items-center justify-center">
+                    <div className="text-center">
+                      <IconComponent className="w-20 h-20 mx-auto mb-4 text-indigo-600" />
+                      <p className="text-indigo-600 font-medium">Interactive Demo</p>
                     </div>
-                  </Link>
+                  </div>
                 </div>
               </div>
             )
           })}
-        </div>
-        
-        {/* Enhanced CTA */}
-        <div className="text-center mt-16">
-          <Link href="/signup">
-            <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 touch-target">
-              Start Your Free Trial
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </Link>
         </div>
       </div>
     </section>
   )
 }
 
-// Enhanced Social proof section with updated stats
+// Social proof section with stats and testimonials
 function SocialProofSection() {
-  const testimonials = [
-    {
-      quote: "FreeflowZee's AI insights helped me increase my project profitability by 40% in just 3 months. The platform pays for itself.",
-      author: "Sarah Chen",
-      role: "UI/UX Designer",
-      company: "Design Studio Co.",
-      avatar: "/avatars/sarah-chen.jpg",
-      rating: 5,
-      metrics: "40% profit increase"
-    },
-    {
-      quote: "The escrow system and instant payments transformed my cash flow. I now get paid within 24 hours instead of waiting 30-60 days.",
-      author: "Marcus Johnson",
-      role: "Freelance Developer", 
-      company: "CodeCraft LLC",
-      avatar: "/avatars/marcus.jpg",
-      rating: 5,
-      metrics: "24hr payments"
-    },
-    {
-      quote: "Client collaboration has never been this smooth. The visual feedback tools eliminated endless email threads and revision confusion.",
-      author: "Elena Rodriguez",
-      role: "Brand Designer",
-      company: "Creative Minds",
-      avatar: "/avatars/elena.jpg", 
-      rating: 5,
-      metrics: "Zero email chaos"
-    }
-  ]
-
   const stats = [
     { number: "50K+", label: "Active Creators", growth: "+23% this month" },
     { number: "2M+", label: "Files Shared", growth: "Secure & organized" },
@@ -388,33 +301,60 @@ function SocialProofSection() {
     { number: "99.9%", label: "Uptime", growth: "Enterprise SLA" }
   ]
 
+  const testimonials = [
+    {
+      quote: "FreeflowZee transformed how I work with clients. The feedback system alone saved me 10 hours per project.",
+      author: "Sarah Chen",
+      role: "UI/UX Designer",
+      company: "Freelance",
+      avatar: "/avatars/sarah-chen.jpg",
+      rating: 5
+    },
+    {
+      quote: "Getting paid used to take weeks. Now it's instant. This platform is a game-changer for freelancers.",
+      author: "Marcus Rodriguez",
+      role: "Video Producer",
+      company: "Motion Studio",
+      avatar: "/avatars/marcus.jpg",
+      rating: 5
+    },
+    {
+      quote: "The collaboration features are incredible. Clients love how easy it is to review and approve work.",
+      author: "Emily Johnson",
+      role: "Graphic Designer",
+      company: "Creative Co.",
+      avatar: "/avatars/emily.jpg",
+      rating: 5
+    }
+  ]
+
   return (
-    <section id="testimonials" data-testid="social-proof-section" className="py-24 bg-white">
+    <section data-testid="social-proof-section" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Enhanced Stats */}
-        <div data-testid="statistics-grid" className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+        {/* Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
           {stats.map((stat, index) => (
-            <div key={index} data-testid={`statistic-${index}`} className="text-center group">
-              <div data-testid={`stat-number-${index}`} className="text-4xl lg:text-5xl font-bold text-indigo-600 mb-2 group-hover:scale-110 transition-transform duration-300">{stat.number}</div>
-              <div data-testid={`stat-label-${index}`} className="text-gray-900 font-semibold mb-1">{stat.label}</div>
+            <div key={index} className="text-center">
+              <div className="text-4xl lg:text-5xl font-bold text-indigo-600 mb-2">{stat.number}</div>
+              <div className="text-gray-900 font-semibold mb-1">{stat.label}</div>
               <div className="text-sm text-gray-500">{stat.growth}</div>
             </div>
           ))}
         </div>
 
-        {/* Enhanced Testimonials */}
+        {/* Testimonials */}
         <div className="text-center mb-16">
-          <h2 data-testid="testimonials-title" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
             Loved by creators worldwide
           </h2>
-          <p data-testid="testimonials-subtitle" className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Join thousands of creative professionals who've transformed their workflow and accelerated their business growth
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Join thousands of creative professionals who've transformed their workflow
           </p>
         </div>
 
-        <div data-testid="testimonials-grid" className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
-            <Card key={index} data-testid={`testimonial-${index}`} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+            <Card key={index} className="border-0 shadow-lg">
               <CardContent className="p-8">
                 <div className="flex mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
@@ -422,49 +362,26 @@ function SocialProofSection() {
                   ))}
                 </div>
                 <Quote className="w-8 h-8 text-indigo-600/20 mb-4" />
-                <p data-testid={`testimonial-quote-${index}`} className="text-gray-700 mb-6 leading-relaxed italic">
-                  "{testimonial.quote}"
-                </p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-12 h-12 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full mr-4 flex items-center justify-center text-white font-semibold">
-                      {testimonial.author.split(' ').map(n => n[0]).join('')}
-                    </div>
-                    <div>
-                      <div data-testid={`testimonial-author-${index}`} className="font-semibold text-gray-900">{testimonial.author}</div>
-                      <div data-testid={`testimonial-role-${index}`} className="text-sm text-gray-600">{testimonial.role}</div>
-                    </div>
+                <p className="text-gray-700 mb-6 leading-relaxed italic">"{testimonial.quote}"</p>
+                <div className="flex items-center">
+                  <div className="w-12 h-12 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full mr-4 flex items-center justify-center text-white font-semibold">
+                    {testimonial.author.split(' ').map(n => n[0]).join('')}
                   </div>
-                  <Badge variant="secondary" className="bg-green-50 text-green-600 text-xs">
-                    {testimonial.metrics}
-                  </Badge>
+                  <div>
+                    <div className="font-semibold text-gray-900">{testimonial.author}</div>
+                    <div className="text-sm text-gray-600">{testimonial.role}</div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           ))}
-        </div>
-        
-        {/* Enhanced CTA */}
-        <div className="text-center mt-16">
-          <Link href="/testimonials">
-            <Button size="lg" variant="outline" className="px-8 py-4 mr-4 touch-target">
-              Read More Stories
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </Link>
-          <Link href="/signup">
-            <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 touch-target">
-              Join Our Community
-              <Users className="ml-2 w-5 h-5" />
-            </Button>
-          </Link>
         </div>
       </div>
     </section>
   )
 }
 
-// Enhanced Pricing section with better value proposition
+// Pricing section with clear value propositions
 function PricingSection() {
   const plans = [
     {
@@ -487,13 +404,12 @@ function PricingSection() {
       period: "per month",
       description: "Everything freelancers need to scale",
       features: [
-        "Unlimited projects & clients",
-        "Advanced collaboration tools",
-        "AI-powered insights",
+        "Unlimited projects",
+        "Advanced collaboration",
         "Priority support",
         "100GB storage",
-        "Escrow protection",
-        "Custom branding"
+        "Custom branding",
+        "Analytics dashboard"
       ],
       cta: "Start Free Trial",
       popular: true
@@ -509,8 +425,7 @@ function PricingSection() {
         "Advanced analytics",
         "White-label solution",
         "1TB storage",
-        "SSO integration",
-        "Dedicated support"
+        "Priority support"
       ],
       cta: "Contact Sales",
       popular: false
@@ -521,10 +436,10 @@ function PricingSection() {
     <section id="pricing" data-testid="pricing-section" className="py-24 bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-20">
-          <h2 data-testid="pricing-title" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
             Simple, transparent pricing
           </h2>
-          <p data-testid="pricing-subtitle" className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Choose the plan that fits your needs. All plans include our core features with no hidden fees.
           </p>
         </div>
@@ -543,7 +458,7 @@ function PricingSection() {
                   <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
                   {plan.period !== "forever" && <span className="text-gray-600 ml-2">{plan.period}</span>}
                 </div>
-                <CardDescription className="text-gray-600">{plan.description}</CardDescription>
+                <p className="text-gray-600">{plan.description}</p>
               </CardHeader>
               <CardContent className="space-y-4">
                 {plan.features.map((feature, featureIndex) => (
@@ -553,7 +468,7 @@ function PricingSection() {
                   </div>
                 ))}
                 <Button 
-                  className={`w-full mt-8 ${plan.popular ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-900'} touch-target`}
+                  className={`w-full mt-8 ${plan.popular ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-900'}`}
                   size="lg"
                 >
                   {plan.cta}
@@ -574,11 +489,10 @@ function PricingSection() {
   )
 }
 
-// Enhanced CTA section
+// Final CTA section with strong conversion focus
 function CTASection() {
   return (
     <section className="py-24 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden">
-      {/* Background elements */}
       <div className="absolute inset-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
@@ -586,17 +500,17 @@ function CTASection() {
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
-          Ready to accelerate your 
-          <span className="block text-yellow-300">creative business?</span>
+          Ready to transform your 
+          <span className="block text-yellow-300">creative workflow?</span>
         </h2>
         
         <p className="text-xl text-indigo-100 mb-12 max-w-2xl mx-auto">
-          Join 50,000+ creative professionals who trust FreeflowZee to manage their most important projects and accelerate their business growth.
+          Join 50,000+ creative professionals who trust FreeflowZee to manage their projects and get paid faster.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-6 justify-center">
           <Link href="/signup">
-            <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-50 px-12 py-6 text-lg font-semibold rounded-xl shadow-2xl touch-target">
+            <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-50 px-12 py-6 text-lg font-semibold rounded-xl shadow-2xl">
               Start Free Trial
               <ArrowRight className="ml-3 w-5 h-5" />
             </Button>
@@ -606,7 +520,7 @@ function CTASection() {
             <Button 
               size="lg" 
               variant="outline" 
-              className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-xl px-12 py-6 text-lg font-semibold rounded-xl touch-target"
+              className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-xl px-12 py-6 text-lg font-semibold rounded-xl"
             >
               <Play className="mr-3 w-5 h-5" />
               Watch Demo
@@ -622,31 +536,18 @@ function CTASection() {
   )
 }
 
-// Main landing page component with SEO optimization
+// Main landing page component
 export default function LandingPage() {
   return (
-    <>
-      {/* SEO Meta Tags */}
-      <head>
-        <title>FreeflowZee - Complete Freelance Management Platform for Creative Professionals</title>
-        <meta name="description" content="The #1 platform for creative professionals to showcase work, collaborate with clients, and get paid faster. AI-powered insights, enterprise security, and 24hr payments." />
-        <meta name="keywords" content="freelance management, creative platform, project collaboration, payment processing, portfolio showcase, client management" />
-        <meta property="og:title" content="FreeflowZee - Complete Freelance Management Platform" />
-        <meta property="og:description" content="Transform your creative workflow with AI-powered project management, real-time collaboration, and instant payments." />
-        <meta property="og:type" content="website" />
-        <link rel="canonical" href="https://freeflowzee.com" />
-      </head>
-      
-             <div className="min-h-screen bg-white">
-         <SiteHeader />
-         <HeroSection />
-        <FeaturesSection />
-        <HowItWorksSection />
-        <SocialProofSection />
-        <PricingSection />
-        <CTASection />
-        <SiteFooter />
-      </div>
-    </>
+    <div className="min-h-screen bg-white">
+      <SiteHeader />
+      <HeroSection />
+      <FeaturesSection />
+      <HowItWorksSection />
+      <SocialProofSection />
+      <PricingSection />
+      <CTASection />
+      <SiteFooter />
+    </div>
   )
 } 
