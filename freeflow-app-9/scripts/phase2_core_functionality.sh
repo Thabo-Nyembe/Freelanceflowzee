@@ -848,7 +848,7 @@ export async function POST(
     }
 
     // Generate access token (mock)
-    const accessToken = `access_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const accessToken = `access_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
 
     return NextResponse.json({
       success: true,

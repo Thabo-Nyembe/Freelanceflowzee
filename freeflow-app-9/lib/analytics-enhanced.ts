@@ -266,11 +266,13 @@ class AnalyticsService {
 
   // Utility methods
   private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const randomPart = Math.random().toString(36).slice(2, 11)
+    return `session_${Date.now()}_${randomPart}`
   }
 
   private generateEventId(): string {
-    return `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const randomPart = Math.random().toString(36).slice(2, 11)
+    return `event_${Date.now()}_${randomPart}`
   }
 
   private getDeviceInfo() {

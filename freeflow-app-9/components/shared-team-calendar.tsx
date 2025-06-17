@@ -297,7 +297,7 @@ export function SharedTeamCalendar() {
     if (!newEvent.title || !newEvent.date || !newEvent.time) return
 
     const event: CalendarEvent = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: Math.random().toString(36).slice(2, 11),
       title: newEvent.title,
       type: newEvent.type,
       date: new Date(newEvent.date),

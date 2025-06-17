@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     // Check if payment succeeded
     if (paymentIntent.status === 'succeeded') {
       // Generate access token for the project
-      const accessToken = `access_token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      const accessToken = `access_token_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
       const projectId = paymentIntent.metadata?.projectId
 
       // In a real app, you'd store this in your database

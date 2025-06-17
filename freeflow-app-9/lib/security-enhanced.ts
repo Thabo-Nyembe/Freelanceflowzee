@@ -459,7 +459,8 @@ class SecurityService {
   }
 
   private async tokenizeFinancialData(data: string): Promise<string> {
-    return `token_${Math.random().toString(36).substr(2, 9)}`
+    const randomPart = Math.random().toString(36).slice(2, 11)
+    return `token_${randomPart}`
   }
 
   private async hashPassword(password: string): Promise<string> {
@@ -541,11 +542,13 @@ class SecurityService {
 
   // Utility methods
   private generateScanId(): string {
-    return `scan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const randomPart = Math.random().toString(36).slice(2, 11)
+    return `scan_${Date.now()}_${randomPart}`
   }
 
   private generateTestSuiteId(): string {
-    return `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const randomPart = Math.random().toString(36).slice(2, 11)
+    return `test_${Date.now()}_${randomPart}`
   }
 }
 

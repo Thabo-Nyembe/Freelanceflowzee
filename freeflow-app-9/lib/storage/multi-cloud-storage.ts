@@ -493,7 +493,8 @@ class MultiCloudStorage {
     const provider = this.selectProvider(fileSize, mimeType, options);
     
     const key = options.folder ? `${options.folder}/${filename}` : filename;
-    const id = `${provider}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const randomPart = Math.random().toString(36).slice(2, 11)
+    const id = `${provider}_${Date.now()}_${randomPart}`;
 
     let result: FileMetadata;
 

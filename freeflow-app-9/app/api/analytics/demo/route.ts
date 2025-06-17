@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     // Generate mock analytics data for demo
     const mockData = {
-      event_id: `demo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      event_id: `demo_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
       tracked_with: 'vercel_analytics',
       timestamp: new Date().toISOString(),
       status: 'recorded'
