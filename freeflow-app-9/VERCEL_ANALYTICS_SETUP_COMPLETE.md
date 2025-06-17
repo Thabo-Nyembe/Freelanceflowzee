@@ -197,7 +197,7 @@ curl -X POST "http://localhost:3000/api/analytics/events" \
 ### Documentation
 - **Setup Guide**: `ANALYTICS_SETUP_GUIDE.md`
 - **API Reference**: `/api/analytics/events` and `/api/analytics/dashboard`
-- **React Hooks**: `hooks/use-analytics.ts`
+- **React Hooks**: `hooks/use-analytics.tsx`
 - **Database Schema**: `scripts/setup-analytics-database.sql`
 
 ### Support

@@ -470,4 +470,4 @@ export const analytics = {
   }
 }
 
-export default useAnalytics 
+export default useAnalytics
