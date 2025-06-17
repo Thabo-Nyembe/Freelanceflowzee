@@ -107,9 +107,9 @@ const PLATFORM_STATS = [
   { label: 'Client Satisfaction', value: '98%', icon: Star, growth: '+2%' }
 ]
 
-export default function LandingPage() {
+export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40">
+    <div className="min-h-screen bg-gradient-to-br from-white via-purple-50/30 to-white">
       {/* Structured Data */}
       <script
         type="application/ld+json"
@@ -122,7 +122,7 @@ export default function LandingPage() {
       
       {/* Hero Section with Enhanced Interactivity */}
       <section className="relative pt-32 pb-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-purple-500/10" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium bg-white/80 backdrop-blur-sm">
@@ -131,7 +131,7 @@ export default function LandingPage() {
             </Badge>
             
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 Create, Share & Get Paid
               </span>
               <br />
@@ -147,7 +147,7 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
               <Button 
                 size="lg" 
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 group"
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 group"
                 asChild
               >
                 <Link href="/signup">
@@ -159,7 +159,7 @@ export default function LandingPage() {
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="border-2 border-gray-300 hover:border-indigo-500 px-8 py-4 text-lg font-semibold hover:bg-indigo-50 transition-all duration-300 group"
+                className="border-2 border-gray-300 hover:border-purple-500 px-8 py-4 text-lg font-semibold hover:bg-purple-50 transition-all duration-300 group"
                 asChild
               >
                 <Link href="/demo">
@@ -171,7 +171,7 @@ export default function LandingPage() {
               <Button 
                 variant="ghost" 
                 size="lg" 
-                className="text-gray-600 hover:text-indigo-600 px-8 py-4 text-lg font-semibold hover:bg-white/50 transition-all duration-300"
+                className="text-gray-600 hover:text-purple-600 px-8 py-4 text-lg font-semibold hover:bg-white/50 transition-all duration-300"
                 asChild
               >
                 <Link href="/projects/demo">
@@ -213,15 +213,15 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Creator Path */}
-            <Card className="group hover:shadow-2xl transition-all duration-500 border-0 bg-gradient-to-br from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100">
+            <Card className="group hover:shadow-2xl transition-all duration-500 border-0 bg-gradient-to-br from-purple-50 to-white hover:from-purple-100 hover:to-purple-50">
               <CardContent className="p-8">
                 <div className="flex items-center mb-6">
-                  <div className="p-3 bg-indigo-500 rounded-full mr-4 group-hover:scale-110 transition-transform">
+                  <div className="p-3 bg-purple-500 rounded-full mr-4 group-hover:scale-110 transition-transform">
                     <Rocket className="w-8 h-8 text-white" />
                   </div>
                   <div>
                     <h3 className="text-2xl font-bold text-gray-900">For Creators</h3>
-                    <p className="text-indigo-600 font-medium">Freelancers & Agencies</p>
+                    <p className="text-purple-600 font-medium">Freelancers & Agencies</p>
                   </div>
                 </div>
                 
@@ -243,7 +243,7 @@ export default function LandingPage() {
                 
                 <div className="flex gap-3">
                   <Button 
-                    className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                    className="flex-1 bg-purple-600 hover:bg-purple-700"
                     asChild
                   >
                     <Link href="/login?redirect=/dashboard">
@@ -252,7 +252,7 @@ export default function LandingPage() {
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="border-indigo-200 hover:border-indigo-400"
+                    className="border-purple-200 hover:border-purple-400"
                     asChild
                   >
                     <Link href="/demo">
@@ -264,7 +264,7 @@ export default function LandingPage() {
             </Card>
 
             {/* Client Path */}
-            <Card className="group hover:shadow-2xl transition-all duration-500 border-0 bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100">
+            <Card className="group hover:shadow-2xl transition-all duration-500 border-0 bg-gradient-to-br from-white to-purple-50 hover:from-purple-50 hover:to-purple-100">
               <CardContent className="p-8">
                 <div className="flex items-center mb-6">
                   <div className="p-3 bg-purple-500 rounded-full mr-4 group-hover:scale-110 transition-transform">
@@ -333,8 +333,8 @@ export default function LandingPage() {
             {FEATURES_DATA.map((feature, index) => (
               <Card key={index} className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
                 <CardContent className="p-6">
-                  <div className="p-3 bg-indigo-100 rounded-full w-fit mb-4 group-hover:bg-indigo-200 transition-colors">
-                    <feature.icon className="w-6 h-6 text-indigo-600" />
+                  <div className="p-3 bg-purple-100 rounded-full w-fit mb-4 group-hover:bg-purple-200 transition-colors">
+                    <feature.icon className="w-6 h-6 text-purple-600" />
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
                   <p className="text-gray-600 mb-4">{feature.description}</p>
@@ -350,7 +350,7 @@ export default function LandingPage() {
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="w-full text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                      className="w-full text-purple-600 hover:text-purple-700 hover:bg-purple-50"
                       asChild
                     >
                       <Link href={feature.demo}>
@@ -383,8 +383,8 @@ export default function LandingPage() {
               <Card key={index} className="text-center p-6 bg-white hover:shadow-lg transition-shadow">
                 <CardContent className="p-0">
                   <div className="flex justify-center mb-4">
-                    <div className="p-3 bg-indigo-100 rounded-full">
-                      <stat.icon className="w-6 h-6 text-indigo-600" />
+                    <div className="p-3 bg-purple-100 rounded-full">
+                      <stat.icon className="w-6 h-6 text-purple-600" />
                     </div>
                   </div>
                   <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
@@ -442,7 +442,7 @@ export default function LandingPage() {
       </section>
 
       {/* Interactive Contact Section */}
-      <section className="py-20 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
+      <section className="py-20 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center text-white mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
