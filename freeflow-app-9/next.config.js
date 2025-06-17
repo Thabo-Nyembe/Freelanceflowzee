@@ -9,6 +9,34 @@ const nextConfig = {
   // External packages for server components (moved from experimental)
   serverExternalPackages: ['@aws-sdk/client-s3', '@aws-sdk/s3-request-presigner', '@aws-sdk/lib-storage'],
   
+  // Turbopack configuration (for development)
+  experimental: {
+    turbo: {
+      rules: {
+        '*.svg': {
+          loaders: ['@svgr/webpack'],
+          as: '*.js',
+        },
+        '*.mp4': {
+          loaders: ['file-loader'],
+          as: '*.js',
+        },
+        '*.webm': {
+          loaders: ['file-loader'],
+          as: '*.js',
+        },
+        '*.mp3': {
+          loaders: ['file-loader'],
+          as: '*.js',
+        },
+        '*.wav': {
+          loaders: ['file-loader'],
+          as: '*.js',
+        },
+      },
+    },
+  },
+  
   // Image optimization
   images: {
     domains: ['images.unsplash.com', 'placehold.co'],

@@ -1,5 +1,4 @@
 import { Metadata } from 'next'
-import LandingPage from './landing'
 import { generatePageSEO, generateStructuredData, SEO_CONFIG } from '@/lib/seo-optimizer'
 import { InteractiveContactSystem } from '@/components/interactive-contact-system'
 import { SiteHeader } from '@/components/navigation/site-header'
@@ -28,9 +27,9 @@ import Link from 'next/link'
 
 // Context7 Pattern: Enhanced SEO with structured data
 export const metadata = generatePageSEO('homepage', {
-  title: `${SEO_CONFIG.site.name} - ${SEO_CONFIG.site.tagline} | Get Started Free`,
-  description: `${SEO_CONFIG.site.description} Trusted by 10,000+ freelancers worldwide. Start your free trial today.`,
-  keywords: `${SEO_CONFIG.keywords.primary}, ${SEO_CONFIG.keywords.longTail}, freelance platform 2024`,
+  title: 'FreeflowZee - Professional Freelance Management Platform | Get Started Free',
+  description: 'The ultimate freelance management platform for creators, agencies, and clients. Streamline projects, collaborate seamlessly, and get paid faster with FreeflowZee. Trusted by 10,000+ freelancers worldwide. Start your free trial today.',
+  keywords: 'freelance management, project collaboration, client portal, payment processing, best freelance management software 2024, client collaboration platform for designers, automated invoicing for freelancers, freelance platform 2024',
   other: {
     'google-site-verification': 'your-google-verification-code',
     'facebook-domain-verification': 'your-facebook-verification-code'
@@ -119,7 +118,7 @@ export default function LandingPage() {
         }}
       />
       
-      <SiteHeader variant="transparent" />
+      <SiteHeader />
       
       {/* Hero Section with Enhanced Interactivity */}
       <section className="relative pt-32 pb-20 overflow-hidden">

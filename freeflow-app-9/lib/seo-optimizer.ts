@@ -1,5 +1,3 @@
-'use client'
-
 import { Metadata } from 'next'
 
 // Context7 Pattern: Centralized SEO Configuration

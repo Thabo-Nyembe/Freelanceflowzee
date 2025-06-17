@@ -37,12 +37,7 @@ import { Clock } from 'lucide-react'
 import { Eye, Heart } from 'lucide-react'
 import { ChevronRight } from 'lucide-react'
 
-// Context7 Pattern: Enhanced SEO for blog
-export const metadata = generatePageSEO('blog', {
-  title: `${SEO_CONFIG.site.name} Blog - Freelance Tips, Tutorials & Industry Insights`,
-  description: 'Stay ahead with the latest freelance industry trends, business tips, and expert insights. Learn how to grow your freelance business and work smarter.',
-  keywords: 'freelance blog, business tips, industry insights, tutorials, freelance growth'
-})
+// Context7 Pattern: Enhanced SEO for blog (handled via layout or head)
 
 const categories = [
   { name: 'All Posts', slug: 'all', count: 12, color: 'bg-gray-100 text-gray-800' },

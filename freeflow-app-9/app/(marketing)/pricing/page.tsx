@@ -1,3 +1,5 @@
+'use client'
+
 import { Metadata } from 'next'
 import { generatePageSEO, generateStructuredData, SEO_CONFIG } from '@/lib/seo-optimizer'
 import { SiteHeader } from '@/components/navigation/site-header'
@@ -30,12 +32,7 @@ import {
 import Link from 'next/link'
 import { useState } from 'react'
 
-// Context7 Pattern: Enhanced SEO for pricing
-export const metadata = generatePageSEO('pricing', {
-  title: `${SEO_CONFIG.site.name} Pricing - Affordable Plans for Every Freelancer | Start Free`,
-  description: 'Choose the perfect FreeflowZee plan for your freelance business. Start free, upgrade as you grow. Transparent pricing with no hidden fees. 30-day money-back guarantee.',
-  keywords: 'freelance platform pricing, project management pricing, affordable freelance tools, subscription plans'
-})
+// Context7 Pattern: Enhanced SEO for pricing (handled via layout or head)
 
 // Context7 Pattern: Pricing Data with ROI calculations
 const PRICING_PLANS = [

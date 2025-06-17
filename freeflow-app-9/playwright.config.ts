@@ -23,11 +23,22 @@ export default defineConfig({
   
   /* Shared settings for all the projects below. */
   use: {
+    /* Base URL to use in actions like await page.goto('/') */
+    baseURL: 'http://localhost:3004',
     
     /* Extra HTTP headers */
     extraHTTPHeaders: {
       'x-test-mode': 'true'
-    }
+    },
+    
+    /* Collect trace when retrying the failed test. */
+    trace: 'on-first-retry',
+    
+    /* Take screenshot on failure */
+    screenshot: 'only-on-failure',
+    
+    /* Timeout for each action */
+    actionTimeout: 30000,
   },
 
   /* Configure projects for comprehensive responsive testing */
@@ -175,8 +186,8 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'PORT=3001 npm run dev',
-    url: 'http://localhost:3001',
+    command: 'PORT=3004 npm run dev',
+    url: 'http://localhost:3004',
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
     stdout: 'ignore',
