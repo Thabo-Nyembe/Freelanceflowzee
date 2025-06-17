@@ -64,11 +64,26 @@ export function FeedbackSystem() {
   const renderViewer = () => {
     switch (selectedFile.type) {
       case "image":
-        return <ImageViewer file={selectedFile} comments={comments} onAddComment={setComments} />
+        return <ImageViewer 
+          src={selectedFile.url}
+          alt={selectedFile.name}
+          comments={comments} 
+          onCommentAdd={(comment) => setComments(prev => [...prev, { ...comment, id: Date.now().toString(), author: 'User', created_at: new Date().toISOString() }])}
+        />
       case "video":
-        return <VideoViewer file={selectedFile} comments={comments} onAddComment={setComments} />
+        return <VideoViewer 
+          src={selectedFile.url}
+          title={selectedFile.name}
+          comments={comments} 
+          onCommentAdd={(comment) => setComments(prev => [...prev, { ...comment, id: Date.now().toString(), author: 'User', created_at: new Date().toISOString() }])}
+        />
       case "audio":
-        return <AudioViewer file={selectedFile} comments={comments} onAddComment={setComments} />
+        return <AudioViewer 
+          src={selectedFile.url}
+          title={selectedFile.name}
+          comments={comments} 
+          onCommentAdd={(comment) => setComments(prev => [...prev, { ...comment, id: Date.now().toString(), author: 'User', created_at: new Date().toISOString() }])}
+        />
       case "document":
         return <DocumentViewer file={selectedFile} comments={comments} onAddComment={setComments} />
       case "code":

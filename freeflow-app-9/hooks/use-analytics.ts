@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useCallback, useRef } from 'react'
+import React, { useEffect, useCallback, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { track } from '@vercel/analytics'
 
@@ -115,8 +115,8 @@ class AnalyticsClient {
     const paint = performance.getEntriesByType('paint')
 
     const metrics: PerformanceMetrics = {
-      page_load_time: navigation.loadEventEnd - navigation.navigationStart,
-      dom_content_loaded: navigation.domContentLoadedEventEnd - navigation.navigationStart,
+      page_load_time: navigation.loadEventEnd - navigation.fetchStart,
+      dom_content_loaded: navigation.domContentLoadedEventEnd - navigation.fetchStart,
     }
 
     // Add paint timings
@@ -428,14 +428,6 @@ export function useAnalytics() {
     trackPayment,
     trackProjectCreated,
     trackSearch
-  }
-}
-
-// Higher-order component for automatic analytics tracking
-export function withAnalytics<T extends object>(WrappedComponent: React.ComponentType<T>) {
-  return function AnalyticsWrapper(props: T) {
-    useAnalytics() // Initialize analytics for the component tree
-    return <WrappedComponent {...props} />
   }
 }
 

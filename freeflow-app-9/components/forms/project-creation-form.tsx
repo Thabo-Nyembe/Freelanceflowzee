@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, CheckCircle, AlertCircle, Upload } from 'lucide-react'
-import { createProject } from '@/app/projects/actions'
+import { createProject } from '@/app/(app)/projects/actions'
 
 interface ProjectCreationFormProps {
   userId: string
@@ -30,13 +30,15 @@ export function ProjectCreationForm({ userId }: ProjectCreationFormProps) {
     try {
       const result = await createProject(formData)
       
-      if (result.error) {
+      if ('error' in result && result.error) {
         setError(result.error)
-      } else {
+      } else if ('success' in result && result.success) {
         setSuccess(true)
         setTimeout(() => {
           router.push('/')
         }, 2000)
+      } else {
+        setError('Project creation failed. Please try again.')
       }
     } catch (err) {
       setError('An unexpected error occurred. Please try again.')

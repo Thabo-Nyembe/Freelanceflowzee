@@ -4,8 +4,15 @@ import { headers } from 'next/headers'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient()
-    const headersList = headers()
+    const supabase = await createClient()
+    const headersList = await headers()
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: 'Database not configured' },
+        { status: 500 }
+      )
+    }
     
     // Get user if authenticated (optional for analytics)
     const { data: { user } } = await supabase.auth.getUser()
@@ -101,8 +108,15 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { searchParams } = new URL(request.url)
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: 'Database not configured' },
+        { status: 500 }
+      )
+    }
     
     // Get user (required for reading analytics)
     const { data: { user }, error: authError } = await supabase.auth.getUser()

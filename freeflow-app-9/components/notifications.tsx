@@ -347,7 +347,7 @@ function NotificationsList({
   onMarkAsRead, 
   onDelete 
 }: { 
-  notifications: typeof notifications
+  notifications: NotificationItem[]
   onMarkAsRead: (id: string) => void
   onDelete: (id: string) => void 
 }) {

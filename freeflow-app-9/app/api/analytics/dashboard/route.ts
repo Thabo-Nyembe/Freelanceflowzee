@@ -3,7 +3,15 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: 'Database not configured' },
+        { status: 500 }
+      )
+    }
+    
     const { searchParams } = new URL(request.url)
     
     // Get user (required for analytics dashboard)
@@ -283,7 +291,15 @@ function getDefaultRealtime() {
 // POST endpoint for custom analytics queries
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: 'Database not configured' },
+        { status: 500 }
+      )
+    }
+    
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
