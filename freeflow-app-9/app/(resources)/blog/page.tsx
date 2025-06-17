@@ -31,13 +31,25 @@ import {
   Book
 } from 'lucide-react'
 import { context7Client, type LibraryDoc, type CodeSnippet } from '@/lib/context7/client'
+import { Metadata } from 'next'
+import { generatePageSEO, generateStructuredData, SEO_CONFIG } from '@/lib/seo-optimizer'
+import { Clock } from 'lucide-react'
+import { Eye, Heart } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
+
+// Context7 Pattern: Enhanced SEO for blog
+export const metadata = generatePageSEO('blog', {
+  title: `${SEO_CONFIG.site.name} Blog - Freelance Tips, Tutorials & Industry Insights`,
+  description: 'Stay ahead with the latest freelance industry trends, business tips, and expert insights. Learn how to grow your freelance business and work smarter.',
+  keywords: 'freelance blog, business tips, industry insights, tutorials, freelance growth'
+})
 
 const categories = [
-  { name: 'All Posts', slug: 'all', count: 12 },
-  { name: 'Workflow Tips', slug: 'workflow', count: 4 },
-  { name: 'Business Growth', slug: 'business', count: 6 },
-  { name: 'Client Management', slug: 'clients', count: 3 },
-  { name: 'Technology', slug: 'tech', count: 2 },
+  { name: 'All Posts', slug: 'all', count: 12, color: 'bg-gray-100 text-gray-800' },
+  { name: 'Workflow Tips', slug: 'workflow', count: 4, color: 'bg-blue-100 text-blue-800' },
+  { name: 'Business Growth', slug: 'business', count: 6, color: 'bg-green-100 text-green-800' },
+  { name: 'Client Management', slug: 'clients', count: 3, color: 'bg-purple-100 text-purple-800' },
+  { name: 'Technology', slug: 'tech', count: 2, color: 'bg-orange-100 text-orange-800' },
 ]
 
 const featuredPost = {
@@ -214,7 +226,7 @@ export default function BlogPage() {
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
-  const [searchMode, setSearchMode] = useState<'articles' | 'docs'>('articles')
+  const [searchMode, setSearchMode] = useState<'articles' | 'docs' | 'all' | string>('articles')
   const [docSearchResults, setDocSearchResults] = useState<LibraryDoc[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [selectedLibrary, setSelectedLibrary] = useState('next.js')
@@ -302,489 +314,294 @@ export default function BlogPage() {
   })
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40">
+      {/* Structured Data for Blog */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(generateStructuredData('Blog'))
+        }}
+      />
+      
       <SiteHeader />
       
-      <main className="pt-16">
-        {/* Hero Section */}
-        <section className="bg-gradient-to-br from-indigo-50 to-purple-50 py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <PenTool className="w-16 h-16 text-indigo-600 mx-auto mb-6" />
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Creative Workflow Blog
+      <main className="pt-24 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                FreeflowZee Blog
+              </span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Insights, tips, and strategies to help creative professionals optimize their workflow, 
-              grow their business, and succeed in the digital age.
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+              Stay ahead with the latest freelance industry insights, business tips, and expert advice 
+              to grow your freelance business and work smarter.
             </p>
             
-            {/* Enhanced Search Bar */}
-            <div className="max-w-4xl mx-auto space-y-4">
-              {/* Search Mode Tabs */}
-              <Tabs value={searchMode} onValueChange={(value) => setSearchMode(value as 'articles' | 'docs')} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
-                  <TabsTrigger value="articles" className="flex items-center gap-2">
-                    <PenTool className="w-4 h-4" />
-                    Articles
-                  </TabsTrigger>
-                  <TabsTrigger value="docs" className="flex items-center gap-2">
-                    <Book className="w-4 h-4" />
-                    Documentation
-                  </TabsTrigger>
-                </TabsList>
-
-                {/* Search Input */}
-                <div className="relative max-w-2xl mx-auto mt-4">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <Input
-                    type="text"
-                    placeholder={searchMode === 'articles' ? "Search articles, tips, and guides..." : "Search documentation and code examples..."}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-12 pr-4 py-3 text-lg bg-white border-gray-300 focus:border-indigo-500 rounded-lg shadow-sm"
-                    suppressHydrationWarning
-                  />
-                  {(isSearching || isLoading) && (
-                    <RefreshCw className="absolute right-12 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 animate-spin" />
-                  )}
-                  {searchTerm && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setSearchTerm('')
-                        setDocSearchResults([])
-                      }}
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-
-                {/* Library Selector for Documentation Search */}
-                {searchMode === 'docs' && (
-                  <div className="max-w-md mx-auto">
-                    <select
-                      value={selectedLibrary}
-                      onChange={(e) => setSelectedLibrary(e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded-lg bg-white focus:border-indigo-500 focus:outline-none"
-                    >
-                      {libraries.map((lib) => (
-                        <option key={lib} value={lib}>
-                          {lib}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-              </Tabs>
-            </div>
-          </div>
-        </section>
-
-        {/* Stats Section */}
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {stats.map((stat) => (
-                <div key={stat.label} className="text-center">
-                  <stat.icon className="w-12 h-12 text-indigo-600 mx-auto mb-4" />
-                  <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
-                  <div className="text-gray-600">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Featured Article */}
-        <section className="py-16 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Featured Article</h2>
-              <p className="text-lg text-gray-600">Our latest and most popular content</p>
-            </div>
-
-            <Card className="overflow-hidden shadow-xl hover:shadow-2xl transition-shadow">
-              <div className="md:flex">
-                <div className="md:w-1/2">
-                  <div className="relative h-64 md:h-full">
-                    <Image
-                      src={featuredPost.image}
-                      alt={featuredPost.title}
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute top-4 left-4">
-                      <Badge variant="secondary" className="bg-indigo-600 text-white">
-                        Featured
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-                <div className="md:w-1/2 p-8">
-                  <div className="flex items-center space-x-4 mb-4">
-                    <Badge variant="outline">{featuredPost.category}</Badge>
-                    <div className="flex items-center text-gray-500 text-sm">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      {new Date(featuredPost.publishDate).toLocaleDateString()}
-                    </div>
-                    <div className="text-gray-500 text-sm">{featuredPost.readTime}</div>
-                  </div>
-                  
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    {featuredPost.title}
-                  </h3>
-                  
-                  <p className="text-gray-600 mb-6 leading-relaxed">
-                    {featuredPost.excerpt}
-                  </p>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Image
-                        src={featuredPost.authorImage}
-                        alt={featuredPost.author}
-                        width={40}
-                        height={40}
-                        className="rounded-full"
-                      />
-                      <div>
-                        <p className="font-medium text-gray-900">{featuredPost.author}</p>
-                        <p className="text-sm text-gray-500">Content Creator</p>
-                      </div>
-                    </div>
-                    
-                    <Link href={`/blog/${featuredPost.slug}`}>
-                      <Button className="bg-indigo-600 hover:bg-indigo-700">
-                        Read Article <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
+            {/* Search and Filter */}
+            <div className="max-w-2xl mx-auto">
+              <div className="relative mb-6">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Input
+                  type="text"
+                  placeholder="Search articles, tips, and insights..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-4 py-3 text-lg border-gray-200 focus:border-indigo-500 rounded-xl"
+                />
               </div>
-            </Card>
-          </div>
-        </section>
-
-        {/* Documentation Search Results */}
-        {searchMode === 'docs' && searchTerm && (
-          <section className="py-16 bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Documentation Search Results</h2>
-                <p className="text-gray-600">
-                  {isSearching ? 'Searching...' : `Found ${docSearchResults.length} result${docSearchResults.length !== 1 ? 's' : ''} for "${searchTerm}" in ${selectedLibrary}`}
-                </p>
-              </div>
-
-              {docSearchResults.length > 0 && (
-                <div className="space-y-6">
-                  {docSearchResults.map((doc) => (
-                    <Card key={doc.id} className="overflow-hidden">
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="flex items-center gap-2">
-                            <Code className="w-5 h-5 text-indigo-600" />
-                            {doc.name} {doc.version && `v${doc.version}`}
-                          </CardTitle>
-                          <Badge variant="outline">{doc.id}</Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <ScrollArea className="h-64 w-full rounded-md border p-4">
-                          <pre className="text-sm whitespace-pre-wrap">{doc.documentation}</pre>
-                        </ScrollArea>
-                        
-                        {doc.codeSnippets.length > 0 && (
-                          <div className="mt-6">
-                            <h4 className="font-medium mb-4 flex items-center gap-2">
-                              <Code className="w-4 h-4" />
-                              Code Examples
-                            </h4>
-                            <div className="space-y-4">
-                              {doc.codeSnippets.map((snippet, index) => (
-                                <Card key={index} className="bg-gray-50">
-                                  <CardHeader className="pb-2">
-                                    <div className="flex items-center justify-between">
-                                      <CardTitle className="text-sm">{snippet.title}</CardTitle>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => copyToClipboard(snippet.code)}
-                                        className="h-8 w-8 p-0"
-                                      >
-                                        <Copy className="w-4 h-4" />
-                                      </Button>
-                                    </div>
-                                    <CardDescription className="text-xs">
-                                      {snippet.description}
-                                    </CardDescription>
-                                  </CardHeader>
-                                  <CardContent className="pt-0">
-                                    <pre className="text-xs bg-white p-3 rounded border overflow-x-auto">
-                                      <code>{snippet.code}</code>
-                                    </pre>
-                                    <div className="flex gap-1 mt-2">
-                                      {snippet.tags.map((tag) => (
-                                        <Badge key={tag} variant="outline" className="text-xs">
-                                          {tag}
-                                        </Badge>
-                                      ))}
-                                    </div>
-                                  </CardContent>
-                                </Card>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-
-              {!isSearching && docSearchResults.length === 0 && searchTerm && (
-                <div className="text-center py-16">
-                  <div className="text-gray-400 mb-4">
-                    <Search className="w-16 h-16 mx-auto" />
-                  </div>
-                  <h3 className="text-xl font-medium text-gray-900 mb-2">No documentation found</h3>
-                  <p className="text-gray-600 mb-4">
-                    Try adjusting your search terms or selecting a different library.
-                  </p>
-                  <Button 
-                    variant="outline"
-                    onClick={() => {
-                      setSearchTerm('')
-                      setDocSearchResults([])
-                    }}
+              
+              {/* Categories */}
+              <div className="flex flex-wrap justify-center gap-3">
+                <Button
+                  variant={searchMode === 'all' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSearchMode('all')}
+                  className="rounded-full"
+                >
+                  All Posts
+                </Button>
+                {categories.map((category) => (
+                  <Button
+                    key={category.slug}
+                    variant={searchMode === category.slug ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSearchMode(category.slug)}
+                    className="rounded-full"
                   >
-                    Clear Search
+                    {category.name} ({category.count})
                   </Button>
-                </div>
-              )}
-            </div>
-          </section>
-        )}
-
-        {/* Categories and Articles */}
-        {searchMode === 'articles' && (
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col lg:flex-row gap-12">
-              {/* Sidebar */}
-              <div className="lg:w-1/4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Target className="w-5 h-5 mr-2" />
-                      Categories
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3">
-                      {categories.map((category) => (
-                        <li key={category.slug}>
-                          <Link
-                            href={`/blog/category/${category.slug}`}
-                            className="flex items-center justify-between text-gray-600 hover:text-indigo-600 transition-colors"
-                          >
-                            <span>{category.name}</span>
-                            <Badge variant="secondary">{category.count}</Badge>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                {/* Newsletter Signup */}
-                <Card className="mt-8">
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Zap className="w-5 h-5 mr-2" />
-                      Stay Updated
-                    </CardTitle>
-                    <CardDescription>
-                      Get the latest articles and tips delivered to your inbox.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {isSubscribed ? (
-                      <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                        <p className="text-sm">🎉 Thanks for subscribing! You'll receive our latest content in your inbox.</p>
-                      </div>
-                    ) : (
-                      <form onSubmit={handleNewsletterSubmit} className="space-y-3">
-                        <Input
-                          type="email"
-                          placeholder="Enter your email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          required
-                          suppressHydrationWarning
-                        />
-                        <Button 
-                          type="submit"
-                          className="w-full bg-indigo-600 hover:bg-indigo-700"
-                          disabled={!email.trim()}
-                        >
-                          Subscribe
-                        </Button>
-                      </form>
-                    )}
-                  </CardContent>
-                </Card>
+                ))}
               </div>
+            </div>
+          </div>
+        </div>
+      </main>
 
-              {/* Articles Grid */}
-              <div className="lg:w-3/4">
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-2xl font-bold text-gray-900">Latest Articles</h2>
-                  <Button variant="outline">
-                    View All Posts <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </div>
-
-                {searchTerm && (
-                  <div className="mb-4 text-sm text-gray-600">
-                    Found {filteredPosts.length} article{filteredPosts.length !== 1 ? 's' : ''} for "{searchTerm}"
+      {/* Featured Posts */}
+      <section className="pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-bold text-gray-900">Featured Articles</h2>
+            <Badge variant="secondary" className="bg-indigo-100 text-indigo-800">
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Trending Now
+            </Badge>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Main Featured Post */}
+            <Card className="lg:col-span-1 group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
+              <div className="relative overflow-hidden rounded-t-lg">
+                <Image
+                  src={featuredPost.image}
+                  alt={featuredPost.title}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <Badge className="absolute top-4 left-4 bg-indigo-600 text-white">
+                  Featured
+                </Badge>
+              </div>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4 mb-4 text-sm text-gray-500">
+                  <Badge variant="outline" className={categories.find(c => c.name === featuredPost.category)?.color}>
+                    {featuredPost.category}
+                  </Badge>
+                  <div className="flex items-center">
+                    <Calendar className="w-4 h-4 mr-1" />
+                    {new Date(featuredPost.publishDate).toLocaleDateString()}
                   </div>
-                )}
-
-                <div className="grid md:grid-cols-2 gap-8">
-                  {filteredPosts.slice(0, visiblePosts).map((post) => (
-                    <Card key={post.slug} className="overflow-hidden hover:shadow-lg transition-shadow">
-                      <div className="relative h-48">
-                        <Image
-                          src={post.image}
-                          alt={post.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      
-                      <CardHeader>
-                        <div className="flex items-center space-x-4 mb-2">
-                          <Badge variant="outline">{post.category}</Badge>
-                          <div className="flex items-center text-gray-500 text-sm">
-                            <Calendar className="w-4 h-4 mr-1" />
-                            {new Date(post.publishDate).toLocaleDateString()}
-                          </div>
+                  <div className="flex items-center">
+                    <Clock className="w-4 h-4 mr-1" />
+                    {featuredPost.readTime}
+                  </div>
+                </div>
+                
+                <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors">
+                  <Link href={`/blog/${featuredPost.slug}`}>
+                    {featuredPost.title}
+                  </Link>
+                </h3>
+                
+                <p className="text-gray-600 mb-4">{featuredPost.excerpt}</p>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <Image
+                      src={featuredPost.authorImage}
+                      alt={featuredPost.author}
+                      width={40}
+                      height={40}
+                      className="rounded-full mr-3"
+                    />
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">{featuredPost.author}</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <Button 
+                  className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700"
+                  asChild
+                >
+                  <Link href={`/blog/${featuredPost.slug}`}>
+                    Read Full Article
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+            
+            {/* Secondary Featured Posts */}
+            <div className="space-y-6">
+              {blogPosts.slice(1, 3).map((post) => (
+                <Card key={post.slug} className="group hover:shadow-lg transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
+                  <CardContent className="p-6">
+                    <div className="flex gap-4">
+                      <Image
+                        src={post.image}
+                        alt={post.title}
+                        width={240}
+                        height={160}
+                        className="w-24 h-24 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="outline" className={categories.find(c => c.name === post.category)?.color}>
+                            {post.category}
+                          </Badge>
+                          <div className="text-xs text-gray-500">{post.readTime}</div>
                         </div>
                         
-                        <CardTitle className="text-lg hover:text-indigo-600 transition-colors">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2">
                           <Link href={`/blog/${post.slug}`}>
                             {post.title}
                           </Link>
-                        </CardTitle>
+                        </h3>
                         
-                        <CardDescription className="line-clamp-3">
-                          {post.excerpt}
-                        </CardDescription>
-                      </CardHeader>
-                      
-                      <CardContent>
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{post.excerpt}</p>
+                        
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center">
                             <Image
                               src={post.authorImage}
                               alt={post.author}
                               width={32}
                               height={32}
-                              className="rounded-full"
+                              className="rounded-full mr-2"
                             />
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">{post.author}</p>
-                              <p className="text-xs text-gray-500">{post.readTime}</p>
-                            </div>
+                            <span className="text-xs text-gray-500">{post.author}</span>
                           </div>
-                          
-                          <Link href={`/blog/${post.slug}`}>
-                            <Button variant="ghost" size="sm">
-                              Read More <ArrowRight className="w-3 h-3 ml-1" />
-                            </Button>
-                          </Link>
                         </div>
-                        
-                        <div className="flex flex-wrap gap-2 mt-4">
-                          {post.tags.map((tag) => (
-                            <Badge key={tag} variant="secondary" className="text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-
-                {/* Load More Button */}
-                {visiblePosts < filteredPosts.length && (
-                  <div className="text-center mt-12">
-                    <Button 
-                      variant="outline" 
-                      size="lg"
-                      onClick={handleLoadMore}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? 'Loading...' : `Load More Articles (${filteredPosts.length - visiblePosts} remaining)`}
-                    </Button>
-                  </div>
-                )}
-
-                {filteredPosts.length === 0 && searchTerm && (
-                  <div className="text-center py-16">
-                    <div className="text-gray-400 mb-4">
-                      <Search className="w-16 h-16 mx-auto" />
+                      </div>
                     </div>
-                    <h3 className="text-xl font-medium text-gray-900 mb-2">No articles found</h3>
-                    <p className="text-gray-600 mb-4">
-                      Try adjusting your search terms or browse all categories.
-                    </p>
-                    <Button 
-                      variant="outline"
-                      onClick={() => setSearchTerm('')}
-                    >
-                      Clear Search
-                    </Button>
-                  </div>
-                )}
-              </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
-        </section>
-        )}
+        </div>
+      </section>
 
-        {/* CTA Section */}
-        <section className="py-16 bg-indigo-600">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Ready to Transform Your Creative Workflow?
-            </h2>
-            <p className="text-xl text-indigo-100 mb-8">
-              Join thousands of creative professionals who have streamlined their process with FreeflowZee.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/signup">
-                <Button size="lg" variant="secondary">
-                  Start Free Trial
-                </Button>
+      {/* Recent Posts */}
+      <section className="py-16 bg-white/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-bold text-gray-900">Latest Articles</h2>
+            <Button variant="outline" asChild>
+              <Link href="/blog/category/all">
+                View All Posts
+                <ChevronRight className="ml-2 w-4 h-4" />
               </Link>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="border-white text-white hover:bg-white hover:text-indigo-600"
-                onClick={() => setIsDemoOpen(true)}
-              >
-                View Demo Project
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {blogPosts.slice(3).map((post) => (
+              <Card key={post.slug} className="group hover:shadow-xl transition-all duration-300 border-0 bg-white">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Badge variant="outline" className={categories.find(c => c.name === post.category)?.color}>
+                      {post.category}
+                    </Badge>
+                    <div className="text-sm text-gray-500">{post.readTime}</div>
+                  </div>
+                  
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors">
+                    <Link href={`/blog/${post.slug}`}>
+                      {post.title}
+                    </Link>
+                  </h3>
+                  
+                  <p className="text-gray-600 mb-4">{post.excerpt}</p>
+                  
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center">
+                      <Image
+                        src={post.authorImage}
+                        alt={post.author}
+                        width={32}
+                        height={32}
+                        className="rounded-full mr-3"
+                      />
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">{post.author}</div>
+                        <div className="text-xs text-gray-500">
+                          {new Date(post.publishDate).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full group-hover:bg-indigo-50 group-hover:border-indigo-200"
+                    asChild
+                  >
+                    <Link href={`/blog/${post.slug}`}>
+                      Read More
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter Signup */}
+      <section className="py-16 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="bg-white rounded-2xl p-8 shadow-2xl">
+            <BookOpen className="w-12 h-12 text-indigo-600 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+              Never Miss an Update
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Get the latest freelance tips, industry insights, and expert advice delivered to your inbox every week.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="flex-1"
+              />
+              <Button className="bg-indigo-600 hover:bg-indigo-700">
+                Subscribe
               </Button>
             </div>
+            
+            <p className="text-sm text-gray-500 mt-4">
+              Join 5,000+ freelancers getting weekly insights. Unsubscribe anytime.
+            </p>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
 
       <SiteFooter />
       
