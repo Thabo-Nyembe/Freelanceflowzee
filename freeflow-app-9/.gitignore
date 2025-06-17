@@ -95,3 +95,6 @@ jspm_packages/
 .fusebox/playwright-temp.config.ts
 structure.txt
 test-results/
+playwright-temp.config.ts
+structure.txt
+test-results/
