@@ -168,9 +168,15 @@ test.describe('Payment System Edge Cases', () => {
       await page.goto('/payment?project=test-project');
       
       // Mock timeout response
-      await page.route('/api/payment/**', async (route) => {
-        await new Promise(resolve => setTimeout(resolve, 10000)); // Simulate timeout
-      });
+      // Simulate a 504 gateway timeout with Playwright's built-in delay
+      await page.route('/api/payment/**', (route) =>
+        route.fulfill({
+          status: 504,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: 'Gateway timeout' }),
+          delay: 10_000
+        })
+      );
       
       // Fill and submit payment
       await page.fill('[data-testid="card-number"]', '4242 4242 4242 4242');
