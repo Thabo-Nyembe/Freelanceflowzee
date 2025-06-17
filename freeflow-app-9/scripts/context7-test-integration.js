@@ -275,7 +275,7 @@ async function runPlaywrightTest(options) {
   ].filter(Boolean);
   
   return new Promise((resolve) => {
-    const process = spawn('./node_modules/.bin/playwright', args, {
+    const playwrightProcess = spawn('./node_modules/.bin/playwright', args, {
       stdio: ['inherit', 'pipe', 'pipe'],
       env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=8192' }
     });
@@ -283,15 +283,15 @@ async function runPlaywrightTest(options) {
     let output = '';
     let errorOutput = '';
     
-    process.stdout.on('data', (data) => {
+    playwrightProcess.stdout.on('data', (data) => {
       output += data.toString();
     });
     
-    process.stderr.on('data', (data) => {
+    playwrightProcess.stderr.on('data', (data) => {
       errorOutput += data.toString();
     });
     
-    process.on('close', (code) => {
+    playwrightProcess.on('close', (code) => {
       try {
         const results = JSON.parse(output);
         resolve({
