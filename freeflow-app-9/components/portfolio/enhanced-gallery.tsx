@@ -738,7 +738,7 @@ export function EnhancedGallery({
                       
                       {/* File Type Icon */}
                       <div className="absolute top-2 left-2 z-10">
-                        <div className="p-1.5 bg-black/20 backdrop-blur-sm rounded-lg">
+                        <div className="p-1.5 bg-purple-100/80 backdrop-blur-sm rounded-lg">
                           {getFileIcon(file.type)}
                         </div>
                       </div>
@@ -749,7 +749,7 @@ export function EnhancedGallery({
                           <Button 
                             size="sm" 
                             variant="outline" 
-                            className="w-8 h-8 p-0 bg-black/20 backdrop-blur-sm border-white/20 hover:bg-black/40"
+                            className="w-8 h-8 p-0 bg-purple-100/80 backdrop-blur-sm border-purple-200 hover:bg-purple-200/80"
                             onClick={(e) => {
                               e.stopPropagation()
                               handleLike(file.id)
@@ -760,7 +760,7 @@ export function EnhancedGallery({
                           <Button 
                             size="sm" 
                             variant="outline" 
-                            className="w-8 h-8 p-0 bg-black/20 backdrop-blur-sm border-white/20 hover:bg-black/40"
+                            className="w-8 h-8 p-0 bg-purple-100/80 backdrop-blur-sm border-purple-200 hover:bg-purple-200/80"
                             onClick={(e) => {
                               e.stopPropagation()
                               dispatch({ type: 'TOGGLE_SHARE_DIALOG', payload: { fileId: file.id } })
@@ -784,7 +784,7 @@ export function EnhancedGallery({
                       {/* Play Button for Videos */}
                       {file.type === 'video' && (
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-16 h-16 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <div className="w-16 h-16 bg-purple-600/90 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
                             <Play className="w-8 h-8 text-white fill-white" />
                           </div>
                         </div>
@@ -960,7 +960,7 @@ export function EnhancedGallery({
 
                     {/* Stats Badge */}
                     <div className="absolute top-3 right-3">
-                      <Badge className="bg-black/20 backdrop-blur-sm text-white border-white/20">
+                                              <Badge className="bg-purple-600/90 backdrop-blur-sm text-white border-purple-200">
                         {collection.fileCount} files
                       </Badge>
                     </div>

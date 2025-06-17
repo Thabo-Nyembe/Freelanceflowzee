@@ -4,13 +4,234 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-  letter-spacing: -0.01em;
+/* ===================================================================
+   FREEFLOWZEE COMPREHENSIVE WHITE & PURPLE THEME SYSTEM
+   Ensures consistent UI/UX across all browsers and components
+   ================================================================ */
+
+:root {
+  /* Purple Color Scale - Luxury and High-End */
+  --purple-50: #faf5ff;
+  --purple-100: #f3e8ff;
+  --purple-200: #e9d5ff;
+  --purple-300: #d8b4fe;
+  --purple-400: #c084fc;
+  --purple-500: #a855f7;
+  --purple-600: #8b5cf6;  /* Primary luxury purple */
+  --purple-700: #7c3aed;  /* Deep royal purple */
+  --purple-800: #6b21a8;  /* Rich amethyst */
+  --purple-900: #581c87;  /* Premium deep purple */
+
+  /* Indigo Complementary Colors */
+  --indigo-50: #eef2ff;
+  --indigo-100: #e0e7ff;
+  --indigo-200: #c7d2fe;
+  --indigo-300: #a5b4fc;
+  --indigo-400: #818cf8;
+  --indigo-500: #6366f1;
+  --indigo-600: #4f46e5;
+  --indigo-700: #4338ca;
+  --indigo-800: #3730a3;
+  --indigo-900: #312e81;
+
+  /* White and Gray Scale */
+  --white: #ffffff;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
+  /* Premium Accent Colors */
+  --royal-purple: #663399;    /* Classic royal purple */
+  --amethyst: #9966cc;       /* Luxurious amethyst */
+  --deep-violet: #4b0082;    /* Deep violet luxury */
+  --plum: #dda0dd;          /* Rich plum */
+  --lavender-luxury: #e6e6fa; /* Soft luxury lavender */
+
+  /* Theme Color Assignments */
+  --theme-primary: var(--purple-600);        /* Luxury purple */
+  --theme-primary-light: var(--purple-500);
+  --theme-primary-dark: var(--purple-800);   /* Rich amethyst */
+  --theme-secondary: var(--purple-700);        /* Deep royal purple */
+  --theme-accent: var(--indigo-600);           /* Luxurious accent */
+  --theme-bg-primary: var(--white);
+  --theme-bg-secondary: var(--gray-50);
+  --theme-bg-purple-50: var(--purple-50);
+  --theme-bg-purple-100: var(--purple-100);
+  --theme-text-primary: var(--gray-900);   /* Deep royal text */
+  --theme-text-secondary: var(--gray-600);
+  --theme-border: var(--gray-200);
+  --theme-border-purple: var(--purple-200);
+
+  /* Gradient Definitions */
+  --theme-gradient-primary: linear-gradient(135deg, var(--purple-600) 0%, var(--purple-700) 100%);
+  --theme-gradient-luxury: linear-gradient(135deg, var(--purple-600) 0%, var(--indigo-600) 50%, var(--purple-700) 100%);
+  --theme-gradient-background: linear-gradient(135deg, var(--gray-50) 0%, var(--purple-50) 50%, var(--gray-50) 100%);
+  --theme-gradient-card: linear-gradient(135deg, var(--white) 0%, var(--purple-50) 100%);
+  --theme-gradient-button: linear-gradient(135deg, var(--purple-600) 0%, var(--purple-700) 100%);
+  --theme-gradient-premium: linear-gradient(135deg, var(--royal-purple) 0%, var(--amethyst) 50%, var(--deep-violet) 100%);
+
+  /* Glass Morphism Effects */
+  --theme-glass-bg: rgba(255, 255, 255, 0.25);
+  --theme-glass-border: rgba(255, 255, 255, 0.18);
+  --theme-glass-backdrop: blur(16px);
+
+  /* Shadow System */
+  --theme-shadow-sm: 0 1px 2px 0 rgba(139, 92, 246, 0.05);
+  --theme-shadow-md: 0 4px 6px -1px rgba(139, 92, 246, 0.1), 0 2px 4px -1px rgba(139, 92, 246, 0.06);
+  --theme-shadow-lg: 0 10px 15px -3px rgba(139, 92, 246, 0.1), 0 4px 6px -2px rgba(139, 92, 246, 0.05);
+  --theme-shadow-xl: 0 20px 25px -5px rgba(139, 92, 246, 0.1), 0 10px 10px -5px rgba(139, 92, 246, 0.04);
+  --theme-shadow-purple: 0 4px 14px 0 rgba(139, 92, 246, 0.39);
+
+  /* Dashboard Layout Variables */
+  --dashboard-sidebar-width: 256px;
+  --dashboard-header-height: 64px;
+  --dashboard-content-padding: 24px;
+  --dashboard-max-width: 1400px;
+  --dashboard-gap: 24px;
 }
 
+/* ===================================================================
+   UNIVERSAL THEME APPLICATION
+   ================================================================ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-color: var(--theme-border);
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.6;
+  color: var(--gray-800);
+  background-color: var(--theme-bg-secondary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ===================================================================
+   COMPONENT THEME UTILITIES
+   ================================================================ */
+
 @layer utilities {
+  /* Theme Color Utilities */
+  .theme-bg-primary { background-color: var(--theme-bg-primary); }
+  .theme-bg-secondary { background-color: var(--theme-bg-secondary); }
+  .theme-bg-purple-50 { background-color: var(--theme-bg-purple-50); }
+  .theme-bg-purple-100 { background-color: var(--theme-bg-purple-100); }
+  
+  .theme-text-primary { color: var(--theme-text-primary); }
+  .theme-text-secondary { color: var(--theme-text-secondary); }
+  
+  .theme-border { border-color: var(--theme-border); }
+  .theme-border-purple { border-color: var(--theme-border-purple); }
+  
+  /* Theme Gradient Utilities */
+  .theme-gradient-primary { background: var(--theme-gradient-primary); }
+  .theme-gradient-luxury { background: var(--theme-gradient-luxury); }
+  .theme-gradient-background { background: var(--theme-gradient-background); }
+  .theme-gradient-card { background: var(--theme-gradient-card); }
+  .theme-gradient-button { background: var(--theme-gradient-button); }
+  .theme-gradient-premium { background: var(--theme-gradient-premium); }
+  .theme-gradient-text { 
+    background: var(--theme-gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  /* Theme Glass Morphism */
+  .theme-glass {
+    background: var(--theme-glass-bg);
+    backdrop-filter: var(--theme-glass-backdrop);
+    border: 1px solid var(--theme-glass-border);
+    box-shadow: var(--theme-shadow-lg);
+  }
+  
+  /* Theme Shadows */
+  .theme-shadow-purple { box-shadow: var(--theme-shadow-purple); }
+  .theme-shadow-lg { box-shadow: var(--theme-shadow-lg); }
+  
+  /* Component-Specific Theme Classes */
+  .theme-button-primary {
+    background: var(--theme-gradient-primary);
+    color: var(--white);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--theme-shadow-md);
+  }
+  
+  .theme-button-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--theme-shadow-lg);
+  }
+  
+  .theme-button-secondary {
+    background: var(--white);
+    color: var(--theme-primary);
+    border: 2px solid var(--theme-border-purple);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    transition: all 0.3s ease;
+    box-shadow: var(--theme-shadow-sm);
+  }
+  
+  .theme-button-secondary:hover {
+    background: var(--theme-bg-purple-50);
+    border-color: var(--theme-primary);
+    box-shadow: var(--theme-shadow-md);
+    transform: translateY(-1px);
+  }
+  
+  .theme-card {
+    background: var(--theme-gradient-card);
+    border: 1px solid var(--theme-glass-border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--theme-shadow-lg);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: var(--theme-glass-backdrop);
+  }
+  
+  .theme-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--theme-shadow-xl);
+  }
+  
+  .theme-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--theme-border-purple);
+  }
+  
+  .theme-footer {
+    background: var(--theme-gradient-primary);
+    color: var(--white);
+  }
+  
+  /* Text Balance for Better Typography */
   .text-balance {
     text-wrap: balance;
   }
@@ -116,17 +337,18 @@ body {
   /* Luxury gradient utilities */
   .luxury-gradient {
     background: linear-gradient(135deg, 
-      hsl(220, 26%, 97%) 0%, 
-      hsl(341, 54%, 96%) 25%, 
-      hsl(262, 83%, 97%) 50%, 
-      hsl(220, 26%, 97%) 100%);
+      var(--royal-purple) 0%, 
+      var(--amethyst) 25%, 
+      var(--purple-600) 50%, 
+      var(--deep-violet) 75%, 
+      var(--purple-700) 100%);
   }
   
   .luxury-gradient-dark {
     background: linear-gradient(135deg, 
-      hsl(215, 28%, 17%) 0%, 
-      hsl(215, 28%, 15%) 50%, 
-      hsl(215, 28%, 12%) 100%);
+      var(--deep-violet) 0%, 
+      var(--purple-800) 50%, 
+      var(--purple-900) 100%);
   }
   
   .glass-card {
@@ -143,23 +365,22 @@ body {
   
   .luxury-shadow {
     box-shadow: 
-      0 4px 6px -1px rgba(0, 0, 0, 0.02),
-      0 2px 4px -1px rgba(0, 0, 0, 0.03),
-      0 0 0 1px rgba(255, 255, 255, 0.4);
+      0 4px 14px 0 rgba(139, 92, 246, 0.39),
+      0 0 0 1px rgba(255, 255, 255, 0.05);
   }
   
   .luxury-shadow-lg {
     box-shadow: 
-      0 20px 25px -5px rgba(0, 0, 0, 0.04),
-      0 10px 10px -5px rgba(0, 0, 0, 0.02),
-      0 0 0 1px rgba(255, 255, 255, 0.5);
+      0 10px 25px -3px rgba(139, 92, 246, 0.3),
+      0 4px 6px -2px rgba(139, 92, 246, 0.15),
+      0 0 0 1px rgba(255, 255, 255, 0.1);
   }
   
   .luxury-shadow-xl {
     box-shadow: 
-      0 25px 50px -12px rgba(0, 0, 0, 0.06),
-      0 0 0 1px rgba(255, 255, 255, 0.6),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      0 20px 40px -4px rgba(139, 92, 246, 0.25),
+      0 8px 16px -4px rgba(139, 92, 246, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.15);
   }
   
   .premium-text {
@@ -600,7 +821,14 @@ body {
 /* Dashboard layout responsive fixes */
 .dashboard-layout {
   min-height: 100vh;
-  background: #f8fafc;
+  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(135deg, #faf7ff 0%, #f4edff 50%, #e9d5ff 100%);
+  position: relative;
 }
 
 @media (max-width: 1023px) {
@@ -859,4 +1087,537 @@ select:focus {
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
   background-color: rgba(59, 130, 246, 0.1) !important;
   z-index: 1000 !important;
+}
+
+/* Dashboard Layout Styles */
+.dashboard-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0; /* Important for flex children to properly shrink */
+  margin-left: 0;
+  transition: margin-left 0.3s ease-in-out;
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .dashboard-main {
+    margin-left: 256px; /* Width of desktop sidebar */
+  }
+}
+
+.dashboard-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.5rem;
+  min-height: 0;
+  /* Custom scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--purple-300) var(--purple-50);
+}
+
+.dashboard-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dashboard-content::-webkit-scrollbar-track {
+  background: rgba(139, 92, 246, 0.05);
+  border-radius: 4px;
+}
+
+.dashboard-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--purple-300), var(--purple-400));
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.dashboard-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--purple-400), var(--purple-500));
+}
+
+/* Dashboard content spacing */
+.dashboard-content > * + * {
+  margin-top: 1.5rem;
+}
+
+/* Responsive dashboard content padding */
+@media (max-width: 640px) {
+  .dashboard-content {
+    padding: 1rem;
+  }
+  
+  .dashboard-header {
+    padding: 0.75rem 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-content {
+    padding: 2rem;
+  }
+  
+  .dashboard-header {
+    padding: 1.25rem 2rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .dashboard-content {
+    padding: 2.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  .dashboard-header {
+    padding: 1.5rem 2.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+}
+
+/* ===================================== */
+/* DASHBOARD LAYOUT SYSTEM - IMPROVED LAYOUT */
+/* ===================================== */
+
+/* Full-height layout container with proper viewport handling */
+.dashboard-layout {
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(135deg, #faf7ff 0%, #f4edff 50%, #e9d5ff 100%);
+  position: relative;
+}
+
+/* Main dashboard wrapper - proper flex layout */
+.dashboard-wrapper {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+  position: relative;
+}
+
+/* Dashboard sidebar with improved scrolling */
+.dashboard-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 256px;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--theme-border);
+  z-index: 40;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Enhanced scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--purple-300) var(--purple-50);
+}
+
+.dashboard-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dashboard-sidebar::-webkit-scrollbar-track {
+  background: var(--purple-50);
+  border-radius: 3px;
+}
+
+.dashboard-sidebar::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--purple-300), var(--purple-400));
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.dashboard-sidebar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--purple-400), var(--purple-500));
+}
+
+/* Show sidebar on desktop */
+@media (min-width: 768px) {
+  .dashboard-sidebar {
+    transform: translateX(0);
+  }
+}
+
+/* Main dashboard content area with proper scrolling */
+.dashboard-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+  margin-left: 0;
+  transition: margin-left 0.3s ease-in-out;
+  position: relative;
+}
+
+/* On desktop with sidebar */
+@media (min-width: 768px) {
+  .dashboard-main {
+    margin-left: 256px;
+  }
+}
+
+/* Dashboard header/breadcrumbs area */
+.dashboard-header {
+  flex-shrink: 0;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--theme-border);
+  z-index: 10;
+}
+
+/* Dashboard content container with proper scrolling */
+.dashboard-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.5rem;
+  min-height: 0;
+  max-height: 100%;
+  /* Enhanced scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--purple-300) var(--purple-50);
+}
+
+.dashboard-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dashboard-content::-webkit-scrollbar-track {
+  background: rgba(139, 92, 246, 0.05);
+  border-radius: 4px;
+}
+
+.dashboard-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--purple-300), var(--purple-400));
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.dashboard-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--purple-400), var(--purple-500));
+}
+
+/* Dashboard content spacing improvements */
+.dashboard-content > * + * {
+  margin-top: 1.5rem;
+}
+
+/* Responsive dashboard content padding */
+@media (max-width: 640px) {
+  .dashboard-content {
+    padding: 1rem;
+  }
+  
+  .dashboard-header {
+    padding: 0.75rem 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-content {
+    padding: 2rem;
+  }
+  
+  .dashboard-header {
+    padding: 1.25rem 2rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .dashboard-content {
+    padding: 2.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  .dashboard-header {
+    padding: 1.5rem 2.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+}
+
+/* ===================================== */
+/* MOBILE HEADER AND NAVIGATION */
+/* ===================================== */
+
+/* Mobile header */
+.mobile-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--theme-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 50;
+}
+
+@media (min-width: 768px) {
+  .mobile-header {
+    display: none;
+  }
+}
+
+/* Mobile menu button */
+.mobile-menu-button {
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: var(--gray-700);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.mobile-menu-button:hover {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--purple-600);
+}
+
+.mobile-menu-button:focus {
+  outline: 2px solid var(--purple-300);
+  outline-offset: 2px;
+}
+
+/* Mobile navigation adjustments */
+@media (max-width: 767px) {
+  .dashboard-main {
+    padding-top: 64px; /* Account for mobile header */
+  }
+}
+
+/* ===================================== */
+/* RESPONSIVE FIXES FOR DROPDOWNS */
+/* ===================================== */
+
+/* Notification dropdown improvements */
+.notification-dropdown {
+  width: 360px;
+  max-width: 90vw;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--gray-100);
+  transition: background-color 0.2s ease;
+  min-height: 60px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.notification-item:hover {
+  background-color: var(--purple-50);
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-unread {
+  background-color: rgba(139, 92, 246, 0.05);
+  border-left: 3px solid var(--purple-500);
+}
+
+/* User menu dropdown */
+.user-menu-dropdown {
+  min-width: 200px;
+  max-height: 400px;
+}
+
+/* ===================================== */
+/* LAYOUT UTILITY CLASSES */
+/* ===================================== */
+
+/* Full height utilities with better browser support */
+.min-h-screen-safe {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.h-screen-safe {
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* Container utilities */
+.container-dashboard {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-dashboard {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-dashboard {
+    padding: 0 2rem;
+  }
+}
+
+/* Spacing utilities */
+.space-y-dashboard > * + * {
+  margin-top: 1.5rem;
+}
+
+.space-y-dashboard-sm > * + * {
+  margin-top: 1rem;
+}
+
+.space-y-dashboard-lg > * + * {
+  margin-top: 2rem;
+}
+
+/* ===================================== */
+/* MODAL AND OVERLAY IMPROVEMENTS */
+/* ===================================== */
+
+/* Modal responsive improvements */
+.modal-responsive {
+  width: 100%;
+  max-width: 90vw;
+  max-height: 90vh;
+  margin: 16px;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 640px) {
+  .modal-responsive {
+    max-width: 640px;
+    margin: 32px auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .modal-responsive {
+    max-width: 768px;
+  }
+}
+
+/* Modal content with proper scrolling */
+.modal-content-scrollable {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+/* ===================================== */
+/* LANDING PAGE DROPDOWN FIXES */
+/* ===================================== */
+
+/* Site header dropdown improvements */
+.site-header-dropdown {
+  min-width: 200px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--theme-border);
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 50;
+  animation: dropdown-enter 0.2s ease-out;
+}
+
+/* Site navigation dropdown items */
+.site-nav-dropdown-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--gray-700);
+  transition: all 0.2s ease;
+  gap: 8px;
+  min-height: 36px;
+}
+
+.site-nav-dropdown-item:hover {
+  background-color: var(--purple-50);
+  color: var(--purple-600);
+  text-decoration: none;
+}
+
+/* Resources dropdown specific styling */
+.resources-dropdown {
+  width: 240px;
+}
+
+.resources-dropdown-section {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.resources-dropdown-section:last-child {
+  border-bottom: none;
+}
+
+.resources-dropdown-title {
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--gray-500);
+  letter-spacing: 0.05em;
+}
+
+/* ===================================== */
+/* Z-INDEX LAYERING SYSTEM */
+/* ===================================== */
+
+/* Ensure proper layering of elements */
+.z-dropdown {
+  z-index: 50;
+}
+
+.z-modal {
+  z-index: 60;
+}
+
+.z-overlay {
+  z-index: 55;
+}
+
+.z-header {
+  z-index: 40;
+}
+
+.z-sidebar {
+  z-index: 30;
 }

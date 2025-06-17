@@ -22,7 +22,7 @@ export function Navigation({ activeScreen, setActiveScreen }: NavigationProps) {
 
   return (
     <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md">
-      <div className="bg-black/40 backdrop-blur-xl border-t border-white/10 p-2">
+      <div className="bg-white/95 backdrop-blur-xl border-t border-purple-200 p-2">
         <div className="grid grid-cols-4 gap-1">
           {navItems.slice(0, 4).map((item) => {
             const Icon = item.icon

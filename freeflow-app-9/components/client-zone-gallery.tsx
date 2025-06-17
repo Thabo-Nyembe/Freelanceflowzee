@@ -500,7 +500,7 @@ export function ClientZoneGallery() {
                 
                 {/* Lock Overlay for Locked Galleries */}
                 {gallery.status === 'locked' && (
-                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-purple-100/80 flex items-center justify-center">
                     <div className="text-center text-white">
                       <Lock className="h-12 w-12 mx-auto mb-3 opacity-80" />
                       <p className="text-lg font-medium">Payment Required</p>
@@ -516,11 +516,11 @@ export function ClientZoneGallery() {
 
                 {/* Analytics Overlay */}
                 <div className="absolute bottom-4 right-4 flex gap-2 text-white text-sm">
-                  <div className="bg-black/40 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1">
+                  <div className="bg-purple-600/90 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1">
                     <Eye className="h-3 w-3" />
                     {gallery.analytics.totalViews}
                   </div>
-                  <div className="bg-black/40 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1">
+                  <div className="bg-purple-600/90 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1">
                     <ImageIcon className="h-3 w-3" />
                     {gallery.images.length + gallery.videos.length}
                   </div>
@@ -651,15 +651,15 @@ export function ClientZoneGallery() {
                 ]
 
                 return (
-                  <div className="bg-black text-white">
+                  <div className="bg-white text-gray-900 border-2 border-purple-200">
                     {/* Header */}
-                    <div className="flex items-center justify-between p-6 border-b border-gray-800">
+                                          <div className="flex items-center justify-between p-6 border-b border-purple-200">
                       <div>
                         <h2 className="text-2xl font-light">{gallery.title}</h2>
-                        <p className="text-gray-400">{allItems.length} items</p>
+                                                  <p className="text-gray-600">{allItems.length} items</p>
                       </div>
                       <div className="flex items-center gap-4">
-                        <Button variant="outline" className="border-gray-700 text-white">
+                                                  <Button variant="outline" className="border-purple-300 text-gray-900 hover:bg-purple-50">
                           <Download className="h-4 w-4 mr-2" />
                           Download All
                         </Button>
@@ -691,14 +691,14 @@ export function ClientZoneGallery() {
                             {/* Video Play Button */}
                             {item.type === 'video' && (
                               <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="bg-black/60 rounded-full p-3">
+                                <div className="bg-purple-600/90 rounded-full p-3">
                                   <Play className="h-6 w-6 text-white" />
                                 </div>
                               </div>
                             )}
 
                             {/* Item Info Overlay */}
-                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end">
+                            <div className="absolute inset-0 bg-purple-100/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-end">
                               <div className="p-3 w-full">
                                 <p className="text-sm font-medium truncate">{item.name}</p>
                                 <div className="flex items-center justify-between text-xs text-gray-300 mt-1">

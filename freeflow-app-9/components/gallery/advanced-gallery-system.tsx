@@ -541,7 +541,7 @@ export function AdvancedGallerySystem() {
                       </div>
 
                       {/* Hover Actions */}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <div className="absolute inset-0 bg-purple-100/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                         <div className="flex gap-2">
                           <Button size="sm" variant="ghost" className="text-white hover:bg-white/20">
                             <Eye className="h-4 w-4" />
@@ -564,7 +564,7 @@ export function AdvancedGallerySystem() {
 
                       {/* Video Duration */}
                       {item.type === 'video' && item.metadata.duration && (
-                        <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                        <div className="absolute bottom-2 right-2 bg-purple-600 text-white text-xs px-2 py-1 rounded">
                           {Math.floor(item.metadata.duration / 60)}:{(item.metadata.duration % 60).toString().padStart(2, '0')}
                         </div>
                       )}

@@ -88,10 +88,10 @@ export function CodeViewer({ file, comments, onAddComment }: CodeViewerProps) {
       </div>
 
       {/* Code Editor */}
-      <div className="flex-1 overflow-auto bg-gray-900 rounded-lg">
+      <div className="flex-1 overflow-auto bg-white border-2 border-purple-200 rounded-lg">
         <div className="flex">
           {/* Line Numbers */}
-          <div className="bg-gray-800 px-4 py-4 text-right text-sm text-gray-400 select-none">
+          <div className="bg-purple-50 px-4 py-4 text-right text-sm text-gray-600 select-none">
             {lines.map((_, index) => (
               <div key={index} className="h-6 leading-6">
                 {index + 1}
@@ -110,7 +110,7 @@ export function CodeViewer({ file, comments, onAddComment }: CodeViewerProps) {
                 return (
                   <div
                     key={index}
-                    className={`h-6 leading-6 cursor-pointer hover:bg-gray-800 relative group ${
+                    className={`h-6 leading-6 cursor-pointer hover:bg-purple-50 relative group ${
                       hasComments ? "bg-yellow-900 bg-opacity-30" : ""
                     }`}
                     onClick={() => handleLineClick(lineNumber)}

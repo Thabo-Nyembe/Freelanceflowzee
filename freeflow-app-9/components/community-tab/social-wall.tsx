@@ -176,14 +176,14 @@ export function SocialWall() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="bg-black bg-opacity-50 text-white hover:bg-opacity-70"
+                className="bg-purple-600 text-white hover:bg-purple-700"
                 onClick={() => toggleVideoMute(post.id)}
               >
                 {mutedVideos.has(post.id) ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
               </Button>
             </div>
             {post.duration && (
-              <div className="absolute bottom-3 right-3 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+              <div className="absolute bottom-3 right-3 bg-purple-600 text-white text-xs px-2 py-1 rounded">
                 {formatTime(post.duration)}
               </div>
             )}

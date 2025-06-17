@@ -11,14 +11,14 @@ export function SiteHeader() {
   const [isResourcesDropdownOpen, setIsResourcesDropdownOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+    <header className="sticky top-0 z-50 w-full theme-header">
       <div className="container flex h-16 items-center">
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-8 flex items-center space-x-2">
-            <div className="p-1 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
+            <div className="p-1 rounded-lg theme-gradient-primary">
               <Rocket className="h-5 w-5 text-white" />
             </div>
-            <span className="hidden font-bold sm:inline-block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent text-lg">
+            <span className="hidden font-bold sm:inline-block theme-gradient-text text-lg">
               FreeflowZee
             </span>
           </Link>
@@ -27,117 +27,170 @@ export function SiteHeader() {
             {/* Product Dropdown */}
             <div className="relative">
               <button
-                className="flex items-center space-x-1 px-3 py-2 text-foreground/60 transition-colors hover:text-foreground/80 rounded-md hover:bg-gray-50"
+                className="flex items-center space-x-1 px-3 py-2 text-foreground/60 transition-colors hover:text-foreground/80 rounded-md hover:bg-purple-50"
                 onMouseEnter={() => setIsProductDropdownOpen(true)}
                 onMouseLeave={() => setIsProductDropdownOpen(false)}
+                onClick={() => setIsProductDropdownOpen(!isProductDropdownOpen)}
               >
                 <span>Product</span>
-                <ChevronDown className="h-3 w-3" />
+                <ChevronDown className={`h-3 w-3 transition-transform ${isProductDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
               
               {isProductDropdownOpen && (
-                <div 
-                  className="absolute top-full left-0 mt-1 w-64 bg-white rounded-lg shadow-lg border p-2 z-50"
-                  onMouseEnter={() => setIsProductDropdownOpen(true)}
-                  onMouseLeave={() => setIsProductDropdownOpen(false)}
-                >
-                  <div className="space-y-1">
-                    <Link href="/features" className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-50 transition-colors">
-                      <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center">
-                        <Rocket className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="font-medium text-gray-900">Features</div>
-                        <div className="text-xs text-gray-500">All platform capabilities</div>
-                      </div>
-                    </Link>
-                    <Link href="/demo" className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-50 transition-colors">
-                      <div className="w-8 h-8 bg-purple-100 rounded-md flex items-center justify-center">
-                        <Play className="h-4 w-4 text-purple-600" />
-                      </div>
-                      <div>
-                        <div className="font-medium text-gray-900">Live Demo</div>
-                        <div className="text-xs text-gray-500">Try before you buy</div>
-                      </div>
-                    </Link>
-                    <Link href="/pricing" className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-50 transition-colors">
-                      <div className="w-8 h-8 bg-green-100 rounded-md flex items-center justify-center">
-                        <span className="text-green-600 font-bold text-sm">$</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-gray-900">Pricing</div>
-                        <div className="text-xs text-gray-500">Plans for every team</div>
-                      </div>
-                    </Link>
+                <>
+                  {/* Backdrop for mobile */}
+                  <div 
+                    className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:hidden"
+                    onClick={() => setIsProductDropdownOpen(false)}
+                  />
+                  
+                  <div 
+                    className="site-header-dropdown absolute top-full left-0 mt-2 w-72 z-dropdown"
+                    onMouseEnter={() => setIsProductDropdownOpen(true)}
+                    onMouseLeave={() => setIsProductDropdownOpen(false)}
+                  >
+                    <div className="space-y-1 p-2">
+                      <Link 
+                        href="/features" 
+                        className="site-nav-dropdown-item"
+                        onClick={() => setIsProductDropdownOpen(false)}
+                      >
+                        <div className="w-8 h-8 theme-bg-purple-100 rounded-md flex items-center justify-center flex-shrink-0">
+                          <Rocket className="h-4 w-4 theme-text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium theme-text-gray-900">Features</div>
+                          <div className="text-xs theme-text-gray-600">All platform capabilities</div>
+                        </div>
+                      </Link>
+                      <Link 
+                        href="/demo" 
+                        className="site-nav-dropdown-item"
+                        onClick={() => setIsProductDropdownOpen(false)}
+                      >
+                        <div className="w-8 h-8 theme-bg-purple-100 rounded-md flex items-center justify-center flex-shrink-0">
+                          <Play className="h-4 w-4 theme-text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium theme-text-gray-900">Live Demo</div>
+                          <div className="text-xs theme-text-gray-600">Try before you buy</div>
+                        </div>
+                      </Link>
+                      <Link 
+                        href="/pricing" 
+                        className="site-nav-dropdown-item"
+                        onClick={() => setIsProductDropdownOpen(false)}
+                      >
+                        <div className="w-8 h-8 theme-bg-purple-100 rounded-md flex items-center justify-center flex-shrink-0">
+                          <span className="theme-text-primary font-bold text-sm">$</span>
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium theme-text-gray-900">Pricing</div>
+                          <div className="text-xs theme-text-gray-600">Plans for every team</div>
+                        </div>
+                      </Link>
+                    </div>
                   </div>
-                </div>
+                </>
               )}
             </div>
 
-            <Link href="/how-it-works" className="px-3 py-2 text-foreground/60 transition-colors hover:text-foreground/80 rounded-md hover:bg-gray-50">
+            <Link href="/how-it-works" className="px-3 py-2 text-foreground/60 transition-colors hover:text-foreground/80 rounded-md hover:bg-purple-50">
               How it Works
             </Link>
 
             {/* Resources Dropdown */}
             <div className="relative">
               <button
-                className="flex items-center space-x-1 px-3 py-2 text-foreground/60 transition-colors hover:text-foreground/80 rounded-md hover:bg-gray-50"
+                className="flex items-center space-x-1 px-3 py-2 text-foreground/60 transition-colors hover:text-foreground/80 rounded-md hover:bg-purple-50"
                 onMouseEnter={() => setIsResourcesDropdownOpen(true)}
                 onMouseLeave={() => setIsResourcesDropdownOpen(false)}
+                onClick={() => setIsResourcesDropdownOpen(!isResourcesDropdownOpen)}
               >
                 <span>Resources</span>
-                <ChevronDown className="h-3 w-3" />
+                <ChevronDown className={`h-3 w-3 transition-transform ${isResourcesDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
               
               {isResourcesDropdownOpen && (
-                <div 
-                  className="absolute top-full left-0 mt-1 w-64 bg-white rounded-lg shadow-lg border p-2 z-50"
-                  onMouseEnter={() => setIsResourcesDropdownOpen(true)}
-                  onMouseLeave={() => setIsResourcesDropdownOpen(false)}
-                >
-                  <div className="space-y-1">
-                    <Link href="/docs" className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-50 transition-colors">
-                      <div className="w-8 h-8 bg-indigo-100 rounded-md flex items-center justify-center">
-                        <span className="text-indigo-600 font-bold text-sm">📖</span>
+                <>
+                  {/* Backdrop for mobile */}
+                  <div 
+                    className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:hidden"
+                    onClick={() => setIsResourcesDropdownOpen(false)}
+                  />
+                  
+                  <div 
+                    className="site-header-dropdown resources-dropdown absolute top-full left-0 mt-2 w-72 z-dropdown"
+                    onMouseEnter={() => setIsResourcesDropdownOpen(true)}
+                    onMouseLeave={() => setIsResourcesDropdownOpen(false)}
+                  >
+                    <div className="space-y-1 p-2">
+                      <div className="resources-dropdown-section">
+                        <div className="resources-dropdown-title">Learn</div>
+                        <Link 
+                          href="/docs" 
+                          className="site-nav-dropdown-item"
+                          onClick={() => setIsResourcesDropdownOpen(false)}
+                        >
+                          <div className="w-8 h-8 theme-bg-purple-100 rounded-md flex items-center justify-center flex-shrink-0">
+                            <span className="theme-text-primary font-bold text-sm">📖</span>
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium theme-text-gray-900">Documentation</div>
+                            <div className="text-xs theme-text-gray-600">Complete guides & tutorials</div>
+                          </div>
+                        </Link>
+                        <Link 
+                          href="/api-docs" 
+                          className="site-nav-dropdown-item"
+                          onClick={() => setIsResourcesDropdownOpen(false)}
+                        >
+                          <div className="w-8 h-8 theme-bg-purple-100 rounded-md flex items-center justify-center flex-shrink-0">
+                            <span className="theme-text-primary font-bold text-sm">⚡</span>
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium theme-text-gray-900">API Reference</div>
+                            <div className="text-xs theme-text-gray-600">Integrate with your tools</div>
+                          </div>
+                        </Link>
                       </div>
-                      <div>
-                        <div className="font-medium text-gray-900">Documentation</div>
-                        <div className="text-xs text-gray-500">Complete guides & tutorials</div>
+                      
+                      <div className="resources-dropdown-section">
+                        <div className="resources-dropdown-title">Connect</div>
+                        <Link 
+                          href="/blog" 
+                          className="site-nav-dropdown-item"
+                          onClick={() => setIsResourcesDropdownOpen(false)}
+                        >
+                          <div className="w-8 h-8 theme-bg-purple-100 rounded-md flex items-center justify-center flex-shrink-0">
+                            <span className="theme-text-primary font-bold text-sm">✍️</span>
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium theme-text-gray-900">Blog</div>
+                            <div className="text-xs theme-text-gray-600">Tips, updates & insights</div>
+                          </div>
+                        </Link>
+                        <Link 
+                          href="/community" 
+                          className="site-nav-dropdown-item"
+                          onClick={() => setIsResourcesDropdownOpen(false)}
+                        >
+                          <div className="w-8 h-8 theme-bg-purple-100 rounded-md flex items-center justify-center flex-shrink-0">
+                            <span className="theme-text-primary font-bold text-sm">👥</span>
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium theme-text-gray-900">Community</div>
+                            <div className="text-xs theme-text-gray-600">Connect with creators</div>
+                          </div>
+                        </Link>
                       </div>
-                    </Link>
-                    <Link href="/api-docs" className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-50 transition-colors">
-                      <div className="w-8 h-8 bg-orange-100 rounded-md flex items-center justify-center">
-                        <span className="text-orange-600 font-bold text-sm">⚡</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-gray-900">API Reference</div>
-                        <div className="text-xs text-gray-500">Integrate with your tools</div>
-                      </div>
-                    </Link>
-                    <Link href="/blog" className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-50 transition-colors">
-                      <div className="w-8 h-8 bg-pink-100 rounded-md flex items-center justify-center">
-                        <span className="text-pink-600 font-bold text-sm">✍️</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-gray-900">Blog</div>
-                        <div className="text-xs text-gray-500">Tips, updates & insights</div>
-                      </div>
-                    </Link>
-                    <Link href="/community" className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-50 transition-colors">
-                      <div className="w-8 h-8 bg-yellow-100 rounded-md flex items-center justify-center">
-                        <span className="text-yellow-600 font-bold text-sm">👥</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-gray-900">Community</div>
-                        <div className="text-xs text-gray-500">Connect with creators</div>
-                      </div>
-                    </Link>
+                    </div>
                   </div>
-                </div>
+                </>
               )}
             </div>
 
-            <Link href="/support" className="px-3 py-2 text-foreground/60 transition-colors hover:text-foreground/80 rounded-md hover:bg-gray-50">
+            <Link href="/support" className="px-3 py-2 text-foreground/60 transition-colors hover:text-foreground/80 rounded-md hover:bg-purple-50">
               Support
             </Link>
           </nav>
@@ -154,10 +207,10 @@ export function SiteHeader() {
         
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           <Link href="/" className="mr-6 flex items-center space-x-2 md:hidden">
-            <div className="p-1 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
+            <div className="p-1 rounded-lg theme-gradient-primary">
               <Rocket className="h-5 w-5 text-white" />
             </div>
-            <span className="font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="font-bold theme-gradient-text">
               FreeflowZee
             </span>
           </Link>
@@ -170,7 +223,7 @@ export function SiteHeader() {
               <Button variant="ghost" size="sm">Sign In</Button>
             </Link>
             <Link href="/signup">
-              <Button size="sm" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
+              <Button size="sm" className="theme-button-primary">
                 Get Started Free
               </Button>
             </Link>
@@ -180,52 +233,96 @@ export function SiteHeader() {
       
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="border-t md:hidden bg-white">
-          <nav className="flex flex-col space-y-1 p-4 max-h-96 overflow-y-auto">
-            <div className="space-y-1">
-              <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Product</div>
-              <Link href="/features" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">
-                Features
-              </Link>
-              <Link href="/demo" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">
-                Live Demo
-              </Link>
-              <Link href="/pricing" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">
-                Pricing
-              </Link>
-              <Link href="/how-it-works" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">
-                How it Works
-              </Link>
-            </div>
+        <>
+          {/* Mobile menu backdrop */}
+          <div 
+            className="fixed inset-0 z-30 bg-black/20 backdrop-blur-sm md:hidden"
+            onClick={() => setIsMenuOpen(false)}
+          />
+          
+          <div className="border-t md:hidden bg-white relative z-40 shadow-lg">
+            <nav className="flex flex-col space-y-1 p-4 max-h-96 overflow-y-auto">
+              <div className="space-y-1">
+                <div className="px-3 py-2 text-xs font-semibold theme-text-gray-600 uppercase tracking-wider">Product</div>
+                <Link 
+                  href="/features" 
+                  className="block px-3 py-2 text-sm font-medium theme-text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-md"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Features
+                </Link>
+                <Link 
+                  href="/demo" 
+                  className="block px-3 py-2 text-sm font-medium theme-text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-md"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Live Demo
+                </Link>
+                <Link 
+                  href="/pricing" 
+                  className="block px-3 py-2 text-sm font-medium theme-text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-md"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Pricing
+                </Link>
+                <Link 
+                  href="/how-it-works" 
+                  className="block px-3 py-2 text-sm font-medium theme-text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-md"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  How it Works
+                </Link>
+              </div>
             
-            <div className="border-t pt-4 space-y-1">
-              <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Resources</div>
-              <Link href="/docs" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">
-                Documentation
-              </Link>
-              <Link href="/api-docs" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">
-                API Reference
-              </Link>
-              <Link href="/blog" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">
-                Blog
-              </Link>
-              <Link href="/community" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">
-                Community
-              </Link>
-              <Link href="/support" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">
-                Support
-              </Link>
-            </div>
-            
-            <div className="border-t pt-4">
-              <Link href="/contact" className="block w-full mb-2">
-                <Button variant="outline" size="sm" className="w-full justify-center">
-                  Contact Sales
-                </Button>
-              </Link>
-            </div>
-          </nav>
-        </div>
+              <div className="border-t pt-4 space-y-1">
+                <div className="px-3 py-2 text-xs font-semibold theme-text-gray-600 uppercase tracking-wider">Resources</div>
+                <Link 
+                  href="/docs" 
+                  className="block px-3 py-2 text-sm font-medium theme-text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-md"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Documentation
+                </Link>
+                <Link 
+                  href="/api-docs" 
+                  className="block px-3 py-2 text-sm font-medium theme-text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-md"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  API Reference
+                </Link>
+                <Link 
+                  href="/blog" 
+                  className="block px-3 py-2 text-sm font-medium theme-text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-md"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Blog
+                </Link>
+                <Link 
+                  href="/community" 
+                  className="block px-3 py-2 text-sm font-medium theme-text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-md"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Community
+                </Link>
+                <Link 
+                  href="/support" 
+                  className="block px-3 py-2 text-sm font-medium theme-text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-md"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Support
+                </Link>
+              </div>
+              
+              <div className="border-t pt-4">
+                <Link href="/contact" className="block w-full mb-2" onClick={() => setIsMenuOpen(false)}>
+                  <Button variant="outline" size="sm" className="w-full justify-center">
+                    Contact Sales
+                  </Button>
+                </Link>
+              </div>
+            </nav>
+          </div>
+        </>
       )}
     </header>
   )

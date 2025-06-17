@@ -116,7 +116,7 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
   }
 
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="theme-footer">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Content */}
         <div className="py-16">
@@ -273,7 +273,7 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
                       placeholder="Enter your email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-indigo-500"
+                      className="bg-white border-purple-300 text-gray-900 placeholder-gray-500 focus:border-purple-500"
                       required
                       suppressHydrationWarning
                     />
@@ -332,7 +332,7 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
                 </Button>
               </Link>
               <Link href="/contact">
-                <Button size="sm" variant="outline" className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white">
+                                    <Button size="sm" variant="outline" className="border-purple-300 text-white hover:bg-purple-50 hover:text-purple-900">
                   Contact Sales
                 </Button>
               </Link>

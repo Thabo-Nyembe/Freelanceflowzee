@@ -572,12 +572,12 @@ export default function GalleryPage() {
                           {/* Type indicator */}
                           <div className="absolute top-2 left-2 z-10">
                             {item.type === 'video' ? (
-                              <Badge className="bg-black/50 text-white">
+                              <Badge className="bg-purple-600 text-white">
                                 <Video className="w-3 h-3 mr-1" />
                                 Video
                               </Badge>
                             ) : (
-                              <Badge className="bg-black/50 text-white">
+                              <Badge className="bg-purple-600 text-white">
                                 <ImageIcon className="w-3 h-3 mr-1" />
                                 Photo
                               </Badge>
@@ -596,7 +596,7 @@ export default function GalleryPage() {
                           </div>
 
                           {/* Hover overlay */}
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                          <div className="absolute inset-0 bg-purple-100/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                             <div className="flex gap-2">
                               <Button size="sm" variant="ghost" className="text-white hover:bg-white/20">
                                 <ZoomIn className="h-4 w-4" />
@@ -611,7 +611,7 @@ export default function GalleryPage() {
                           
                           {/* Video duration */}
                           {item.type === 'video' && item.metadata?.duration && (
-                            <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                            <div className="absolute bottom-2 right-2 bg-purple-600 text-white text-xs px-2 py-1 rounded">
                               {Math.floor(item.metadata.duration / 60)}:{(item.metadata.duration % 60).toString().padStart(2, '0')}
                             </div>
                           )}
@@ -756,7 +756,7 @@ export default function GalleryPage() {
 
       {/* Lightbox Modal */}
       {isLightboxOpen && selectedCollection && filteredItems.length > 0 && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-white/95 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="relative w-full h-full flex items-center justify-center p-4">
             {/* Close button */}
             <Button
@@ -810,7 +810,7 @@ export default function GalleryPage() {
             </div>
 
             {/* Info panel */}
-            <div className="absolute bottom-4 left-4 right-4 bg-black/70 text-white p-4 rounded-lg">
+                            <div className="absolute bottom-4 left-4 right-4 bg-purple-600/90 text-white p-4 rounded-lg">
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="font-semibold text-lg mb-1">

@@ -225,7 +225,7 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
 
           {/* Overlay */}
           {overlay && overlayContent && (
-            <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+            <div className="absolute inset-0 bg-purple-100/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
               {overlayContent}
             </div>
           )}

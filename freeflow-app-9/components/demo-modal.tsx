@@ -105,7 +105,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl w-[95vw] h-[90vh] p-0 overflow-hidden bg-black">
+      <DialogContent className="max-w-4xl w-[95vw] h-[90vh] p-0 overflow-hidden bg-white border-2 border-purple-200">
         <DialogHeader className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/80 to-transparent p-4">
           <div className="flex items-center justify-between text-white">
             <DialogTitle className="text-xl font-semibold">

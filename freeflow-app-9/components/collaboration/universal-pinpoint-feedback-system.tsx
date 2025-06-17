@@ -666,7 +666,7 @@ export function UniversalPinpointFeedbackSystem({
                           <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${getPriorityColor(comment.priority)}`}></div>
                           
                           {/* Hover Preview */}
-                          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white p-2 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-purple-600/90 text-white p-2 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                             <div className="font-medium">{comment.userName}</div>
                             <div className="max-w-48 truncate">{comment.content}</div>
                           </div>
@@ -711,7 +711,7 @@ export function UniversalPinpointFeedbackSystem({
                               } hover:scale-x-150 transition-transform`}></div>
                               
                               {/* Timestamp Tooltip */}
-                              <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white p-2 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                              <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-purple-600/90 text-white p-2 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                                 <div className="font-medium">{comment.userName}</div>
                                 <div className="text-xs">{Math.floor(comment.position.timestamp! / 60)}:{String(Math.floor(comment.position.timestamp! % 60)).padStart(2, '0')}</div>
                                 <div className="max-w-48 truncate">{comment.content}</div>

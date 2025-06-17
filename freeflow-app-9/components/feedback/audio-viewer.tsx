@@ -467,7 +467,7 @@ export default function AudioViewer({
       {(showCommentDialog || editingComment) && (
         <>
           <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            className="fixed inset-0 bg-white/95 backdrop-blur-sm z-40"
             onClick={() => {
               setShowCommentDialog(false)
               setEditingComment(null)

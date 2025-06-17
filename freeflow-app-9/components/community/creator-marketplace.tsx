@@ -146,7 +146,7 @@ export function CreatorMarketplace() {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute top-3 left-3">
-                  <Badge className="bg-black bg-opacity-70 text-white">#{index + 1}</Badge>
+                  <Badge className="bg-purple-600 text-white">#{index + 1}</Badge>
                 </div>
                 <div className="absolute top-3 right-3 flex space-x-2">
                   <Button variant="ghost" size="sm" className="bg-white bg-opacity-80 hover:bg-opacity-100">

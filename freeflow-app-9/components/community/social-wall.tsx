@@ -124,13 +124,13 @@ export function SocialWall() {
               <Button
                 variant="ghost"
                 size="lg"
-                className="w-16 h-16 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 text-white"
+                className="w-16 h-16 rounded-full bg-purple-600 hover:bg-purple-700 text-white"
               >
                 <Play className="w-8 h-8 ml-1" />
               </Button>
             </div>
             {post.duration && (
-              <div className="absolute bottom-3 right-3 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+              <div className="absolute bottom-3 right-3 bg-purple-600 text-white text-xs px-2 py-1 rounded">
                 {post.duration}
               </div>
             )}

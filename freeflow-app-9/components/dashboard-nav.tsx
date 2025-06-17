@@ -103,7 +103,46 @@ const consolidatedNavigation = navigationItems.map(item => ({
 }));
 
 // ========================================
-// COMPREHENSIVE NOTIFICATION SYSTEM
+// IMPROVED DROPDOWN SYSTEM
+// ========================================
+
+interface DropdownProps {
+  trigger: React.ReactNode
+  children: React.ReactNode
+  align?: 'start' | 'end' | 'center'
+  side?: 'top' | 'bottom' | 'left' | 'right'
+  className?: string
+}
+
+function ImprovedDropdown({ trigger, children, align = 'start', side = 'bottom', className }: DropdownProps) {
+  return (
+    <DropdownMenu modal={false}>
+      <DropdownMenuTrigger asChild className="focus:outline-none">
+        {trigger}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align={align}
+        side={side}
+        className={cn(
+          'dropdown-menu',
+          'min-w-[220px] max-h-[400px] overflow-y-auto',
+          'bg-white/98 backdrop-blur-xl border border-gray-200',
+          'rounded-xl shadow-lg z-dropdown',
+          'animate-in slide-in-from-top-2 duration-200',
+          className
+        )}
+        sideOffset={8}
+        collisionPadding={16}
+        avoidCollisions
+      >
+        {children}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+// ========================================
+// ENHANCED NOTIFICATION SYSTEM
 // ========================================
 
 interface Notification {
@@ -250,32 +289,38 @@ type NotificationAction =
 const notificationReducer = (state: NotificationState, action: NotificationAction): NotificationState => {
   switch (action.type) {
     case 'MARK_READ':
-      const updatedNotifications = state.notifications.map(n => 
-        n.id === action.id ? { ...n, read: true } : n
-      )
       return {
         ...state,
-        notifications: updatedNotifications,
-        unreadCount: updatedNotifications.filter(n => !n.read).length
+        notifications: state.notifications.map(n => 
+          n.id === action.id ? { ...n, read: true } : n
+        ),
+        unreadCount: Math.max(0, state.unreadCount - 1)
       }
     case 'MARK_ALL_READ':
-      const allReadNotifications = state.notifications.map(n => ({ ...n, read: true }))
       return {
         ...state,
-        notifications: allReadNotifications,
+        notifications: state.notifications.map(n => ({ ...n, read: true })),
         unreadCount: 0
       }
     case 'DELETE':
-      const filteredNotifications = state.notifications.filter(n => n.id !== action.id)
+      const deletedNotification = state.notifications.find(n => n.id === action.id)
       return {
         ...state,
-        notifications: filteredNotifications,
-        unreadCount: filteredNotifications.filter(n => !n.read).length
+        notifications: state.notifications.filter(n => n.id !== action.id),
+        unreadCount: deletedNotification && !deletedNotification.read 
+          ? Math.max(0, state.unreadCount - 1) 
+          : state.unreadCount
       }
     case 'SET_FILTER':
-      return { ...state, selectedType: action.filter }
+      return {
+        ...state,
+        selectedType: action.filter
+      }
     case 'TOGGLE_EXPANDED':
-      return { ...state, isExpanded: !state.isExpanded }
+      return {
+        ...state,
+        isExpanded: !state.isExpanded
+      }
     case 'REFRESH_NOTIFICATIONS':
       return {
         ...state,
@@ -329,7 +374,7 @@ export function DashboardNav({ className, onLogout, user, setOpen }: DashboardNa
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="fixed inset-0 bg-black/50" onClick={toggleMobileMenu} />
+          <div className="fixed inset-0 bg-purple-100/80 backdrop-blur-sm" onClick={toggleMobileMenu} />
           <div className="fixed top-0 right-0 h-full w-80 bg-white shadow-xl">
             <div className="flex items-center justify-between p-4 border-b">
               <span className="font-semibold">Menu</span>

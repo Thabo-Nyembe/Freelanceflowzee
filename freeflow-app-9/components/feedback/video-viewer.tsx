@@ -189,7 +189,7 @@ export default function VideoViewer({
       {/* Video Container */}
       <div 
         ref={containerRef}
-        className="relative w-full h-96 bg-black cursor-pointer"
+        className="relative w-full h-96 bg-white border-2 border-purple-200 cursor-pointer"
         onClick={handleVideoClick}
         data-testid="video-viewer"
       >
@@ -210,7 +210,7 @@ export default function VideoViewer({
         
         {/* Fallback placeholder */}
         <div 
-          className="absolute inset-0 bg-gray-800 flex items-center justify-center text-white hidden"
+          className="absolute inset-0 bg-white border-2 border-purple-200 flex items-center justify-center text-gray-900 hidden"
           data-testid="video-placeholder"
         >
           <div className="text-center">
@@ -239,7 +239,7 @@ export default function VideoViewer({
         ))}
 
         {/* Video Controls Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white/90 to-transparent p-4 border-t border-purple-200">
           <div className="flex items-center gap-3 text-white">
             <button
               onClick={(e) => {
@@ -492,7 +492,7 @@ export default function VideoViewer({
       {(showCommentDialog || editingComment) && (
         <>
           <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            className="fixed inset-0 bg-white/95 backdrop-blur-sm z-40"
             onClick={() => {
               setShowCommentDialog(false)
               setEditingComment(null)

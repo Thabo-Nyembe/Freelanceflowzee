@@ -114,7 +114,7 @@ const PLATFORM_STATS = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-purple-50/30 to-white">
+    <div className="min-h-screen theme-gradient-background">
       {/* Structured Data */}
       <script
         type="application/ld+json"
@@ -137,11 +137,11 @@ export default function HomePage() {
             
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
               <div className="flex items-center justify-center gap-4 mb-2">
-                <div className="p-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full">
+                <div className="p-3 theme-gradient-primary rounded-full">
                   <Rocket className="w-8 h-8 md:w-12 md:h-12 text-white" />
                 </div>
               </div>
-              <span className="bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="theme-gradient-text">
                 Create, Share & Get Paid
               </span>
               <br />
@@ -157,7 +157,7 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
               <Button 
                 size="lg" 
-                className="bg-purple-600 hover:bg-purple-700 px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                className="theme-button-primary px-8 py-4 text-lg font-semibold"
                 asChild
               >
                 <Link href="/login?redirect=/dashboard">
@@ -168,7 +168,7 @@ export default function HomePage() {
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="border-purple-200 hover:border-purple-400 px-8 py-4 text-lg font-semibold hover:bg-purple-50 transition-all duration-300 group"
+                className="theme-button-secondary px-8 py-4 text-lg font-semibold group"
                 asChild
               >
                 <Link href="/demo">
@@ -179,7 +179,7 @@ export default function HomePage() {
               
               <Button 
                 size="lg"
-                className="bg-purple-600 hover:bg-purple-700 px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                className="theme-button-primary px-8 py-4 text-lg font-semibold"
                 asChild
               >
                 <Link href="/projects">

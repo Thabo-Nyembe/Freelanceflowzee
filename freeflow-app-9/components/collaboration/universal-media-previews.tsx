@@ -176,7 +176,7 @@ const VideoPreview = () => {
       </div>
       
       {/* Video Timeline */}
-      <div className="absolute bottom-4 left-4 right-4 bg-black/70 rounded-lg p-3">
+      <div className="absolute bottom-4 left-4 right-4 bg-purple-600/90 rounded-lg p-3">
         <div className="flex items-center gap-3 text-white text-sm mb-2">
           <span>{Math.floor(currentTime / 60)}:{(currentTime % 60).toString().padStart(2, '0')}</span>
           <div className="flex-1 relative">

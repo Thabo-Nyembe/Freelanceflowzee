@@ -272,7 +272,7 @@ export default function UniversalMediaPreviewsEnhanced() {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">{selectedFile.name}</h3>
                 
-                <div className="relative border rounded-lg overflow-hidden bg-black">
+                <div className="relative border rounded-lg overflow-hidden bg-white border-purple-200">
                   <div className="aspect-video flex items-center justify-center">
                     <div className="w-full h-full bg-gradient-to-br from-red-400 to-orange-600 flex items-center justify-center">
                       <div className="text-white text-center">
@@ -297,7 +297,7 @@ export default function UniversalMediaPreviewsEnhanced() {
                   </div>
 
                   {/* Video Controls */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white p-4">
+                                      <div className="absolute bottom-0 left-0 right-0 bg-purple-600/90 text-white p-4">
                     <div className="space-y-2">
                       {/* Timeline with comment markers */}
                       <div className="relative">
@@ -316,7 +316,7 @@ export default function UniversalMediaPreviewsEnhanced() {
                             onClick={() => setCurrentTime(comment.timestamp)}
                           >
                             <div className="w-3 h-3 bg-yellow-400 rounded-full border border-white shadow-sm mt-[-2px]" />
-                            <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-black/90 text-white rounded p-2 text-xs w-48 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-purple-600/90 text-white rounded p-2 text-xs w-48 opacity-0 group-hover:opacity-100 transition-opacity">
                               <div className="font-medium">{formatTime(comment.timestamp)}</div>
                               <div className="mt-1">{comment.content}</div>
                               <div className="text-gray-300 mt-1">{comment.author}</div>
@@ -394,7 +394,7 @@ export default function UniversalMediaPreviewsEnhanced() {
                         onClick={() => setCurrentTime(comment.timestamp)}
                       >
                         <div className="w-4 h-4 bg-orange-400 rounded-full border-2 border-white shadow-sm mb-2" />
-                        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black/90 text-white rounded p-2 text-xs w-48 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-purple-600/90 text-white rounded p-2 text-xs w-48 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="font-medium">{formatTime(comment.timestamp)}</div>
                           <div className="mt-1">{comment.content}</div>
                           <div className="text-gray-300 mt-1">{comment.author}</div>
