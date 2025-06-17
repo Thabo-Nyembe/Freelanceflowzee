@@ -168,7 +168,7 @@ test.describe('Payment System Edge Cases', () => {
       await page.goto('/payment?project=test-project');
       
       // Mock timeout response
-      // Simulate a 504 gateway timeout with Playwright's built-in delay
+      // Simulate a 504 gateway timeout with Playwright's built-in 10s delay
       await page.route('/api/payment/**', (route) =>
         route.fulfill({
           status: 504,
