@@ -254,26 +254,26 @@ export default function ApiDocsPage() {
       
       <main className="pt-16">
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-gray-900 to-blue-900 py-16 text-white">
+        <section className="bg-gradient-to-br from-purple-50 to-blue-50 py-16 text-purple-700 border-b-2 border-purple-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <Code className="w-16 h-16 text-blue-400 mx-auto mb-6" />
+              <Code className="w-16 h-16 text-purple-600 mx-auto mb-6" />
               <h1 className="text-4xl font-bold mb-4">
                 FreeflowZee API Documentation
               </h1>
-              <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+              <p className="text-xl text-purple-600 mb-8 max-w-3xl mx-auto">
                 Integrate FreeflowZee into your applications with our powerful REST API. 
                 Manage projects, process payments, and automate workflows programmatically.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
                 <Link href="/signup">
-                  <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+                  <Button size="lg" className="bg-purple-600 hover:bg-purple-700">
                     <Key className="w-5 h-5 mr-2" />
                     Get API Key
                   </Button>
                 </Link>
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-gray-900">
+                <Button size="lg" variant="outline" className="border-purple-600 text-purple-700 hover:bg-purple-600 hover:text-white">
                   <Download className="w-5 h-5 mr-2" />
                   Download SDKs
                 </Button>
@@ -281,11 +281,11 @@ export default function ApiDocsPage() {
 
               {/* Search Bar */}
               <div className="max-w-2xl mx-auto relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400 w-5 h-5" />
                 <Input
                   type="text"
                   placeholder="Search API endpoints..."
-                  className="pl-12 pr-4 py-3 text-lg bg-white/10 border-white/20 text-white placeholder-gray-300 focus:border-blue-400 rounded-lg"
+                  className="pl-12 pr-4 py-3 text-lg bg-white border-purple-200 text-purple-700 placeholder-purple-400 focus:border-purple-600 rounded-lg"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -410,13 +410,13 @@ export default function ApiDocsPage() {
 
                           {/* Code Block */}
                           <div className="relative">
-                            <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
+                            <pre className="bg-purple-50 text-purple-800 p-4 rounded-lg overflow-x-auto text-sm border-2 border-purple-200">
                               <code>{currentCodeExample[selectedLanguage as keyof typeof currentCodeExample]}</code>
                             </pre>
                             <Button
                               size="sm"
                               variant="outline"
-                              className="absolute top-2 right-2 bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700"
+                              className="absolute top-2 right-2 bg-white border-purple-200 text-purple-700 hover:bg-purple-100"
                               onClick={() => copyToClipboard(currentCodeExample[selectedLanguage as keyof typeof currentCodeExample])}
                             >
                               {copiedCode === currentCodeExample[selectedLanguage as keyof typeof currentCodeExample] ? (

@@ -173,7 +173,7 @@ export default function DocsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <SiteHeader />
+      <SiteHeader variant="transparent" />
       
       <main className="pt-16">
         {/* Hero Section */}

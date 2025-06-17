@@ -106,8 +106,8 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl w-[95vw] h-[90vh] p-0 overflow-hidden bg-white border-2 border-purple-200">
-        <DialogHeader className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/80 to-transparent p-4">
-          <div className="flex items-center justify-between text-white">
+        <DialogHeader className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-white to-transparent p-4 border-b border-purple-200">
+          <div className="flex items-center justify-between text-purple-700">
             <DialogTitle className="text-xl font-semibold">
               FreeflowZee Platform Demo
             </DialogTitle>
@@ -115,7 +115,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="text-white hover:bg-white/20"
+              className="text-purple-700 hover:bg-purple-100"
             >
               <X className="h-6 w-6" />
             </Button>
@@ -124,49 +124,49 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
 
         <div className="relative w-full h-full">
           {/* Demo Video Content */}
-          <div className="relative w-full h-full bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center">
+          <div className="relative w-full h-full bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 flex items-center justify-center border-2 border-purple-200">
             
             {/* Animated Demo Content - Following Context7 pattern */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-8">
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-purple-700 p-8">
               <div className="max-w-2xl mx-auto text-center space-y-8">
                 <div className="animate-pulse">
                   <h2 className="text-4xl font-bold mb-4">
                     Welcome to FreeflowZee
                   </h2>
-                  <p className="text-xl text-gray-300 mb-8">
+                  <p className="text-xl text-purple-600 mb-8">
                     The ultimate platform for creators and freelancers
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 animate-fade-in-up delay-300">
+                  <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 animate-fade-in-up delay-300 border-2 border-purple-200">
                     <div className="w-12 h-12 bg-indigo-500 rounded-lg mx-auto mb-4 flex items-center justify-center">
                       <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                       </svg>
                     </div>
-                    <h3 className="font-semibold mb-2">Upload Files</h3>
-                    <p className="text-sm text-gray-300">Drag & drop up to 10GB</p>
+                    <h3 className="font-semibold mb-2 text-purple-700">Upload Files</h3>
+                    <p className="text-sm text-purple-600">Drag & drop up to 10GB</p>
                   </div>
 
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 animate-fade-in-up delay-500">
+                  <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 animate-fade-in-up delay-500 border-2 border-purple-200">
                     <div className="w-12 h-12 bg-purple-500 rounded-lg mx-auto mb-4 flex items-center justify-center">
                       <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2m0 0H9a2 2 0 01-2-2V10a2 2 0 012-2h8m0 0V9a2 2 0 012-2h2a2 2 0 012 2v6a2 2 0 01-2 2h-2" />
                       </svg>
                     </div>
-                    <h3 className="font-semibold mb-2">Collaborate</h3>
-                    <p className="text-sm text-gray-300">Real-time feedback & comments</p>
+                    <h3 className="font-semibold mb-2 text-purple-700">Collaborate</h3>
+                    <p className="text-sm text-purple-600">Real-time feedback & comments</p>
                   </div>
 
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 animate-fade-in-up delay-700">
+                  <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 animate-fade-in-up delay-700 border-2 border-purple-200">
                     <div className="w-12 h-12 bg-green-500 rounded-lg mx-auto mb-4 flex items-center justify-center">
                       <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                       </svg>
                     </div>
-                    <h3 className="font-semibold mb-2">Get Paid</h3>
-                    <p className="text-sm text-gray-300">Automated invoicing & payments</p>
+                    <h3 className="font-semibold mb-2 text-purple-700">Get Paid</h3>
+                    <p className="text-sm text-purple-600">Automated invoicing & payments</p>
                   </div>
                 </div>
 
@@ -176,7 +176,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
                       onClose()
                       window.location.href = '/signup'
                     }}
-                    className="bg-white text-indigo-900 hover:bg-gray-100 px-8 py-3 text-lg font-semibold"
+                    className="bg-purple-600 text-white hover:bg-purple-700 px-8 py-3 text-lg font-semibold"
                   >
                     Start Your Free Trial
                   </Button>
@@ -199,13 +199,13 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
             </video>
 
             {/* Video Controls */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-              <div className="flex items-center space-x-4 text-white">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white to-transparent p-4 border-t border-purple-200">
+              <div className="flex items-center space-x-4 text-purple-700">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={togglePlayPause}
-                  className="text-white hover:bg-white/20"
+                  className="text-purple-700 hover:bg-purple-100"
                 >
                   {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
                 </Button>
@@ -214,7 +214,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
                   variant="ghost"
                   size="icon"
                   onClick={toggleMute}
-                  className="text-white hover:bg-white/20"
+                  className="text-purple-700 hover:bg-purple-100"
                 >
                   {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
                 </Button>
@@ -227,7 +227,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
                     max={duration || 0}
                     value={currentTime}
                     onChange={handleSeek}
-                    className="flex-1 h-1 bg-white/30 rounded-lg appearance-none slider"
+                    className="flex-1 h-1 bg-purple-200 rounded-lg appearance-none slider"
                   />
                   <span className="text-sm">{formatTime(duration)}</span>
                 </div>
@@ -240,7 +240,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
                       document.documentElement.requestFullscreen()
                     }
                   }}
-                  className="text-white hover:bg-white/20"
+                  className="text-purple-700 hover:bg-purple-100"
                 >
                   <Maximize2 className="h-5 w-5" />
                 </Button>

@@ -424,14 +424,14 @@ const EnhancedCommunityHub = () => {
             )}
 
             {post.mediaType === 'video' && (
-              <div className="aspect-video bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 relative flex items-center justify-center">
-                <div className="text-center text-white">
-                  <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4 mx-auto cursor-pointer hover:bg-white/30 transition-colors">
+              <div className="aspect-video bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 relative flex items-center justify-center border-2 border-purple-200">
+                <div className="text-center text-purple-700">
+                  <div className="w-16 h-16 bg-purple-200 rounded-full flex items-center justify-center mb-4 mx-auto cursor-pointer hover:bg-purple-300 transition-colors">
                     {isPlaying ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8 ml-1" />}
                   </div>
-                  <p className="text-sm opacity-80">Video Content • {post.duration}</p>
+                  <p className="text-sm text-purple-600">Video Content • {post.duration}</p>
                 </div>
-                <div className="absolute top-3 right-3 bg-purple-600/90 backdrop-blur-sm px-2 py-1 rounded text-white text-xs">
+                <div className="absolute top-3 right-3 bg-purple-600 px-2 py-1 rounded text-white text-xs">
                   {post.duration}
                 </div>
               </div>
@@ -460,16 +460,16 @@ const EnhancedCommunityHub = () => {
             )}
 
             {post.mediaType === 'audio' && (
-              <div className="p-6 bg-gradient-to-r from-green-400 to-blue-500">
+              <div className="p-6 bg-gradient-to-r from-green-50 to-blue-50 border-2 border-purple-200">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors">
-                    {audioPlaying === post.id ? <Pause className="w-6 h-6 text-white" /> : <Play className="w-6 h-6 text-white ml-1" />}
+                  <div className="w-12 h-12 bg-purple-200 rounded-full flex items-center justify-center cursor-pointer hover:bg-purple-300 transition-colors">
+                    {audioPlaying === post.id ? <Pause className="w-6 h-6 text-purple-700" /> : <Play className="w-6 h-6 text-purple-700 ml-1" />}
                   </div>
-                  <div className="flex-1 text-white">
+                  <div className="flex-1 text-purple-700">
                     <p className="font-semibold">Audio Post</p>
-                    <p className="text-sm opacity-80">Duration: {post.duration}</p>
+                    <p className="text-sm text-purple-600">Duration: {post.duration}</p>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
+                  <Button variant="ghost" size="sm" className="text-purple-700 hover:bg-purple-100">
                     {audioPlaying === post.id ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                   </Button>
                 </div>
@@ -479,8 +479,8 @@ const EnhancedCommunityHub = () => {
                   {post.waveform?.map((height, index) => (
                     <div
                       key={index}
-                      className={`w-2 bg-white/30 rounded-t transition-all duration-300 ${
-                        audioPlaying === post.id && index < 5 ? 'bg-white' : ''
+                      className={`w-2 bg-purple-300 rounded-t transition-all duration-300 ${
+                        audioPlaying === post.id && index < 5 ? 'bg-purple-600' : ''
                       }`}
                       style={{ height: `${height * 100}%` }}
                     />

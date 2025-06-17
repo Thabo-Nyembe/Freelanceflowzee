@@ -33,11 +33,27 @@ export function SiteHeader({
   const pathname = usePathname()
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
+    // Force initial check
+    const checkScrollPosition = () => {
+      const scrollPosition = window.pageYOffset || document.documentElement.scrollTop
+      const shouldShowBackground = scrollPosition > 10
+      setIsScrolled(shouldShowBackground)
     }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+
+    // Check immediately on mount
+    checkScrollPosition()
+
+    // Set up scroll listener
+    const handleScroll = () => {
+      requestAnimationFrame(checkScrollPosition)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
   }, [])
 
   const handleEmailClick = () => {
@@ -49,15 +65,23 @@ export function SiteHeader({
   }
 
   const getNavClassName = () => {
-    const baseClasses = "fixed top-0 w-full z-50 transition-all duration-300"
+    const baseClasses = "fixed top-0 w-full z-50 transition-all duration-300 ease-in-out"
     
     switch (variant) {
       case 'transparent':
-        return `${baseClasses} ${isScrolled ? 'bg-white/95 backdrop-blur-md shadow-lg' : 'bg-transparent'}`
+        if (isScrolled) {
+          return `${baseClasses} bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200`
+        } else {
+          return `${baseClasses} bg-transparent`
+        }
       case 'minimal':
         return `${baseClasses} bg-white border-b border-gray-200`
       default:
-        return `${baseClasses} ${isScrolled ? 'bg-white/95 backdrop-blur-md shadow-lg' : 'bg-white border-b border-gray-200'}`
+        if (isScrolled) {
+          return `${baseClasses} bg-white/95 backdrop-blur-md shadow-lg`
+        } else {
+          return `${baseClasses} bg-white border-b border-gray-200`
+        }
     }
   }
 

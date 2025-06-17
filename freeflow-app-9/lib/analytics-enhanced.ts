@@ -50,7 +50,7 @@ class AnalyticsService {
           height: window.innerHeight,
         },
         device: this.getDeviceInfo(),
-        performance: this.getPerformanceMetrics(),
+        performance: this.calculateErrorMetrics({}),
       },
       aiContext: this.generateAIContext(event, properties),
     }
@@ -173,7 +173,7 @@ class AnalyticsService {
       summary: {
         users: this.calculateUserMetrics(rawData),
         revenue: this.calculateRevenueMetrics(rawData),
-        performance: this.calculatePerformanceMetrics(),
+        performance: this.calculateErrorMetrics({}),
         errors: this.calculateErrorMetrics(rawData),
       },
       trends: this.identifyTrends(rawData),
@@ -334,15 +334,15 @@ class AnalyticsService {
 
   private async sendToGoogleAnalytics(event: AnalyticsEvent) {
     // Send to Google Analytics 4
-    if (typeof gtag !== 'undefined') {
-      gtag('event', event.event, event.properties)
+    if (typeof (window as any).gtag !== 'undefined') {
+      (window as any).gtag('event', event.event, event.properties)
     }
   }
 
   private async sendToMixpanel(event: AnalyticsEvent) {
     // Send to Mixpanel
-    if (typeof mixpanel !== 'undefined') {
-      mixpanel.track(event.event, event.properties)
+    if (typeof (window as any).mixpanel !== 'undefined') {
+      (window as any).mixpanel.track(event.event, event.properties)
     }
   }
 

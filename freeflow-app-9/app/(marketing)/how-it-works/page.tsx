@@ -81,7 +81,7 @@ export default function HowItWorksPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
-      <SiteHeader />
+      <SiteHeader variant="transparent" />
       
       <main className="pt-16">
         {/* Hero Section */}

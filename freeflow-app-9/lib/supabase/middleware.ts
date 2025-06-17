@@ -57,7 +57,8 @@ export async function updateSession(request: NextRequest) {
     '/login', '/signup', '/', '/landing', '/payment', '/contact', '/support', 
     '/privacy', '/terms', '/blog', '/newsletter', '/demo', '/community', 
     '/features', '/how-it-works', '/docs', '/tutorials', '/api-docs', '/unified',
-    '/book-appointment'
+    '/book-appointment', '/resources', '/tools', '/pricing', '/careers', '/press',
+    '/changelog', '/status'
   ]
   const isPublicRoute = publicRoutes.some(route => 
     request.nextUrl.pathname === route || 

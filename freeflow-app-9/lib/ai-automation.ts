@@ -154,7 +154,7 @@ class AIAutomationService {
       text: await this.generateText(request, context),
       images: await this.generateImages(request, context),
       code: await this.generateCode(request, context),
-      documentation: await this.generateDocumentation(request, context),
+      documentation: await this.generateDocumentation(request),
       presentations: await this.generatePresentations(request, context),
       optimization: await this.optimizeContent(request, context),
     }

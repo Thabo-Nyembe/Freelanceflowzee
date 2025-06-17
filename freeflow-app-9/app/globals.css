@@ -1511,9 +1511,6 @@ select:focus {
   border-radius: 12px;
   background: white;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
 }
 
 @media (min-width: 640px) {
@@ -1688,3 +1685,229 @@ button[class*="bg-gray-900"]:hover,
   background: var(--purple-700) !important;
   color: white !important;
 }
+
+/* Additional overrides for specific dark patterns */
+*[class*="from-gray-900"],
+*[class*="via-gray-900"],
+*[class*="to-gray-900"],
+*[class*="from-black"],
+*[class*="via-black"],
+*[class*="to-black"],
+*[class*="from-slate-900"],
+*[class*="via-slate-900"],
+*[class*="to-slate-900"] {
+  background: var(--purple-50) !important;
+  color: var(--purple-700) !important;
+  border: 2px solid var(--purple-200) !important;
+}
+
+/* Override video and media dark backgrounds */
+*[class*="from-purple-900"],
+*[class*="via-purple-900"],
+*[class*="to-purple-900"],
+*[class*="from-blue-900"],
+*[class*="via-blue-900"],
+*[class*="to-blue-900"],
+*[class*="from-indigo-900"],
+*[class*="via-indigo-900"],
+*[class*="to-indigo-900"] {
+  background: linear-gradient(135deg, var(--purple-50) 0%, var(--blue-50) 50%, var(--indigo-50) 100%) !important;
+  color: var(--purple-700) !important;
+  border: 2px solid var(--purple-200) !important;
+}
+
+/* Ensure text visibility on problematic backgrounds only */
+*[class*="bg-black"] *[class*="text-white"],
+*[class*="bg-gray-900"] *[class*="text-white"],
+*[class*="from-gray-900"] *[class*="text-white"],
+*[class*="from-black"] *[class*="text-white"] {
+  color: var(--purple-700) !important;
+}
+
+/* Allow white text on colored backgrounds (buttons, badges, etc.) */
+*[class*="bg-purple"] *[class*="text-white"],
+*[class*="bg-blue"] *[class*="text-white"],
+*[class*="bg-green"] *[class*="text-white"],
+*[class*="bg-red"] *[class*="text-white"],
+*[class*="bg-indigo"] *[class*="text-white"],
+*[class*="from-purple"] *[class*="text-white"],
+*[class*="from-blue"] *[class*="text-white"],
+*[class*="from-green"] *[class*="text-white"] {
+  color: white !important;
+}
+
+/* Override code syntax highlighting with light theme */
+pre[class*="bg-gray-900"],
+code[class*="bg-gray-900"] {
+  background: var(--purple-50) !important;
+  color: var(--purple-800) !important;
+  border: 2px solid var(--purple-200) !important;
+}
+
+/* ===================================== */
+/* ENHANCED HEADER TRANSPARENCY FONT VISIBILITY FIXES */
+/* ===================================== */
+
+/* Ensure text visibility for transparent header on all backgrounds */
+nav[data-testid="site-header"] {
+  /* Enhanced text contrast for better visibility */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Transparent header text visibility enhancements */
+nav[data-testid="site-header"].bg-transparent button,
+nav[data-testid="site-header"].bg-transparent a,
+nav[data-testid="site-header"].bg-transparent span {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  font-weight: 500 !important;
+}
+
+/* Dropdown menu visibility on transparent header */
+[data-radix-popper-content-wrapper] {
+  z-index: 9999 !important;
+}
+
+/* Dropdown menu items visibility */
+[data-radix-dropdown-menu-content] {
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+[data-radix-dropdown-menu-item] {
+  color: rgb(55, 65, 81) !important;
+  font-weight: 500 !important;
+}
+
+[data-radix-dropdown-menu-item]:hover {
+  background: rgba(99, 102, 241, 0.1) !important;
+  color: rgb(99, 102, 241) !important;
+}
+
+/* Mobile menu visibility on transparent header */
+nav[data-testid="site-header"].bg-transparent [data-testid="mobile-menu"] {
+  background: rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Enhanced button hover effects for transparent header */
+nav[data-testid="site-header"].bg-transparent button:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+  backdrop-filter: blur(8px) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Logo visibility enhancement on transparent header */
+nav[data-testid="site-header"].bg-transparent [data-testid="nav-logo"] {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+  font-weight: 700 !important;
+}
+
+/* Get Started button visibility on transparent header */
+nav[data-testid="site-header"].bg-transparent .bg-indigo-600 {
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* ===================================== */
+
+/* Header theme classes for sticky navigation */
+.theme-header {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Theme gradient classes for consistent branding */
+.theme-gradient-primary {
+  background: linear-gradient(135deg, #8b5cf6, #a855f7) !important;
+}
+
+.theme-gradient-text {
+  background: linear-gradient(135deg, #8b5cf6, #a855f7) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+.theme-text-primary {
+  color: #8b5cf6 !important;
+}
+
+.theme-text-gray-900 {
+  color: #111827 !important;
+}
+
+.theme-text-gray-600 {
+  color: #4b5563 !important;
+}
+
+.theme-bg-purple-100 {
+  background-color: #f3e8ff !important;
+}
+
+.theme-border-purple {
+  border-color: rgba(139, 92, 246, 0.2) !important;
+}
+
+/* Header dropdown styling */
+.site-header-dropdown {
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(139, 92, 246, 0.15) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+  z-index: 9999 !important;
+}
+
+.site-nav-dropdown-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 12px 16px !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+}
+
+.site-nav-dropdown-item:hover {
+  background: rgba(139, 92, 246, 0.08) !important;
+  transform: translateY(-1px) !important;
+}
+
+.resources-dropdown-section {
+  border-bottom: 1px solid rgba(139, 92, 246, 0.1) !important;
+  padding-bottom: 8px !important;
+  margin-bottom: 8px !important;
+}
+
+.resources-dropdown-section:last-child {
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.resources-dropdown-title {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  color: #8b5cf6 !important;
+  margin-bottom: 8px !important;
+  padding: 0 16px !important;
+}
+
+/* High z-index for dropdowns */
+.z-dropdown {
+  z-index: 9999 !important;
+}
+
+/* ===================================== */
+
+
