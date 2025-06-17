@@ -169,7 +169,12 @@ test.describe('Payment System Edge Cases', () => {
       
       // Mock timeout response
       await page.route('/api/payment/**', async (route) => {
-        await new Promise(resolve => setTimeout(resolve, 10000)); // Simulate timeout
+        await route.fulfill({
+          status: 504,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: 'timeout' }),
+          delay: 10000
+        });
       });
       
       // Fill and submit payment
@@ -257,16 +262,15 @@ test.describe('File Upload Edge Cases', () => {
       
       // Mock large file upload with progress tracking
       await page.route('/api/storage/upload', async (route) => {
-        // Simulate progressive upload
-        await new Promise(resolve => setTimeout(resolve, 1000));
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ 
+          body: JSON.stringify({
             success: true,
             fileId: 'large-file-123',
             size: 9.5 * 1024 * 1024 * 1024 // 9.5GB
-          })
+          }),
+          delay: 1000
         });
       });
       
@@ -472,8 +476,7 @@ test.describe('Network and Connectivity Edge Cases', () => {
     test('When network is slow, then loading states are shown appropriately', async ({ page, context }) => {
       // Arrange - Simulate slow network
       await context.route('**/*', async (route) => {
-        await new Promise(resolve => setTimeout(resolve, 3000)); // 3s delay
-        await route.continue();
+        await route.continue({ delay: 3000 });
       });
       
       // Act - Navigate to data-heavy page
