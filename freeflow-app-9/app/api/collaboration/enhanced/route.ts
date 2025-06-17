@@ -869,7 +869,7 @@ function generateSecurePassword(): string {
 }
 
 async function generateDownloadToken(supabase: any, data: any): Promise<string> {
-  const token = `dt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  const token = `dt_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
   
   await supabase.from('download_tokens').insert({
     token,

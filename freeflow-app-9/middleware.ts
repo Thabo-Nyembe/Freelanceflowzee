@@ -104,9 +104,10 @@ export async function middleware(request: NextRequest) {
   }
 
   // Get client IP for rate limiting
-  const ip = request.headers.get('x-forwarded-for') || 
-    request.headers.get('x-forwarded-for')?.split(',')[0] || 
-    request.headers.get('x-real-ip') || 
+  const forwardedFor = request.headers.get('x-forwarded-for')
+  const ip = forwardedFor?.split(',')[0]?.trim() ||
+    request.headers.get('x-real-ip') ||
+    request.ip ||
     '127.0.0.1'
 
   // Apply rate limiting to auth endpoints

@@ -217,6 +217,17 @@ npm run test:debug
 npm run test:ui
 ```
 
+### Running Tests in Docker
+
+If Playwright isn't available on your system, you can run the entire test suite
+inside a Docker container using the provided script:
+
+```bash
+./scripts/docker-test-env.sh        # runs `npm test` in Docker
+./scripts/docker-test-env.sh "npm run test:ui"  # pass custom test command
+```
+
+
 ### Test Coverage
 - ✅ **Authentication flows** - Login, signup, logout
 - ✅ **Dashboard functionality** - Navigation, stats, quick actions

@@ -412,7 +412,9 @@ class DeploymentAutomation {
   }
 
   private generateDeploymentId(): string {
-    return `deploy_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    // use slice instead of deprecated substr
+    const randomPart = Math.random().toString(36).slice(2, 11)
+    return `deploy_${Date.now()}_${randomPart}`
   }
 
   private async runPreDeploymentChecks(result: DeploymentResult): Promise<void> {

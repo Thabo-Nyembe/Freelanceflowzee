@@ -228,7 +228,7 @@ async function verifyAPIEndpoints() {
 async function verifyComponents() {
   const componentFiles = [
     'components/analytics/analytics-dashboard.tsx',
-    'hooks/use-analytics.ts'
+    'hooks/use-analytics.tsx'
   ];
 
   componentFiles.forEach(file => {

@@ -35,7 +35,9 @@ class AnalyticsClient {
   }
 
   private generateSessionId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    // use slice instead of deprecated substr
+    const randomPart = Math.random().toString(36).slice(2, 11)
+    return `${Date.now()}-${randomPart}`
   }
 
   private initializeIfNeeded() {
