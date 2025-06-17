@@ -22,7 +22,11 @@ import {
   Clock,
   Target,
   Rocket,
-  BookOpen
+  BookOpen,
+  Upload,
+  Palette,
+  Share2,
+  CreditCard
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -132,6 +136,11 @@ export default function HomePage() {
             </Badge>
             
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+              <div className="flex items-center justify-center gap-4 mb-2">
+                <div className="p-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full">
+                  <Rocket className="w-8 h-8 md:w-12 md:h-12 text-white" />
+                </div>
+              </div>
               <span className="bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 Create, Share & Get Paid
               </span>
@@ -196,6 +205,199 @@ export default function HomePage() {
                 Setup in 2 Minutes
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Interactive How It Works Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              How FreeflowZee Works
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              From upload to payment in just 4 simple steps. See how thousands of creatives 
+              are streamlining their workflow and getting paid faster.
+            </p>
+          </div>
+
+          {/* Process Overview */}
+          <div className="max-w-5xl mx-auto mb-16">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              <div className="group hover:scale-105 transition-transform duration-300">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 transition-colors">
+                  <Upload className="w-8 h-8 text-purple-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900">Upload</h3>
+                <p className="text-sm text-gray-600">Add your files</p>
+              </div>
+              <div className="group hover:scale-105 transition-transform duration-300">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 transition-colors">
+                  <Palette className="w-8 h-8 text-purple-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900">Customize</h3>
+                <p className="text-sm text-gray-600">Brand your pages</p>
+              </div>
+              <div className="group hover:scale-105 transition-transform duration-300">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 transition-colors">
+                  <Share2 className="w-8 h-8 text-purple-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900">Share</h3>
+                <p className="text-sm text-gray-600">Send to clients</p>
+              </div>
+              <div className="group hover:scale-105 transition-transform duration-300">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 transition-colors">
+                  <CreditCard className="w-8 h-8 text-purple-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900">Get Paid</h3>
+                <p className="text-sm text-gray-600">Receive payments</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Interactive Step Details */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm hover:bg-purple-50/50">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-full">
+                    <span className="text-purple-600 font-bold text-sm">1</span>
+                  </div>
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <Upload className="w-5 h-5 text-purple-600" />
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload Your Work</h3>
+                <p className="text-gray-600 text-sm mb-4">Upload creative projects, documents, and files to your secure workspace.</p>
+                <ul className="space-y-2 mb-4">
+                  {[
+                    "Drag & drop uploads",
+                    "All file types supported", 
+                    "Auto organization",
+                    "Version control"
+                  ].map((detail, idx) => (
+                    <li key={idx} className="flex items-center text-xs text-gray-600">
+                      <CheckCircle className="w-3 h-3 mr-2 text-purple-500 flex-shrink-0" />
+                      {detail}
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex items-center text-xs text-gray-500">
+                  <Clock className="w-3 h-3 mr-1" />
+                  <span>2 minutes</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm hover:bg-purple-50/50">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-full">
+                    <span className="text-purple-600 font-bold text-sm">2</span>
+                  </div>
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <Palette className="w-5 h-5 text-purple-600" />
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Customize Pages</h3>
+                <p className="text-gray-600 text-sm mb-4">Brand your project pages with custom colors, logos, and layouts.</p>
+                <ul className="space-y-2 mb-4">
+                  {[
+                    "Custom branding",
+                    "Professional templates",
+                    "Mobile responsive", 
+                    "White-label options"
+                  ].map((detail, idx) => (
+                    <li key={idx} className="flex items-center text-xs text-gray-600">
+                      <CheckCircle className="w-3 h-3 mr-2 text-purple-500 flex-shrink-0" />
+                      {detail}
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex items-center text-xs text-gray-500">
+                  <Clock className="w-3 h-3 mr-1" />
+                  <span>5 minutes</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm hover:bg-purple-50/50">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-full">
+                    <span className="text-purple-600 font-bold text-sm">3</span>
+                  </div>
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <Share2 className="w-5 h-5 text-purple-600" />
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Share with Clients</h3>
+                <p className="text-gray-600 text-sm mb-4">Send secure, password-protected links to clients for review and approval.</p>
+                <ul className="space-y-2 mb-4">
+                  {[
+                    "Secure sharing links",
+                    "Password protection",
+                    "Access controls",
+                    "Real-time notifications"
+                  ].map((detail, idx) => (
+                    <li key={idx} className="flex items-center text-xs text-gray-600">
+                      <CheckCircle className="w-3 h-3 mr-2 text-purple-500 flex-shrink-0" />
+                      {detail}
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex items-center text-xs text-gray-500">
+                  <Clock className="w-3 h-3 mr-1" />
+                  <span>1 minute</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm hover:bg-purple-50/50">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-full">
+                    <span className="text-purple-600 font-bold text-sm">4</span>
+                  </div>
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <CreditCard className="w-5 h-5 text-purple-600" />
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Get Paid Instantly</h3>
+                <p className="text-gray-600 text-sm mb-4">Clients approve and pay for projects directly through your branded pages.</p>
+                <ul className="space-y-2 mb-4">
+                  {[
+                    "Integrated payments",
+                    "Multiple methods",
+                    "Automated invoicing",
+                    "Instant notifications"
+                  ].map((detail, idx) => (
+                    <li key={idx} className="flex items-center text-xs text-gray-600">
+                      <CheckCircle className="w-3 h-3 mr-2 text-purple-500 flex-shrink-0" />
+                      {detail}
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex items-center text-xs text-gray-500">
+                  <Clock className="w-3 h-3 mr-1" />
+                  <span>Instant</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Interactive Demo CTA */}
+          <div className="text-center mt-12">
+            <Button 
+              className="bg-purple-600 hover:bg-purple-700 text-lg px-8 py-3"
+              asChild
+            >
+              <Link href="/how-it-works">
+                <Play className="w-5 h-5 mr-2" />
+                See Complete Interactive Demo
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
