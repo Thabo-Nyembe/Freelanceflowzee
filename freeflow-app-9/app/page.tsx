@@ -400,8 +400,197 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Subscription Pricing Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Choose Your Perfect Plan
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Start free and scale as you grow. Transparent pricing with no hidden fees.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Starter Plan */}
+            <Card className="relative hover:shadow-xl transition-all duration-300 border border-gray-200">
+              <CardContent className="p-8">
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Starter</h3>
+                  <p className="text-gray-600 mb-4">Perfect for getting started</p>
+                  <div className="flex items-baseline justify-center mb-4">
+                    <span className="text-5xl font-bold text-gray-900">$0</span>
+                    <span className="text-xl text-gray-500 ml-2">/month</span>
+                  </div>
+                </div>
+                
+                <Button className="w-full mb-6 bg-gray-900 hover:bg-gray-800" asChild>
+                  <Link href="/signup">
+                    Start Free
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Link>
+                </Button>
+                
+                <ul className="space-y-3">
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">Up to 3 active projects</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">Basic client collaboration</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">File sharing up to 1GB</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">Standard templates</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">Email support</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Professional Plan - Popular */}
+            <Card className="relative hover:shadow-2xl transition-all duration-300 ring-2 ring-purple-500 shadow-xl scale-105">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <div className="bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium">
+                  Most Popular
+                </div>
+              </div>
+              
+              <CardContent className="p-8">
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Professional</h3>
+                  <p className="text-gray-600 mb-4">For growing freelancers</p>
+                  <div className="flex items-baseline justify-center mb-4">
+                    <span className="text-5xl font-bold text-gray-900">$19</span>
+                    <span className="text-xl text-gray-500 ml-2">/month</span>
+                  </div>
+                </div>
+                
+                <Button className="w-full mb-6 bg-purple-600 hover:bg-purple-700" asChild>
+                  <Link href="/signup?plan=professional">
+                    Start Free Trial
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Link>
+                </Button>
+                
+                <ul className="space-y-3">
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">Unlimited projects</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">Advanced client portals</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">File sharing up to 100GB</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">Custom branding</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">Priority support</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">Payment processing</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">Advanced analytics</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Enterprise Plan */}
+            <Card className="relative hover:shadow-xl transition-all duration-300 border border-gray-200">
+              <CardContent className="p-8">
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Enterprise</h3>
+                  <p className="text-gray-600 mb-4">For agencies and teams</p>
+                  <div className="flex items-baseline justify-center mb-4">
+                    <span className="text-5xl font-bold text-gray-900">$49</span>
+                    <span className="text-xl text-gray-500 ml-2">/month</span>
+                  </div>
+                </div>
+                
+                <Button className="w-full mb-6 bg-indigo-600 hover:bg-indigo-700" asChild>
+                  <Link href="/contact?plan=enterprise">
+                    Contact Sales
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Link>
+                </Button>
+                
+                <ul className="space-y-3">
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">Everything in Professional</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">Unlimited team members</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">White-label solution</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">Advanced security</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">Dedicated account manager</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">SLA guarantee</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">API access</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Trust Badges */}
+          <div className="text-center mt-12">
+            <p className="text-gray-600 mb-4">All plans include:</p>
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
+              <div className="flex items-center">
+                <Shield className="w-4 h-4 mr-2 text-green-500" />
+                30-day money back guarantee
+              </div>
+              <div className="flex items-center">
+                <Users className="w-4 h-4 mr-2 text-green-500" />
+                No setup fees
+              </div>
+              <div className="flex items-center">
+                <Clock className="w-4 h-4 mr-2 text-green-500" />
+                Cancel anytime
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials Section */}
-      <section className="py-20">
+      <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
