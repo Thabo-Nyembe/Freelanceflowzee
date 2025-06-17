@@ -20,6 +20,7 @@ interface OptimizedImageProps {
   loading?: 'lazy' | 'eager'
   onLoad?: () => void
   onError?: () => void
+  onClick?: () => void
   style?: React.CSSProperties
   objectFit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down'
   objectPosition?: string
@@ -248,7 +249,7 @@ OptimizedImageEnhanced.displayName = 'OptimizedImageEnhanced'
 export const withLazyLoading = <P extends object>(
   Component: React.ComponentType<P>
 ) => {
-  return React.forwardRef<any, P>((props, ref) => {
+  return React.forwardRef<any, P & React.RefAttributes<any>>((props, ref) => {
     const [isVisible, setIsVisible] = useState(false)
     const elementRef = useRef<HTMLDivElement>(null)
 
@@ -272,7 +273,7 @@ export const withLazyLoading = <P extends object>(
 
     return (
       <div ref={elementRef}>
-        {isVisible && <Component {...props} ref={ref} />}
+        {isVisible && <Component {...(props as any)} ref={ref} />}
       </div>
     )
   })
