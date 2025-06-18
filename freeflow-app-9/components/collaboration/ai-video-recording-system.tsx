@@ -22,6 +22,7 @@ import {
   MapPin, 
   MessageCircle, 
   Eye, 
+  EyeOff,
   Clock, 
   BarChart3, 
   Users, 
@@ -366,7 +367,7 @@ export function AIVideoRecordingSystem({
   const startScreenRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: { mediaSource: 'screen' },
+        video: true,
         audio: true
       })
 

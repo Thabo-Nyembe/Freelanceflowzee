@@ -522,7 +522,7 @@ export function BlockBasedContentEditor({
           )
 
         case 'heading':
-          const HeadingTag = `h${block.content.level || 1}` as keyof JSX.IntrinsicElements
+          const headingLevel = block.content.level || 1
           return isEditing ? (
             <Input
               value={block.content.text || ''}
@@ -536,12 +536,17 @@ export function BlockBasedContentEditor({
               autoFocus
             />
           ) : (
-            <HeadingTag 
+            <div 
               className="cursor-text text-2xl font-bold"
               onClick={() => dispatch({ type: 'SET_EDITING', editing: true })}
+              style={{
+                fontSize: headingLevel === 1 ? '2rem' : 
+                         headingLevel === 2 ? '1.75rem' : 
+                         headingLevel === 3 ? '1.5rem' : '1.25rem'
+              }}
             >
               {block.content.text || 'Heading'}
-            </HeadingTag>
+            </div>
           )
 
         case 'checklist':

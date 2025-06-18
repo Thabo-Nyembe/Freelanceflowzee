@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useReducer, useState } from 'react'
+import React, { useReducer, useState, useCallback, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { Slider } from '@/components/ui/slider'
 import { 
   Camera, 
   Palette, 
@@ -28,9 +30,34 @@ import {
   DollarSign,
   Cpu,
   Globe,
-  Shield
+  Shield,
+  Clock,
+  Star,
+  TrendingUp,
+  RefreshCw,
+  Archive,
+  Cloud,
+  Layers,
+  CheckCircle,
+  AlertTriangle,
+  Info,
+  Upload,
+  Trash2,
+  Copy,
+  Share2,
+  FolderOpen,
+  History,
+  Target,
+  BarChart3,
+  Microscope,
+  Rocket,
+  Crown,
+  Award,
+  Flame,
+  Diamond
 } from 'lucide-react'
 
+// A+++ Enhanced Interfaces
 interface AssetGenerationState {
   selectedField: string
   generationType: string
@@ -44,6 +71,13 @@ interface AssetGenerationState {
   selectedModel: AIModel
   customApiKey: string
   useCustomApi: boolean
+  batchMode: boolean
+  batchSize: number
+  generationHistory: GenerationHistoryEntry[]
+  favoriteAssets: string[]
+  currentPreset: AssetPreset | null
+  realTimeMode: boolean
+  qualityAnalysis: QualityAnalysis | null
 }
 
 interface GeneratedAsset {
@@ -57,20 +91,45 @@ interface GeneratedAsset {
   createdAt: Date
   size: string
   format: string
+  qualityScore?: number
+  aiModel?: string
+  promptUsed?: string
+  variations?: GeneratedAsset[]
+  tags: string[]
+  isFavorite?: boolean
+  downloadCount?: number
+  userRating?: number
 }
 
 interface AssetMetadata {
   dimensions?: string
   tags: string[]
   description: string
+  resolution?: string
+  colorDepth?: string
+  compression?: string
+  fileSize?: string
+  estimatedValue?: string
+  commercialUse?: boolean
+  license?: string
 }
 
 interface AdvancedSettings {
-  quality: 'draft' | 'standard' | 'professional' | 'premium'
+  quality: 'draft' | 'standard' | 'professional' | 'premium' | 'enterprise'
   style: string
   colorScheme: string
   resolution: string
   format: string
+  aiTemperature: number
+  diversityFactor: number
+  iterationCount: number
+  enhanceMode: boolean
+  antiAliasing: boolean
+  hdrSupport: boolean
+  metadata: boolean
+  watermark: boolean
+  batch: boolean
+  realTime: boolean
 }
 
 interface AIModel {
@@ -79,11 +138,56 @@ interface AIModel {
   provider: string
   description: string
   costPerRequest: number
-  speed: 'fast' | 'medium' | 'slow'
-  quality: 'good' | 'excellent' | 'premium'
+  speed: 'ultrafast' | 'fast' | 'medium' | 'slow' | 'premium'
+  quality: 'good' | 'excellent' | 'premium' | 'enterprise'
   requiresApiKey: boolean
   isFree: boolean
   maxTokens?: number
+  specialty?: string[]
+  tier: 'free' | 'pro' | 'enterprise'
+  features: string[]
+  limits?: {
+    dailyRequests?: number
+    monthlyRequests?: number
+    concurrent?: number
+  }
+}
+
+interface GenerationHistoryEntry {
+  id: string
+  timestamp: Date
+  field: string
+  type: string
+  prompt: string
+  model: string
+  success: boolean
+  assetsGenerated: number
+  qualityScore: number
+  duration: number
+}
+
+interface AssetPreset {
+  id: string
+  name: string
+  description: string
+  field: string
+  settings: AdvancedSettings
+  parameters: Record<string, any>
+  isPublic: boolean
+  createdBy: string
+  usageCount: number
+  rating: number
+}
+
+interface QualityAnalysis {
+  overallScore: number
+  technicalQuality: number
+  creativityScore: number
+  commercialViability: number
+  marketDemand: number
+  suggestions: string[]
+  strengths: string[]
+  improvements: string[]
 }
 
 type AssetGenerationAction =
@@ -100,81 +204,195 @@ type AssetGenerationAction =
   | { type: 'SET_MODEL'; payload: AIModel }
   | { type: 'SET_API_KEY'; payload: string }
   | { type: 'TOGGLE_CUSTOM_API'; payload: boolean }
+  | { type: 'TOGGLE_BATCH_MODE'; payload: boolean }
+  | { type: 'SET_BATCH_SIZE'; payload: number }
+  | { type: 'ADD_HISTORY_ENTRY'; payload: GenerationHistoryEntry }
+  | { type: 'TOGGLE_FAVORITE'; payload: string }
+  | { type: 'SET_PRESET'; payload: AssetPreset | null }
+  | { type: 'TOGGLE_REAL_TIME'; payload: boolean }
+  | { type: 'SET_QUALITY_ANALYSIS'; payload: QualityAnalysis | null }
 
+// A+++ Enhanced Creative Fields with More Options
 const CREATIVE_FIELDS = {
   photography: {
     name: 'Photography',
     icon: Camera,
     color: 'bg-blue-500',
+    tier: 'pro',
     assetTypes: [
-      { id: 'luts', name: 'LUTs (Color Grading)', description: 'Professional color grading presets' },
-      { id: 'presets', name: 'Lightroom Presets', description: 'Photo editing presets' },
-      { id: 'actions', name: 'Photoshop Actions', description: 'Automated photo effects' },
-      { id: 'overlays', name: 'Photo Overlays', description: 'Light leaks, textures, bokeh' },
-      { id: 'templates', name: 'Portfolio Templates', description: 'Professional portfolio layouts' }
+      { id: 'luts', name: 'Professional LUTs', description: 'Cinematic color grading presets', tier: 'pro' },
+      { id: 'presets', name: 'Lightroom Presets', description: 'Professional photo editing presets', tier: 'free' },
+      { id: 'actions', name: 'Photoshop Actions', description: 'Automated photo effects and workflows', tier: 'pro' },
+      { id: 'overlays', name: 'Photo Overlays', description: 'Light leaks, textures, bokeh effects', tier: 'free' },
+      { id: 'templates', name: 'Portfolio Templates', description: 'Professional portfolio layouts', tier: 'enterprise' },
+      { id: 'filters', name: 'AI Filters', description: 'Intelligent enhancement filters', tier: 'enterprise' }
     ]
   },
   videography: {
     name: 'Videography',
     icon: Video,
     color: 'bg-purple-500',
+    tier: 'pro',
     assetTypes: [
-      { id: 'transitions', name: 'Video Transitions', description: 'Smooth scene transitions' },
-      { id: 'luts', name: 'Cinematic LUTs', description: 'Film-style color grading' },
-      { id: 'titles', name: 'Title Templates', description: 'Animated text overlays' },
-      { id: 'effects', name: 'Visual Effects', description: 'Particles, glitches, distortions' },
-      { id: 'audio', name: 'Audio Tracks', description: 'Background music and SFX' }
+      { id: 'transitions', name: 'Video Transitions', description: 'Smooth scene transitions', tier: 'free' },
+      { id: 'luts', name: 'Cinematic LUTs', description: 'Film-style color grading', tier: 'pro' },
+      { id: 'titles', name: 'Title Templates', description: 'Animated text overlays', tier: 'free' },
+      { id: 'effects', name: 'Visual Effects', description: 'Particles, glitches, distortions', tier: 'pro' },
+      { id: 'audio', name: 'Audio Tracks', description: 'Background music and SFX', tier: 'enterprise' },
+      { id: 'motion', name: 'Motion Graphics', description: 'Animated graphic elements', tier: 'enterprise' }
     ]
   },
   design: {
     name: 'Graphic Design',
     icon: Palette,
     color: 'bg-pink-500',
+    tier: 'free',
     assetTypes: [
-      { id: 'templates', name: 'Design Templates', description: 'Logos, posters, social media' },
-      { id: 'patterns', name: 'Seamless Patterns', description: 'Repeating background patterns' },
-      { id: 'icons', name: 'Icon Sets', description: 'Consistent icon collections' },
-      { id: 'fonts', name: 'Custom Fonts', description: 'Brand-specific typography' },
-      { id: 'mockups', name: 'Product Mockups', description: '3D product presentations' }
+      { id: 'templates', name: 'Design Templates', description: 'Logos, posters, social media', tier: 'free' },
+      { id: 'patterns', name: 'Seamless Patterns', description: 'Repeating background patterns', tier: 'free' },
+      { id: 'icons', name: 'Icon Sets', description: 'Consistent icon collections', tier: 'pro' },
+      { id: 'fonts', name: 'Custom Fonts', description: 'Brand-specific typography', tier: 'enterprise' },
+      { id: 'mockups', name: 'Product Mockups', description: '3D product presentations', tier: 'pro' },
+      { id: 'branding', name: 'Brand Kits', description: 'Complete brand identity packages', tier: 'enterprise' }
     ]
   },
   music: {
     name: 'Music Production',
     icon: Music,
     color: 'bg-green-500',
+    tier: 'pro',
     assetTypes: [
-      { id: 'samples', name: 'Audio Samples', description: 'Drum hits, loops, one-shots' },
-      { id: 'presets', name: 'Synth Presets', description: 'Synthesizer sound presets' },
-      { id: 'midi', name: 'MIDI Patterns', description: 'Chord progressions and melodies' },
-      { id: 'stems', name: 'Song Stems', description: 'Individual track elements' },
-      { id: 'effects', name: 'Audio Effects', description: 'Reverb, delay, distortion presets' }
+      { id: 'samples', name: 'Audio Samples', description: 'Drum hits, loops, one-shots', tier: 'free' },
+      { id: 'presets', name: 'Synth Presets', description: 'Synthesizer sound presets', tier: 'pro' },
+      { id: 'midi', name: 'MIDI Patterns', description: 'Chord progressions and melodies', tier: 'pro' },
+      { id: 'stems', name: 'Song Stems', description: 'Individual track elements', tier: 'enterprise' },
+      { id: 'effects', name: 'Audio Effects', description: 'Reverb, delay, distortion presets', tier: 'pro' },
+      { id: 'mastering', name: 'Mastering Chains', description: 'Professional mastering templates', tier: 'enterprise' }
     ]
   },
   web: {
     name: 'Web Development',
     icon: Code,
     color: 'bg-orange-500',
+    tier: 'free',
     assetTypes: [
-      { id: 'components', name: 'UI Components', description: 'Reusable React/Vue components' },
-      { id: 'animations', name: 'CSS Animations', description: 'Smooth micro-interactions' },
-      { id: 'themes', name: 'Color Themes', description: 'Complete design systems' },
-      { id: 'templates', name: 'Page Templates', description: 'Landing pages, dashboards' },
-      { id: 'snippets', name: 'Code Snippets', description: 'Utility functions and helpers' }
+      { id: 'components', name: 'UI Components', description: 'Reusable React/Vue components', tier: 'free' },
+      { id: 'animations', name: 'CSS Animations', description: 'Smooth micro-interactions', tier: 'pro' },
+      { id: 'themes', name: 'Color Themes', description: 'Complete design systems', tier: 'pro' },
+      { id: 'templates', name: 'Page Templates', description: 'Landing pages, dashboards', tier: 'enterprise' },
+      { id: 'snippets', name: 'Code Snippets', description: 'Utility functions and helpers', tier: 'free' },
+      { id: 'frameworks', name: 'Framework Boilerplates', description: 'Full-stack starter projects', tier: 'enterprise' }
     ]
   },
   writing: {
     name: 'Content Writing',
     icon: FileText,
     color: 'bg-indigo-500',
+    tier: 'free',
     assetTypes: [
-      { id: 'templates', name: 'Content Templates', description: 'Blog posts, emails, social media' },
-      { id: 'prompts', name: 'Writing Prompts', description: 'Creative inspiration starters' },
-      { id: 'outlines', name: 'Content Outlines', description: 'Structured content frameworks' },
-      { id: 'headlines', name: 'Headline Variations', description: 'Compelling title options' },
-      { id: 'hooks', name: 'Opening Hooks', description: 'Attention-grabbing intros' }
+      { id: 'templates', name: 'Content Templates', description: 'Blog posts, emails, social media', tier: 'free' },
+      { id: 'prompts', name: 'Writing Prompts', description: 'Creative inspiration starters', tier: 'free' },
+      { id: 'outlines', name: 'Content Outlines', description: 'Structured content frameworks', tier: 'pro' },
+      { id: 'headlines', name: 'Headline Variations', description: 'Compelling title options', tier: 'pro' },
+      { id: 'hooks', name: 'Opening Hooks', description: 'Attention-grabbing intros', tier: 'pro' },
+      { id: 'campaigns', name: 'Marketing Campaigns', description: 'Complete marketing sequences', tier: 'enterprise' }
     ]
   }
 }
+
+// A+++ Enhanced AI Models with Enterprise Options
+const AI_MODELS: AIModel[] = [
+  {
+    id: 'gpt-4o',
+    name: 'GPT-4o',
+    provider: 'OpenAI',
+    description: 'Most advanced multimodal AI for premium asset generation',
+    costPerRequest: 0.03,
+    speed: 'fast',
+    quality: 'enterprise',
+    requiresApiKey: true,
+    isFree: false,
+    tier: 'enterprise',
+    specialty: ['creative', 'multimodal', 'precision'],
+    features: ['Vision', 'Audio', 'Code', 'Ultra-high quality'],
+    limits: { dailyRequests: 1000, concurrent: 10 }
+  },
+  {
+    id: 'claude-3.5-sonnet',
+    name: 'Claude 3.5 Sonnet',
+    provider: 'Anthropic',
+    description: 'Creative powerhouse for artistic asset generation',
+    costPerRequest: 0.025,
+    speed: 'fast',
+    quality: 'premium',
+    requiresApiKey: true,
+    isFree: false,
+    tier: 'enterprise',
+    specialty: ['creative', 'artistic', 'detailed'],
+    features: ['Artistic creativity', 'Detail-oriented', 'Long context'],
+    limits: { dailyRequests: 800, concurrent: 8 }
+  },
+  {
+    id: 'gemini-pro-vision',
+    name: 'Gemini Pro Vision',
+    provider: 'Google',
+    description: 'Advanced multimodal AI with vision capabilities',
+    costPerRequest: 0.02,
+    speed: 'fast',
+    quality: 'premium',
+    requiresApiKey: true,
+    isFree: false,
+    tier: 'pro',
+    specialty: ['vision', 'multimodal', 'analysis'],
+    features: ['Vision analysis', 'Multimodal', 'Fast processing'],
+    limits: { dailyRequests: 500, concurrent: 5 }
+  },
+  {
+    id: 'dall-e-3',
+    name: 'DALL-E 3',
+    provider: 'OpenAI',
+    description: 'Specialized image generation AI',
+    costPerRequest: 0.04,
+    speed: 'medium',
+    quality: 'enterprise',
+    requiresApiKey: true,
+    isFree: false,
+    tier: 'enterprise',
+    specialty: ['image', 'artistic', 'photorealistic'],
+    features: ['Image generation', 'Photorealistic', 'Artistic styles'],
+    limits: { dailyRequests: 100, concurrent: 3 }
+  },
+  {
+    id: 'stable-diffusion-xl',
+    name: 'Stable Diffusion XL',
+    provider: 'Stability AI',
+    description: 'Open-source image generation powerhouse',
+    costPerRequest: 0.01,
+    speed: 'medium',
+    quality: 'premium',
+    requiresApiKey: false,
+    isFree: true,
+    tier: 'free',
+    specialty: ['image', 'open-source', 'customizable'],
+    features: ['Open source', 'Customizable', 'High resolution'],
+    limits: { dailyRequests: 50, concurrent: 2 }
+  },
+  {
+    id: 'midjourney-api',
+    name: 'Midjourney',
+    provider: 'Midjourney',
+    description: 'Premium artistic image generation',
+    costPerRequest: 0.05,
+    speed: 'slow',
+    quality: 'enterprise',
+    requiresApiKey: true,
+    isFree: false,
+    tier: 'enterprise',
+    specialty: ['artistic', 'premium', 'detailed'],
+    features: ['Artistic excellence', 'Premium quality', 'Detailed rendering'],
+    limits: { dailyRequests: 200, concurrent: 5 }
+  }
+]
 
 const assetGenerationReducer = (state: AssetGenerationState, action: AssetGenerationAction): AssetGenerationState => {
   switch (action.type) {
@@ -204,8 +422,7 @@ const assetGenerationReducer = (state: AssetGenerationState, action: AssetGenera
       return {
         ...state,
         isGenerating: true,
-        generationProgress: 0,
-        generatedAssets: []
+        generationProgress: 0
       }
     
     case 'UPDATE_PROGRESS':
@@ -217,7 +434,7 @@ const assetGenerationReducer = (state: AssetGenerationState, action: AssetGenera
     case 'ADD_GENERATED_ASSET':
       return {
         ...state,
-        generatedAssets: [...state.generatedAssets, action.payload]
+        generatedAssets: [action.payload, ...state.generatedAssets]
       }
     
     case 'COMPLETE_GENERATION':
@@ -263,81 +480,58 @@ const assetGenerationReducer = (state: AssetGenerationState, action: AssetGenera
         useCustomApi: action.payload
       }
     
+    case 'TOGGLE_BATCH_MODE':
+      return {
+        ...state,
+        batchMode: action.payload
+      }
+    
+    case 'SET_BATCH_SIZE':
+      return {
+        ...state,
+        batchSize: action.payload
+      }
+    
+    case 'ADD_HISTORY_ENTRY':
+      return {
+        ...state,
+        generationHistory: [action.payload, ...state.generationHistory.slice(0, 49)]
+      }
+    
+    case 'TOGGLE_FAVORITE':
+      return {
+        ...state,
+        favoriteAssets: state.favoriteAssets.includes(action.payload)
+          ? state.favoriteAssets.filter(id => id !== action.payload)
+          : [...state.favoriteAssets, action.payload]
+      }
+    
+    case 'SET_PRESET':
+      return {
+        ...state,
+        currentPreset: action.payload
+      }
+    
+    case 'TOGGLE_REAL_TIME':
+      return {
+        ...state,
+        realTimeMode: action.payload
+      }
+    
+    case 'SET_QUALITY_ANALYSIS':
+      return {
+        ...state,
+        qualityAnalysis: action.payload
+      }
+    
     default:
       return state
   }
 }
 
 export default function AICreate() {
-  // Available AI Models
-  const [availableModels] = useState<AIModel[]>([
-    {
-      id: 'gpt-4o-mini',
-      name: 'GPT-4o Mini',
-      provider: 'OpenAI',
-      description: 'Fast and cost-effective model for creative tasks',
-      costPerRequest: 0.01,
-      speed: 'fast',
-      quality: 'good',
-      requiresApiKey: true,
-      isFree: false
-    },
-    {
-      id: 'gpt-3.5-turbo',
-      name: 'GPT-3.5 Turbo',
-      provider: 'OpenAI',
-      description: 'Balanced performance and cost',
-      costPerRequest: 0.002,
-      speed: 'fast',
-      quality: 'good',
-      requiresApiKey: true,
-      isFree: false
-    },
-    {
-      id: 'claude-3-haiku',
-      name: 'Claude 3 Haiku',
-      provider: 'Anthropic',
-      description: 'Fast and efficient for creative generation',
-      costPerRequest: 0.0025,
-      speed: 'fast',
-      quality: 'excellent',
-      requiresApiKey: true,
-      isFree: false
-    },
-    {
-      id: 'gemini-pro',
-      name: 'Gemini Pro',
-      provider: 'Google',
-      description: 'Advanced multimodal capabilities',
-      costPerRequest: 0.005,
-      speed: 'medium',
-      quality: 'excellent',
-      requiresApiKey: true,
-      isFree: false
-    },
-    {
-      id: 'llama-2-7b',
-      name: 'Llama 2 7B',
-      provider: 'Meta',
-      description: 'Free open-source model via Hugging Face',
-      costPerRequest: 0,
-      speed: 'medium',
-      quality: 'good',
-      requiresApiKey: false,
-      isFree: true
-    },
-    {
-      id: 'mistral-7b',
-      name: 'Mistral 7B',
-      provider: 'Mistral AI',
-      description: 'Free high-performance model',
-      costPerRequest: 0,
-      speed: 'fast',
-      quality: 'good',
-      requiresApiKey: false,
-      isFree: true
-    }
-  ])
+  // Available AI Models (kept for backward compatibility)
+  const [availableModels] = useState<AIModel[]>(AI_MODELS)
 
   const [state, dispatch] = useReducer(assetGenerationReducer, {
     selectedField: '',
@@ -353,11 +547,28 @@ export default function AICreate() {
       style: 'modern',
       colorScheme: 'vibrant',
       resolution: 'high',
-      format: 'auto'
+      format: 'auto',
+      aiTemperature: 0.7,
+      diversityFactor: 0.8,
+      iterationCount: 1,
+      enhanceMode: false,
+      antiAliasing: true,
+      hdrSupport: false,
+      metadata: true,
+      watermark: false,
+      batch: false,
+      realTime: false
     },
-    selectedModel: availableModels[4], // Default to free Llama model
+    selectedModel: AI_MODELS[4], // Default to free Stable Diffusion
     customApiKey: '',
-    useCustomApi: false
+    useCustomApi: false,
+    batchMode: false,
+    batchSize: 10,
+    generationHistory: [],
+    favoriteAssets: [],
+    currentPreset: null,
+    realTimeMode: false,
+    qualityAnalysis: null
   })
 
   // Context7 Pattern: Enhanced Asset Generation with Model Selection
@@ -437,7 +648,8 @@ export default function AICreate() {
             },
             createdAt: new Date(asset.createdAt),
             size: asset.metadata.size,
-            format: asset.metadata.format
+            format: asset.metadata.format,
+            tags: asset.metadata.tags || []
           }
           
           dispatch({ type: 'ADD_GENERATED_ASSET', payload: formattedAsset })
@@ -463,7 +675,7 @@ export default function AICreate() {
   }
 
   const generateMockAssets = (field: string, type: string, typeName: string): GeneratedAsset[] => {
-    const baseAssets = [
+    const baseAssets: GeneratedAsset[] = [
       {
         id: `${field}-${type}-1`,
         name: `Professional ${typeName} Pack 1`,
@@ -478,7 +690,8 @@ export default function AICreate() {
         },
         createdAt: new Date(),
         size: '2.4 MB',
-        format: getFormatForType(type)
+        format: getFormatForType(type),
+        tags: ['professional', 'modern', 'clean']
       },
       {
         id: `${field}-${type}-2`,
@@ -494,7 +707,8 @@ export default function AICreate() {
         },
         createdAt: new Date(),
         size: '3.1 MB',
-        format: getFormatForType(type)
+        format: getFormatForType(type),
+        tags: ['creative', 'artistic', 'unique']
       },
       {
         id: `${field}-${type}-3`,
@@ -510,7 +724,8 @@ export default function AICreate() {
         },
         createdAt: new Date(),
         size: '1.8 MB',
-        format: getFormatForType(type)
+        format: getFormatForType(type),
+        tags: ['minimalist', 'clean', 'elegant']
       }
     ]
     
@@ -705,184 +920,177 @@ export default function AICreate() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {availableModels.map((model) => (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {AI_MODELS.map((model) => (
                         <Card
                           key={model.id}
-                          className={`cursor-pointer transition-all duration-200 hover:scale-[1.02] ${
+                          className={`cursor-pointer transition-all duration-200 ${
                             state.selectedModel.id === model.id 
-                              ? 'ring-2 ring-purple-500 bg-purple-50 border-purple-200' 
-                              : 'hover:shadow-md hover:border-purple-100'
+                              ? 'ring-2 ring-purple-500 bg-purple-50' 
+                              : 'hover:shadow-md'
                           }`}
                           onClick={() => dispatch({ type: 'SET_MODEL', payload: model })}
                         >
                           <CardContent className="p-4">
                             <div className="flex items-start justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <Cpu className="w-4 h-4 text-gray-600" />
-                                <h4 className="font-semibold text-sm">{model.name}</h4>
+                              <div>
+                                <h4 className="font-semibold">{model.name}</h4>
+                                <p className="text-sm text-gray-600">{model.provider}</p>
                               </div>
-                              <div className="flex flex-col items-end gap-1">
-                                {model.isFree ? (
-                                  <Badge className="bg-green-500 text-xs">Free</Badge>
-                                ) : (
-                                  <Badge variant="outline" className="text-xs">
-                                    <DollarSign className="w-3 h-3 mr-1" />
-                                    ${model.costPerRequest}
-                                  </Badge>
-                                )}
+                              <div className="flex gap-1">
                                 <Badge 
-                                  variant="secondary" 
-                                  className={`text-xs ${
-                                    model.speed === 'fast' ? 'bg-green-100 text-green-700' :
-                                    model.speed === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                                    'bg-red-100 text-red-700'
-                                  }`}
+                                  variant={model.tier === 'enterprise' ? 'default' : model.tier === 'pro' ? 'secondary' : 'outline'}
+                                  className="text-xs"
                                 >
-                                  {model.speed}
+                                  {model.tier}
                                 </Badge>
+                                {model.isFree && <Badge variant="outline" className="text-xs bg-green-50">Free</Badge>}
                               </div>
                             </div>
-                            <p className="text-xs text-gray-600 mb-2">{model.description}</p>
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs text-gray-500">{model.provider}</span>
-                              <div className="flex items-center gap-1">
-                                {[...Array(3)].map((_, i) => (
-                                  <div
-                                    key={i}
-                                    className={`w-2 h-2 rounded-full ${
-                                      i < (model.quality === 'premium' ? 3 : model.quality === 'excellent' ? 2 : 1)
-                                        ? 'bg-purple-400'
-                                        : 'bg-gray-200'
-                                    }`}
-                                  />
+                            <p className="text-sm text-gray-600 mb-3">{model.description}</p>
+                            <div className="flex items-center justify-between text-xs">
+                              <div className="flex gap-2">
+                                <Badge variant="outline" className="text-xs">{model.speed}</Badge>
+                                <Badge variant="outline" className="text-xs">{model.quality}</Badge>
+                              </div>
+                              <div className="text-right">
+                                {model.isFree ? (
+                                  <span className="text-green-600 font-medium">Free</span>
+                                ) : (
+                                  <span className="text-gray-600">${model.costPerRequest}/req</span>
+                                )}
+                              </div>
+                            </div>
+                            {model.features && (
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {model.features.slice(0, 3).map((feature, idx) => (
+                                  <Badge key={idx} variant="outline" className="text-xs">
+                                    {feature}
+                                  </Badge>
                                 ))}
-                                <span className="text-xs text-gray-500 ml-1">Quality</span>
                               </div>
-                            </div>
+                            )}
                           </CardContent>
                         </Card>
                       ))}
                     </div>
 
-                    {/* Context7 Pattern: Custom API Key Management */}
+                    {/* Custom API Configuration */}
                     {state.selectedModel.requiresApiKey && (
-                      <div className="space-y-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Key className="w-4 h-4 text-amber-600" />
-                          <span className="text-sm font-medium text-amber-800">API Key Required</span>
-                          <Badge variant="outline" className="ml-auto text-xs">
-                            {state.selectedModel.provider}
-                          </Badge>
-                        </div>
-                        
-                        <div className="flex items-center gap-2 mb-3">
-                          <input
-                            type="checkbox"
-                            id="useCustomApi"
-                            checked={state.useCustomApi}
-                            onChange={(e) => dispatch({ type: 'TOGGLE_CUSTOM_API', payload: e.target.checked })}
-                            className="rounded border-amber-300"
-                          />
-                          <label htmlFor="useCustomApi" className="text-sm text-amber-700">
-                            Use my own API key (saves costs & enables unlimited usage)
-                          </label>
-                        </div>
-
-                        {state.useCustomApi ? (
-                          <div className="space-y-2">
-                            <Input
-                              type="password"
-                              placeholder={`Enter your ${state.selectedModel.provider} API key...`}
-                              value={state.customApiKey}
-                              onChange={(e) => dispatch({ type: 'SET_API_KEY', payload: e.target.value })}
-                              className="bg-white border-amber-300 focus:border-amber-500"
+                      <Card className="border-amber-200 bg-amber-50">
+                        <CardHeader className="pb-3">
+                          <CardTitle className="flex items-center gap-2 text-sm">
+                            <Key className="w-4 h-4 text-amber-600" />
+                            API Configuration Required
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <label className="text-sm font-medium">Use Custom API Key</label>
+                            <Switch
+                              checked={state.useCustomApi}
+                              onCheckedChange={(checked) => dispatch({ type: 'TOGGLE_CUSTOM_API', payload: checked })}
                             />
-                            <div className="flex items-start gap-2 p-2 bg-blue-50 rounded text-xs">
-                              <Shield className="w-3 h-3 text-blue-600 mt-0.5 flex-shrink-0" />
-                              <span className="text-blue-700">
-                                Your API key is stored securely in your browser and never sent to our servers. 
-                                It's only used to make direct requests to {state.selectedModel.provider}.
-                              </span>
-                            </div>
                           </div>
-                        ) : (
-                          <div className="p-3 bg-white border border-amber-200 rounded text-xs">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Globe className="w-3 h-3 text-gray-600" />
-                              <span className="font-medium">Using FreeflowZee API Credits</span>
+                          {state.useCustomApi && (
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">API Key</label>
+                              <Input
+                                type="password"
+                                placeholder={`Enter your ${state.selectedModel.provider} API key`}
+                                value={state.customApiKey}
+                                onChange={(e) => dispatch({ type: 'SET_API_KEY', payload: e.target.value })}
+                              />
+                              <p className="text-xs text-gray-500">
+                                Your API key is stored securely and only used for this session.
+                              </p>
                             </div>
-                            <p className="text-gray-600 mb-2">
-                              We'll handle the API calls for you. Each generation uses your account credits.
-                            </p>
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-500">Cost per request:</span>
-                              <Badge variant="outline" className="text-xs">
-                                ${state.selectedModel.costPerRequest} credits
-                              </Badge>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* A+++ Batch Generation Controls */}
+                    <Card className="border-blue-200 bg-blue-50">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center gap-2 text-sm">
+                          <Layers className="w-4 h-4 text-blue-600" />
+                          Batch Generation
+                          <Badge variant="outline" className="ml-auto text-xs">
+                            Pro Feature
+                          </Badge>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-sm font-medium">Enable Batch Mode</label>
+                          <Switch
+                            checked={state.batchMode}
+                            onCheckedChange={(checked) => dispatch({ type: 'TOGGLE_BATCH_MODE', payload: checked })}
+                          />
+                        </div>
+                        {state.batchMode && (
+                          <div className="space-y-3">
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">Batch Size: {state.batchSize}</label>
+                              <Slider
+                                value={[state.batchSize]}
+                                onValueChange={(value) => dispatch({ type: 'SET_BATCH_SIZE', payload: value[0] })}
+                                max={50}
+                                min={5}
+                                step={5}
+                                className="w-full"
+                              />
+                              <div className="flex justify-between text-xs text-gray-500">
+                                <span>5 assets</span>
+                                <span>50 assets</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-blue-600">
+                              <Info className="w-4 h-4" />
+                              <span>Estimated cost: ${(state.selectedModel.costPerRequest * state.batchSize).toFixed(3)}</span>
                             </div>
                           </div>
                         )}
-                      </div>
-                    )}
-
-                    {/* Context7 Pattern: Model Performance Indicators */}
-                    <div className="grid grid-cols-3 gap-4 p-3 bg-gray-50 rounded-lg">
-                      <div className="text-center">
-                        <div className="text-lg font-semibold text-purple-600">
-                          {state.selectedModel.speed === 'fast' ? '⚡' : 
-                           state.selectedModel.speed === 'medium' ? '⏱️' : '🐌'}
-                        </div>
-                        <div className="text-xs text-gray-600">Speed</div>
-                        <div className="text-xs font-medium capitalize">{state.selectedModel.speed}</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-lg font-semibold text-purple-600">
-                          {state.selectedModel.quality === 'premium' ? '💎' : 
-                           state.selectedModel.quality === 'excellent' ? '⭐' : '👍'}
-                        </div>
-                        <div className="text-xs text-gray-600">Quality</div>
-                        <div className="text-xs font-medium capitalize">{state.selectedModel.quality}</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-lg font-semibold text-purple-600">
-                          {state.selectedModel.isFree ? '🆓' : '💰'}
-                        </div>
-                        <div className="text-xs text-gray-600">Cost</div>
-                        <div className="text-xs font-medium">
-                          {state.selectedModel.isFree ? 'Free' : `$${state.selectedModel.costPerRequest}`}
-                        </div>
-                      </div>
-                    </div>
+                      </CardContent>
+                    </Card>
                   </CardContent>
                 </Card>
 
                 <Button
                   onClick={generateAssets}
-                  disabled={state.isGenerating}
-                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-                  size="lg"
+                  disabled={state.isGenerating || !state.selectedField || !state.generationType}
+                  className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
                 >
                   {state.isGenerating ? (
-                    <>
-                      <Sparkles className="w-5 h-5 mr-2 animate-spin" />
-                      Generating Assets... {state.generationProgress}%
-                    </>
+                    <div className="flex items-center gap-2">
+                      <RefreshCw className="w-5 h-5 animate-spin" />
+                      Generating... {state.generationProgress}%
+                    </div>
                   ) : (
-                    <>
-                      <Zap className="w-5 h-5 mr-2" />
-                      Generate AI Assets
-                    </>
+                    <div className="flex items-center gap-2">
+                      <Wand2 className="w-5 h-5" />
+                      Generate {state.batchMode ? `${state.batchSize} ` : ''}Assets
+                    </div>
                   )}
                 </Button>
 
                 {state.isGenerating && (
-                  <div className="space-y-2">
-                    <Progress value={state.generationProgress} className="w-full" />
-                    <p className="text-sm text-center text-gray-600">
-                      Creating professional assets for {selectedField?.name}...
-                    </p>
-                  </div>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">Generation Progress</span>
+                          <span className="text-sm text-gray-600">{state.generationProgress}%</span>
+                        </div>
+                        <Progress value={state.generationProgress} className="w-full" />
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Sparkles className="w-4 h-4" />
+                          <span>AI is crafting your assets...</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 )}
               </CardContent>
             </Card>
@@ -892,46 +1100,51 @@ export default function AICreate() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Download className="w-5 h-5" />
+                  <Archive className="w-5 h-5" />
                   Generated Assets ({state.generatedAssets.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {state.generatedAssets.map((asset) => (
-                    <Card key={asset.id} className="overflow-hidden">
-                      <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 relative">
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <FileImage className="w-12 h-12 text-gray-400" />
-                        </div>
-                        <Badge className="absolute top-2 right-2 bg-green-500">
-                          {asset.format}
-                        </Badge>
-                      </div>
+                    <Card key={asset.id} className="hover:shadow-lg transition-shadow duration-200">
                       <CardContent className="p-4 space-y-3">
-                        <h4 className="font-semibold text-sm">{asset.name}</h4>
-                        <p className="text-xs text-gray-600">{asset.metadata.description}</p>
+                        <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
+                          <FileImage className="w-8 h-8 text-gray-400" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium truncate">{asset.name}</h4>
+                          <p className="text-xs text-gray-600 line-clamp-2">{asset.metadata.description}</p>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-gray-500">{asset.size}</span>
+                          <Badge variant="outline">{asset.format}</Badge>
+                        </div>
                         <div className="flex flex-wrap gap-1">
-                          {asset.metadata.tags.map((tag) => (
-                            <Badge key={tag} variant="secondary" className="text-xs">
+                          {asset.tags.slice(0, 3).map((tag, idx) => (
+                            <Badge key={idx} variant="secondary" className="text-xs">
                               {tag}
                             </Badge>
                           ))}
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-500">{asset.size}</span>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => dispatch({ type: 'SET_PREVIEW', payload: asset })}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            <Button size="sm">
-                              <Download className="w-4 h-4" />
-                            </Button>
-                          </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => dispatch({ type: 'SET_PREVIEW', payload: asset })}
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            Preview
+                          </Button>
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="flex-1"
+                          >
+                            <Download className="w-4 h-4 mr-1" />
+                            Download
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -945,19 +1158,102 @@ export default function AICreate() {
         <TabsContent value="library" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Your Asset Library</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <FolderOpen className="w-5 h-5" />
+                Asset Library
+                <Badge variant="secondary" className="ml-auto">
+                  {state.generatedAssets.length} assets
+                </Badge>
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12">
-                <FileImage className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No assets in library yet</h3>
-                <p className="text-gray-600 mb-4">
-                  Generate your first assets to start building your professional library
-                </p>
-                <Button variant="outline">
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Start Generating
-                </Button>
+              <div className="space-y-4">
+                {/* Library Controls */}
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Search assets..."
+                      className="w-64"
+                    />
+                    <Select defaultValue="all">
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="luts">LUTs</SelectItem>
+                        <SelectItem value="presets">Presets</SelectItem>
+                        <SelectItem value="templates">Templates</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <Upload className="w-4 h-4 mr-1" />
+                      Upload
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Archive className="w-4 h-4 mr-1" />
+                      Export All
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Library Grid */}
+                {state.generatedAssets.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {state.generatedAssets.map((asset) => (
+                      <Card key={asset.id} className="group hover:shadow-md transition-all duration-200">
+                        <CardContent className="p-3 space-y-2">
+                          <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center relative overflow-hidden">
+                            <FileImage className="w-6 h-6 text-gray-400" />
+                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                              <div className="flex gap-1">
+                                <Button size="sm" variant="secondary" className="w-8 h-8 p-0">
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                                <Button size="sm" variant="secondary" className="w-8 h-8 p-0">
+                                  <Download className="w-4 h-4" />
+                                </Button>
+                                <Button size="sm" variant="secondary" className="w-8 h-8 p-0">
+                                  <Star className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-sm truncate">{asset.name}</h4>
+                            <p className="text-xs text-gray-500">{asset.size}</p>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Badge variant="outline" className="text-xs">{asset.format}</Badge>
+                            <div className="flex gap-1">
+                              <Button size="sm" variant="ghost" className="w-6 h-6 p-0">
+                                <Copy className="w-3 h-3" />
+                              </Button>
+                              <Button size="sm" variant="ghost" className="w-6 h-6 p-0">
+                                <Share2 className="w-3 h-3" />
+                              </Button>
+                              <Button size="sm" variant="ghost" className="w-6 h-6 p-0 text-red-500">
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Archive className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No assets yet</h3>
+                    <p className="text-gray-600 mb-4">Generate your first assets to build your library</p>
+                    <Button onClick={() => (document.querySelector('[value="generate"]') as HTMLElement)?.click()}>
+                      <Wand2 className="w-4 h-4 mr-1" />
+                      Generate Assets
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -966,115 +1262,313 @@ export default function AICreate() {
         <TabsContent value="settings" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Advanced Generation Settings</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                Advanced Settings
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Quality Level</label>
-                  <Select
-                    value={state.advancedSettings.quality}
-                    onValueChange={(value: any) => dispatch({ 
-                      type: 'UPDATE_ADVANCED_SETTINGS', 
-                      payload: { quality: value } 
-                    })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft">Draft - Fast generation</SelectItem>
-                      <SelectItem value="standard">Standard - Balanced quality</SelectItem>
-                      <SelectItem value="professional">Professional - High quality</SelectItem>
-                      <SelectItem value="premium">Premium - Maximum quality</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Output Resolution</label>
-                  <Select
-                    value={state.advancedSettings.resolution}
-                    onValueChange={(value) => dispatch({ 
-                      type: 'UPDATE_ADVANCED_SETTINGS', 
-                      payload: { resolution: value } 
-                    })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">Low (720p)</SelectItem>
-                      <SelectItem value="medium">Medium (1080p)</SelectItem>
-                      <SelectItem value="high">High (1440p)</SelectItem>
-                      <SelectItem value="ultra">Ultra (4K)</SelectItem>
-                    </SelectContent>
-                  </Select>
+              {/* Quality Settings */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Diamond className="w-5 h-5 text-purple-600" />
+                  Quality & Performance
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Quality Level</label>
+                    <Select
+                      value={state.advancedSettings.quality}
+                      onValueChange={(value) => dispatch({ 
+                        type: 'UPDATE_ADVANCED_SETTINGS', 
+                        payload: { quality: value as any }
+                      })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="draft">Draft (Fast)</SelectItem>
+                        <SelectItem value="standard">Standard</SelectItem>
+                        <SelectItem value="professional">Professional</SelectItem>
+                        <SelectItem value="premium">Premium (Slow)</SelectItem>
+                        <SelectItem value="enterprise">Enterprise (Ultra)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Resolution</label>
+                    <Select
+                      value={state.advancedSettings.resolution}
+                      onValueChange={(value) => dispatch({ 
+                        type: 'UPDATE_ADVANCED_SETTINGS', 
+                        payload: { resolution: value }
+                      })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1280x720">HD (1280x720)</SelectItem>
+                        <SelectItem value="1920x1080">Full HD (1920x1080)</SelectItem>
+                        <SelectItem value="2560x1440">2K (2560x1440)</SelectItem>
+                        <SelectItem value="3840x2160">4K (3840x2160)</SelectItem>
+                        <SelectItem value="7680x4320">8K (7680x4320)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <h4 className="font-semibold text-blue-900 mb-2">Pro Tip</h4>
-                <p className="text-sm text-blue-800">
-                  Higher quality settings will take longer to generate but produce more professional results. 
-                  Use draft mode for quick previews and professional/premium for final assets.
-                </p>
+              {/* AI Parameters */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Brain className="w-5 h-5 text-blue-600" />
+                  AI Parameters
+                </h3>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      Creativity (Temperature): {state.advancedSettings.aiTemperature}
+                    </label>
+                    <Slider
+                      value={[state.advancedSettings.aiTemperature]}
+                      onValueChange={(value) => dispatch({
+                        type: 'UPDATE_ADVANCED_SETTINGS',
+                        payload: { aiTemperature: value[0] }
+                      })}
+                      max={2}
+                      min={0}
+                      step={0.1}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>Conservative</span>
+                      <span>Creative</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      Diversity Factor: {state.advancedSettings.diversityFactor}
+                    </label>
+                    <Slider
+                      value={[state.advancedSettings.diversityFactor]}
+                      onValueChange={(value) => dispatch({
+                        type: 'UPDATE_ADVANCED_SETTINGS',
+                        payload: { diversityFactor: value[0] }
+                      })}
+                      max={1}
+                      min={0}
+                      step={0.1}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>Similar</span>
+                      <span>Diverse</span>
+                    </div>
+                  </div>
+                </div>
               </div>
+
+              {/* Enhancement Options */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-yellow-600" />
+                  Enhancement Options
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium">Auto Enhancement</label>
+                    <Switch
+                      checked={state.advancedSettings.enhanceMode}
+                      onCheckedChange={(checked) => dispatch({
+                        type: 'UPDATE_ADVANCED_SETTINGS',
+                        payload: { enhanceMode: checked }
+                      })}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium">Anti-Aliasing</label>
+                    <Switch
+                      checked={state.advancedSettings.antiAliasing}
+                      onCheckedChange={(checked) => dispatch({
+                        type: 'UPDATE_ADVANCED_SETTINGS',
+                        payload: { antiAliasing: checked }
+                      })}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium">HDR Support</label>
+                    <Switch
+                      checked={state.advancedSettings.hdrSupport}
+                      onCheckedChange={(checked) => dispatch({
+                        type: 'UPDATE_ADVANCED_SETTINGS',
+                        payload: { hdrSupport: checked }
+                      })}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium">Include Metadata</label>
+                    <Switch
+                      checked={state.advancedSettings.metadata}
+                      onCheckedChange={(checked) => dispatch({
+                        type: 'UPDATE_ADVANCED_SETTINGS',
+                        payload: { metadata: checked }
+                      })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Real-time Generation */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-green-600" />
+                  Real-time Features
+                  <Badge variant="outline" className="ml-2">
+                    Beta
+                  </Badge>
+                </h3>
+                <Card className="border-green-200 bg-green-50">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="text-sm font-medium">Real-time Generation</label>
+                      <Switch
+                        checked={state.realTimeMode}
+                        onCheckedChange={(checked) => dispatch({ 
+                          type: 'TOGGLE_REAL_TIME', 
+                          payload: checked 
+                        })}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-600">
+                      Generate assets as you type. Requires fast AI model and stable connection.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Analytics & Insights */}
+              {state.qualityAnalysis && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-indigo-600" />
+                    Quality Analysis
+                  </h3>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-600">
+                            {state.qualityAnalysis.overallScore}
+                          </div>
+                          <div className="text-xs text-gray-600">Overall</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-blue-600">
+                            {state.qualityAnalysis.technicalQuality}
+                          </div>
+                          <div className="text-xs text-gray-600">Technical</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-purple-600">
+                            {state.qualityAnalysis.creativityScore}
+                          </div>
+                          <div className="text-xs text-gray-600">Creative</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-orange-600">
+                            {state.qualityAnalysis.marketDemand}
+                          </div>
+                          <div className="text-xs text-gray-600">Market</div>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm">Suggestions:</h4>
+                        <ul className="text-xs text-gray-600 space-y-1">
+                          {state.qualityAnalysis.suggestions.map((suggestion, idx) => (
+                            <li key={idx} className="flex items-start gap-2">
+                              <Target className="w-3 h-3 mt-0.5 text-blue-500" />
+                              {suggestion}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
+      {/* Asset Preview Modal */}
       {state.previewAsset && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card className="w-full max-w-4xl max-h-[90vh] overflow-hidden">
             <CardHeader>
-              <div className="flex justify-between items-start">
+              <div className="flex items-center justify-between">
                 <CardTitle>{state.previewAsset.name}</CardTitle>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => dispatch({ type: 'SET_PREVIEW', payload: null })}
                 >
-                  ×
+                  ✕
                 </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
+              <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
                 <FileImage className="w-16 h-16 text-gray-400" />
               </div>
-              
-              <div className="space-y-2">
-                <p className="text-sm text-gray-600">{state.previewAsset.metadata.description}</p>
-                <div className="flex flex-wrap gap-2">
-                  {state.previewAsset.metadata.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary">
-                      {tag}
-                    </Badge>
-                  ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-medium mb-2">Details</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Format:</span>
+                      <Badge variant="outline">{state.previewAsset.format}</Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Size:</span>
+                      <span>{state.previewAsset.size}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Dimensions:</span>
+                      <span>{state.previewAsset.metadata.dimensions}</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Tags</h4>
+                  <div className="flex flex-wrap gap-1">
+                    {state.previewAsset.tags.map((tag, idx) => (
+                      <Badge key={idx} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               </div>
-              
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="font-medium">Format:</span> {state.previewAsset.format}
-                </div>
-                <div>
-                  <span className="font-medium">Size:</span> {state.previewAsset.size}
-                </div>
-                <div>
-                  <span className="font-medium">Category:</span> {state.previewAsset.category}
-                </div>
-                <div>
-                  <span className="font-medium">Created:</span> {state.previewAsset.createdAt.toLocaleDateString()}
-                </div>
+              <p className="text-sm text-gray-600">
+                {state.previewAsset.metadata.description}
+              </p>
+              <div className="flex gap-2">
+                <Button className="flex-1">
+                  <Download className="w-4 h-4 mr-1" />
+                  Download
+                </Button>
+                <Button variant="outline">
+                  <Star className="w-4 h-4 mr-1" />
+                  Favorite
+                </Button>
+                <Button variant="outline">
+                  <Share2 className="w-4 h-4 mr-1" />
+                  Share
+                </Button>
               </div>
-              
-              <Button className="w-full">
-                <Download className="w-4 h-4 mr-2" />
-                Download Asset
-              </Button>
             </CardContent>
           </Card>
         </div>

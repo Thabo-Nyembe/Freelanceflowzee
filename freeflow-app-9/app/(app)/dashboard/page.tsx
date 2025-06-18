@@ -6,6 +6,13 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { 
+  EnhancedInteractiveSystem, 
+  EnhancedButton, 
+  EnhancedNavigation, 
+  EnhancedCard,
+  DASHBOARD_ROUTES 
+} from '@/components/ui/enhanced-interactive-system'
+import { 
   LayoutDashboard,
   FolderOpen,
   MessageSquare,
