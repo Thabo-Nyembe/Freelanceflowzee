@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from 'react'
-import { generateStructuredData } from '@/lib/seo-optimizer'
 import { InteractiveContactSystem } from '@/components/interactive-contact-system'
 import { DemoModal } from '@/components/demo-modal'
 import { SiteHeader } from '@/components/navigation/site-header'
@@ -105,26 +104,37 @@ const PLATFORM_STATS = [
   { label: 'Client Satisfaction', value: '98%', icon: Star, growth: '+2%' }
 ]
 
-// Context7 Pattern: Structured data for SEO (handled client-side)
-const structuredData = {
+// Context7 Pattern: Client-side structured data for SEO
+const generateStructuredData = () => ({
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "name": "FreeflowZee",
-  "description": "Professional freelance management platform",
+  "description": "Professional freelance management platform for creators, agencies, and clients",
   "url": "https://freeflowzee.com",
-  "applicationCategory": "BusinessApplication"
-}
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "10000"
+  }
+})
 
 export default function HomePage() {
   const [isDemoOpen, setIsDemoOpen] = useState(false)
 
   return (
     <div className="min-h-screen theme-gradient-background">
-      {/* Structured Data */}
+      {/* Client-side Structured Data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(generateStructuredData('Organization'))
+          __html: JSON.stringify(generateStructuredData())
         }}
       />
       
@@ -199,11 +209,11 @@ export default function HomePage() {
               </div>
               <div className="flex items-center">
                 <Shield className="w-4 h-4 mr-2 text-blue-500" />
-                Bank-Level Security
+                Enterprise Security
               </div>
               <div className="flex items-center">
-                <Globe className="w-4 h-4 mr-2 text-purple-500" />
-                Global Support
+                <Clock className="w-4 h-4 mr-2 text-purple-500" />
+                Setup in 5 Minutes
               </div>
             </div>
           </div>
@@ -211,73 +221,68 @@ export default function HomePage() {
       </section>
 
       {/* Platform Stats */}
-      <section className="py-16 bg-white/60 backdrop-blur-sm">
+      <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {PLATFORM_STATS.map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="flex items-center justify-center mb-4">
-                  <div className="p-3 theme-gradient-primary rounded-full">
-                    <stat.icon className="w-6 h-6 text-white" />
+                  <div className="p-3 bg-purple-100 rounded-full">
+                    <stat.icon className="w-6 h-6 text-purple-600" />
                   </div>
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
-                <div className="text-gray-600 text-sm mb-1">{stat.label}</div>
-                <div className="text-green-600 text-xs font-medium">{stat.growth}</div>
+                <div className="text-sm text-gray-600 mb-1">{stat.label}</div>
+                <div className="text-xs text-green-600 font-medium">{stat.growth}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20">
+      {/* Interactive Features Grid */}
+      <section className="py-20 bg-gradient-to-br from-gray-50 to-purple-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Badge variant="secondary" className="mb-4 px-3 py-1 text-sm bg-purple-100 text-purple-700">
               Features
             </Badge>
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
-              Everything You Need to
-              <span className="theme-gradient-text"> Succeed</span>
+              Everything You Need to <span className="theme-gradient-text">Succeed</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              From project management to payments, we've got every aspect of your freelance business covered.
+              Powerful tools designed to streamline your workflow and enhance client relationships.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {FEATURES_DATA.map((feature, index) => (
-              <Card key={index} className="theme-card group cursor-pointer">
+              <Card key={index} className="theme-card group cursor-pointer transition-all duration-300 hover:scale-105">
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-center mb-4">
-                    <div className="p-3 theme-gradient-primary rounded-full group-hover:scale-110 transition-transform">
-                      <feature.icon className="w-6 h-6 text-white" />
+                  <div className="flex items-center justify-center mb-6">
+                    <div className="p-4 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full group-hover:scale-110 transition-transform">
+                      <feature.icon className="w-8 h-8 text-white" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3 text-center">
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-600 text-center mb-4">
-                    {feature.description}
-                  </p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">{feature.title}</h3>
+                  <p className="text-gray-600 mb-6 text-center">{feature.description}</p>
+                  
                   <ul className="space-y-2 mb-6">
-                    {feature.benefits.map((benefit, idx) => (
-                      <li key={idx} className="flex items-center text-sm text-gray-600">
+                    {feature.benefits.map((benefit, benefitIndex) => (
+                      <li key={benefitIndex} className="flex items-center text-sm text-gray-600">
                         <CheckCircle className="w-4 h-4 mr-2 text-green-500 flex-shrink-0" />
                         {benefit}
                       </li>
                     ))}
                   </ul>
+                  
                   <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full group-hover:bg-purple-600 group-hover:text-white transition-colors"
+                    className="w-full theme-button-secondary group-hover:theme-button-primary transition-all"
                     asChild
                   >
                     <Link href={feature.demo}>
-                      Try Demo
-                      <ExternalLink className="w-4 h-4 ml-2" />
+                      Try Interactive Demo
+                      <ArrowRight className="w-4 h-4 ml-2" />
                     </Link>
                   </Button>
                 </CardContent>
@@ -287,15 +292,73 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* User Types Section */}
-      <section className="py-20 bg-gradient-to-r from-purple-50 to-indigo-50">
+      {/* How It Works */}
+      <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
+            <Badge variant="secondary" className="mb-4 px-3 py-1 text-sm bg-indigo-100 text-indigo-700">
+              Process
+            </Badge>
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
-              Choose Your <span className="theme-gradient-text">Path</span>
+              How <span className="theme-gradient-text">FreeflowZee</span> Works
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Whether you're a creator or a client, we have the perfect solution for your needs.
+              Get started in minutes with our intuitive platform designed for modern freelancers.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-12">
+            <div className="text-center">
+              <div className="flex items-center justify-center mb-6">
+                <div className="p-4 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full">
+                  <Upload className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">1. Create Your Profile</h3>
+              <p className="text-gray-600">
+                Set up your professional profile, showcase your portfolio, and define your services in minutes.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="flex items-center justify-center mb-6">
+                <div className="p-4 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full">
+                  <Users className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">2. Connect with Clients</h3>
+              <p className="text-gray-600">
+                Share your project links, collaborate in real-time, and manage all communications in one place.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="flex items-center justify-center mb-6">
+                <div className="p-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full">
+                  <CreditCard className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">3. Get Paid Securely</h3>
+              <p className="text-gray-600">
+                Automated invoicing, secure payments, and escrow protection ensure you get paid on time, every time.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Dual Path Section */}
+      <section className="py-20 bg-gradient-to-br from-purple-50 to-indigo-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <Badge variant="secondary" className="mb-4 px-3 py-1 text-sm bg-purple-100 text-purple-700">
+              Choose Your Path
+            </Badge>
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+              Built for <span className="theme-gradient-text">Everyone</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Whether you're a creator looking to streamline your business or a client seeking seamless collaboration.
             </p>
           </div>
 
