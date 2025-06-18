@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useReducer, useCallback } from 'react'
+import React, { useState, useReducer, useCallback, useRef } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -225,42 +225,104 @@ function fileReducer(state: FileState, action: FileAction): FileState {
   }
 }
 
+// Utility functions
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+const getFileIcon = (mimeType: string) => {
+  if (mimeType.startsWith('image/')) return Image
+  if (mimeType.startsWith('video/')) return Video
+  if (mimeType.startsWith('audio/')) return Music
+  if (mimeType.includes('pdf')) return FileText
+  if (mimeType.includes('zip') || mimeType.includes('archive')) return Archive
+  return FileText
+}
+
+const getFileColor = (mimeType: string): string => {
+  if (mimeType.startsWith('image/')) return 'text-purple-500'
+  if (mimeType.startsWith('video/')) return 'text-blue-500'
+  if (mimeType.startsWith('audio/')) return 'text-green-500'
+  if (mimeType.includes('pdf')) return 'text-red-500'
+  if (mimeType.includes('zip') || mimeType.includes('archive')) return 'text-orange-500'
+  return 'text-gray-500'
+}
+
 export function FilesHub({ projects, userId }: FilesHubProps) {
   const [state, dispatch] = useReducer(fileReducer, initialState)
   const [activeTab, setActiveTab] = useState('files')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Interactive handlers using Context7 patterns
-  const handleFileUpload = useCallback(() => {
-    console.log('Starting file upload...')
+  const handleUploadClick = useCallback(() => {
+    fileInputRef.current?.click()
+  }, [])
+
+  const handleFileChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    console.log('Starting file upload...', file.name)
     dispatch({ type: 'START_UPLOAD' })
     
-    // Simulate upload progress
-    let progress = 0
-    const interval = setInterval(() => {
-      progress += 10
-      dispatch({ type: 'UPDATE_UPLOAD_PROGRESS', payload: progress })
-      
-      if (progress >= 100) {
-        clearInterval(interval)
-        dispatch({ type: 'COMPLETE_UPLOAD' })
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('folder', 'uploads')
+      formData.append('publicRead', 'false')
+
+      // Simulate progress for UI (real progress would come from upload API)
+      let progress = 0
+      const progressInterval = setInterval(() => {
+        progress += 20
+        dispatch({ type: 'UPDATE_UPLOAD_PROGRESS', payload: progress })
+      }, 300)
+
+      const response = await fetch('/api/storage/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      clearInterval(progressInterval)
+      dispatch({ type: 'UPDATE_UPLOAD_PROGRESS', payload: 100 })
+
+      if (response.ok) {
+        const result = await response.json()
         
-        // Add new file to state
+        // Add new file to state with actual data
         const newFile = {
-          id: Date.now().toString(),
-          name: 'New_Upload.pdf',
-          type: 'pdf',
-          size: '3.2 MB',
+          id: result.file.id,
+          name: result.file.filename,
+          type: file.type.split('/')[0],
+          size: formatFileSize(result.file.size),
           modified: 'Just now',
           author: 'You',
           shared: false,
           starred: false,
-          icon: FileText,
-          color: 'text-red-500'
+          icon: getFileIcon(file.type),
+          color: getFileColor(file.type),
+          downloadUrl: result.file.url,
+          provider: result.file.provider
         }
+        
         dispatch({ type: 'ADD_FILE', payload: newFile })
-        alert('File uploaded successfully!')
+        dispatch({ type: 'COMPLETE_UPLOAD' })
+        alert(`File uploaded successfully to ${result.file.provider}! ${result.costOptimized || ''}`)
+      } else {
+        throw new Error('Upload failed')
       }
-    }, 200)
+    } catch (error) {
+      console.error('Upload error:', error)
+      dispatch({ type: 'COMPLETE_UPLOAD' })
+      alert('Upload failed. Please try again.')
+    }
+    
+    // Reset file input
+    event.target.value = ''
   }, [])
 
   const handleCreateFolder = useCallback(() => {
@@ -271,9 +333,22 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
     }
   }, [])
 
-  const handleDownloadFile = useCallback((file: any) => {
-    console.log(`Downloading ${file.name}...`)
-    alert(`Downloading ${file.name}...`)
+  const handleDownloadFile = useCallback(async (file: any) => {
+    try {
+      const { downloadFile } = await import('@/lib/utils/download-utils')
+      await downloadFile({
+        id: file.id,
+        name: file.name,
+        downloadUrl: file.downloadUrl,
+        url: file.url,
+        provider: file.provider,
+        key: file.key,
+        mimeType: file.type
+      })
+    } catch (error) {
+      console.error('Download error:', error)
+      alert(`Download failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
   }, [])
 
   const handleShareFile = useCallback((file: any) => {
@@ -330,7 +405,7 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
             New Folder
           </Button>
           <Button 
-            onClick={handleFileUpload}
+            onClick={handleUploadClick}
             disabled={state.isUploading}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             data-testid="upload-file-btn"
@@ -338,6 +413,14 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
             <Upload className="w-4 h-4 mr-2" />
             {state.isUploading ? `Uploading ${state.uploadProgress}%` : 'Upload Files'}
           </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            onChange={handleFileChange}
+            className="hidden"
+            accept="image/*,video/*,audio/*,.pdf,.zip,.txt,.json,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+            multiple={false}
+          />
         </div>
       </div>
 
