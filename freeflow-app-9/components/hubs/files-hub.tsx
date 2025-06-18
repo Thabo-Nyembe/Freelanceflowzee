@@ -263,62 +263,54 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
   }, [])
 
   const handleFileChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
+    const files = event.target.files
+    if (!files || files.length === 0) return
 
-    console.log('Starting file upload...', file.name)
+    console.log('Starting file upload...', files[0].name)
     dispatch({ type: 'START_UPLOAD' })
     
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('folder', 'uploads')
-      formData.append('publicRead', 'false')
-
-      // Simulate progress for UI (real progress would come from upload API)
-      let progress = 0
-      const progressInterval = setInterval(() => {
-        progress += 20
-        dispatch({ type: 'UPDATE_UPLOAD_PROGRESS', payload: progress })
-      }, 300)
-
-      const response = await fetch('/api/storage/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      clearInterval(progressInterval)
-      dispatch({ type: 'UPDATE_UPLOAD_PROGRESS', payload: 100 })
-
-      if (response.ok) {
-        const result = await response.json()
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('folder', 'uploads')
+        formData.append('publicRead', 'false')
+        formData.append('project_id', 'sample-project')
         
-        // Add new file to state with actual data
-        const newFile = {
-          id: result.file.id,
-          name: result.file.filename,
-          type: file.type.split('/')[0],
-          size: formatFileSize(result.file.size),
-          modified: 'Just now',
-          author: 'You',
-          shared: false,
-          starred: false,
-          icon: getFileIcon(file.type),
-          color: getFileColor(file.type),
-          downloadUrl: result.file.url,
-          provider: result.file.provider
+        const response = await fetch('/api/storage/upload', {
+          method: 'POST',
+          body: formData
+        })
+        
+        if (!response.ok) {
+          throw new Error(`Upload failed: ${response.statusText}`)
         }
         
-        dispatch({ type: 'ADD_FILE', payload: newFile })
-        dispatch({ type: 'COMPLETE_UPLOAD' })
-        alert(`File uploaded successfully to ${result.file.provider}! ${result.costOptimized || ''}`)
-      } else {
-        throw new Error('Upload failed')
-      }
+        const result = await response.json()
+        return {
+          id: result.file.file_id || `file_${Date.now()}_${Math.random()}`,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          url: result.file.url,
+          provider: result.file.provider,
+          uploadedAt: new Date().toISOString(),
+          status: 'completed' as const
+        }
+      })
+      
+      const uploadedFiles = await Promise.all(uploadPromises)
+      
+      dispatch({ 
+        type: 'UPLOAD_SUCCESS',
+        payload: { files: uploadedFiles }
+      })
     } catch (error) {
       console.error('Upload error:', error)
-      dispatch({ type: 'COMPLETE_UPLOAD' })
-      alert('Upload failed. Please try again.')
+      dispatch({ 
+        type: 'UPLOAD_ERROR',
+        payload: { error: error instanceof Error ? error.message : 'Upload failed' }
+      })
     }
     
     // Reset file input
@@ -335,19 +327,39 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
 
   const handleDownloadFile = useCallback(async (file: any) => {
     try {
-      const { downloadFile } = await import('@/lib/utils/download-utils')
-      await downloadFile({
-        id: file.id,
-        name: file.name,
-        downloadUrl: file.downloadUrl,
-        url: file.url,
-        provider: file.provider,
-        key: file.key,
-        mimeType: file.type
+      dispatch({ type: 'DOWNLOAD_START', payload: { fileId: file.id } })
+      
+      const response = await fetch(`/api/storage/download?fileId=${file.id}`)
+      
+      if (!response.ok) {
+        throw new Error(`Download failed: ${response.statusText}`)
+      }
+      
+      const blob = await response.blob()
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = file.name
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      
+      dispatch({ 
+        type: 'DOWNLOAD_SUCCESS',
+        payload: { fileId: file.id }
       })
     } catch (error) {
       console.error('Download error:', error)
-      alert(`Download failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      dispatch({ 
+        type: 'DOWNLOAD_ERROR',
+        payload: { 
+          fileId: file.id,
+          error: error instanceof Error ? error.message : 'Download failed' 
+        }
+      })
     }
   }, [])
 
@@ -419,7 +431,7 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
             onChange={handleFileChange}
             className="hidden"
             accept="image/*,video/*,audio/*,.pdf,.zip,.txt,.json,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
-            multiple={false}
+            multiple={true}
           />
         </div>
       </div>

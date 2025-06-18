@@ -46,6 +46,51 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- File Storage Metadata Table
+CREATE TABLE IF NOT EXISTS file_storage (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  filename VARCHAR(255) NOT NULL,
+  original_filename VARCHAR(255) NOT NULL,
+  file_path VARCHAR(500) NOT NULL,
+  file_size BIGINT NOT NULL,
+  mime_type VARCHAR(100) NOT NULL,
+  provider VARCHAR(20) DEFAULT 'supabase' CHECK (provider IN ('supabase', 'wasabi')),
+  bucket VARCHAR(100) NOT NULL,
+  key VARCHAR(500) NOT NULL,
+  url TEXT,
+  signed_url TEXT,
+  access_count INTEGER DEFAULT 0,
+  is_public BOOLEAN DEFAULT false,
+  folder VARCHAR(255),
+  tags TEXT[],
+  metadata JSONB DEFAULT '{}',
+  project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
+  uploaded_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  expires_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Storage Analytics Table
+CREATE TABLE IF NOT EXISTS storage_analytics (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  date DATE DEFAULT CURRENT_DATE,
+  total_files INTEGER DEFAULT 0,
+  total_size BIGINT DEFAULT 0,
+  supabase_files INTEGER DEFAULT 0,
+  supabase_size BIGINT DEFAULT 0,
+  wasabi_files INTEGER DEFAULT 0,
+  wasabi_size BIGINT DEFAULT 0,
+  uploads_today INTEGER DEFAULT 0,
+  downloads_today INTEGER DEFAULT 0,
+  cost_supabase DECIMAL(10,4) DEFAULT 0,
+  cost_wasabi DECIMAL(10,4) DEFAULT 0,
+  cost_savings DECIMAL(10,4) DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(date)
+);
+
 -- Feedback/Comments table for media files
 CREATE TABLE IF NOT EXISTS feedback_comments (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -73,6 +118,7 @@ CREATE TABLE IF NOT EXISTS project_attachments (
   file_type VARCHAR(100),
   file_size BIGINT,
   uploaded_by UUID REFERENCES auth.users(id),
+  storage_id UUID REFERENCES file_storage(id) ON DELETE SET NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -204,42 +250,23 @@ CREATE TABLE IF NOT EXISTS upf_voice_notes (
 -- Create UPF analytics table
 CREATE TABLE IF NOT EXISTS upf_analytics (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  project_id VARCHAR(255) NOT NULL,
-  date DATE NOT NULL DEFAULT CURRENT_DATE,
+  date DATE DEFAULT CURRENT_DATE,
   total_comments INTEGER DEFAULT 0,
-  open_comments INTEGER DEFAULT 0,
-  resolved_comments INTEGER DEFAULT 0,
-  high_priority_comments INTEGER DEFAULT 0,
-  avg_response_time INTERVAL,
+  comments_by_type JSONB DEFAULT '{}',
+  comments_by_priority JSONB DEFAULT '{}',
+  comments_by_status JSONB DEFAULT '{}',
+  avg_resolution_time INTERVAL,
+  most_active_users JSONB DEFAULT '[]',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(project_id, date)
+  UNIQUE(date)
 );
-
--- ============================================================================
--- STORAGE BUCKETS
--- ============================================================================
-
--- Create storage bucket for project attachments
-INSERT INTO storage.buckets (id, name, public) 
-VALUES ('project-attachments', 'project-attachments', true)
-ON CONFLICT (id) DO NOTHING;
-
--- Create storage bucket for UPF voice notes
-INSERT INTO storage.buckets (id, name, public) 
-VALUES ('voice-notes', 'voice-notes', false)
-ON CONFLICT (id) DO NOTHING;
-
--- Create storage bucket for general uploads
-INSERT INTO storage.buckets (id, name, public) 
-VALUES ('uploads', 'uploads', true)
-ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================================
 -- INDEXES FOR PERFORMANCE
 -- ============================================================================
 
--- Main schema indexes
+-- Main tables indexes
 CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id);
 CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status);
 CREATE INDEX IF NOT EXISTS idx_projects_created_at ON projects(created_at);
@@ -249,7 +276,19 @@ CREATE INDEX IF NOT EXISTS idx_project_attachments_project_id ON project_attachm
 CREATE INDEX IF NOT EXISTS idx_time_entries_project_id ON time_entries(project_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_user_id ON invoices(user_id);
 
--- UPF system indexes
+-- File storage indexes
+CREATE INDEX IF NOT EXISTS idx_file_storage_project_id ON file_storage(project_id);
+CREATE INDEX IF NOT EXISTS idx_file_storage_uploaded_by ON file_storage(uploaded_by);
+CREATE INDEX IF NOT EXISTS idx_file_storage_provider ON file_storage(provider);
+CREATE INDEX IF NOT EXISTS idx_file_storage_created_at ON file_storage(created_at);
+CREATE INDEX IF NOT EXISTS idx_file_storage_tags ON file_storage USING GIN(tags);
+CREATE INDEX IF NOT EXISTS idx_file_storage_metadata ON file_storage USING GIN(metadata);
+
+-- Storage analytics indexes
+CREATE INDEX IF NOT EXISTS idx_storage_analytics_date ON storage_analytics(date);
+CREATE INDEX IF NOT EXISTS idx_storage_analytics_created_at ON storage_analytics(created_at);
+
+-- UPF indexes
 CREATE INDEX IF NOT EXISTS idx_upf_comments_file_id ON upf_comments(file_id);
 CREATE INDEX IF NOT EXISTS idx_upf_comments_project_id ON upf_comments(project_id);
 CREATE INDEX IF NOT EXISTS idx_upf_comments_user_id ON upf_comments(user_id);
@@ -259,17 +298,19 @@ CREATE INDEX IF NOT EXISTS idx_upf_comments_created_at ON upf_comments(created_a
 CREATE INDEX IF NOT EXISTS idx_upf_reactions_comment_id ON upf_reactions(comment_id);
 CREATE INDEX IF NOT EXISTS idx_upf_attachments_comment_id ON upf_attachments(comment_id);
 
--- Create GIN indexes for JSONB columns
+-- JSONB GIN indexes for complex queries
 CREATE INDEX IF NOT EXISTS idx_upf_comments_position_data ON upf_comments USING GIN(position_data);
 CREATE INDEX IF NOT EXISTS idx_upf_comments_ai_analysis ON upf_comments USING GIN(ai_analysis);
 
 -- ============================================================================
--- ROW LEVEL SECURITY (RLS)
+-- ROW LEVEL SECURITY (RLS) POLICIES
 -- ============================================================================
 
 -- Enable RLS on all tables
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE file_storage ENABLE ROW LEVEL SECURITY;
+ALTER TABLE storage_analytics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE feedback_comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE project_attachments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE project_members ENABLE ROW LEVEL SECURITY;
@@ -281,164 +322,143 @@ ALTER TABLE upf_attachments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE upf_voice_notes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE upf_analytics ENABLE ROW LEVEL SECURITY;
 
--- ============================================================================
--- RLS POLICIES
--- ============================================================================
-
 -- Projects policies
-DROP POLICY IF EXISTS "Users can view their own projects" ON projects;
-CREATE POLICY "Users can view their own projects" ON projects
-  FOR SELECT USING (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "Users can insert their own projects" ON projects;
-CREATE POLICY "Users can insert their own projects" ON projects
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "Users can update their own projects" ON projects;
-CREATE POLICY "Users can update their own projects" ON projects
-  FOR UPDATE USING (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "Users can delete their own projects" ON projects;
-CREATE POLICY "Users can delete their own projects" ON projects
-  FOR DELETE USING (auth.uid() = user_id);
+CREATE POLICY "Users can view own projects" ON projects FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own projects" ON projects FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own projects" ON projects FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own projects" ON projects FOR DELETE USING (auth.uid() = user_id);
 
 -- User profiles policies
-DROP POLICY IF EXISTS "Users can view their own profile" ON user_profiles;
-CREATE POLICY "Users can view their own profile" ON user_profiles
-  FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Users can view own profile" ON user_profiles FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Users can update own profile" ON user_profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Users can insert own profile" ON user_profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
-DROP POLICY IF EXISTS "Users can insert their own profile" ON user_profiles;
-CREATE POLICY "Users can insert their own profile" ON user_profiles
-  FOR INSERT WITH CHECK (auth.uid() = id);
+-- File storage policies
+CREATE POLICY "Users can view own files" ON file_storage FOR SELECT USING (auth.uid() = uploaded_by);
+CREATE POLICY "Users can upload files" ON file_storage FOR INSERT WITH CHECK (auth.uid() = uploaded_by);
+CREATE POLICY "Users can update own files" ON file_storage FOR UPDATE USING (auth.uid() = uploaded_by);
+CREATE POLICY "Users can delete own files" ON file_storage FOR DELETE USING (auth.uid() = uploaded_by);
 
-DROP POLICY IF EXISTS "Users can update their own profile" ON user_profiles;
-CREATE POLICY "Users can update their own profile" ON user_profiles
-  FOR UPDATE USING (auth.uid() = id);
+-- Storage analytics policies (service role only)
+CREATE POLICY "Service role can manage storage analytics" ON storage_analytics FOR ALL USING (auth.jwt() ->> 'role' = 'service_role');
 
--- UPF policies (permissive for collaboration)
-DROP POLICY IF EXISTS "Users can view comments in their projects" ON upf_comments;
-CREATE POLICY "Users can view comments in their projects" ON upf_comments
-  FOR SELECT USING (true); -- Allow all reads for collaboration
-
-DROP POLICY IF EXISTS "Users can create comments" ON upf_comments;
-CREATE POLICY "Users can create comments" ON upf_comments
-  FOR INSERT WITH CHECK (true); -- Allow all inserts for collaboration
-
-DROP POLICY IF EXISTS "Users can update their own comments" ON upf_comments;
-CREATE POLICY "Users can update their own comments" ON upf_comments
-  FOR UPDATE USING (true); -- Allow all updates for collaboration
-
-DROP POLICY IF EXISTS "Users can delete their own comments" ON upf_comments;
-CREATE POLICY "Users can delete their own comments" ON upf_comments
-  FOR DELETE USING (true); -- Allow all deletes for collaboration
-
--- UPF reactions policies
-DROP POLICY IF EXISTS "Users can manage reactions" ON upf_reactions;
-CREATE POLICY "Users can manage reactions" ON upf_reactions
-  FOR ALL USING (true);
-
--- UPF attachments policies
-DROP POLICY IF EXISTS "Users can manage attachments" ON upf_attachments;
-CREATE POLICY "Users can manage attachments" ON upf_attachments
-  FOR ALL USING (true);
-
--- UPF voice notes policies
-DROP POLICY IF EXISTS "Users can manage voice notes" ON upf_voice_notes;
-CREATE POLICY "Users can manage voice notes" ON upf_voice_notes
-  FOR ALL USING (true);
-
--- UPF analytics policies
-DROP POLICY IF EXISTS "Users can view analytics" ON upf_analytics;
-CREATE POLICY "Users can view analytics" ON upf_analytics
-  FOR SELECT USING (true);
+-- UPF policies
+CREATE POLICY "Users can view UPF comments" ON upf_comments FOR SELECT USING (true);
+CREATE POLICY "Users can insert UPF comments" ON upf_comments FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own UPF comments" ON upf_comments FOR UPDATE USING (auth.uid() = user_id);
 
 -- ============================================================================
 -- FUNCTIONS AND TRIGGERS
 -- ============================================================================
 
--- Function to update updated_at timestamps
+-- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
+    NEW.updated_at = NOW();
+    RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ language 'plpgsql';
 
 -- Function to update UPF analytics
 CREATE OR REPLACE FUNCTION update_upf_analytics()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO upf_analytics (project_id, date, total_comments, open_comments, resolved_comments, high_priority_comments)
-  VALUES (
-    COALESCE(NEW.project_id, OLD.project_id),
-    CURRENT_DATE,
-    (SELECT COUNT(*) FROM upf_comments WHERE project_id = COALESCE(NEW.project_id, OLD.project_id)),
-    (SELECT COUNT(*) FROM upf_comments WHERE project_id = COALESCE(NEW.project_id, OLD.project_id) AND status = 'open'),
-    (SELECT COUNT(*) FROM upf_comments WHERE project_id = COALESCE(NEW.project_id, OLD.project_id) AND status = 'resolved'),
-    (SELECT COUNT(*) FROM upf_comments WHERE project_id = COALESCE(NEW.project_id, OLD.project_id) AND priority = 'high')
-  )
-  ON CONFLICT (project_id, date) 
-  DO UPDATE SET
-    total_comments = EXCLUDED.total_comments,
-    open_comments = EXCLUDED.open_comments,
-    resolved_comments = EXCLUDED.resolved_comments,
-    high_priority_comments = EXCLUDED.high_priority_comments,
+  INSERT INTO upf_analytics (date, total_comments)
+  VALUES (CURRENT_DATE, 1)
+  ON CONFLICT (date) 
+  DO UPDATE SET 
+    total_comments = upf_analytics.total_comments + 1,
     updated_at = NOW();
-  
-  RETURN COALESCE(NEW, OLD);
+  RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ language 'plpgsql';
 
--- ============================================================================
--- TRIGGERS
--- ============================================================================
+-- Function to update storage analytics
+CREATE OR REPLACE FUNCTION update_storage_analytics()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Update daily storage analytics
+  INSERT INTO storage_analytics (
+    date, 
+    total_files, 
+    total_size,
+    supabase_files,
+    supabase_size,
+    wasabi_files,
+    wasabi_size
+  ) 
+  SELECT 
+    CURRENT_DATE,
+    COUNT(*),
+    SUM(file_size),
+    SUM(CASE WHEN provider = 'supabase' THEN 1 ELSE 0 END),
+    SUM(CASE WHEN provider = 'supabase' THEN file_size ELSE 0 END),
+    SUM(CASE WHEN provider = 'wasabi' THEN 1 ELSE 0 END),
+    SUM(CASE WHEN provider = 'wasabi' THEN file_size ELSE 0 END)
+  FROM file_storage
+  ON CONFLICT (date) 
+  DO UPDATE SET 
+    total_files = EXCLUDED.total_files,
+    total_size = EXCLUDED.total_size,
+    supabase_files = EXCLUDED.supabase_files,
+    supabase_size = EXCLUDED.supabase_size,
+    wasabi_files = EXCLUDED.wasabi_files,
+    wasabi_size = EXCLUDED.wasabi_size,
+    updated_at = NOW();
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
 
--- Updated_at triggers for main tables
-DROP TRIGGER IF EXISTS update_projects_updated_at ON projects;
+-- Create triggers
 CREATE TRIGGER update_projects_updated_at 
   BEFORE UPDATE ON projects
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-DROP TRIGGER IF EXISTS update_feedback_comments_updated_at ON feedback_comments;
 CREATE TRIGGER update_feedback_comments_updated_at 
   BEFORE UPDATE ON feedback_comments
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-DROP TRIGGER IF EXISTS update_user_profiles_updated_at ON user_profiles;
 CREATE TRIGGER update_user_profiles_updated_at 
   BEFORE UPDATE ON user_profiles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-DROP TRIGGER IF EXISTS update_invoices_updated_at ON invoices;
 CREATE TRIGGER update_invoices_updated_at 
   BEFORE UPDATE ON invoices
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- UPF analytics trigger
-DROP TRIGGER IF EXISTS upf_comments_analytics_trigger ON upf_comments;
+CREATE TRIGGER update_file_storage_updated_at 
+  BEFORE UPDATE ON file_storage
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TRIGGER upf_comments_analytics_trigger
   AFTER INSERT OR UPDATE OR DELETE ON upf_comments
   FOR EACH ROW
   EXECUTE FUNCTION update_upf_analytics();
 
--- UPF updated_at trigger
-DROP TRIGGER IF EXISTS upf_comments_updated_at_trigger ON upf_comments;
 CREATE TRIGGER upf_comments_updated_at_trigger
   BEFORE UPDATE ON upf_comments
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER storage_analytics_trigger
+  AFTER INSERT OR UPDATE OR DELETE ON file_storage
+  FOR EACH ROW
+  EXECUTE FUNCTION update_storage_analytics();
+
 -- ============================================================================
--- COMPLETION MESSAGE
+-- STORAGE BUCKETS SETUP
 -- ============================================================================
 
-DO $$
-BEGIN
-  RAISE NOTICE '🎉 FreeflowZee Database Setup Complete!';
-  RAISE NOTICE '✅ All tables, indexes, and policies created successfully';
-  RAISE NOTICE '🔐 Row Level Security enabled on all tables';
-  RAISE NOTICE '📊 Analytics and triggers configured';
-  RAISE NOTICE '🚀 Your database is ready for production!';
-END
-$$; 
+-- Create storage buckets (Run these separately in Supabase if needed)
+-- insert into storage.buckets (id, name, public) values ('uploads', 'uploads', false);
+-- insert into storage.buckets (id, name, public) values ('project-attachments', 'project-attachments', false);
+-- insert into storage.buckets (id, name, public) values ('voice-notes', 'voice-notes', false);
+
+-- ============================================================================
+-- SAMPLE DATA (Optional - Remove in production)
+-- ============================================================================
+
+-- This completes the database setup for FreeflowZee
+-- Make sure to run this script in your Supabase SQL Editor
+-- and create the storage buckets manually if they don't exist 

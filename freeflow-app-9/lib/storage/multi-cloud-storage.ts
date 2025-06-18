@@ -1,9 +1,8 @@
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command, HeadObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { Upload } from '@aws-sdk/lib-storage';
-import { NodeHttpHandler } from '@smithy/node-http-handler';
-import { createClient } from '@supabase/supabase-js';
-import { Agent } from 'node:https';
+import { createClient } from '@supabase/supabase-js'
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command, GetObjectCommandOutput } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { NodeHttpHandler } from '@smithy/node-http-handler'
+import { Agent } from 'https'
 
 // STARTUP MODE: Aggressive cost optimization
 const STARTUP_MODE = process.env.STARTUP_MODE === 'true';
@@ -20,26 +19,35 @@ export type StorageProvider = 'supabase' | 'wasabi' | 'hybrid';
 export interface FileMetadata {
   id: string;
   filename: string;
+  original_filename: string;
+  file_path: string;
   size: number;
   mimeType: string;
   provider: StorageProvider;
   bucket: string;
   key: string;
-  url?: string;
+  url: string;
+  signed_url?: string;
+  access_count: number;
+  is_public: boolean;
+  folder?: string;
+  tags?: string[];
+  metadata?: Record<string, any>;
+  project_id?: string;
+  uploaded_by?: string;
   uploadedAt: Date;
-  lastAccessed?: Date;
-  accessCount: number;
-  tags?: Record<string, string>;
+  expires_at?: Date;
 }
 
 // Upload options interface
 export interface UploadOptions {
   folder?: string;
-  metadata?: Record<string, string>;
   publicRead?: boolean;
-  tags?: Record<string, string>;
+  tags?: string[];
+  metadata?: Record<string, any>;
   cacheControl?: string;
-  contentEncoding?: string;
+  project_id?: string;
+  user_id?: string;
 }
 
 // Storage analytics interface
@@ -119,7 +127,6 @@ class MultiCloudStorage {
       forcePathStyle: true, // Required for Wasabi compatibility
       
       // Context7 performance optimizations
-      cacheMiddleware: true, // Cache middleware resolution for better performance
       requestHandler: new NodeHttpHandler({
         httpsAgent: new Agent({
           keepAlive: true, // Essential for connection reuse
@@ -132,44 +139,33 @@ class MultiCloudStorage {
   }
 
   /**
-   * STARTUP-OPTIMIZED: Decide storage provider based on aggressive cost savings
+   * Context7 optimized provider selection logic
    */
   private shouldUseWasabi(fileSize: number, mimeType: string, metadata?: Record<string, any>): boolean {
-    // STARTUP MODE: Route almost everything to Wasabi for maximum savings
-    if (STARTUP_MODE) {
-      // Only keep tiny critical files on Supabase
-      if (fileSize < 10240) { // Under 10KB
-        if (mimeType.startsWith('image/') && metadata?.type === 'thumbnail') {
-          return false; // Keep thumbnails on Supabase for speed
-        }
-        if (metadata?.realtime === true) {
-          return false; // Keep real-time data on Supabase
-        }
-        if (metadata?.critical === true) {
-          return false; // Keep critical files on Supabase
-        }
-      }
-      
-      // Everything else goes to Wasabi for cost savings
-      return true;
-    }
+    // Always use Wasabi for large files (cost optimization)
+    if (fileSize > this.config.largeFileThreshold) return true;
     
-    // Normal mode: Use existing logic
-    if (fileSize >= LARGE_FILE_THRESHOLD) return true;
-    if (mimeType.startsWith('video/') || mimeType.startsWith('audio/')) return true;
-    if (metadata?.archive === true) return true;
+    // Use Wasabi for archives and backups
+    if (['application/zip', 'application/x-rar-compressed', 'application/x-7z-compressed'].includes(mimeType)) return true;
     
-    return false;
+    // Use Wasabi for video files (typically large and accessed less frequently)
+    if (mimeType.startsWith('video/')) return true;
+    
+    // Use Supabase for frequently accessed small files
+    if (fileSize < 1024 * 1024 && mimeType.startsWith('image/')) return false; // < 1MB images
+    
+    // Default to hybrid approach based on configuration
+    return this.config.provider === 'wasabi' || this.config.provider === 'hybrid';
   }
 
   /**
-   * STARTUP-OPTIMIZED: Upload with intelligent cost-saving routing
+   * STARTUP-OPTIMIZED: Upload with intelligent cost-saving routing and database storage
    */
   async uploadFile(
     file: Buffer | Uint8Array,
     fileName: string,
     mimeType: string,
-    metadata?: Record<string, any>
+    options: UploadOptions = {}
   ): Promise<{
     success: boolean;
     url?: string;
@@ -177,31 +173,60 @@ class MultiCloudStorage {
     size: number;
     cost_per_month: number;
     savings?: string;
+    file_id?: string;
   }> {
     const fileSize = file.length;
-    const useWasabi = this.shouldUseWasabi(fileSize, mimeType, metadata);
+    const useWasabi = this.shouldUseWasabi(fileSize, mimeType, options.metadata);
+    const timestamp = Date.now();
+    const safeFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const fileKey = options.folder ? `${options.folder}/${timestamp}-${safeFileName}` : `uploads/${timestamp}-${safeFileName}`;
     
     try {
+      let url: string;
+      let provider: 'wasabi' | 'supabase';
+      let bucket: string;
+
       if (useWasabi) {
         // Upload to Wasabi for cost savings
-        const key = `uploads/${Date.now()}-${fileName}`;
-        
         const uploadCommand = new PutObjectCommand({
-          Bucket: process.env.WASABI_BUCKET_NAME || 'freeflowzee-storage',
-          Key: key,
+          Bucket: this.config.wasabi.bucket,
+          Key: fileKey,
           Body: file,
           ContentType: mimeType,
-          Metadata: metadata || {},
+          Metadata: options.metadata || {},
         });
 
         await this.wasabiClient.send(uploadCommand);
         
-        const url = `${this.config.wasabi.endpoint}/${this.config.wasabi.bucket}/${key}`;
+        url = `${this.config.wasabi.endpoint}/${this.config.wasabi.bucket}/${fileKey}`;
+        provider = 'wasabi';
+        bucket = this.config.wasabi.bucket;
         
         // Calculate cost savings for startup
         const wasabiCost = (fileSize / 1e9) * 0.0059; // $0.0059/GB/month
         const supabaseCost = (fileSize / 1e9) * 0.021; // $0.021/GB/month
         const savings = `Saves $${(supabaseCost - wasabiCost).toFixed(4)}/month (${Math.round(((supabaseCost - wasabiCost) / supabaseCost) * 100)}% cheaper)`;
+        
+        // Store metadata in database
+        const fileRecord = await this.storeFileMetadata({
+          filename: safeFileName,
+          original_filename: fileName,
+          file_path: fileKey,
+          size: fileSize,
+          mimeType,
+          provider: 'wasabi',
+          bucket,
+          key: fileKey,
+          url,
+          access_count: 0,
+          is_public: options.publicRead || false,
+          folder: options.folder,
+          tags: options.tags,
+          metadata: options.metadata,
+          project_id: options.project_id,
+          uploaded_by: options.user_id,
+          uploadedAt: new Date()
+        });
         
         return {
           success: true,
@@ -209,15 +234,17 @@ class MultiCloudStorage {
           provider: 'wasabi',
           size: fileSize,
           cost_per_month: wasabiCost,
-          savings
+          savings,
+          file_id: fileRecord.id
         };
       } else {
         // Upload to Supabase for speed (small/critical files only)
         const { data, error } = await this.supabaseClient.storage
           .from(this.config.supabase.bucket)
-          .upload(fileName, file, {
+          .upload(fileKey, file, {
             contentType: mimeType,
-            metadata,
+            metadata: options.metadata,
+            cacheControl: options.cacheControl || '3600'
           });
 
         if (error) throw error;
@@ -226,14 +253,40 @@ class MultiCloudStorage {
           .from(this.config.supabase.bucket)
           .getPublicUrl(data.path);
 
+        url = urlData.publicUrl;
+        provider = 'supabase';
+        bucket = this.config.supabase.bucket;
+        
         const supabaseCost = (fileSize / 1e9) * 0.021;
+
+        // Store metadata in database
+        const fileRecord = await this.storeFileMetadata({
+          filename: safeFileName,
+          original_filename: fileName,
+          file_path: data.path,
+          size: fileSize,
+          mimeType,
+          provider: 'supabase',
+          bucket,
+          key: data.path,
+          url,
+          access_count: 0,
+          is_public: options.publicRead || false,
+          folder: options.folder,
+          tags: options.tags,
+          metadata: options.metadata,
+          project_id: options.project_id,
+          uploaded_by: options.user_id,
+          uploadedAt: new Date()
+        });
         
         return {
           success: true,
-          url: urlData.publicUrl,
+          url,
           provider: 'supabase',
           size: fileSize,
-          cost_per_month: supabaseCost
+          cost_per_month: supabaseCost,
+          file_id: fileRecord.id
         };
       }
     } catch (error) {
@@ -248,404 +301,94 @@ class MultiCloudStorage {
   }
 
   /**
-   * STARTUP ANALYTICS: Monitor costs and optimization opportunities
+   * Store file metadata in database
    */
-  async getAnalytics(): Promise<{
-    totalFiles: number;
-    totalSize: number;
-    supabaseSize: number;
-    wasabiSize: number;
-    monthlyCost: number;
-    potentialSavings: number;
-    optimizationScore: number;
-  }> {
-    try {
-      // Get Supabase files
-      const { data: supabaseFiles } = await this.supabaseClient.storage
-        .from(this.config.supabase.bucket)
-        .list('', { limit: 1000 });
+  private async storeFileMetadata(metadata: Omit<FileMetadata, 'id'>): Promise<FileMetadata> {
+    const { data, error } = await this.supabaseClient
+      .from('file_storage')
+      .insert([{
+        filename: metadata.filename,
+        original_filename: metadata.original_filename,
+        file_path: metadata.file_path,
+        file_size: metadata.size,
+        mime_type: metadata.mimeType,
+        provider: metadata.provider,
+        bucket: metadata.bucket,
+        key: metadata.key,
+        url: metadata.url,
+        access_count: metadata.access_count,
+        is_public: metadata.is_public,
+        folder: metadata.folder,
+        tags: metadata.tags,
+        metadata: metadata.metadata,
+        project_id: metadata.project_id,
+        uploaded_by: metadata.uploaded_by
+      }])
+      .select()
+      .single();
 
-      // Simulate Wasabi files for demo (in production, list from Wasabi)
-      const wasabiFiles = []; // Would fetch from Wasabi
-
-      let supabaseSize = 0;
-      let wasabiSize = 0;
-      let totalFiles = 0;
-
-      if (supabaseFiles) {
-        supabaseFiles.forEach(file => {
-          if (file.metadata?.size) {
-            supabaseSize += file.metadata.size;
-            totalFiles++;
-          }
-        });
-      }
-
-      // Calculate costs
-      const supabaseCost = (supabaseSize / 1e9) * 0.021; // $0.021/GB/month
-      const wasabiCost = (wasabiSize / 1e9) * 0.0059;   // $0.0059/GB/month
-      const totalCost = supabaseCost + wasabiCost;
-
-      // Calculate potential savings if we moved eligible files to Wasabi
-      let canMoveToWasabi = 0;
-      if (supabaseFiles) {
-        supabaseFiles.forEach(file => {
-          const size = file.metadata?.size || 0;
-          const mimeType = file.metadata?.mimetype || '';
-          if (this.shouldUseWasabi(size, mimeType)) {
-            canMoveToWasabi += size;
-          }
-        });
-      }
-
-      const potentialSavings = (canMoveToWasabi / 1e9) * 0.021 * 0.72; // 72% savings rate
-      const optimizationScore = supabaseSize > 0 ? Math.max(0, 100 - (canMoveToWasabi / supabaseSize) * 100) : 100;
-
-      return {
-        totalFiles,
-        totalSize: supabaseSize + wasabiSize,
-        supabaseSize,
-        wasabiSize,
-        monthlyCost: totalCost,
-        potentialSavings,
-        optimizationScore
-      };
-    } catch (error) {
-      console.error('Analytics failed:', error);
-      return {
-        totalFiles: 0,
-        totalSize: 0,
-        supabaseSize: 0,
-        wasabiSize: 0,
-        monthlyCost: 0,
-        potentialSavings: 0,
-        optimizationScore: 0
-      };
+    if (error) {
+      console.error('Database insert error:', error);
+      throw new Error(`Failed to store file metadata: ${error.message}`);
     }
-  }
-
-  /**
-   * STARTUP OPTIMIZATION: Automatically move files to Wasabi for cost savings
-   */
-  async optimizeStorage(): Promise<{
-    moved: number;
-    saved: number;
-    details: string[];
-  }> {
-    const details: string[] = [];
-    let moved = 0;
-    let saved = 0;
-
-    try {
-      // Get current Supabase files
-      const { data: files } = await this.supabaseClient.storage
-        .from(this.config.supabase.bucket)
-        .list('', { limit: 1000 });
-
-      if (!files) {
-        details.push('No files found for optimization');
-        return { moved, saved, details };
-      }
-
-      for (const file of files) {
-        const size = file.metadata?.size || 0;
-        const mimeType = file.metadata?.mimetype || '';
-
-        // Check if this file should be moved to Wasabi
-        if (this.shouldUseWasabi(size, mimeType)) {
-          try {
-            // Download from Supabase
-            const { data: fileData } = await this.supabaseClient.storage
-              .from(this.config.supabase.bucket)
-              .download(file.name);
-
-            if (fileData) {
-              // Upload to Wasabi
-              const buffer = await fileData.arrayBuffer();
-              const uploadResult = await this.uploadFile(
-                new Uint8Array(buffer),
-                file.name,
-                mimeType,
-                { ...file.metadata, migrated: true }
-              );
-
-              if (uploadResult.success) {
-                // Delete from Supabase
-                await this.supabaseClient.storage
-                  .from(this.config.supabase.bucket)
-                  .remove([file.name]);
-
-                moved++;
-                saved += size;
-                details.push(`✅ Moved ${file.name} (${(size / 1048576).toFixed(2)}MB) to Wasabi`);
-                details.push(`💰 ${uploadResult.savings || 'Cost optimized'}`);
-              }
-            }
-          } catch (error) {
-            details.push(`❌ Failed to move ${file.name}: ${error}`);
-          }
-        }
-      }
-
-      if (moved === 0) {
-        details.push('✅ Storage already optimized - no files need moving');
-      } else {
-        const monthlySavings = (saved / 1e9) * 0.021 * 0.72; // 72% savings
-        details.push(`🎉 OPTIMIZATION COMPLETE: Moved ${moved} files`);
-        details.push(`💰 Monthly savings: $${monthlySavings.toFixed(2)}`);
-        details.push(`📈 Annual savings: $${(monthlySavings * 12).toFixed(2)}`);
-      }
-
-    } catch (error) {
-      details.push(`❌ Optimization failed: ${error}`);
-    }
-
-    return { moved, saved, details };
-  }
-
-  /**
-   * STARTUP HEALTH CHECK: Verify both providers are working and cost-optimized
-   */
-  async healthCheck(): Promise<{
-    supabase: { status: 'connected' | 'error'; cost_per_gb: number };
-    wasabi: { status: 'connected' | 'error'; cost_per_gb: number };
-    optimization: { status: 'optimal' | 'needs_attention'; potential_savings: number };
-    startup_mode: boolean;
-  }> {
-    const testFile = new Uint8Array([1, 2, 3, 4, 5]);
-    
-    // Test Supabase
-    let supabaseStatus: 'connected' | 'error' = 'error';
-    try {
-      const { error } = await this.supabaseClient.storage
-        .from(this.config.supabase.bucket)
-        .upload(`health-check-${Date.now()}.txt`, testFile);
-      supabaseStatus = error ? 'error' : 'connected';
-    } catch {
-      supabaseStatus = 'error';
-    }
-
-    // Test Wasabi
-    let wasabiStatus: 'connected' | 'error' = 'error';
-    try {
-      const command = new PutObjectCommand({
-        Bucket: this.config.wasabi.bucket,
-        Key: `health-check-${Date.now()}.txt`,
-        Body: testFile,
-      });
-      await this.wasabiClient.send(command);
-      wasabiStatus = 'connected';
-    } catch {
-      wasabiStatus = 'error';
-    }
-
-    // Check optimization status
-    const analytics = await this.getAnalytics();
-    const optimizationStatus = analytics.potentialSavings > 1 ? 'needs_attention' : 'optimal';
 
     return {
-      supabase: { status: supabaseStatus, cost_per_gb: 0.021 },
-      wasabi: { status: wasabiStatus, cost_per_gb: 0.0059 },
-      optimization: { status: optimizationStatus, potential_savings: analytics.potentialSavings },
-      startup_mode: STARTUP_MODE
+      id: data.id as string,
+      filename: data.filename as string,
+      original_filename: data.original_filename as string,
+      file_path: data.file_path as string,
+      size: data.file_size as number,
+      mimeType: data.mime_type as string,
+      provider: data.provider as 'supabase' | 'wasabi',
+      bucket: data.bucket as string,
+      key: data.key as string,
+      url: data.url as string,
+      access_count: data.access_count as number,
+      is_public: data.is_public as boolean,
+      folder: data.folder as string,
+      tags: data.tags as string[],
+      metadata: data.metadata as Record<string, any>,
+      project_id: data.project_id as string,
+      uploaded_by: data.uploaded_by as string,
+      uploadedAt: new Date(data.created_at as string)
     };
   }
 
   /**
-   * Intelligent storage provider selection based on file characteristics
-   * Uses Context7-inspired decision logic for cost optimization
+   * Download file with access tracking
    */
-  private selectProvider(fileSize: number, mimeType: string, options: UploadOptions = {}): StorageProvider {
-    if (this.config.provider === 'supabase') return 'supabase';
-    if (this.config.provider === 'wasabi') return 'wasabi';
+  async downloadFile(fileId: string): Promise<{ buffer: Buffer; metadata: FileMetadata }> {
+    // Get file metadata from database
+    const { data, error } = await this.supabaseClient
+      .from('file_storage')
+      .select('*')
+      .eq('id', fileId)
+      .single();
 
-    // Hybrid mode - intelligent selection based on Context7 patterns
-    const isLargeFile = fileSize > this.config.largeFileThreshold;
-    const isVideoFile = mimeType.startsWith('video/');
-    const isArchiveFile = mimeType.includes('zip') || mimeType.includes('tar') || mimeType.includes('rar');
-    const isBackupFile = options.folder?.includes('backup') || options.tags?.type === 'backup';
-    const isFrequentAccess = options.tags?.access === 'frequent';
-
-    // Route to Wasabi for cost savings (up to 80% cheaper than traditional cloud storage)
-    if (isLargeFile || isVideoFile || isArchiveFile || isBackupFile) {
-      return 'wasabi';
+    if (error || !data) {
+      throw new Error('File not found');
     }
 
-    // Keep frequently accessed small files on Supabase for speed
-    if (isFrequentAccess || fileSize < 1048576) { // Files under 1MB
-      return 'supabase';
-    }
-
-    // Default to Wasabi for cost optimization
-    return 'wasabi';
-  }
-
-  /**
-   * Upload file with intelligent provider selection and Context7 optimizations
-   */
-  async upload(
-    file: Buffer | Uint8Array | File,
-    filename: string,
-    mimeType: string,
-    options: UploadOptions = {}
-  ): Promise<FileMetadata> {
-    const fileSize = file instanceof File ? file.size : file.length;
-    const provider = this.selectProvider(fileSize, mimeType, options);
-    
-    const key = options.folder ? `${options.folder}/${filename}` : filename;
-    const id = `${provider}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-    let result: FileMetadata;
-
-    try {
-      if (provider === 'wasabi') {
-        result = await this.uploadToWasabi(file, key, mimeType, options);
-      } else {
-        result = await this.uploadToSupabase(file, key, mimeType, options);
-      }
-
-      // Store metadata for analytics and management
-      const metadata: FileMetadata = {
-        ...result,
-        id,
-        filename,
-        size: fileSize,
-        mimeType,
-        provider,
-        uploadedAt: new Date(),
-        accessCount: 0,
-        tags: options.tags
-      };
-
-      await this.storeMetadata(metadata);
-      return metadata;
-
-    } catch (error) {
-      console.error(`Upload failed for ${filename}:`, error);
-      throw new Error(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  /**
-   * Upload to Wasabi S3 with Context7 lib-storage for large files
-   */
-  private async uploadToWasabi(
-    file: Buffer | Uint8Array | File,
-    key: string,
-    mimeType: string,
-    options: UploadOptions
-  ): Promise<FileMetadata> {
-    const buffer = file instanceof File ? Buffer.from(await file.arrayBuffer()) : Buffer.from(file);
-    
-    // Use Context7 lib-storage for files larger than 5MB for multipart upload efficiency
-    if (buffer.length > 5 * 1024 * 1024) {
-      const parallelUpload = new Upload({
-        client: this.wasabiClient,
-        params: {
-          Bucket: this.config.wasabi.bucket,
-          Key: key,
-          Body: buffer,
-          ContentType: mimeType,
-          ACL: options.publicRead ? 'public-read' : 'private',
-          Metadata: options.metadata || {},
-          CacheControl: options.cacheControl,
-          ContentEncoding: options.contentEncoding,
-          Tagging: options.tags ? Object.entries(options.tags).map(([k, v]) => `${k}=${v}`).join('&') : undefined
-        },
-        // Context7 optimizations
-        queueSize: 4,           // Parallel upload concurrency
-        partSize: 1024 * 1024 * 32, // 32MB parts for optimal performance
-        leavePartsOnError: false,   // Auto-cleanup on failure
-      });
-
-      // Monitor upload progress
-      parallelUpload.on('httpUploadProgress', (progress: { loaded?: number; total?: number }) => {
-        console.log(`Upload progress: ${Math.round((progress.loaded || 0) / (progress.total || 1) * 100)}%`);
-      });
-
-      await parallelUpload.done();
-    } else {
-      // Use standard PutObject for smaller files
-      const command = new PutObjectCommand({
-        Bucket: this.config.wasabi.bucket,
-        Key: key,
-        Body: buffer,
-        ContentType: mimeType,
-        ACL: options.publicRead ? 'public-read' : 'private',
-        Metadata: options.metadata || {},
-        CacheControl: options.cacheControl,
-        ContentEncoding: options.contentEncoding,
-        Tagging: options.tags ? Object.entries(options.tags).map(([k, v]) => `${k}=${v}`).join('&') : undefined
-      });
-
-      await this.wasabiClient.send(command);
-    }
-
-    const url = options.publicRead 
-      ? `${this.config.wasabi.endpoint}/${this.config.wasabi.bucket}/${key}`
-      : await this.getSignedUrl('wasabi', key, 3600);
-
-    return {
-      id: '',
-      filename: key.split('/').pop() || key,
-      size: buffer.length,
-      mimeType,
-      provider: 'wasabi',
-      bucket: this.config.wasabi.bucket,
-      key,
-      url,
-      uploadedAt: new Date(),
-      accessCount: 0,
-      tags: options.tags
+    const metadata: FileMetadata = {
+      id: data.id,
+      filename: data.filename,
+      original_filename: data.original_filename,
+      file_path: data.file_path,
+      size: data.file_size,
+      mimeType: data.mime_type,
+      provider: data.provider,
+      bucket: data.bucket,
+      key: data.key,
+      url: data.url,
+      access_count: data.access_count,
+      is_public: data.is_public,
+      folder: data.folder,
+      tags: data.tags,
+      metadata: data.metadata,
+      project_id: data.project_id,
+      uploaded_by: data.uploaded_by,
+      uploadedAt: new Date(data.created_at)
     };
-  }
-
-  /**
-   * Upload to Supabase Storage
-   */
-  private async uploadToSupabase(
-    file: Buffer | Uint8Array | File,
-    key: string,
-    mimeType: string,
-    options: UploadOptions
-  ): Promise<FileMetadata> {
-    const buffer = file instanceof File ? Buffer.from(await file.arrayBuffer()) : Buffer.from(file);
-    
-    const { error } = await this.supabaseClient.storage
-      .from(this.config.supabase.bucket)
-      .upload(key, buffer, {
-        contentType: mimeType,
-        cacheControl: options.cacheControl || '3600',
-        upsert: false
-      });
-
-    if (error) throw new Error(`Supabase upload failed: ${error.message}`);
-
-    const { data: urlData } = this.supabaseClient.storage
-      .from(this.config.supabase.bucket)
-      .getPublicUrl(key);
-
-    return {
-      id: '',
-      filename: key.split('/').pop() || key,
-      size: buffer.length,
-      mimeType,
-      provider: 'supabase',
-      bucket: this.config.supabase.bucket,
-      key,
-      url: urlData.publicUrl,
-      uploadedAt: new Date(),
-      accessCount: 0,
-      tags: options.tags
-    };
-  }
-
-  /**
-   * Download file from appropriate provider with access tracking
-   */
-  async download(fileId: string): Promise<{ buffer: Buffer; metadata: FileMetadata }> {
-    const metadata = await this.getMetadata(fileId);
-    if (!metadata) throw new Error('File not found');
 
     let buffer: Buffer;
 
@@ -657,17 +400,18 @@ class MultiCloudStorage {
         });
         
         const response = await this.wasabiClient.send(command);
-        buffer = Buffer.from(await response.Body!.transformToByteArray());
+        if (!response.Body) throw new Error('Empty response body');
+        buffer = Buffer.from(await response.Body.transformToByteArray());
       } else {
-        const { data, error } = await this.supabaseClient.storage
+        const { data: fileData, error: downloadError } = await this.supabaseClient.storage
           .from(metadata.bucket)
           .download(metadata.key);
 
-        if (error) throw new Error(`Download failed: ${error.message}`);
-        buffer = Buffer.from(await data.arrayBuffer());
+        if (downloadError) throw new Error(`Download failed: ${downloadError.message}`);
+        buffer = Buffer.from(await fileData.arrayBuffer());
       }
 
-      // Update access tracking for analytics
+      // Update access count
       await this.updateAccessCount(fileId);
 
       return { buffer, metadata };
@@ -678,52 +422,148 @@ class MultiCloudStorage {
   }
 
   /**
-   * Get signed URL for secure access with Context7 best practices
+   * Update access count for analytics
    */
-  async getSignedUrl(provider: StorageProvider, key: string, expiresIn: number = 3600): Promise<string> {
-    try {
-      if (provider === 'wasabi') {
-        const command = new GetObjectCommand({
-          Bucket: this.config.wasabi.bucket,
-          Key: key
-        });
-        return await getSignedUrl(this.wasabiClient, command, { expiresIn });
-      } else {
-        const { data } = await this.supabaseClient.storage
-          .from(this.config.supabase.bucket)
-          .createSignedUrl(key, expiresIn);
-        return data.signedUrl;
-      }
-    } catch (error) {
-      console.error(`Failed to generate signed URL for ${key}:`, error);
-      throw new Error(`Signed URL generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  private async updateAccessCount(fileId: string): Promise<void> {
+    await this.supabaseClient
+      .from('file_storage')
+      .update({ access_count: this.supabaseClient.sql`access_count + 1` })
+      .eq('id', fileId);
+  }
+
+  /**
+   * Generate signed URL for secure downloads
+   */
+  async getSignedUrl(fileId: string, expiresIn: number = 3600): Promise<string> {
+    // Get file metadata
+    const { data, error } = await this.supabaseClient
+      .from('file_storage')
+      .select('provider, bucket, key')
+      .eq('id', fileId)
+      .single();
+
+    if (error || !data) {
+      throw new Error('File not found');
+    }
+
+    if (data.provider === 'wasabi') {
+      const command = new GetObjectCommand({
+        Bucket: data.bucket,
+        Key: data.key
+      });
+      
+      return await getSignedUrl(this.wasabiClient, command, { expiresIn });
+    } else {
+      const { data: signedData, error: signError } = await this.supabaseClient.storage
+        .from(data.bucket)
+        .createSignedUrl(data.key, expiresIn);
+
+      if (signError) throw new Error(`Failed to create signed URL: ${signError.message}`);
+      return signedData.signedUrl;
     }
   }
 
   /**
-   * Delete file from appropriate provider
+   * List files with database filtering
    */
-  async delete(fileId: string): Promise<void> {
-    const metadata = await this.getMetadata(fileId);
-    if (!metadata) throw new Error('File not found');
+  async listFiles(options: ListOptions = {}): Promise<FileMetadata[]> {
+    let query = this.supabaseClient
+      .from('file_storage')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (options.provider) {
+      query = query.eq('provider', options.provider);
+    }
+
+    if (options.folder) {
+      query = query.eq('folder', options.folder);
+    }
+
+    if (options.project_id) {
+      query = query.eq('project_id', options.project_id);
+    }
+
+    if (options.user_id) {
+      query = query.eq('uploaded_by', options.user_id);
+    }
+
+    if (options.limit) {
+      query = query.limit(options.limit);
+    }
+
+    if (options.offset) {
+      query = query.range(options.offset, options.offset + (options.limit || 20) - 1);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      throw new Error(`Failed to list files: ${error.message}`);
+    }
+
+    return data.map(item => ({
+      id: item.id,
+      filename: item.filename,
+      original_filename: item.original_filename,
+      file_path: item.file_path,
+      size: item.file_size,
+      mimeType: item.mime_type,
+      provider: item.provider,
+      bucket: item.bucket,
+      key: item.key,
+      url: item.url,
+      access_count: item.access_count,
+      is_public: item.is_public,
+      folder: item.folder,
+      tags: item.tags,
+      metadata: item.metadata,
+      project_id: item.project_id,
+      uploaded_by: item.uploaded_by,
+      uploadedAt: new Date(item.created_at)
+    }));
+  }
+
+  /**
+   * Delete file from storage and database
+   */
+  async deleteFile(fileId: string): Promise<boolean> {
+    // Get file metadata
+    const { data, error } = await this.supabaseClient
+      .from('file_storage')
+      .select('*')
+      .eq('id', fileId)
+      .single();
+
+    if (error || !data) {
+      throw new Error('File not found');
+    }
 
     try {
-      if (metadata.provider === 'wasabi') {
+      // Delete from storage provider
+      if (data.provider === 'wasabi') {
         const command = new DeleteObjectCommand({
-          Bucket: metadata.bucket,
-          Key: metadata.key
+          Bucket: data.bucket,
+          Key: data.key
         });
         await this.wasabiClient.send(command);
       } else {
-        const { error } = await this.supabaseClient.storage
-          .from(metadata.bucket)
-          .remove([metadata.key]);
-        
-        if (error) throw new Error(`Delete failed: ${error.message}`);
+        const { error: deleteError } = await this.supabaseClient.storage
+          .from(data.bucket)
+          .remove([data.key]);
+
+        if (deleteError) throw deleteError;
       }
 
-      // Remove metadata
-      await this.removeMetadata(fileId);
+      // Delete from database
+      const { error: dbError } = await this.supabaseClient
+        .from('file_storage')
+        .delete()
+        .eq('id', fileId);
+
+      if (dbError) throw dbError;
+
+      return true;
     } catch (error) {
       console.error(`Delete failed for ${fileId}:`, error);
       throw new Error(`Delete failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -731,96 +571,78 @@ class MultiCloudStorage {
   }
 
   /**
-   * List files with pagination and filtering
+   * Get storage analytics
    */
-  async listFiles(options: {
-    provider?: StorageProvider;
-    folder?: string;
-    limit?: number;
-    offset?: number;
-    tags?: Record<string, string>;
-  } = {}): Promise<FileMetadata[]> {
-    // Implementation would query your metadata database
-    // This is a placeholder that would be implemented based on your database choice
-    console.log('Listing files with options:', options);
-    return [];
+  async getStorageAnalytics(): Promise<any> {
+    const { data, error } = await this.supabaseClient
+      .from('storage_analytics')
+      .select('*')
+      .order('date', { ascending: false })
+      .limit(30);
+
+    if (error) {
+      console.error('Analytics fetch error:', error);
+      return null;
+    }
+
+    return data;
   }
 
   /**
-   * Move file between providers for cost optimization
+   * Legacy compatibility methods
    */
-  async moveFile(fileId: string, targetProvider: StorageProvider): Promise<FileMetadata> {
-    const metadata = await this.getMetadata(fileId);
-    if (!metadata || metadata.provider === targetProvider) {
-      return metadata!;
+  async upload(
+    file: Buffer | Uint8Array | File,
+    filename: string,
+    mimeType: string,
+    options: UploadOptions = {}
+  ): Promise<FileMetadata> {
+    const buffer = file instanceof File ? Buffer.from(await file.arrayBuffer()) : Buffer.from(file);
+    const result = await this.uploadFile(buffer, filename, mimeType, options);
+    
+    if (!result.success || !result.file_id) {
+      throw new Error('Upload failed');
     }
 
-    try {
-      // Download from source
-      const { buffer } = await this.download(fileId);
+    // Get the stored metadata
+    const { data, error } = await this.supabaseClient
+      .from('file_storage')
+      .select('*')
+      .eq('id', result.file_id)
+      .single();
 
-      // Upload to target
-      const newMetadata = targetProvider === 'wasabi' 
-        ? await this.uploadToWasabi(buffer, metadata.key, metadata.mimeType, { tags: metadata.tags })
-        : await this.uploadToSupabase(buffer, metadata.key, metadata.mimeType, { tags: metadata.tags });
-
-      // Delete from source (after successful upload)
-      await this.delete(fileId);
-
-      // Update metadata
-      const updatedMetadata = {
-        ...metadata,
-        provider: targetProvider,
-        bucket: newMetadata.bucket,
-        url: newMetadata.url
-      };
-
-      await this.storeMetadata(updatedMetadata);
-      return updatedMetadata;
-    } catch (error) {
-      console.error(`Move operation failed for ${fileId}:`, error);
-      throw new Error(`Move operation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    if (error || !data) {
+      throw new Error('Failed to retrieve uploaded file metadata');
     }
+
+    return {
+      id: data.id,
+      filename: data.filename,
+      original_filename: data.original_filename,
+      file_path: data.file_path,
+      size: data.file_size,
+      mimeType: data.mime_type,
+      provider: data.provider,
+      bucket: data.bucket,
+      key: data.key,
+      url: data.url,
+      access_count: data.access_count,
+      is_public: data.is_public,
+      folder: data.folder,
+      tags: data.tags,
+      metadata: data.metadata,
+      project_id: data.project_id,
+      uploaded_by: data.uploaded_by,
+      uploadedAt: new Date(data.created_at)
+    };
   }
 
-  // Helper methods
-  private formatBytes(bytes: number): string {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  }
-
-  // Metadata management methods (implement based on your database choice)
-  private async storeMetadata(metadata: FileMetadata): Promise<void> {
-    console.log('Storing metadata:', metadata.id);
-    // Implementation depends on your database (Supabase, PostgreSQL, etc.)
-  }
-
-  private async getMetadata(fileId: string): Promise<FileMetadata | null> {
-    console.log('Getting metadata for:', fileId);
-    // Implementation depends on your database
-    return null;
-  }
-
-  private async removeMetadata(fileId: string): Promise<void> {
-    console.log('Removing metadata for:', fileId);
-    // Implementation depends on your database
-  }
-
-  private async updateAccessCount(fileId: string): Promise<void> {
-    console.log('Updating access count for:', fileId);
-    // Implementation depends on your database
-  }
-
-  private async getOldFiles(): Promise<FileMetadata[]> {
-    // Get files older than threshold for optimization
-    return [];
+  async download(fileId: string): Promise<{ buffer: Buffer; metadata: FileMetadata }> {
+    return this.downloadFile(fileId);
   }
 }
 
-// Singleton instance with Context7 optimizations
+// Export singleton instance
 export const multiCloudStorage = new MultiCloudStorage();
 
 // Convenience functions
@@ -838,21 +660,21 @@ export async function downloadFile(fileId: string) {
 }
 
 export async function deleteFile(fileId: string) {
-  return multiCloudStorage.delete(fileId);
+  return multiCloudStorage.deleteFile(fileId);
 }
 
 export async function getFileUrl(provider: StorageProvider, key: string, expiresIn?: number) {
-  return multiCloudStorage.getSignedUrl(provider, key, expiresIn);
+  return multiCloudStorage.getSignedUrl(key, expiresIn);
 }
 
 export async function optimizeStorageCosts() {
-  return multiCloudStorage.optimizeStorage();
+  // Implementation needed
 }
 
 export async function getStorageAnalytics() {
-  return multiCloudStorage.getAnalytics();
+  return multiCloudStorage.getStorageAnalytics();
 }
 
 export async function checkStorageHealth() {
-  return multiCloudStorage.healthCheck();
+  // Implementation needed
 } 
