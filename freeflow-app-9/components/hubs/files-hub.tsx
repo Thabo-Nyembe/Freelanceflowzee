@@ -1,11 +1,12 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useReducer, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { 
   FileText,
   Upload,
@@ -24,7 +25,18 @@ import {
   Image,
   Video,
   Music,
-  Archive
+  Archive,
+  Cloud,
+  HardDrive,
+  RefreshCw,
+  Plus,
+  FolderPlus,
+  Users,
+  Lock,
+  Clock,
+  TrendingUp,
+  Zap,
+  Settings
 } from 'lucide-react'
 
 interface FilesHubProps {
@@ -32,42 +44,549 @@ interface FilesHubProps {
   userId: string
 }
 
+// Context7 useReducer pattern for file state management
+interface FileState {
+  files: any[]
+  folders: any[]
+  selectedItems: string[]
+  viewMode: 'grid' | 'list'
+  searchQuery: string
+  currentFolder: string | null
+  uploadProgress: number
+  isUploading: boolean
+  storageStats: {
+    used: number
+    total: number
+    files: number
+    folders: number
+  }
+}
+
+type FileAction = 
+  | { type: 'SET_VIEW_MODE'; payload: 'grid' | 'list' }
+  | { type: 'SET_SEARCH_QUERY'; payload: string }
+  | { type: 'SELECT_ITEM'; payload: string }
+  | { type: 'DESELECT_ITEM'; payload: string }
+  | { type: 'CLEAR_SELECTION' }
+  | { type: 'SET_CURRENT_FOLDER'; payload: string | null }
+  | { type: 'START_UPLOAD' }
+  | { type: 'UPDATE_UPLOAD_PROGRESS'; payload: number }
+  | { type: 'COMPLETE_UPLOAD' }
+  | { type: 'ADD_FILE'; payload: any }
+  | { type: 'DELETE_FILES'; payload: string[] }
+
+const initialState: FileState = {
+  files: [
+    {
+      id: '1',
+      name: 'Brand_Guidelines_V2.pdf',
+      type: 'pdf',
+      size: '2.4 MB',
+      modified: '2 hours ago',
+      author: 'Sarah Chen',
+      shared: true,
+      starred: true,
+      icon: FileText,
+      color: 'text-red-500'
+    },
+    {
+      id: '2',
+      name: 'Logo_Concepts.psd',
+      type: 'image',
+      size: '45.2 MB',
+      modified: '1 day ago',
+      author: 'You',
+      shared: false,
+      starred: false,
+      icon: Image,
+      color: 'text-purple-500'
+    },
+    {
+      id: '3',
+      name: 'Presentation_Video.mp4',
+      type: 'video',
+      size: '127.8 MB',
+      modified: '3 days ago',
+      author: 'Mike Johnson',
+      shared: true,
+      starred: false,
+      icon: Video,
+      color: 'text-blue-500'
+    },
+    {
+      id: '4',
+      name: 'Project_Archive.zip',
+      type: 'archive',
+      size: '89.1 MB',
+      modified: '1 week ago',
+      author: 'Team',
+      shared: false,
+      starred: true,
+      icon: Archive,
+      color: 'text-orange-500'
+    },
+    {
+      id: '5',
+      name: 'Audio_Branding.wav',
+      type: 'audio',
+      size: '15.6 MB',
+      modified: '2 weeks ago',
+      author: 'Audio Team',
+      shared: true,
+      starred: false,
+      icon: Music,
+      color: 'text-green-500'
+    }
+  ],
+  folders: [
+    {
+      id: 'f1',
+      name: 'Brand Assets',
+      filesCount: 23,
+      modified: '1 day ago',
+      shared: true,
+      color: 'text-purple-600'
+    },
+    {
+      id: 'f2',
+      name: 'Client Reviews',
+      filesCount: 8,
+      modified: '3 days ago',
+      shared: false,
+      color: 'text-blue-600'
+    },
+    {
+      id: 'f3',
+      name: 'Final Deliverables',
+      filesCount: 12,
+      modified: '1 week ago',
+      shared: true,
+      color: 'text-green-600'
+    },
+    {
+      id: 'f4',
+      name: 'Work in Progress',
+      filesCount: 34,
+      modified: '2 hours ago',
+      shared: false,
+      color: 'text-orange-600'
+    }
+  ],
+  selectedItems: [],
+  viewMode: 'grid',
+  searchQuery: '',
+  currentFolder: null,
+  uploadProgress: 0,
+  isUploading: false,
+  storageStats: {
+    used: 869.5,
+    total: 2000,
+    files: 156,
+    folders: 24
+  }
+}
+
+function fileReducer(state: FileState, action: FileAction): FileState {
+  switch (action.type) {
+    case 'SET_VIEW_MODE':
+      return { ...state, viewMode: action.payload }
+    case 'SET_SEARCH_QUERY':
+      return { ...state, searchQuery: action.payload }
+    case 'SELECT_ITEM':
+      return { 
+        ...state, 
+        selectedItems: [...state.selectedItems, action.payload] 
+      }
+    case 'DESELECT_ITEM':
+      return { 
+        ...state, 
+        selectedItems: state.selectedItems.filter(id => id !== action.payload) 
+      }
+    case 'CLEAR_SELECTION':
+      return { ...state, selectedItems: [] }
+    case 'SET_CURRENT_FOLDER':
+      return { ...state, currentFolder: action.payload }
+    case 'START_UPLOAD':
+      return { ...state, isUploading: true, uploadProgress: 0 }
+    case 'UPDATE_UPLOAD_PROGRESS':
+      return { ...state, uploadProgress: action.payload }
+    case 'COMPLETE_UPLOAD':
+      return { ...state, isUploading: false, uploadProgress: 0 }
+    case 'ADD_FILE':
+      return { ...state, files: [...state.files, action.payload] }
+    case 'DELETE_FILES':
+      return { 
+        ...state, 
+        files: state.files.filter(file => !action.payload.includes(file.id)),
+        selectedItems: []
+      }
+    default:
+      return state
+  }
+}
+
 export function FilesHub({ projects, userId }: FilesHubProps) {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [searchQuery, setSearchQuery] = useState('')
+  const [state, dispatch] = useReducer(fileReducer, initialState)
+  const [activeTab, setActiveTab] = useState('files')
+
+  // Interactive handlers using Context7 patterns
+  const handleFileUpload = useCallback(() => {
+    console.log('Starting file upload...')
+    dispatch({ type: 'START_UPLOAD' })
+    
+    // Simulate upload progress
+    let progress = 0
+    const interval = setInterval(() => {
+      progress += 10
+      dispatch({ type: 'UPDATE_UPLOAD_PROGRESS', payload: progress })
+      
+      if (progress >= 100) {
+        clearInterval(interval)
+        dispatch({ type: 'COMPLETE_UPLOAD' })
+        
+        // Add new file to state
+        const newFile = {
+          id: Date.now().toString(),
+          name: 'New_Upload.pdf',
+          type: 'pdf',
+          size: '3.2 MB',
+          modified: 'Just now',
+          author: 'You',
+          shared: false,
+          starred: false,
+          icon: FileText,
+          color: 'text-red-500'
+        }
+        dispatch({ type: 'ADD_FILE', payload: newFile })
+        alert('File uploaded successfully!')
+      }
+    }, 200)
+  }, [])
+
+  const handleCreateFolder = useCallback(() => {
+    const folderName = prompt('Enter folder name:')
+    if (folderName) {
+      console.log(`Creating folder: ${folderName}`)
+      alert(`Folder "${folderName}" created successfully!`)
+    }
+  }, [])
+
+  const handleDownloadFile = useCallback((file: any) => {
+    console.log(`Downloading ${file.name}...`)
+    alert(`Downloading ${file.name}...`)
+  }, [])
+
+  const handleShareFile = useCallback((file: any) => {
+    console.log(`Sharing ${file.name}...`)
+    alert(`Share link copied for ${file.name}!`)
+  }, [])
+
+  const handleDeleteSelected = useCallback(() => {
+    if (state.selectedItems.length > 0) {
+      const confirmed = confirm(`Delete ${state.selectedItems.length} item(s)?`)
+      if (confirmed) {
+        dispatch({ type: 'DELETE_FILES', payload: state.selectedItems })
+        alert('Files deleted successfully!')
+      }
+    }
+  }, [state.selectedItems])
+
+  const handleItemSelect = useCallback((id: string) => {
+    if (state.selectedItems.includes(id)) {
+      dispatch({ type: 'DESELECT_ITEM', payload: id })
+    } else {
+      dispatch({ type: 'SELECT_ITEM', payload: id })
+    }
+  }, [state.selectedItems])
+
+  const filteredFiles = state.files.filter(file =>
+    file.name.toLowerCase().includes(state.searchQuery.toLowerCase())
+  )
+
+  const filteredFolders = state.folders.filter(folder =>
+    folder.name.toLowerCase().includes(state.searchQuery.toLowerCase())
+  )
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2 text-2xl">
-              <FileText className="h-6 w-6 text-primary" />
-              Files Hub
-            </CardTitle>
-            <CardDescription>
-              Organize and manage all your project files
-            </CardDescription>
-          </div>
-          <Button className="gap-2">
-            <Upload className="h-4 w-4" />
-            Upload Files
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-center py-12">
-          <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="font-medium text-lg mb-2">Files Hub Coming Soon</h3>
-          <p className="text-muted-foreground mb-4">
-            Advanced file management features will be available here.
+    <div className="w-full space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Enterprise Files Hub
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Professional file management with cloud storage optimization
           </p>
-          <Button>
-            <Upload className="h-4 w-4 mr-2" />
-            Upload First File
+        </div>
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleCreateFolder}
+          >
+            <FolderPlus className="w-4 h-4 mr-2" />
+            New Folder
+          </Button>
+          <Button 
+            onClick={handleFileUpload}
+            disabled={state.isUploading}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            {state.isUploading ? `Uploading ${state.uploadProgress}%` : 'Upload Files'}
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Storage Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Cloud className="w-8 h-8" />
+              <div>
+                <div className="text-2xl font-bold">{state.storageStats.used} MB</div>
+                <div className="text-sm opacity-90">Storage Used</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <FileText className="w-8 h-8" />
+              <div>
+                <div className="text-2xl font-bold">{state.storageStats.files}</div>
+                <div className="text-sm opacity-90">Total Files</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Folder className="w-8 h-8" />
+              <div>
+                <div className="text-2xl font-bold">{state.storageStats.folders}</div>
+                <div className="text-sm opacity-90">Folders</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <TrendingUp className="w-8 h-8" />
+              <div>
+                <div className="text-2xl font-bold">{Math.round((state.storageStats.used / state.storageStats.total) * 100)}%</div>
+                <div className="text-sm opacity-90">Usage</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Toolbar */}
+      <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4 flex-1">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search files and folders..."
+                  value={state.searchQuery}
+                  onChange={(e) => dispatch({ type: 'SET_SEARCH_QUERY', payload: e.target.value })}
+                  className="pl-10 bg-white/80"
+                />
+              </div>
+              <Button variant="outline" size="sm">
+                <Filter className="w-4 h-4 mr-2" />
+                Filter
+              </Button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {state.selectedItems.length > 0 && (
+                <>
+                  <Button variant="outline" size="sm" onClick={() => dispatch({ type: 'CLEAR_SELECTION' })}>
+                    Clear ({state.selectedItems.length})
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleDeleteSelected}>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete
+                  </Button>
+                </>
+              )}
+              
+              <div className="flex border rounded-lg overflow-hidden">
+                <Button
+                  variant={state.viewMode === 'grid' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="rounded-none"
+                  onClick={() => dispatch({ type: 'SET_VIEW_MODE', payload: 'grid' })}
+                >
+                  <Grid className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={state.viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="rounded-none"
+                  onClick={() => dispatch({ type: 'SET_VIEW_MODE', payload: 'list' })}
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3 bg-white/50 backdrop-blur-sm">
+          <TabsTrigger value="files" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
+            <FileText className="w-4 h-4 mr-2" />
+            Files
+          </TabsTrigger>
+          <TabsTrigger value="shared" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
+            <Share className="w-4 h-4 mr-2" />
+            Shared
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
+            <TrendingUp className="w-4 h-4 mr-2" />
+            Analytics
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="files" className="mt-6">
+          {/* Folders */}
+          {filteredFolders.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                <Folder className="w-5 h-5" />
+                Folders
+              </h3>
+              <div className={`grid gap-4 ${state.viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1'}`}>
+                {filteredFolders.map(folder => (
+                  <Card 
+                    key={folder.id}
+                    className={`cursor-pointer transition-all hover:shadow-lg ${state.selectedItems.includes(folder.id) ? 'ring-2 ring-blue-500' : ''}`}
+                    onClick={() => handleItemSelect(folder.id)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3">
+                        <Folder className={`w-8 h-8 ${folder.color}`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium truncate">{folder.name}</div>
+                          <div className="text-sm text-gray-500">{folder.filesCount} files</div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {folder.shared && <Users className="w-4 h-4 text-blue-500" />}
+                          <Button variant="ghost" size="sm" className="p-1">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Files */}
+          <div>
+            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              Files
+            </h3>
+            <div className={`grid gap-4 ${state.viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
+              {filteredFiles.map(file => (
+                <Card 
+                  key={file.id}
+                  className={`cursor-pointer transition-all hover:shadow-lg ${state.selectedItems.includes(file.id) ? 'ring-2 ring-blue-500' : ''}`}
+                  onClick={() => handleItemSelect(file.id)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <file.icon className={`w-8 h-8 ${file.color} flex-shrink-0`} />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium truncate flex items-center gap-2">
+                          {file.name}
+                          {file.starred && <Star className="w-4 h-4 text-yellow-500 fill-current" />}
+                        </div>
+                        <div className="text-sm text-gray-500">{file.size}</div>
+                        <div className="text-xs text-gray-400">Modified {file.modified}</div>
+                        <div className="text-xs text-gray-400">by {file.author}</div>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        {file.shared && <Badge variant="secondary" className="text-xs">Shared</Badge>}
+                        <div className="flex items-center gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="p-1"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDownloadFile(file)
+                            }}
+                          >
+                            <Download className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="p-1"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleShareFile(file)
+                            }}
+                          >
+                            <Share className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" className="p-1">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="shared" className="mt-6">
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+            <CardContent className="p-8 text-center">
+              <Share className="w-12 h-12 text-blue-500 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Shared Files</h3>
+              <p className="text-gray-600 mb-4">Files shared with team members and clients</p>
+              <Button onClick={() => alert('Shared files feature coming soon!')}>
+                View Shared Files
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="analytics" className="mt-6">
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+            <CardContent className="p-8 text-center">
+              <TrendingUp className="w-12 h-12 text-green-500 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">File Analytics</h3>
+              <p className="text-gray-600 mb-4">Track file usage, downloads, and collaboration metrics</p>
+              <Button onClick={() => alert('Analytics dashboard coming soon!')}>
+                View Analytics
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   )
 } 

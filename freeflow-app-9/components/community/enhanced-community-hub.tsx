@@ -361,11 +361,26 @@ const EnhancedCommunityHub = () => {
 
         {/* Action Buttons */}
         <div className="flex gap-2 pt-2">
-          <Button className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+          <Button 
+            className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            onClick={() => {
+              console.log(`Contacting ${creator.name}`)
+              // In production: open contact modal or redirect to messaging
+              alert(`Opening contact form for ${creator.name}`)
+            }}
+          >
             <Mail className="w-4 h-4 mr-2" />
             Contact
           </Button>
-          <Button variant="outline" className="flex-1">
+          <Button 
+            variant="outline" 
+            className="flex-1"
+            onClick={() => {
+              console.log(`Hiring ${creator.name}`)
+              // In production: open hire modal or redirect to project creation
+              alert(`Opening hiring process for ${creator.name}`)
+            }}
+          >
             <Briefcase className="w-4 h-4 mr-2" />
             Hire Now
           </Button>
@@ -663,15 +678,39 @@ const EnhancedCommunityHub = () => {
                       />
                     </div>
                     <div className="flex items-center gap-4">
-                      <Button variant="ghost" size="sm" className="text-purple-600 hover:text-purple-700">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-purple-600 hover:text-purple-700"
+                        onClick={() => {
+                          console.log('Opening photo upload');
+                          alert('Photo upload coming soon!');
+                        }}
+                      >
                         <Image className="w-4 h-4 mr-2" />
                         Photo
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-blue-600 hover:text-blue-700"
+                        onClick={() => {
+                          console.log('Opening video upload');
+                          alert('Video upload coming soon!');
+                        }}
+                      >
                         <Video className="w-4 h-4 mr-2" />
                         Video
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-green-600 hover:text-green-700">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-green-600 hover:text-green-700"
+                        onClick={() => {
+                          console.log('Opening audio recording');
+                          alert('Audio recording coming soon!');
+                        }}
+                      >
                         <Mic className="w-4 h-4 mr-2" />
                         Audio
                       </Button>

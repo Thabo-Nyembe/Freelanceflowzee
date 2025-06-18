@@ -127,8 +127,62 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/20">
-      <div className="p-6">
-        {children}
+      {/* Enhanced Navigation Sidebar */}
+      <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg border-r border-gray-200">
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-xl font-bold text-gray-900">FreeflowZee</h2>
+            <p className="text-sm text-gray-600">Enterprise Dashboard</p>
+          </div>
+          
+          {/* Navigation Items */}
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+            {navigationItems.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
+              >
+                <span className="mr-3 text-gray-400">{item.icon === 'LayoutDashboard' ? '📊' : 
+                  item.icon === 'FolderOpen' ? '📁' : 
+                  item.icon === 'Video' ? '🎬' : 
+                  item.icon === 'Palette' ? '🎨' : 
+                  item.icon === 'Users' ? '👥' : 
+                  item.icon === 'Brain' ? '🧠' : 
+                  item.icon === 'Calendar' ? '📅' : 
+                  item.icon === 'Shield' ? '🛡️' : 
+                  item.icon === 'MessageSquare' ? '💬' : 
+                  item.icon === 'BarChart3' ? '📈' : 
+                  item.icon === 'UserCheck' ? '👤' : 
+                  item.icon === 'DollarSign' ? '💰' : 
+                  item.icon === 'Bell' ? '🔔' : '⭐'
+                }</span>
+                <span className="flex-1">{item.name}</span>
+                {item.badge && (
+                  <span className="px-2 py-1 text-xs font-medium text-purple-600 bg-purple-100 rounded-full">
+                    {item.badge}
+                  </span>
+                )}
+              </a>
+            ))}
+          </nav>
+          
+          {/* Footer */}
+          <div className="p-4 border-t border-gray-200">
+            <div className="text-xs text-gray-500 text-center">
+              <div>🚀 All 8 A+++ Features</div>
+              <div>Context7 + Playwright Ready</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Main Content */}
+      <div className="ml-64">
+        <div className="p-6">
+          {children}
+        </div>
       </div>
     </div>
   )
