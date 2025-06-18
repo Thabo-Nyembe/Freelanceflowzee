@@ -78,4 +78,40 @@ test.describe('API Integration Tests', () => {
     expect(testData.success).toBe(true);
     expect(testData.message).toContain('endpoint is working');
   });
+
+  test('should test AI Create API', async ({ request }) => {
+    const response = await request.post('/api/ai/create', {
+      data: {
+        field: 'photography',
+        assetType: 'luts',
+        quality: 'standard',
+        prompt: 'cinematic color grading'
+      }
+    })
+
+    expect(response.status()).toBeLessThan(500)
+    
+    if (response.ok()) {
+      const data = await response.json()
+      expect(data).toHaveProperty('assets')
+    }
+  })
+
+  test('should test collaboration API', async ({ request }) => {
+    const response = await request.get('/api/collaboration/upf/test')
+    
+    expect(response.status()).toBeLessThan(500)
+  })
+
+  test('should test analytics API', async ({ request }) => {
+    const response = await request.get('/api/analytics/demo')
+    
+    expect(response.status()).toBeLessThan(500)
+  })
+
+  test('should test storage API', async ({ request }) => {
+    const response = await request.get('/api/storage/analytics')
+    
+    expect(response.status()).toBeLessThan(500)
+  })
 });
