@@ -1,205 +1,98 @@
 {
-  "testSuite": "FreeflowZee Dashboard Tab & Button Testing",
-  "timestamp": "2024-01-18T20:30:00Z",
-  "environment": {
-    "os": "macOS 24.5.0",
-    "framework": "Next.js 15.2.4",
-    "testing": "Manual + HTTP Validation",
-    "browserIssue": "Playwright resolved via alternative methods"
+  "summary": {
+    "duration": 18,
+    "scriptsRun": 0,
+    "totalScripts": 6,
+    "overallPassRate": 0,
+    "totalTests": 0,
+    "passedTests": 0,
+    "failedTests": 0,
+    "warningTests": 0
   },
-  "overall": {
-    "status": "COMPLETE SUCCESS",
-    "componentsReady": "7/7",
-    "tabsImplemented": "100%",
-    "buttonsWorking": "96%",
-    "productionReady": true
-  },
-  "components": {
-    "projectsHub": {
-      "status": "PERFECT",
-      "score": "100%",
-      "tabs": {
-        "implemented": 4,
-        "expected": 4,
-        "list": ["Overview", "Active", "Completed", "Analytics"]
+  "results": [
+    {
+      "name": "Projects Hub",
+      "emoji": "📊",
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "passRate": 0
       },
-      "buttons": {
-        "implemented": 5,
-        "expected": 5,
-        "testIds": [
-          "create-project-btn",
-          "import-project-btn",
-          "quick-start-btn",
-          "view-all-btn",
-          "export-data-btn"
-        ]
-      }
+      "details": [],
+      "screenshots": [],
+      "error": "Report file not found or could not be parsed"
     },
-    "videoStudio": {
-      "status": "PERFECT",
-      "score": "100%",
-      "tabs": {
-        "implemented": 4,
-        "expected": 4,
-        "list": ["Projects", "Templates", "Assets", "Analytics"]
+    {
+      "name": "Video Studio",
+      "emoji": "🎬",
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "passRate": 0
       },
-      "buttons": {
-        "implemented": 5,
-        "expected": 5,
-        "testIds": [
-          "record-btn",
-          "edit-btn",
-          "upload-btn",
-          "share-btn",
-          "export-btn"
-        ]
-      }
+      "details": [],
+      "screenshots": [],
+      "error": "Report file not found or could not be parsed"
     },
-    "communityHub": {
-      "status": "PERFECT",
-      "score": "100%",
-      "tabs": {
-        "implemented": 4,
-        "expected": 4,
-        "list": ["Feed", "Creators", "Showcase", "Events"]
+    {
+      "name": "Community Hub",
+      "emoji": "👥",
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "passRate": 0
       },
-      "buttons": {
-        "implemented": 4,
-        "expected": 4,
-        "testIds": [
-          "like-btn",
-          "share-btn",
-          "comment-btn",
-          "follow-creator-btn"
-        ]
-      }
+      "details": [],
+      "screenshots": [],
+      "error": "Report file not found or could not be parsed"
     },
-    "aiAssistant": {
-      "status": "EXCELLENT",
-      "score": "96%",
-      "tabs": {
-        "implemented": 4,
-        "expected": 4,
-        "list": ["Chat", "Analyze", "Generate", "History"]
+    {
+      "name": "AI Assistant",
+      "emoji": "🤖",
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "passRate": 0
       },
-      "buttons": {
-        "implemented": 4,
-        "expected": 4,
-        "testIds": [
-          "send-message-btn",
-          "take-action-btn",
-          "quick-action-btn",
-          "clear-chat-btn"
-        ],
-        "note": "All buttons functional, minor verification pattern issue"
-      }
+      "details": [],
+      "screenshots": [],
+      "error": "Report file not found or could not be parsed"
     },
-    "myDayToday": {
-      "status": "PERFECT",
-      "score": "100%",
-      "tabs": {
-        "implemented": 4,
-        "expected": 4,
-        "list": ["Today", "Schedule", "Tasks", "Insights"]
+    {
+      "name": "My Day Today",
+      "emoji": "📅",
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "passRate": 0
       },
-      "buttons": {
-        "implemented": 4,
-        "expected": 4,
-        "testIds": [
-          "add-task-btn",
-          "view-calendar-btn",
-          "generate-schedule-btn",
-          "start-timer-btn"
-        ]
-      }
+      "details": [],
+      "screenshots": [],
+      "error": "Report file not found or could not be parsed"
     },
-    "filesHub": {
-      "status": "EXCELLENT",
-      "score": "98%",
-      "tabs": {
-        "implemented": 4,
-        "expected": 5,
-        "list": ["Files", "Shared", "Storage", "Analytics"],
-        "missing": ["Recent"]
+    {
+      "name": "Files & Escrow",
+      "emoji": "📁💰",
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "passRate": 0
       },
-      "buttons": {
-        "implemented": 5,
-        "expected": 5,
-        "note": "All existing buttons working perfectly"
-      }
-    },
-    "escrowSystem": {
-      "status": "PERFECT",
-      "score": "100%",
-      "tabs": {
-        "implemented": 4,
-        "expected": 4,
-        "list": ["Active", "Completed", "Pending", "Analytics"]
-      },
-      "buttons": {
-        "implemented": 4,
-        "expected": 4,
-        "testIds": [
-          "request-deposit-btn",
-          "release-funds-btn",
-          "download-receipt-btn",
-          "view-details-btn"
-        ]
-      }
+      "details": [],
+      "screenshots": [],
+      "error": "Report file not found or could not be parsed"
     }
+  ],
+  "recommendations": {
+    "status": "needs-improvement",
+    "passRate": 0,
+    "failedScripts": 12
   },
-  "testing": {
-    "playwrightIssue": {
-      "problem": "TargetClosedError on macOS browser initialization",
-      "solution": "Manual testing infrastructure with system browser",
-      "status": "RESOLVED"
-    },
-    "methods": {
-      "httpValidation": "✅ Server responding (HTTP 200)",
-      "routeTesting": "✅ 8/8 routes properly secured",
-      "componentAnalysis": "✅ 100% implementation verified",
-      "systemBrowser": "✅ All pages open successfully",
-      "testIdVerification": "✅ 96% coverage (25/26 found)"
-    },
-    "scripts": [
-      "manual-dashboard-test.js",
-      "simplified-dashboard-test.js",
-      "check-component-implementations.js",
-      "verify-test-ids.js"
-    ]
-  },
-  "achievements": {
-    "originalGoal": "incorporate tabs and features to make buttons work or create them if they don't exist",
-    "completed": [
-      "100% tab structure implementation",
-      "96%+ button functionality",
-      "Production-ready components",
-      "macOS Playwright issue resolution",
-      "Individual component testing capability"
-    ],
-    "technicalDetails": {
-      "architecture": "React 18 + TypeScript",
-      "styling": "Tailwind CSS + Shadcn/ui",
-      "icons": "Lucide React",
-      "testIdPattern": "kebab-case with -btn suffix",
-      "userFeedback": "Console logging + alert notifications"
-    }
-  },
-  "productionReadiness": {
-    "status": "READY",
-    "grade": "A+",
-    "confidence": "100%",
-    "deployment": {
-      "serverRunning": true,
-      "componentsWorking": true,
-      "userInteractionReady": true,
-      "testingInfrastructure": true
-    }
-  },
-  "nextSteps": [
-    "✅ Manual testing complete",
-    "✅ Component implementation complete",
-    "✅ Testing infrastructure ready",
-    "🎯 Ready for production deployment"
-  ]
+  "timestamp": "2025-06-18T19:30:48.920Z"
 }
