@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useReducer, useEffect, useCallback } from 'react'
+// Context7 MCP Integration for Enhanced Interactive Patterns
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -58,7 +59,14 @@ import {
 
 // ========================================
 // CONTEXT7 ENHANCED STATE MANAGEMENT
+// Using Context7 MCP patterns for modern React state management
 // ========================================
+
+interface InteractiveElement {
+  id: string
+  type: string
+  state: any
+}
 
 interface InteractiveState {
   currentRoute: string

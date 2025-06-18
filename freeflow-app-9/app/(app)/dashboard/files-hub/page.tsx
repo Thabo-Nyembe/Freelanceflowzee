@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { StorageAnalytics, FileMetadata, uploadFile } from '@/lib/storage/multi-cloud-storage'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
