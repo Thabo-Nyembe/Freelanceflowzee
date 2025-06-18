@@ -98,3 +98,16 @@ test-results/
 playwright-temp.config.ts
 structure.txt
 test-results/
+
+# Parent directory files that cause commit delays
+../.DS_Store
+../.localized
+../Adobe/
+../README.md
+../app/
+../archive/
+../build/
+../docs/
+../freeflow-app-9 Tee Zee .code-workspace
+../freeflow-app-9 Tee Zee ai .code-workspace
+../public/
