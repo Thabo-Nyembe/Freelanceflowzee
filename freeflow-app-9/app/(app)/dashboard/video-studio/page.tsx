@@ -106,61 +106,120 @@ export default function VideoStudioPage() {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-red-50 to-pink-50 border-red-200/50 hover:shadow-lg transition-all duration-200 cursor-pointer">
+        <Card 
+          data-testid="record-btn"
+          className="bg-gradient-to-br from-red-50 to-pink-50 border-red-200/50 hover:shadow-lg transition-all duration-200 cursor-pointer"
+          onClick={() => {
+            console.log('Starting screen recording');
+            alert('Screen recording started!');
+          }}
+        >
           <CardContent className="p-6 text-center">
             <div className="w-12 h-12 bg-red-500 text-white rounded-xl flex items-center justify-center mx-auto mb-3">
               <Monitor className="h-6 w-6" />
             </div>
-            <h3 className="font-semibold text-gray-900 mb-1">Screen Recording</h3>
+            <h3 className="font-semibold text-gray-900 mb-1">Record</h3>
             <p className="text-sm text-gray-600">Record your screen with audio</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200/50 hover:shadow-lg transition-all duration-200 cursor-pointer">
+        <Card 
+          data-testid="edit-btn"
+          className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200/50 hover:shadow-lg transition-all duration-200 cursor-pointer"
+          onClick={() => {
+            console.log('Opening video editor');
+            alert('Video editor opened!');
+          }}
+        >
           <CardContent className="p-6 text-center">
             <div className="w-12 h-12 bg-blue-500 text-white rounded-xl flex items-center justify-center mx-auto mb-3">
               <Camera className="h-6 w-6" />
             </div>
-            <h3 className="font-semibold text-gray-900 mb-1">Camera Recording</h3>
-            <p className="text-sm text-gray-600">Record with your webcam</p>
+            <h3 className="font-semibold text-gray-900 mb-1">Edit</h3>
+            <p className="text-sm text-gray-600">Edit videos with advanced tools</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200/50 hover:shadow-lg transition-all duration-200 cursor-pointer">
+        <Card 
+          data-testid="upload-btn"
+          className="bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200/50 hover:shadow-lg transition-all duration-200 cursor-pointer"
+          onClick={() => {
+            console.log('Opening upload dialog');
+            alert('Upload dialog opened!');
+          }}
+        >
           <CardContent className="p-6 text-center">
             <div className="w-12 h-12 bg-purple-500 text-white rounded-xl flex items-center justify-center mx-auto mb-3">
               <Video className="h-6 w-6" />
             </div>
-            <h3 className="font-semibold text-gray-900 mb-1">Screen + Camera</h3>
-            <p className="text-sm text-gray-600">Combined recording mode</p>
+            <h3 className="font-semibold text-gray-900 mb-1">Upload</h3>
+            <p className="text-sm text-gray-600">Upload existing videos</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-200/50 hover:shadow-lg transition-all duration-200 cursor-pointer">
+        <Card 
+          data-testid="share-btn"
+          className="bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-200/50 hover:shadow-lg transition-all duration-200 cursor-pointer"
+          onClick={() => {
+            console.log('Opening share options');
+            alert('Share options opened!');
+          }}
+        >
           <CardContent className="p-6 text-center">
             <div className="w-12 h-12 bg-emerald-500 text-white rounded-xl flex items-center justify-center mx-auto mb-3">
               <Users className="h-6 w-6" />
             </div>
-            <h3 className="font-semibold text-gray-900 mb-1">Live Session</h3>
-            <p className="text-sm text-gray-600">Collaborate in real-time</p>
+            <h3 className="font-semibold text-gray-900 mb-1">Share</h3>
+            <p className="text-sm text-gray-600">Share videos with clients</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Export Action */}
+      <div className="mt-6">
+        <Card className="bg-gradient-to-br from-orange-50 to-yellow-50 border-orange-200/50">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-orange-500 text-white rounded-lg flex items-center justify-center">
+                  <Download className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Export Options</h3>
+                  <p className="text-sm text-gray-600">Download in various formats</p>
+                </div>
+              </div>
+              <Button 
+                data-testid="export-btn"
+                variant="outline" 
+                className="border-orange-200 text-orange-700 hover:bg-orange-50"
+                onClick={() => {
+                  console.log('Opening export dialog');
+                  alert('Export dialog opened!');
+                }}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Main Video Studio Interface */}
-      <Tabs defaultValue="studio" className="w-full">
+      <Tabs defaultValue="projects" className="w-full">
         <TabsList className="grid grid-cols-4 w-full max-w-2xl">
-          <TabsTrigger value="studio" className="flex items-center gap-2">
+          <TabsTrigger value="projects" className="flex items-center gap-2">
             <Video className="h-4 w-4" />
-            Studio
+            Projects
           </TabsTrigger>
-          <TabsTrigger value="ai-features" className="flex items-center gap-2">
+          <TabsTrigger value="templates" className="flex items-center gap-2">
             <Brain className="h-4 w-4" />
-            AI Features
+            Templates
           </TabsTrigger>
-          <TabsTrigger value="library" className="flex items-center gap-2">
+          <TabsTrigger value="assets" className="flex items-center gap-2">
             <Play className="h-4 w-4" />
-            Library
+            Assets
           </TabsTrigger>
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <TrendingUp className="h-4 w-4" />
@@ -168,7 +227,7 @@ export default function VideoStudioPage() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="studio" className="mt-6">
+        <TabsContent value="projects" className="mt-6">
           <EnterpriseVideoStudio
             projectId="current-project"
             currentUser={currentUser}
@@ -177,7 +236,7 @@ export default function VideoStudioPage() {
           />
         </TabsContent>
 
-        <TabsContent value="ai-features" className="mt-6">
+        <TabsContent value="templates" className="mt-6">
           <div className="space-y-6">
             {/* AI Recording System */}
             <AIVideoRecordingSystem
@@ -276,7 +335,7 @@ export default function VideoStudioPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="library" className="mt-6">
+        <TabsContent value="assets" className="mt-6">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">

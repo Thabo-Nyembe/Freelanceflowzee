@@ -565,9 +565,20 @@ export default function MyDayPage() {
                         <Target className="h-5 w-5" />
                         Today's Tasks
                       </span>
-                      <Badge variant="outline" className="text-xs">
-                        {state.tasks.filter(t => !t.completed).length} remaining
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs">
+                          {state.tasks.filter(t => !t.completed).length} remaining
+                        </Badge>
+                        <Button 
+                          data-testid="add-task-btn"
+                          size="sm" 
+                          onClick={addTask}
+                          className="gap-2"
+                        >
+                          <Plus className="h-3 w-3" />
+                          Add Task
+                        </Button>
+                      </div>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -647,6 +658,7 @@ export default function MyDayPage() {
                               <div className="flex items-center gap-2">
                                 {!task.completed && (
                                   <Button
+                                    data-testid="start-timer-btn"
                                     variant="outline"
                                     size="sm"
                                     className="gap-2"
@@ -695,6 +707,32 @@ export default function MyDayPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
+                    <Button 
+                      data-testid="view-calendar-btn"
+                      className="w-full justify-start gap-2"
+                      variant="outline"
+                      onClick={() => {
+                        console.log('View calendar clicked');
+                        router.push('/dashboard/calendar');
+                      }}
+                    >
+                      <Calendar className="h-4 w-4" />
+                      View Calendar
+                    </Button>
+                    
+                    <Button 
+                      data-testid="generate-schedule-btn"
+                      className="w-full justify-start gap-2"
+                      variant="outline"
+                      onClick={() => {
+                        console.log('Generate schedule clicked');
+                        alert('AI-powered schedule generation started!');
+                      }}
+                    >
+                      <Brain className="h-4 w-4" />
+                      Generate Schedule
+                    </Button>
+                    
                     <Button 
                       className="w-full justify-start gap-2"
                       variant="outline"

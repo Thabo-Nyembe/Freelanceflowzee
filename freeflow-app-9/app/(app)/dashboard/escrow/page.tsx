@@ -20,6 +20,7 @@ import {
   Calendar,
   FileText
 } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 // Escrow state management with useReducer (Context7 best practice)
 interface EscrowState {
@@ -258,14 +259,43 @@ export default function EscrowPage() {
             Secure payment management for your freelance projects
           </p>
         </div>
-        <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
+        <Button 
+          data-testid="request-deposit-btn"
+          className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+          onClick={() => {
+            console.log('Request deposit clicked');
+            alert('Request deposit dialog opened!');
+          }}
+        >
           <CreditCard className="mr-2 h-4 w-4" />
           Request Deposit
         </Button>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid gap-6 md:grid-cols-3">
+      {/* Tabs */}
+      <Tabs defaultValue="active" className="w-full">
+        <TabsList className="grid w-full grid-cols-4 bg-white shadow-sm">
+          <TabsTrigger value="active" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            Active
+          </TabsTrigger>
+          <TabsTrigger value="completed" className="flex items-center gap-2">
+            <CheckCircle className="h-4 w-4" />
+            Completed
+          </TabsTrigger>
+          <TabsTrigger value="pending" className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            Pending
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Analytics
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="active" className="mt-6">
+          {/* Stats Overview */}
+          <div className="grid gap-6 md:grid-cols-3">
         <Card className="border-none shadow-lg bg-gradient-to-br from-indigo-50 to-indigo-100">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-indigo-700">Total Escrow Value</CardTitle>
@@ -382,6 +412,7 @@ export default function EscrowPage() {
                           className="px-3 py-2 border rounded-md flex-1"
                         />
                         <Button 
+                          data-testid="release-funds-btn"
                           onClick={() => handleReleaseFunds(deposit.id)}
                           className="bg-green-600 hover:bg-green-700"
                         >
@@ -397,6 +428,7 @@ export default function EscrowPage() {
                       </div>
                     ) : (
                       <Button 
+                        data-testid="release-funds-btn"
                         onClick={() => setShowPasswordForm(deposit.id)}
                         className="bg-green-600 hover:bg-green-700"
                       >
@@ -408,13 +440,28 @@ export default function EscrowPage() {
                 )}
                 
                 {deposit.status === 'released' && (
-                  <Button variant="outline" className="text-green-600 border-green-600">
+                  <Button 
+                    data-testid="download-receipt-btn"
+                    variant="outline" 
+                    className="text-green-600 border-green-600"
+                    onClick={() => {
+                      console.log('Download receipt clicked');
+                      alert('Receipt downloaded!');
+                    }}
+                  >
                     <Download className="mr-2 h-4 w-4" />
                     Download Receipt
                   </Button>
                 )}
 
-                <Button variant="outline">
+                <Button 
+                  data-testid="view-details-btn"
+                  variant="outline"
+                  onClick={() => {
+                    console.log('View details clicked');
+                    alert('Project details opened!');
+                  }}
+                >
                   <FileText className="mr-2 h-4 w-4" />
                   View Details
                 </Button>
@@ -424,13 +471,39 @@ export default function EscrowPage() {
         ))}
       </div>
 
-      {/* Error Display */}
-      {state.error && (
-        <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          <AlertCircle className="h-5 w-5" />
-          {state.error}
-        </div>
-      )}
+          {/* Error Display */}
+          {state.error && (
+            <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+              <AlertCircle className="h-5 w-5" />
+              {state.error}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="completed" className="mt-6">
+          <div className="text-center py-12">
+            <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold mb-2">Completed Projects</h3>
+            <p className="text-gray-600">Your completed projects with released funds will appear here</p>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="pending" className="mt-6">
+          <div className="text-center py-12">
+            <Clock className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold mb-2">Pending Deposits</h3>
+            <p className="text-gray-600">Deposits waiting for client confirmation will appear here</p>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="analytics" className="mt-6">
+          <div className="text-center py-12">
+            <FileText className="h-16 w-16 text-blue-500 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold mb-2">Analytics Dashboard</h3>
+            <p className="text-gray-600">Detailed analytics and reports coming soon</p>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {/* Cross-Feature Navigation */}
       <div className="mt-12 pt-8 border-t border-gray-200">

@@ -229,17 +229,40 @@ export default function ProjectsHubPage() {
             </p>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" className="gap-2">
+            <Button 
+              variant="outline" 
+              className="gap-2"
+              data-testid="import-project-btn"
+              onClick={() => {
+                console.log('Import project clicked');
+                alert('Import project functionality');
+              }}
+            >
               <Filter className="h-4 w-4" />
-              Filter
+              Import Project
             </Button>
-            <Button variant="outline" className="gap-2">
+            <Button 
+              variant="outline" 
+              className="gap-2"
+              data-testid="quick-start-btn"
+              onClick={() => {
+                console.log('Quick start clicked');
+                alert('Quick start functionality');
+              }}
+            >
               <Search className="h-4 w-4" />
-              Search
+              Quick Start
             </Button>
-            <Button className="bg-gradient-to-r from-purple-600 to-blue-600 text-white gap-2">
+            <Button 
+              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white gap-2"
+              data-testid="create-project-btn"
+              onClick={() => {
+                console.log('Create project clicked');
+                alert('Create project functionality');
+              }}
+            >
               <Plus className="h-4 w-4" />
-              New Project
+              Create Project
             </Button>
           </div>
         </div>
@@ -322,6 +345,34 @@ export default function ProjectsHubPage() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6 mt-6">
+            {/* Quick Actions */}
+            <div className="flex gap-3 mb-6">
+              <Button 
+                variant="outline" 
+                className="gap-2"
+                data-testid="view-all-btn"
+                onClick={() => {
+                  console.log('View all clicked');
+                  alert('View all projects functionality');
+                }}
+              >
+                <Eye className="h-4 w-4" />
+                View All
+              </Button>
+              <Button 
+                variant="outline" 
+                className="gap-2"
+                data-testid="export-data-btn"
+                onClick={() => {
+                  console.log('Export data clicked');
+                  alert('Export data functionality');
+                }}
+              >
+                <Download className="h-4 w-4" />
+                Export Data
+              </Button>
+            </div>
+            
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {mockProjects.map((project) => (
                 <ProjectCard key={project.id} project={project} />

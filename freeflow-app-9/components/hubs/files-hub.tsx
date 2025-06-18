@@ -324,6 +324,7 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
             variant="outline" 
             size="sm"
             onClick={handleCreateFolder}
+            data-testid="new-folder-btn"
           >
             <FolderPlus className="w-4 h-4 mr-2" />
             New Folder
@@ -332,6 +333,7 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
             onClick={handleFileUpload}
             disabled={state.isUploading}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            data-testid="upload-file-btn"
           >
             <Upload className="w-4 h-4 mr-2" />
             {state.isUploading ? `Uploading ${state.uploadProgress}%` : 'Upload Files'}
@@ -416,7 +418,7 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
                   <Button variant="outline" size="sm" onClick={() => dispatch({ type: 'CLEAR_SELECTION' })}>
                     Clear ({state.selectedItems.length})
                   </Button>
-                  <Button variant="outline" size="sm" onClick={handleDeleteSelected}>
+                  <Button variant="outline" size="sm" onClick={handleDeleteSelected} data-testid="delete-file-btn">
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete
                   </Button>
@@ -534,6 +536,7 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
                               e.stopPropagation()
                               handleDownloadFile(file)
                             }}
+                            data-testid="download-file-btn"
                           >
                             <Download className="w-4 h-4" />
                           </Button>
@@ -545,6 +548,7 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
                               e.stopPropagation()
                               handleShareFile(file)
                             }}
+                            data-testid="share-file-btn"
                           >
                             <Share className="w-4 h-4" />
                           </Button>

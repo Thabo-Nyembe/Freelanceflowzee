@@ -1061,6 +1061,7 @@ export default function AICreate() {
                   onClick={generateAssets}
                   disabled={state.isGenerating || !state.selectedField || !state.generationType}
                   className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                  data-testid="generate-assets-btn"
                 >
                   {state.isGenerating ? (
                     <div className="flex items-center gap-2">
@@ -1133,6 +1134,7 @@ export default function AICreate() {
                             size="sm"
                             className="flex-1"
                             onClick={() => dispatch({ type: 'SET_PREVIEW', payload: asset })}
+                            data-testid="preview-asset-btn"
                           >
                             <Eye className="w-4 h-4 mr-1" />
                             Preview
@@ -1141,6 +1143,7 @@ export default function AICreate() {
                             variant="default"
                             size="sm"
                             className="flex-1"
+                            data-testid="download-asset-btn"
                           >
                             <Download className="w-4 h-4 mr-1" />
                             Download
@@ -1188,11 +1191,11 @@ export default function AICreate() {
                     </Select>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" data-testid="upload-asset-btn">
                       <Upload className="w-4 h-4 mr-1" />
                       Upload
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" data-testid="export-all-btn">
                       <Archive className="w-4 h-4 mr-1" />
                       Export All
                     </Button>

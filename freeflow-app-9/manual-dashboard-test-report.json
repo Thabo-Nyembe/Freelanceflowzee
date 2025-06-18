@@ -1,0 +1,157 @@
+{
+  "timestamp": "2025-06-18T18:04:44.268Z",
+  "overall_score": 33,
+  "results": {
+    "routes": {
+      "/dashboard": {
+        "status": "passed",
+        "code": 307
+      },
+      "/dashboard/projects-hub": {
+        "status": "passed",
+        "code": 307
+      },
+      "/dashboard/video-studio": {
+        "status": "passed",
+        "code": 307
+      },
+      "/dashboard/community": {
+        "status": "passed",
+        "code": 307
+      },
+      "/dashboard/ai-assistant": {
+        "status": "passed",
+        "code": 307
+      },
+      "/dashboard/my-day": {
+        "status": "passed",
+        "code": 307
+      },
+      "/dashboard/files-hub": {
+        "status": "passed",
+        "code": 307
+      },
+      "/dashboard/escrow": {
+        "status": "passed",
+        "code": 307
+      },
+      "/dashboard/collaboration": {
+        "status": "passed",
+        "code": 307
+      },
+      "/dashboard/analytics": {
+        "status": "passed",
+        "code": 307
+      },
+      "/dashboard/client-zone": {
+        "status": "passed",
+        "code": 307
+      },
+      "/dashboard/storage": {
+        "status": "passed",
+        "code": 307
+      }
+    },
+    "components": {
+      "/dashboard/projects-hub": {
+        "status": "failed",
+        "error": "HTTP 307"
+      },
+      "/dashboard/video-studio": {
+        "status": "failed",
+        "error": "HTTP 307"
+      },
+      "/dashboard/community": {
+        "status": "failed",
+        "error": "HTTP 307"
+      },
+      "/dashboard/ai-assistant": {
+        "status": "failed",
+        "error": "HTTP 307"
+      },
+      "/dashboard/my-day": {
+        "status": "failed",
+        "error": "HTTP 307"
+      },
+      "/dashboard/files-hub": {
+        "status": "failed",
+        "error": "HTTP 307"
+      },
+      "/dashboard/escrow": {
+        "status": "failed",
+        "error": "HTTP 307"
+      }
+    },
+    "buttons": {
+      "/dashboard/projects-hub": {
+        "total": 4,
+        "found": 0,
+        "ratio": 0
+      },
+      "/dashboard/video-studio": {
+        "total": 5,
+        "found": 0,
+        "ratio": 0
+      },
+      "/dashboard/community": {
+        "total": 4,
+        "found": 0,
+        "ratio": 0
+      },
+      "/dashboard/ai-assistant": {
+        "total": 4,
+        "found": 0,
+        "ratio": 0
+      },
+      "/dashboard/my-day": {
+        "total": 4,
+        "found": 0,
+        "ratio": 0
+      },
+      "/dashboard/escrow": {
+        "total": 4,
+        "found": 0,
+        "ratio": 0
+      }
+    },
+    "interactions": {
+      "/api/ai/chat": {
+        "status": "passed",
+        "code": 200
+      },
+      "/api/collaboration/upf": {
+        "status": "passed",
+        "code": 200
+      },
+      "/api/storage/analytics": {
+        "status": "passed",
+        "code": 200
+      },
+      "/api/upload": {
+        "status": "passed",
+        "code": 200
+      }
+    },
+    "summary": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "errors": []
+    }
+  },
+  "summary": {
+    "routes": {
+      "passed": 12,
+      "total": 12
+    },
+    "components": {
+      "passed": 0,
+      "total": 7
+    },
+    "buttons": {
+      "found": 0,
+      "total": 25
+    },
+    "macos_workaround": "Successfully implemented manual testing to bypass Playwright browser issues"
+  }
+}

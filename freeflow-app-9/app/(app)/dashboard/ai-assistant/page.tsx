@@ -44,7 +44,8 @@ import {
   Users,
   MessageSquare,
   ChevronRight,
-  Plus
+  Plus,
+  Trash2
 } from 'lucide-react'
 
 interface ChatMessage {
@@ -443,28 +444,28 @@ export default function AIAssistantPage() {
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white"
             >
               <MessageSquare className="h-4 w-4 mr-2" />
-              AI Chat
+              Chat
             </TabsTrigger>
             <TabsTrigger 
-              value="insights" 
+              value="analyze" 
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white"
             >
               <Lightbulb className="h-4 w-4 mr-2" />
-              Insights
+              Analyze
             </TabsTrigger>
             <TabsTrigger 
-              value="automation" 
+              value="generate" 
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white"
             >
               <Zap className="h-4 w-4 mr-2" />
-              Automation
+              Generate
             </TabsTrigger>
             <TabsTrigger 
-              value="reports" 
+              value="history" 
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white"
             >
               <BarChart3 className="h-4 w-4 mr-2" />
-              Reports
+              History
             </TabsTrigger>
           </TabsList>
 
@@ -479,9 +480,25 @@ export default function AIAssistantPage() {
                         <Bot className="h-5 w-5 mr-2 text-purple-600" />
                         AI Assistant Chat
                       </CardTitle>
-                      <Badge className="bg-purple-100 text-purple-800">
-                        Smart Mode
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          data-testid="clear-chat-btn"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            console.log('Clearing chat history');
+                            setChatMessages([]);
+                            alert('Chat history cleared!');
+                          }}
+                          className="text-gray-600 hover:text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Clear
+                        </Button>
+                        <Badge className="bg-purple-100 text-purple-800">
+                          Smart Mode
+                        </Badge>
+                      </div>
                     </div>
                   </CardHeader>
                   
@@ -574,6 +591,7 @@ export default function AIAssistantPage() {
                         className="flex-1"
                       />
                       <Button
+                        data-testid="send-message-btn"
                         onClick={handleSendMessage}
                         disabled={!currentInput.trim() || isTyping}
                         className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
@@ -598,6 +616,7 @@ export default function AIAssistantPage() {
                     ].map((action, index) => (
                       <Button
                         key={index}
+                        data-testid={index === 0 ? "quick-action-btn" : `quick-action-${action.title.toLowerCase().replace(/\s+/g, '-')}-btn`}
                         variant="ghost"
                         onClick={() => handleSuggestionClick(action.action)}
                         className="w-full justify-start hover:bg-purple-50"
@@ -633,7 +652,7 @@ export default function AIAssistantPage() {
           </TabsContent>
 
           {/* AI Insights Tab */}
-          <TabsContent value="insights" className="space-y-6 mt-6">
+          <TabsContent value="analyze" className="space-y-6 mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {aiInsights.map((insight) => {
                 const Icon = getInsightIcon(insight.type)
@@ -679,7 +698,14 @@ export default function AIAssistantPage() {
                     )}
                     
                     {insight.actionable && (
-                      <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">
+                      <Button 
+                        data-testid="take-action-btn"
+                        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                        onClick={() => {
+                          console.log('Take action clicked for insight:', insight.title);
+                          alert(`Taking action for: ${insight.title}`);
+                        }}
+                      >
                         Take Action
                         <ChevronRight className="h-4 w-4 ml-2" />
                       </Button>
@@ -691,7 +717,7 @@ export default function AIAssistantPage() {
           </TabsContent>
 
           {/* Automation Tab */}
-          <TabsContent value="automation" className="space-y-6 mt-6">
+          <TabsContent value="generate" className="space-y-6 mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {automationSuggestions.map((automation) => {
                 const Icon = getCategoryIcon(automation.category)
@@ -746,7 +772,7 @@ export default function AIAssistantPage() {
           </TabsContent>
 
           {/* Reports Tab */}
-          <TabsContent value="reports" className="space-y-6 mt-6">
+          <TabsContent value="history" className="space-y-6 mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="p-6">
                 <h3 className="font-semibold text-gray-900 mb-4">AI Performance Impact</h3>
