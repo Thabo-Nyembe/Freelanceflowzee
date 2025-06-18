@@ -91,6 +91,7 @@ const navigationItems = [
   { href: '/dashboard/storage', title: 'Multi-Cloud Storage', icon: Cloud },
   { href: '/dashboard/community', title: 'Community Hub', icon: Users },
   { href: '/dashboard/ai-design', title: 'AI Design Assistant', icon: Cpu },
+      { href: '/dashboard/ai-create', title: 'AI Create', icon: Sparkles },
   { href: '/dashboard/client-portal', title: 'Client Portal', icon: UserCheck },
   { href: '/dashboard/analytics', title: 'Analytics', icon: BarChart3 }
 ];

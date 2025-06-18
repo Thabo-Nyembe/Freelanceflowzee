@@ -115,7 +115,7 @@ const structuredData = {
   "applicationCategory": "BusinessApplication"
 }
 
-export default function LandingPage() {
+export default function HomePage() {
   const [isDemoOpen, setIsDemoOpen] = useState(false)
 
   return (
@@ -199,467 +199,87 @@ export default function LandingPage() {
               </div>
               <div className="flex items-center">
                 <Shield className="w-4 h-4 mr-2 text-blue-500" />
-                Enterprise-Grade Security
+                Bank-Level Security
               </div>
               <div className="flex items-center">
-                <Clock className="w-4 h-4 mr-2 text-purple-500" />
-                Setup in Minutes
+                <Globe className="w-4 h-4 mr-2 text-purple-500" />
+                Global Support
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* How FreeflowZee Works Section */}
-      <section className="py-20 bg-white">
+      {/* Platform Stats */}
+      <section className="py-16 bg-white/60 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              How FreeflowZee Works
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Four simple steps to transform your freelance workflow and start getting paid faster
-            </p>
-          </div>
-
-          <div className="relative">
-            {/* Workflow Connection Line */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-full max-w-5xl h-1 bg-gradient-to-r from-purple-200 via-blue-200 via-green-200 to-yellow-200 rounded-full" />
-            </div>
-
-            <div className="space-y-16">
-              {/* Step 1: Upload */}
-              <div className="flex flex-col lg:flex-row items-center gap-12">
-                <div className="flex-1">
-                  <Card className="hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-purple-50 to-white">
-                    <CardContent className="p-8">
-                      <div className="flex items-center space-x-4 mb-6">
-                        <div className="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-full">
-                          <span className="text-purple-600 font-bold text-lg">1</span>
-                        </div>
-                        <div className="p-3 bg-purple-100 rounded-lg">
-                          <Upload className="w-8 h-8 text-purple-700" />
-                        </div>
-                      </div>
-                      <h4 className="text-2xl font-bold text-gray-900 mb-3">Upload Your Work</h4>
-                      <p className="text-lg text-gray-600 mb-6">
-                        Upload your creative projects, documents, and files to your secure workspace.
-                      </p>
-                      <ul className="space-y-3 mb-6">
-                        <li className="flex items-center text-gray-700">
-                          <CheckCircle className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" />
-                          Drag & drop file uploads
-                        </li>
-                        <li className="flex items-center text-gray-700">
-                          <CheckCircle className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" />
-                          Support for all file types
-                        </li>
-                        <li className="flex items-center text-gray-700">
-                          <CheckCircle className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" />
-                          Automatic file organization
-                        </li>
-                        <li className="flex items-center text-gray-700">
-                          <CheckCircle className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" />
-                          Version control system
-                        </li>
-                      </ul>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2 text-sm text-gray-600">
-                          <Clock className="w-4 h-4" />
-                          <span>2 minutes</span>
-                        </div>
-                        <Button 
-                          size="sm" 
-                          className="bg-purple-600 hover:bg-purple-700"
-                          asChild
-                        >
-                          <Link href="/demo">
-                            <ExternalLink className="w-4 h-4 mr-2" />
-                            Try Interactive Demo
-                          </Link>
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-                <div className="flex-1">
-                  <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl p-8 text-center">
-                    <div className="w-24 h-24 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Upload className="w-12 h-12 text-white" />
-                    </div>
-                    <p className="text-purple-700 font-medium">Interactive Upload Demo</p>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            {PLATFORM_STATS.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="p-3 theme-gradient-primary rounded-full">
+                    <stat.icon className="w-6 h-6 text-white" />
                   </div>
                 </div>
+                <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
+                <div className="text-gray-600 text-sm mb-1">{stat.label}</div>
+                <div className="text-green-600 text-xs font-medium">{stat.growth}</div>
               </div>
-
-              {/* Step 2: Customize */}
-              <div className="flex flex-col lg:flex-row-reverse items-center gap-12">
-                <div className="flex-1">
-                  <Card className="hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-blue-50 to-white">
-                    <CardContent className="p-8">
-                      <div className="flex items-center space-x-4 mb-6">
-                        <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full">
-                          <span className="text-blue-600 font-bold text-lg">2</span>
-                        </div>
-                        <div className="p-3 bg-blue-100 rounded-lg">
-                          <Palette className="w-8 h-8 text-blue-700" />
-                        </div>
-                      </div>
-                      <h4 className="text-2xl font-bold text-gray-900 mb-3">Customize Your Presentation</h4>
-                      <p className="text-lg text-gray-600 mb-6">
-                        Brand your project pages with custom colors, logos, and layouts.
-                      </p>
-                      <ul className="space-y-3 mb-6">
-                        <li className="flex items-center text-gray-700">
-                          <CheckCircle className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" />
-                          Custom branding options
-                        </li>
-                        <li className="flex items-center text-gray-700">
-                          <CheckCircle className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" />
-                          Professional templates
-                        </li>
-                        <li className="flex items-center text-gray-700">
-                          <CheckCircle className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" />
-                          Mobile-responsive design
-                        </li>
-                        <li className="flex items-center text-gray-700">
-                          <CheckCircle className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" />
-                          White-label solutions
-                        </li>
-                      </ul>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2 text-sm text-gray-600">
-                          <Clock className="w-4 h-4" />
-                          <span>5 minutes</span>
-                        </div>
-                        <Button 
-                          size="sm" 
-                          className="bg-blue-600 hover:bg-blue-700"
-                          asChild
-                        >
-                          <Link href="/demo">
-                            <ExternalLink className="w-4 h-4 mr-2" />
-                            Try Interactive Demo
-                          </Link>
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-                <div className="flex-1">
-                  <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl p-8 text-center">
-                    <div className="w-24 h-24 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Palette className="w-12 h-12 text-white" />
-                    </div>
-                    <p className="text-blue-700 font-medium">Interactive Customization Demo</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Step 3: Share */}
-              <div className="flex flex-col lg:flex-row items-center gap-12">
-                <div className="flex-1">
-                  <Card className="hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-green-50 to-white">
-                    <CardContent className="p-8">
-                      <div className="flex items-center space-x-4 mb-6">
-                        <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full">
-                          <span className="text-green-600 font-bold text-lg">3</span>
-                        </div>
-                        <div className="p-3 bg-green-100 rounded-lg">
-                          <Share2 className="w-8 h-8 text-green-700" />
-                        </div>
-                      </div>
-                      <h4 className="text-2xl font-bold text-gray-900 mb-3">Share with Clients</h4>
-                      <p className="text-lg text-gray-600 mb-6">
-                        Send secure, password-protected links to clients for review and approval.
-                      </p>
-                      <ul className="space-y-3 mb-6">
-                        <li className="flex items-center text-gray-700">
-                          <CheckCircle className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" />
-                          Secure sharing links
-                        </li>
-                        <li className="flex items-center text-gray-700">
-                          <CheckCircle className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" />
-                          Password protection
-                        </li>
-                        <li className="flex items-center text-gray-700">
-                          <CheckCircle className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" />
-                          Access controls
-                        </li>
-                        <li className="flex items-center text-gray-700">
-                          <CheckCircle className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" />
-                          Real-time notifications
-                        </li>
-                      </ul>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2 text-sm text-gray-600">
-                          <Clock className="w-4 h-4" />
-                          <span>1 minute</span>
-                        </div>
-                        <Button 
-                          size="sm" 
-                          className="bg-green-600 hover:bg-green-700"
-                          asChild
-                        >
-                          <Link href="/demo">
-                            <ExternalLink className="w-4 h-4 mr-2" />
-                            Try Interactive Demo
-                          </Link>
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-                <div className="flex-1">
-                  <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-2xl p-8 text-center">
-                    <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Share2 className="w-12 h-12 text-white" />
-                    </div>
-                    <p className="text-green-700 font-medium">Interactive Sharing Demo</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Step 4: Get Paid */}
-              <div className="flex flex-col lg:flex-row-reverse items-center gap-12">
-                <div className="flex-1">
-                  <Card className="hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-yellow-50 to-white">
-                    <CardContent className="p-8">
-                      <div className="flex items-center space-x-4 mb-6">
-                        <div className="flex items-center justify-center w-12 h-12 bg-yellow-100 rounded-full">
-                          <span className="text-yellow-600 font-bold text-lg">4</span>
-                        </div>
-                        <div className="p-3 bg-yellow-100 rounded-lg">
-                          <CreditCard className="w-8 h-8 text-yellow-700" />
-                        </div>
-                      </div>
-                      <h4 className="text-2xl font-bold text-gray-900 mb-3">Get Paid Instantly</h4>
-                      <p className="text-lg text-gray-600 mb-6">
-                        Clients can approve and pay for projects directly through your branded pages.
-                      </p>
-                      <ul className="space-y-3 mb-6">
-                        <li className="flex items-center text-gray-700">
-                          <CheckCircle className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" />
-                          Integrated payment processing
-                        </li>
-                        <li className="flex items-center text-gray-700">
-                          <CheckCircle className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" />
-                          Multiple payment methods
-                        </li>
-                        <li className="flex items-center text-gray-700">
-                          <CheckCircle className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" />
-                          Automated invoicing
-                        </li>
-                        <li className="flex items-center text-gray-700">
-                          <CheckCircle className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" />
-                          Instant notifications
-                        </li>
-                      </ul>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2 text-sm text-gray-600">
-                          <Clock className="w-4 h-4" />
-                          <span>Instant</span>
-                        </div>
-                        <Button 
-                          size="sm" 
-                          className="bg-yellow-600 hover:bg-yellow-700"
-                          onClick={() => setIsDemoOpen(true)}
-                        >
-                          <Play className="w-4 h-4 mr-2" />
-                          Watch Payment Demo
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-                <div className="flex-1">
-                  <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-2xl p-8 text-center">
-                    <div className="w-24 h-24 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <CreditCard className="w-12 h-12 text-white" />
-                    </div>
-                    <p className="text-yellow-700 font-medium">Interactive Payment Demo</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Final CTA */}
-            <div className="text-center mt-16">
-              <Button 
-                size="lg"
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-lg px-10 py-4"
-                onClick={() => setIsDemoOpen(true)}
-              >
-                <Play className="w-5 h-5 mr-2" />
-                Experience the Complete Workflow
-              </Button>
-              <p className="text-sm text-gray-500 mt-3">
-                No credit card required • Full interactive demo
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* User Types Section with Enhanced Interactivity */}
-      <section className="py-20 bg-white/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Choose Your Path to Success
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Whether you're a freelancer, agency, or client, FreeflowZee adapts to your unique workflow
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Creator Path */}
-            <Card className="group hover:shadow-2xl transition-all duration-500 border-0 bg-gradient-to-br from-purple-50 to-white hover:from-purple-100 hover:to-purple-50">
-              <CardContent className="p-8">
-                <div className="flex items-center mb-6">
-                  <div className="p-3 bg-purple-500 rounded-full mr-4 group-hover:scale-110 transition-transform">
-                    <Rocket className="w-8 h-8 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900">For Creators</h3>
-                    <p className="text-purple-600 font-medium">Freelancers & Agencies</p>
-                  </div>
-                </div>
-                
-                <ul className="space-y-3 mb-8">
-                  {[
-                    'Professional project management',
-                    'Client collaboration tools',
-                    'Automated invoicing & payments',
-                    'Time tracking & reporting',
-                    'Portfolio showcase',
-                    'Team collaboration'
-                  ].map((feature, index) => (
-                    <li key={index} className="flex items-center text-gray-700">
-                      <CheckCircle className="w-5 h-5 mr-3 text-green-500" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                
-                <div className="flex gap-3">
-                  <Button 
-                    className="flex-1 bg-purple-600 hover:bg-purple-700"
-                    asChild
-                  >
-                    <Link href="/login?redirect=/dashboard">
-                      Creator Login
-                    </Link>
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="border-purple-200 hover:border-purple-400"
-                    onClick={() => setIsDemoOpen(true)}
-                  >
-                    Try Demo
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Client Path */}
-            <Card className="group hover:shadow-2xl transition-all duration-500 border-0 bg-gradient-to-br from-white to-purple-50 hover:from-purple-50 hover:to-purple-100">
-              <CardContent className="p-8">
-                <div className="flex items-center mb-6">
-                  <div className="p-3 bg-purple-500 rounded-full mr-4 group-hover:scale-110 transition-transform">
-                    <Building className="w-8 h-8 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900">For Clients</h3>
-                    <p className="text-purple-600 font-medium">Businesses & Organizations</p>
-                  </div>
-                </div>
-                
-                <ul className="space-y-3 mb-8">
-                  {[
-                    'Real-time project visibility',
-                    'Easy feedback & approval',
-                    'Secure file collaboration',
-                    'Payment protection & escrow',
-                    'Progress tracking',
-                    'Quality assurance'
-                  ].map((feature, index) => (
-                    <li key={index} className="flex items-center text-gray-700">
-                      <CheckCircle className="w-5 h-5 mr-3 text-green-500" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                
-                <div className="flex gap-3">
-                  <Button 
-                    className="flex-1 bg-purple-600 hover:bg-purple-700"
-                    asChild
-                  >
-                    <Link href="/projects">
-                      View Projects
-                    </Link>
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="border-purple-200 hover:border-purple-400"
-                    asChild
-                  >
-                    <Link href="/contact">
-                      Get Started
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Interactive Features Section */}
+      {/* Features Section */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Powerful Features That Work
+            <Badge variant="secondary" className="mb-4 px-3 py-1 text-sm bg-purple-100 text-purple-700">
+              Features
+            </Badge>
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+              Everything You Need to
+              <span className="theme-gradient-text"> Succeed</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Everything you need to manage projects, collaborate with clients, and grow your business
+              From project management to payments, we've got every aspect of your freelance business covered.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {FEATURES_DATA.map((feature, index) => (
-              <Card key={index} className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
+              <Card key={index} className="theme-card group cursor-pointer">
                 <CardContent className="p-6">
-                  <div className="p-3 bg-purple-100 rounded-full w-fit mb-4 group-hover:bg-purple-200 transition-colors">
-                    <feature.icon className="w-6 h-6 text-purple-600" />
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="p-3 theme-gradient-primary rounded-full group-hover:scale-110 transition-transform">
+                      <feature.icon className="w-6 h-6 text-white" />
+                    </div>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
-                  <p className="text-gray-600 mb-4">{feature.description}</p>
-                  <ul className="space-y-2 mb-4">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3 text-center">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 text-center mb-4">
+                    {feature.description}
+                  </p>
+                  <ul className="space-y-2 mb-6">
                     {feature.benefits.map((benefit, idx) => (
                       <li key={idx} className="flex items-center text-sm text-gray-600">
-                        <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+                        <CheckCircle className="w-4 h-4 mr-2 text-green-500 flex-shrink-0" />
                         {benefit}
                       </li>
                     ))}
                   </ul>
-                  {feature.interactive && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="w-full text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-                      asChild
-                    >
-                      <Link href={feature.demo}>
-                        Try Interactive Demo
-                        <ArrowRight className="ml-2 w-4 h-4" />
-                      </Link>
-                    </Button>
-                  )}
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full group-hover:bg-purple-600 group-hover:text-white transition-colors"
+                    asChild
+                  >
+                    <Link href={feature.demo}>
+                      Try Demo
+                      <ExternalLink className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
                 </CardContent>
               </Card>
             ))}
@@ -667,251 +287,148 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 bg-gray-50">
+      {/* User Types Section */}
+      <section className="py-20 bg-gradient-to-r from-purple-50 to-indigo-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Trusted by Professionals Worldwide
-            </h2>
-            <p className="text-xl text-gray-600">
-              Join thousands of successful freelancers and agencies
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {PLATFORM_STATS.map((stat, index) => (
-              <Card key={index} className="text-center p-6 bg-white hover:shadow-lg transition-shadow">
-                <CardContent className="p-0">
-                  <div className="flex justify-center mb-4">
-                    <div className="p-3 bg-purple-100 rounded-full">
-                      <stat.icon className="w-6 h-6 text-purple-600" />
-                    </div>
-                  </div>
-                  <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
-                  <div className="text-gray-600 mb-2">{stat.label}</div>
-                  <div className="flex items-center justify-center text-sm">
-                    <TrendingUp className="w-4 h-4 mr-1 text-green-500" />
-                    <span className="text-green-600 font-medium">{stat.growth}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Subscription Pricing Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Choose Your Perfect Plan
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+              Choose Your <span className="theme-gradient-text">Path</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Start free and scale as you grow. Transparent pricing with no hidden fees.
+              Whether you're a creator or a client, we have the perfect solution for your needs.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Starter Plan */}
-            <Card className="relative hover:shadow-xl transition-all duration-300 border border-gray-200">
-              <CardContent className="p-8">
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Starter</h3>
-                  <p className="text-gray-600 mb-4">Perfect for getting started</p>
-                  <div className="flex items-baseline justify-center mb-4">
-                    <span className="text-5xl font-bold text-gray-900">$0</span>
-                    <span className="text-xl text-gray-500 ml-2">/month</span>
+          <div className="grid md:grid-cols-2 gap-12">
+            {/* Creator Path */}
+            <Card className="theme-card text-center p-8">
+              <CardContent>
+                <div className="flex items-center justify-center mb-6">
+                  <div className="p-4 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full">
+                    <Palette className="w-8 h-8 text-white" />
                   </div>
                 </div>
-                
-                <Button className="w-full mb-6 bg-purple-600 hover:bg-purple-700 text-white" asChild>
-                  <Link href="/signup">
-                    Start Free
-                    <ArrowRight className="ml-2 w-4 h-4" />
-                  </Link>
-                </Button>
-                
-                <ul className="space-y-3">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">For Creators</h3>
+                <p className="text-gray-600 mb-6">
+                  Freelancers, agencies, and creative professionals who want to streamline their workflow and get paid faster.
+                </p>
+                <ul className="space-y-3 mb-8 text-left">
                   <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-gray-700">Up to 3 active projects</span>
+                    <CheckCircle className="w-5 h-5 mr-3 text-green-500" />
+                    Project management & time tracking
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-gray-700">Basic client collaboration</span>
+                    <CheckCircle className="w-5 h-5 mr-3 text-green-500" />
+                    Client collaboration tools
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-gray-700">File sharing up to 1GB</span>
+                    <CheckCircle className="w-5 h-5 mr-3 text-green-500" />
+                    Automated invoicing & payments
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-gray-700">Standard templates</span>
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-gray-700">Email support</span>
+                    <CheckCircle className="w-5 h-5 mr-3 text-green-500" />
+                    Portfolio showcase
                   </li>
                 </ul>
+                <Button 
+                  size="lg" 
+                  className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+                  asChild
+                >
+                  <Link href="/login?redirect=/dashboard">
+                    Start Creating
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
 
-            {/* Professional Plan - Popular */}
-            <Card className="relative hover:shadow-2xl transition-all duration-300 ring-2 ring-purple-500 shadow-xl scale-105">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <div className="bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium">
-                  Most Popular
-                </div>
-              </div>
-              
-              <CardContent className="p-8">
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Professional</h3>
-                  <p className="text-gray-600 mb-4">For growing freelancers</p>
-                  <div className="flex items-baseline justify-center mb-4">
-                    <span className="text-5xl font-bold text-gray-900">$19</span>
-                    <span className="text-xl text-gray-500 ml-2">/month</span>
+            {/* Client Path */}
+            <Card className="theme-card text-center p-8">
+              <CardContent>
+                <div className="flex items-center justify-center mb-6">
+                  <div className="p-4 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full">
+                    <Building className="w-8 h-8 text-white" />
                   </div>
                 </div>
-                
-                <Button className="w-full mb-6 bg-purple-600 hover:bg-purple-700" asChild>
-                  <Link href="/signup?plan=professional">
-                    Start Free Trial
-                    <ArrowRight className="ml-2 w-4 h-4" />
-                  </Link>
-                </Button>
-                
-                <ul className="space-y-3">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">For Clients</h3>
+                <p className="text-gray-600 mb-6">
+                  Businesses and individuals who want to collaborate effectively with creative professionals.
+                </p>
+                <ul className="space-y-3 mb-8 text-left">
                   <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-gray-700">Unlimited projects</span>
-                  </li>
-                  <li className="flex items-center text-gray-700">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-gray-700">Advanced client portals</span>
+                    <CheckCircle className="w-5 h-5 mr-3 text-green-500" />
+                    Real-time project visibility
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-gray-700">File sharing up to 100GB</span>
+                    <CheckCircle className="w-5 h-5 mr-3 text-green-500" />
+                    Easy feedback & approval system
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-gray-700">Custom branding</span>
+                    <CheckCircle className="w-5 h-5 mr-3 text-green-500" />
+                    Secure payment processing
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-gray-700">Priority support</span>
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-gray-700">Payment processing</span>
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-gray-700">Advanced analytics</span>
+                    <CheckCircle className="w-5 h-5 mr-3 text-green-500" />
+                    Professional project delivery
                   </li>
                 </ul>
-              </CardContent>
-            </Card>
-
-            {/* Enterprise Plan */}
-            <Card className="relative hover:shadow-xl transition-all duration-300 border border-gray-200">
-              <CardContent className="p-8">
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Enterprise</h3>
-                  <p className="text-gray-600 mb-4">For agencies and teams</p>
-                  <div className="flex items-baseline justify-center mb-4">
-                    <span className="text-5xl font-bold text-gray-900">$49</span>
-                    <span className="text-xl text-gray-500 ml-2">/month</span>
-                  </div>
-                </div>
-                
-                <Button className="w-full mb-6 bg-indigo-600 hover:bg-indigo-700" asChild>
-                  <Link href="/contact?plan=enterprise">
-                    Contact Sales
-                    <ArrowRight className="ml-2 w-4 h-4" />
+                <Button 
+                  size="lg" 
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
+                  asChild
+                >
+                  <Link href="/projects">
+                    View Projects
+                    <ArrowRight className="w-5 h-5 ml-2" />
                   </Link>
                 </Button>
-                
-                <ul className="space-y-3">
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-gray-700">Everything in Professional</span>
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-gray-700">Unlimited team members</span>
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-gray-700">White-label solution</span>
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-gray-700">Advanced security</span>
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-gray-700">Dedicated account manager</span>
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-gray-700">SLA guarantee</span>
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-gray-700">API access</span>
-                  </li>
-                </ul>
               </CardContent>
             </Card>
           </div>
-          
-          {/* Trust Badges */}
+
+          {/* Help Section */}
           <div className="text-center mt-12">
-            <p className="text-gray-600 mb-4">All plans include:</p>
-            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
-              <div className="flex items-center">
-                <Shield className="w-4 h-4 mr-2 text-green-500" />
-                30-day money back guarantee
-              </div>
-              <div className="flex items-center">
-                <Users className="w-4 h-4 mr-2 text-green-500" />
-                No setup fees
-              </div>
-              <div className="flex items-center">
-                <Clock className="w-4 h-4 mr-2 text-green-500" />
-                Cancel anytime
-              </div>
-            </div>
+            <p className="text-gray-600 mb-4">Not sure which path is right for you?</p>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsDemoOpen(true)}
+              className="theme-button-secondary"
+            >
+              <BookOpen className="w-4 h-4 mr-2" />
+              Explore Demo
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-20 bg-gray-50">
+      {/* Testimonials */}
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              What Our Users Say
+            <Badge variant="secondary" className="mb-4 px-3 py-1 text-sm bg-purple-100 text-purple-700">
+              Testimonials
+            </Badge>
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+              Loved by <span className="theme-gradient-text">Creators</span>
             </h2>
-            <p className="text-xl text-gray-600">
-              Real feedback from real professionals
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Join thousands of satisfied users who have transformed their freelance business.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             {TESTIMONIALS.map((testimonial, index) => (
-              <Card key={index} className="bg-white hover:shadow-xl transition-shadow">
+              <Card key={index} className="theme-card">
                 <CardContent className="p-6">
                   <div className="flex items-center mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
                       <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
                     ))}
                   </div>
-                  <p className="text-gray-700 mb-6 italic">"{testimonial.content}"</p>
+                  <p className="text-gray-600 mb-6 italic">
+                    "{testimonial.content}"
+                  </p>
                   <div className="flex items-center">
                     <img 
                       src={testimonial.image} 
@@ -921,7 +438,7 @@ export default function LandingPage() {
                     <div>
                       <div className="font-semibold text-gray-900">{testimonial.name}</div>
                       <div className="text-sm text-gray-600">{testimonial.role}</div>
-                      <div className="text-sm text-gray-500">{testimonial.company}</div>
+                      <div className="text-sm text-purple-600">{testimonial.company}</div>
                     </div>
                   </div>
                 </CardContent>
@@ -931,115 +448,36 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Strategic Call-to-Action Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-gray-900 mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Ready to Transform Your Workflow?
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Join thousands of professionals who've already upgraded their freelance business
-            </p>
-          </div>
-          
-          {/* Three Strategic CTA Buttons */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Sales CTA */}
-            <Card className="group hover:shadow-2xl transition-all duration-500 border-0 bg-gradient-to-br from-white to-purple-50 hover:from-purple-50 hover:to-white">
-              <CardContent className="p-8 text-center">
-                <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-200 transition-colors">
-                  <Rocket className="w-8 h-8 text-purple-600" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Start Your Journey</h3>
-                <p className="text-gray-600 mb-6">
-                  Join 10,000+ professionals who've transformed their workflow with FreeflowZee's powerful platform.
-                </p>
-                <Button 
-                  size="lg" 
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg group-hover:shadow-xl transition-all"
-                  asChild
-                >
-                  <Link href="/signup">
-                    Start Free Trial
-                    <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                </Button>
-                <p className="text-sm text-gray-500 mt-3">
-                  No credit card required • 14-day free trial
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Information CTA */}
-            <Card className="group hover:shadow-2xl transition-all duration-500 border-0 bg-gradient-to-br from-white to-indigo-50 hover:from-indigo-50 hover:to-white">
-              <CardContent className="p-8 text-center">
-                <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-indigo-200 transition-colors">
-                  <Users className="w-8 h-8 text-indigo-600" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">See It In Action</h3>
-                <p className="text-gray-600 mb-6">
-                  Experience the power of seamless project management with our interactive demo and live examples.
-                </p>
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="w-full border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white shadow-lg group-hover:shadow-xl transition-all"
-                  asChild
-                >
-                  <Link href="/demo">
-                    Watch Live Demo
-                    <Play className="ml-2 w-5 h-5" />
-                  </Link>
-                </Button>
-                <p className="text-sm text-gray-500 mt-3">
-                  5-minute interactive walkthrough
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Brand Awareness CTA */}
-            <Card className="group hover:shadow-2xl transition-all duration-500 border-0 bg-gradient-to-br from-white to-gray-50 hover:from-gray-50 hover:to-white">
-              <CardContent className="p-8 text-center">
-                <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-gray-200 transition-colors">
-                  <Star className="w-8 h-8 text-gray-600" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Learn & Grow</h3>
-                <p className="text-gray-600 mb-6">
-                  Access our comprehensive resource library, tutorials, and join our thriving community of creators.
-                </p>
-                <Button 
-                  size="lg" 
-                  variant="ghost"
-                  className="w-full text-gray-700 hover:bg-gray-100 border-2 border-gray-300 hover:border-gray-400 shadow-lg group-hover:shadow-xl transition-all"
-                  asChild
-                >
-                  <Link href="/resources">
-                    Explore Resources
-                    <BookOpen className="ml-2 w-5 h-5" />
-                  </Link>
-                </Button>
-                <p className="text-sm text-gray-500 mt-3">
-                  Free guides • Tutorials • Community
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Bottom CTA */}
-          <div className="text-center mt-12">
-            <p className="text-gray-600 mb-4">
-              Ready to take your freelance business to the next level?
-            </p>
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-purple-600 to-indigo-600">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+            Ready to Transform Your
+            <br />
+            Freelance Business?
+          </h2>
+          <p className="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
+            Join thousands of creators who are already using FreeflowZee to streamline their workflow and grow their business.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button 
               size="lg" 
-              className="bg-purple-600 text-white hover:bg-purple-700 px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+              className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold"
               asChild
             >
-              <Link href="/contact">
-                Talk to Our Team
-                <MessageCircle className="ml-2 w-5 h-5" />
+              <Link href="/login?redirect=/dashboard">
+                Get Started Free
+                <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
+            </Button>
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="border-white text-white hover:bg-white hover:text-purple-600 px-8 py-4 text-lg font-semibold"
+              onClick={() => setIsDemoOpen(true)}
+            >
+              <Play className="w-5 h-5 mr-2" />
+              Watch Demo
             </Button>
           </div>
         </div>
@@ -1048,7 +486,13 @@ export default function LandingPage() {
       <SiteFooter />
       
       {/* Demo Modal */}
-      <DemoModal isOpen={isDemoOpen} onClose={() => setIsDemoOpen(false)} />
+      <DemoModal 
+        isOpen={isDemoOpen} 
+        onClose={() => setIsDemoOpen(false)} 
+      />
+      
+      {/* Interactive Contact System */}
+      <InteractiveContactSystem />
     </div>
   )
 } 
