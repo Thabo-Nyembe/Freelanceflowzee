@@ -50,6 +50,14 @@ const navigationItems = [
     features: ['5 analysis modes', 'Natural language AI chat', 'Smart recommendations']
   },
   {
+    name: 'AI Create',
+    href: '/dashboard/ai-create',
+    icon: 'Sparkles',
+    description: 'AI-Powered Asset Generation - Creative AI-Level',
+    badge: 'A+++',
+    features: ['Generate assets with AI', 'Multiple AI models', 'Batch processing', 'Advanced settings']
+  },
+  {
     name: 'My Day',
     href: '/dashboard/my-day',
     icon: 'Calendar',
@@ -150,6 +158,7 @@ export default async function DashboardLayout({
                   item.icon === 'Palette' ? '🎨' : 
                   item.icon === 'Users' ? '👥' : 
                   item.icon === 'Brain' ? '🧠' : 
+                  item.icon === 'Sparkles' ? '✨' : 
                   item.icon === 'Calendar' ? '📅' : 
                   item.icon === 'Shield' ? '🛡️' : 
                   item.icon === 'MessageSquare' ? '💬' : 
