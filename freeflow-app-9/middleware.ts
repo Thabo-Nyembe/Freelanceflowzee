@@ -134,6 +134,6 @@ export const config = {
      * - avatars (avatar images)
      * - public folder assets
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|avatars|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|json|txt|xml|js|css)$).*)' 
+    '/((?!api|_next/static|_next/image|favicon.ico|avatars|fonts|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|json|txt|xml|js|css|woff|woff2|ttf|eot)$).*)' 
   ],
 } 
