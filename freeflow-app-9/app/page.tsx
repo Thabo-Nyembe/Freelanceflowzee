@@ -28,8 +28,7 @@ import {
   Upload,
   Palette,
   Share2,
-  CreditCard,
-  ExternalLink
+  CreditCard
 } from 'lucide-react'
 import Link from 'next/link'
 
