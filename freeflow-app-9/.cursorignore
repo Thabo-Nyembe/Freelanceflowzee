@@ -1,2 +1,24 @@
-supabase indexing (e.g. foo/ or *.csv)
-local.emv
+# Minimal ignore for debugging - allow access to most files for fixing issues
+
+# Keep core files accessible for debugging
+!app/
+!components/
+!lib/
+!public/
+!middleware.ts
+!next.config.js
+!package.json
+!tsconfig.json
+
+# Only ignore the most problematic directories
+node_modules/
+.git/
+
+# Temporarily allow .next for debugging build issues
+!.next/
+
+# Allow scripts for testing
+!scripts/
+
+# Keep env files accessible for configuration debugging
+!.env*

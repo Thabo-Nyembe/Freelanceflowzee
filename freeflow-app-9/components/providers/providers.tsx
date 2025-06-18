@@ -1,6 +1,6 @@
 'use client'
 
-import { ThemeProvider } from 'next-themes'
+import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -8,8 +8,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <ThemeProvider
       attribute="class"
       defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
+      storageKey="freeflowzee-ui-theme"
+      defaultSystemTheme="light"
     >
       {children}
       <Toaster />

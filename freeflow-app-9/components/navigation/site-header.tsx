@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Rocket, Menu, X, ChevronDown, ExternalLink, Play } from 'lucide-react'
 import { useState } from 'react'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 export function SiteHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -216,6 +217,7 @@ export function SiteHeader() {
           </Link>
           
           <nav className="flex items-center space-x-3">
+            <ThemeToggle />
             <Link href="/contact" className="hidden sm:block">
               <Button variant="ghost" size="sm">Contact Sales</Button>
             </Link>

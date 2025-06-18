@@ -1,3 +1,4 @@
+// Force deployment update - Production Ready V2.1
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
@@ -132,8 +133,9 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - avatars (avatar images)
+     * - fonts (font files)
      * - public folder assets
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|avatars|fonts|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|json|txt|xml|js|css|woff|woff2|ttf|eot)$).*)' 
+    '/((?!api|_next/static|_next/image|favicon|avatars|fonts|images|icons|media|videos|public|sw\\.js|manifest\\.json|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|json|txt|xml|js|css|woff|woff2|ttf|eot|mp4|wav|pdf)$).*)' 
   ],
 } 

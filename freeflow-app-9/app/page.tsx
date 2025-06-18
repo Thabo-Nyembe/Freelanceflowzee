@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     siteName: 'FreeflowZee',
     images: [
       {
-        url: '/homepage-mockup.jpg',
+        url: '/images/homepage-mockup.jpg',
         width: 1200,
         height: 630,
         alt: 'FreeflowZee Platform Preview',
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'FreeflowZee - Professional Freelance Management Platform',
     description: 'The ultimate freelance management platform for creators, agencies, and clients.',
-    images: ['/homepage-mockup.jpg'],
+    images: ['/images/homepage-mockup.jpg'],
   },
 }
 
