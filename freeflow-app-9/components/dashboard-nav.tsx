@@ -86,6 +86,7 @@ const navigationItems = [
   { href: '/dashboard/projects-hub', title: 'Projects Hub', icon: FolderOpen },
   { href: '/dashboard/my-day', title: 'My Day Today', icon: Calendar },
   { href: '/dashboard/collaboration', title: 'Collaboration', icon: MessageSquare },
+  { href: '/dashboard/notifications', title: 'Notifications', icon: Bell },
   { href: '/dashboard/escrow', title: 'Escrow System', icon: Shield },
   { href: '/dashboard/files-hub', title: 'Files Hub', icon: FolderOpen },
   { href: '/dashboard/storage', title: 'Multi-Cloud Storage', icon: Cloud },

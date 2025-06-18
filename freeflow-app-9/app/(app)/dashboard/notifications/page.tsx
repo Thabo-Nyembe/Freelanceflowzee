@@ -1,764 +1,641 @@
 'use client'
 
 import React, { useState, useReducer, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Bell, Check, CheckCircle, AlertCircle, Clock, MessageSquare, DollarSign, Users, Zap, Filter, Search, Settings, Brain, Sparkles, TrendingUp } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { 
-  Bell, 
-  CheckCircle, 
-  AlertCircle, 
-  Filter, 
-  Search, 
-  Trash2, 
-  DollarSign,
-  MessageSquare,
-  Users,
-  Target,
-  Clock,
-  Cloud,
-  Briefcase,
-  Receipt,
-  Settings,
-  RefreshCw,
-  Archive,
-  Star,
-  MoreHorizontal,
-  ChevronRight,
-  CalendarDays,
-  Shield,
-  Activity,
-  TrendingUp,
-  Zap,
-  Download,
-  Eye,
-  Edit,
-  CheckSquare
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-// ========================================
-// ENHANCED NOTIFICATION SYSTEM
-// ========================================
-
+// Types for notification system
 interface Notification {
   id: string
-  type: 'payment' | 'project' | 'team' | 'client' | 'system' | 'deadline'
+  type: 'payment' | 'project' | 'collaboration' | 'system' | 'ai_insight' | 'client'
+  priority: 'low' | 'medium' | 'high' | 'urgent'
   title: string
   message: string
-  timestamp: string
+  timestamp: Date
   read: boolean
-  priority: 'high' | 'medium' | 'low'
-  actionUrl?: string
-  actionLabel?: string
-  icon?: React.ComponentType<{ className?: string }>
-  color?: string
-  starred?: boolean
-  archived?: boolean
-}
-
-// Enhanced mock notifications with comprehensive routing
-const mockNotifications: Notification[] = [
-  {
-    id: '1',
-    type: 'payment',
-    title: 'Escrow Payment Received',
-    message: 'Payment of $2,500 secured in escrow for Brand Identity Project. Client funds are now protected and available upon milestone completion.',
-    timestamp: '2 minutes ago',
-    read: false,
-    priority: 'high',
-    actionUrl: '/dashboard/escrow',
-    actionLabel: 'View Escrow',
-    icon: DollarSign,
-    color: 'text-emerald-600',
-    starred: true
-  },
-  {
-    id: '2',
-    type: 'client',
-    title: 'New Client Feedback',
-    message: 'Sarah Johnson left detailed feedback on your logo designs: "Love the color palette! Can we explore a few more minimalist options for the icon?"',
-    timestamp: '15 minutes ago',
-    read: false,
-    priority: 'high',
-    actionUrl: '/dashboard/collaboration',
-    actionLabel: 'View Feedback',
-    icon: MessageSquare,
-    color: 'text-purple-600'
-  },
-  {
-    id: '3',
-    type: 'deadline',
-    title: 'Project Deadline Approaching',
-    message: 'Website mockups due in 2 hours for TechCorp project. Remember to include mobile responsive designs and accessibility features.',
-    timestamp: '1 hour ago',
-    read: false,
-    priority: 'high',
-    actionUrl: '/dashboard/project-tracker',
-    actionLabel: 'View Project',
-    icon: Clock,
-    color: 'text-red-600',
-    starred: true
-  },
-  {
-    id: '4',
-    type: 'team',
-    title: 'Team Meeting Reminder',
-    message: 'Weekly standup meeting starts in 30 minutes. We\'ll be discussing the Q1 roadmap and upcoming client presentations.',
-    timestamp: '2 hours ago',
-    read: true,
-    priority: 'medium',
-    actionUrl: '/dashboard/calendar',
-    actionLabel: 'View Calendar',
-    icon: Users,
-    color: 'text-cyan-600'
-  },
-  {
-    id: '5',
-    type: 'project',
-    title: 'Project Milestone Completed',
-    message: 'Mobile app design phase completed successfully! All screens approved by client. Ready to move to development phase.',
-    timestamp: '3 hours ago',
-    read: true,
-    priority: 'medium',
-    actionUrl: '/dashboard/project-tracker',
-    actionLabel: 'View Progress',
-    icon: CheckCircle,
-    color: 'text-green-600'
-  },
-  {
-    id: '6',
-    type: 'system',
-    title: 'Automatic Backup Completed',
-    message: 'All project files have been successfully backed up to cloud storage. Last backup: 127 files (2.3GB).',
-    timestamp: '6 hours ago',
-    read: true,
-    priority: 'low',
-    actionUrl: '/dashboard/cloud-storage',
-    actionLabel: 'View Files',
-    icon: Cloud,
-    color: 'text-blue-600'
-  },
-  {
-    id: '7',
-    type: 'client',
-    title: 'New Project Request',
-    message: 'WebFlow Agency wants to discuss a new branding project: E-commerce redesign for fashion startup with $15K budget.',
-    timestamp: '1 day ago',
-    read: false,
-    priority: 'medium',
-    actionUrl: '/dashboard/projects-hub',
-    actionLabel: 'View Request',
-    icon: Briefcase,
-    color: 'text-orange-600',
-    starred: true
-  },
-  {
-    id: '8',
-    type: 'payment',
-    title: 'Invoice Payment Received',
-    message: 'Invoice #INV-2024-001 has been paid ($1,200). Payment processed successfully via Stripe.',
-    timestamp: '2 days ago',
-    read: true,
-    priority: 'low',
-    actionUrl: '/dashboard/invoices',
-    actionLabel: 'View Invoice',
-    icon: Receipt,
-    color: 'text-green-600'
-  },
-  {
-    id: '9',
-    type: 'team',
-    title: 'New Team Member Added',
-    message: 'Alex Chen has been added to the Brand Identity Project team as UI/UX Designer. Welcome message sent.',
-    timestamp: '3 days ago',
-    read: true,
-    priority: 'low',
-    actionUrl: '/dashboard/team',
-    actionLabel: 'View Team',
-    icon: Users,
-    color: 'text-cyan-600'
-  },
-  {
-    id: '10',
-    type: 'deadline',
-    title: 'Project Review Due',
-    message: 'Client review scheduled for tomorrow at 2 PM. Make sure all deliverables are uploaded to the client portal.',
-    timestamp: '4 days ago',
-    read: false,
-    priority: 'medium',
-    actionUrl: '/dashboard/client-zone',
-    actionLabel: 'Upload Files',
-    icon: Eye,
-    color: 'text-yellow-600'
+  actionRequired: boolean
+  aiGenerated?: boolean
+  metadata?: {
+    projectId?: string
+    clientId?: string
+    amount?: number
+    deadline?: Date
+    sentiment?: 'positive' | 'neutral' | 'negative'
   }
-]
-
-// ========================================
-// NOTIFICATION STATE MANAGEMENT
-// ========================================
+}
 
 interface NotificationState {
   notifications: Notification[]
   unreadCount: number
-  selectedType: string
-  searchQuery: string
-  sortBy: 'date' | 'priority' | 'type'
-  view: 'all' | 'unread' | 'starred' | 'archived'
+  filter: 'all' | 'unread' | 'urgent' | 'ai_insights'
+  searchTerm: string
+  loading: boolean
+  aiProcessing: boolean
 }
 
 type NotificationAction = 
-  | { type: 'MARK_READ'; id: string }
-  | { type: 'MARK_UNREAD'; id: string }
+  | { type: 'ADD_NOTIFICATION'; payload: Notification }
+  | { type: 'MARK_READ'; payload: string }
   | { type: 'MARK_ALL_READ' }
-  | { type: 'DELETE'; id: string }
-  | { type: 'STAR'; id: string }
-  | { type: 'ARCHIVE'; id: string }
-  | { type: 'SET_FILTER'; filter: string }
-  | { type: 'SET_SEARCH'; query: string }
-  | { type: 'SET_SORT'; sort: 'date' | 'priority' | 'type' }
-  | { type: 'SET_VIEW'; view: 'all' | 'unread' | 'starred' | 'archived' }
-  | { type: 'REFRESH_NOTIFICATIONS' }
+  | { type: 'DELETE_NOTIFICATION'; payload: string }
+  | { type: 'SET_FILTER'; payload: NotificationState['filter'] }
+  | { type: 'SET_SEARCH'; payload: string }
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_AI_PROCESSING'; payload: boolean }
+  | { type: 'BULK_ACTION'; payload: { action: 'read' | 'delete'; ids: string[] } }
 
 const notificationReducer = (state: NotificationState, action: NotificationAction): NotificationState => {
   switch (action.type) {
-    case 'MARK_READ':
-      const updatedNotifications = state.notifications.map(n => 
-        n.id === action.id ? { ...n, read: true } : n
-      )
+    case 'ADD_NOTIFICATION':
       return {
         ...state,
-        notifications: updatedNotifications,
-        unreadCount: updatedNotifications.filter(n => !n.read).length
+        notifications: [action.payload, ...state.notifications],
+        unreadCount: state.unreadCount + 1
       }
-    case 'MARK_UNREAD':
-      const unreadNotifications = state.notifications.map(n => 
-        n.id === action.id ? { ...n, read: false } : n
-      )
+    case 'MARK_READ':
       return {
         ...state,
-        notifications: unreadNotifications,
-        unreadCount: unreadNotifications.filter(n => !n.read).length
+        notifications: state.notifications.map(n => 
+          n.id === action.payload ? { ...n, read: true } : n
+        ),
+        unreadCount: Math.max(0, state.unreadCount - 1)
       }
     case 'MARK_ALL_READ':
-      const allReadNotifications = state.notifications.map(n => ({ ...n, read: true }))
       return {
         ...state,
-        notifications: allReadNotifications,
+        notifications: state.notifications.map(n => ({ ...n, read: true })),
         unreadCount: 0
       }
-    case 'DELETE':
-      const filteredNotifications = state.notifications.filter(n => n.id !== action.id)
+    case 'DELETE_NOTIFICATION':
+      const notif = state.notifications.find(n => n.id === action.payload)
       return {
         ...state,
-        notifications: filteredNotifications,
-        unreadCount: filteredNotifications.filter(n => !n.read).length
-      }
-    case 'STAR':
-      return {
-        ...state,
-        notifications: state.notifications.map(n => 
-          n.id === action.id ? { ...n, starred: !n.starred } : n
-        )
-      }
-    case 'ARCHIVE':
-      return {
-        ...state,
-        notifications: state.notifications.map(n => 
-          n.id === action.id ? { ...n, archived: !n.archived } : n
-        )
+        notifications: state.notifications.filter(n => n.id !== action.payload),
+        unreadCount: notif && !notif.read ? state.unreadCount - 1 : state.unreadCount
       }
     case 'SET_FILTER':
-      return { ...state, selectedType: action.filter }
+      return { ...state, filter: action.payload }
     case 'SET_SEARCH':
-      return { ...state, searchQuery: action.query }
-    case 'SET_SORT':
-      return { ...state, sortBy: action.sort }
-    case 'SET_VIEW':
-      return { ...state, view: action.view }
-    case 'REFRESH_NOTIFICATIONS':
-      return {
-        ...state,
-        notifications: mockNotifications,
-        unreadCount: mockNotifications.filter(n => !n.read).length
+      return { ...state, searchTerm: action.payload }
+    case 'SET_LOADING':
+      return { ...state, loading: action.payload }
+    case 'SET_AI_PROCESSING':
+      return { ...state, aiProcessing: action.payload }
+    case 'BULK_ACTION':
+      if (action.payload.action === 'read') {
+        return {
+          ...state,
+          notifications: state.notifications.map(n => 
+            action.payload.ids.includes(n.id) ? { ...n, read: true } : n
+          ),
+          unreadCount: state.unreadCount - action.payload.ids.filter(id => 
+            !state.notifications.find(n => n.id === id)?.read
+          ).length
+        }
+      } else {
+        const deletedUnread = action.payload.ids.filter(id => 
+          !state.notifications.find(n => n.id === id)?.read
+        ).length
+        return {
+          ...state,
+          notifications: state.notifications.filter(n => !action.payload.ids.includes(n.id)),
+          unreadCount: state.unreadCount - deletedUnread
+        }
       }
     default:
       return state
   }
 }
 
-// ========================================
-// MAIN NOTIFICATIONS PAGE COMPONENT
-// ========================================
+// Mock notifications with AI-generated insights
+const generateMockNotifications = (): Notification[] => [
+  {
+    id: '1',
+    type: 'ai_insight',
+    priority: 'high',
+    title: 'AI Revenue Optimization Alert',
+    message: 'Your project completion rate is 15% above average this month. Consider raising your rates by 12% for new clients.',
+    timestamp: new Date(Date.now() - 5 * 60 * 1000),
+    read: false,
+    actionRequired: true,
+    aiGenerated: true,
+    metadata: { sentiment: 'positive' }
+  },
+  {
+    id: '2',
+    type: 'payment',
+    priority: 'urgent',
+    title: 'Payment Received: $2,500',
+    message: 'Payment from Kaleidocraft Co. for Brand Identity Project has been processed successfully.',
+    timestamp: new Date(Date.now() - 15 * 60 * 1000),
+    read: false,
+    actionRequired: false,
+    metadata: { amount: 2500, clientId: 'client-1', sentiment: 'positive' }
+  },
+  {
+    id: '3',
+    type: 'project',
+    priority: 'high',
+    title: 'Project Deadline Approaching',
+    message: 'Mobile App Design project is due in 2 days. Current progress: 75% complete.',
+    timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000),
+    read: false,
+    actionRequired: true,
+    metadata: { projectId: 'proj-1', deadline: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000) }
+  },
+  {
+    id: '4',
+    type: 'collaboration',
+    priority: 'medium',
+    title: 'New Feedback on Brand Guidelines',
+    message: 'Sarah Chen left 3 new comments on your brand guidelines PDF. Sentiment: Positive.',
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    read: false,
+    actionRequired: true,
+    metadata: { clientId: 'sarah-chen', sentiment: 'positive' }
+  },
+  {
+    id: '5',
+    type: 'ai_insight',
+    priority: 'medium',
+    title: 'Client Communication Pattern Alert',
+    message: 'Your response time to client messages has improved by 40% this week. Clients are 65% more likely to approve revisions faster.',
+    timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000),
+    read: true,
+    actionRequired: false,
+    aiGenerated: true,
+    metadata: { sentiment: 'positive' }
+  },
+  {
+    id: '6',
+    type: 'client',
+    priority: 'high',
+    title: 'New Project Inquiry',
+    message: 'TechFlow Industries is interested in a complete website redesign. Estimated budget: $8,500.',
+    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
+    read: false,
+    actionRequired: true,
+    metadata: { amount: 8500, sentiment: 'positive' }
+  },
+  {
+    id: '7',
+    type: 'system',
+    priority: 'low',
+    title: 'Weekly Analytics Ready',
+    message: 'Your weekly performance report is available. Revenue up 23% compared to last week.',
+    timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+    read: true,
+    actionRequired: false,
+    metadata: { sentiment: 'positive' }
+  },
+  {
+    id: '8',
+    type: 'ai_insight',
+    priority: 'medium',
+    title: 'Project Efficiency Recommendation',
+    message: 'AI suggests using your new design template for logo projects. This could reduce project time by 35%.',
+    timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+    read: false,
+    actionRequired: false,
+    aiGenerated: true,
+    metadata: { sentiment: 'neutral' }
+  }
+]
 
 export default function NotificationsPage() {
-  const router = useRouter()
-  
-  // Notification state management
-  const [notificationState, dispatch] = useReducer(notificationReducer, {
-    notifications: mockNotifications,
-    unreadCount: mockNotifications.filter(n => !n.read).length,
-    selectedType: 'all',
-    searchQuery: '',
-    sortBy: 'date',
-    view: 'all'
+  const [state, dispatch] = useReducer(notificationReducer, {
+    notifications: generateMockNotifications(),
+    unreadCount: 6,
+    filter: 'all',
+    searchTerm: '',
+    loading: false,
+    aiProcessing: false
   })
 
-  // Auto-refresh notifications
-  useEffect(() => {
-    const interval = setInterval(() => {
-      dispatch({ type: 'REFRESH_NOTIFICATIONS' })
-    }, 30000) // Refresh every 30 seconds
+  const [selectedNotifications, setSelectedNotifications] = useState<string[]>([])
 
-    return () => clearInterval(interval)
-  }, [])
+  // Filter notifications based on current filter and search
+  const filteredNotifications = state.notifications.filter(notification => {
+    const matchesFilter = 
+      state.filter === 'all' || 
+      (state.filter === 'unread' && !notification.read) ||
+      (state.filter === 'urgent' && (notification.priority === 'urgent' || notification.priority === 'high')) ||
+      (state.filter === 'ai_insights' && notification.aiGenerated)
 
-  const handleNotificationClick = (notification: Notification) => {
-    // Mark as read if unread
-    if (!notification.read) {
-      dispatch({ type: 'MARK_READ', id: notification.id })
+    const matchesSearch = notification.title.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+                         notification.message.toLowerCase().includes(state.searchTerm.toLowerCase())
+
+    return matchesFilter && matchesSearch
+  })
+
+  const getNotificationIcon = (type: Notification['type']) => {
+    switch (type) {
+      case 'payment': return <DollarSign className="h-4 w-4" />
+      case 'project': return <Clock className="h-4 w-4" />
+      case 'collaboration': return <MessageSquare className="h-4 w-4" />
+      case 'client': return <Users className="h-4 w-4" />
+      case 'ai_insight': return <Brain className="h-4 w-4" />
+      case 'system': return <Bell className="h-4 w-4" />
+      default: return <Bell className="h-4 w-4" />
     }
+  }
+
+  const getPriorityColor = (priority: Notification['priority']) => {
+    switch (priority) {
+      case 'urgent': return 'bg-red-500'
+      case 'high': return 'bg-orange-500'
+      case 'medium': return 'bg-yellow-500'
+      case 'low': return 'bg-green-500'
+      default: return 'bg-gray-500'
+    }
+  }
+
+  const handleMarkRead = (id: string) => {
+    dispatch({ type: 'MARK_READ', payload: id })
+  }
+
+  const handleDelete = (id: string) => {
+    dispatch({ type: 'DELETE_NOTIFICATION', payload: id })
+  }
+
+  const handleBulkAction = (action: 'read' | 'delete') => {
+    if (selectedNotifications.length > 0) {
+      dispatch({ type: 'BULK_ACTION', payload: { action, ids: selectedNotifications } })
+      setSelectedNotifications([])
+    }
+  }
+
+  const generateAIInsight = async () => {
+    dispatch({ type: 'SET_AI_PROCESSING', payload: true })
     
-    // Navigate to action URL
-    if (notification.actionUrl) {
-      router.push(notification.actionUrl)
-    }
+    // Simulate AI processing
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    
+    const aiInsights = [
+      {
+        id: `ai-${Date.now()}`,
+        type: 'ai_insight' as const,
+        priority: 'medium' as const,
+        title: 'AI Performance Analysis',
+        message: 'Based on your recent activity, you could increase project efficiency by 28% by batching similar design tasks together.',
+        timestamp: new Date(),
+        read: false,
+        actionRequired: false,
+        aiGenerated: true,
+        metadata: { sentiment: 'positive' as const }
+      },
+      {
+        id: `ai-${Date.now() + 1}`,
+        type: 'ai_insight' as const,
+        priority: 'high' as const,
+        title: 'Revenue Opportunity Detected',
+        message: 'AI found 3 past clients who haven\'t worked with you in 6+ months. Reach out with a 15% returning client discount.',
+        timestamp: new Date(),
+        read: false,
+        actionRequired: true,
+        aiGenerated: true,
+        metadata: { sentiment: 'positive' as const }
+      }
+    ]
+
+    aiInsights.forEach(insight => {
+      dispatch({ type: 'ADD_NOTIFICATION', payload: insight })
+    })
+
+    dispatch({ type: 'SET_AI_PROCESSING', payload: false })
   }
 
-  // Filter and sort notifications
-  const getFilteredNotifications = () => {
-    let filtered = notificationState.notifications
-
-    // Filter by view
-    switch (notificationState.view) {
-      case 'unread':
-        filtered = filtered.filter(n => !n.read && !n.archived)
-        break
-      case 'starred':
-        filtered = filtered.filter(n => n.starred && !n.archived)
-        break
-      case 'archived':
-        filtered = filtered.filter(n => n.archived)
-        break
-      default:
-        filtered = filtered.filter(n => !n.archived)
-    }
-
-    // Filter by type
-    if (notificationState.selectedType !== 'all') {
-      filtered = filtered.filter(n => n.type === notificationState.selectedType)
-    }
-
-    // Filter by search query
-    if (notificationState.searchQuery) {
-      const query = notificationState.searchQuery.toLowerCase()
-      filtered = filtered.filter(n => 
-        n.title.toLowerCase().includes(query) || 
-        n.message.toLowerCase().includes(query)
-      )
-    }
-
-    // Sort notifications
-    switch (notificationState.sortBy) {
-      case 'priority':
-        const priorityOrder = { high: 3, medium: 2, low: 1 }
-        filtered.sort((a, b) => priorityOrder[b.priority] - priorityOrder[a.priority])
-        break
-      case 'type':
-        filtered.sort((a, b) => a.type.localeCompare(b.type))
-        break
-      default: // date
-        // Mock date sorting based on timestamp
-        filtered.sort((a, b) => {
-          const timeA = a.timestamp.includes('minute') ? 0 : 
-                     a.timestamp.includes('hour') ? 1 : 
-                     a.timestamp.includes('day') ? 2 : 3
-          const timeB = b.timestamp.includes('minute') ? 0 : 
-                     b.timestamp.includes('hour') ? 1 : 
-                     b.timestamp.includes('day') ? 2 : 3
-          return timeA - timeB
-        })
-    }
-
-    return filtered
-  }
-
-  const filteredNotifications = getFilteredNotifications()
-
-  // Notification categories with counts
-  const notificationTypes = [
-    { value: 'all', label: 'All Types', count: notificationState.notifications.filter(n => !n.archived).length },
-    { value: 'payment', label: 'Payments', count: notificationState.notifications.filter(n => n.type === 'payment' && !n.archived).length },
-    { value: 'project', label: 'Projects', count: notificationState.notifications.filter(n => n.type === 'project' && !n.archived).length },
-    { value: 'client', label: 'Clients', count: notificationState.notifications.filter(n => n.type === 'client' && !n.archived).length },
-    { value: 'team', label: 'Team', count: notificationState.notifications.filter(n => n.type === 'team' && !n.archived).length },
-    { value: 'deadline', label: 'Deadlines', count: notificationState.notifications.filter(n => n.type === 'deadline' && !n.archived).length },
-    { value: 'system', label: 'System', count: notificationState.notifications.filter(n => n.type === 'system' && !n.archived).length }
-  ]
-
-  // Enhanced Notification Item Component
-  const NotificationItem = ({ notification }: { notification: Notification }) => {
-    const Icon = notification.icon || Bell
-    const priorityColors = {
-      high: 'border-l-red-500 bg-red-50/50',
-      medium: 'border-l-yellow-500 bg-yellow-50/50',
-      low: 'border-l-blue-500 bg-blue-50/50'
-    }
-
-    return (
-      <Card 
-        className={cn(
-          "mb-4 cursor-pointer transition-all duration-200 hover:shadow-md border-l-4",
-          priorityColors[notification.priority],
-          !notification.read ? 'bg-blue-50/30 border-r-4 border-r-blue-500' : 'bg-white',
-          notification.starred && 'ring-2 ring-yellow-400/30'
-        )}
-        onClick={() => handleNotificationClick(notification)}
-      >
-        <CardContent className="p-6">
-          <div className="flex items-start gap-4">
-            {/* Icon */}
-            <div className={cn(
-              "p-3 rounded-xl flex-shrink-0",
-              notification.read ? 'bg-gray-100' : 'bg-white shadow-sm border'
-            )}>
-              <Icon className={cn("h-5 w-5", notification.color || 'text-gray-600')} />
-            </div>
-            
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <h3 className={cn(
-                    "font-semibold text-lg",
-                    !notification.read ? 'text-gray-900' : 'text-gray-700'
-                  )}>
-                    {notification.title}
-                  </h3>
-                  {!notification.read && (
-                    <div className="w-2.5 h-2.5 bg-blue-600 rounded-full flex-shrink-0" />
-                  )}
-                  {notification.starred && (
-                    <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                  )}
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <Badge 
-                    variant={notification.priority === 'high' ? 'destructive' : 
-                            notification.priority === 'medium' ? 'default' : 'secondary'}
-                    className="text-xs"
-                  >
-                    {notification.priority}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs capitalize">
-                    {notification.type}
-                  </Badge>
-                </div>
-              </div>
-              
-              <p className="text-gray-600 mb-4 leading-relaxed">
-                {notification.message}
-              </p>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500 flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {notification.timestamp}
-                </span>
-                
-                <div className="flex items-center gap-2">
-                  {notification.actionLabel && (
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleNotificationClick(notification)
-                      }}
-                      className="h-8"
-                    >
-                      {notification.actionLabel}
-                      <ChevronRight className="h-3 w-3 ml-1" />
-                    </Button>
-                  )}
-                  
-                  {/* Quick Actions */}
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        dispatch({ type: 'STAR', id: notification.id })
-                      }}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Star className={cn(
-                        "h-3 w-3",
-                        notification.starred ? "text-yellow-500 fill-yellow-500" : "text-gray-400"
-                      )} />
-                    </Button>
-                    
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        dispatch({ 
-                          type: notification.read ? 'MARK_UNREAD' : 'MARK_READ', 
-                          id: notification.id 
-                        })
-                      }}
-                      className="h-8 w-8 p-0"
-                    >
-                      <CheckCircle className={cn(
-                        "h-3 w-3",
-                        notification.read ? "text-green-600" : "text-gray-400"
-                      )} />
-                    </Button>
-                    
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        dispatch({ type: 'ARCHIVE', id: notification.id })
-                      }}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Archive className="h-3 w-3 text-gray-400" />
-                    </Button>
-                    
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        dispatch({ type: 'DELETE', id: notification.id })
-                      }}
-                      className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    )
+  const formatTimeAgo = (date: Date) => {
+    const now = new Date()
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
+    
+    if (diffInMinutes < 1) return 'Just now'
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`
+    return `${Math.floor(diffInMinutes / 1440)}d ago`
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50/30 p-4">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Notifications</h1>
-              <p className="text-gray-600">
-                Stay updated with your projects, payments, and team activities
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                onClick={() => dispatch({ type: 'REFRESH_NOTIFICATIONS' })}
-                className="gap-2"
-              >
-                <RefreshCw className="h-4 w-4" />
-                Refresh
-              </Button>
-              
-              <Button
-                variant="outline"
-                onClick={() => dispatch({ type: 'MARK_ALL_READ' })}
-                disabled={notificationState.unreadCount === 0}
-                className="gap-2"
-              >
-                <CheckSquare className="h-4 w-4" />
-                Mark All Read
-              </Button>
-            </div>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <Bell className="h-8 w-8 text-purple-600" />
+              Notifications
+              {state.unreadCount > 0 && (
+                <Badge variant="secondary" className="bg-red-500 text-white">
+                  {state.unreadCount}
+                </Badge>
+              )}
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Stay updated with your projects, payments, and AI insights
+            </p>
           </div>
-
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-blue-100 text-sm">Total</p>
-                    <p className="text-2xl font-bold">{notificationState.notifications.filter(n => !n.archived).length}</p>
-                  </div>
-                  <Bell className="h-8 w-8 text-blue-200" />
-                </div>
-              </CardContent>
-            </Card>
+          
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={generateAIInsight}
+              disabled={state.aiProcessing}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+            >
+              {state.aiProcessing ? (
+                <>
+                  <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                  Generating AI Insights...
+                </>
+              ) : (
+                <>
+                  <Brain className="h-4 w-4 mr-2" />
+                  Generate AI Insights
+                </>
+              )}
+            </Button>
             
-            <Card className="bg-gradient-to-r from-red-500 to-red-600 text-white">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-red-100 text-sm">Unread</p>
-                    <p className="text-2xl font-bold">{notificationState.unreadCount}</p>
-                  </div>
-                  <AlertCircle className="h-8 w-8 text-red-200" />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-yellow-100 text-sm">Starred</p>
-                    <p className="text-2xl font-bold">
-                      {notificationState.notifications.filter(n => n.starred && !n.archived).length}
-                    </p>
-                  </div>
-                  <Star className="h-8 w-8 text-yellow-200" />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-green-100 text-sm">High Priority</p>
-                    <p className="text-2xl font-bold">
-                      {notificationState.notifications.filter(n => n.priority === 'high' && !n.read && !n.archived).length}
-                    </p>
-                  </div>
-                  <Zap className="h-8 w-8 text-green-200" />
-                </div>
-              </CardContent>
-            </Card>
+            <Button
+              variant="outline"
+              onClick={() => dispatch({ type: 'MARK_ALL_READ' })}
+              disabled={state.unreadCount === 0}
+            >
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Mark All Read
+            </Button>
           </div>
         </div>
 
-        {/* Filters and Controls */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="flex flex-col lg:flex-row gap-4">
-              {/* Search */}
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+        {/* Controls */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+              <div className="flex items-center gap-4 w-full sm:w-auto">
+                <div className="relative flex-1 sm:flex-none">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     placeholder="Search notifications..."
-                    value={notificationState.searchQuery}
-                    onChange={(e) => dispatch({ type: 'SET_SEARCH', query: e.target.value })}
-                    className="pl-9"
+                    value={state.searchTerm}
+                    onChange={(e) => dispatch({ type: 'SET_SEARCH', payload: e.target.value })}
+                    className="pl-10 w-full sm:w-80"
                   />
                 </div>
+                
+                <Select value={state.filter} onValueChange={(value: NotificationState['filter']) => dispatch({ type: 'SET_FILTER', payload: value })}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="unread">Unread ({state.notifications.filter(n => !n.read).length})</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                    <SelectItem value="ai_insights">AI Insights</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              
-              {/* View Filters */}
-              <div className="flex gap-2">
-                {[
-                  { value: 'all', label: 'All', icon: Bell },
-                  { value: 'unread', label: 'Unread', icon: AlertCircle },
-                  { value: 'starred', label: 'Starred', icon: Star },
-                  { value: 'archived', label: 'Archived', icon: Archive }
-                ].map((view) => {
-                  const IconComponent = view.icon
-                  return (
-                    <Button
-                      key={view.value}
-                      variant={notificationState.view === view.value ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => dispatch({ type: 'SET_VIEW', view: view.value as any })}
-                      className="gap-2"
-                    >
-                      <IconComponent className="h-3 w-3" />
-                      {view.label}
-                    </Button>
-                  )
-                })}
-              </div>
-              
-              {/* Sort */}
-              <select
-                value={notificationState.sortBy}
-                onChange={(e) => dispatch({ type: 'SET_SORT', sort: e.target.value as any })}
-                className="px-3 py-2 border rounded-md text-sm"
-              >
-                <option value="date">Sort by Date</option>
-                <option value="priority">Sort by Priority</option>
-                <option value="type">Sort by Type</option>
-              </select>
-            </div>
-            
-            {/* Type Filters */}
-            <div className="flex flex-wrap gap-2 mt-4">
-              {notificationTypes.map((type) => (
-                <Button
-                  key={type.value}
-                  variant={notificationState.selectedType === type.value ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => dispatch({ type: 'SET_FILTER', filter: type.value })}
-                  className="gap-2"
-                >
-                  {type.label}
-                  {type.count > 0 && (
-                    <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 text-xs">
-                      {type.count}
-                    </Badge>
-                  )}
-                </Button>
-              ))}
+
+              {selectedNotifications.length > 0 && (
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleBulkAction('read')}
+                  >
+                    Mark Read ({selectedNotifications.length})
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleBulkAction('delete')}
+                  >
+                    Delete ({selectedNotifications.length})
+                  </Button>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Notifications List */}
-        <div className="space-y-4">
-          {filteredNotifications.length === 0 ? (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <Bell className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications found</h3>
-                <p className="text-gray-500 mb-6">
-                  {notificationState.searchQuery 
-                    ? `No notifications match "${notificationState.searchQuery}"` 
-                    : 'You\'re all caught up! No notifications in this category.'}
-                </p>
-                {notificationState.searchQuery && (
-                  <Button
-                    variant="outline"
-                    onClick={() => dispatch({ type: 'SET_SEARCH', query: '' })}
+        {/* Notification Tabs */}
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="payments">Payments</TabsTrigger>
+            <TabsTrigger value="projects">Projects</TabsTrigger>
+            <TabsTrigger value="collaboration">Collaboration</TabsTrigger>
+            <TabsTrigger value="ai">AI Insights</TabsTrigger>
+            <TabsTrigger value="clients">Clients</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="all" className="space-y-4">
+            {filteredNotifications.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Bell className="h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No notifications found</h3>
+                  <p className="text-gray-600 text-center">
+                    {state.searchTerm ? 'Try adjusting your search terms' : 'You\'re all caught up!'}
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-3">
+                {filteredNotifications.map((notification) => (
+                  <Card
+                    key={notification.id}
+                    className={`transition-all duration-200 hover:shadow-md ${
+                      !notification.read ? 'bg-blue-50/50 border-blue-200' : 'bg-white'
+                    } ${selectedNotifications.includes(notification.id) ? 'ring-2 ring-purple-500' : ''}`}
                   >
-                    Clear Search
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="group">
-              {filteredNotifications.map((notification) => (
-                <NotificationItem key={notification.id} notification={notification} />
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-4">
+                        <input
+                          type="checkbox"
+                          checked={selectedNotifications.includes(notification.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedNotifications([...selectedNotifications, notification.id])
+                            } else {
+                              setSelectedNotifications(selectedNotifications.filter(id => id !== notification.id))
+                            }
+                          }}
+                          className="mt-1"
+                        />
+                        
+                        <div className="flex-shrink-0">
+                          <div className={`w-2 h-2 rounded-full ${getPriorityColor(notification.priority)} mt-2`} />
+                        </div>
+
+                        <div className="flex-shrink-0 mt-1">
+                          <div className={`p-2 rounded-full ${
+                            notification.aiGenerated ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-600'
+                          }`}>
+                            {getNotificationIcon(notification.type)}
+                          </div>
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-semibold text-gray-900 truncate">
+                              {notification.title}
+                            </h4>
+                            {notification.aiGenerated && (
+                              <Badge variant="secondary" className="bg-purple-100 text-purple-700 text-xs">
+                                <Sparkles className="h-3 w-3 mr-1" />
+                                AI
+                              </Badge>
+                            )}
+                            {notification.actionRequired && (
+                              <Badge variant="secondary" className="bg-orange-100 text-orange-700 text-xs">
+                                Action Required
+                              </Badge>
+                            )}
+                          </div>
+                          
+                          <p className="text-gray-600 text-sm mb-2 line-clamp-2">
+                            {notification.message}
+                          </p>
+                          
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-500">
+                              {formatTimeAgo(notification.timestamp)}
+                            </span>
+                            
+                            <div className="flex gap-2">
+                              {!notification.read && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleMarkRead(notification.id)}
+                                  className="text-xs"
+                                >
+                                  <Check className="h-3 w-3 mr-1" />
+                                  Mark Read
+                                </Button>
+                              )}
+                              
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleDelete(notification.id)}
+                                className="text-xs text-red-600 hover:text-red-700"
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Individual tabs would filter by type */}
+          <TabsContent value="payments">
+            <div className="space-y-3">
+              {filteredNotifications.filter(n => n.type === 'payment').map((notification) => (
+                <Card key={notification.id} className="bg-green-50/50 border-green-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <DollarSign className="h-5 w-5 text-green-600" />
+                      <div>
+                        <h4 className="font-semibold text-gray-900">{notification.title}</h4>
+                        <p className="text-sm text-gray-600">{notification.message}</p>
+                        <span className="text-xs text-gray-500">{formatTimeAgo(notification.timestamp)}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
-          )}
-        </div>
+          </TabsContent>
 
-        {/* Load More / Pagination could go here */}
-        {filteredNotifications.length > 0 && (
-          <div className="mt-8 text-center">
-            <p className="text-sm text-gray-500">
-              Showing {filteredNotifications.length} of {notificationState.notifications.filter(n => !n.archived).length} notifications
-            </p>
-          </div>
-        )}
+          <TabsContent value="ai">
+            <div className="space-y-3">
+              {filteredNotifications.filter(n => n.aiGenerated).map((notification) => (
+                <Card key={notification.id} className="bg-purple-50/50 border-purple-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-full bg-purple-100 text-purple-600">
+                        <Brain className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-semibold text-gray-900">{notification.title}</h4>
+                          <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            AI Generated
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">{notification.message}</p>
+                        <span className="text-xs text-gray-500">{formatTimeAgo(notification.timestamp)}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Add other tab contents as needed */}
+          <TabsContent value="projects">
+            <div className="text-center py-8">
+              <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600">Project notifications will appear here</p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="collaboration">
+            <div className="text-center py-8">
+              <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600">Collaboration notifications will appear here</p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="clients">
+            <div className="text-center py-8">
+              <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600">Client notifications will appear here</p>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* AI Insights Summary Card */}
+        <Card className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              AI Performance Summary
+            </CardTitle>
+            <CardDescription className="text-purple-100">
+              Your freelance business insights powered by AI
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold">+23%</div>
+                <div className="text-sm text-purple-100">Revenue Growth</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">92%</div>
+                <div className="text-sm text-purple-100">Client Satisfaction</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">-15%</div>
+                <div className="text-sm text-purple-100">Project Time</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
