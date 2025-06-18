@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { EnhancedUploadProgress } from '@/components/upload/enhanced-upload-progress'
+import { EnhancedDownloadManager } from '@/components/download/enhanced-download-manager'
 import { 
   FileText,
   Upload,
@@ -44,6 +46,31 @@ interface FilesHubProps {
   userId: string
 }
 
+// Utility functions
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+const getFileIcon = (mimeType: string) => {
+  if (mimeType?.includes('image')) return Image
+  if (mimeType?.includes('video')) return Video
+  if (mimeType?.includes('audio')) return Music
+  if (mimeType?.includes('pdf')) return FileText
+  return FileText
+}
+
+const getFileColor = (mimeType: string): string => {
+  if (mimeType?.includes('image')) return 'text-purple-500'
+  if (mimeType?.includes('video')) return 'text-blue-500'
+  if (mimeType?.includes('audio')) return 'text-green-500'
+  if (mimeType?.includes('pdf')) return 'text-red-500'
+  return 'text-gray-500'
+}
+
 // Context7 useReducer pattern for file state management
 interface FileState {
   files: any[]
@@ -74,6 +101,11 @@ type FileAction =
   | { type: 'COMPLETE_UPLOAD' }
   | { type: 'ADD_FILE'; payload: any }
   | { type: 'DELETE_FILES'; payload: string[] }
+  | { type: 'UPLOAD_SUCCESS'; payload: { files: any[] } }
+  | { type: 'UPLOAD_ERROR'; payload: { error: string } }
+  | { type: 'DOWNLOAD_START'; payload: { fileId: string } }
+  | { type: 'DOWNLOAD_SUCCESS'; payload: { fileId: string } }
+  | { type: 'DOWNLOAD_ERROR'; payload: { fileId: string; error: string } }
 
 const initialState: FileState = {
   files: [
@@ -220,36 +252,28 @@ function fileReducer(state: FileState, action: FileAction): FileState {
         files: state.files.filter(file => !action.payload.includes(file.id)),
         selectedItems: []
       }
+    case 'UPLOAD_SUCCESS':
+      return {
+        ...state,
+        files: [...state.files, ...action.payload.files],
+        isUploading: false,
+        uploadProgress: 0
+      }
+    case 'UPLOAD_ERROR':
+      return {
+        ...state,
+        isUploading: false,
+        uploadProgress: 0
+      }
+    case 'DOWNLOAD_START':
+      return state // Could add download tracking if needed
+    case 'DOWNLOAD_SUCCESS':
+      return state // Could add download tracking if needed
+    case 'DOWNLOAD_ERROR':
+      return state // Could add download tracking if needed
     default:
       return state
   }
-}
-
-// Utility functions
-const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 Bytes'
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
-
-const getFileIcon = (mimeType: string) => {
-  if (mimeType.startsWith('image/')) return Image
-  if (mimeType.startsWith('video/')) return Video
-  if (mimeType.startsWith('audio/')) return Music
-  if (mimeType.includes('pdf')) return FileText
-  if (mimeType.includes('zip') || mimeType.includes('archive')) return Archive
-  return FileText
-}
-
-const getFileColor = (mimeType: string): string => {
-  if (mimeType.startsWith('image/')) return 'text-purple-500'
-  if (mimeType.startsWith('video/')) return 'text-blue-500'
-  if (mimeType.startsWith('audio/')) return 'text-green-500'
-  if (mimeType.includes('pdf')) return 'text-red-500'
-  if (mimeType.includes('zip') || mimeType.includes('archive')) return 'text-orange-500'
-  return 'text-gray-500'
 }
 
 export function FilesHub({ projects, userId }: FilesHubProps) {

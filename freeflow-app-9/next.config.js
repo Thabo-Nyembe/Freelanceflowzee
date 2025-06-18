@@ -1,70 +1,78 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Production optimizations
-  reactStrictMode: true,
-  poweredByHeader: false,
-  generateEtags: true,
-  compress: true,
-  
-  // External packages for server components (moved from experimental)
-  serverExternalPackages: ['@aws-sdk/client-s3', '@aws-sdk/s3-request-presigner', '@aws-sdk/lib-storage'],
-  
-  // Turbopack configuration (for development)
+  // Experimental features for performance
   experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
+    serverComponentsExternalPackages: ['@supabase/supabase-js'],
     turbo: {
       rules: {
         '*.svg': {
           loaders: ['@svgr/webpack'],
           as: '*.js',
         },
-        '*.mp4': {
-          loaders: ['file-loader'],
-          as: '*.js',
-        },
-        '*.webm': {
-          loaders: ['file-loader'],
-          as: '*.js',
-        },
-        '*.mp3': {
-          loaders: ['file-loader'],
-          as: '*.js',
-        },
-        '*.wav': {
-          loaders: ['file-loader'],
-          as: '*.js',
-        },
       },
     },
   },
+
+  // SEO & Performance Optimizations
+  poweredByHeader: false,
+  compress: true,
+  generateEtags: true,
   
-  // Image optimization
+  // External packages for server components (moved from experimental)
+  serverExternalPackages: ['@aws-sdk/client-s3', '@aws-sdk/s3-request-presigner', '@aws-sdk/lib-storage'],
+  
+  // Image optimization for SEO
   images: {
-    domains: ['images.unsplash.com', 'placehold.co'],
-    minimumCacheTTL: 2678400,
+    formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    formats: ['image/webp'],
+    minimumCacheTTL: 31536000, // 1 year
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: '**.supabase.co',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.amazonaws.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.wasabisys.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'images.unsplash.com',
-        pathname: '/**',
       },
       {
         protocol: 'https',
-        hostname: 'placehold.co',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.supabase.co',
-        pathname: '/storage/v1/object/public/**',
+        hostname: 'via.placeholder.com',
       }
-    ],
+    ]
   },
 
   // Media file handling
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
+    // Optimize bundle size
+    config.optimization.splitChunks = {
+      chunks: 'all',
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+        },
+      },
+    }
+
+    // Tree shaking for better performance
+    config.optimization.usedExports = true
+    config.optimization.sideEffects = false
+
     // Handle media files
     config.module.rules.push({
       test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
@@ -86,54 +94,114 @@ const nextConfig = {
     NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
   },
 
-  // Security headers
+  // Headers for SEO and security
   async headers() {
     return [
       {
         source: '/(.*)',
         headers: [
           {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
             key: 'X-Frame-Options',
-            value: 'DENY',
+            value: 'DENY'
           },
           {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
           },
           {
             key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
+            value: 'strict-origin-when-cross-origin'
           },
           {
-            key: 'Content-Security-Policy',
-            value: `
-              default-src 'self';
-              script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com;
-              style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-              img-src 'self' blob: data: https://images.unsplash.com https://placehold.co https://*.supabase.co;
-              font-src 'self' https://fonts.gstatic.com;
-              media-src 'self' blob: data:;
-              connect-src 'self' https://*.supabase.co https://api.stripe.com;
-              frame-src 'self' https://js.stripe.com https://hooks.stripe.com;
-            `.replace(/\s+/g, ' ').trim(),
-          },
-        ],
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()'
+          }
+        ]
+      },
+      {
+        source: '/api/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, s-maxage=86400, stale-while-revalidate=86400'
+          }
+        ]
+      },
+      {
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable'
+          }
+        ]
+      },
+      {
+        source: '/images/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable'
+          }
+        ]
+      }
+    ]
+  },
+
+  // Redirects for SEO
+  async redirects() {
+    return [
+      {
+        source: '/home',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/dashboard/files',
+        destination: '/dashboard/files-hub',
+        permanent: true,
+      },
+      {
+        source: '/dashboard/projects',
+        destination: '/dashboard/projects-hub',
+        permanent: true,
       },
     ]
   },
 
-  eslint: {
-    // Disable ESLint during build to allow deployment
-    ignoreDuringBuilds: true,
+  // Rewrites for clean URLs
+  async rewrites() {
+    return [
+      {
+        source: '/sitemap.xml',
+        destination: '/api/sitemap',
+      },
+      {
+        source: '/robots.txt',
+        destination: '/api/robots',
+      },
+    ]
   },
 
+  // Output configuration for static export compatibility
+  output: 'standalone',
+  
+  // Enable SWC minification for better performance
+  swcMinify: true,
+
+  // Compiler options
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+
+  // TypeScript configuration
   typescript: {
-    // Temporarily ignore TypeScript build errors for deployment
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
+  },
+
+  // ESLint configuration
+  eslint: {
+    ignoreDuringBuilds: false,
   },
 }
 

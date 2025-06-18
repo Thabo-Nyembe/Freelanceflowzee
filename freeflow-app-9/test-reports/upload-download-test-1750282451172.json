@@ -1,0 +1,15 @@
+{
+  "total": 1,
+  "passed": 0,
+  "failed": 1,
+  "scenarios": [
+    {
+      "name": "Test Suite Execution",
+      "status": "failed",
+      "timestamp": "2025-06-18T21:34:10.988Z",
+      "error": "browser.newContext: Unknown permission: downloads"
+    }
+  ],
+  "startTime": "2025-06-18T21:34:10.548Z",
+  "endTime": "2025-06-18T21:34:11.172Z"
+}
