@@ -18,17 +18,16 @@ import {
   Calendar, 
   Code, 
   Quote, 
-  Divider, 
+  Minus, 
   GripVertical, 
   Trash2, 
   Copy, 
   Move, 
   Save, 
   Share2, 
-  Template, 
   Database, 
   Filter, 
-  Sort, 
+  ArrowUpDown, 
   Search,
   Eye,
   Edit,
@@ -41,7 +40,10 @@ import {
   AlignRight,
   Bold,
   Italic,
-  Underline
+  Underline,
+  SeparatorHorizontal as Divider,
+  ArrowUpDown as Sort,
+  Layout as Template
 } from 'lucide-react'
 
 // Types for block-based editor

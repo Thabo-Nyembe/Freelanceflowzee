@@ -3,6 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import ProjectCreationForm from '@/components/projects/project-creation-form'
 
+// Force dynamic to avoid static generation issues
+export const dynamic = 'force-dynamic'
+
 export default async function CreateProjectPage() {
   // Check if we're in test mode to bypass authentication
   const testMode = await isTestMode()

@@ -12,6 +12,9 @@ interface FeedbackPageProps {
   }>
 }
 
+// Force dynamic to avoid static generation issues
+export const dynamic = 'force-dynamic'
+
 export default async function FeedbackPage({ searchParams }: FeedbackPageProps) {
   // Check if we're in test mode to bypass authentication
   const testMode = await isTestMode()
