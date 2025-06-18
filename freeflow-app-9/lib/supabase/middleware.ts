@@ -11,8 +11,20 @@ export async function updateSession(request: NextRequest) {
                            request.headers.get('user-agent')?.includes('Playwright') ||
                            request.headers.get('x-test-mode') === 'true'
 
+  // Check if we're in local development environment
+  const isDevelopmentLocal = process.env.NODE_ENV === 'development' &&
+                            (request.nextUrl.hostname === 'localhost' || 
+                             request.nextUrl.hostname === '127.0.0.1' ||
+                             request.nextUrl.hostname.startsWith('192.168.') ||
+                             request.nextUrl.hostname.endsWith('.local'))
+
   if (isTestEnvironment) {
     console.log('🧪 Test environment detected - skipping auth middleware')
+    return supabaseResponse
+  }
+
+  if (isDevelopmentLocal) {
+    console.log('🔧 Local development environment detected - bypassing authentication for testing')
     return supabaseResponse
   }
 
@@ -27,6 +39,8 @@ export async function updateSession(request: NextRequest) {
   }
 
   // FULL AUTHENTICATION ENABLED - Production Mode
+  console.log('🔐 Production environment detected - enforcing authentication')
+  
   const supabase = createServerClient(
     supabaseUrl,
     supabaseAnonKey,
@@ -58,7 +72,7 @@ export async function updateSession(request: NextRequest) {
     '/privacy', '/terms', '/blog', '/newsletter', '/demo', '/community', 
     '/features', '/how-it-works', '/docs', '/tutorials', '/api-docs', '/unified',
     '/book-appointment', '/resources', '/tools', '/pricing', '/careers', '/press',
-    '/changelog', '/status'
+    '/changelog', '/status', '/enhanced-collaboration-demo', '/media-preview-demo'
   ]
   const isPublicRoute = publicRoutes.some(route => 
     request.nextUrl.pathname === route || 

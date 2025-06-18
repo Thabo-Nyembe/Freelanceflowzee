@@ -337,7 +337,7 @@ export default function NotificationsPage() {
               )}
             </h1>
             <p className="text-gray-600 mt-1">
-              Stay updated with your projects, payments, and AI insights
+              Stay updated with your projects, payments, and AI insights with real-time updates
             </p>
           </div>
           
@@ -401,6 +401,9 @@ export default function NotificationsPage() {
 
               {selectedNotifications.length > 0 && (
                 <div className="flex gap-2">
+                  <span className="text-xs text-gray-500 mr-2 flex items-center">
+                    Bulk Actions:
+                  </span>
                   <Button
                     size="sm"
                     variant="outline"
@@ -616,7 +619,7 @@ export default function NotificationsPage() {
               AI Performance Summary
             </CardTitle>
             <CardDescription className="text-purple-100">
-              Your freelance business insights powered by AI
+              Your freelance business insights powered by AI with Smart Categorization & Priority Assessment
             </CardDescription>
           </CardHeader>
           <CardContent>

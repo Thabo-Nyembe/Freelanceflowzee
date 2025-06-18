@@ -78,13 +78,25 @@ function checkAuthRateLimit(ip: string): boolean {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   
-  // Check for test environment (Playwright testing only)
+  // Check for test environment (Playwright testing)
   const isTestEnv = 
     request.headers.get('x-test-mode') === 'true' ||
     request.headers.get('user-agent')?.includes('Playwright')
 
+  // Check for local development environment
+  const isLocalDev = process.env.NODE_ENV === 'development' &&
+                    (request.nextUrl.hostname === 'localhost' || 
+                     request.nextUrl.hostname === '127.0.0.1' ||
+                     request.nextUrl.hostname.startsWith('192.168.') ||
+                     request.nextUrl.hostname.endsWith('.local'))
+
   if (isTestEnv) {
     console.log('🧪 Test environment detected - skipping auth middleware')
+    return NextResponse.next()
+  }
+
+  if (isLocalDev) {
+    console.log(`🔧 Local development detected: ${pathname} - bypassing authentication for testing`)
     return NextResponse.next()
   }
 
@@ -119,7 +131,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Use authentication for protected routes
+  // Use authentication for protected routes (production only)
   console.log(`🔐 Protected route detected: ${pathname} - checking authentication`)
   return await updateSession(request)
 }
