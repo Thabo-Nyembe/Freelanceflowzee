@@ -234,8 +234,8 @@ export default function ProjectsHubPage() {
               className="gap-2"
               data-testid="import-project-btn"
               onClick={() => {
-                console.log('Import project clicked');
-                alert('Import project functionality');
+                // TODO: Implement import functionality
+                alert('Import project feature coming soon!');
               }}
             >
               <Filter className="h-4 w-4" />
@@ -246,8 +246,8 @@ export default function ProjectsHubPage() {
               className="gap-2"
               data-testid="quick-start-btn"
               onClick={() => {
-                console.log('Quick start clicked');
-                alert('Quick start functionality');
+                // TODO: Implement quick start functionality
+                alert('Quick start wizard coming soon!');
               }}
             >
               <Search className="h-4 w-4" />
@@ -257,8 +257,7 @@ export default function ProjectsHubPage() {
               className="bg-gradient-to-r from-purple-600 to-blue-600 text-white gap-2"
               data-testid="create-project-btn"
               onClick={() => {
-                console.log('Create project clicked');
-                alert('Create project functionality');
+                window.location.href = '/projects/new';
               }}
             >
               <Plus className="h-4 w-4" />

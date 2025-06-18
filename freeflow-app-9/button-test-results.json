@@ -1,0 +1,208 @@
+{
+  "timestamp": "2025-06-18T23:11:54.249Z",
+  "summary": {
+    "totalRoutes": 9,
+    "workingRoutes": 9,
+    "totalAPIs": 4,
+    "workingAPIs": 3,
+    "totalButtons": 0,
+    "expectedButtons": 28,
+    "foundButtons": 19
+  },
+  "routes": {
+    "/dashboard": {
+      "statusCode": 307,
+      "working": true
+    },
+    "/dashboard/projects-hub": {
+      "statusCode": 307,
+      "working": true
+    },
+    "/dashboard/files-hub": {
+      "statusCode": 307,
+      "working": true
+    },
+    "/dashboard/ai-create": {
+      "statusCode": 307,
+      "working": true
+    },
+    "/dashboard/video-studio": {
+      "statusCode": 307,
+      "working": true
+    },
+    "/dashboard/community": {
+      "statusCode": 307,
+      "working": true
+    },
+    "/dashboard/my-day": {
+      "statusCode": 307,
+      "working": true
+    },
+    "/dashboard/escrow": {
+      "statusCode": 307,
+      "working": true
+    },
+    "/dashboard/time-tracking": {
+      "statusCode": 307,
+      "working": true
+    }
+  },
+  "apis": {
+    "/api/ai/chat": {
+      "statusCode": 200,
+      "working": true
+    },
+    "/api/collaboration/upf": {
+      "statusCode": 200,
+      "working": true
+    },
+    "/api/storage/analytics": {
+      "statusCode": 500,
+      "working": false
+    },
+    "/api/upload": {
+      "statusCode": 200,
+      "working": true
+    }
+  },
+  "buttons": {
+    "Dashboard": {
+      "expected": [
+        "new-project-btn",
+        "create-project-btn",
+        "create-invoice-btn",
+        "upload-files-btn",
+        "schedule-meeting-btn"
+      ],
+      "found": [
+        "new-project-btn"
+      ],
+      "missing": [
+        "create-project-btn",
+        "create-invoice-btn",
+        "upload-files-btn",
+        "schedule-meeting-btn"
+      ],
+      "file": "app/(app)/dashboard/page.tsx"
+    },
+    "Projects Hub": {
+      "expected": [
+        "create-project-btn",
+        "new-project-btn"
+      ],
+      "found": [
+        "create-project-btn"
+      ],
+      "missing": [
+        "new-project-btn"
+      ],
+      "file": "app/(app)/dashboard/projects-hub/page.tsx"
+    },
+    "Files Hub": {
+      "expected": [
+        "upload-file-btn",
+        "create-folder-btn"
+      ],
+      "found": [
+        "upload-file-btn"
+      ],
+      "missing": [
+        "create-folder-btn"
+      ],
+      "file": "components/hubs/files-hub.tsx"
+    },
+    "AI Create": {
+      "expected": [
+        "generate-assets-btn",
+        "preview-asset-btn",
+        "download-asset-btn",
+        "upload-asset-btn",
+        "export-all-btn"
+      ],
+      "found": [
+        "generate-assets-btn",
+        "preview-asset-btn",
+        "download-asset-btn",
+        "upload-asset-btn",
+        "export-all-btn"
+      ],
+      "missing": [],
+      "file": "components/collaboration/ai-create.tsx"
+    },
+    "Video Studio": {
+      "expected": [
+        "create-video-btn",
+        "upload-media-btn",
+        "upload-btn"
+      ],
+      "found": [
+        "create-video-btn",
+        "upload-media-btn",
+        "upload-btn"
+      ],
+      "missing": [],
+      "file": "app/(app)/dashboard/video-studio/page.tsx"
+    },
+    "Community": {
+      "expected": [
+        "create-post-btn"
+      ],
+      "found": [
+        "create-post-btn"
+      ],
+      "missing": [],
+      "file": "components/community/enhanced-community-hub.tsx"
+    },
+    "My Day": {
+      "expected": [
+        "add-task-btn",
+        "start-timer-btn"
+      ],
+      "found": [
+        "add-task-btn",
+        "start-timer-btn"
+      ],
+      "missing": [],
+      "file": "app/(app)/dashboard/my-day/page.tsx"
+    },
+    "Escrow": {
+      "expected": [
+        "create-escrow-btn",
+        "create-deposit-btn",
+        "add-milestone-btn"
+      ],
+      "found": [
+        "create-escrow-btn",
+        "create-deposit-btn",
+        "add-milestone-btn"
+      ],
+      "missing": [],
+      "file": "app/(app)/dashboard/escrow/page.tsx"
+    },
+    "Time Tracking": {
+      "expected": [
+        "start-timer-btn",
+        "add-entry-btn",
+        "create-project-btn",
+        "export-timesheet-btn",
+        "generate-report-btn"
+      ],
+      "found": [
+        "start-timer-btn",
+        "export-timesheet-btn"
+      ],
+      "missing": [
+        "add-entry-btn",
+        "create-project-btn",
+        "generate-report-btn"
+      ],
+      "file": "app/(app)/dashboard/time-tracking/page.tsx"
+    }
+  },
+  "scores": {
+    "routes": 100,
+    "apis": 75,
+    "buttons": 68,
+    "overall": 81
+  }
+}

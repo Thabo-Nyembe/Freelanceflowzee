@@ -16,7 +16,7 @@ console.log('⚡ Resolving macOS Playwright browser issues with manual testing')
 
 class ManualDashboardTester {
   constructor() {
-    this.baseUrl = 'http://localhost:3003'; // Using port 3003 as shown in terminal
+    this.baseUrl = 'http://localhost:3005'; // Using port 3005 as shown in terminal
     this.results = {
       routes: {},
       components: {},

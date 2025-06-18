@@ -259,17 +259,41 @@ export default function EscrowPage() {
             Secure payment management for your freelance projects
           </p>
         </div>
-        <Button 
-          data-testid="request-deposit-btn"
-          className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
-          onClick={() => {
-            console.log('Request deposit clicked');
-            alert('Request deposit dialog opened!');
-          }}
-        >
-          <CreditCard className="mr-2 h-4 w-4" />
-          Request Deposit
-        </Button>
+        <div className="flex gap-3">
+          <Button 
+            data-testid="create-deposit-btn"
+            variant="outline"
+            onClick={() => {
+              console.log('Create deposit clicked');
+              alert('Create deposit dialog opened!');
+            }}
+          >
+            <DollarSign className="mr-2 h-4 w-4" />
+            Create Deposit
+          </Button>
+          <Button 
+            data-testid="add-milestone-btn"
+            variant="outline"
+            onClick={() => {
+              console.log('Add milestone clicked');
+              alert('Add milestone dialog opened!');
+            }}
+          >
+            <CheckCircle className="mr-2 h-4 w-4" />
+            Add Milestone
+          </Button>
+          <Button 
+            data-testid="create-escrow-btn"
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+            onClick={() => {
+              console.log('Create escrow clicked');
+              alert('Create escrow dialog opened!');
+            }}
+          >
+            <CreditCard className="mr-2 h-4 w-4" />
+            Create Escrow
+          </Button>
+        </div>
       </div>
 
       {/* Tabs */}

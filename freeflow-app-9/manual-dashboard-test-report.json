@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-06-18T18:04:44.268Z",
+  "timestamp": "2025-06-18T23:05:11.763Z",
   "overall_score": 33,
   "results": {
     "routes": {
@@ -124,8 +124,7 @@
         "code": 200
       },
       "/api/storage/analytics": {
-        "status": "passed",
-        "code": 200
+        "status": "failed"
       },
       "/api/upload": {
         "status": "passed",

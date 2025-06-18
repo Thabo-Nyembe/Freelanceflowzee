@@ -25,7 +25,7 @@ function SignUpForm() {
   const [isHydrated, setIsHydrated] = useState(false)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
-  const redirectTo = searchParams.get('redirect') || '/'
+  const redirectTo = searchParams?.get('redirect') || '/'
 
   // Handle hydration properly
   useEffect(() => {

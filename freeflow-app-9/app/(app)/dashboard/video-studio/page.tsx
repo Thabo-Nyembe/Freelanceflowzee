@@ -107,7 +107,7 @@ export default function VideoStudioPage() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card 
-          data-testid="record-btn"
+          data-testid="create-video-btn"
           className="bg-gradient-to-br from-red-50 to-pink-50 border-red-200/50 hover:shadow-lg transition-all duration-200 cursor-pointer"
           onClick={() => {
             console.log('Starting screen recording');
@@ -141,7 +141,7 @@ export default function VideoStudioPage() {
         </Card>
 
         <Card 
-          data-testid="upload-btn"
+          data-testid="upload-media-btn"
           className="bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200/50 hover:shadow-lg transition-all duration-200 cursor-pointer"
           onClick={() => {
             console.log('Opening upload dialog');
@@ -350,7 +350,7 @@ export default function VideoStudioPage() {
                     <Settings className="h-4 w-4 mr-2" />
                     Organize
                   </Button>
-                  <Button size="sm">
+                  <Button size="sm" data-testid="upload-btn">
                     <Video className="h-4 w-4 mr-2" />
                     New Recording
                   </Button>

@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { EnhancedSharingModal } from '@/components/ui/enhanced-sharing-modal'
+import { useSharingModal } from '@/hooks/use-sharing-modal'
 import { 
   Heart, MessageCircle, Share, Bookmark, MoreHorizontal, Search, Filter,
   Play, Pause, Volume2, VolumeX, Camera, Image, Mic, Video,
@@ -28,6 +30,8 @@ const EnhancedCommunityHub = () => {
     tags: []
   })
   const [audioPlaying, setAudioPlaying] = useState(null)
+  
+  const { isOpen, shareContent, closeSharingModal, sharePost } = useSharingModal()
 
   // Top 20 creators data
   const topCreators = [
@@ -547,10 +551,12 @@ const EnhancedCommunityHub = () => {
               <button 
                 data-testid="share-btn"
                 className="flex items-center gap-2 text-sm text-gray-600 hover:text-green-500 transition-colors"
-                onClick={() => {
-                  console.log(`Sharing post ${post.id}`);
-                  alert('Share options opened!');
-                }}
+                onClick={() => sharePost(
+                  `${post.author.name}'s Post`,
+                  post.content,
+                  post.id.toString(),
+                  post.mediaUrl
+                )}
               >
                 <Share className="w-5 h-5" />
                 <span>Share Post</span>
@@ -1008,6 +1014,19 @@ const EnhancedCommunityHub = () => {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Sharing Modal */}
+      {shareContent && (
+        <EnhancedSharingModal
+          isOpen={isOpen}
+          onClose={closeSharingModal}
+          title={shareContent.title}
+          description={shareContent.description}
+          url={shareContent.url}
+          imageUrl={shareContent.imageUrl}
+          type={shareContent.type}
+        />
+      )}
     </div>
   )
 }

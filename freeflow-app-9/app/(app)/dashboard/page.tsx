@@ -292,7 +292,8 @@ export default function DashboardPage() {
       icon: Plus,
       color: 'text-violet-600',
       bgColor: 'bg-violet-50',
-      action: () => console.log('Start new project')
+      action: () => window.location.href = '/dashboard/projects-hub',
+      testId: 'create-project-btn'
     },
     {
       title: 'Invoice Client',
@@ -300,7 +301,8 @@ export default function DashboardPage() {
       icon: Wallet,
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-50',
-      action: () => console.log('Create invoice')
+      action: () => window.location.href = '/dashboard/invoices',
+      testId: 'create-invoice-btn'
     },
     {
       title: 'Upload Files',
@@ -308,7 +310,8 @@ export default function DashboardPage() {
       icon: Download,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
-      action: () => console.log('Upload files')
+      action: () => window.location.href = '/dashboard/files-hub',
+      testId: 'upload-files-btn'
     },
     {
       title: 'Schedule Meeting',
@@ -316,7 +319,8 @@ export default function DashboardPage() {
       icon: Calendar,
       color: 'text-amber-600',
       bgColor: 'bg-amber-50',
-      action: () => console.log('Schedule meeting')
+      action: () => window.location.href = '/dashboard/calendar',
+      testId: 'schedule-meeting-btn'
     }
   ];
 
@@ -339,7 +343,11 @@ export default function DashboardPage() {
               day: 'numeric' 
             })}
           </div>
-          <Button className="button-touch w-full sm:w-auto">
+          <Button 
+            className="button-touch w-full sm:w-auto"
+            onClick={() => window.location.href = '/dashboard/projects-hub'}
+            data-testid="new-project-btn"
+          >
             <Plus className="w-4 h-4 mr-2" />
             New Project
           </Button>
@@ -446,6 +454,7 @@ export default function DashboardPage() {
                     variant="ghost"
                     onClick={action.action}
                     className="h-auto p-4 justify-start text-left touch-target"
+                    data-testid={action.testId}
                   >
                     <div className={`p-2 rounded-xl ${action.bgColor} mr-3`}>
                       <Icon className={`w-4 h-4 ${action.color}`} />

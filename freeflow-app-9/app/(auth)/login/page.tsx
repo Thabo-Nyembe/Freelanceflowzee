@@ -20,9 +20,9 @@ function LoginForm() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   
   // Get error from URL params (from server action redirects)
-  const urlError = searchParams.get('error')
-  const urlMessage = searchParams.get('message')
-  const redirectTo = searchParams.get('redirect') || '/'
+  const urlError = searchParams?.get('error')
+  const urlMessage = searchParams?.get('message')
+  const redirectTo = searchParams?.get('redirect') || '/'
 
   // Check if user is already authenticated
   useEffect(() => {
