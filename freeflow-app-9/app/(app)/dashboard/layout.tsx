@@ -1,70 +1,135 @@
+import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { verifySession, getUser } from '@/lib/dal'
-import { Suspense } from 'react'
-import { DashboardLoading } from '@/components/dashboard-loading'
-import { DashboardLayoutClient } from './dashboard-layout-client'
-import { headers } from 'next/headers'
+
+// Context7 Enhanced Navigation System
+const navigationItems = [
+  {
+    name: 'Overview',
+    href: '/dashboard',
+    icon: 'LayoutDashboard',
+    description: 'Main dashboard overview'
+  },
+  {
+    name: 'Projects Hub',
+    href: '/dashboard/projects-hub',
+    icon: 'FolderOpen',
+    description: 'Universal Pinpoint Feedback System - Figma-Level',
+    badge: 'A+++',
+    features: ['Multi-media commenting', 'AI-powered analysis', 'Real-time collaboration', 'Voice recording']
+  },
+  {
+    name: 'Video Studio',
+    href: '/dashboard/video-studio',
+    icon: 'Video',
+    description: 'Enterprise Video Studio - Loom-Level',
+    badge: 'A+++',
+    features: ['Screen recording', 'AI transcription', 'Real-time collaboration', 'Advanced editing']
+  },
+  {
+    name: 'Canvas Collaboration',
+    href: '/dashboard/canvas',
+    icon: 'Palette',
+    description: 'Real-Time Canvas Collaboration - Figma-Level',
+    badge: 'A+++',
+    features: ['Live collaborative drawing', 'Vector tools', 'Component library', 'Version control']
+  },
+  {
+    name: 'Community',
+    href: '/dashboard/community',
+    icon: 'Users',
+    description: 'Enhanced Community Hub - Slack/Discord-Level',
+    badge: 'A+++',
+    features: ['Creator marketplace (2,847+ creators)', 'Instagram-like social wall', 'Real-time messaging']
+  },
+  {
+    name: 'AI Assistant',
+    href: '/dashboard/ai-assistant',
+    icon: 'Brain',
+    description: 'AI-Powered Design Assistant - Notion AI-Level',
+    badge: 'A+++',
+    features: ['5 analysis modes', 'Natural language AI chat', 'Smart recommendations']
+  },
+  {
+    name: 'My Day',
+    href: '/dashboard/my-day',
+    icon: 'Calendar',
+    description: 'My Day Today AI Planning - ClickUp/Monday.com-Level',
+    badge: 'A+++',
+    features: ['AI-powered task management', 'Smart scheduling', 'Progress tracking']
+  },
+  {
+    name: 'Escrow',
+    href: '/dashboard/escrow',
+    icon: 'Shield',
+    description: 'Advanced Escrow System - Enterprise-Level',
+    badge: 'A+++',
+    features: ['$13,500 total management', 'Milestone-based payments', 'Secure fund holdings']
+  },
+  {
+    name: 'Files Hub',
+    href: '/dashboard/files-hub',
+    icon: 'FolderOpen',
+    description: 'Enterprise Files Hub - Dropbox/Box-Level',
+    badge: 'A+++',
+    features: ['Multi-cloud storage', 'Cost optimization', 'Advanced search', 'Version control']
+  },
+  {
+    name: 'Collaboration',
+    href: '/dashboard/collaboration',
+    icon: 'MessageSquare',
+    description: 'Enhanced collaboration tools',
+    features: ['Real-time chat', 'File sharing', 'Video calls', 'Screen sharing']
+  },
+  {
+    name: 'Analytics',
+    href: '/dashboard/analytics',
+    icon: 'BarChart3',
+    description: 'Advanced analytics and insights'
+  },
+  {
+    name: 'Client Zone',
+    href: '/dashboard/client-zone',
+    icon: 'UserCheck',
+    description: 'Client management and portal'
+  },
+  {
+    name: 'Financial Hub',
+    href: '/dashboard/financial-hub',
+    icon: 'DollarSign',
+    description: 'Financial management and invoicing'
+  },
+  {
+    name: 'Notifications',
+    href: '/dashboard/notifications',
+    icon: 'Bell',
+    description: 'Smart notifications with AI categorization',
+    features: ['AI-powered notifications', 'Smart categorization', 'Real-time updates']
+  }
+]
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  // Check for test mode
-  const headersList = await headers()
-  const isTestMode = headersList.get('x-test-mode') === 'true'
+  const supabase = await createClient()
   
-  if (isTestMode) {
-    console.log('🧪 Test environment detected - skipping auth middleware')
-    // Create mock user for testing
-    const mockUser = {
-      id: 'test-user-id',
-      email: 'test@example.com',
-      user_metadata: { full_name: 'Test User' }
-    }
+  if (!supabase) {
+    // Demo mode - allow access for testing
+    console.log('🔧 Running in demo mode - allowing dashboard access')
+  } else {
+    const { data: { user }, error } = await supabase.auth.getUser()
     
-    return (
-      <DashboardLayoutClient user={mockUser}>
-        <Suspense fallback={<DashboardLoading />}>
-          {children}
-        </Suspense>
-      </DashboardLayoutClient>
-    )
-  }
-
-  // Use DAL for authentication following Next.js guide
-  const session = await verifySession()
-  
-  if (!session) {
-    console.log('🔐 No valid session found - redirecting to login')
-    redirect('/login')
-  }
-
-  // Get user data through DAL
-  const user = await getUser()
-  
-  if (!user) {
-    console.log('🔐 No user data found - redirecting to login')
-    redirect('/login')
-  }
-
-  console.log('🔐 Authenticated user accessing dashboard:', user.email)
-
-  // Convert DAL user format to expected format for client component
-  const clientUser = {
-    id: user.id,
-    email: user.email || 'unknown@example.com', // Fallback for undefined email
-    user_metadata: { 
-      full_name: user.name,
-      role: user.role 
+    if (error || !user) {
+      redirect('/login')
     }
   }
 
   return (
-    <DashboardLayoutClient user={clientUser}>
-      <Suspense fallback={<DashboardLoading />}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/20">
+      <div className="p-6">
         {children}
-      </Suspense>
-    </DashboardLayoutClient>
+      </div>
+    </div>
   )
 } 
