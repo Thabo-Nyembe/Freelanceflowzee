@@ -69,8 +69,8 @@ interface ClientSession {
 
 export default function PaymentClient() {
   const searchParams = useSearchParams()
-  const projectId = searchParams.get('project')
-  const returnUrl = searchParams.get('return')
+  const projectId = searchParams?.get('project')
+  const returnUrl = searchParams?.get('return')
   
   // Client authentication state
   const [clientSession, setClientSession] = useState<ClientSession>({
@@ -348,7 +348,11 @@ export default function PaymentClient() {
               <CardTitle className="text-lg">Access This Project</CardTitle>
             </CardHeader>
             <CardContent>
-              <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
+              <Tabs value={activeTab} onValueChange={(value: string) => {
+                if (value === 'preview' || value === 'login' || value === 'payment') {
+                  setActiveTab(value)
+                }
+              }}>
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="login" disabled={clientSession.accessLevel === 'premium'}>
                     {clientSession.isAuthenticated ? 'Logged In' : 'Client Login'}
