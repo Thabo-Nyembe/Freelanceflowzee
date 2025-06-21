@@ -1,0 +1,90 @@
+{
+  "topSkills": [
+    {
+      "skill": "React Development",
+      "growth": "+45%",
+      "demand": "High"
+    },
+    {
+      "skill": "UI/UX Design",
+      "growth": "+38%",
+      "demand": "High"
+    },
+    {
+      "skill": "Digital Marketing",
+      "growth": "+32%",
+      "demand": "Medium"
+    },
+    {
+      "skill": "Video Production",
+      "growth": "+28%",
+      "demand": "Medium"
+    },
+    {
+      "skill": "Content Writing",
+      "growth": "+25%",
+      "demand": "High"
+    }
+  ],
+  "industryGrowth": [
+    {
+      "industry": "Technology",
+      "growth": "+42%",
+      "projects": 1250
+    },
+    {
+      "industry": "E-commerce",
+      "growth": "+35%",
+      "projects": 890
+    },
+    {
+      "industry": "Healthcare",
+      "growth": "+28%",
+      "projects": 650
+    },
+    {
+      "industry": "Education",
+      "growth": "+22%",
+      "projects": 480
+    },
+    {
+      "industry": "Finance",
+      "growth": "+18%",
+      "projects": 320
+    }
+  ],
+  "averageRates": {
+    "Web Development": "$65/hr",
+    "Graphic Design": "$45/hr",
+    "Content Writing": "$35/hr",
+    "Digital Marketing": "$55/hr",
+    "Video Editing": "$50/hr"
+  },
+  "projectTypes": [
+    {
+      "type": "Website Development",
+      "percentage": 35,
+      "avgBudget": "$3,500"
+    },
+    {
+      "type": "Logo Design",
+      "percentage": 20,
+      "avgBudget": "$500"
+    },
+    {
+      "type": "Mobile App",
+      "percentage": 15,
+      "avgBudget": "$8,000"
+    },
+    {
+      "type": "Marketing Campaign",
+      "percentage": 18,
+      "avgBudget": "$2,200"
+    },
+    {
+      "type": "Content Creation",
+      "percentage": 12,
+      "avgBudget": "$1,200"
+    }
+  ]
+}

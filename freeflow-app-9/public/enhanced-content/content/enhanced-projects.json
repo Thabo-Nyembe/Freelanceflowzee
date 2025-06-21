@@ -1,0 +1,5684 @@
+[
+  {
+    "id": "project_1",
+    "title": "Video Production for Fitness Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Video Production",
+    "industry": "Fitness",
+    "client": {
+      "id": "user_18",
+      "name": "Silke Hansen",
+      "avatar": "https://randomuser.me/api/portraits/women/62.jpg",
+      "email": "silke.hansen@example.com"
+    },
+    "freelancer": {
+      "id": "user_19",
+      "name": "Karan Kavser",
+      "avatar": "https://randomuser.me/api/portraits/men/97.jpg",
+      "email": "karan.kavser@example.com"
+    },
+    "budget": 3760,
+    "timeline": 4,
+    "status": "completed",
+    "progress": 46,
+    "priority": "high",
+    "tags": [
+      "development",
+      "design",
+      "ecommerce"
+    ],
+    "createdAt": "2024-06-05T03:06:06.826Z",
+    "dueDate": "2025-07-14T16:30:22.778Z",
+    "images": [
+      "https://picsum.photos/1200/600?random=199"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=199",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2025-01-08T20:04:17.659Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-08-27T11:32:30.166Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-09-08T03:41:47.905Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-09-18T18:28:10.947Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-04-23T08:58:32.543Z",
+        "likes": 6
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2023-08-29T02:21:50.262Z",
+        "likes": 8
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-02-14T02:55:09.127Z",
+        "likes": 7
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_2",
+    "title": "UI/UX Design for Automotive Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "UI/UX Design",
+    "industry": "Automotive",
+    "client": {
+      "id": "user_14",
+      "name": "Addison Clark",
+      "avatar": "https://randomuser.me/api/portraits/women/21.jpg",
+      "email": "addison.clark@example.com"
+    },
+    "freelancer": {
+      "id": "user_21",
+      "name": "Serafín Patiño",
+      "avatar": "https://randomuser.me/api/portraits/men/85.jpg",
+      "email": "serafin.patino@example.com"
+    },
+    "budget": 1486,
+    "timeline": 4,
+    "status": "in_review",
+    "progress": 2,
+    "priority": "high",
+    "tags": [
+      "development",
+      "design",
+      "mobile",
+      "business"
+    ],
+    "createdAt": "2023-12-20T17:12:24.894Z",
+    "dueDate": "2025-06-23T04:59:38.716Z",
+    "images": [
+      "https://picsum.photos/800/800?random=915"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=915",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-07-21T10:19:03.209Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-08-09T11:03:21.687Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-09-13T12:41:22.646Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-06-22T10:07:33.682Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2024-05-24T13:24:23.905Z",
+        "likes": 4
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-07-24T16:17:51.128Z",
+        "likes": 4
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-10-08T07:07:46.420Z",
+        "likes": 0
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_3",
+    "title": "Video Production for Entertainment Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Video Production",
+    "industry": "Entertainment",
+    "client": {
+      "id": "user_19",
+      "name": "Karan Kavser",
+      "avatar": "https://randomuser.me/api/portraits/men/97.jpg",
+      "email": "karan.kavser@example.com"
+    },
+    "freelancer": {
+      "id": "user_16",
+      "name": "Nanna Hansen",
+      "avatar": "https://randomuser.me/api/portraits/women/19.jpg",
+      "email": "nanna.hansen@example.com"
+    },
+    "budget": 4568,
+    "timeline": 4,
+    "status": "in_review",
+    "progress": 81,
+    "priority": "high",
+    "tags": [
+      "marketing",
+      "web"
+    ],
+    "createdAt": "2024-11-24T03:58:31.339Z",
+    "dueDate": "2025-07-24T11:19:41.767Z",
+    "images": [
+      "https://picsum.photos/1200/600?random=652"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=652",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-08-22T20:44:08.012Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-08-13T23:00:09.780Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-06-23T09:31:21.724Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-08-23T23:57:59.291Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-04-21T16:46:09.026Z",
+        "likes": 9
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2025-03-14T00:07:55.023Z",
+        "likes": 3
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2024-12-04T15:55:16.028Z",
+        "likes": 7
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_4",
+    "title": "Social Media Design for Education Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Social Media Design",
+    "industry": "Education",
+    "client": {
+      "id": "user_12",
+      "name": "Abeer Prabhakaran",
+      "avatar": "https://randomuser.me/api/portraits/men/96.jpg",
+      "email": "abeer.prabhakaran@example.com"
+    },
+    "freelancer": {
+      "id": "user_10",
+      "name": "Frank Soto",
+      "avatar": "https://randomuser.me/api/portraits/men/78.jpg",
+      "email": "frank.soto@example.com"
+    },
+    "budget": 1346,
+    "timeline": 4,
+    "status": "active",
+    "progress": 49,
+    "priority": "low",
+    "tags": [
+      "design",
+      "branding",
+      "ui-ux",
+      "ecommerce"
+    ],
+    "createdAt": "2024-11-15T03:02:10.060Z",
+    "dueDate": "2025-08-17T21:48:08.206Z",
+    "images": [
+      "https://picsum.photos/1600/600?random=28"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=28",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-11-05T20:50:01.513Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-08-08T01:38:07.263Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-08-27T06:36:23.293Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-08-03T10:54:54.452Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2024-07-21T18:37:21.182Z",
+        "likes": 1
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-11-13T05:09:23.628Z",
+        "likes": 2
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2024-04-05T15:06:44.240Z",
+        "likes": 0
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_5",
+    "title": "Website Design for Entertainment Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Website Design",
+    "industry": "Entertainment",
+    "client": {
+      "id": "user_3",
+      "name": "Surma Ovsiienko",
+      "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+      "email": "surma.ovsiienko@example.com"
+    },
+    "freelancer": {
+      "id": "user_5",
+      "name": "Emile Gautier",
+      "avatar": "https://randomuser.me/api/portraits/men/55.jpg",
+      "email": "emile.gautier@example.com"
+    },
+    "budget": 2961,
+    "timeline": 5,
+    "status": "in_review",
+    "progress": 14,
+    "priority": "medium",
+    "tags": [
+      "web",
+      "design",
+      "business"
+    ],
+    "createdAt": "2024-06-14T00:09:36.915Z",
+    "dueDate": "2025-09-18T15:24:47.233Z",
+    "images": [
+      "https://picsum.photos/1200/600?random=822"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=822",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2024-02-19T09:24:03.143Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-09-01T12:13:42.681Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-08-27T07:52:59.596Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-09-11T01:30:18.764Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-03-12T20:22:53.594Z",
+        "likes": 8
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-02-12T02:25:44.319Z",
+        "likes": 5
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-01-02T11:15:37.657Z",
+        "likes": 6
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_6",
+    "title": "UI/UX Design for Gaming Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "UI/UX Design",
+    "industry": "Gaming",
+    "client": {
+      "id": "user_9",
+      "name": "Claire Taylor",
+      "avatar": "https://randomuser.me/api/portraits/women/61.jpg",
+      "email": "claire.taylor@example.com"
+    },
+    "freelancer": {
+      "id": "user_9",
+      "name": "Claire Taylor",
+      "avatar": "https://randomuser.me/api/portraits/women/61.jpg",
+      "email": "claire.taylor@example.com"
+    },
+    "budget": 8886,
+    "timeline": 3,
+    "status": "in_review",
+    "progress": 84,
+    "priority": "low",
+    "tags": [
+      "mobile",
+      "ui-ux",
+      "design",
+      "development"
+    ],
+    "createdAt": "2025-05-31T10:40:17.947Z",
+    "dueDate": "2025-08-28T00:19:06.778Z",
+    "images": [
+      "https://picsum.photos/800/600?random=549"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=549",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2024-06-18T03:00:56.925Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-08-10T16:35:15.267Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-08-24T05:56:39.977Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-07-13T00:50:02.172Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-06-02T07:04:24.250Z",
+        "likes": 6
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-09-23T10:28:33.139Z",
+        "likes": 5
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-04-01T00:35:56.468Z",
+        "likes": 3
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_7",
+    "title": "Photography for Gaming Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Photography",
+    "industry": "Gaming",
+    "client": {
+      "id": "user_8",
+      "name": "Johanna Martin",
+      "avatar": "https://randomuser.me/api/portraits/women/29.jpg",
+      "email": "johanna.martin@example.com"
+    },
+    "freelancer": {
+      "id": "user_18",
+      "name": "Silke Hansen",
+      "avatar": "https://randomuser.me/api/portraits/women/62.jpg",
+      "email": "silke.hansen@example.com"
+    },
+    "budget": 6635,
+    "timeline": 6,
+    "status": "active",
+    "progress": 34,
+    "priority": "medium",
+    "tags": [
+      "development",
+      "ui-ux",
+      "business"
+    ],
+    "createdAt": "2024-05-27T17:38:38.207Z",
+    "dueDate": "2025-08-12T17:57:00.488Z",
+    "images": [
+      "https://picsum.photos/1600/900?random=574"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=574",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2024-02-26T15:40:22.292Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-09-08T00:58:58.972Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-06-24T19:22:52.328Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-08-07T18:54:52.020Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-01-03T10:06:42.033Z",
+        "likes": 5
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2025-02-20T18:35:28.821Z",
+        "likes": 4
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-02-15T18:13:14.570Z",
+        "likes": 3
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_8",
+    "title": "Mobile App for Fashion Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Mobile App",
+    "industry": "Fashion",
+    "client": {
+      "id": "user_8",
+      "name": "Johanna Martin",
+      "avatar": "https://randomuser.me/api/portraits/women/29.jpg",
+      "email": "johanna.martin@example.com"
+    },
+    "freelancer": {
+      "id": "user_14",
+      "name": "Addison Clark",
+      "avatar": "https://randomuser.me/api/portraits/women/21.jpg",
+      "email": "addison.clark@example.com"
+    },
+    "budget": 2486,
+    "timeline": 8,
+    "status": "active",
+    "progress": 39,
+    "priority": "medium",
+    "tags": [
+      "mobile",
+      "design",
+      "business"
+    ],
+    "createdAt": "2024-02-23T10:40:32.818Z",
+    "dueDate": "2025-09-05T16:39:47.948Z",
+    "images": [
+      "https://picsum.photos/800/600?random=90"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=90",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2024-10-07T10:47:31.397Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-08-24T11:00:16.227Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-07-29T13:19:53.857Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-06-28T01:27:29.864Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2025-03-10T23:43:02.419Z",
+        "likes": 7
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2023-08-25T21:47:24.582Z",
+        "likes": 5
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2024-02-25T22:04:39.150Z",
+        "likes": 3
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_9",
+    "title": "Website Design for Non-Profit Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Website Design",
+    "industry": "Non-Profit",
+    "client": {
+      "id": "user_12",
+      "name": "Abeer Prabhakaran",
+      "avatar": "https://randomuser.me/api/portraits/men/96.jpg",
+      "email": "abeer.prabhakaran@example.com"
+    },
+    "freelancer": {
+      "id": "user_17",
+      "name": "Ringo Campos",
+      "avatar": "https://randomuser.me/api/portraits/men/34.jpg",
+      "email": "ringo.campos@example.com"
+    },
+    "budget": 3434,
+    "timeline": 6,
+    "status": "active",
+    "progress": 61,
+    "priority": "low",
+    "tags": [
+      "design",
+      "development",
+      "ecommerce"
+    ],
+    "createdAt": "2023-02-06T15:22:01.630Z",
+    "dueDate": "2025-07-06T01:25:02.840Z",
+    "images": [
+      "https://picsum.photos/1200/800?random=31"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=31",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2024-11-14T16:43:55.449Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-07-14T00:06:45.194Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-07-02T08:03:25.992Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-08-03T17:07:40.005Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-08-08T22:24:14.923Z",
+        "likes": 6
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2023-07-08T19:40:38.156Z",
+        "likes": 9
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-08-21T12:10:12.497Z",
+        "likes": 1
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_10",
+    "title": "Photography for Fashion Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Photography",
+    "industry": "Fashion",
+    "client": {
+      "id": "user_8",
+      "name": "Johanna Martin",
+      "avatar": "https://randomuser.me/api/portraits/women/29.jpg",
+      "email": "johanna.martin@example.com"
+    },
+    "freelancer": {
+      "id": "user_25",
+      "name": "Verena Rolland",
+      "avatar": "https://randomuser.me/api/portraits/women/22.jpg",
+      "email": "verena.rolland@example.com"
+    },
+    "budget": 8021,
+    "timeline": 5,
+    "status": "draft",
+    "progress": 46,
+    "priority": "high",
+    "tags": [
+      "design",
+      "mobile"
+    ],
+    "createdAt": "2024-01-14T22:55:03.368Z",
+    "dueDate": "2025-07-25T12:03:19.748Z",
+    "images": [
+      "https://picsum.photos/800/800?random=915"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=915",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2024-04-03T15:00:44.761Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-07-30T18:01:47.755Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-06-27T18:28:03.102Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-08-16T04:25:14.868Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-06-11T13:20:06.204Z",
+        "likes": 6
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-05-19T06:54:57.392Z",
+        "likes": 3
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-06-11T09:25:48.918Z",
+        "likes": 7
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_11",
+    "title": "Web Development for Gaming Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Web Development",
+    "industry": "Gaming",
+    "client": {
+      "id": "user_23",
+      "name": "Aila Grønningsæter",
+      "avatar": "https://randomuser.me/api/portraits/women/21.jpg",
+      "email": "aila.gronningsaeter@example.com"
+    },
+    "freelancer": {
+      "id": "user_18",
+      "name": "Silke Hansen",
+      "avatar": "https://randomuser.me/api/portraits/women/62.jpg",
+      "email": "silke.hansen@example.com"
+    },
+    "budget": 6259,
+    "timeline": 5,
+    "status": "draft",
+    "progress": 20,
+    "priority": "high",
+    "tags": [
+      "ui-ux",
+      "development",
+      "mobile"
+    ],
+    "createdAt": "2025-03-19T07:19:13.807Z",
+    "dueDate": "2025-09-19T05:46:36.423Z",
+    "images": [
+      "https://picsum.photos/1200/900?random=726"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=726",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-12-02T01:36:24.612Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-08-12T11:31:37.708Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-08-16T09:56:58.013Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-07-01T08:44:47.397Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2024-06-06T02:06:43.305Z",
+        "likes": 6
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-04-18T13:42:12.046Z",
+        "likes": 2
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2025-01-16T22:27:02.432Z",
+        "likes": 1
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_12",
+    "title": "Website Design for Travel Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Website Design",
+    "industry": "Travel",
+    "client": {
+      "id": "user_11",
+      "name": "Eelis Anttila",
+      "avatar": "https://randomuser.me/api/portraits/men/7.jpg",
+      "email": "eelis.anttila@example.com"
+    },
+    "freelancer": {
+      "id": "user_24",
+      "name": "Nuria Campos",
+      "avatar": "https://randomuser.me/api/portraits/women/56.jpg",
+      "email": "nuria.campos@example.com"
+    },
+    "budget": 7981,
+    "timeline": 2,
+    "status": "completed",
+    "progress": 53,
+    "priority": "medium",
+    "tags": [
+      "ecommerce",
+      "branding",
+      "ui-ux"
+    ],
+    "createdAt": "2025-04-09T02:57:14.138Z",
+    "dueDate": "2025-08-02T23:43:44.185Z",
+    "images": [
+      "https://picsum.photos/1600/800?random=691"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=691",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-05-24T10:54:14.510Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-09-11T07:51:22.829Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-07-21T09:12:05.841Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-08-30T06:15:38.614Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2025-06-10T02:30:49.191Z",
+        "likes": 1
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-05-22T10:36:47.181Z",
+        "likes": 4
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2025-01-12T20:44:11.676Z",
+        "likes": 8
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_13",
+    "title": "Mobile App for Healthcare Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Mobile App",
+    "industry": "Healthcare",
+    "client": {
+      "id": "user_13",
+      "name": "Nicolay Nordahl",
+      "avatar": "https://randomuser.me/api/portraits/men/99.jpg",
+      "email": "nicolay.nordahl@example.com"
+    },
+    "freelancer": {
+      "id": "user_12",
+      "name": "Abeer Prabhakaran",
+      "avatar": "https://randomuser.me/api/portraits/men/96.jpg",
+      "email": "abeer.prabhakaran@example.com"
+    },
+    "budget": 8674,
+    "timeline": 3,
+    "status": "completed",
+    "progress": 68,
+    "priority": "low",
+    "tags": [
+      "design",
+      "business",
+      "development",
+      "startup"
+    ],
+    "createdAt": "2024-12-15T21:16:46.153Z",
+    "dueDate": "2025-08-15T03:48:28.534Z",
+    "images": [
+      "https://picsum.photos/1600/600?random=28"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=28",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-09-29T19:20:16.871Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-08-19T00:50:18.433Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-07-07T03:28:18.630Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-09-02T07:13:30.745Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2024-06-14T21:05:59.254Z",
+        "likes": 8
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2023-02-06T15:38:12.638Z",
+        "likes": 2
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2024-07-05T07:56:42.529Z",
+        "likes": 9
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_14",
+    "title": "Brand Identity for Finance Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Brand Identity",
+    "industry": "Finance",
+    "client": {
+      "id": "user_9",
+      "name": "Claire Taylor",
+      "avatar": "https://randomuser.me/api/portraits/women/61.jpg",
+      "email": "claire.taylor@example.com"
+    },
+    "freelancer": {
+      "id": "user_17",
+      "name": "Ringo Campos",
+      "avatar": "https://randomuser.me/api/portraits/men/34.jpg",
+      "email": "ringo.campos@example.com"
+    },
+    "budget": 8681,
+    "timeline": 9,
+    "status": "active",
+    "progress": 7,
+    "priority": "low",
+    "tags": [
+      "creative",
+      "business",
+      "ui-ux"
+    ],
+    "createdAt": "2025-06-12T03:31:05.291Z",
+    "dueDate": "2025-09-02T05:30:11.922Z",
+    "images": [
+      "https://picsum.photos/800/600?random=686"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=686",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-09-09T23:11:38.677Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-08-10T06:54:26.812Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-08-21T04:47:16.625Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-08-27T15:35:15.529Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2024-03-29T00:47:56.807Z",
+        "likes": 6
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2023-11-15T05:25:33.142Z",
+        "likes": 8
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2024-05-31T22:35:43.628Z",
+        "likes": 3
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_15",
+    "title": "UI/UX Design for Travel Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "UI/UX Design",
+    "industry": "Travel",
+    "client": {
+      "id": "user_16",
+      "name": "Nanna Hansen",
+      "avatar": "https://randomuser.me/api/portraits/women/19.jpg",
+      "email": "nanna.hansen@example.com"
+    },
+    "freelancer": {
+      "id": "user_17",
+      "name": "Ringo Campos",
+      "avatar": "https://randomuser.me/api/portraits/men/34.jpg",
+      "email": "ringo.campos@example.com"
+    },
+    "budget": 1404,
+    "timeline": 3,
+    "status": "active",
+    "progress": 10,
+    "priority": "high",
+    "tags": [
+      "branding",
+      "business",
+      "portfolio"
+    ],
+    "createdAt": "2023-09-28T17:43:22.002Z",
+    "dueDate": "2025-07-01T04:11:37.426Z",
+    "images": [
+      "https://picsum.photos/800/600?random=296"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=296",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2024-03-08T05:52:14.150Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-08-03T00:40:51.748Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-08-29T11:59:01.424Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-08-07T00:27:20.741Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2024-01-13T05:23:14.084Z",
+        "likes": 6
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2025-05-13T04:43:27.028Z",
+        "likes": 5
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2025-05-03T00:56:01.757Z",
+        "likes": 5
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_16",
+    "title": "Mobile App for Automotive Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Mobile App",
+    "industry": "Automotive",
+    "client": {
+      "id": "user_14",
+      "name": "Addison Clark",
+      "avatar": "https://randomuser.me/api/portraits/women/21.jpg",
+      "email": "addison.clark@example.com"
+    },
+    "freelancer": {
+      "id": "user_5",
+      "name": "Emile Gautier",
+      "avatar": "https://randomuser.me/api/portraits/men/55.jpg",
+      "email": "emile.gautier@example.com"
+    },
+    "budget": 2400,
+    "timeline": 7,
+    "status": "in_review",
+    "progress": 5,
+    "priority": "medium",
+    "tags": [
+      "portfolio",
+      "branding",
+      "marketing",
+      "mobile",
+      "ui-ux"
+    ],
+    "createdAt": "2025-02-25T03:36:40.992Z",
+    "dueDate": "2025-07-07T09:44:01.583Z",
+    "images": [
+      "https://picsum.photos/1200/600?random=333"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=333",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2024-02-06T20:37:23.811Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-07-26T22:02:31.215Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-08-04T08:14:49.488Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-07-22T10:18:54.243Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-07-20T20:13:25.378Z",
+        "likes": 6
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2023-10-29T14:14:30.339Z",
+        "likes": 6
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2024-12-10T03:59:41.285Z",
+        "likes": 9
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_17",
+    "title": "E-commerce Store for Non-Profit Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "E-commerce Store",
+    "industry": "Non-Profit",
+    "client": {
+      "id": "user_15",
+      "name": "Gordyata Gudzenko",
+      "avatar": "https://randomuser.me/api/portraits/men/33.jpg",
+      "email": "gordyata.gudzenko@example.com"
+    },
+    "freelancer": {
+      "id": "user_22",
+      "name": "Vlade Santrač",
+      "avatar": "https://randomuser.me/api/portraits/men/65.jpg",
+      "email": "vlade.santrac@example.com"
+    },
+    "budget": 3057,
+    "timeline": 8,
+    "status": "draft",
+    "progress": 39,
+    "priority": "medium",
+    "tags": [
+      "branding",
+      "creative",
+      "startup",
+      "portfolio",
+      "web"
+    ],
+    "createdAt": "2023-12-23T13:46:26.125Z",
+    "dueDate": "2025-09-06T19:13:04.036Z",
+    "images": [
+      "https://picsum.photos/1600/600?random=560"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=560",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2025-05-18T06:18:03.787Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-08-26T21:12:36.120Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-07-29T21:48:14.965Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-08-14T12:59:49.022Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2025-02-05T19:03:57.019Z",
+        "likes": 5
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-06-16T08:29:17.415Z",
+        "likes": 2
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2025-05-08T23:29:40.709Z",
+        "likes": 1
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_18",
+    "title": "Social Media Design for Non-Profit Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Social Media Design",
+    "industry": "Non-Profit",
+    "client": {
+      "id": "user_6",
+      "name": "Albin Roussel",
+      "avatar": "https://randomuser.me/api/portraits/men/76.jpg",
+      "email": "albin.roussel@example.com"
+    },
+    "freelancer": {
+      "id": "user_13",
+      "name": "Nicolay Nordahl",
+      "avatar": "https://randomuser.me/api/portraits/men/99.jpg",
+      "email": "nicolay.nordahl@example.com"
+    },
+    "budget": 3962,
+    "timeline": 8,
+    "status": "draft",
+    "progress": 77,
+    "priority": "high",
+    "tags": [
+      "branding",
+      "startup",
+      "marketing"
+    ],
+    "createdAt": "2023-03-28T11:45:41.826Z",
+    "dueDate": "2025-08-12T12:29:00.810Z",
+    "images": [
+      "https://picsum.photos/800/600?random=296"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=296",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2024-06-27T05:03:16.983Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-09-11T09:43:03.256Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-07-26T01:48:00.099Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-08-14T15:37:23.770Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2025-03-23T06:01:56.173Z",
+        "likes": 3
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2023-11-02T00:46:43.989Z",
+        "likes": 5
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2025-01-03T20:51:44.490Z",
+        "likes": 1
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_19",
+    "title": "Content Writing for Real Estate Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Content Writing",
+    "industry": "Real Estate",
+    "client": {
+      "id": "user_6",
+      "name": "Albin Roussel",
+      "avatar": "https://randomuser.me/api/portraits/men/76.jpg",
+      "email": "albin.roussel@example.com"
+    },
+    "freelancer": {
+      "id": "user_19",
+      "name": "Karan Kavser",
+      "avatar": "https://randomuser.me/api/portraits/men/97.jpg",
+      "email": "karan.kavser@example.com"
+    },
+    "budget": 3738,
+    "timeline": 7,
+    "status": "draft",
+    "progress": 23,
+    "priority": "high",
+    "tags": [
+      "creative",
+      "design",
+      "startup"
+    ],
+    "createdAt": "2024-04-25T23:44:48.018Z",
+    "dueDate": "2025-07-10T05:44:50.830Z",
+    "images": [
+      "https://picsum.photos/1200/800?random=738"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=738",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-11-07T14:05:14.399Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-09-19T15:43:27.279Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-09-13T07:52:01.205Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-07-29T07:39:42.276Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2025-03-29T16:41:45.221Z",
+        "likes": 8
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-12-28T23:04:02.760Z",
+        "likes": 1
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-06-02T17:52:05.986Z",
+        "likes": 9
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_20",
+    "title": "Marketing Campaign for Travel Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Marketing Campaign",
+    "industry": "Travel",
+    "client": {
+      "id": "user_15",
+      "name": "Gordyata Gudzenko",
+      "avatar": "https://randomuser.me/api/portraits/men/33.jpg",
+      "email": "gordyata.gudzenko@example.com"
+    },
+    "freelancer": {
+      "id": "user_11",
+      "name": "Eelis Anttila",
+      "avatar": "https://randomuser.me/api/portraits/men/7.jpg",
+      "email": "eelis.anttila@example.com"
+    },
+    "budget": 2381,
+    "timeline": 7,
+    "status": "draft",
+    "progress": 16,
+    "priority": "high",
+    "tags": [
+      "design",
+      "development",
+      "marketing",
+      "branding",
+      "ui-ux"
+    ],
+    "createdAt": "2024-12-29T06:03:41.878Z",
+    "dueDate": "2025-08-29T07:07:24.426Z",
+    "images": [
+      "https://picsum.photos/800/600?random=989"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=989",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-05-12T10:42:32.323Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-09-18T09:02:10.814Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-07-30T10:14:13.992Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-07-03T06:54:45.325Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2024-10-21T19:59:00.547Z",
+        "likes": 1
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-04-19T10:30:19.935Z",
+        "likes": 7
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-05-12T20:58:17.741Z",
+        "likes": 0
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_21",
+    "title": "Website Design for Fashion Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Website Design",
+    "industry": "Fashion",
+    "client": {
+      "id": "user_3",
+      "name": "Surma Ovsiienko",
+      "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+      "email": "surma.ovsiienko@example.com"
+    },
+    "freelancer": {
+      "id": "user_9",
+      "name": "Claire Taylor",
+      "avatar": "https://randomuser.me/api/portraits/women/61.jpg",
+      "email": "claire.taylor@example.com"
+    },
+    "budget": 5223,
+    "timeline": 4,
+    "status": "draft",
+    "progress": 92,
+    "priority": "medium",
+    "tags": [
+      "mobile",
+      "web",
+      "portfolio"
+    ],
+    "createdAt": "2023-05-24T13:47:28.427Z",
+    "dueDate": "2025-09-16T15:32:47.210Z",
+    "images": [
+      "https://picsum.photos/800/600?random=243"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=243",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2024-10-20T19:52:55.763Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-08-22T02:35:08.261Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-07-18T15:25:56.097Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-07-24T03:28:50.928Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-02-20T06:22:36.773Z",
+        "likes": 8
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2023-04-22T05:49:56.394Z",
+        "likes": 0
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-12-16T23:00:23.827Z",
+        "likes": 2
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_22",
+    "title": "Video Production for Healthcare Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Video Production",
+    "industry": "Healthcare",
+    "client": {
+      "id": "user_18",
+      "name": "Silke Hansen",
+      "avatar": "https://randomuser.me/api/portraits/women/62.jpg",
+      "email": "silke.hansen@example.com"
+    },
+    "freelancer": {
+      "id": "user_4",
+      "name": "Alma Barnes",
+      "avatar": "https://randomuser.me/api/portraits/women/54.jpg",
+      "email": "alma.barnes@example.com"
+    },
+    "budget": 2941,
+    "timeline": 7,
+    "status": "active",
+    "progress": 48,
+    "priority": "medium",
+    "tags": [
+      "portfolio",
+      "mobile",
+      "ui-ux",
+      "branding",
+      "startup"
+    ],
+    "createdAt": "2023-05-27T18:14:29.529Z",
+    "dueDate": "2025-06-22T02:15:38.711Z",
+    "images": [
+      "https://picsum.photos/800/600?random=161"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=161",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-09-28T18:54:48.602Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-07-15T13:56:04.673Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-07-02T02:07:59.196Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-07-18T05:46:56.007Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2024-11-25T07:23:58.943Z",
+        "likes": 4
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-08-31T08:20:07.600Z",
+        "likes": 5
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2025-05-19T04:47:53.681Z",
+        "likes": 2
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_23",
+    "title": "Logo Design for Retail Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Logo Design",
+    "industry": "Retail",
+    "client": {
+      "id": "user_7",
+      "name": "Roza Pustova",
+      "avatar": "https://randomuser.me/api/portraits/women/60.jpg",
+      "email": "roza.pustova@example.com"
+    },
+    "freelancer": {
+      "id": "user_23",
+      "name": "Aila Grønningsæter",
+      "avatar": "https://randomuser.me/api/portraits/women/21.jpg",
+      "email": "aila.gronningsaeter@example.com"
+    },
+    "budget": 8349,
+    "timeline": 6,
+    "status": "draft",
+    "progress": 62,
+    "priority": "high",
+    "tags": [
+      "creative",
+      "development"
+    ],
+    "createdAt": "2025-01-29T18:22:15.002Z",
+    "dueDate": "2025-08-30T04:52:52.997Z",
+    "images": [
+      "https://picsum.photos/1200/800?random=31"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=31",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-12-06T01:16:33.532Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-09-20T17:31:26.077Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-08-31T04:02:51.822Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-08-04T05:57:32.130Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-05-10T21:47:33.664Z",
+        "likes": 0
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-06-10T05:02:21.563Z",
+        "likes": 6
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-05-02T12:10:15.632Z",
+        "likes": 3
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_24",
+    "title": "Video Production for Retail Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Video Production",
+    "industry": "Retail",
+    "client": {
+      "id": "user_16",
+      "name": "Nanna Hansen",
+      "avatar": "https://randomuser.me/api/portraits/women/19.jpg",
+      "email": "nanna.hansen@example.com"
+    },
+    "freelancer": {
+      "id": "user_2",
+      "name": "Rolf-Peter Ruppert",
+      "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+      "email": "rolf-peter.ruppert@example.com"
+    },
+    "budget": 3595,
+    "timeline": 3,
+    "status": "draft",
+    "progress": 83,
+    "priority": "low",
+    "tags": [
+      "ui-ux",
+      "development",
+      "portfolio",
+      "branding",
+      "creative"
+    ],
+    "createdAt": "2024-09-10T02:52:17.503Z",
+    "dueDate": "2025-09-18T08:07:21.032Z",
+    "images": [
+      "https://picsum.photos/800/800?random=145"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=145",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2024-02-23T09:17:12.284Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-07-02T01:22:27.861Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-07-26T01:11:47.375Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-07-18T01:40:43.333Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-04-13T23:56:22.288Z",
+        "likes": 4
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-05-31T14:39:27.044Z",
+        "likes": 5
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2024-12-30T13:34:33.100Z",
+        "likes": 8
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_25",
+    "title": "Social Media Design for Automotive Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Social Media Design",
+    "industry": "Automotive",
+    "client": {
+      "id": "user_12",
+      "name": "Abeer Prabhakaran",
+      "avatar": "https://randomuser.me/api/portraits/men/96.jpg",
+      "email": "abeer.prabhakaran@example.com"
+    },
+    "freelancer": {
+      "id": "user_6",
+      "name": "Albin Roussel",
+      "avatar": "https://randomuser.me/api/portraits/men/76.jpg",
+      "email": "albin.roussel@example.com"
+    },
+    "budget": 5994,
+    "timeline": 5,
+    "status": "completed",
+    "progress": 95,
+    "priority": "low",
+    "tags": [
+      "mobile",
+      "creative",
+      "web"
+    ],
+    "createdAt": "2025-03-27T08:45:53.273Z",
+    "dueDate": "2025-07-03T08:06:50.900Z",
+    "images": [
+      "https://picsum.photos/1200/600?random=333"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=333",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2024-08-03T10:51:07.620Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-07-12T21:47:15.687Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-09-04T19:48:45.485Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-08-03T16:50:52.997Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-12-15T08:32:07.525Z",
+        "likes": 4
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-04-04T17:29:08.886Z",
+        "likes": 9
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2024-04-18T09:44:01.892Z",
+        "likes": 6
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_26",
+    "title": "Marketing Campaign for Fitness Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Marketing Campaign",
+    "industry": "Fitness",
+    "client": {
+      "id": "user_18",
+      "name": "Silke Hansen",
+      "avatar": "https://randomuser.me/api/portraits/women/62.jpg",
+      "email": "silke.hansen@example.com"
+    },
+    "freelancer": {
+      "id": "user_23",
+      "name": "Aila Grønningsæter",
+      "avatar": "https://randomuser.me/api/portraits/women/21.jpg",
+      "email": "aila.gronningsaeter@example.com"
+    },
+    "budget": 2174,
+    "timeline": 6,
+    "status": "in_review",
+    "progress": 59,
+    "priority": "low",
+    "tags": [
+      "ecommerce",
+      "portfolio"
+    ],
+    "createdAt": "2024-05-06T19:52:21.098Z",
+    "dueDate": "2025-08-25T04:26:31.227Z",
+    "images": [
+      "https://picsum.photos/800/600?random=549"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=549",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2025-01-07T22:36:54.792Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-07-09T09:48:28.088Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-09-07T23:48:38.473Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-08-04T04:48:11.615Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2024-10-25T13:27:02.325Z",
+        "likes": 1
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2025-01-13T18:53:01.799Z",
+        "likes": 5
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-06-08T08:30:33.873Z",
+        "likes": 8
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_27",
+    "title": "Marketing Campaign for Travel Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Marketing Campaign",
+    "industry": "Travel",
+    "client": {
+      "id": "user_16",
+      "name": "Nanna Hansen",
+      "avatar": "https://randomuser.me/api/portraits/women/19.jpg",
+      "email": "nanna.hansen@example.com"
+    },
+    "freelancer": {
+      "id": "user_16",
+      "name": "Nanna Hansen",
+      "avatar": "https://randomuser.me/api/portraits/women/19.jpg",
+      "email": "nanna.hansen@example.com"
+    },
+    "budget": 1991,
+    "timeline": 7,
+    "status": "completed",
+    "progress": 62,
+    "priority": "high",
+    "tags": [
+      "branding",
+      "design"
+    ],
+    "createdAt": "2023-04-24T18:24:22.666Z",
+    "dueDate": "2025-08-17T23:26:43.526Z",
+    "images": [
+      "https://picsum.photos/800/600?random=90"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=90",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2024-02-25T20:12:09.406Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-07-15T14:53:43.882Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-08-08T17:05:31.754Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-07-18T11:26:21.241Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2024-10-30T06:06:04.089Z",
+        "likes": 0
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2025-02-07T15:48:55.001Z",
+        "likes": 8
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2025-04-18T04:46:02.129Z",
+        "likes": 4
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_28",
+    "title": "UI/UX Design for Technology Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "UI/UX Design",
+    "industry": "Technology",
+    "client": {
+      "id": "user_6",
+      "name": "Albin Roussel",
+      "avatar": "https://randomuser.me/api/portraits/men/76.jpg",
+      "email": "albin.roussel@example.com"
+    },
+    "freelancer": {
+      "id": "user_15",
+      "name": "Gordyata Gudzenko",
+      "avatar": "https://randomuser.me/api/portraits/men/33.jpg",
+      "email": "gordyata.gudzenko@example.com"
+    },
+    "budget": 8827,
+    "timeline": 7,
+    "status": "draft",
+    "progress": 33,
+    "priority": "high",
+    "tags": [
+      "web",
+      "design",
+      "ui-ux"
+    ],
+    "createdAt": "2023-01-29T23:00:43.405Z",
+    "dueDate": "2025-08-12T17:12:55.326Z",
+    "images": [
+      "https://picsum.photos/800/800?random=460"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=460",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-08-28T05:54:32.296Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-09-20T04:14:21.989Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-07-11T11:06:14.105Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-08-10T23:27:39.776Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-08-29T09:15:59.082Z",
+        "likes": 4
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-11-04T20:32:39.454Z",
+        "likes": 5
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-11-10T17:08:40.055Z",
+        "likes": 5
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_29",
+    "title": "Video Production for Food & Beverage Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Video Production",
+    "industry": "Food & Beverage",
+    "client": {
+      "id": "user_24",
+      "name": "Nuria Campos",
+      "avatar": "https://randomuser.me/api/portraits/women/56.jpg",
+      "email": "nuria.campos@example.com"
+    },
+    "freelancer": {
+      "id": "user_22",
+      "name": "Vlade Santrač",
+      "avatar": "https://randomuser.me/api/portraits/men/65.jpg",
+      "email": "vlade.santrac@example.com"
+    },
+    "budget": 8561,
+    "timeline": 8,
+    "status": "completed",
+    "progress": 91,
+    "priority": "low",
+    "tags": [
+      "creative",
+      "design",
+      "startup",
+      "branding",
+      "development"
+    ],
+    "createdAt": "2024-06-17T21:53:51.260Z",
+    "dueDate": "2025-08-21T08:00:07.848Z",
+    "images": [
+      "https://picsum.photos/1600/600?random=407"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=407",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-04-25T04:00:42.487Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-08-20T16:13:56.342Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-09-18T05:44:36.716Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-08-31T08:31:22.621Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2025-06-03T17:53:22.436Z",
+        "likes": 5
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-02-26T22:44:30.479Z",
+        "likes": 9
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-08-14T18:08:17.663Z",
+        "likes": 7
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_30",
+    "title": "Logo Design for Healthcare Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Logo Design",
+    "industry": "Healthcare",
+    "client": {
+      "id": "user_4",
+      "name": "Alma Barnes",
+      "avatar": "https://randomuser.me/api/portraits/women/54.jpg",
+      "email": "alma.barnes@example.com"
+    },
+    "freelancer": {
+      "id": "user_6",
+      "name": "Albin Roussel",
+      "avatar": "https://randomuser.me/api/portraits/men/76.jpg",
+      "email": "albin.roussel@example.com"
+    },
+    "budget": 7546,
+    "timeline": 9,
+    "status": "in_review",
+    "progress": 13,
+    "priority": "medium",
+    "tags": [
+      "design",
+      "creative",
+      "startup",
+      "development"
+    ],
+    "createdAt": "2024-02-10T16:50:18.330Z",
+    "dueDate": "2025-08-23T12:17:11.885Z",
+    "images": [
+      "https://picsum.photos/1600/900?random=40"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=40",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2025-03-18T13:02:11.864Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-09-13T09:30:14.475Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-07-26T17:14:33.392Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-09-13T03:36:21.068Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "Judith Bravo",
+          "email": "judith.bravo@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+          "location": "General Francisco Villa, Mexico",
+          "phone": "(609) 918 4255",
+          "profession": "Brand Strategist",
+          "bio": "Judith here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.685Z",
+          "skills": [
+            "React",
+            "Adobe Photoshop",
+            "Figma",
+            "After Effects",
+            "Node.js",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 42,
+          "hourlyRate": 43,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-11-29T12:29:26.369Z",
+        "likes": 8
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Rolf-Peter Ruppert",
+          "email": "rolf-peter.ruppert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+          "location": "Hermsdorf, Germany",
+          "phone": "0679-6671632",
+          "profession": "Content Creator",
+          "bio": "Creative professional Rolf-Peter - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "React",
+            "After Effects",
+            "Canva",
+            "Vue.js",
+            "Python",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 36,
+          "hourlyRate": 98,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-03-19T07:15:30.259Z",
+        "likes": 7
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Surma Ovsiienko",
+          "email": "surma.ovsiienko@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+          "location": "Dobromil, Ukraine",
+          "phone": "(099) T72-6713",
+          "profession": "Marketing Specialist",
+          "bio": "Surma here! I specialize in creating beautiful, functional designs that drive results.",
+          "joinDate": "2025-06-21T18:14:21.686Z",
+          "skills": [
+            "Node.js",
+            "Adobe Illustrator",
+            "React"
+          ],
+          "rating": 3.1,
+          "projectsCompleted": 26,
+          "hourlyRate": 44,
+          "isVerified": false,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-10-10T21:57:38.042Z",
+        "likes": 1
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  }
+]

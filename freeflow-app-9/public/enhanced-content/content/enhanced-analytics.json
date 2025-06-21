@@ -1,0 +1,325 @@
+{
+  "overview": {
+    "totalViews": 18029,
+    "totalDownloads": 3499,
+    "totalRevenue": 36689,
+    "averageRating": 3.5,
+    "completionRate": 82.2
+  },
+  "daily": [
+    {
+      "date": "2025-05-23",
+      "views": 341,
+      "downloads": 21,
+      "uploads": 47,
+      "revenue": 474,
+      "newUsers": 3,
+      "activeProjects": 19
+    },
+    {
+      "date": "2025-05-24",
+      "views": 870,
+      "downloads": 57,
+      "uploads": 35,
+      "revenue": 2106,
+      "newUsers": 5,
+      "activeProjects": 10
+    },
+    {
+      "date": "2025-05-25",
+      "views": 758,
+      "downloads": 122,
+      "uploads": 39,
+      "revenue": 209,
+      "newUsers": 4,
+      "activeProjects": 6
+    },
+    {
+      "date": "2025-05-26",
+      "views": 191,
+      "downloads": 79,
+      "uploads": 20,
+      "revenue": 1880,
+      "newUsers": 11,
+      "activeProjects": 12
+    },
+    {
+      "date": "2025-05-27",
+      "views": 630,
+      "downloads": 140,
+      "uploads": 51,
+      "revenue": 773,
+      "newUsers": 8,
+      "activeProjects": 10
+    },
+    {
+      "date": "2025-05-28",
+      "views": 768,
+      "downloads": 104,
+      "uploads": 9,
+      "revenue": 643,
+      "newUsers": 16,
+      "activeProjects": 17
+    },
+    {
+      "date": "2025-05-29",
+      "views": 336,
+      "downloads": 142,
+      "uploads": 51,
+      "revenue": 1557,
+      "newUsers": 9,
+      "activeProjects": 16
+    },
+    {
+      "date": "2025-05-30",
+      "views": 816,
+      "downloads": 140,
+      "uploads": 34,
+      "revenue": 703,
+      "newUsers": 16,
+      "activeProjects": 13
+    },
+    {
+      "date": "2025-05-31",
+      "views": 620,
+      "downloads": 200,
+      "uploads": 6,
+      "revenue": 2195,
+      "newUsers": 16,
+      "activeProjects": 17
+    },
+    {
+      "date": "2025-06-01",
+      "views": 161,
+      "downloads": 55,
+      "uploads": 5,
+      "revenue": 957,
+      "newUsers": 3,
+      "activeProjects": 5
+    },
+    {
+      "date": "2025-06-02",
+      "views": 655,
+      "downloads": 76,
+      "uploads": 7,
+      "revenue": 1371,
+      "newUsers": 12,
+      "activeProjects": 12
+    },
+    {
+      "date": "2025-06-03",
+      "views": 487,
+      "downloads": 36,
+      "uploads": 51,
+      "revenue": 1178,
+      "newUsers": 7,
+      "activeProjects": 10
+    },
+    {
+      "date": "2025-06-04",
+      "views": 970,
+      "downloads": 189,
+      "uploads": 19,
+      "revenue": 1552,
+      "newUsers": 20,
+      "activeProjects": 16
+    },
+    {
+      "date": "2025-06-05",
+      "views": 472,
+      "downloads": 130,
+      "uploads": 48,
+      "revenue": 1647,
+      "newUsers": 5,
+      "activeProjects": 19
+    },
+    {
+      "date": "2025-06-06",
+      "views": 290,
+      "downloads": 46,
+      "uploads": 32,
+      "revenue": 1620,
+      "newUsers": 5,
+      "activeProjects": 13
+    },
+    {
+      "date": "2025-06-07",
+      "views": 366,
+      "downloads": 194,
+      "uploads": 21,
+      "revenue": 1076,
+      "newUsers": 6,
+      "activeProjects": 10
+    },
+    {
+      "date": "2025-06-08",
+      "views": 713,
+      "downloads": 205,
+      "uploads": 48,
+      "revenue": 1750,
+      "newUsers": 9,
+      "activeProjects": 14
+    },
+    {
+      "date": "2025-06-09",
+      "views": 700,
+      "downloads": 130,
+      "uploads": 36,
+      "revenue": 2008,
+      "newUsers": 18,
+      "activeProjects": 5
+    },
+    {
+      "date": "2025-06-10",
+      "views": 185,
+      "downloads": 106,
+      "uploads": 29,
+      "revenue": 1174,
+      "newUsers": 20,
+      "activeProjects": 17
+    },
+    {
+      "date": "2025-06-11",
+      "views": 749,
+      "downloads": 57,
+      "uploads": 29,
+      "revenue": 413,
+      "newUsers": 8,
+      "activeProjects": 17
+    },
+    {
+      "date": "2025-06-12",
+      "views": 538,
+      "downloads": 179,
+      "uploads": 5,
+      "revenue": 1901,
+      "newUsers": 12,
+      "activeProjects": 9
+    },
+    {
+      "date": "2025-06-13",
+      "views": 777,
+      "downloads": 121,
+      "uploads": 30,
+      "revenue": 790,
+      "newUsers": 5,
+      "activeProjects": 8
+    },
+    {
+      "date": "2025-06-14",
+      "views": 871,
+      "downloads": 97,
+      "uploads": 40,
+      "revenue": 355,
+      "newUsers": 4,
+      "activeProjects": 8
+    },
+    {
+      "date": "2025-06-15",
+      "views": 1051,
+      "downloads": 41,
+      "uploads": 40,
+      "revenue": 1010,
+      "newUsers": 16,
+      "activeProjects": 16
+    },
+    {
+      "date": "2025-06-16",
+      "views": 248,
+      "downloads": 108,
+      "uploads": 49,
+      "revenue": 1199,
+      "newUsers": 12,
+      "activeProjects": 8
+    },
+    {
+      "date": "2025-06-17",
+      "views": 456,
+      "downloads": 68,
+      "uploads": 14,
+      "revenue": 1600,
+      "newUsers": 17,
+      "activeProjects": 13
+    },
+    {
+      "date": "2025-06-18",
+      "views": 716,
+      "downloads": 188,
+      "uploads": 18,
+      "revenue": 1463,
+      "newUsers": 10,
+      "activeProjects": 15
+    },
+    {
+      "date": "2025-06-19",
+      "views": 1088,
+      "downloads": 170,
+      "uploads": 48,
+      "revenue": 1256,
+      "newUsers": 8,
+      "activeProjects": 10
+    },
+    {
+      "date": "2025-06-20",
+      "views": 696,
+      "downloads": 158,
+      "uploads": 5,
+      "revenue": 527,
+      "newUsers": 21,
+      "activeProjects": 19
+    },
+    {
+      "date": "2025-06-21",
+      "views": 510,
+      "downloads": 140,
+      "uploads": 20,
+      "revenue": 1302,
+      "newUsers": 15,
+      "activeProjects": 13
+    }
+  ],
+  "topCountries": [
+    {
+      "country": "United States",
+      "views": 15420,
+      "percentage": 32.1
+    },
+    {
+      "country": "United Kingdom",
+      "views": 8930,
+      "percentage": 18.6
+    },
+    {
+      "country": "Canada",
+      "views": 6780,
+      "percentage": 14.1
+    },
+    {
+      "country": "Australia",
+      "views": 4560,
+      "percentage": 9.5
+    },
+    {
+      "country": "Germany",
+      "views": 3890,
+      "percentage": 8.1
+    }
+  ],
+  "deviceTypes": [
+    {
+      "device": "Desktop",
+      "count": 28450,
+      "percentage": 59.3
+    },
+    {
+      "device": "Mobile",
+      "count": 15670,
+      "percentage": 32.7
+    },
+    {
+      "device": "Tablet",
+      "count": 3840,
+      "percentage": 8
+    }
+  ]
+}

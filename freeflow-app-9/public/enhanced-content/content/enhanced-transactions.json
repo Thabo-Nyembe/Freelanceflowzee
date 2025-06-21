@@ -1,0 +1,522 @@
+[
+  {
+    "id": "escrow_1",
+    "projectId": "project_28",
+    "projectTitle": "UI/UX Design for Technology Company",
+    "client": {
+      "id": "user_6",
+      "name": "Albin Roussel",
+      "avatar": "https://randomuser.me/api/portraits/men/76.jpg",
+      "email": "albin.roussel@example.com"
+    },
+    "freelancer": {
+      "id": "user_15",
+      "name": "Gordyata Gudzenko",
+      "avatar": "https://randomuser.me/api/portraits/men/33.jpg",
+      "email": "gordyata.gudzenko@example.com"
+    },
+    "amount": 990,
+    "currency": "USD",
+    "status": "released",
+    "type": "milestone",
+    "createdAt": "2024-04-07T06:38:49.134Z",
+    "releaseDate": "2025-07-11T23:34:01.027Z",
+    "description": "Payment for UI/UX Design for Technology Company - Milestone 1",
+    "milestoneNumber": 5,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_2",
+    "projectId": "project_4",
+    "projectTitle": "Social Media Design for Education Company",
+    "client": {
+      "id": "user_12",
+      "name": "Abeer Prabhakaran",
+      "avatar": "https://randomuser.me/api/portraits/men/96.jpg",
+      "email": "abeer.prabhakaran@example.com"
+    },
+    "freelancer": {
+      "id": "user_10",
+      "name": "Frank Soto",
+      "avatar": "https://randomuser.me/api/portraits/men/78.jpg",
+      "email": "frank.soto@example.com"
+    },
+    "amount": 2002,
+    "currency": "USD",
+    "status": "pending",
+    "type": "partial",
+    "createdAt": "2024-09-28T22:22:37.854Z",
+    "releaseDate": "2025-09-09T19:17:21.564Z",
+    "description": "Payment for Social Media Design for Education Company - Milestone 2",
+    "milestoneNumber": 2,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_3",
+    "projectId": "project_18",
+    "projectTitle": "Social Media Design for Non-Profit Company",
+    "client": {
+      "id": "user_6",
+      "name": "Albin Roussel",
+      "avatar": "https://randomuser.me/api/portraits/men/76.jpg",
+      "email": "albin.roussel@example.com"
+    },
+    "freelancer": {
+      "id": "user_13",
+      "name": "Nicolay Nordahl",
+      "avatar": "https://randomuser.me/api/portraits/men/99.jpg",
+      "email": "nicolay.nordahl@example.com"
+    },
+    "amount": 1238,
+    "currency": "USD",
+    "status": "disputed",
+    "type": "milestone",
+    "createdAt": "2024-08-13T17:44:24.311Z",
+    "releaseDate": "2025-07-10T17:08:25.531Z",
+    "description": "Payment for Social Media Design for Non-Profit Company - Milestone 3",
+    "milestoneNumber": 1,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_4",
+    "projectId": "project_21",
+    "projectTitle": "Website Design for Fashion Company",
+    "client": {
+      "id": "user_3",
+      "name": "Surma Ovsiienko",
+      "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+      "email": "surma.ovsiienko@example.com"
+    },
+    "freelancer": {
+      "id": "user_9",
+      "name": "Claire Taylor",
+      "avatar": "https://randomuser.me/api/portraits/women/61.jpg",
+      "email": "claire.taylor@example.com"
+    },
+    "amount": 4544,
+    "currency": "USD",
+    "status": "pending",
+    "type": "full_payment",
+    "createdAt": "2024-04-25T06:34:18.703Z",
+    "releaseDate": "2025-08-17T19:38:21.602Z",
+    "description": "Payment for Website Design for Fashion Company - Milestone 4",
+    "milestoneNumber": 3,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_5",
+    "projectId": "project_7",
+    "projectTitle": "Photography for Gaming Company",
+    "client": {
+      "id": "user_8",
+      "name": "Johanna Martin",
+      "avatar": "https://randomuser.me/api/portraits/women/29.jpg",
+      "email": "johanna.martin@example.com"
+    },
+    "freelancer": {
+      "id": "user_18",
+      "name": "Silke Hansen",
+      "avatar": "https://randomuser.me/api/portraits/women/62.jpg",
+      "email": "silke.hansen@example.com"
+    },
+    "amount": 4841,
+    "currency": "USD",
+    "status": "disputed",
+    "type": "milestone",
+    "createdAt": "2024-07-14T06:29:44.438Z",
+    "releaseDate": "2025-08-09T08:37:31.229Z",
+    "description": "Payment for Photography for Gaming Company - Milestone 5",
+    "milestoneNumber": 5,
+    "disputeReason": "Quality concerns"
+  },
+  {
+    "id": "escrow_6",
+    "projectId": "project_20",
+    "projectTitle": "Marketing Campaign for Travel Company",
+    "client": {
+      "id": "user_15",
+      "name": "Gordyata Gudzenko",
+      "avatar": "https://randomuser.me/api/portraits/men/33.jpg",
+      "email": "gordyata.gudzenko@example.com"
+    },
+    "freelancer": {
+      "id": "user_11",
+      "name": "Eelis Anttila",
+      "avatar": "https://randomuser.me/api/portraits/men/7.jpg",
+      "email": "eelis.anttila@example.com"
+    },
+    "amount": 5248,
+    "currency": "USD",
+    "status": "pending",
+    "type": "milestone",
+    "createdAt": "2024-12-18T18:09:56.172Z",
+    "releaseDate": "2025-08-30T05:38:20.174Z",
+    "description": "Payment for Marketing Campaign for Travel Company - Milestone 6",
+    "milestoneNumber": 3,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_7",
+    "projectId": "project_13",
+    "projectTitle": "Mobile App for Healthcare Company",
+    "client": {
+      "id": "user_13",
+      "name": "Nicolay Nordahl",
+      "avatar": "https://randomuser.me/api/portraits/men/99.jpg",
+      "email": "nicolay.nordahl@example.com"
+    },
+    "freelancer": {
+      "id": "user_12",
+      "name": "Abeer Prabhakaran",
+      "avatar": "https://randomuser.me/api/portraits/men/96.jpg",
+      "email": "abeer.prabhakaran@example.com"
+    },
+    "amount": 2503,
+    "currency": "USD",
+    "status": "active",
+    "type": "full_payment",
+    "createdAt": "2024-07-12T12:43:32.358Z",
+    "releaseDate": "2025-08-14T23:53:38.609Z",
+    "description": "Payment for Mobile App for Healthcare Company - Milestone 7",
+    "milestoneNumber": 2,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_8",
+    "projectId": "project_17",
+    "projectTitle": "E-commerce Store for Non-Profit Company",
+    "client": {
+      "id": "user_15",
+      "name": "Gordyata Gudzenko",
+      "avatar": "https://randomuser.me/api/portraits/men/33.jpg",
+      "email": "gordyata.gudzenko@example.com"
+    },
+    "freelancer": {
+      "id": "user_22",
+      "name": "Vlade Santrač",
+      "avatar": "https://randomuser.me/api/portraits/men/65.jpg",
+      "email": "vlade.santrac@example.com"
+    },
+    "amount": 4069,
+    "currency": "USD",
+    "status": "active",
+    "type": "full_payment",
+    "createdAt": "2024-02-21T00:04:51.334Z",
+    "releaseDate": "2025-08-26T00:14:54.139Z",
+    "description": "Payment for E-commerce Store for Non-Profit Company - Milestone 8",
+    "milestoneNumber": 3,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_9",
+    "projectId": "project_5",
+    "projectTitle": "Website Design for Entertainment Company",
+    "client": {
+      "id": "user_3",
+      "name": "Surma Ovsiienko",
+      "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+      "email": "surma.ovsiienko@example.com"
+    },
+    "freelancer": {
+      "id": "user_5",
+      "name": "Emile Gautier",
+      "avatar": "https://randomuser.me/api/portraits/men/55.jpg",
+      "email": "emile.gautier@example.com"
+    },
+    "amount": 1354,
+    "currency": "USD",
+    "status": "released",
+    "type": "milestone",
+    "createdAt": "2024-12-02T00:58:28.786Z",
+    "releaseDate": "2025-07-25T11:13:20.383Z",
+    "description": "Payment for Website Design for Entertainment Company - Milestone 9",
+    "milestoneNumber": 2,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_10",
+    "projectId": "project_7",
+    "projectTitle": "Photography for Gaming Company",
+    "client": {
+      "id": "user_8",
+      "name": "Johanna Martin",
+      "avatar": "https://randomuser.me/api/portraits/women/29.jpg",
+      "email": "johanna.martin@example.com"
+    },
+    "freelancer": {
+      "id": "user_18",
+      "name": "Silke Hansen",
+      "avatar": "https://randomuser.me/api/portraits/women/62.jpg",
+      "email": "silke.hansen@example.com"
+    },
+    "amount": 2556,
+    "currency": "USD",
+    "status": "released",
+    "type": "partial",
+    "createdAt": "2023-02-08T20:43:03.280Z",
+    "releaseDate": "2025-07-15T03:51:15.477Z",
+    "description": "Payment for Photography for Gaming Company - Milestone 10",
+    "milestoneNumber": 4,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_11",
+    "projectId": "project_6",
+    "projectTitle": "UI/UX Design for Gaming Company",
+    "client": {
+      "id": "user_9",
+      "name": "Claire Taylor",
+      "avatar": "https://randomuser.me/api/portraits/women/61.jpg",
+      "email": "claire.taylor@example.com"
+    },
+    "freelancer": {
+      "id": "user_9",
+      "name": "Claire Taylor",
+      "avatar": "https://randomuser.me/api/portraits/women/61.jpg",
+      "email": "claire.taylor@example.com"
+    },
+    "amount": 704,
+    "currency": "USD",
+    "status": "disputed",
+    "type": "partial",
+    "createdAt": "2023-04-12T19:49:14.176Z",
+    "releaseDate": "2025-07-31T02:38:37.969Z",
+    "description": "Payment for UI/UX Design for Gaming Company - Milestone 11",
+    "milestoneNumber": 1,
+    "disputeReason": "Quality concerns"
+  },
+  {
+    "id": "escrow_12",
+    "projectId": "project_6",
+    "projectTitle": "UI/UX Design for Gaming Company",
+    "client": {
+      "id": "user_9",
+      "name": "Claire Taylor",
+      "avatar": "https://randomuser.me/api/portraits/women/61.jpg",
+      "email": "claire.taylor@example.com"
+    },
+    "freelancer": {
+      "id": "user_9",
+      "name": "Claire Taylor",
+      "avatar": "https://randomuser.me/api/portraits/women/61.jpg",
+      "email": "claire.taylor@example.com"
+    },
+    "amount": 2596,
+    "currency": "USD",
+    "status": "active",
+    "type": "partial",
+    "createdAt": "2024-12-15T03:10:57.524Z",
+    "releaseDate": "2025-08-07T16:41:58.450Z",
+    "description": "Payment for UI/UX Design for Gaming Company - Milestone 12",
+    "milestoneNumber": 5,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_13",
+    "projectId": "project_21",
+    "projectTitle": "Website Design for Fashion Company",
+    "client": {
+      "id": "user_3",
+      "name": "Surma Ovsiienko",
+      "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+      "email": "surma.ovsiienko@example.com"
+    },
+    "freelancer": {
+      "id": "user_9",
+      "name": "Claire Taylor",
+      "avatar": "https://randomuser.me/api/portraits/women/61.jpg",
+      "email": "claire.taylor@example.com"
+    },
+    "amount": 4684,
+    "currency": "USD",
+    "status": "active",
+    "type": "milestone",
+    "createdAt": "2024-06-15T12:18:53.919Z",
+    "releaseDate": "2025-08-20T14:12:24.701Z",
+    "description": "Payment for Website Design for Fashion Company - Milestone 13",
+    "milestoneNumber": 2,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_14",
+    "projectId": "project_19",
+    "projectTitle": "Content Writing for Real Estate Company",
+    "client": {
+      "id": "user_6",
+      "name": "Albin Roussel",
+      "avatar": "https://randomuser.me/api/portraits/men/76.jpg",
+      "email": "albin.roussel@example.com"
+    },
+    "freelancer": {
+      "id": "user_19",
+      "name": "Karan Kavser",
+      "avatar": "https://randomuser.me/api/portraits/men/97.jpg",
+      "email": "karan.kavser@example.com"
+    },
+    "amount": 3902,
+    "currency": "USD",
+    "status": "released",
+    "type": "partial",
+    "createdAt": "2024-04-14T05:17:29.957Z",
+    "releaseDate": "2025-08-07T03:51:29.481Z",
+    "description": "Payment for Content Writing for Real Estate Company - Milestone 14",
+    "milestoneNumber": 3,
+    "disputeReason": "Quality concerns"
+  },
+  {
+    "id": "escrow_15",
+    "projectId": "project_24",
+    "projectTitle": "Video Production for Retail Company",
+    "client": {
+      "id": "user_16",
+      "name": "Nanna Hansen",
+      "avatar": "https://randomuser.me/api/portraits/women/19.jpg",
+      "email": "nanna.hansen@example.com"
+    },
+    "freelancer": {
+      "id": "user_2",
+      "name": "Rolf-Peter Ruppert",
+      "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+      "email": "rolf-peter.ruppert@example.com"
+    },
+    "amount": 4687,
+    "currency": "USD",
+    "status": "pending",
+    "type": "milestone",
+    "createdAt": "2023-03-14T16:05:20.628Z",
+    "releaseDate": "2025-06-24T22:03:25.758Z",
+    "description": "Payment for Video Production for Retail Company - Milestone 15",
+    "milestoneNumber": 1,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_16",
+    "projectId": "project_4",
+    "projectTitle": "Social Media Design for Education Company",
+    "client": {
+      "id": "user_12",
+      "name": "Abeer Prabhakaran",
+      "avatar": "https://randomuser.me/api/portraits/men/96.jpg",
+      "email": "abeer.prabhakaran@example.com"
+    },
+    "freelancer": {
+      "id": "user_10",
+      "name": "Frank Soto",
+      "avatar": "https://randomuser.me/api/portraits/men/78.jpg",
+      "email": "frank.soto@example.com"
+    },
+    "amount": 4459,
+    "currency": "USD",
+    "status": "released",
+    "type": "full_payment",
+    "createdAt": "2024-10-30T05:00:04.955Z",
+    "releaseDate": "2025-08-29T05:23:33.162Z",
+    "description": "Payment for Social Media Design for Education Company - Milestone 16",
+    "milestoneNumber": 5,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_17",
+    "projectId": "project_29",
+    "projectTitle": "Video Production for Food & Beverage Company",
+    "client": {
+      "id": "user_24",
+      "name": "Nuria Campos",
+      "avatar": "https://randomuser.me/api/portraits/women/56.jpg",
+      "email": "nuria.campos@example.com"
+    },
+    "freelancer": {
+      "id": "user_22",
+      "name": "Vlade Santrač",
+      "avatar": "https://randomuser.me/api/portraits/men/65.jpg",
+      "email": "vlade.santrac@example.com"
+    },
+    "amount": 1735,
+    "currency": "USD",
+    "status": "disputed",
+    "type": "partial",
+    "createdAt": "2024-11-12T08:26:50.022Z",
+    "releaseDate": "2025-09-20T03:26:23.902Z",
+    "description": "Payment for Video Production for Food & Beverage Company - Milestone 17",
+    "milestoneNumber": 4,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_18",
+    "projectId": "project_9",
+    "projectTitle": "Website Design for Non-Profit Company",
+    "client": {
+      "id": "user_12",
+      "name": "Abeer Prabhakaran",
+      "avatar": "https://randomuser.me/api/portraits/men/96.jpg",
+      "email": "abeer.prabhakaran@example.com"
+    },
+    "freelancer": {
+      "id": "user_17",
+      "name": "Ringo Campos",
+      "avatar": "https://randomuser.me/api/portraits/men/34.jpg",
+      "email": "ringo.campos@example.com"
+    },
+    "amount": 4797,
+    "currency": "USD",
+    "status": "pending",
+    "type": "partial",
+    "createdAt": "2023-06-01T02:42:44.625Z",
+    "releaseDate": "2025-08-02T23:09:31.579Z",
+    "description": "Payment for Website Design for Non-Profit Company - Milestone 18",
+    "milestoneNumber": 4,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_19",
+    "projectId": "project_28",
+    "projectTitle": "UI/UX Design for Technology Company",
+    "client": {
+      "id": "user_6",
+      "name": "Albin Roussel",
+      "avatar": "https://randomuser.me/api/portraits/men/76.jpg",
+      "email": "albin.roussel@example.com"
+    },
+    "freelancer": {
+      "id": "user_15",
+      "name": "Gordyata Gudzenko",
+      "avatar": "https://randomuser.me/api/portraits/men/33.jpg",
+      "email": "gordyata.gudzenko@example.com"
+    },
+    "amount": 738,
+    "currency": "USD",
+    "status": "pending",
+    "type": "full_payment",
+    "createdAt": "2024-08-11T03:09:45.743Z",
+    "releaseDate": "2025-08-15T13:48:24.513Z",
+    "description": "Payment for UI/UX Design for Technology Company - Milestone 19",
+    "milestoneNumber": 5,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_20",
+    "projectId": "project_9",
+    "projectTitle": "Website Design for Non-Profit Company",
+    "client": {
+      "id": "user_12",
+      "name": "Abeer Prabhakaran",
+      "avatar": "https://randomuser.me/api/portraits/men/96.jpg",
+      "email": "abeer.prabhakaran@example.com"
+    },
+    "freelancer": {
+      "id": "user_17",
+      "name": "Ringo Campos",
+      "avatar": "https://randomuser.me/api/portraits/men/34.jpg",
+      "email": "ringo.campos@example.com"
+    },
+    "amount": 1937,
+    "currency": "USD",
+    "status": "disputed",
+    "type": "milestone",
+    "createdAt": "2024-04-24T19:18:45.565Z",
+    "releaseDate": "2025-08-11T15:01:43.776Z",
+    "description": "Payment for Website Design for Non-Profit Company - Milestone 20",
+    "milestoneNumber": 3,
+    "disputeReason": "Quality concerns"
+  }
+]

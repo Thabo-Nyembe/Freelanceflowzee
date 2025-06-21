@@ -1,0 +1,200 @@
+[
+  {
+    "id": "skill_1",
+    "name": "Photoshop",
+    "category": "Design",
+    "demand": 36,
+    "averageRate": 53,
+    "projects": 67,
+    "description": "Professional Photoshop services for modern businesses"
+  },
+  {
+    "id": "skill_2",
+    "name": "Illustrator",
+    "category": "Design",
+    "demand": 86,
+    "averageRate": 44,
+    "projects": 129,
+    "description": "Professional Illustrator services for modern businesses"
+  },
+  {
+    "id": "skill_3",
+    "name": "Figma",
+    "category": "Design",
+    "demand": 87,
+    "averageRate": 73,
+    "projects": 315,
+    "description": "Professional Figma services for modern businesses"
+  },
+  {
+    "id": "skill_4",
+    "name": "Sketch",
+    "category": "Design",
+    "demand": 12,
+    "averageRate": 20,
+    "projects": 602,
+    "description": "Professional Sketch services for modern businesses"
+  },
+  {
+    "id": "skill_5",
+    "name": "InDesign",
+    "category": "Design",
+    "demand": 58,
+    "averageRate": 78,
+    "projects": 311,
+    "description": "Professional InDesign services for modern businesses"
+  },
+  {
+    "id": "skill_6",
+    "name": "After Effects",
+    "category": "Design",
+    "demand": 7,
+    "averageRate": 41,
+    "projects": 593,
+    "description": "Professional After Effects services for modern businesses"
+  },
+  {
+    "id": "skill_7",
+    "name": "JavaScript",
+    "category": "Development",
+    "demand": 22,
+    "averageRate": 22,
+    "projects": 871,
+    "description": "Professional JavaScript services for modern businesses"
+  },
+  {
+    "id": "skill_8",
+    "name": "React",
+    "category": "Development",
+    "demand": 16,
+    "averageRate": 30,
+    "projects": 776,
+    "description": "Professional React services for modern businesses"
+  },
+  {
+    "id": "skill_9",
+    "name": "Node.js",
+    "category": "Development",
+    "demand": 44,
+    "averageRate": 64,
+    "projects": 1038,
+    "description": "Professional Node.js services for modern businesses"
+  },
+  {
+    "id": "skill_10",
+    "name": "Python",
+    "category": "Development",
+    "demand": 46,
+    "averageRate": 83,
+    "projects": 518,
+    "description": "Professional Python services for modern businesses"
+  },
+  {
+    "id": "skill_11",
+    "name": "PHP",
+    "category": "Development",
+    "demand": 21,
+    "averageRate": 94,
+    "projects": 986,
+    "description": "Professional PHP services for modern businesses"
+  },
+  {
+    "id": "skill_12",
+    "name": "Vue.js",
+    "category": "Development",
+    "demand": 43,
+    "averageRate": 94,
+    "projects": 679,
+    "description": "Professional Vue.js services for modern businesses"
+  },
+  {
+    "id": "skill_13",
+    "name": "SEO",
+    "category": "Marketing",
+    "demand": 96,
+    "averageRate": 80,
+    "projects": 345,
+    "description": "Professional SEO services for modern businesses"
+  },
+  {
+    "id": "skill_14",
+    "name": "Google Ads",
+    "category": "Marketing",
+    "demand": 86,
+    "averageRate": 41,
+    "projects": 446,
+    "description": "Professional Google Ads services for modern businesses"
+  },
+  {
+    "id": "skill_15",
+    "name": "Social Media",
+    "category": "Marketing",
+    "demand": 12,
+    "averageRate": 99,
+    "projects": 200,
+    "description": "Professional Social Media services for modern businesses"
+  },
+  {
+    "id": "skill_16",
+    "name": "Content Marketing",
+    "category": "Marketing",
+    "demand": 54,
+    "averageRate": 38,
+    "projects": 427,
+    "description": "Professional Content Marketing services for modern businesses"
+  },
+  {
+    "id": "skill_17",
+    "name": "Email Marketing",
+    "category": "Marketing",
+    "demand": 35,
+    "averageRate": 20,
+    "projects": 655,
+    "description": "Professional Email Marketing services for modern businesses"
+  },
+  {
+    "id": "skill_18",
+    "name": "Project Management",
+    "category": "Business",
+    "demand": 95,
+    "averageRate": 78,
+    "projects": 67,
+    "description": "Professional Project Management services for modern businesses"
+  },
+  {
+    "id": "skill_19",
+    "name": "Strategy",
+    "category": "Business",
+    "demand": 11,
+    "averageRate": 67,
+    "projects": 433,
+    "description": "Professional Strategy services for modern businesses"
+  },
+  {
+    "id": "skill_20",
+    "name": "Analytics",
+    "category": "Business",
+    "demand": 3,
+    "averageRate": 99,
+    "projects": 954,
+    "description": "Professional Analytics services for modern businesses"
+  },
+  {
+    "id": "skill_21",
+    "name": "Consulting",
+    "category": "Business",
+    "demand": 37,
+    "averageRate": 20,
+    "projects": 906,
+    "description": "Professional Consulting services for modern businesses"
+  },
+  {
+    "id": "skill_22",
+    "name": "Sales",
+    "category": "Business",
+    "demand": 69,
+    "averageRate": 97,
+    "projects": 274,
+    "description": "Professional Sales services for modern businesses"
+  }
+]

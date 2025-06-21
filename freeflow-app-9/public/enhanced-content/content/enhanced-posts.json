@@ -1,0 +1,1432 @@
+[
+  {
+    "id": "post_1",
+    "type": "collaboration",
+    "author": {
+      "id": "user_13",
+      "name": "Nicolay Nordahl",
+      "avatar": "https://randomuser.me/api/portraits/men/99.jpg",
+      "profession": "Content Creator"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1600/600?random=410",
+    "likes": 86,
+    "comments": 9,
+    "shares": 13,
+    "views": 1028,
+    "tags": [
+      "ecommerce",
+      "creative",
+      "design"
+    ],
+    "createdAt": "2025-01-13T01:15:07.305Z",
+    "isLiked": false,
+    "isBookmarked": true
+  },
+  {
+    "id": "post_2",
+    "type": "collaboration",
+    "author": {
+      "id": "user_10",
+      "name": "Frank Soto",
+      "avatar": "https://randomuser.me/api/portraits/men/78.jpg",
+      "profession": "Developer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/800/600?random=296",
+    "likes": 44,
+    "comments": 13,
+    "shares": 29,
+    "views": 213,
+    "tags": [
+      "web",
+      "marketing",
+      "portfolio"
+    ],
+    "createdAt": "2024-05-02T12:33:34.805Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_3",
+    "type": "question",
+    "author": {
+      "id": "user_24",
+      "name": "Nuria Campos",
+      "avatar": "https://randomuser.me/api/portraits/women/56.jpg",
+      "profession": "Developer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": null,
+    "likes": 144,
+    "comments": 23,
+    "shares": 25,
+    "views": 165,
+    "tags": [
+      "startup",
+      "web"
+    ],
+    "createdAt": "2025-04-01T23:11:37.350Z",
+    "isLiked": true,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_4",
+    "type": "showcase",
+    "author": {
+      "id": "user_20",
+      "name": "Amna Van der Rijt",
+      "avatar": "https://randomuser.me/api/portraits/women/21.jpg",
+      "profession": "Brand Strategist"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse.",
+    "image": "https://picsum.photos/1200/600?random=550",
+    "likes": 49,
+    "comments": 2,
+    "shares": 19,
+    "views": 725,
+    "tags": [
+      "branding",
+      "mobile",
+      "development"
+    ],
+    "createdAt": "2024-03-21T22:24:14.049Z",
+    "isLiked": true,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_5",
+    "type": "announcement",
+    "author": {
+      "id": "user_25",
+      "name": "Verena Rolland",
+      "avatar": "https://randomuser.me/api/portraits/women/22.jpg",
+      "profession": "Video Editor"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/800/600?random=296",
+    "likes": 152,
+    "comments": 22,
+    "shares": 1,
+    "views": 714,
+    "tags": [
+      "creative",
+      "business",
+      "design"
+    ],
+    "createdAt": "2024-05-12T07:47:39.734Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_6",
+    "type": "showcase",
+    "author": {
+      "id": "user_4",
+      "name": "Alma Barnes",
+      "avatar": "https://randomuser.me/api/portraits/women/54.jpg",
+      "profession": "Developer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse.",
+    "image": null,
+    "likes": 185,
+    "comments": 1,
+    "shares": 29,
+    "views": 723,
+    "tags": [
+      "portfolio",
+      "web",
+      "mobile"
+    ],
+    "createdAt": "2023-09-24T02:07:12.131Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_7",
+    "type": "tip",
+    "author": {
+      "id": "user_10",
+      "name": "Frank Soto",
+      "avatar": "https://randomuser.me/api/portraits/men/78.jpg",
+      "profession": "Developer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1200/600?random=652",
+    "likes": 97,
+    "comments": 43,
+    "shares": 25,
+    "views": 473,
+    "tags": [
+      "development",
+      "startup",
+      "ecommerce"
+    ],
+    "createdAt": "2025-01-15T12:41:42.265Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_8",
+    "type": "question",
+    "author": {
+      "id": "user_11",
+      "name": "Eelis Anttila",
+      "avatar": "https://randomuser.me/api/portraits/men/7.jpg",
+      "profession": "Social Media Manager"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1600/600?random=28",
+    "likes": 24,
+    "comments": 15,
+    "shares": 29,
+    "views": 388,
+    "tags": [
+      "design",
+      "web",
+      "branding"
+    ],
+    "createdAt": "2023-06-04T15:44:27.395Z",
+    "isLiked": true,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_9",
+    "type": "tip",
+    "author": {
+      "id": "user_13",
+      "name": "Nicolay Nordahl",
+      "avatar": "https://randomuser.me/api/portraits/men/99.jpg",
+      "profession": "Content Creator"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1200/900?random=726",
+    "likes": 43,
+    "comments": 36,
+    "shares": 22,
+    "views": 486,
+    "tags": [
+      "development",
+      "mobile"
+    ],
+    "createdAt": "2023-10-06T15:52:56.127Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_10",
+    "type": "showcase",
+    "author": {
+      "id": "user_7",
+      "name": "Roza Pustova",
+      "avatar": "https://randomuser.me/api/portraits/women/60.jpg",
+      "profession": "Web Designer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse.",
+    "image": "https://picsum.photos/800/600?random=161",
+    "likes": 190,
+    "comments": 6,
+    "shares": 0,
+    "views": 653,
+    "tags": [
+      "web",
+      "creative",
+      "design"
+    ],
+    "createdAt": "2024-02-20T21:29:36.129Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_11",
+    "type": "collaboration",
+    "author": {
+      "id": "user_15",
+      "name": "Gordyata Gudzenko",
+      "avatar": "https://randomuser.me/api/portraits/men/33.jpg",
+      "profession": "Social Media Manager"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": null,
+    "likes": 152,
+    "comments": 41,
+    "shares": 11,
+    "views": 850,
+    "tags": [
+      "startup",
+      "creative",
+      "mobile"
+    ],
+    "createdAt": "2025-01-06T06:30:23.283Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_12",
+    "type": "showcase",
+    "author": {
+      "id": "user_14",
+      "name": "Addison Clark",
+      "avatar": "https://randomuser.me/api/portraits/women/21.jpg",
+      "profession": "Brand Strategist"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse.",
+    "image": "https://picsum.photos/800/600?random=230",
+    "likes": 64,
+    "comments": 16,
+    "shares": 18,
+    "views": 574,
+    "tags": [
+      "web",
+      "branding"
+    ],
+    "createdAt": "2024-05-06T04:40:40.241Z",
+    "isLiked": true,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_13",
+    "type": "collaboration",
+    "author": {
+      "id": "user_13",
+      "name": "Nicolay Nordahl",
+      "avatar": "https://randomuser.me/api/portraits/men/99.jpg",
+      "profession": "Content Creator"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/800/600?random=549",
+    "likes": 51,
+    "comments": 20,
+    "shares": 10,
+    "views": 504,
+    "tags": [
+      "portfolio",
+      "design",
+      "web"
+    ],
+    "createdAt": "2024-01-22T02:41:13.010Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_14",
+    "type": "announcement",
+    "author": {
+      "id": "user_2",
+      "name": "Rolf-Peter Ruppert",
+      "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+      "profession": "Content Creator"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": null,
+    "likes": 134,
+    "comments": 1,
+    "shares": 2,
+    "views": 467,
+    "tags": [
+      "creative",
+      "portfolio",
+      "development"
+    ],
+    "createdAt": "2023-04-01T17:18:45.974Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_15",
+    "type": "tip",
+    "author": {
+      "id": "user_24",
+      "name": "Nuria Campos",
+      "avatar": "https://randomuser.me/api/portraits/women/56.jpg",
+      "profession": "Developer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1600/600?random=682",
+    "likes": 101,
+    "comments": 23,
+    "shares": 24,
+    "views": 997,
+    "tags": [
+      "design",
+      "development",
+      "business"
+    ],
+    "createdAt": "2024-08-06T15:19:52.789Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_16",
+    "type": "showcase",
+    "author": {
+      "id": "user_4",
+      "name": "Alma Barnes",
+      "avatar": "https://randomuser.me/api/portraits/women/54.jpg",
+      "profession": "Developer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse.",
+    "image": null,
+    "likes": 123,
+    "comments": 18,
+    "shares": 11,
+    "views": 739,
+    "tags": [
+      "branding",
+      "mobile",
+      "web"
+    ],
+    "createdAt": "2024-10-10T00:56:23.854Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_17",
+    "type": "question",
+    "author": {
+      "id": "user_10",
+      "name": "Frank Soto",
+      "avatar": "https://randomuser.me/api/portraits/men/78.jpg",
+      "profession": "Developer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": null,
+    "likes": 94,
+    "comments": 34,
+    "shares": 26,
+    "views": 691,
+    "tags": [
+      "startup",
+      "web"
+    ],
+    "createdAt": "2025-02-17T03:01:46.560Z",
+    "isLiked": true,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_18",
+    "type": "announcement",
+    "author": {
+      "id": "user_14",
+      "name": "Addison Clark",
+      "avatar": "https://randomuser.me/api/portraits/women/21.jpg",
+      "profession": "Brand Strategist"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": null,
+    "likes": 96,
+    "comments": 35,
+    "shares": 25,
+    "views": 535,
+    "tags": [
+      "design",
+      "ecommerce",
+      "development"
+    ],
+    "createdAt": "2024-08-10T15:21:08.828Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_19",
+    "type": "tip",
+    "author": {
+      "id": "user_3",
+      "name": "Surma Ovsiienko",
+      "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+      "profession": "Marketing Specialist"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1200/900?random=726",
+    "likes": 111,
+    "comments": 6,
+    "shares": 5,
+    "views": 994,
+    "tags": [
+      "business",
+      "web",
+      "mobile"
+    ],
+    "createdAt": "2025-01-25T09:04:51.163Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_20",
+    "type": "showcase",
+    "author": {
+      "id": "user_10",
+      "name": "Frank Soto",
+      "avatar": "https://randomuser.me/api/portraits/men/78.jpg",
+      "profession": "Developer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse.",
+    "image": null,
+    "likes": 169,
+    "comments": 11,
+    "shares": 18,
+    "views": 614,
+    "tags": [
+      "ui-ux",
+      "branding",
+      "startup"
+    ],
+    "createdAt": "2025-05-12T17:20:21.943Z",
+    "isLiked": true,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_21",
+    "type": "question",
+    "author": {
+      "id": "user_2",
+      "name": "Rolf-Peter Ruppert",
+      "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+      "profession": "Content Creator"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": null,
+    "likes": 10,
+    "comments": 20,
+    "shares": 25,
+    "views": 693,
+    "tags": [
+      "ui-ux",
+      "marketing",
+      "portfolio"
+    ],
+    "createdAt": "2024-03-01T02:24:41.288Z",
+    "isLiked": true,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_22",
+    "type": "announcement",
+    "author": {
+      "id": "user_17",
+      "name": "Ringo Campos",
+      "avatar": "https://randomuser.me/api/portraits/men/34.jpg",
+      "profession": "Marketing Specialist"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": null,
+    "likes": 6,
+    "comments": 33,
+    "shares": 16,
+    "views": 123,
+    "tags": [
+      "mobile",
+      "branding",
+      "marketing"
+    ],
+    "createdAt": "2023-01-11T13:26:30.357Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_23",
+    "type": "tip",
+    "author": {
+      "id": "user_13",
+      "name": "Nicolay Nordahl",
+      "avatar": "https://randomuser.me/api/portraits/men/99.jpg",
+      "profession": "Content Creator"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/800/800?random=145",
+    "likes": 193,
+    "comments": 11,
+    "shares": 12,
+    "views": 70,
+    "tags": [
+      "design",
+      "development",
+      "ui-ux"
+    ],
+    "createdAt": "2023-02-23T21:03:28.132Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_24",
+    "type": "announcement",
+    "author": {
+      "id": "user_15",
+      "name": "Gordyata Gudzenko",
+      "avatar": "https://randomuser.me/api/portraits/men/33.jpg",
+      "profession": "Social Media Manager"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1600/600?random=560",
+    "likes": 61,
+    "comments": 10,
+    "shares": 22,
+    "views": 817,
+    "tags": [
+      "portfolio",
+      "branding",
+      "creative"
+    ],
+    "createdAt": "2024-05-27T13:33:47.907Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_25",
+    "type": "announcement",
+    "author": {
+      "id": "user_21",
+      "name": "Serafín Patiño",
+      "avatar": "https://randomuser.me/api/portraits/men/85.jpg",
+      "profession": "UI/UX Designer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1200/800?random=494",
+    "likes": 115,
+    "comments": 17,
+    "shares": 2,
+    "views": 681,
+    "tags": [
+      "design",
+      "development",
+      "marketing"
+    ],
+    "createdAt": "2023-06-13T07:03:53.784Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_26",
+    "type": "showcase",
+    "author": {
+      "id": "user_9",
+      "name": "Claire Taylor",
+      "avatar": "https://randomuser.me/api/portraits/women/61.jpg",
+      "profession": "Photographer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse.",
+    "image": null,
+    "likes": 145,
+    "comments": 32,
+    "shares": 15,
+    "views": 294,
+    "tags": [
+      "creative",
+      "branding",
+      "design"
+    ],
+    "createdAt": "2023-11-30T18:46:59.380Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_27",
+    "type": "showcase",
+    "author": {
+      "id": "user_7",
+      "name": "Roza Pustova",
+      "avatar": "https://randomuser.me/api/portraits/women/60.jpg",
+      "profession": "Web Designer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse.",
+    "image": null,
+    "likes": 0,
+    "comments": 15,
+    "shares": 17,
+    "views": 933,
+    "tags": [
+      "ui-ux",
+      "branding"
+    ],
+    "createdAt": "2023-09-06T14:13:34.347Z",
+    "isLiked": true,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_28",
+    "type": "question",
+    "author": {
+      "id": "user_2",
+      "name": "Rolf-Peter Ruppert",
+      "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+      "profession": "Content Creator"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/800/800?random=915",
+    "likes": 5,
+    "comments": 10,
+    "shares": 13,
+    "views": 452,
+    "tags": [
+      "design",
+      "development"
+    ],
+    "createdAt": "2025-03-16T02:18:47.509Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_29",
+    "type": "showcase",
+    "author": {
+      "id": "user_10",
+      "name": "Frank Soto",
+      "avatar": "https://randomuser.me/api/portraits/men/78.jpg",
+      "profession": "Developer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse.",
+    "image": "https://picsum.photos/1200/600?random=199",
+    "likes": 117,
+    "comments": 22,
+    "shares": 6,
+    "views": 517,
+    "tags": [
+      "design",
+      "development",
+      "ui-ux"
+    ],
+    "createdAt": "2023-03-05T09:55:30.844Z",
+    "isLiked": true,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_30",
+    "type": "question",
+    "author": {
+      "id": "user_14",
+      "name": "Addison Clark",
+      "avatar": "https://randomuser.me/api/portraits/women/21.jpg",
+      "profession": "Brand Strategist"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1200/600?random=197",
+    "likes": 12,
+    "comments": 27,
+    "shares": 0,
+    "views": 68,
+    "tags": [
+      "design",
+      "ecommerce"
+    ],
+    "createdAt": "2023-07-04T14:44:17.487Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_31",
+    "type": "tip",
+    "author": {
+      "id": "user_4",
+      "name": "Alma Barnes",
+      "avatar": "https://randomuser.me/api/portraits/women/54.jpg",
+      "profession": "Developer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1200/600?random=333",
+    "likes": 66,
+    "comments": 23,
+    "shares": 24,
+    "views": 482,
+    "tags": [
+      "branding",
+      "mobile",
+      "startup"
+    ],
+    "createdAt": "2024-02-08T01:02:17.331Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_32",
+    "type": "question",
+    "author": {
+      "id": "user_14",
+      "name": "Addison Clark",
+      "avatar": "https://randomuser.me/api/portraits/women/21.jpg",
+      "profession": "Brand Strategist"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1200/900?random=173",
+    "likes": 72,
+    "comments": 16,
+    "shares": 0,
+    "views": 1031,
+    "tags": [
+      "web",
+      "creative",
+      "ecommerce"
+    ],
+    "createdAt": "2024-10-12T16:31:43.612Z",
+    "isLiked": true,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_33",
+    "type": "showcase",
+    "author": {
+      "id": "user_23",
+      "name": "Aila Grønningsæter",
+      "avatar": "https://randomuser.me/api/portraits/women/21.jpg",
+      "profession": "Graphic Designer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse.",
+    "image": "https://picsum.photos/1600/600?random=682",
+    "likes": 160,
+    "comments": 41,
+    "shares": 19,
+    "views": 1020,
+    "tags": [
+      "ui-ux",
+      "marketing",
+      "business"
+    ],
+    "createdAt": "2023-12-13T02:09:43.513Z",
+    "isLiked": false,
+    "isBookmarked": true
+  },
+  {
+    "id": "post_34",
+    "type": "announcement",
+    "author": {
+      "id": "user_11",
+      "name": "Eelis Anttila",
+      "avatar": "https://randomuser.me/api/portraits/men/7.jpg",
+      "profession": "Social Media Manager"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1200/900?random=173",
+    "likes": 82,
+    "comments": 21,
+    "shares": 21,
+    "views": 856,
+    "tags": [
+      "startup",
+      "business",
+      "mobile"
+    ],
+    "createdAt": "2024-10-20T22:58:29.915Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_35",
+    "type": "announcement",
+    "author": {
+      "id": "user_23",
+      "name": "Aila Grønningsæter",
+      "avatar": "https://randomuser.me/api/portraits/women/21.jpg",
+      "profession": "Graphic Designer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/800/800?random=629",
+    "likes": 177,
+    "comments": 12,
+    "shares": 29,
+    "views": 1015,
+    "tags": [
+      "development",
+      "marketing",
+      "startup"
+    ],
+    "createdAt": "2023-03-17T03:04:07.571Z",
+    "isLiked": true,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_36",
+    "type": "collaboration",
+    "author": {
+      "id": "user_8",
+      "name": "Johanna Martin",
+      "avatar": "https://randomuser.me/api/portraits/women/29.jpg",
+      "profession": "Photographer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1200/800?random=738",
+    "likes": 108,
+    "comments": 14,
+    "shares": 26,
+    "views": 100,
+    "tags": [
+      "design",
+      "development",
+      "creative"
+    ],
+    "createdAt": "2024-07-21T23:15:58.311Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_37",
+    "type": "announcement",
+    "author": {
+      "id": "user_2",
+      "name": "Rolf-Peter Ruppert",
+      "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+      "profession": "Content Creator"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": null,
+    "likes": 30,
+    "comments": 8,
+    "shares": 28,
+    "views": 149,
+    "tags": [
+      "branding",
+      "development",
+      "startup"
+    ],
+    "createdAt": "2023-04-01T08:43:18.226Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_38",
+    "type": "collaboration",
+    "author": {
+      "id": "user_3",
+      "name": "Surma Ovsiienko",
+      "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+      "profession": "Marketing Specialist"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": null,
+    "likes": 168,
+    "comments": 22,
+    "shares": 0,
+    "views": 72,
+    "tags": [
+      "design",
+      "ui-ux",
+      "portfolio"
+    ],
+    "createdAt": "2023-10-16T12:28:40.632Z",
+    "isLiked": true,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_39",
+    "type": "tip",
+    "author": {
+      "id": "user_12",
+      "name": "Abeer Prabhakaran",
+      "avatar": "https://randomuser.me/api/portraits/men/96.jpg",
+      "profession": "Graphic Designer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1600/800?random=657",
+    "likes": 98,
+    "comments": 15,
+    "shares": 29,
+    "views": 942,
+    "tags": [
+      "creative",
+      "ecommerce",
+      "mobile"
+    ],
+    "createdAt": "2025-02-06T22:32:59.980Z",
+    "isLiked": true,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_40",
+    "type": "question",
+    "author": {
+      "id": "user_9",
+      "name": "Claire Taylor",
+      "avatar": "https://randomuser.me/api/portraits/women/61.jpg",
+      "profession": "Photographer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1600/800?random=657",
+    "likes": 77,
+    "comments": 25,
+    "shares": 23,
+    "views": 570,
+    "tags": [
+      "portfolio",
+      "design",
+      "creative"
+    ],
+    "createdAt": "2023-10-21T20:30:09.965Z",
+    "isLiked": true,
+    "isBookmarked": true
+  },
+  {
+    "id": "post_41",
+    "type": "tip",
+    "author": {
+      "id": "user_1",
+      "name": "Judith Bravo",
+      "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+      "profession": "Brand Strategist"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": null,
+    "likes": 154,
+    "comments": 13,
+    "shares": 15,
+    "views": 302,
+    "tags": [
+      "development",
+      "creative",
+      "design"
+    ],
+    "createdAt": "2025-01-09T04:16:53.369Z",
+    "isLiked": true,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_42",
+    "type": "question",
+    "author": {
+      "id": "user_9",
+      "name": "Claire Taylor",
+      "avatar": "https://randomuser.me/api/portraits/women/61.jpg",
+      "profession": "Photographer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": null,
+    "likes": 16,
+    "comments": 30,
+    "shares": 10,
+    "views": 182,
+    "tags": [
+      "creative",
+      "mobile",
+      "web"
+    ],
+    "createdAt": "2023-12-14T14:09:52.239Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_43",
+    "type": "collaboration",
+    "author": {
+      "id": "user_19",
+      "name": "Karan Kavser",
+      "avatar": "https://randomuser.me/api/portraits/men/97.jpg",
+      "profession": "Web Designer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1600/800?random=921",
+    "likes": 151,
+    "comments": 9,
+    "shares": 9,
+    "views": 749,
+    "tags": [
+      "marketing",
+      "creative",
+      "portfolio"
+    ],
+    "createdAt": "2024-03-04T00:08:36.348Z",
+    "isLiked": false,
+    "isBookmarked": true
+  },
+  {
+    "id": "post_44",
+    "type": "showcase",
+    "author": {
+      "id": "user_8",
+      "name": "Johanna Martin",
+      "avatar": "https://randomuser.me/api/portraits/women/29.jpg",
+      "profession": "Photographer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse.",
+    "image": null,
+    "likes": 145,
+    "comments": 19,
+    "shares": 3,
+    "views": 500,
+    "tags": [
+      "startup",
+      "branding",
+      "portfolio"
+    ],
+    "createdAt": "2024-10-09T07:44:44.287Z",
+    "isLiked": true,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_45",
+    "type": "question",
+    "author": {
+      "id": "user_16",
+      "name": "Nanna Hansen",
+      "avatar": "https://randomuser.me/api/portraits/women/19.jpg",
+      "profession": "Brand Strategist"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1600/800?random=921",
+    "likes": 181,
+    "comments": 3,
+    "shares": 20,
+    "views": 1015,
+    "tags": [
+      "startup",
+      "web",
+      "design"
+    ],
+    "createdAt": "2023-02-07T17:39:27.906Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_46",
+    "type": "question",
+    "author": {
+      "id": "user_7",
+      "name": "Roza Pustova",
+      "avatar": "https://randomuser.me/api/portraits/women/60.jpg",
+      "profession": "Web Designer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/800/800?random=145",
+    "likes": 150,
+    "comments": 40,
+    "shares": 10,
+    "views": 144,
+    "tags": [
+      "business",
+      "branding",
+      "mobile"
+    ],
+    "createdAt": "2023-08-07T16:04:48.283Z",
+    "isLiked": false,
+    "isBookmarked": true
+  },
+  {
+    "id": "post_47",
+    "type": "collaboration",
+    "author": {
+      "id": "user_21",
+      "name": "Serafín Patiño",
+      "avatar": "https://randomuser.me/api/portraits/men/85.jpg",
+      "profession": "UI/UX Designer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": null,
+    "likes": 152,
+    "comments": 23,
+    "shares": 5,
+    "views": 1047,
+    "tags": [
+      "ui-ux",
+      "branding",
+      "mobile"
+    ],
+    "createdAt": "2024-10-25T10:38:04.825Z",
+    "isLiked": true,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_48",
+    "type": "question",
+    "author": {
+      "id": "user_12",
+      "name": "Abeer Prabhakaran",
+      "avatar": "https://randomuser.me/api/portraits/men/96.jpg",
+      "profession": "Graphic Designer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1600/800?random=905",
+    "likes": 30,
+    "comments": 20,
+    "shares": 16,
+    "views": 57,
+    "tags": [
+      "design",
+      "creative",
+      "branding"
+    ],
+    "createdAt": "2023-10-05T00:36:20.209Z",
+    "isLiked": false,
+    "isBookmarked": true
+  },
+  {
+    "id": "post_49",
+    "type": "announcement",
+    "author": {
+      "id": "user_8",
+      "name": "Johanna Martin",
+      "avatar": "https://randomuser.me/api/portraits/women/29.jpg",
+      "profession": "Photographer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/800/600?random=296",
+    "likes": 179,
+    "comments": 28,
+    "shares": 12,
+    "views": 920,
+    "tags": [
+      "business",
+      "development",
+      "web"
+    ],
+    "createdAt": "2024-12-08T06:03:08.422Z",
+    "isLiked": true,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_50",
+    "type": "collaboration",
+    "author": {
+      "id": "user_22",
+      "name": "Vlade Santrač",
+      "avatar": "https://randomuser.me/api/portraits/men/65.jpg",
+      "profession": "Marketing Specialist"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1600/900?random=574",
+    "likes": 178,
+    "comments": 49,
+    "shares": 5,
+    "views": 389,
+    "tags": [
+      "development",
+      "branding",
+      "web"
+    ],
+    "createdAt": "2025-04-29T20:58:10.286Z",
+    "isLiked": false,
+    "isBookmarked": true
+  },
+  {
+    "id": "post_51",
+    "type": "tip",
+    "author": {
+      "id": "user_9",
+      "name": "Claire Taylor",
+      "avatar": "https://randomuser.me/api/portraits/women/61.jpg",
+      "profession": "Photographer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1600/800?random=657",
+    "likes": 160,
+    "comments": 32,
+    "shares": 7,
+    "views": 774,
+    "tags": [
+      "design",
+      "web",
+      "development"
+    ],
+    "createdAt": "2024-08-02T12:57:03.564Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_52",
+    "type": "collaboration",
+    "author": {
+      "id": "user_1",
+      "name": "Judith Bravo",
+      "avatar": "https://randomuser.me/api/portraits/women/51.jpg",
+      "profession": "Brand Strategist"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": null,
+    "likes": 175,
+    "comments": 48,
+    "shares": 29,
+    "views": 654,
+    "tags": [
+      "ecommerce",
+      "business",
+      "marketing"
+    ],
+    "createdAt": "2025-05-12T05:50:56.858Z",
+    "isLiked": true,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_53",
+    "type": "collaboration",
+    "author": {
+      "id": "user_4",
+      "name": "Alma Barnes",
+      "avatar": "https://randomuser.me/api/portraits/women/54.jpg",
+      "profession": "Developer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/800/800?random=145",
+    "likes": 48,
+    "comments": 8,
+    "shares": 26,
+    "views": 870,
+    "tags": [
+      "design",
+      "startup"
+    ],
+    "createdAt": "2025-04-16T03:15:01.958Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_54",
+    "type": "tip",
+    "author": {
+      "id": "user_14",
+      "name": "Addison Clark",
+      "avatar": "https://randomuser.me/api/portraits/women/21.jpg",
+      "profession": "Brand Strategist"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1200/800?random=274",
+    "likes": 109,
+    "comments": 49,
+    "shares": 18,
+    "views": 335,
+    "tags": [
+      "marketing",
+      "mobile",
+      "development"
+    ],
+    "createdAt": "2023-09-08T13:51:48.038Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_55",
+    "type": "tip",
+    "author": {
+      "id": "user_9",
+      "name": "Claire Taylor",
+      "avatar": "https://randomuser.me/api/portraits/women/61.jpg",
+      "profession": "Photographer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1200/900?random=563",
+    "likes": 188,
+    "comments": 39,
+    "shares": 5,
+    "views": 841,
+    "tags": [
+      "development",
+      "portfolio",
+      "web"
+    ],
+    "createdAt": "2024-05-04T09:09:31.904Z",
+    "isLiked": false,
+    "isBookmarked": true
+  },
+  {
+    "id": "post_56",
+    "type": "showcase",
+    "author": {
+      "id": "user_14",
+      "name": "Addison Clark",
+      "avatar": "https://randomuser.me/api/portraits/women/21.jpg",
+      "profession": "Brand Strategist"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse.",
+    "image": "https://picsum.photos/1600/600?random=407",
+    "likes": 15,
+    "comments": 40,
+    "shares": 11,
+    "views": 66,
+    "tags": [
+      "portfolio",
+      "business"
+    ],
+    "createdAt": "2023-08-03T06:37:17.195Z",
+    "isLiked": true,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_57",
+    "type": "tip",
+    "author": {
+      "id": "user_20",
+      "name": "Amna Van der Rijt",
+      "avatar": "https://randomuser.me/api/portraits/women/21.jpg",
+      "profession": "Brand Strategist"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1600/600?random=560",
+    "likes": 78,
+    "comments": 37,
+    "shares": 28,
+    "views": 51,
+    "tags": [
+      "branding",
+      "development"
+    ],
+    "createdAt": "2025-02-07T11:08:43.684Z",
+    "isLiked": false,
+    "isBookmarked": true
+  },
+  {
+    "id": "post_58",
+    "type": "tip",
+    "author": {
+      "id": "user_18",
+      "name": "Silke Hansen",
+      "avatar": "https://randomuser.me/api/portraits/women/62.jpg",
+      "profession": "Graphic Designer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1600/900?random=40",
+    "likes": 30,
+    "comments": 16,
+    "shares": 26,
+    "views": 412,
+    "tags": [
+      "branding",
+      "marketing",
+      "web"
+    ],
+    "createdAt": "2024-10-12T23:32:18.319Z",
+    "isLiked": false,
+    "isBookmarked": true
+  },
+  {
+    "id": "post_59",
+    "type": "showcase",
+    "author": {
+      "id": "user_6",
+      "name": "Albin Roussel",
+      "avatar": "https://randomuser.me/api/portraits/men/76.jpg",
+      "profession": "Marketing Specialist"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse.",
+    "image": "https://picsum.photos/1200/600?random=822",
+    "likes": 170,
+    "comments": 19,
+    "shares": 10,
+    "views": 508,
+    "tags": [
+      "marketing",
+      "creative",
+      "branding"
+    ],
+    "createdAt": "2023-09-25T02:17:48.482Z",
+    "isLiked": false,
+    "isBookmarked": false
+  },
+  {
+    "id": "post_60",
+    "type": "showcase",
+    "author": {
+      "id": "user_3",
+      "name": "Surma Ovsiienko",
+      "avatar": "https://randomuser.me/api/portraits/men/81.jpg",
+      "profession": "Marketing Specialist"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse.",
+    "image": "https://picsum.photos/800/600?random=230",
+    "likes": 193,
+    "comments": 29,
+    "shares": 22,
+    "views": 497,
+    "tags": [
+      "portfolio",
+      "design",
+      "development"
+    ],
+    "createdAt": "2023-11-05T19:26:32.697Z",
+    "isLiked": false,
+    "isBookmarked": false
+  }
+]

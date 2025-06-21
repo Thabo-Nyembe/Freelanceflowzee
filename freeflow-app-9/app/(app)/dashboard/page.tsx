@@ -326,16 +326,16 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* Header Section - Responsive */}
+      {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="heading-responsive">Welcome back!</h1>
-          <p className="text-responsive text-gray-600 mt-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Welcome back!</h1>
+          <p className="text-gray-600 mt-2">
             Here's what's happening with your projects today.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <div className="text-mobile sm:text-desktop text-gray-500">
+          <div className="text-sm text-gray-500">
             {currentTime.toLocaleDateString('en-US', { 
               weekday: 'long', 
               year: 'numeric', 
@@ -343,166 +343,106 @@ export default function DashboardPage() {
               day: 'numeric' 
             })}
           </div>
-          <Button 
-            className="button-touch w-full sm:w-auto"
-            onClick={() => window.location.href = '/dashboard/projects-hub'}
-            data-testid="new-project-btn"
-          >
+          <Button className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             New Project
           </Button>
         </div>
       </div>
 
-      {/* Stats Cards - Responsive Grid */}
-      <div className="grid-responsive">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {stats.map((stat, index) => {
-          const Icon = stat.icon
+          const Icon = stat.icon;
           return (
-            <Card key={index} className="card-responsive hover:scale-[1.02] transition-transform duration-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-mobile sm:text-desktop font-medium">
-                  {stat.title}
-                </CardTitle>
-                <div className={`p-2 rounded-xl ${stat.bgColor}`}>
-                  <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${stat.color}`} />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl sm:text-3xl font-bold">{stat.value}</div>
-                <div className="flex items-center space-x-2 mt-1">
-                  <span className="text-xs sm:text-sm text-emerald-600 font-medium">
+            <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                    <Icon className={`w-5 h-5 ${stat.color}`} />
+                  </div>
+                  <Badge variant={stat.trend === 'up' ? 'default' : 'secondary'} className="text-xs">
                     {stat.change}
-                  </span>
-                  <span className="text-xs sm:text-sm text-gray-500">
-                    {stat.description}
-                  </span>
+                  </Badge>
+                </div>
+                <div className="mt-4">
+                  <h3 className="text-2xl font-bold text-gray-900">{stat.value}</h3>
+                  <p className="text-sm text-gray-500 mt-1">{stat.title}</p>
+                  <p className="text-xs text-gray-400 mt-1">{stat.description}</p>
                 </div>
               </CardContent>
             </Card>
-          )
+          );
         })}
       </div>
 
-      {/* Main Content Grid - Mobile-First */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-        
-        {/* Recent Projects - Takes 2 columns on desktop */}
-        <div className="lg:col-span-2">
-          <Card className="card-responsive">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Briefcase className="w-5 h-5" />
-                Recent Projects
-              </CardTitle>
-              <Button variant="ghost" size="sm" className="text-responsive">
-                View All
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {recentProjects.map((project) => (
-                <div key={project.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors">
-                  <div className="flex-1 space-y-2 sm:space-y-1">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                      <h4 className="font-medium text-responsive">{project.name}</h4>
-                      <Badge variant="outline" className="text-xs w-fit">
-                        {project.status}
-                      </Badge>
+      {/* Recent Projects */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg font-semibold">Recent Projects</CardTitle>
+            <Button variant="outline" size="sm">
+              View All
+              <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {recentProjects.map((project) => (
+              <div key={project.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">{project.name}</h4>
+                  <p className="text-sm text-gray-500">{project.client}</p>
+                  <div className="flex items-center gap-4 mt-2">
+                    <div className="flex items-center gap-2">
+                      <Progress value={project.progress} className="w-20" />
+                      <span className="text-xs text-gray-500">{project.progress}%</span>
                     </div>
-                    <p className="text-mobile text-gray-600">{project.client}</p>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                      <div className="flex items-center space-x-2 text-mobile">
-                        <span>Progress:</span>
-                        <Progress value={project.progress} className="w-16 sm:w-20" />
-                        <span className="text-xs">{project.progress}%</span>
-                      </div>
-                      <span className="text-mobile text-gray-500">Due: {project.dueDate}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between sm:justify-end mt-3 sm:mt-0 sm:ml-4">
-                    <span className="font-semibold text-responsive text-emerald-600">
-                      {project.earnings}
-                    </span>
-                    <Button variant="ghost" size="sm" className="ml-2 touch-target">
-                      <Eye className="w-4 h-4" />
-                    </Button>
+                    <Badge variant={project.status === 'In Progress' ? 'default' : 'secondary'} className="text-xs">
+                      {project.status}
+                    </Badge>
                   </div>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
+                <div className="text-right">
+                  <p className="font-semibold text-emerald-600">{project.earnings}</p>
+                  <p className="text-xs text-gray-500">Due {project.dueDate}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* Sidebar Content */}
-        <div className="space-y-6">
-          
-          {/* Quick Actions */}
-          <Card className="card-responsive">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="w-5 h-5" />
-                Quick Actions
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 lg:grid-cols-1 gap-3">
-              {quickActions.map((action, index) => {
-                const Icon = action.icon
-                return (
-                  <Button
-                    key={index}
-                    variant="ghost"
-                    onClick={action.action}
-                    className="h-auto p-4 justify-start text-left touch-target"
-                    data-testid={action.testId}
-                  >
-                    <div className={`p-2 rounded-xl ${action.bgColor} mr-3`}>
-                      <Icon className={`w-4 h-4 ${action.color}`} />
-                    </div>
-                    <div className="hidden lg:block">
-                      <div className="font-medium text-sm">{action.title}</div>
-                      <div className="text-xs text-gray-500">{action.description}</div>
-                    </div>
-                    <div className="lg:hidden font-medium text-sm">{action.title}</div>
-                  </Button>
-                )
-              })}
-            </CardContent>
-          </Card>
-
-          {/* Recent Notifications */}
-          <Card className="card-responsive">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="w-5 h-5" />
-                Recent Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {notificationsData.map((notification) => {
-                const Icon = notification.icon
-                return (
-                  <div key={notification.id} className="flex items-start space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors">
-                    <div className={`p-2 rounded-lg bg-gray-100`}>
-                      <Icon className={`w-4 h-4 ${notification.color}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-medium truncate">{notification.title}</h4>
-                      <p className="text-xs text-gray-600 mt-1 line-clamp-2">{notification.message}</p>
-                      <span className="text-xs text-gray-500 mt-1">{notification.time}</span>
-                    </div>
+      {/* Quick Actions */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {quickActions.map((action, index) => {
+              const Icon = action.icon;
+              return (
+                <button
+                  key={index}
+                  onClick={action.action}
+                  data-testid={action.testId}
+                  className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left group"
+                >
+                  <div className={`p-2 rounded-lg ${action.bgColor} w-fit`}>
+                    <Icon className={`w-5 h-5 ${action.color}`} />
                   </div>
-                )
-              })}
-              <Button variant="ghost" size="sm" className="w-full mt-3 text-responsive">
-                View All Notifications
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+                  <h4 className="font-medium text-gray-900 mt-3 group-hover:text-violet-600 transition-colors">
+                    {action.title}
+                  </h4>
+                  <p className="text-sm text-gray-500 mt-1">{action.description}</p>
+                </button>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
-  

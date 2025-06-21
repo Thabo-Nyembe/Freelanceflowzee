@@ -1,0 +1,2762 @@
+[
+  {
+    "id": "project_1",
+    "title": "Content Writing for Real Estate Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Content Writing",
+    "industry": "Real Estate",
+    "client": {
+      "id": "user_8",
+      "name": "Jesse Peltola",
+      "avatar": "https://randomuser.me/api/portraits/men/16.jpg",
+      "email": "jesse.peltola@example.com"
+    },
+    "freelancer": {
+      "id": "user_11",
+      "name": "Nathan Nicolas",
+      "avatar": "https://randomuser.me/api/portraits/men/35.jpg",
+      "email": "nathan.nicolas@example.com"
+    },
+    "budget": 2792,
+    "timeline": 2,
+    "status": "draft",
+    "progress": 30,
+    "priority": "medium",
+    "tags": [
+      "marketing",
+      "design",
+      "creative",
+      "web"
+    ],
+    "createdAt": "2024-09-30T05:49:18.015Z",
+    "dueDate": "2025-08-16T13:28:19.416Z",
+    "images": [
+      "https://picsum.photos/800/800?random=90"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=90",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-03-30T21:45:19.660Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-09-03T09:05:40.637Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-09-03T16:48:30.893Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-07-20T17:01:07.720Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "علیرضا کریمی",
+          "email": "aalyrd.khrymy@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/13.jpg",
+          "location": "شهریار, Iran",
+          "phone": "033-16383488",
+          "profession": "Photographer",
+          "bio": "I'm علیرضا, a dedicated freelancer committed to delivering exceptional work on time.",
+          "joinDate": "2025-06-21T16:58:20.960Z",
+          "skills": [
+            "CSS",
+            "SEO",
+            "Premiere Pro"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 44,
+          "hourlyRate": 27,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2024-05-04T20:22:28.987Z",
+        "likes": 4
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Lucas Carlson",
+          "email": "lucas.carlson@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+          "location": "Reno, United States",
+          "phone": "(703) 451-8288",
+          "profession": "Illustrator",
+          "bio": "Creative professional Lucas - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Figma",
+            "Adobe Photoshop",
+            "HTML",
+            "Canva",
+            "JavaScript"
+          ],
+          "rating": 3.2,
+          "projectsCompleted": 22,
+          "hourlyRate": 87,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2023-04-15T19:08:28.614Z",
+        "likes": 9
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Zoe Robert",
+          "email": "zoe.robert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/43.jpg",
+          "location": "Burg (Ag), Switzerland",
+          "phone": "077 689 11 70",
+          "profession": "Writer",
+          "bio": "Creative professional Zoe - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Python",
+            "JavaScript",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 43,
+          "hourlyRate": 82,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-03-03T13:43:03.703Z",
+        "likes": 5
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_2",
+    "title": "Graphic Design for Non-Profit Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Graphic Design",
+    "industry": "Non-Profit",
+    "client": {
+      "id": "user_10",
+      "name": "Earl Ryan",
+      "avatar": "https://randomuser.me/api/portraits/men/40.jpg",
+      "email": "earl.ryan@example.com"
+    },
+    "freelancer": {
+      "id": "user_4",
+      "name": "Ikram Nooijen",
+      "avatar": "https://randomuser.me/api/portraits/men/92.jpg",
+      "email": "ikram.nooijen@example.com"
+    },
+    "budget": 5838,
+    "timeline": 8,
+    "status": "draft",
+    "progress": 15,
+    "priority": "high",
+    "tags": [
+      "marketing",
+      "ui-ux"
+    ],
+    "createdAt": "2023-11-03T12:04:19.172Z",
+    "dueDate": "2025-08-30T17:15:57.514Z",
+    "images": [
+      "https://picsum.photos/1200/900?random=676"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=676",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-01-08T08:43:13.607Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-08-04T18:48:46.915Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-08-13T13:56:55.330Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-07-28T01:17:23.785Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "علیرضا کریمی",
+          "email": "aalyrd.khrymy@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/13.jpg",
+          "location": "شهریار, Iran",
+          "phone": "033-16383488",
+          "profession": "Photographer",
+          "bio": "I'm علیرضا, a dedicated freelancer committed to delivering exceptional work on time.",
+          "joinDate": "2025-06-21T16:58:20.960Z",
+          "skills": [
+            "CSS",
+            "SEO",
+            "Premiere Pro"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 44,
+          "hourlyRate": 27,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-07-20T11:50:39.889Z",
+        "likes": 1
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Lucas Carlson",
+          "email": "lucas.carlson@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+          "location": "Reno, United States",
+          "phone": "(703) 451-8288",
+          "profession": "Illustrator",
+          "bio": "Creative professional Lucas - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Figma",
+            "Adobe Photoshop",
+            "HTML",
+            "Canva",
+            "JavaScript"
+          ],
+          "rating": 3.2,
+          "projectsCompleted": 22,
+          "hourlyRate": 87,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2023-10-04T16:37:02.942Z",
+        "likes": 2
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Zoe Robert",
+          "email": "zoe.robert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/43.jpg",
+          "location": "Burg (Ag), Switzerland",
+          "phone": "077 689 11 70",
+          "profession": "Writer",
+          "bio": "Creative professional Zoe - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Python",
+            "JavaScript",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 43,
+          "hourlyRate": 82,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2025-05-29T18:57:19.496Z",
+        "likes": 1
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_3",
+    "title": "Web Development for Automotive Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Web Development",
+    "industry": "Automotive",
+    "client": {
+      "id": "user_5",
+      "name": "Naja Kristensen",
+      "avatar": "https://randomuser.me/api/portraits/women/58.jpg",
+      "email": "naja.kristensen@example.com"
+    },
+    "freelancer": {
+      "id": "user_7",
+      "name": "Layla Fletcher",
+      "avatar": "https://randomuser.me/api/portraits/women/15.jpg",
+      "email": "layla.fletcher@example.com"
+    },
+    "budget": 4191,
+    "timeline": 5,
+    "status": "in_review",
+    "progress": 71,
+    "priority": "high",
+    "tags": [
+      "web",
+      "mobile"
+    ],
+    "createdAt": "2023-02-14T22:28:52.589Z",
+    "dueDate": "2025-08-17T23:46:38.092Z",
+    "images": [
+      "https://picsum.photos/1600/800?random=645"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=645",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-10-13T12:34:54.773Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-07-20T09:50:20.056Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-08-19T09:20:14.539Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-07-18T04:21:22.335Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "علیرضا کریمی",
+          "email": "aalyrd.khrymy@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/13.jpg",
+          "location": "شهریار, Iran",
+          "phone": "033-16383488",
+          "profession": "Photographer",
+          "bio": "I'm علیرضا, a dedicated freelancer committed to delivering exceptional work on time.",
+          "joinDate": "2025-06-21T16:58:20.960Z",
+          "skills": [
+            "CSS",
+            "SEO",
+            "Premiere Pro"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 44,
+          "hourlyRate": 27,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2024-12-27T23:37:19.877Z",
+        "likes": 3
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Lucas Carlson",
+          "email": "lucas.carlson@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+          "location": "Reno, United States",
+          "phone": "(703) 451-8288",
+          "profession": "Illustrator",
+          "bio": "Creative professional Lucas - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Figma",
+            "Adobe Photoshop",
+            "HTML",
+            "Canva",
+            "JavaScript"
+          ],
+          "rating": 3.2,
+          "projectsCompleted": 22,
+          "hourlyRate": 87,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-01-19T12:11:33.854Z",
+        "likes": 0
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Zoe Robert",
+          "email": "zoe.robert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/43.jpg",
+          "location": "Burg (Ag), Switzerland",
+          "phone": "077 689 11 70",
+          "profession": "Writer",
+          "bio": "Creative professional Zoe - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Python",
+            "JavaScript",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 43,
+          "hourlyRate": 82,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2024-12-11T17:39:42.122Z",
+        "likes": 2
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_4",
+    "title": "Video Production for Education Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Video Production",
+    "industry": "Education",
+    "client": {
+      "id": "user_4",
+      "name": "Ikram Nooijen",
+      "avatar": "https://randomuser.me/api/portraits/men/92.jpg",
+      "email": "ikram.nooijen@example.com"
+    },
+    "freelancer": {
+      "id": "user_5",
+      "name": "Naja Kristensen",
+      "avatar": "https://randomuser.me/api/portraits/women/58.jpg",
+      "email": "naja.kristensen@example.com"
+    },
+    "budget": 7642,
+    "timeline": 8,
+    "status": "active",
+    "progress": 16,
+    "priority": "high",
+    "tags": [
+      "design",
+      "development",
+      "marketing",
+      "branding",
+      "ui-ux"
+    ],
+    "createdAt": "2023-12-06T00:22:21.900Z",
+    "dueDate": "2025-06-30T06:37:21.257Z",
+    "images": [
+      "https://picsum.photos/1200/900?random=55"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=55",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2024-05-02T12:49:54.017Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-07-02T08:22:39.513Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-08-03T22:24:43.742Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-06-29T14:02:06.130Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "علیرضا کریمی",
+          "email": "aalyrd.khrymy@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/13.jpg",
+          "location": "شهریار, Iran",
+          "phone": "033-16383488",
+          "profession": "Photographer",
+          "bio": "I'm علیرضا, a dedicated freelancer committed to delivering exceptional work on time.",
+          "joinDate": "2025-06-21T16:58:20.960Z",
+          "skills": [
+            "CSS",
+            "SEO",
+            "Premiere Pro"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 44,
+          "hourlyRate": 27,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-01-03T03:07:06.733Z",
+        "likes": 9
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Lucas Carlson",
+          "email": "lucas.carlson@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+          "location": "Reno, United States",
+          "phone": "(703) 451-8288",
+          "profession": "Illustrator",
+          "bio": "Creative professional Lucas - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Figma",
+            "Adobe Photoshop",
+            "HTML",
+            "Canva",
+            "JavaScript"
+          ],
+          "rating": 3.2,
+          "projectsCompleted": 22,
+          "hourlyRate": 87,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2023-04-22T01:03:57.143Z",
+        "likes": 0
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Zoe Robert",
+          "email": "zoe.robert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/43.jpg",
+          "location": "Burg (Ag), Switzerland",
+          "phone": "077 689 11 70",
+          "profession": "Writer",
+          "bio": "Creative professional Zoe - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Python",
+            "JavaScript",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 43,
+          "hourlyRate": 82,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-04-18T08:53:28.098Z",
+        "likes": 5
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_5",
+    "title": "Graphic Design for Finance Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Graphic Design",
+    "industry": "Finance",
+    "client": {
+      "id": "user_1",
+      "name": "علیرضا کریمی",
+      "avatar": "https://randomuser.me/api/portraits/men/13.jpg",
+      "email": "aalyrd.khrymy@example.com"
+    },
+    "freelancer": {
+      "id": "user_8",
+      "name": "Jesse Peltola",
+      "avatar": "https://randomuser.me/api/portraits/men/16.jpg",
+      "email": "jesse.peltola@example.com"
+    },
+    "budget": 8038,
+    "timeline": 8,
+    "status": "completed",
+    "progress": 53,
+    "priority": "high",
+    "tags": [
+      "web",
+      "design",
+      "development",
+      "startup"
+    ],
+    "createdAt": "2025-01-25T06:16:48.313Z",
+    "dueDate": "2025-08-14T21:24:33.795Z",
+    "images": [
+      "https://picsum.photos/1200/900?random=55"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=55",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-07-23T22:16:37.040Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-07-30T05:03:18.950Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-07-10T02:04:00.279Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-09-10T05:31:39.877Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "علیرضا کریمی",
+          "email": "aalyrd.khrymy@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/13.jpg",
+          "location": "شهریار, Iran",
+          "phone": "033-16383488",
+          "profession": "Photographer",
+          "bio": "I'm علیرضا, a dedicated freelancer committed to delivering exceptional work on time.",
+          "joinDate": "2025-06-21T16:58:20.960Z",
+          "skills": [
+            "CSS",
+            "SEO",
+            "Premiere Pro"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 44,
+          "hourlyRate": 27,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2024-05-04T04:21:22.345Z",
+        "likes": 3
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Lucas Carlson",
+          "email": "lucas.carlson@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+          "location": "Reno, United States",
+          "phone": "(703) 451-8288",
+          "profession": "Illustrator",
+          "bio": "Creative professional Lucas - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Figma",
+            "Adobe Photoshop",
+            "HTML",
+            "Canva",
+            "JavaScript"
+          ],
+          "rating": 3.2,
+          "projectsCompleted": 22,
+          "hourlyRate": 87,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2023-06-02T16:14:59.585Z",
+        "likes": 7
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Zoe Robert",
+          "email": "zoe.robert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/43.jpg",
+          "location": "Burg (Ag), Switzerland",
+          "phone": "077 689 11 70",
+          "profession": "Writer",
+          "bio": "Creative professional Zoe - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Python",
+            "JavaScript",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 43,
+          "hourlyRate": 82,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2024-11-07T06:54:59.652Z",
+        "likes": 1
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_6",
+    "title": "Logo Design for Travel Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Logo Design",
+    "industry": "Travel",
+    "client": {
+      "id": "user_8",
+      "name": "Jesse Peltola",
+      "avatar": "https://randomuser.me/api/portraits/men/16.jpg",
+      "email": "jesse.peltola@example.com"
+    },
+    "freelancer": {
+      "id": "user_3",
+      "name": "Zoe Robert",
+      "avatar": "https://randomuser.me/api/portraits/women/43.jpg",
+      "email": "zoe.robert@example.com"
+    },
+    "budget": 5790,
+    "timeline": 7,
+    "status": "draft",
+    "progress": 89,
+    "priority": "high",
+    "tags": [
+      "portfolio",
+      "development",
+      "mobile",
+      "business"
+    ],
+    "createdAt": "2023-12-20T05:28:05.561Z",
+    "dueDate": "2025-06-26T07:09:47.937Z",
+    "images": [
+      "https://picsum.photos/1200/800?random=211"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=211",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2024-04-22T21:37:40.690Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-08-29T21:00:59.525Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-09-17T20:29:25.797Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-09-15T20:14:06.842Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "علیرضا کریمی",
+          "email": "aalyrd.khrymy@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/13.jpg",
+          "location": "شهریار, Iran",
+          "phone": "033-16383488",
+          "profession": "Photographer",
+          "bio": "I'm علیرضا, a dedicated freelancer committed to delivering exceptional work on time.",
+          "joinDate": "2025-06-21T16:58:20.960Z",
+          "skills": [
+            "CSS",
+            "SEO",
+            "Premiere Pro"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 44,
+          "hourlyRate": 27,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2025-02-22T16:15:05.611Z",
+        "likes": 1
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Lucas Carlson",
+          "email": "lucas.carlson@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+          "location": "Reno, United States",
+          "phone": "(703) 451-8288",
+          "profession": "Illustrator",
+          "bio": "Creative professional Lucas - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Figma",
+            "Adobe Photoshop",
+            "HTML",
+            "Canva",
+            "JavaScript"
+          ],
+          "rating": 3.2,
+          "projectsCompleted": 22,
+          "hourlyRate": 87,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-11-01T18:54:16.650Z",
+        "likes": 4
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Zoe Robert",
+          "email": "zoe.robert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/43.jpg",
+          "location": "Burg (Ag), Switzerland",
+          "phone": "077 689 11 70",
+          "profession": "Writer",
+          "bio": "Creative professional Zoe - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Python",
+            "JavaScript",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 43,
+          "hourlyRate": 82,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2024-06-02T23:45:50.166Z",
+        "likes": 0
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_7",
+    "title": "Web Development for Gaming Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Web Development",
+    "industry": "Gaming",
+    "client": {
+      "id": "user_8",
+      "name": "Jesse Peltola",
+      "avatar": "https://randomuser.me/api/portraits/men/16.jpg",
+      "email": "jesse.peltola@example.com"
+    },
+    "freelancer": {
+      "id": "user_8",
+      "name": "Jesse Peltola",
+      "avatar": "https://randomuser.me/api/portraits/men/16.jpg",
+      "email": "jesse.peltola@example.com"
+    },
+    "budget": 7870,
+    "timeline": 6,
+    "status": "completed",
+    "progress": 71,
+    "priority": "low",
+    "tags": [
+      "creative",
+      "branding",
+      "marketing",
+      "startup",
+      "web"
+    ],
+    "createdAt": "2025-04-08T06:05:59.823Z",
+    "dueDate": "2025-07-17T04:25:01.375Z",
+    "images": [
+      "https://picsum.photos/1600/600?random=242"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=242",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2025-01-01T10:02:09.293Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-09-09T17:12:19.939Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-07-26T12:43:55.575Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-08-10T08:03:52.242Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "علیرضا کریمی",
+          "email": "aalyrd.khrymy@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/13.jpg",
+          "location": "شهریار, Iran",
+          "phone": "033-16383488",
+          "profession": "Photographer",
+          "bio": "I'm علیرضا, a dedicated freelancer committed to delivering exceptional work on time.",
+          "joinDate": "2025-06-21T16:58:20.960Z",
+          "skills": [
+            "CSS",
+            "SEO",
+            "Premiere Pro"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 44,
+          "hourlyRate": 27,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-01-08T07:53:50.405Z",
+        "likes": 5
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Lucas Carlson",
+          "email": "lucas.carlson@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+          "location": "Reno, United States",
+          "phone": "(703) 451-8288",
+          "profession": "Illustrator",
+          "bio": "Creative professional Lucas - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Figma",
+            "Adobe Photoshop",
+            "HTML",
+            "Canva",
+            "JavaScript"
+          ],
+          "rating": 3.2,
+          "projectsCompleted": 22,
+          "hourlyRate": 87,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2025-05-02T10:09:58.501Z",
+        "likes": 6
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Zoe Robert",
+          "email": "zoe.robert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/43.jpg",
+          "location": "Burg (Ag), Switzerland",
+          "phone": "077 689 11 70",
+          "profession": "Writer",
+          "bio": "Creative professional Zoe - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Python",
+            "JavaScript",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 43,
+          "hourlyRate": 82,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2025-04-22T20:46:36.357Z",
+        "likes": 0
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_8",
+    "title": "Web Development for Retail Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Web Development",
+    "industry": "Retail",
+    "client": {
+      "id": "user_2",
+      "name": "Lucas Carlson",
+      "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+      "email": "lucas.carlson@example.com"
+    },
+    "freelancer": {
+      "id": "user_5",
+      "name": "Naja Kristensen",
+      "avatar": "https://randomuser.me/api/portraits/women/58.jpg",
+      "email": "naja.kristensen@example.com"
+    },
+    "budget": 6365,
+    "timeline": 8,
+    "status": "active",
+    "progress": 65,
+    "priority": "high",
+    "tags": [
+      "design",
+      "ui-ux"
+    ],
+    "createdAt": "2025-02-14T02:35:21.425Z",
+    "dueDate": "2025-06-28T16:28:28.281Z",
+    "images": [
+      "https://picsum.photos/800/900?random=167"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=167",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-01-23T14:18:10.011Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-08-22T19:54:51.179Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-06-29T12:18:51.203Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-08-29T01:31:01.334Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "علیرضا کریمی",
+          "email": "aalyrd.khrymy@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/13.jpg",
+          "location": "شهریار, Iran",
+          "phone": "033-16383488",
+          "profession": "Photographer",
+          "bio": "I'm علیرضا, a dedicated freelancer committed to delivering exceptional work on time.",
+          "joinDate": "2025-06-21T16:58:20.960Z",
+          "skills": [
+            "CSS",
+            "SEO",
+            "Premiere Pro"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 44,
+          "hourlyRate": 27,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-11-16T14:24:08.367Z",
+        "likes": 4
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Lucas Carlson",
+          "email": "lucas.carlson@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+          "location": "Reno, United States",
+          "phone": "(703) 451-8288",
+          "profession": "Illustrator",
+          "bio": "Creative professional Lucas - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Figma",
+            "Adobe Photoshop",
+            "HTML",
+            "Canva",
+            "JavaScript"
+          ],
+          "rating": 3.2,
+          "projectsCompleted": 22,
+          "hourlyRate": 87,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2025-05-06T09:55:15.151Z",
+        "likes": 6
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Zoe Robert",
+          "email": "zoe.robert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/43.jpg",
+          "location": "Burg (Ag), Switzerland",
+          "phone": "077 689 11 70",
+          "profession": "Writer",
+          "bio": "Creative professional Zoe - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Python",
+            "JavaScript",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 43,
+          "hourlyRate": 82,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-09-02T22:50:54.021Z",
+        "likes": 2
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_9",
+    "title": "Mobile App for Finance Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Mobile App",
+    "industry": "Finance",
+    "client": {
+      "id": "user_11",
+      "name": "Nathan Nicolas",
+      "avatar": "https://randomuser.me/api/portraits/men/35.jpg",
+      "email": "nathan.nicolas@example.com"
+    },
+    "freelancer": {
+      "id": "user_12",
+      "name": "Asma Honing",
+      "avatar": "https://randomuser.me/api/portraits/women/55.jpg",
+      "email": "asma.honing@example.com"
+    },
+    "budget": 4907,
+    "timeline": 6,
+    "status": "completed",
+    "progress": 14,
+    "priority": "medium",
+    "tags": [
+      "mobile",
+      "creative"
+    ],
+    "createdAt": "2025-06-12T07:05:39.426Z",
+    "dueDate": "2025-07-16T10:09:16.417Z",
+    "images": [
+      "https://picsum.photos/800/900?random=167"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=167",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-02-21T07:40:00.900Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-08-16T05:55:23.262Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-08-19T21:58:52.481Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-08-21T10:29:21.875Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "علیرضا کریمی",
+          "email": "aalyrd.khrymy@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/13.jpg",
+          "location": "شهریار, Iran",
+          "phone": "033-16383488",
+          "profession": "Photographer",
+          "bio": "I'm علیرضا, a dedicated freelancer committed to delivering exceptional work on time.",
+          "joinDate": "2025-06-21T16:58:20.960Z",
+          "skills": [
+            "CSS",
+            "SEO",
+            "Premiere Pro"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 44,
+          "hourlyRate": 27,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-03-19T19:31:10.818Z",
+        "likes": 3
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Lucas Carlson",
+          "email": "lucas.carlson@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+          "location": "Reno, United States",
+          "phone": "(703) 451-8288",
+          "profession": "Illustrator",
+          "bio": "Creative professional Lucas - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Figma",
+            "Adobe Photoshop",
+            "HTML",
+            "Canva",
+            "JavaScript"
+          ],
+          "rating": 3.2,
+          "projectsCompleted": 22,
+          "hourlyRate": 87,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2024-03-19T11:07:51.523Z",
+        "likes": 3
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Zoe Robert",
+          "email": "zoe.robert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/43.jpg",
+          "location": "Burg (Ag), Switzerland",
+          "phone": "077 689 11 70",
+          "profession": "Writer",
+          "bio": "Creative professional Zoe - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Python",
+            "JavaScript",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 43,
+          "hourlyRate": 82,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-03-25T05:57:51.725Z",
+        "likes": 5
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_10",
+    "title": "E-commerce Store for Food & Beverage Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "E-commerce Store",
+    "industry": "Food & Beverage",
+    "client": {
+      "id": "user_14",
+      "name": "ملینا گلشن",
+      "avatar": "https://randomuser.me/api/portraits/women/27.jpg",
+      "email": "mlyn.glshn@example.com"
+    },
+    "freelancer": {
+      "id": "user_2",
+      "name": "Lucas Carlson",
+      "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+      "email": "lucas.carlson@example.com"
+    },
+    "budget": 4830,
+    "timeline": 2,
+    "status": "active",
+    "progress": 62,
+    "priority": "medium",
+    "tags": [
+      "portfolio",
+      "ui-ux",
+      "branding",
+      "ecommerce"
+    ],
+    "createdAt": "2025-06-14T00:48:51.319Z",
+    "dueDate": "2025-06-25T01:25:37.436Z",
+    "images": [
+      "https://picsum.photos/1200/900?random=55"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=55",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2025-02-26T21:21:37.465Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-07-04T01:59:47.943Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-07-15T10:48:18.450Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-07-03T19:12:24.694Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "علیرضا کریمی",
+          "email": "aalyrd.khrymy@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/13.jpg",
+          "location": "شهریار, Iran",
+          "phone": "033-16383488",
+          "profession": "Photographer",
+          "bio": "I'm علیرضا, a dedicated freelancer committed to delivering exceptional work on time.",
+          "joinDate": "2025-06-21T16:58:20.960Z",
+          "skills": [
+            "CSS",
+            "SEO",
+            "Premiere Pro"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 44,
+          "hourlyRate": 27,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2024-12-21T01:25:07.787Z",
+        "likes": 1
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Lucas Carlson",
+          "email": "lucas.carlson@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+          "location": "Reno, United States",
+          "phone": "(703) 451-8288",
+          "profession": "Illustrator",
+          "bio": "Creative professional Lucas - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Figma",
+            "Adobe Photoshop",
+            "HTML",
+            "Canva",
+            "JavaScript"
+          ],
+          "rating": 3.2,
+          "projectsCompleted": 22,
+          "hourlyRate": 87,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2025-01-28T16:13:23.590Z",
+        "likes": 3
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Zoe Robert",
+          "email": "zoe.robert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/43.jpg",
+          "location": "Burg (Ag), Switzerland",
+          "phone": "077 689 11 70",
+          "profession": "Writer",
+          "bio": "Creative professional Zoe - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Python",
+            "JavaScript",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 43,
+          "hourlyRate": 82,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-10-07T17:54:57.765Z",
+        "likes": 4
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_11",
+    "title": "UI/UX Design for Retail Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "UI/UX Design",
+    "industry": "Retail",
+    "client": {
+      "id": "user_2",
+      "name": "Lucas Carlson",
+      "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+      "email": "lucas.carlson@example.com"
+    },
+    "freelancer": {
+      "id": "user_10",
+      "name": "Earl Ryan",
+      "avatar": "https://randomuser.me/api/portraits/men/40.jpg",
+      "email": "earl.ryan@example.com"
+    },
+    "budget": 7406,
+    "timeline": 9,
+    "status": "draft",
+    "progress": 16,
+    "priority": "low",
+    "tags": [
+      "design",
+      "branding",
+      "creative"
+    ],
+    "createdAt": "2024-10-12T00:18:40.850Z",
+    "dueDate": "2025-08-24T09:34:42.566Z",
+    "images": [
+      "https://picsum.photos/800/800?random=90"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=90",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-04-11T22:41:58.259Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-06-28T12:43:31.805Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-06-30T13:20:30.350Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-07-29T00:22:09.521Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "علیرضا کریمی",
+          "email": "aalyrd.khrymy@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/13.jpg",
+          "location": "شهریار, Iran",
+          "phone": "033-16383488",
+          "profession": "Photographer",
+          "bio": "I'm علیرضا, a dedicated freelancer committed to delivering exceptional work on time.",
+          "joinDate": "2025-06-21T16:58:20.960Z",
+          "skills": [
+            "CSS",
+            "SEO",
+            "Premiere Pro"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 44,
+          "hourlyRate": 27,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2024-09-14T05:30:25.306Z",
+        "likes": 3
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Lucas Carlson",
+          "email": "lucas.carlson@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+          "location": "Reno, United States",
+          "phone": "(703) 451-8288",
+          "profession": "Illustrator",
+          "bio": "Creative professional Lucas - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Figma",
+            "Adobe Photoshop",
+            "HTML",
+            "Canva",
+            "JavaScript"
+          ],
+          "rating": 3.2,
+          "projectsCompleted": 22,
+          "hourlyRate": 87,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2023-04-27T18:21:44.733Z",
+        "likes": 0
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Zoe Robert",
+          "email": "zoe.robert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/43.jpg",
+          "location": "Burg (Ag), Switzerland",
+          "phone": "077 689 11 70",
+          "profession": "Writer",
+          "bio": "Creative professional Zoe - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Python",
+            "JavaScript",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 43,
+          "hourlyRate": 82,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-08-24T21:19:47.864Z",
+        "likes": 4
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_12",
+    "title": "Logo Design for Fashion Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Logo Design",
+    "industry": "Fashion",
+    "client": {
+      "id": "user_8",
+      "name": "Jesse Peltola",
+      "avatar": "https://randomuser.me/api/portraits/men/16.jpg",
+      "email": "jesse.peltola@example.com"
+    },
+    "freelancer": {
+      "id": "user_7",
+      "name": "Layla Fletcher",
+      "avatar": "https://randomuser.me/api/portraits/women/15.jpg",
+      "email": "layla.fletcher@example.com"
+    },
+    "budget": 8414,
+    "timeline": 6,
+    "status": "active",
+    "progress": 81,
+    "priority": "high",
+    "tags": [
+      "portfolio",
+      "design"
+    ],
+    "createdAt": "2023-01-09T14:29:47.061Z",
+    "dueDate": "2025-09-19T12:18:50.557Z",
+    "images": [
+      "https://picsum.photos/1600/600?random=242"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=242",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2024-10-09T20:19:01.629Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-07-05T09:30:06.912Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-07-01T15:14:05.212Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-07-01T20:03:55.592Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "علیرضا کریمی",
+          "email": "aalyrd.khrymy@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/13.jpg",
+          "location": "شهریار, Iran",
+          "phone": "033-16383488",
+          "profession": "Photographer",
+          "bio": "I'm علیرضا, a dedicated freelancer committed to delivering exceptional work on time.",
+          "joinDate": "2025-06-21T16:58:20.960Z",
+          "skills": [
+            "CSS",
+            "SEO",
+            "Premiere Pro"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 44,
+          "hourlyRate": 27,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2024-12-30T09:40:56.579Z",
+        "likes": 8
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Lucas Carlson",
+          "email": "lucas.carlson@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+          "location": "Reno, United States",
+          "phone": "(703) 451-8288",
+          "profession": "Illustrator",
+          "bio": "Creative professional Lucas - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Figma",
+            "Adobe Photoshop",
+            "HTML",
+            "Canva",
+            "JavaScript"
+          ],
+          "rating": 3.2,
+          "projectsCompleted": 22,
+          "hourlyRate": 87,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2023-06-02T05:44:44.619Z",
+        "likes": 9
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Zoe Robert",
+          "email": "zoe.robert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/43.jpg",
+          "location": "Burg (Ag), Switzerland",
+          "phone": "077 689 11 70",
+          "profession": "Writer",
+          "bio": "Creative professional Zoe - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Python",
+            "JavaScript",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 43,
+          "hourlyRate": 82,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2024-01-18T18:58:01.997Z",
+        "likes": 9
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_13",
+    "title": "E-commerce Store for Gaming Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "E-commerce Store",
+    "industry": "Gaming",
+    "client": {
+      "id": "user_7",
+      "name": "Layla Fletcher",
+      "avatar": "https://randomuser.me/api/portraits/women/15.jpg",
+      "email": "layla.fletcher@example.com"
+    },
+    "freelancer": {
+      "id": "user_5",
+      "name": "Naja Kristensen",
+      "avatar": "https://randomuser.me/api/portraits/women/58.jpg",
+      "email": "naja.kristensen@example.com"
+    },
+    "budget": 4197,
+    "timeline": 7,
+    "status": "completed",
+    "progress": 77,
+    "priority": "low",
+    "tags": [
+      "branding",
+      "marketing"
+    ],
+    "createdAt": "2023-08-13T09:01:22.352Z",
+    "dueDate": "2025-08-09T09:34:50.105Z",
+    "images": [
+      "https://picsum.photos/1200/900?random=565"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=565",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2024-04-19T21:12:05.521Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-08-28T23:33:21.653Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-09-05T12:07:02.125Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-07-19T03:01:51.288Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "علیرضا کریمی",
+          "email": "aalyrd.khrymy@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/13.jpg",
+          "location": "شهریار, Iran",
+          "phone": "033-16383488",
+          "profession": "Photographer",
+          "bio": "I'm علیرضا, a dedicated freelancer committed to delivering exceptional work on time.",
+          "joinDate": "2025-06-21T16:58:20.960Z",
+          "skills": [
+            "CSS",
+            "SEO",
+            "Premiere Pro"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 44,
+          "hourlyRate": 27,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-10-14T03:38:15.923Z",
+        "likes": 9
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Lucas Carlson",
+          "email": "lucas.carlson@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+          "location": "Reno, United States",
+          "phone": "(703) 451-8288",
+          "profession": "Illustrator",
+          "bio": "Creative professional Lucas - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Figma",
+            "Adobe Photoshop",
+            "HTML",
+            "Canva",
+            "JavaScript"
+          ],
+          "rating": 3.2,
+          "projectsCompleted": 22,
+          "hourlyRate": 87,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2023-10-26T05:35:51.634Z",
+        "likes": 0
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Zoe Robert",
+          "email": "zoe.robert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/43.jpg",
+          "location": "Burg (Ag), Switzerland",
+          "phone": "077 689 11 70",
+          "profession": "Writer",
+          "bio": "Creative professional Zoe - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Python",
+            "JavaScript",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 43,
+          "hourlyRate": 82,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2023-09-01T17:50:12.798Z",
+        "likes": 1
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_14",
+    "title": "E-commerce Store for Travel Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "E-commerce Store",
+    "industry": "Travel",
+    "client": {
+      "id": "user_3",
+      "name": "Zoe Robert",
+      "avatar": "https://randomuser.me/api/portraits/women/43.jpg",
+      "email": "zoe.robert@example.com"
+    },
+    "freelancer": {
+      "id": "user_7",
+      "name": "Layla Fletcher",
+      "avatar": "https://randomuser.me/api/portraits/women/15.jpg",
+      "email": "layla.fletcher@example.com"
+    },
+    "budget": 8119,
+    "timeline": 3,
+    "status": "active",
+    "progress": 21,
+    "priority": "low",
+    "tags": [
+      "branding",
+      "development"
+    ],
+    "createdAt": "2023-01-21T00:29:24.295Z",
+    "dueDate": "2025-09-03T04:45:54.530Z",
+    "images": [
+      "https://picsum.photos/800/600?random=526"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=526",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2023-01-19T18:28:31.176Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-07-04T11:41:43.049Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-07-22T10:04:47.943Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-09-07T15:01:17.360Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "علیرضا کریمی",
+          "email": "aalyrd.khrymy@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/13.jpg",
+          "location": "شهریار, Iran",
+          "phone": "033-16383488",
+          "profession": "Photographer",
+          "bio": "I'm علیرضا, a dedicated freelancer committed to delivering exceptional work on time.",
+          "joinDate": "2025-06-21T16:58:20.960Z",
+          "skills": [
+            "CSS",
+            "SEO",
+            "Premiere Pro"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 44,
+          "hourlyRate": 27,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2023-12-06T07:43:47.727Z",
+        "likes": 5
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Lucas Carlson",
+          "email": "lucas.carlson@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+          "location": "Reno, United States",
+          "phone": "(703) 451-8288",
+          "profession": "Illustrator",
+          "bio": "Creative professional Lucas - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Figma",
+            "Adobe Photoshop",
+            "HTML",
+            "Canva",
+            "JavaScript"
+          ],
+          "rating": 3.2,
+          "projectsCompleted": 22,
+          "hourlyRate": 87,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2023-05-26T11:35:05.821Z",
+        "likes": 2
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Zoe Robert",
+          "email": "zoe.robert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/43.jpg",
+          "location": "Burg (Ag), Switzerland",
+          "phone": "077 689 11 70",
+          "profession": "Writer",
+          "bio": "Creative professional Zoe - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Python",
+            "JavaScript",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 43,
+          "hourlyRate": 82,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2024-12-08T00:42:43.739Z",
+        "likes": 2
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  },
+  {
+    "id": "project_15",
+    "title": "Mobile App for Technology Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse. Excepteur sint occaecat cupidatat non proident, sunt in culpa. Nulla pariatur excepteur sint occaecat cupidatat non proident. At vero eos et accusamus et iusto odio dignissimos ducimus. Et harum quidem rerum facilis est et expedita distinctio. Temporibus autem quibusdam et aut officiis debitis aut rerum. Neque porro quisquam est qui dolorem ipsum quia dolor sit.",
+    "type": "Mobile App",
+    "industry": "Technology",
+    "client": {
+      "id": "user_9",
+      "name": "Pramitha Gatty",
+      "avatar": "https://randomuser.me/api/portraits/women/2.jpg",
+      "email": "pramitha.gatty@example.com"
+    },
+    "freelancer": {
+      "id": "user_2",
+      "name": "Lucas Carlson",
+      "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+      "email": "lucas.carlson@example.com"
+    },
+    "budget": 4475,
+    "timeline": 9,
+    "status": "active",
+    "progress": 5,
+    "priority": "low",
+    "tags": [
+      "design",
+      "marketing"
+    ],
+    "createdAt": "2023-08-16T08:48:18.211Z",
+    "dueDate": "2025-08-05T13:59:19.647Z",
+    "images": [
+      "https://picsum.photos/1200/800?random=893"
+    ],
+    "thumbnail": "https://picsum.photos/300/200?random=893",
+    "files": [
+      {
+        "name": "project_brief.pdf",
+        "size": "2.4 MB",
+        "type": "document"
+      },
+      {
+        "name": "design_mockup.fig",
+        "size": "15.7 MB",
+        "type": "design"
+      },
+      {
+        "name": "final_logo.svg",
+        "size": "245 KB",
+        "type": "image"
+      },
+      {
+        "name": "brand_guidelines.pdf",
+        "size": "8.9 MB",
+        "type": "document"
+      }
+    ],
+    "milestones": [
+      {
+        "id": 1,
+        "title": "Project Discovery",
+        "status": "completed",
+        "amount": 500,
+        "dueDate": "2024-09-29T22:35:51.000Z"
+      },
+      {
+        "id": 2,
+        "title": "Design Phase",
+        "status": "in_progress",
+        "amount": 1500,
+        "dueDate": "2025-07-08T07:48:17.853Z"
+      },
+      {
+        "id": 3,
+        "title": "Development",
+        "status": "pending",
+        "amount": 2000,
+        "dueDate": "2025-07-06T16:19:30.574Z"
+      },
+      {
+        "id": 4,
+        "title": "Final Delivery",
+        "status": "pending",
+        "amount": 1000,
+        "dueDate": "2025-08-08T17:57:50.709Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "author": {
+          "id": "user_1",
+          "name": "علیرضا کریمی",
+          "email": "aalyrd.khrymy@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/13.jpg",
+          "location": "شهریار, Iran",
+          "phone": "033-16383488",
+          "profession": "Photographer",
+          "bio": "I'm علیرضا, a dedicated freelancer committed to delivering exceptional work on time.",
+          "joinDate": "2025-06-21T16:58:20.960Z",
+          "skills": [
+            "CSS",
+            "SEO",
+            "Premiere Pro"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 44,
+          "hourlyRate": 27,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the color scheme.",
+        "createdAt": "2024-07-22T09:38:40.465Z",
+        "likes": 4
+      },
+      {
+        "id": 2,
+        "author": {
+          "id": "user_2",
+          "name": "Lucas Carlson",
+          "email": "lucas.carlson@example.com",
+          "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+          "location": "Reno, United States",
+          "phone": "(703) 451-8288",
+          "profession": "Illustrator",
+          "bio": "Creative professional Lucas - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Figma",
+            "Adobe Photoshop",
+            "HTML",
+            "Canva",
+            "JavaScript"
+          ],
+          "rating": 3.2,
+          "projectsCompleted": 22,
+          "hourlyRate": 87,
+          "isVerified": true,
+          "isOnline": false
+        },
+        "content": "This looks great! I especially love the typography.",
+        "createdAt": "2025-01-20T02:56:46.856Z",
+        "likes": 9
+      },
+      {
+        "id": 3,
+        "author": {
+          "id": "user_3",
+          "name": "Zoe Robert",
+          "email": "zoe.robert@example.com",
+          "avatar": "https://randomuser.me/api/portraits/women/43.jpg",
+          "location": "Burg (Ag), Switzerland",
+          "phone": "077 689 11 70",
+          "profession": "Writer",
+          "bio": "Creative professional Zoe - helping businesses grow through innovative design solutions.",
+          "joinDate": "2025-06-21T16:58:20.961Z",
+          "skills": [
+            "Python",
+            "JavaScript",
+            "Sketch"
+          ],
+          "rating": 4.2,
+          "projectsCompleted": 43,
+          "hourlyRate": 82,
+          "isVerified": true,
+          "isOnline": true
+        },
+        "content": "This looks great! I especially love the layout.",
+        "createdAt": "2025-06-11T14:43:56.565Z",
+        "likes": 4
+      }
+    ],
+    "attachments": [
+      {
+        "name": "reference_image.jpg",
+        "size": "1.2 MB",
+        "url": "https://picsum.photos/800/600"
+      },
+      {
+        "name": "style_guide.pdf",
+        "size": "3.8 MB",
+        "url": "/docs/style-guide.pdf"
+      }
+    ]
+  }
+]

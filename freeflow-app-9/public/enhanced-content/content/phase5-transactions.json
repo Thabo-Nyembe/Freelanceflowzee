@@ -1,0 +1,262 @@
+[
+  {
+    "id": "escrow_1",
+    "projectId": "project_10",
+    "projectTitle": "E-commerce Store for Food & Beverage Company",
+    "client": {
+      "id": "user_14",
+      "name": "ملینا گلشن",
+      "avatar": "https://randomuser.me/api/portraits/women/27.jpg",
+      "email": "mlyn.glshn@example.com"
+    },
+    "freelancer": {
+      "id": "user_2",
+      "name": "Lucas Carlson",
+      "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+      "email": "lucas.carlson@example.com"
+    },
+    "amount": 3188,
+    "currency": "USD",
+    "status": "pending",
+    "type": "full_payment",
+    "createdAt": "2025-01-18T14:31:58.478Z",
+    "releaseDate": "2025-07-01T06:21:37.927Z",
+    "description": "Payment for E-commerce Store for Food & Beverage Company - Milestone 1",
+    "milestoneNumber": 2,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_2",
+    "projectId": "project_10",
+    "projectTitle": "E-commerce Store for Food & Beverage Company",
+    "client": {
+      "id": "user_14",
+      "name": "ملینا گلشن",
+      "avatar": "https://randomuser.me/api/portraits/women/27.jpg",
+      "email": "mlyn.glshn@example.com"
+    },
+    "freelancer": {
+      "id": "user_2",
+      "name": "Lucas Carlson",
+      "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+      "email": "lucas.carlson@example.com"
+    },
+    "amount": 4794,
+    "currency": "USD",
+    "status": "released",
+    "type": "partial",
+    "createdAt": "2023-10-26T20:15:30.903Z",
+    "releaseDate": "2025-08-13T05:49:24.006Z",
+    "description": "Payment for E-commerce Store for Food & Beverage Company - Milestone 2",
+    "milestoneNumber": 2,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_3",
+    "projectId": "project_5",
+    "projectTitle": "Graphic Design for Finance Company",
+    "client": {
+      "id": "user_1",
+      "name": "علیرضا کریمی",
+      "avatar": "https://randomuser.me/api/portraits/men/13.jpg",
+      "email": "aalyrd.khrymy@example.com"
+    },
+    "freelancer": {
+      "id": "user_8",
+      "name": "Jesse Peltola",
+      "avatar": "https://randomuser.me/api/portraits/men/16.jpg",
+      "email": "jesse.peltola@example.com"
+    },
+    "amount": 4575,
+    "currency": "USD",
+    "status": "released",
+    "type": "full_payment",
+    "createdAt": "2023-01-23T12:29:13.740Z",
+    "releaseDate": "2025-06-21T20:01:31.014Z",
+    "description": "Payment for Graphic Design for Finance Company - Milestone 3",
+    "milestoneNumber": 2,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_4",
+    "projectId": "project_4",
+    "projectTitle": "Video Production for Education Company",
+    "client": {
+      "id": "user_4",
+      "name": "Ikram Nooijen",
+      "avatar": "https://randomuser.me/api/portraits/men/92.jpg",
+      "email": "ikram.nooijen@example.com"
+    },
+    "freelancer": {
+      "id": "user_5",
+      "name": "Naja Kristensen",
+      "avatar": "https://randomuser.me/api/portraits/women/58.jpg",
+      "email": "naja.kristensen@example.com"
+    },
+    "amount": 4090,
+    "currency": "USD",
+    "status": "disputed",
+    "type": "full_payment",
+    "createdAt": "2023-01-02T16:00:42.566Z",
+    "releaseDate": "2025-07-13T07:59:26.973Z",
+    "description": "Payment for Video Production for Education Company - Milestone 4",
+    "milestoneNumber": 2,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_5",
+    "projectId": "project_11",
+    "projectTitle": "UI/UX Design for Retail Company",
+    "client": {
+      "id": "user_2",
+      "name": "Lucas Carlson",
+      "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+      "email": "lucas.carlson@example.com"
+    },
+    "freelancer": {
+      "id": "user_10",
+      "name": "Earl Ryan",
+      "avatar": "https://randomuser.me/api/portraits/men/40.jpg",
+      "email": "earl.ryan@example.com"
+    },
+    "amount": 2299,
+    "currency": "USD",
+    "status": "released",
+    "type": "partial",
+    "createdAt": "2023-04-04T06:01:42.635Z",
+    "releaseDate": "2025-08-11T01:51:44.123Z",
+    "description": "Payment for UI/UX Design for Retail Company - Milestone 5",
+    "milestoneNumber": 5,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_6",
+    "projectId": "project_1",
+    "projectTitle": "Content Writing for Real Estate Company",
+    "client": {
+      "id": "user_8",
+      "name": "Jesse Peltola",
+      "avatar": "https://randomuser.me/api/portraits/men/16.jpg",
+      "email": "jesse.peltola@example.com"
+    },
+    "freelancer": {
+      "id": "user_11",
+      "name": "Nathan Nicolas",
+      "avatar": "https://randomuser.me/api/portraits/men/35.jpg",
+      "email": "nathan.nicolas@example.com"
+    },
+    "amount": 3252,
+    "currency": "USD",
+    "status": "active",
+    "type": "milestone",
+    "createdAt": "2025-02-13T01:48:21.562Z",
+    "releaseDate": "2025-09-16T21:42:31.908Z",
+    "description": "Payment for Content Writing for Real Estate Company - Milestone 6",
+    "milestoneNumber": 5,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_7",
+    "projectId": "project_4",
+    "projectTitle": "Video Production for Education Company",
+    "client": {
+      "id": "user_4",
+      "name": "Ikram Nooijen",
+      "avatar": "https://randomuser.me/api/portraits/men/92.jpg",
+      "email": "ikram.nooijen@example.com"
+    },
+    "freelancer": {
+      "id": "user_5",
+      "name": "Naja Kristensen",
+      "avatar": "https://randomuser.me/api/portraits/women/58.jpg",
+      "email": "naja.kristensen@example.com"
+    },
+    "amount": 1198,
+    "currency": "USD",
+    "status": "released",
+    "type": "full_payment",
+    "createdAt": "2023-05-04T13:27:53.322Z",
+    "releaseDate": "2025-08-13T02:15:13.925Z",
+    "description": "Payment for Video Production for Education Company - Milestone 7",
+    "milestoneNumber": 5,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_8",
+    "projectId": "project_8",
+    "projectTitle": "Web Development for Retail Company",
+    "client": {
+      "id": "user_2",
+      "name": "Lucas Carlson",
+      "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+      "email": "lucas.carlson@example.com"
+    },
+    "freelancer": {
+      "id": "user_5",
+      "name": "Naja Kristensen",
+      "avatar": "https://randomuser.me/api/portraits/women/58.jpg",
+      "email": "naja.kristensen@example.com"
+    },
+    "amount": 1688,
+    "currency": "USD",
+    "status": "pending",
+    "type": "partial",
+    "createdAt": "2024-04-05T15:12:39.038Z",
+    "releaseDate": "2025-09-01T17:48:32.960Z",
+    "description": "Payment for Web Development for Retail Company - Milestone 8",
+    "milestoneNumber": 3,
+    "disputeReason": null
+  },
+  {
+    "id": "escrow_9",
+    "projectId": "project_10",
+    "projectTitle": "E-commerce Store for Food & Beverage Company",
+    "client": {
+      "id": "user_14",
+      "name": "ملینا گلشن",
+      "avatar": "https://randomuser.me/api/portraits/women/27.jpg",
+      "email": "mlyn.glshn@example.com"
+    },
+    "freelancer": {
+      "id": "user_2",
+      "name": "Lucas Carlson",
+      "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+      "email": "lucas.carlson@example.com"
+    },
+    "amount": 4255,
+    "currency": "USD",
+    "status": "pending",
+    "type": "partial",
+    "createdAt": "2023-07-14T20:09:59.256Z",
+    "releaseDate": "2025-06-22T05:53:39.580Z",
+    "description": "Payment for E-commerce Store for Food & Beverage Company - Milestone 9",
+    "milestoneNumber": 2,
+    "disputeReason": "Quality concerns"
+  },
+  {
+    "id": "escrow_10",
+    "projectId": "project_12",
+    "projectTitle": "Logo Design for Fashion Company",
+    "client": {
+      "id": "user_8",
+      "name": "Jesse Peltola",
+      "avatar": "https://randomuser.me/api/portraits/men/16.jpg",
+      "email": "jesse.peltola@example.com"
+    },
+    "freelancer": {
+      "id": "user_7",
+      "name": "Layla Fletcher",
+      "avatar": "https://randomuser.me/api/portraits/women/15.jpg",
+      "email": "layla.fletcher@example.com"
+    },
+    "amount": 907,
+    "currency": "USD",
+    "status": "pending",
+    "type": "partial",
+    "createdAt": "2024-11-30T21:13:20.952Z",
+    "releaseDate": "2025-07-09T08:09:39.679Z",
+    "description": "Payment for Logo Design for Fashion Company - Milestone 10",
+    "milestoneNumber": 3,
+    "disputeReason": null
+  }
+]
