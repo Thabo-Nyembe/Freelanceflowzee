@@ -1,0 +1,82 @@
+[
+  {
+    "id": "project_1",
+    "title": "Content Writing for Real Estate Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, q...",
+    "status": "draft",
+    "progress": 30,
+    "budget": 2792,
+    "client": "Jesse Peltola",
+    "thumbnail": "https://picsum.photos/300/200?random=90"
+  },
+  {
+    "id": "project_2",
+    "title": "Graphic Design for Non-Profit Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, q...",
+    "status": "draft",
+    "progress": 15,
+    "budget": 5838,
+    "client": "Earl Ryan",
+    "thumbnail": "https://picsum.photos/300/200?random=676"
+  },
+  {
+    "id": "project_3",
+    "title": "Web Development for Automotive Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, q...",
+    "status": "in_review",
+    "progress": 71,
+    "budget": 4191,
+    "client": "Naja Kristensen",
+    "thumbnail": "https://picsum.photos/300/200?random=645"
+  },
+  {
+    "id": "project_4",
+    "title": "Video Production for Education Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, q...",
+    "status": "active",
+    "progress": 16,
+    "budget": 7642,
+    "client": "Ikram Nooijen",
+    "thumbnail": "https://picsum.photos/300/200?random=55"
+  },
+  {
+    "id": "project_5",
+    "title": "Graphic Design for Finance Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, q...",
+    "status": "completed",
+    "progress": 53,
+    "budget": 8038,
+    "client": "علیرضا کریمی",
+    "thumbnail": "https://picsum.photos/300/200?random=55"
+  },
+  {
+    "id": "project_6",
+    "title": "Logo Design for Travel Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, q...",
+    "status": "draft",
+    "progress": 89,
+    "budget": 5790,
+    "client": "Jesse Peltola",
+    "thumbnail": "https://picsum.photos/300/200?random=211"
+  },
+  {
+    "id": "project_7",
+    "title": "Web Development for Gaming Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, q...",
+    "status": "completed",
+    "progress": 71,
+    "budget": 7870,
+    "client": "Jesse Peltola",
+    "thumbnail": "https://picsum.photos/300/200?random=242"
+  },
+  {
+    "id": "project_8",
+    "title": "Web Development for Retail Company",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, q...",
+    "status": "active",
+    "progress": 65,
+    "budget": 6365,
+    "client": "Lucas Carlson",
+    "thumbnail": "https://picsum.photos/300/200?random=167"
+  }
+]

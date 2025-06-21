@@ -21,24 +21,44 @@ export default defineConfig({
     ['junit', { outputFile: 'test-results/junit.xml' }]
   ],
   
-  /* Shared settings for all the projects below. */
+  
+  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like await page.goto('/') */
     baseURL: 'http://localhost:3001',
     
-    /* Extra HTTP headers */
-    extraHTTPHeaders: {
-      'x-test-mode': 'true'
-    },
-    
-    /* Collect trace when retrying the failed test. */
+    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     
     /* Take screenshot on failure */
     screenshot: 'only-on-failure',
     
+    /* Record video on failure */
+    video: 'retain-on-failure',
+    
     /* Timeout for each action */
     actionTimeout: 30000,
+        
+    /* Extra HTTP headers */
+    extraHTTPHeaders: {
+      'x-test-mode': 'true'
+    },
+    
+    /* Browser launch options */
+    launchOptions: {
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--disable-gpu',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding'
+      ]
+    }
   },
 
   /* Configure projects for comprehensive responsive testing */

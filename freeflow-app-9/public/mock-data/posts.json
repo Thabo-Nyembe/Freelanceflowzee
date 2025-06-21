@@ -1,0 +1,170 @@
+[
+  {
+    "id": "post_1",
+    "author": {
+      "id": "user_2",
+      "name": "Lucas Carlson",
+      "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+      "profession": "Illustrator"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/800/800?random=90",
+    "likes": 177,
+    "comments": 43,
+    "createdAt": "2024-05-07T05:43:53.024Z"
+  },
+  {
+    "id": "post_2",
+    "author": {
+      "id": "user_2",
+      "name": "Lucas Carlson",
+      "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+      "profession": "Illustrator"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1200/900?random=676",
+    "likes": 13,
+    "comments": 16,
+    "createdAt": "2025-04-12T01:06:00.981Z"
+  },
+  {
+    "id": "post_3",
+    "author": {
+      "id": "user_11",
+      "name": "Nathan Nicolas",
+      "avatar": "https://randomuser.me/api/portraits/men/35.jpg",
+      "profession": "Graphic Designer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1600/600?random=242",
+    "likes": 87,
+    "comments": 31,
+    "createdAt": "2023-09-02T15:54:08.943Z"
+  },
+  {
+    "id": "post_4",
+    "author": {
+      "id": "user_15",
+      "name": "Julie Mcguinness",
+      "avatar": "https://randomuser.me/api/portraits/women/14.jpg",
+      "profession": "Video Editor"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse.",
+    "image": null,
+    "likes": 114,
+    "comments": 0,
+    "createdAt": "2023-03-06T08:02:51.859Z"
+  },
+  {
+    "id": "post_5",
+    "author": {
+      "id": "user_7",
+      "name": "Layla Fletcher",
+      "avatar": "https://randomuser.me/api/portraits/women/15.jpg",
+      "profession": "Social Media Manager"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/800/900?random=290",
+    "likes": 135,
+    "comments": 3,
+    "createdAt": "2025-01-07T22:59:35.677Z"
+  },
+  {
+    "id": "post_6",
+    "author": {
+      "id": "user_11",
+      "name": "Nathan Nicolas",
+      "avatar": "https://randomuser.me/api/portraits/men/35.jpg",
+      "profession": "Graphic Designer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1600/800?random=645",
+    "likes": 145,
+    "comments": 12,
+    "createdAt": "2024-08-08T18:16:45.864Z"
+  },
+  {
+    "id": "post_7",
+    "author": {
+      "id": "user_13",
+      "name": "Cornelio Báez",
+      "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+      "profession": "UI/UX Designer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1200/900?random=55",
+    "likes": 170,
+    "comments": 16,
+    "createdAt": "2024-06-10T22:12:45.107Z"
+  },
+  {
+    "id": "post_8",
+    "author": {
+      "id": "user_15",
+      "name": "Julie Mcguinness",
+      "avatar": "https://randomuser.me/api/portraits/women/14.jpg",
+      "profession": "Video Editor"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/800/600?random=526",
+    "likes": 184,
+    "comments": 4,
+    "createdAt": "2025-01-19T18:36:40.594Z"
+  },
+  {
+    "id": "post_9",
+    "author": {
+      "id": "user_6",
+      "name": "Ryan Bryne",
+      "avatar": "https://randomuser.me/api/portraits/men/62.jpg",
+      "profession": "Developer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": null,
+    "likes": 4,
+    "comments": 15,
+    "createdAt": "2024-08-05T19:14:01.875Z"
+  },
+  {
+    "id": "post_10",
+    "author": {
+      "id": "user_7",
+      "name": "Layla Fletcher",
+      "avatar": "https://randomuser.me/api/portraits/women/15.jpg",
+      "profession": "Social Media Manager"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/800/800?random=328",
+    "likes": 49,
+    "comments": 30,
+    "createdAt": "2024-07-09T02:11:24.958Z"
+  },
+  {
+    "id": "post_11",
+    "author": {
+      "id": "user_2",
+      "name": "Lucas Carlson",
+      "avatar": "https://randomuser.me/api/portraits/men/9.jpg",
+      "profession": "Illustrator"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "image": "https://picsum.photos/1200/600?random=900",
+    "likes": 43,
+    "comments": 21,
+    "createdAt": "2025-05-26T05:06:55.512Z"
+  },
+  {
+    "id": "post_12",
+    "author": {
+      "id": "user_13",
+      "name": "Cornelio Báez",
+      "avatar": "https://randomuser.me/api/portraits/men/63.jpg",
+      "profession": "UI/UX Designer"
+    },
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco. Duis aute irure dolor in reprehenderit in voluptate velit esse.",
+    "image": "https://picsum.photos/1200/900?random=55",
+    "likes": 182,
+    "comments": 4,
+    "createdAt": "2023-03-04T20:53:16.483Z"
+  }
+]

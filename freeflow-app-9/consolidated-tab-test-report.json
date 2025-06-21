@@ -1,6 +1,6 @@
 {
   "summary": {
-    "duration": 18,
+    "duration": 19,
     "scriptsRun": 0,
     "totalScripts": 6,
     "overallPassRate": 0,
@@ -94,5 +94,5 @@
     "passRate": 0,
     "failedScripts": 12
   },
-  "timestamp": "2025-06-18T19:30:48.920Z"
+  "timestamp": "2025-06-21T19:15:24.289Z"
 }

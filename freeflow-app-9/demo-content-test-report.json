@@ -1,0 +1,61 @@
+{
+  "timestamp": "2025-06-21T17:35:24.577Z",
+  "successRate": 89,
+  "results": {
+    "contentFiles": {
+      "enhanced-users.json": {
+        "status": "passed",
+        "count": 15
+      },
+      "enhanced-projects.json": {
+        "status": "passed",
+        "count": 15
+      },
+      "enhanced-posts.json": {
+        "status": "passed",
+        "count": 25
+      },
+      "enhanced-files.json": {
+        "status": "passed",
+        "count": 81
+      },
+      "enhanced-transactions.json": {
+        "status": "passed",
+        "count": 10
+      },
+      "enhanced-analytics.json": {
+        "status": "passed",
+        "count": 1
+      }
+    },
+    "apiEndpoints": {
+      "demoAPI": {
+        "status": "partial",
+        "foundFeatures": 2,
+        "totalFeatures": 5
+      }
+    },
+    "components": {
+      "demoManager": {
+        "status": "passed",
+        "foundFunctions": 6,
+        "totalFunctions": 6
+      },
+      "reactProvider": {
+        "status": "passed",
+        "foundHooks": 4,
+        "totalHooks": 4
+      }
+    },
+    "summary": {
+      "passed": 8,
+      "failed": 1,
+      "errors": []
+    }
+  },
+  "recommendations": [
+    "Demo content integration is ready for feature demonstrations",
+    "Proceed with testing individual dashboard components",
+    "Consider creating guided demo flows for different audiences"
+  ]
+}

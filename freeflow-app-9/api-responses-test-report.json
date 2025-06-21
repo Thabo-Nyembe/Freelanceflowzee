@@ -1,0 +1,109 @@
+{
+  "timestamp": "2025-06-21T17:41:23.708Z",
+  "bit": 4,
+  "successRate": 100,
+  "results": {
+    "endpoints": {
+      "demoAPI": {
+        "status": "excellent",
+        "score": 100,
+        "features": {
+          "hasGET": true,
+          "hasPOST": true,
+          "hasTypeHandling": true,
+          "hasErrorHandling": true
+        },
+        "supportedTypes": 6,
+        "totalTypes": 6
+      }
+    },
+    "dataFlow": {
+      "manager": {
+        "status": "excellent",
+        "score": 100,
+        "implementedFunctions": 6,
+        "totalFunctions": 6,
+        "features": {
+          "hasCache": true,
+          "hasSingleton": true,
+          "hasErrorHandling": true
+        }
+      },
+      "contentFiles": {
+        "status": "excellent",
+        "score": 100,
+        "validFiles": 6,
+        "totalFiles": 6,
+        "totalItems": 147,
+        "fileResults": {
+          "enhanced-users.json": {
+            "status": "valid",
+            "itemCount": 15,
+            "minRequired": 10
+          },
+          "enhanced-projects.json": {
+            "status": "valid",
+            "itemCount": 15,
+            "minRequired": 10
+          },
+          "enhanced-posts.json": {
+            "status": "valid",
+            "itemCount": 25,
+            "minRequired": 15
+          },
+          "enhanced-files.json": {
+            "status": "valid",
+            "itemCount": 81,
+            "minRequired": 20
+          },
+          "enhanced-transactions.json": {
+            "status": "valid",
+            "itemCount": 10,
+            "minRequired": 5
+          },
+          "enhanced-analytics.json": {
+            "status": "valid",
+            "itemCount": 1,
+            "minRequired": 1
+          }
+        }
+      },
+      "reactProvider": {
+        "status": "excellent",
+        "score": 100,
+        "implementedHooks": 5,
+        "totalHooks": 5,
+        "reactFeatures": {
+          "hasContext": true,
+          "hasProvider": true,
+          "hasUseEffect": true,
+          "hasUseState": true,
+          "hasErrorBoundary": true
+        }
+      }
+    },
+    "performance": {
+      "status": "excellent",
+      "score": 100,
+      "avgLoadTime": 0,
+      "totalSizeMB": 0.01,
+      "recommendation": "Performance is good"
+    },
+    "summary": {
+      "passed": 5,
+      "failed": 0,
+      "warnings": 0
+    }
+  },
+  "insights": {
+    "strongestComponent": {
+      "name": "performance",
+      "score": 100
+    },
+    "weakestComponent": {
+      "name": "none",
+      "score": 100
+    },
+    "overallReadiness": "Ready for demos"
+  }
+}

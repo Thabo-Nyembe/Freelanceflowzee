@@ -1,0 +1,55 @@
+{
+  "timestamp": "2025-06-21T17:37:10.279Z",
+  "bit": 2,
+  "successRate": 40,
+  "results": {
+    "components": {
+      "app/dashboard/page.tsx": {
+        "status": "missing"
+      },
+      "components/dashboard/dashboard-layout.tsx": {
+        "status": "missing"
+      },
+      "components/dashboard/dashboard-header.tsx": {
+        "status": "missing"
+      },
+      "components/dashboard/overview-cards.tsx": {
+        "status": "optional"
+      },
+      "components/dashboard/recent-projects.tsx": {
+        "status": "optional"
+      },
+      "components/dashboard/activity-feed.tsx": {
+        "status": "optional"
+      },
+      "components/dashboard/quick-stats.tsx": {
+        "status": "optional"
+      },
+      "components/dashboard/earnings-chart.tsx": {
+        "status": "optional"
+      }
+    },
+    "integrations": {
+      "demoUsage": {
+        "totalFiles": 7,
+        "integratedFiles": 1,
+        "integrationRate": 14
+      },
+      "apiTest": {
+        "status": "passed",
+        "userCount": 15
+      }
+    },
+    "summary": {
+      "passed": 2,
+      "failed": 3,
+      "warnings": 5
+    }
+  },
+  "nextSteps": [
+    "Create basic dashboard structure",
+    "Implement core dashboard components",
+    "Add demo content integration",
+    "Re-run Bit 2 after implementation"
+  ]
+}

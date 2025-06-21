@@ -75,7 +75,7 @@ class MasterTabTester {
 
     return new Promise((resolve, reject) => {
       const scriptPath = path.join(__dirname, scriptConfig.script);
-      const child = spawn('node', [scriptPath], {
+      const child = spawn('node', [scriptPath, '--debug'], {
         stdio: 'inherit',
         cwd: process.cwd()
       });

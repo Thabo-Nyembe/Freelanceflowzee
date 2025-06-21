@@ -1,10 +1,7 @@
-
 const fs = require('fs');
-const Context7TestIntegration = require('./context7-test-integration');
 
 class Context7Reporter {
   constructor(options = {}) {
-    this.integration = new Context7TestIntegration();
     this.results = [];
   }
 
@@ -26,7 +23,6 @@ class Context7Reporter {
     console.log('🤖 Generating AI-enhanced test analysis...');
     
     const testOutput = JSON.stringify(this.results, null, 2);
-    const report = this.integration.generateEnhancedReport(testOutput);
     
     // Save results for further analysis
     fs.writeFileSync('test-results/context7-analysis.json', testOutput);
