@@ -9,7 +9,7 @@ import { resendVerification } from '@/app/(auth)/login/actions'
 
 export function VerificationReminder() {
   const searchParams = useSearchParams()
-  const [isVisible, setIsVisible] = useState(searchParams.get('verification_reminder') === 'true')
+  const [isVisible, setIsVisible] = useState(searchParams?.get('verification_reminder') === 'true')
   const [isResending, setIsResending] = useState(false)
   const [resendStatus, setResendStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
@@ -21,7 +21,7 @@ export function VerificationReminder() {
     
     try {
       // Get user email from URL params or localStorage
-      const userEmail = searchParams.get('email') || localStorage.getItem('userEmail')
+      const userEmail = searchParams?.get('email') || localStorage.getItem('userEmail')
       if (!userEmail) {
         setResendStatus('error')
         return

@@ -1,280 +1,280 @@
 {
   "overview": {
-    "totalViews": 16460,
-    "totalDownloads": 3526,
-    "totalRevenue": 35891,
-    "averageRating": 4.8,
-    "completionRate": 88.4
+    "totalViews": 17510,
+    "totalDownloads": 3802,
+    "totalRevenue": 35833,
+    "averageRating": 4.9,
+    "completionRate": 87
   },
   "daily": [
     {
       "date": "2025-05-23",
-      "views": 1039,
-      "downloads": 103,
-      "uploads": 11,
-      "revenue": 1424,
-      "newUsers": 4,
-      "activeProjects": 19
+      "views": 586,
+      "downloads": 157,
+      "uploads": 17,
+      "revenue": 1694,
+      "newUsers": 3,
+      "activeProjects": 14
     },
     {
       "date": "2025-05-24",
-      "views": 146,
-      "downloads": 170,
-      "uploads": 52,
-      "revenue": 278,
-      "newUsers": 11,
-      "activeProjects": 6
+      "views": 417,
+      "downloads": 101,
+      "uploads": 29,
+      "revenue": 306,
+      "newUsers": 6,
+      "activeProjects": 7
     },
     {
       "date": "2025-05-25",
-      "views": 1024,
-      "downloads": 162,
-      "uploads": 7,
-      "revenue": 1111,
-      "newUsers": 21,
-      "activeProjects": 9
+      "views": 590,
+      "downloads": 199,
+      "uploads": 38,
+      "revenue": 788,
+      "newUsers": 9,
+      "activeProjects": 12
     },
     {
       "date": "2025-05-26",
-      "views": 228,
-      "downloads": 180,
-      "uploads": 6,
-      "revenue": 1424,
-      "newUsers": 5,
-      "activeProjects": 16
+      "views": 437,
+      "downloads": 181,
+      "uploads": 46,
+      "revenue": 2013,
+      "newUsers": 19,
+      "activeProjects": 10
     },
     {
       "date": "2025-05-27",
-      "views": 596,
-      "downloads": 88,
-      "uploads": 24,
-      "revenue": 1548,
+      "views": 1050,
+      "downloads": 140,
+      "uploads": 21,
+      "revenue": 417,
       "newUsers": 3,
       "activeProjects": 8
     },
     {
       "date": "2025-05-28",
-      "views": 335,
-      "downloads": 153,
-      "uploads": 31,
-      "revenue": 1173,
-      "newUsers": 14,
-      "activeProjects": 7
+      "views": 410,
+      "downloads": 30,
+      "uploads": 27,
+      "revenue": 2182,
+      "newUsers": 10,
+      "activeProjects": 5
     },
     {
       "date": "2025-05-29",
-      "views": 656,
-      "downloads": 29,
-      "uploads": 38,
-      "revenue": 694,
+      "views": 414,
+      "downloads": 49,
+      "uploads": 53,
+      "revenue": 1079,
+      "newUsers": 12,
+      "activeProjects": 11
+    },
+    {
+      "date": "2025-05-30",
+      "views": 700,
+      "downloads": 118,
+      "uploads": 12,
+      "revenue": 673,
+      "newUsers": 10,
+      "activeProjects": 15
+    },
+    {
+      "date": "2025-05-31",
+      "views": 179,
+      "downloads": 155,
+      "uploads": 41,
+      "revenue": 1137,
+      "newUsers": 8,
+      "activeProjects": 10
+    },
+    {
+      "date": "2025-06-01",
+      "views": 299,
+      "downloads": 205,
+      "uploads": 25,
+      "revenue": 1182,
+      "newUsers": 5,
+      "activeProjects": 16
+    },
+    {
+      "date": "2025-06-02",
+      "views": 639,
+      "downloads": 24,
+      "uploads": 43,
+      "revenue": 2143,
       "newUsers": 18,
       "activeProjects": 6
     },
     {
-      "date": "2025-05-30",
-      "views": 554,
-      "downloads": 113,
-      "uploads": 22,
-      "revenue": 1012,
-      "newUsers": 13,
-      "activeProjects": 10
-    },
-    {
-      "date": "2025-05-31",
-      "views": 493,
-      "downloads": 86,
-      "uploads": 34,
-      "revenue": 315,
-      "newUsers": 16,
-      "activeProjects": 8
-    },
-    {
-      "date": "2025-06-01",
-      "views": 500,
-      "downloads": 79,
-      "uploads": 28,
-      "revenue": 482,
-      "newUsers": 19,
-      "activeProjects": 10
-    },
-    {
-      "date": "2025-06-02",
-      "views": 205,
-      "downloads": 130,
-      "uploads": 23,
-      "revenue": 883,
-      "newUsers": 5,
-      "activeProjects": 9
-    },
-    {
       "date": "2025-06-03",
-      "views": 604,
-      "downloads": 129,
-      "uploads": 29,
-      "revenue": 584,
+      "views": 730,
+      "downloads": 163,
+      "uploads": 27,
+      "revenue": 1653,
       "newUsers": 2,
-      "activeProjects": 15
+      "activeProjects": 7
     },
     {
       "date": "2025-06-04",
-      "views": 626,
-      "downloads": 188,
-      "uploads": 19,
-      "revenue": 2035,
-      "newUsers": 14,
-      "activeProjects": 13
+      "views": 928,
+      "downloads": 43,
+      "uploads": 51,
+      "revenue": 1783,
+      "newUsers": 7,
+      "activeProjects": 8
     },
     {
       "date": "2025-06-05",
-      "views": 497,
-      "downloads": 99,
-      "uploads": 23,
-      "revenue": 1073,
-      "newUsers": 18,
-      "activeProjects": 18
+      "views": 907,
+      "downloads": 104,
+      "uploads": 39,
+      "revenue": 1149,
+      "newUsers": 21,
+      "activeProjects": 11
     },
     {
       "date": "2025-06-06",
-      "views": 269,
-      "downloads": 71,
-      "uploads": 47,
-      "revenue": 1896,
-      "newUsers": 15,
-      "activeProjects": 10
-    },
-    {
-      "date": "2025-06-07",
-      "views": 446,
-      "downloads": 116,
-      "uploads": 7,
-      "revenue": 974,
+      "views": 766,
+      "downloads": 207,
+      "uploads": 37,
+      "revenue": 499,
       "newUsers": 15,
       "activeProjects": 19
     },
     {
+      "date": "2025-06-07",
+      "views": 763,
+      "downloads": 201,
+      "uploads": 35,
+      "revenue": 1068,
+      "newUsers": 18,
+      "activeProjects": 5
+    },
+    {
       "date": "2025-06-08",
-      "views": 390,
-      "downloads": 23,
-      "uploads": 7,
-      "revenue": 1531,
-      "newUsers": 12,
-      "activeProjects": 15
+      "views": 839,
+      "downloads": 107,
+      "uploads": 16,
+      "revenue": 273,
+      "newUsers": 17,
+      "activeProjects": 13
     },
     {
       "date": "2025-06-09",
-      "views": 591,
-      "downloads": 100,
-      "uploads": 26,
-      "revenue": 1852,
-      "newUsers": 17,
-      "activeProjects": 7
+      "views": 354,
+      "downloads": 159,
+      "uploads": 54,
+      "revenue": 1734,
+      "newUsers": 7,
+      "activeProjects": 9
     },
     {
       "date": "2025-06-10",
-      "views": 643,
-      "downloads": 31,
-      "uploads": 22,
-      "revenue": 956,
-      "newUsers": 4,
-      "activeProjects": 12
+      "views": 131,
+      "downloads": 85,
+      "uploads": 23,
+      "revenue": 712,
+      "newUsers": 19,
+      "activeProjects": 10
     },
     {
       "date": "2025-06-11",
-      "views": 400,
-      "downloads": 192,
-      "uploads": 7,
-      "revenue": 2122,
-      "newUsers": 5,
-      "activeProjects": 18
+      "views": 433,
+      "downloads": 203,
+      "uploads": 48,
+      "revenue": 999,
+      "newUsers": 19,
+      "activeProjects": 16
     },
     {
       "date": "2025-06-12",
-      "views": 891,
-      "downloads": 89,
-      "uploads": 43,
-      "revenue": 233,
-      "newUsers": 7,
-      "activeProjects": 14
+      "views": 339,
+      "downloads": 87,
+      "uploads": 37,
+      "revenue": 793,
+      "newUsers": 11,
+      "activeProjects": 16
     },
     {
       "date": "2025-06-13",
-      "views": 305,
-      "downloads": 150,
+      "views": 488,
+      "downloads": 113,
       "uploads": 50,
-      "revenue": 1642,
-      "newUsers": 12,
-      "activeProjects": 14
+      "revenue": 1409,
+      "newUsers": 18,
+      "activeProjects": 7
     },
     {
       "date": "2025-06-14",
-      "views": 996,
-      "downloads": 179,
-      "uploads": 17,
-      "revenue": 276,
-      "newUsers": 19,
+      "views": 137,
+      "downloads": 141,
+      "uploads": 14,
+      "revenue": 2043,
+      "newUsers": 4,
       "activeProjects": 18
     },
     {
       "date": "2025-06-15",
-      "views": 636,
-      "downloads": 107,
-      "uploads": 8,
-      "revenue": 1859,
+      "views": 676,
+      "downloads": 175,
+      "uploads": 38,
+      "revenue": 1054,
+      "newUsers": 8,
+      "activeProjects": 8
+    },
+    {
+      "date": "2025-06-16",
+      "views": 808,
+      "downloads": 94,
+      "uploads": 30,
+      "revenue": 1137,
       "newUsers": 18,
       "activeProjects": 9
     },
     {
-      "date": "2025-06-16",
-      "views": 519,
-      "downloads": 177,
-      "uploads": 33,
-      "revenue": 567,
-      "newUsers": 16,
-      "activeProjects": 16
-    },
-    {
       "date": "2025-06-17",
-      "views": 710,
-      "downloads": 56,
+      "views": 912,
+      "downloads": 196,
       "uploads": 8,
-      "revenue": 500,
-      "newUsers": 17,
-      "activeProjects": 11
+      "revenue": 634,
+      "newUsers": 21,
+      "activeProjects": 9
     },
     {
       "date": "2025-06-18",
-      "views": 236,
-      "downloads": 178,
-      "uploads": 16,
-      "revenue": 2015,
-      "newUsers": 8,
+      "views": 870,
+      "downloads": 134,
+      "uploads": 7,
+      "revenue": 1174,
+      "newUsers": 6,
       "activeProjects": 5
     },
     {
       "date": "2025-06-19",
-      "views": 191,
-      "downloads": 39,
-      "uploads": 16,
-      "revenue": 1306,
-      "newUsers": 3,
-      "activeProjects": 13
+      "views": 378,
+      "downloads": 74,
+      "uploads": 48,
+      "revenue": 2196,
+      "newUsers": 18,
+      "activeProjects": 7
     },
     {
       "date": "2025-06-20",
-      "views": 991,
-      "downloads": 162,
-      "uploads": 27,
-      "revenue": 1957,
-      "newUsers": 21,
-      "activeProjects": 18
+      "views": 373,
+      "downloads": 98,
+      "uploads": 13,
+      "revenue": 1610,
+      "newUsers": 12,
+      "activeProjects": 17
     },
     {
       "date": "2025-06-21",
-      "views": 743,
-      "downloads": 147,
-      "uploads": 12,
-      "revenue": 2169,
-      "newUsers": 17,
+      "views": 957,
+      "downloads": 59,
+      "uploads": 40,
+      "revenue": 299,
+      "newUsers": 10,
       "activeProjects": 8
     }
   ],

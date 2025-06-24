@@ -15,6 +15,16 @@ const SUPABASE_MAX_SIZE = STARTUP_MODE ? 524288 : 1048576; // 512KB vs 1MB
 // Storage provider types
 export type StorageProvider = 'supabase' | 'wasabi' | 'hybrid';
 
+// Add missing ListOptions interface
+export interface ListOptions {
+  provider?: StorageProvider;
+  folder?: string;
+  project_id?: string;
+  user_id?: string;
+  limit?: number;
+  offset?: number;
+}
+
 // File metadata interface
 export interface FileMetadata {
   id: string;
@@ -339,7 +349,7 @@ class MultiCloudStorage {
       file_path: data.file_path as string,
       size: data.file_size as number,
       mimeType: data.mime_type as string,
-      provider: data.provider as 'supabase' | 'wasabi',
+      provider: data.provider as StorageProvider,
       bucket: data.bucket as string,
       key: data.key as string,
       url: data.url as string,
@@ -370,24 +380,24 @@ class MultiCloudStorage {
     }
 
     const metadata: FileMetadata = {
-      id: data.id,
-      filename: data.filename,
-      original_filename: data.original_filename,
-      file_path: data.file_path,
-      size: data.file_size,
-      mimeType: data.mime_type,
-      provider: data.provider,
-      bucket: data.bucket,
-      key: data.key,
-      url: data.url,
-      access_count: data.access_count,
-      is_public: data.is_public,
-      folder: data.folder,
-      tags: data.tags,
-      metadata: data.metadata,
-      project_id: data.project_id,
-      uploaded_by: data.uploaded_by,
-      uploadedAt: new Date(data.created_at)
+      id: data.id as string,
+      filename: data.filename as string,
+      original_filename: data.original_filename as string,
+      file_path: data.file_path as string,
+      size: data.file_size as number,
+      mimeType: data.mime_type as string,
+      provider: data.provider as StorageProvider,
+      bucket: data.bucket as string,
+      key: data.key as string,
+      url: data.url as string,
+      access_count: data.access_count as number,
+      is_public: data.is_public as boolean,
+      folder: data.folder as string,
+      tags: data.tags as string[],
+      metadata: data.metadata as Record<string, any>,
+      project_id: data.project_id as string,
+      uploaded_by: data.uploaded_by as string,
+      uploadedAt: new Date(data.created_at as string)
     };
 
     let buffer: Buffer;
@@ -425,9 +435,19 @@ class MultiCloudStorage {
    * Update access count for analytics
    */
   private async updateAccessCount(fileId: string): Promise<void> {
+    // First get the current access count
+    const { data } = await this.supabaseClient
+      .from('file_storage')
+      .select('access_count')
+      .eq('id', fileId)
+      .single();
+    
+    const currentCount = (data?.access_count as number) || 0;
+    
+    // Update with incremented count
     await this.supabaseClient
       .from('file_storage')
-      .update({ access_count: this.supabaseClient.sql`access_count + 1` })
+      .update({ access_count: currentCount + 1 })
       .eq('id', fileId);
   }
 
@@ -448,15 +468,15 @@ class MultiCloudStorage {
 
     if (data.provider === 'wasabi') {
       const command = new GetObjectCommand({
-        Bucket: data.bucket,
-        Key: data.key
+        Bucket: data.bucket as string,
+        Key: data.key as string
       });
       
       return await getSignedUrl(this.wasabiClient, command, { expiresIn });
     } else {
       const { data: signedData, error: signError } = await this.supabaseClient.storage
-        .from(data.bucket)
-        .createSignedUrl(data.key, expiresIn);
+        .from(data.bucket as string)
+        .createSignedUrl(data.key as string, expiresIn);
 
       if (signError) throw new Error(`Failed to create signed URL: ${signError.message}`);
       return signedData.signedUrl;
@@ -503,24 +523,24 @@ class MultiCloudStorage {
     }
 
     return data.map(item => ({
-      id: item.id,
-      filename: item.filename,
-      original_filename: item.original_filename,
-      file_path: item.file_path,
-      size: item.file_size,
-      mimeType: item.mime_type,
-      provider: item.provider,
-      bucket: item.bucket,
-      key: item.key,
-      url: item.url,
-      access_count: item.access_count,
-      is_public: item.is_public,
-      folder: item.folder,
-      tags: item.tags,
-      metadata: item.metadata,
-      project_id: item.project_id,
-      uploaded_by: item.uploaded_by,
-      uploadedAt: new Date(item.created_at)
+      id: item.id as string,
+      filename: item.filename as string,
+      original_filename: item.original_filename as string,
+      file_path: item.file_path as string,
+      size: item.file_size as number,
+      mimeType: item.mime_type as string,
+      provider: item.provider as StorageProvider,
+      bucket: item.bucket as string,
+      key: item.key as string,
+      url: item.url as string,
+      access_count: item.access_count as number,
+      is_public: item.is_public as boolean,
+      folder: item.folder as string,
+      tags: item.tags as string[],
+      metadata: item.metadata as Record<string, any>,
+      project_id: item.project_id as string,
+      uploaded_by: item.uploaded_by as string,
+      uploadedAt: new Date(item.created_at as string)
     }));
   }
 
@@ -543,14 +563,14 @@ class MultiCloudStorage {
       // Delete from storage provider
       if (data.provider === 'wasabi') {
         const command = new DeleteObjectCommand({
-          Bucket: data.bucket,
-          Key: data.key
+          Bucket: data.bucket as string,
+          Key: data.key as string
         });
         await this.wasabiClient.send(command);
       } else {
         const { error: deleteError } = await this.supabaseClient.storage
-          .from(data.bucket)
-          .remove([data.key]);
+          .from(data.bucket as string)
+          .remove([data.key as string]);
 
         if (deleteError) throw deleteError;
       }
@@ -616,24 +636,24 @@ class MultiCloudStorage {
     }
 
     return {
-      id: data.id,
-      filename: data.filename,
-      original_filename: data.original_filename,
-      file_path: data.file_path,
-      size: data.file_size,
-      mimeType: data.mime_type,
-      provider: data.provider,
-      bucket: data.bucket,
-      key: data.key,
-      url: data.url,
-      access_count: data.access_count,
-      is_public: data.is_public,
-      folder: data.folder,
-      tags: data.tags,
-      metadata: data.metadata,
-      project_id: data.project_id,
-      uploaded_by: data.uploaded_by,
-      uploadedAt: new Date(data.created_at)
+      id: data.id as string,
+      filename: data.filename as string,
+      original_filename: data.original_filename as string,
+      file_path: data.file_path as string,
+      size: data.file_size as number,
+      mimeType: data.mime_type as string,
+      provider: data.provider as StorageProvider,
+      bucket: data.bucket as string,
+      key: data.key as string,
+      url: data.url as string,
+      access_count: data.access_count as number,
+      is_public: data.is_public as boolean,
+      folder: data.folder as string,
+      tags: data.tags as string[],
+      metadata: data.metadata as Record<string, any>,
+      project_id: data.project_id as string,
+      uploaded_by: data.uploaded_by as string,
+      uploadedAt: new Date(data.created_at as string)
     };
   }
 

@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     const headersList = await headers()
     const forwarded = headersList.get('x-forwarded-for')
     const realIp = headersList.get('x-real-ip')
-    const clientIp = forwarded ? forwarded.split(',')[0] : realIp
+    const clientIp = forwarded ? forwarded.split(',')[0] : (realIp || null)
 
     // Initialize Supabase client
     const supabase = await createClient()
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
         revenue_potential: calculateRevenuePotential(event, data),
         conversion_value: calculateConversionValue(event, data),
         traffic_source: getTrafficSource(referrer),
-        device_type: getDeviceType(userAgent),
+        device_type: getDeviceType(userAgent || ''),
         utm_data: extractUTMParams(referrer)
       }
     }
@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
 
     if (analyticsError) {
       console.error('Analytics insert error:', analyticsError)
+      throw new Error(`Failed to insert analytics event: ${analyticsError.message}`)
     }
 
     // Update aggregated metrics for real-time dashboards
@@ -68,18 +69,30 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Analytics tracking error:', error)
+    // Properly type the error and provide structured error details
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+    const errorDetails = error instanceof Error && error.cause ? error.cause : undefined
+    
+    console.error('Analytics tracking error:', {
+      message: errorMessage,
+      details: errorDetails
+    })
+    
     return NextResponse.json({ 
+      success: false,
       error: 'Failed to track event',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
+      message: errorMessage,
+      details: errorDetails
+    }, { 
+      status: 500 
+    })
   }
 }
 
 // Generate unique session ID
-function generateSessionId(userAgent: string, ip: string): string {
+function generateSessionId(userAgent: string | undefined, ip: string | undefined | null): string {
   const timestamp = Date.now()
-  const hash = btoa(`${userAgent}-${ip}-${timestamp}`).substring(0, 16)
+  const hash = btoa(`${userAgent || 'unknown'}-${ip || 'unknown'}-${timestamp}`).substring(0, 16)
   return `session_${hash}`
 }
 
@@ -166,10 +179,10 @@ function isRevenueEvent(event: string): boolean {
 }
 
 // Track revenue-specific metrics
-async function trackRevenueEvent(supabase: any, event: string, data: any, userId: string | null) {
+async function trackRevenueEvent(supabase: any, event: string, data: any, userId: string | undefined | null) {
   const revenueData = {
     event_type: event,
-    user_id: userId,
+    user_id: userId || null,
     file_id: data.fileId,
     amount: data.amount || data.revenue || 0,
     currency: data.currency || 'USD',
@@ -184,7 +197,7 @@ async function trackRevenueEvent(supabase: any, event: string, data: any, userId
 }
 
 // Update aggregated metrics for real-time dashboards
-async function updateAggregatedMetrics(supabase: any, event: string, data: any, userId: string | null) {
+async function updateAggregatedMetrics(supabase: any, event: string, data: any, userId: string | undefined | null) {
   const today = new Date().toISOString().split('T')[0]
   
   // Update daily aggregates
@@ -198,11 +211,11 @@ async function updateAggregatedMetrics(supabase: any, event: string, data: any, 
     // Update existing record
     const updates = {
       total_events: existing.total_events + 1,
-      [`${event}_count`]: (existing[`${event}_count`] || 0) + 1
-    }
-
-    if (data.revenue || data.amount) {
-      updates.total_revenue = (existing.total_revenue || 0) + (data.revenue || data.amount || 0)
+      unique_users: userId ? new Set([...existing.unique_users, userId]).size : existing.unique_users,
+      event_counts: {
+        ...existing.event_counts,
+        [event]: (existing.event_counts[event] || 0) + 1
+      }
     }
 
     await supabase
@@ -211,17 +224,14 @@ async function updateAggregatedMetrics(supabase: any, event: string, data: any, 
       .eq('date', today)
   } else {
     // Create new record
-    const newRecord = {
-      date: today,
-      total_events: 1,
-      [`${event}_count`]: 1,
-      total_revenue: data.revenue || data.amount || 0,
-      unique_users: userId ? 1 : 0
-    }
-
     await supabase
       .from('daily_analytics')
-      .insert(newRecord)
+      .insert({
+        date: today,
+        total_events: 1,
+        unique_users: userId ? 1 : 0,
+        event_counts: { [event]: 1 }
+      })
   }
 }
 

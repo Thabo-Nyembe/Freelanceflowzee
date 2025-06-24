@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
+import OpenAI from 'openai'
+import { aiConfig } from '@/app/config/ai'
 
 interface AIContext {
   userId: string
@@ -22,6 +26,10 @@ interface AIResponse {
   insights?: any[]
   confidence: number
 }
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+})
 
 function generateAIResponse(input: string, context: AIContext): AIResponse {
   const lowercaseInput = input.toLowerCase()
@@ -157,39 +165,37 @@ What would you like to focus on first?`,
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const { message, context } = await request.json()
+    const supabase = createRouteHandlerClient({ cookies })
+    const { data: { session } } = await supabase.auth.getSession()
 
-    if (!message || typeof message !== 'string') {
-      return NextResponse.json(
-        { error: 'Message is required and must be a string' },
-        { status: 400 }
-      )
+    if (!session) {
+      return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    // Generate AI response
-    const aiResponse = generateAIResponse(message, {
-      userId: context?.userId || 'anonymous',
-      sessionId: context?.sessionId || Date.now().toString(),
-      projectData: context?.projectData || null,
-      clientData: context?.clientData || null,
-      performanceMetrics: context?.performanceMetrics || null,
-      preferences: context?.preferences || null
+    const { messages } = await request.json()
+
+    if (!messages || !Array.isArray(messages)) {
+      return new NextResponse('Messages array is required', { status: 400 })
+    }
+
+    const response = await openai.chat.completions.create({
+      model: aiConfig.models.chat,
+      messages,
+      temperature: aiConfig.modelSettings.temperature,
+      max_tokens: aiConfig.modelSettings.maxTokens,
+      top_p: aiConfig.modelSettings.topP,
+      presence_penalty: aiConfig.modelSettings.presencePenalty,
+      frequency_penalty: aiConfig.modelSettings.frequencyPenalty,
     })
 
     return NextResponse.json({
-      success: true,
-      response: aiResponse,
-      timestamp: new Date().toISOString()
+      message: response.choices[0]?.message?.content || '',
     })
-
   } catch (error) {
-    console.error('AI Chat API Error:', error)
-    return NextResponse.json(
-      { error: 'Failed to generate AI response' },
-      { status: 500 }
-    )
+    console.error('Chat error:', error)
+    return new NextResponse('Internal Server Error', { status: 500 })
   }
 }
 

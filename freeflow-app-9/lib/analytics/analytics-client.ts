@@ -9,6 +9,15 @@ interface AnalyticsEvent {
   performance_metrics?: Record<string, number>
 }
 
+interface ErrorDetails {
+  error_type: string;
+  message: string;
+  stack?: string;
+  code?: string;
+  context?: Record<string, unknown>;
+  [key: string]: unknown; // Allow additional properties
+}
+
 class IntegratedAnalyticsClient {
   private sessionId: string
   private isInitialized: boolean = false
@@ -122,11 +131,34 @@ class IntegratedAnalyticsClient {
     this.trackEvent('performance', performanceData)
   }
 
-  public trackError(type: string, details: Record<string, any>) {
-    this.trackEvent('error', {
-      error_type: type,
-      ...details
-    })
+  public trackError(type: string, details: Partial<ErrorDetails> & { message: string }) {
+    try {
+      // Ensure required fields are present
+      if (!type || !details.message) {
+        throw new Error('Error type and message are required')
+      }
+
+      // Format error details
+      const errorData: ErrorDetails = {
+        error_type: type,
+        message: details.message,
+        stack: details.stack,
+        code: details.code,
+        context: details.context,
+        timestamp: new Date().toISOString()
+      }
+
+      this.trackEvent('error', errorData)
+    } catch (error) {
+      // Log error but don't throw to prevent error tracking from breaking the app
+      console.error('Failed to track error:', {
+        error_type: 'analytics_error',
+        message: error instanceof Error ? error.message : 'Unknown error occurred',
+        context: {
+          originalError: details
+        }
+      } as ErrorDetails)
+    }
   }
 
   // Helper methods

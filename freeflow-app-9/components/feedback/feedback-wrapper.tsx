@@ -9,8 +9,8 @@ export interface Comment {
   id: string
   content: string
   position?: {
-    x: number
-    y: number
+    x?: number
+    y?: number
     timestamp?: number
   }
   author: string

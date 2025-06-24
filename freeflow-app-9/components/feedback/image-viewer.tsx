@@ -7,8 +7,8 @@ export interface Comment {
   id: string
   content: string
   position?: {
-    x: number
-    y: number
+    x?: number
+    y?: number
     timestamp?: number
   }
   author: string
@@ -38,7 +38,7 @@ export default function ImageViewer({
   className = ''
 }: ImageViewerProps) {
   const [showCommentDialog, setShowCommentDialog] = useState(false)
-  const [clickPosition, setClickPosition] = useState<{ x: number; y: number } | null>(null)
+  const [clickPosition, setClickPosition] = useState<{ x?: number; y?: number } | null>(null)
   const [editingComment, setEditingComment] = useState<Comment | null>(null)
   const [newComment, setNewComment] = useState('')
   const [selectedPriority, setSelectedPriority] = useState<'low' | 'medium' | 'high' | 'critical'>('medium')

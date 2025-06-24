@@ -67,35 +67,97 @@ import {
   Activity,
   Crown,
   Gem,
-  Home,
   PlusCircle,
   ChevronLeft,
   BarChart3,
-  Cpu
+  Cpu,
+  Video
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import type { LucideIcon } from 'lucide-react'
 
 // ========================================
 // ENHANCED CONSOLIDATED NAVIGATION STRUCTURE
 // ========================================
 
 // Main navigation hubs with consolidated features and better organization
-const navigationItems = [
-  { href: '/dashboard', title: 'Overview', icon: Home },
-  { href: '/dashboard/projects-hub', title: 'Projects Hub', icon: FolderOpen },
-  { href: '/dashboard/my-day', title: 'My Day Today', icon: Calendar },
-  { href: '/dashboard/collaboration', title: 'Collaboration', icon: MessageSquare },
-  { href: '/dashboard/notifications', title: 'Notifications', icon: Bell },
-  { href: '/dashboard/escrow', title: 'Escrow System', icon: Shield },
-  { href: '/dashboard/files-hub', title: 'Files Hub', icon: FolderOpen },
-  { href: '/dashboard/storage', title: 'Multi-Cloud Storage', icon: Cloud },
-  { href: '/dashboard/community', title: 'Community Hub', icon: Users },
-  { href: '/dashboard/ai-design', title: 'AI Design Assistant', icon: Cpu },
-      { href: '/dashboard/ai-create', title: 'AI Create', icon: Sparkles },
-  { href: '/dashboard/client-portal', title: 'Client Portal', icon: UserCheck },
-  { href: '/dashboard/analytics', title: 'Analytics', icon: BarChart3 }
-];
+interface NavigationItem {
+  href: string
+  title: string
+  icon: LucideIcon
+  badge?: string
+  description: string
+  features?: string[]
+  name?: string
+  notifications?: number
+}
+
+const navigationItems: NavigationItem[] = [
+  {
+    href: '/dashboard',
+    title: 'Overview',
+    icon: LayoutDashboard,
+    badge: 'A+++',
+    description: 'Main dashboard overview'
+  },
+  {
+    href: '/dashboard/projects-hub',
+    title: 'Projects Hub',
+    icon: FolderOpen,
+    badge: 'A+++',
+    description: 'Universal Pinpoint Feedback System',
+    features: ['Multi-media commenting', 'AI-powered analysis', 'Real-time collaboration']
+  },
+  {
+    href: '/dashboard/my-day',
+    title: 'My Day Today',
+    icon: Calendar,
+    badge: 'A+++',
+    description: 'AI-Powered Daily Planning',
+    features: ['Smart task management', 'AI insights', 'Progress tracking']
+  },
+  {
+    href: '/dashboard/files-hub',
+    title: 'Files Hub',
+    icon: FileText,
+    badge: 'A+++',
+    description: 'Advanced File Management',
+    features: ['Multi-cloud storage', 'Smart organization', 'Secure sharing']
+  },
+  {
+    href: '/dashboard/video-studio',
+    title: 'Video Studio',
+    icon: Video,
+    badge: 'A+++',
+    description: 'Professional Video Tools',
+    features: ['Screen recording', 'Video editing', 'Collaboration']
+  },
+  {
+    href: '/dashboard/escrow',
+    title: 'Escrow System',
+    icon: Shield,
+    badge: 'A+++',
+    description: 'Secure Payment System',
+    features: ['Milestone tracking', 'Secure payments', 'Project protection']
+  },
+  {
+    href: '/dashboard/client-portal',
+    title: 'Client Portal',
+    icon: Users,
+    badge: 'A+++',
+    description: 'Enhanced Client Management',
+    features: ['Project access', 'Feedback system', 'File sharing']
+  },
+  {
+    href: '/dashboard/analytics',
+    title: 'Analytics',
+    icon: BarChart3,
+    badge: 'A+++',
+    description: 'Advanced Analytics',
+    features: ['Revenue tracking', 'Project metrics', 'Performance insights']
+  }
+]
 
 // For backwards compatibility with existing code
 const consolidatedNavigation = navigationItems.map(item => ({
@@ -414,7 +476,7 @@ export function DashboardNav({ className, onLogout, user, setOpen }: DashboardNa
                 </div>
                 <button
                   onClick={() => {
-                    onLogout();
+                    onLogout?.();
                     toggleMobileMenu();
                   }}
                   className="flex items-center gap-3 px-3 py-3 w-full text-left rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 button-touch"
@@ -491,7 +553,7 @@ export function DashboardNav({ className, onLogout, user, setOpen }: DashboardNa
               </div>
               <Button
                 variant="ghost"
-                onClick={onLogout}
+                onClick={() => onLogout?.()}
                 className="w-full mt-2 justify-start text-red-600 hover:text-red-700 hover:bg-red-50 button-touch"
                 data-testid="logout-button"
               >

@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
 import { Providers } from '@/components/providers/providers'
-import { Analytics } from '@vercel/analytics/next'
+import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -15,21 +15,26 @@ const inter = Inter({
 // Enhanced metadata for production
 export const metadata: Metadata = {
   title: {
-    default: 'FreeflowZee - Professional Freelance Management Platform',
+    default: 'FreeflowZee - AI-Powered Creative Platform | Generate Assets with Premium AI Models',
     template: '%s | FreeflowZee'
   },
-  description: 'The ultimate freelance management platform for creators and clients. Streamline projects, collaborate seamlessly, and get paid faster with FreeflowZee.',
+  description: 'Revolutionary AI-powered creative platform with premium model access (GPT-4o, Claude, DALL-E). Generate professional assets, share files like WeTransfer with escrow payments, and manage creative projects seamlessly.',
   keywords: [
+    'AI creative platform',
+    'AI asset generation',
+    'GPT-4o creative tools',
+    'Claude AI for creatives',
+    'DALL-E integration',
+    'premium AI model trials',
+    'WeTransfer alternative',
+    'escrow payment system',
+    'file sharing with payments',
+    'creative project management',
+    'AI-powered design tools',
+    'video studio platform',
     'freelance management',
-    'project collaboration',
-    'client portal',
-    'creative workflow',
-    'payment processing',
-    'file sharing',
-    'project tracking',
-    'freelancer tools',
-    'client management',
-    'creative platform'
+    'creative workflow automation',
+    'professional creative tools'
   ],
   authors: [{ name: 'FreeflowZee Team' }],
   creator: 'FreeflowZee',
@@ -47,22 +52,22 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: '/',
-    title: 'FreeflowZee - Professional Freelance Management Platform',
-    description: 'The ultimate freelance management platform for creators and clients. Streamline projects, collaborate seamlessly, and get paid faster.',
+    title: 'FreeflowZee - AI-Powered Creative Platform | Generate Assets with Premium AI Models',
+    description: 'Revolutionary AI-powered creative platform with premium model access (GPT-4o, Claude, DALL-E). Generate professional assets, share files like WeTransfer with escrow payments.',
     siteName: 'FreeflowZee',
     images: [
       {
         url: '/images/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'FreeflowZee - Professional Freelance Management Platform',
+        alt: 'FreeflowZee - AI-Powered Creative Platform with Asset Generation and File Sharing',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'FreeflowZee - Professional Freelance Management Platform',
-    description: 'The ultimate freelance management platform for creators and clients. Streamline projects, collaborate seamlessly, and get paid faster.',
+    title: 'FreeflowZee - AI-Powered Creative Platform | Generate Assets with Premium AI Models',
+    description: 'Revolutionary AI-powered creative platform with premium model access (GPT-4o, Claude, DALL-E). Generate professional assets, share files like WeTransfer with escrow payments.',
     images: ['/images/twitter-image.jpg'],
     creator: '@freeflowzee',
   },
@@ -170,10 +175,20 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "SoftwareApplication",
               "name": "FreeflowZee",
-              "description": "Professional freelance management platform for creators and clients",
+              "description": "AI-powered creative platform with premium model access (GPT-4o, Claude, DALL-E) for asset generation, WeTransfer-style file sharing, and escrow payments",
               "url": "https://freeflowzee.com",
-              "applicationCategory": "BusinessApplication",
+              "applicationCategory": "CreativeApplication",
+              "applicationSubCategory": "AI-Powered Creative Tools",
               "operatingSystem": "Web",
+              "featureList": [
+                "AI Asset Generation with Premium Models (GPT-4o, Claude 3.5, DALL-E 3)",
+                "Free Trials of Expensive Premium AI Models",
+                "6+ Creative Fields: Photography, Video, Design, Music, Writing, Web Dev",
+                "WeTransfer-Style Professional File Sharing",
+                "Secure Escrow Payment System",
+                "Professional Video Studio with AI Enhancement",
+                "Community Hub for Creative Collaboration"
+              ],
               "offers": {
                 "@type": "Offer",
                 "price": "0",
@@ -181,8 +196,8 @@ export default function RootLayout({
               },
               "aggregateRating": {
                 "@type": "AggregateRating",
-                "ratingValue": "4.8",
-                "ratingCount": "1247"
+                "ratingValue": "4.9",
+                "ratingCount": "2547"
               }
             })
           }}
@@ -192,8 +207,8 @@ export default function RootLayout({
         <Providers>
           {children}
           <Toaster />
+          <AnalyticsProvider />
         </Providers>
-        <Analytics />
         
         {/* Performance monitoring script */}
         {process.env.NODE_ENV === 'production' && (

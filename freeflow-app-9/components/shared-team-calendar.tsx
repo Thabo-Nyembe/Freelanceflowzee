@@ -258,7 +258,7 @@ export function SharedTeamCalendar() {
     const daysInMonth = lastDay.getDate()
     const startingDay = firstDay.getDay()
 
-    const days = []
+    const days: (Date | null)[] = []
     
     // Add empty cells for days before the month starts
     for (let i = 0; i < startingDay; i++) {

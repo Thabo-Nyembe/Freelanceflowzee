@@ -169,15 +169,6 @@ const QUICK_ACTIONS = [
     testId: 'quick-action-upload-files'
   },
   {
-    id: 'ai-create',
-    title: 'Generate Assets',
-    description: 'Use AI to create design assets',
-    icon: Sparkles,
-    href: '/dashboard/ai-create',
-    color: 'bg-purple-500',
-    testId: 'quick-action-ai-create'
-  },
-  {
     id: 'collaboration',
     title: 'Invite Collaborators',
     description: 'Add team members to projects',

@@ -18,8 +18,8 @@ import {
 
 export function ClientPresentationDemo() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { dashboardMetrics } = useDashboardMetrics();
-  const { projects, users } = useDemoContent();
+  const dashboardMetrics = useDashboardMetrics();
+  const { content } = useDemoContent(); const projects = content?.projects; const users = content?.users;
 
   const slides = [
     {

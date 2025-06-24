@@ -1,34 +1,45 @@
 {
+  "apiKey": "${process.env.CONTEXT7_API_KEY}",
   "mcpServers": {
     "context7": {
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "args": ["context7-mcp-server", "start"],
       "env": {
-        "DEFAULT_MINIMUM_TOKENS": "10000"
+        "CONTEXT7_API_KEY": "${process.env.CONTEXT7_API_KEY}",
+        "CONTEXT7_PROJECT_ID": "freeflowzee",
+        "CONTEXT7_ENV": "production"
       },
       "description": "Context7 MCP Server for up-to-date library documentation"
     }
   },
   "libraries": [
-    "next.js",
-    "react",
-    "typescript",
-    "tailwindcss",
-    "supabase",
-    "@radix-ui/react-accordion",
-    "@radix-ui/react-dialog",
-    "@radix-ui/react-dropdown-menu",
-    "@radix-ui/react-tabs",
-    "@radix-ui/react-toast",
-    "lucide-react",
-    "react-hook-form",
-    "zod",
-    "class-variance-authority",
-    "clsx",
-    "tailwind-merge",
-    "date-fns",
-    "recharts"
+    "/context7/supastarter_dev-docs-nextjs",
+    "/context7/ai-create-docs",
+    "/context7/ai-assistant-docs"
   ],
   "defaultTokens": 10000,
-  "autoUpdate": true
+  "autoUpdate": true,
+  "features": {
+    "chat": true,
+    "analyze": true,
+    "generate": true,
+    "advancedModels": true
+  },
+  "models": {
+    "gpt-4o": {
+      "provider": "OpenAI",
+      "apiEndpoint": "https://api.openai.com/v1",
+      "maxTokens": 4096
+    },
+    "claude-3.5-sonnet": {
+      "provider": "Anthropic",
+      "apiEndpoint": "https://api.anthropic.com/v1",
+      "maxTokens": 8192
+    },
+    "dall-e-3": {
+      "provider": "OpenAI",
+      "apiEndpoint": "https://api.openai.com/v1/images/generations",
+      "maxTokens": null
+    }
+  }
 } 

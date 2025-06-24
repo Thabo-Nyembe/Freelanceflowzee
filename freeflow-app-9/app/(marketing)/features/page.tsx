@@ -31,59 +31,59 @@ import {
 
 const mainFeatures = [
   {
-    icon: Upload,
-    title: "Smart File Management",
-    description: "Upload, organize, and manage all your creative files in one secure workspace.",
+    icon: Zap,
+    title: "AI Create Studio",
+    description: "Revolutionary AI-powered asset generation across 6+ creative fields with premium model access.",
     features: [
-      "Drag & drop file uploads",
-      "Automatic file organization",
-      "Version control system",
-      "Bulk file operations",
-      "Advanced search & filtering"
+      "Generate assets for Photography, Video, Design, Music, Writing & Web Dev",
+      "Access premium AI models: GPT-4o, Claude 3.5 Sonnet, DALL-E 3",
+      "Free trials of expensive premium models",
+      "Professional-grade asset quality and formats",
+      "Real-time generation with progress tracking"
     ],
-    demo: "Try Upload",
+    demo: "Try AI Create",
+    color: "from-purple-500 to-pink-500"
+  },
+  {
+    icon: Upload,
+    title: "Files & Escrow System",
+    description: "WeTransfer-like professional file sharing combined with secure escrow payment protection.",
+    features: [
+      "WeTransfer-style drag & drop file sharing",
+      "Secure escrow payment protection",
+      "Real-time upload/download progress",
+      "SEO-optimized sharing pages",
+      "Professional client experience"
+    ],
+    demo: "Try File Sharing",
     color: "from-blue-500 to-cyan-500"
   },
   {
     icon: Palette,
-    title: "Custom Branding",
-    description: "Create stunning, branded presentations that reflect your unique style.",
+    title: "Video Studio Pro",
+    description: "Complete video editing suite with AI-powered features and professional templates.",
     features: [
-      "Custom color schemes",
-      "Logo integration",
-      "Professional templates",
-      "White-label solutions",
-      "Mobile-responsive design"
+      "Professional video editing tools",
+      "AI-powered video enhancement",
+      "Extensive template library",
+      "Real-time collaboration features",
+      "Export in multiple formats"
     ],
-    demo: "See Customization",
-    color: "from-purple-500 to-pink-500"
-  },
-  {
-    icon: Share2,
-    title: "Secure Sharing",
-    description: "Share your work with clients through password-protected, professional links.",
-    features: [
-      "Password protection",
-      "Access controls",
-      "Expiration dates",
-      "Download permissions",
-      "Real-time notifications"
-    ],
-    demo: "View Sharing",
+    demo: "Try Video Studio",
     color: "from-green-500 to-emerald-500"
   },
   {
-    icon: CreditCard,
-    title: "Instant Payments",
-    description: "Get paid faster with integrated payment processing and automated invoicing.",
+    icon: Users,
+    title: "Community Hub",
+    description: "Connect and collaborate with a thriving community of creative professionals worldwide.",
     features: [
-      "Stripe integration",
-      "Multiple payment methods",
-      "Automated invoicing",
-      "Payment tracking",
-      "Tax calculations"
+      "Network with 25,000+ creative professionals",
+      "Share projects and get feedback",
+      "Collaborative project opportunities",
+      "Professional networking and referrals",
+      "Industry insights and trends"
     ],
-    demo: "See Payments",
+    demo: "Join Community",
     color: "from-orange-500 to-red-500"
   }
 ]

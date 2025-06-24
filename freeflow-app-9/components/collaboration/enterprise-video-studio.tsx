@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Video, Mic, Monitor, StopCircle, Play, Pause, Square, Settings, Share2, Download, Edit3, Scissors, Volume2, Camera, Users, MessageSquare, Eye, Clock, Waveform, Subtitles, Sparkles, Zap, Brain, TrendingUp, ChevronRight, ChevronLeft, RotateCcw, RotateCw, Maximize, Minimize } from 'lucide-react'
+import { Video, Mic, Monitor, StopCircle, Play, Pause, Square, Settings, Share2, Download, Edit3, Scissors, Volume2, Camera, Users, MessageSquare, Eye, Clock, BarChart3, Subtitles, Sparkles, Zap, Brain, TrendingUp, ChevronRight, ChevronLeft, RotateCcw, RotateCw, Maximize, Minimize } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 

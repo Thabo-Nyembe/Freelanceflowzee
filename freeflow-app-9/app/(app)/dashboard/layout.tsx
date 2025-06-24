@@ -1,5 +1,9 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { UserButton } from '@/components/user-button'
 
 // Context7 Enhanced Navigation System
 const navigationItems = [
@@ -7,130 +11,105 @@ const navigationItems = [
     name: 'Overview',
     href: '/dashboard',
     icon: 'LayoutDashboard',
-    description: 'Main dashboard overview'
+    description: 'Main dashboard overview',
+    badge: 'A+++'
   },
   {
     name: 'Projects Hub',
     href: '/dashboard/projects-hub',
     icon: 'FolderOpen',
-    description: 'Universal Pinpoint Feedback System - Figma-Level',
+    description: 'Universal Pinpoint Feedback System',
     badge: 'A+++',
-    features: ['Multi-media commenting', 'AI-powered analysis', 'Real-time collaboration', 'Voice recording']
-  },
-  {
-    name: 'Video Studio',
-    href: '/dashboard/video-studio',
-    icon: 'Video',
-    description: 'Enterprise Video Studio - Loom-Level',
-    badge: 'A+++',
-    features: ['Screen recording', 'AI transcription', 'Real-time collaboration', 'Advanced editing']
-  },
-  {
-    name: 'Canvas Collaboration',
-    href: '/dashboard/canvas',
-    icon: 'Palette',
-    description: 'Real-Time Canvas Collaboration - Figma-Level',
-    badge: 'A+++',
-    features: ['Live collaborative drawing', 'Vector tools', 'Component library', 'Version control']
-  },
-  {
-    name: 'Community',
-    href: '/dashboard/community',
-    icon: 'Users',
-    description: 'Enhanced Community Hub - Slack/Discord-Level',
-    badge: 'A+++',
-    features: ['Creator marketplace (2,847+ creators)', 'Instagram-like social wall', 'Real-time messaging']
+    features: ['Multi-media commenting', 'AI-powered analysis', 'Real-time collaboration']
   },
   {
     name: 'AI Assistant',
     href: '/dashboard/ai-assistant',
     icon: 'Brain',
-    description: 'AI-Powered Design Assistant - Notion AI-Level',
+    description: 'Intelligent AI Assistant',
     badge: 'A+++',
-    features: ['5 analysis modes', 'Natural language AI chat', 'Smart recommendations']
+    features: ['Real-time analysis', 'Smart suggestions', 'Context-aware help']
   },
   {
     name: 'AI Create',
     href: '/dashboard/ai-create',
     icon: 'Sparkles',
-    description: 'AI-Powered Asset Generation - Creative AI-Level',
+    description: 'AI-Powered Content Creation',
     badge: 'A+++',
-    features: ['Generate assets with AI', 'Multiple AI models', 'Batch processing', 'Advanced settings']
+    features: ['Content generation', 'Asset creation', 'Smart templates']
   },
   {
-    name: 'My Day',
+    name: 'My Day Today',
     href: '/dashboard/my-day',
     icon: 'Calendar',
-    description: 'My Day Today AI Planning - ClickUp/Monday.com-Level',
+    description: 'AI-Powered Daily Planning',
     badge: 'A+++',
-    features: ['AI-powered task management', 'Smart scheduling', 'Progress tracking']
-  },
-  {
-    name: 'Escrow',
-    href: '/dashboard/escrow',
-    icon: 'Shield',
-    description: 'Advanced Escrow System - Enterprise-Level',
-    badge: 'A+++',
-    features: ['$13,500 total management', 'Milestone-based payments', 'Secure fund holdings']
+    features: ['Smart task management', 'AI insights', 'Progress tracking']
   },
   {
     name: 'Files Hub',
     href: '/dashboard/files-hub',
-    icon: 'FolderOpen',
-    description: 'Enterprise Files Hub - Dropbox/Box-Level',
+    icon: 'FileText',
+    description: 'Advanced File Management',
     badge: 'A+++',
-    features: ['Multi-cloud storage', 'Cost optimization', 'Advanced search', 'Version control']
+    features: ['Multi-cloud storage', 'Smart organization', 'Secure sharing']
   },
   {
-    name: 'Collaboration',
-    href: '/dashboard/collaboration',
-    icon: 'MessageSquare',
-    description: 'Enhanced collaboration tools',
-    features: ['Real-time chat', 'File sharing', 'Video calls', 'Screen sharing']
+    name: 'Video Studio',
+    href: '/dashboard/video-studio',
+    icon: 'Video',
+    description: 'Professional Video Tools',
+    badge: 'A+++',
+    features: ['Screen recording', 'Video editing', 'Collaboration']
+  },
+  {
+    name: 'Escrow System',
+    href: '/dashboard/escrow',
+    icon: 'Shield',
+    description: 'Secure Payment System',
+    badge: 'A+++',
+    features: ['Milestone tracking', 'Secure payments', 'Project protection']
+  },
+  {
+    name: 'Client Portal',
+    href: '/dashboard/client-portal',
+    icon: 'Users',
+    description: 'Enhanced Client Management',
+    badge: 'A+++',
+    features: ['Project access', 'Feedback system', 'File sharing']
   },
   {
     name: 'Analytics',
     href: '/dashboard/analytics',
-    icon: 'BarChart3',
-    description: 'Advanced analytics and insights'
-  },
-  {
-    name: 'Client Zone',
-    href: '/dashboard/client-zone',
-    icon: 'UserCheck',
-    description: 'Client management and portal'
-  },
-  {
-    name: 'Financial Hub',
-    href: '/dashboard/financial-hub',
-    icon: 'DollarSign',
-    description: 'Financial management and invoicing'
-  },
-  {
-    name: 'Notifications',
-    href: '/dashboard/notifications',
-    icon: 'Bell',
-    description: 'Smart notifications with AI categorization',
-    features: ['AI-powered notifications', 'Smart categorization', 'Real-time updates']
+    icon: 'BarChart',
+    description: 'Advanced Analytics',
+    badge: 'A+++',
+    features: ['Revenue tracking', 'Project metrics', 'Performance insights']
   }
 ]
 
-export default async function DashboardLayout({
-  children,
+export default function DashboardLayout({
+  children
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  
-  if (!supabase) {
-    // Demo mode - allow access for testing
-    console.log('🔧 Running in demo mode - allowing dashboard access')
-  } else {
-    const { data: { user }, error } = await supabase.auth.getUser()
-    
-    if (error || !user) {
-      redirect('/login')
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const router = useRouter()
+  const supabase = createClientComponentClient()
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        router.push('/login')
+      }
     }
+    checkAuth()
+  }, [router, supabase.auth])
+
+  async function handleSignOut() {
+    await supabase.auth.signOut()
+    router.push('/login')
   }
 
   return (

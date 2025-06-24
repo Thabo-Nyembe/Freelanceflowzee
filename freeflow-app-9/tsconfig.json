@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
+    "target": "es2015",
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
     ],
     "allowJs": true,
-    "target": "ES6",
     "skipLibCheck": true,
-    "strict": false,
+    "strict": true,
     "noImplicitAny": false,
     "noEmit": true,
     "esModuleInterop": true,
@@ -31,7 +31,9 @@
         "./*"
       ]
     },
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "allowImportingTsExtensions": true,
+    "baseUrl": "."
   },
   "include": [
     "next-env.d.ts",

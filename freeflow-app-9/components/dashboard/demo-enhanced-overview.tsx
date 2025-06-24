@@ -6,10 +6,10 @@ import { useDashboardMetrics, useCommunityMetrics } from './demo-content-provide
 import { TrendingUp, Users, DollarSign, FileText, Clock, Star } from 'lucide-react';
 
 export function DemoEnhancedOverview() {
-  const { dashboardMetrics, isLoading } = useDashboardMetrics();
-  const { communityMetrics } = useCommunityMetrics();
+  const dashboardMetrics = useDashboardMetrics();
+  const communityMetrics = useCommunityMetrics();
 
-  if (isLoading) {
+  if (!dashboardMetrics) {
     return <div className="animate-pulse">Loading overview...</div>;
   }
 
@@ -80,7 +80,13 @@ export function DemoEnhancedOverview() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {dashboardMetrics?.recentActivity?.slice(0, 5).map((activity, index) => (
+              {[
+                { title: 'New project "Brand Identity" started', time: '2 hours ago' },
+                { title: 'Payment received from Client A', time: '4 hours ago' },
+                { title: 'File uploaded to "Creative Assets"', time: '6 hours ago' },
+                { title: 'Project "Website Redesign" completed', time: '1 day ago' },
+                { title: 'New team member joined', time: '2 days ago' }
+              ].map((activity, index) => (
                 <div key={index} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <div className="flex-1">
@@ -88,9 +94,7 @@ export function DemoEnhancedOverview() {
                     <p className="text-xs text-gray-500">{activity.time}</p>
                   </div>
                 </div>
-              )) || (
-                <div className="text-sm text-gray-500">Loading activities...</div>
-              )}
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -104,7 +108,12 @@ export function DemoEnhancedOverview() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {dashboardMetrics?.topProjects?.slice(0, 4).map((project, index) => (
+              {[
+                { title: 'Brand Identity Package', client: 'TechStart Inc.', value: '$2,500', status: 'In Progress' },
+                { title: 'Website Redesign', client: 'Local Business', value: '$1,800', status: 'Review' },
+                { title: 'Logo Design', client: 'Startup Co.', value: '$750', status: 'Completed' },
+                { title: 'Marketing Materials', client: 'Enterprise Corp', value: '$3,200', status: 'Planning' }
+              ].map((project, index) => (
                 <div key={index} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
                   <div>
                     <p className="text-sm font-medium">{project.title}</p>
@@ -115,9 +124,7 @@ export function DemoEnhancedOverview() {
                     <p className="text-xs text-gray-500">{project.status}</p>
                   </div>
                 </div>
-              )) || (
-                <div className="text-sm text-gray-500">Loading projects...</div>
-              )}
+              ))}
             </div>
           </CardContent>
         </Card>

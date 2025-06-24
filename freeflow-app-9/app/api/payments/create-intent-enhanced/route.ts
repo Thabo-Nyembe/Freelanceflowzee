@@ -84,13 +84,13 @@ export async function POST(request: NextRequest) {
       const paymentIntentData: Stripe.PaymentIntentCreateParams = {
         amount,
         currency: currency.toLowerCase(),
-        payment_method_types,
         metadata: {
           description: description || 'FreeflowZee Payment',
           customer_email: customer_email || '',
           created_via: 'freeflowzee-enhanced',
           created_at: new Date().toISOString(),
         },
+        // Use automatic_payment_methods for broader payment method support
         automatic_payment_methods: {
           enabled: true,
           allow_redirects: 'always',

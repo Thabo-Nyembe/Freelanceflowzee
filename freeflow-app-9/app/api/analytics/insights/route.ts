@@ -61,7 +61,11 @@ export async function POST(request: NextRequest) {
     // Validate input
     if (!events || !Array.isArray(events)) {
       return NextResponse.json(
-        { error: 'Events array is required' },
+        { 
+          success: false,
+          error: 'Invalid input',
+          message: 'Events array is required'
+        },
         { status: 400 }
       )
     }
@@ -83,11 +87,21 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Event analysis error:', error)
+    // Properly type the error and provide structured error details
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+    const errorDetails = error instanceof Error && error.cause ? error.cause : undefined
+    
+    console.error('Event analysis error:', {
+      message: errorMessage,
+      details: errorDetails
+    })
+    
     return NextResponse.json(
       { 
+        success: false,
         error: 'Failed to analyze events',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        message: errorMessage,
+        details: errorDetails
       },
       { status: 500 }
     )

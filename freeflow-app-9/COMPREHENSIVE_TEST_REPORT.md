@@ -1,15 +1,15 @@
 
 # 🧪 FreeflowZee Comprehensive Test Report
 
-**Generated:** 2025-06-21T19:14:23.644Z
-**Duration:** 0.4 minutes
-**Overall Pass Rate:** 0% (0/0)
+**Generated:** 2025-06-23T18:19:17.238Z
+**Duration:** 19.6 minutes
+**Overall Pass Rate:** 0.7% (4/560)
 
 ## 📊 Test Results Summary
 
 ### 🏗️ Build Status
-- **Status:** ✅ PASSED
-- **Details:** Build completed successfully
+- **Status:** ❌ FAILED
+- **Details:** Build failed - see logs
 
 ### 🖼️ Avatar System
 - **Status:** ✅ PASSED
@@ -17,11 +17,11 @@
 
 ### 📊 Dashboard Tests
 - **Status:** ❌ FAILED
-- **Results:** 0/0 passed (0%)
+- **Results:** 0/144 passed (0.0%)
 
 ### 💳 Payment Tests
 - **Status:** ❌ FAILED
-- **Results:** 0/0 passed (0%)
+- **Results:** 4/416 passed (1.0%)
 
 ### 🧪 E2E Tests
 - **Status:** ❌ FAILED
@@ -30,18 +30,15 @@
 ## 🔧 Fixes Applied
 
 - ✅ Cleared corrupted webpack cache
+- ✅ Cleared corrupted webpack cache
 
 ## 📈 Performance Metrics
 
-
-- ✅ Build process completed
-- 📦 Bundle optimization active
-- 🚀 Dynamic route handling configured
-- 🖼️ Image optimization enabled
-
+- ❌ Build metrics unavailable due to build failure
 
 ## 🎯 Recommendations
 
+🔥 **CRITICAL:** Fix build issues before proceeding with further testing
 📊 **MEDIUM:** Dashboard test pass rate below 80% - investigate failing tests
 💳 **HIGH:** Payment test pass rate below 90% - critical for production
 

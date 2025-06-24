@@ -81,7 +81,8 @@ export async function middleware(request: NextRequest) {
   // Check for test environment (Playwright testing)
   const isTestEnv = 
     request.headers.get('x-test-mode') === 'true' ||
-    request.headers.get('user-agent')?.includes('Playwright')
+    request.headers.get('user-agent')?.includes('Playwright') ||
+    process.env.NODE_ENV === 'test'
 
   // Check for local development environment
   const isLocalDev = process.env.NODE_ENV === 'development' &&
@@ -90,30 +91,22 @@ export async function middleware(request: NextRequest) {
                      request.nextUrl.hostname.startsWith('192.168.') ||
                      request.nextUrl.hostname.endsWith('.local'))
 
-  if (isTestEnv) {
-    console.log('🧪 Test environment detected - skipping auth middleware')
-    return NextResponse.next()
-  }
-
-  if (isLocalDev) {
-    console.log(`🔧 Local development detected: ${pathname} - bypassing authentication for testing`)
-    return NextResponse.next()
-  }
-
   // Check if current path is a public route - allow immediate access
   if (publicRoutes.includes(pathname)) {
     console.log(`🌐 Public route detected: ${pathname} - allowing access`)
     return NextResponse.next()
   }
 
-  // Check for development bypass header (for specific development needs)
-  const isDevBypass = 
-    process.env.NODE_ENV === 'development' && 
-    request.headers.get('x-dev-bypass') === 'true'
+  // Allow test environment to bypass authentication
+  if (isTestEnv) {
+    console.log('🧪 Test environment detected - skipping auth middleware')
+    return NextResponse.next()
+  }
 
-  if (isDevBypass) {
-    console.log('🔧 Development bypass detected - skipping rate limiting')
-    return await updateSession(request)
+  // Allow local development to bypass authentication
+  if (isLocalDev) {
+    console.log(`🔧 Local development detected: ${pathname} - bypassing authentication for testing`)
+    return NextResponse.next()
   }
 
   // Get client IP for rate limiting
@@ -131,7 +124,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Use authentication for protected routes (production only)
+  // Use authentication for protected routes
   console.log(`🔐 Protected route detected: ${pathname} - checking authentication`)
   return await updateSession(request)
 }

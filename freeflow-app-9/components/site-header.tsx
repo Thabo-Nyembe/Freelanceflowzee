@@ -93,7 +93,7 @@ export function SiteHeader({
   }
 
   const getLinkClassName = (href: string) => {
-    const isActive = pathname === href || (href !== '/' && pathname.startsWith(href))
+    const isActive = pathname === href || (href !== '/' && pathname?.startsWith(href))
     const baseClass = "transition-colors font-medium"
     
     if (variant === 'transparent' && !isScrolled) {
@@ -266,7 +266,7 @@ export function SiteHeader({
                 ) : (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="flex items-center space-x-2">
+                      <Button variant="ghost" className="flex items-center space-x-2" data-testid="user-menu-trigger">
                         <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
                           {user.avatar ? (
                             <img 
@@ -282,7 +282,7 @@ export function SiteHeader({
                         <ChevronDown className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuContent align="end" className="w-56" data-testid="user-menu">
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
                         <Link href="/dashboard" className="flex items-center">

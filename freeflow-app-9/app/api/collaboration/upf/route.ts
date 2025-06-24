@@ -20,6 +20,13 @@ interface Comment {
 }
 
 // Types for UPF API
+interface UPFUser {
+  id: string
+  email?: string
+  name?: string
+  role?: string
+}
+
 interface UPFCommentRequest {
   fileId: string
   content: string
@@ -210,6 +217,24 @@ export async function GET(request: NextRequest) {
 
   console.log('🔧 UPF API called:', { action, fileId, hasValidEnv: hasValidEnvironment() })
 
+  // Initialize user as null
+  let user: UPFUser | null = null
+
+  // Get session if available
+  const session = await verifySession()
+  
+  if (session) {
+    user = {
+      id: session.user.id,
+      email: session.user.email,
+      name: session.user.name,
+      role: session.user.role
+    }
+    console.log('🔐 Authenticated user accessing UPF API:', user.email)
+  } else {
+    console.log('🔧 No authenticated user - proceeding with limited access')
+  }
+
   // Check environment first
   if (!hasValidEnvironment()) {
     console.log('⚠️ Environment not properly configured, using fallback mode')
@@ -251,17 +276,6 @@ export async function GET(request: NextRequest) {
       mode: 'fallback',
       message: '⚠️ Using mock data - Complete database setup for real operations'
     })
-  }
-
-  // Use DAL for authentication following Next.js guide
-  const session = await verifySession()
-  let user = null
-  
-  if (session) {
-    user = session.user
-    console.log('🔐 Authenticated user accessing UPF API:', user.email)
-  } else {
-    console.log('🔧 No authenticated user - proceeding with limited access')
   }
 
   const supabase = await createClient()
@@ -1248,19 +1262,21 @@ function extractCommentThemes(comments: any[]): string[] {
 }
 
 function generateRelevantTags(content: string, fileType: string): string[] {
-  const tags = []
-  
-  if (content.toLowerCase().includes('mobile')) tags.push('mobile')
-  if (content.toLowerCase().includes('desktop')) tags.push('desktop')
-  if (content.toLowerCase().includes('color')) tags.push('color')
-  if (content.toLowerCase().includes('font')) tags.push('typography')
-  if (content.toLowerCase().includes('button')) tags.push('interaction')
-  if (content.toLowerCase().includes('slow')) tags.push('performance')
-  if (content.toLowerCase().includes('accessibility')) tags.push('a11y')
-  
-  tags.push(fileType)
-  
-  return tags.slice(0, 5)
+  const tags: string[] = []
+
+  // Add file type specific tags
+  if (fileType === 'image') {
+    tags.push('mobile', 'desktop', 'color', 'typography', 'interaction')
+  } else if (fileType === 'video') {
+    tags.push('performance', 'a11y')
+  }
+
+  // Add content-based tags
+  if (content.toLowerCase().includes('responsive')) {
+    tags.push('responsive')
+  }
+
+  return tags
 }
 
 function calculateEstimatedTime(comments: any[]): string {
@@ -1577,31 +1593,21 @@ function analyzeTimeline(comments: any[]): any {
 }
 
 function generateActionableRecommendations(stats: any, themes: any[], userActivity: any[]): string[] {
-  const recommendations = []
+  const recommendations: string[] = []
 
-  if (stats.pending > stats.resolved) {
+  // Add completion rate based recommendations
+  if (stats.completionRate < 80) {
     recommendations.push('Focus on resolving pending comments to improve completion rate')
   }
 
-  if (stats.highPriority > 0) {
-    recommendations.push(`Address ${stats.highPriority} high-priority items immediately`)
-  }
+  // Add theme based recommendations
+  themes.forEach(theme => {
+    if (theme.frequency > 3) {
+      recommendations.push(`Consider addressing recurring theme: ${theme.name}`)
+    }
+  })
 
-  const topTheme = themes[0]
-  if (topTheme) {
-    recommendations.push(`Primary focus area: ${topTheme.category} (${topTheme.count} comments)`)
-  }
-
-  if (stats.withVoiceNotes > 0) {
-    recommendations.push('Review voice notes for complex feedback requiring detailed attention')
-  }
-
-  const inactiveUsers = userActivity.filter(u => u.commentCount === 0)
-  if (inactiveUsers.length > 0) {
-    recommendations.push('Engage inactive team members to increase collaboration')
-  }
-
-  return recommendations.slice(0, 5)
+  return recommendations
 }
 
 function calculateAverageResponseTime(comments: any[]): number {

@@ -1,68 +1,81 @@
 {
-  "timestamp": "2025-06-18T23:11:54.249Z",
+  "timestamp": "2025-06-24T19:43:08.516Z",
   "summary": {
     "totalRoutes": 9,
-    "workingRoutes": 9,
+    "workingRoutes": 0,
     "totalAPIs": 4,
-    "workingAPIs": 3,
+    "workingAPIs": 0,
     "totalButtons": 0,
     "expectedButtons": 28,
-    "foundButtons": 19
+    "foundButtons": 18
   },
   "routes": {
     "/dashboard": {
-      "statusCode": 307,
-      "working": true
+      "statusCode": 0,
+      "working": false,
+      "error": ""
     },
     "/dashboard/projects-hub": {
-      "statusCode": 307,
-      "working": true
+      "statusCode": 0,
+      "working": false,
+      "error": ""
     },
     "/dashboard/files-hub": {
-      "statusCode": 307,
-      "working": true
+      "statusCode": 0,
+      "working": false,
+      "error": ""
     },
     "/dashboard/ai-create": {
-      "statusCode": 307,
-      "working": true
+      "statusCode": 0,
+      "working": false,
+      "error": ""
     },
     "/dashboard/video-studio": {
-      "statusCode": 307,
-      "working": true
+      "statusCode": 0,
+      "working": false,
+      "error": ""
     },
     "/dashboard/community": {
-      "statusCode": 307,
-      "working": true
+      "statusCode": 0,
+      "working": false,
+      "error": ""
     },
     "/dashboard/my-day": {
-      "statusCode": 307,
-      "working": true
+      "statusCode": 0,
+      "working": false,
+      "error": ""
     },
     "/dashboard/escrow": {
-      "statusCode": 307,
-      "working": true
+      "statusCode": 0,
+      "working": false,
+      "error": ""
     },
     "/dashboard/time-tracking": {
-      "statusCode": 307,
-      "working": true
+      "statusCode": 0,
+      "working": false,
+      "error": ""
     }
   },
   "apis": {
     "/api/ai/chat": {
-      "statusCode": 200,
-      "working": true
+      "statusCode": 0,
+      "working": false,
+      "error": ""
     },
     "/api/collaboration/upf": {
-      "statusCode": 200,
-      "working": true
+      "statusCode": 0,
+      "working": false,
+      "error": ""
     },
     "/api/storage/analytics": {
-      "statusCode": 500,
-      "working": false
+      "statusCode": 0,
+      "working": false,
+      "error": ""
     },
     "/api/upload": {
-      "statusCode": 200,
-      "working": true
+      "statusCode": 0,
+      "working": false,
+      "error": ""
     }
   },
   "buttons": {
@@ -74,10 +87,9 @@
         "upload-files-btn",
         "schedule-meeting-btn"
       ],
-      "found": [
-        "new-project-btn"
-      ],
+      "found": [],
       "missing": [
+        "new-project-btn",
         "create-project-btn",
         "create-invoice-btn",
         "upload-files-btn",
@@ -200,9 +212,9 @@
     }
   },
   "scores": {
-    "routes": 100,
-    "apis": 75,
-    "buttons": 68,
-    "overall": 81
+    "routes": 0,
+    "apis": 0,
+    "buttons": 64,
+    "overall": 21
   }
 }

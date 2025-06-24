@@ -9,7 +9,11 @@ export async function POST(request: NextRequest) {
     
     if (!supabase) {
       return NextResponse.json(
-        { success: false, error: 'Database not configured' },
+        { 
+          success: false, 
+          error: 'Configuration error',
+          message: 'Database not configured'
+        },
         { status: 500 }
       )
     }
@@ -38,7 +42,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Missing required fields: event_type, event_name, session_id' 
+          error: 'Validation error',
+          message: 'Missing required fields: event_type, event_name, session_id' 
         },
         { status: 400 }
       )
@@ -66,10 +71,7 @@ export async function POST(request: NextRequest) {
     
     if (error) {
       console.error('Failed to insert analytics event:', error)
-      return NextResponse.json(
-        { success: false, error: 'Failed to track event' },
-        { status: 500 }
-      )
+      throw new Error(`Failed to track event: ${error.message}`)
     }
     
     // Track special business metrics
@@ -98,9 +100,22 @@ export async function POST(request: NextRequest) {
     })
     
   } catch (error) {
-    console.error('Analytics API error:', error)
+    // Properly type the error and provide structured error details
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+    const errorDetails = error instanceof Error && error.cause ? error.cause : undefined
+    
+    console.error('Analytics API error:', {
+      message: errorMessage,
+      details: errorDetails
+    })
+    
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { 
+        success: false, 
+        error: 'Internal server error',
+        message: errorMessage,
+        details: errorDetails
+      },
       { status: 500 }
     )
   }
@@ -113,7 +128,11 @@ export async function GET(request: NextRequest) {
     
     if (!supabase) {
       return NextResponse.json(
-        { success: false, error: 'Database not configured' },
+        { 
+          success: false, 
+          error: 'Configuration error',
+          message: 'Database not configured'
+        },
         { status: 500 }
       )
     }
@@ -123,7 +142,12 @@ export async function GET(request: NextRequest) {
     
     if (authError || !user) {
       return NextResponse.json(
-        { success: false, error: 'Authentication required' },
+        { 
+          success: false, 
+          error: 'Authentication error',
+          message: 'Authentication required',
+          details: authError?.message
+        },
         { status: 401 }
       )
     }
@@ -171,38 +195,32 @@ export async function GET(request: NextRequest) {
     
     if (error) {
       console.error('Failed to fetch analytics events:', error)
-      return NextResponse.json(
-        { success: false, error: 'Failed to fetch events' },
-        { status: 500 }
-      )
+      throw new Error(`Failed to fetch events: ${error.message}`)
     }
-    
-    // Get aggregated metrics
-    const { data: metrics } = await supabase
-      .from('business_metrics')
-      .select('*')
-      .eq('user_id', user.id)
-      .gte('timestamp', startTime.toISOString())
-      .lte('timestamp', now.toISOString())
-    
-    // Calculate summary
-    const summary = calculateEventsSummary(events || [], metrics || [])
     
     return NextResponse.json({
       success: true,
-      data: {
-        events: events || [],
-        metrics: metrics || [],
-        summary,
-        timeRange,
-        totalEvents: events?.length || 0
-      }
+      events,
+      message: 'Events retrieved successfully'
     })
     
   } catch (error) {
-    console.error('Analytics GET API error:', error)
+    // Properly type the error and provide structured error details
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+    const errorDetails = error instanceof Error && error.cause ? error.cause : undefined
+    
+    console.error('Analytics API error:', {
+      message: errorMessage,
+      details: errorDetails
+    })
+    
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { 
+        success: false, 
+        error: 'Internal server error',
+        message: errorMessage,
+        details: errorDetails
+      },
       { status: 500 }
     )
   }

@@ -5,7 +5,7 @@ import { headers } from 'next/headers'
 // Context7 enhanced upload endpoint with multi-cloud support
 export async function POST(request: NextRequest) {
   try {
-    const headersList = headers()
+    const headersList = await headers()
     const authorization = headersList.get('authorization')
 
     if (!authorization) {
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Initialize Supabase client
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Parse multipart form data
     const formData = await request.formData()
@@ -176,7 +176,7 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category')
     const limit = parseInt(searchParams.get('limit') || '10')
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     let query = supabase
       .from('file_storage')

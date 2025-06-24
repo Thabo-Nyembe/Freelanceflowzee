@@ -1,0 +1,190 @@
+{
+  "timestamp": "2025-06-24T18:32:11.433Z",
+  "summary": {
+    "total": 29,
+    "passed": 25,
+    "failed": 4,
+    "successRate": 86
+  },
+  "details": [
+    {
+      "name": "Stripe Publishable Key",
+      "status": true,
+      "details": "Present"
+    },
+    {
+      "name": "Stripe Secret Key",
+      "status": true,
+      "details": "Present"
+    },
+    {
+      "name": "Webhook Endpoint",
+      "status": true,
+      "details": "Configured: http://localhost:3000/api/payments/webhooks"
+    },
+    {
+      "name": "Payment API Health Check",
+      "status": true,
+      "details": "Features: 6"
+    },
+    {
+      "name": "Payment Intent Creation",
+      "status": true,
+      "details": "Client Secret: Generated"
+    },
+    {
+      "name": "Payment Page Rendering",
+      "status": true,
+      "details": "Payment container loaded"
+    },
+    {
+      "name": "Pricing Cards Display",
+      "status": true,
+      "details": "Found 3 pricing options"
+    },
+    {
+      "name": "Payment Tabs Present",
+      "status": true,
+      "details": "Tab navigation available"
+    },
+    {
+      "name": "Plan Selection Buttons",
+      "status": true,
+      "details": "Free: 1, Pro: 1, Enterprise: 1"
+    },
+    {
+      "name": "Client Access System",
+      "status": false,
+      "details": "Client login form available"
+    },
+    {
+      "name": "Free Tier Selection",
+      "status": true,
+      "details": "Free tier clickable"
+    },
+    {
+      "name": "Pro Tier Selection",
+      "status": true,
+      "details": "Pro tier selected"
+    },
+    {
+      "name": "Payment Flow Testing",
+      "status": false,
+      "details": "Payment tab not activated after pro selection"
+    },
+    {
+      "name": "Escrow System Mentions",
+      "status": true,
+      "details": "Found 4 escrow references"
+    },
+    {
+      "name": "Escrow Feature Display",
+      "status": true,
+      "details": "4 escrow features listed"
+    },
+    {
+      "name": "Payment Page Title",
+      "status": true,
+      "details": "Title: Secure Payment & Pricing Plans | FreeflowZee AI-Powered Creative Platform | FreeflowZee"
+    },
+    {
+      "name": "Meta Description",
+      "status": true,
+      "details": "Length: 184 chars"
+    },
+    {
+      "name": "Canonical URL",
+      "status": true,
+      "details": "Canonical: https://freeflowzee.com/payment"
+    },
+    {
+      "name": "Open Graph Title",
+      "status": true,
+      "details": "OG Title: Present"
+    },
+    {
+      "name": "Open Graph Description",
+      "status": true,
+      "details": "OG Description: Present"
+    },
+    {
+      "name": "Open Graph Image",
+      "status": true,
+      "details": "OG Image: Present"
+    },
+    {
+      "name": "Twitter Card",
+      "status": true,
+      "details": "Twitter Card: summary_large_image"
+    },
+    {
+      "name": "Twitter Title",
+      "status": true,
+      "details": "Twitter Title: Present"
+    },
+    {
+      "name": "Structured Data",
+      "status": true,
+      "details": "2 structured data blocks found"
+    },
+    {
+      "name": "Pricing Page SEO",
+      "status": false,
+      "details": "Pricing Title: FreeflowZee - AI-Powered Creative Platform | Generate Assets with Premium AI Models"
+    },
+    {
+      "name": "Mobile Payment Layout",
+      "status": true,
+      "details": "Container width: 359"
+    },
+    {
+      "name": "Touch-Friendly Buttons",
+      "status": false,
+      "details": "0 buttons ≥44px height"
+    },
+    {
+      "name": "Tablet Payment Layout",
+      "status": true,
+      "details": "Container width: 752"
+    },
+    {
+      "name": "Desktop Payment Layout",
+      "status": true,
+      "details": "Container width: 1904"
+    }
+  ],
+  "config": {
+    "baseUrl": "http://localhost:3000",
+    "timeout": 30000,
+    "retries": 3,
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "testData": {
+      "customer": {
+        "email": "test@freeflowzee.com",
+        "name": "Test Customer",
+        "card": {
+          "number": "4242424242424242",
+          "expiry": "12/34",
+          "cvc": "123"
+        }
+      },
+      "pricing": {
+        "free": {
+          "name": "Creator Free",
+          "price": 0
+        },
+        "pro": {
+          "name": "Pro Creator",
+          "price": 29
+        },
+        "enterprise": {
+          "name": "Agency Enterprise",
+          "price": 79
+        }
+      }
+    }
+  }
+}

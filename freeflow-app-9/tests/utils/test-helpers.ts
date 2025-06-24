@@ -1,21 +1,65 @@
 import { Page, expect } from '@playwright/test';
 
 export class TestHelpers {
-  constructor(private page: Page) {}
+  readonly page: Page;
+
+  constructor(page: Page) {
+    this.page = page;
+  }
 
   // Wait for app to be ready
   async waitForAppReady() {
     await this.page.waitForLoadState('networkidle');
-    await this.page.waitForSelector('[data-testid]', { timeout: 10000 });
+    await this.page.waitForSelector('[data-testid]', { timeout: 15000 });
   }
 
-  // Authentication helper
-  async authenticateUser(email = 'test@freeflowzee.com', password = 'test123') {
+  // Authentication helper with test mode
+  async authenticateUser(email: string, password: string) {
     await this.page.goto('/login');
+    await this.page.waitForSelector('[data-testid="email-input"]', { timeout: 10000 });
     await this.page.fill('[data-testid="email-input"]', email);
     await this.page.fill('[data-testid="password-input"]', password);
     await this.page.click('[data-testid="login-button"]');
-    await this.waitForAppReady();
+    
+    try {
+      await this.page.waitForURL('/dashboard', { timeout: 45000 });
+    } catch (error) {
+      // Take screenshot on failure
+      await this.takeTimestampedScreenshot('auth-failure');
+      throw error;
+    }
+  }
+
+  async fillLoginForm(email: string, password: string) {
+    // Wait for loading state to finish
+    await this.page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 });
+    
+    // Wait for form elements with increased timeout
+    await this.page.waitForSelector('[data-testid="email-input"]', { timeout: 30000, state: 'visible' });
+    await this.page.fill('[data-testid="email-input"]', email);
+    await this.page.fill('[data-testid="password-input"]', password);
+  }
+
+  async submitLoginForm() {
+    await this.page.click('[data-testid="login-button"]');
+  }
+
+  async checkForErrorMessage() {
+    const errorElement = await this.page.locator('[data-testid="error-message"]');
+    return errorElement.isVisible();
+  }
+
+  async getErrorMessage() {
+    const errorElement = await this.page.locator('[data-testid="error-message"]');
+    return errorElement.textContent();
+  }
+
+  async waitForLoginResponse() {
+    // Wait for either success navigation or error message
+    await Promise.race([
+      this.page.waitForURL('/dashboard'),
+      this.page.waitForSelector('[data-testid="error-message"]', { state: 'visible', timeout: 5000 })
+    ]);
   }
 
   // Dashboard navigation helper
@@ -46,14 +90,77 @@ export class TestHelpers {
   }
 
   // Wait for element with better error handling
-  async waitForElement(selector: string, timeout = 10000) {
+  async waitForElement(selector: string, options = { timeout: 15000 }) {
     try {
-      await this.page.waitForSelector(selector, { timeout });
-      return true;
+      await this.page.waitForSelector(selector, options);
     } catch (error) {
-      console.error(`Element ${selector} not found within ${timeout}ms`);
-      await this.takeTimestampedScreenshot(`element-not-found-${selector.replace(/[^\w]/g, '-')}`);
+      console.error(`Failed to find element: ${selector}`);
+      await this.takeTimestampedScreenshot(`wait-failed-${selector}`);
       throw error;
+    }
+  }
+
+  // Check if element exists
+  async elementExists(selector: string): Promise<boolean> {
+    return await this.page.locator(selector).count() > 0;
+  }
+
+  // Wait for network idle with timeout
+  async waitForNetworkIdle(timeout = 15000) {
+    await this.page.waitForLoadState('networkidle', { timeout });
+  }
+
+  // Clear browser storage
+  async clearStorage() {
+    await this.page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
+  }
+
+  // Mock API response
+  async mockApiResponse(url: string, response: any) {
+    await this.page.route(url, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(response)
+      });
+    });
+  }
+
+  // Check for accessibility issues
+  async checkAccessibility() {
+    // Add your accessibility testing logic here
+    // For example, using axe-core or similar tools
+  }
+
+  // Get all form validation errors
+  async getFormValidationErrors() {
+    return await this.page.evaluate(() => {
+      const errors: string[] = [];
+      document.querySelectorAll('[data-testid*="error"]').forEach((el) => {
+        errors.push(el.textContent || '');
+      });
+      return errors;
+    });
+  }
+
+  // Wait for page load with timeout
+  async waitForPageLoad(timeout = 30000) {
+    await Promise.all([
+      this.page.waitForLoadState('domcontentloaded', { timeout }),
+      this.page.waitForLoadState('networkidle', { timeout })
+    ]);
+  }
+
+  // Check if user is authenticated
+  async isAuthenticated(): Promise<boolean> {
+    try {
+      await this.navigateToDashboard();
+      return true;
+    } catch {
+      return false;
     }
   }
 

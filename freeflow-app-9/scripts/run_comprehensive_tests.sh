@@ -3,68 +3,77 @@
 
 set -e
 
-echo "🧪 Running Comprehensive FreeflowZee Test Suite"
+# Colors for output
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+# Set environment variables for testing
+export NODE_ENV=test
+export PLAYWRIGHT_HTML_REPORT="./playwright-report"
+export PLAYWRIGHT_JUNIT_OUTPUT_NAME="./test-results/junit.xml"
+
+echo -e "${GREEN}🚀 Starting FreeflowZee Comprehensive Test Suite${NC}"
 echo "================================================="
 
-# Colors
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
+# Install dependencies if needed
+echo -e "\n${YELLOW}📦 Installing dependencies...${NC}"
+npm install
 
-# Test execution tracking
-TOTAL_TESTS=0
-PASSED_TESTS=0
-FAILED_TESTS=0
+# Install browsers if not already installed
+echo -e "\n${YELLOW}🌐 Installing browsers...${NC}"
+npx playwright install
 
+# Create test results directory
+mkdir -p test-results
+
+# Function to run a test suite
 run_test_suite() {
-    local suite_name="$1"
-    local command="$2"
+    local suite_name=$1
+    local test_pattern=$2
     
-    echo -e "\n${YELLOW}Running $suite_name...${NC}"
+    echo -e "\n${YELLOW}🧪 Running ${suite_name}...${NC}"
+    npx playwright test "${test_pattern}" \
+        --reporter=list,html,junit \
+        --workers=2 \
+        --retries=1
     
-    if eval "$command"; then
-        echo -e "${GREEN}✅ $suite_name PASSED${NC}"
-        ((PASSED_TESTS++))
+    local exit_code=$?
+    if [ $exit_code -eq 0 ]; then
+        echo -e "${GREEN}✅ ${suite_name} passed!${NC}"
     else
-        echo -e "${RED}❌ $suite_name FAILED${NC}"
-        ((FAILED_TESTS++))
+        echo -e "${RED}❌ ${suite_name} failed!${NC}"
+        return $exit_code
     fi
-    
-    ((TOTAL_TESTS++))
 }
 
-# Ensure server is running
-echo "Starting test server..."
-npm run dev &
-SERVER_PID=$!
-sleep 10
+# Run test suites in order
+echo -e "\n${YELLOW}🔍 Running all test suites...${NC}"
 
-# Run test suites
-run_test_suite "Dashboard Tests" "npm run test:dashboard"
-run_test_suite "Payment Tests" "npm run test:payment"
-run_test_suite "API Integration Tests" "npm run test:api"
-run_test_suite "Enhanced Dashboard Tests" "npm run test:dashboard-enhanced"
-run_test_suite "Comprehensive Payment Tests" "npm run test:payment-comprehensive"
-run_test_suite "Mobile Responsive Tests" "npm run test:mobile"
-
-# Kill server
-kill $SERVER_PID || true
-
-# Generate summary
-echo -e "\n🏁 Test Execution Summary"
-echo "=========================="
-echo -e "Total Test Suites: $TOTAL_TESTS"
-echo -e "Passed: ${GREEN}$PASSED_TESTS${NC}"
-echo -e "Failed: ${RED}$FAILED_TESTS${NC}"
-
-SUCCESS_RATE=$(( PASSED_TESTS * 100 / TOTAL_TESTS ))
-echo -e "Success Rate: $SUCCESS_RATE%"
-
-if [ $FAILED_TESTS -eq 0 ]; then
-    echo -e "\n🎉 ${GREEN}ALL TESTS PASSED!${NC}"
-    exit 0
-else
-    echo -e "\n⚠️  ${YELLOW}Some tests failed. Check logs above.${NC}"
+# Authentication tests first
+run_test_suite "Authentication Tests" "auth.test.ts"
+if [ $? -ne 0 ]; then
+    echo -e "${RED}❌ Authentication tests failed! Stopping test execution.${NC}"
     exit 1
 fi
+
+# Run comprehensive test suite
+run_test_suite "Comprehensive Tests" "comprehensive.test.ts"
+if [ $? -ne 0 ]; then
+    echo -e "${RED}❌ Comprehensive tests failed!${NC}"
+    exit 1
+fi
+
+# Generate and display test report
+echo -e "\n${GREEN}📊 Generating test report...${NC}"
+echo "Test report available at: $PLAYWRIGHT_HTML_REPORT/index.html"
+
+# Display test summary
+echo -e "\n${GREEN}📝 Test Summary${NC}"
+echo "================================================="
+echo "✅ Authentication Tests: Passed"
+echo "✅ Comprehensive Tests: Passed"
+echo "================================================="
+
+echo -e "\n${GREEN}🎉 All tests completed successfully!${NC}"

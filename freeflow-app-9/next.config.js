@@ -1,27 +1,43 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Experimental features for performance
-  experimental: {
-    optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
-      },
-    },
-  },
-
-  // SEO & Performance Optimizations
+  // Core Configuration
+  reactStrictMode: true,
   poweredByHeader: false,
-  compress: true,
   generateEtags: true,
+  compress: true,
   
-  // External packages for server components
+  // Server external packages
   serverExternalPackages: ['@supabase/supabase-js', '@aws-sdk/client-s3', '@aws-sdk/s3-request-presigner', '@aws-sdk/lib-storage'],
   
-  // Image optimization for SEO
+  // Experimental features
+  experimental: {
+    // Package import optimizations
+    optimizePackageImports: [
+      '@radix-ui/react-icons',
+      'lucide-react',
+      'framer-motion',
+      'date-fns'
+    ],
+    
+    // Server actions
+    serverActions: {
+      allowedOrigins: ['localhost:3000'],
+    },
+    
+    // Build optimizations
+    swcPlugins: [],
+    forceSwcTransforms: true,
+  },
+  
+  // Compiler optimizations
+  compiler: {
+    emotion: false,
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn']
+    } : false,
+  },
+  
+  // Image optimization
   images: {
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -32,29 +48,14 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**.supabase.co',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.amazonaws.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.wasabisys.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'via.placeholder.com',
+        hostname: '**'
       }
-    ]
+    ],
+    domains: ['ouzcjoxaupimazrivyta.supabase.co', 'localhost'],
   },
-
-  // Handle media files
-  webpack: (config) => {
+  
+  // Webpack configuration
+  webpack: (config, { dev, isServer }) => {
     // Handle media files
     config.module.rules.push({
       test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
@@ -66,122 +67,60 @@ const nextConfig = {
           name: '[name].[hash].[ext]',
         },
       },
-    })
+    });
 
-    return config
+    // Fix module resolution issues
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+      crypto: false,
+      path: false,
+      os: false,
+      stream: false,
+      util: false,
+      punycode: false,
+    };
+
+    // Optimize webpack cache
+    if (!dev) {
+      config.cache = {
+        type: 'filesystem',
+        buildDependencies: {
+          config: [__filename]
+        }
+      };
+    }
+
+    // Handle SVG files
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ['@svgr/webpack'],
+    });
+
+    return config;
   },
-
+  
   // Environment variables
   env: {
-    NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
-  },
-
-  // Headers for SEO and security
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY'
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff'
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin'
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()'
-          }
-        ]
-      },
-      {
-        source: '/api/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=0, s-maxage=86400, stale-while-revalidate=86400'
-          }
-        ]
-      },
-      {
-        source: '/_next/static/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable'
-          }
-        ]
-      },
-      {
-        source: '/images/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable'
-          }
-        ]
-      }
-    ]
-  },
-
-  // Redirects for SEO
-  async redirects() {
-    return [
-      {
-        source: '/home',
-        destination: '/',
-        permanent: true,
-      },
-      {
-        source: '/dashboard/files',
-        destination: '/dashboard/files-hub',
-        permanent: true,
-      },
-      {
-        source: '/dashboard/projects',
-        destination: '/dashboard/projects-hub',
-        permanent: true,
-      },
-    ]
-  },
-
-  // Rewrites for clean URLs
-  async rewrites() {
-    return [
-      {
-        source: '/sitemap.xml',
-        destination: '/api/sitemap',
-      },
-      {
-        source: '/robots.txt',
-        destination: '/api/robots',
-      },
-    ]
-  },
-
-  // Output configuration for static export compatibility
-  output: 'standalone',
-
-  // Compiler options
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+    NEXT_PUBLIC_APP_URL: process.env.NODE_ENV === 'production' 
+      ? 'https://freeflowzee.com' 
+      : 'http://localhost:3000',
   },
 
   // TypeScript configuration
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
 
   // ESLint configuration
   eslint: {
     ignoreDuringBuilds: false,
   },
-}
 
-module.exports = nextConfig
+  // Output configuration
+  output: 'standalone',
+};
+
+module.exports = nextConfig;

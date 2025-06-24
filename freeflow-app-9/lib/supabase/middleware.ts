@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -46,19 +47,32 @@ export async function updateSession(request: NextRequest) {
     supabaseAnonKey,
     {
       cookies: {
-        getAll() {
-          return request.cookies.getAll()
+        get(name: string) {
+          return request.cookies.get(name)?.value
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+        set(name: string, value: string, options: Partial<ResponseCookie>) {
+          request.cookies.set({
+            name,
+            value,
+            ...options,
+          })
           supabaseResponse = NextResponse.next({
             request,
           })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
+          supabaseResponse.cookies.set({
+            name,
+            value,
+            ...options,
+          })
         },
-      },
+        remove(name: string, options?: Partial<ResponseCookie>) {
+          request.cookies.delete(name)
+          supabaseResponse = NextResponse.next({
+            request,
+          })
+          supabaseResponse.cookies.delete(name)
+        }
+      }
     }
   )
 

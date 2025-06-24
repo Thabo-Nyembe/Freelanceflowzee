@@ -71,6 +71,13 @@ const CREATE_ADD_BUTTONS = {
   }
 };
 
+const TEST_CONFIG = {
+  baseUrl: 'http://localhost:3000',  // Changed from 3002 to 3000
+  timeout: 30000,
+  retries: 2,
+  headless: false
+};
+
 class CreateAddButtonTester {
   constructor() {
     this.browser = null;

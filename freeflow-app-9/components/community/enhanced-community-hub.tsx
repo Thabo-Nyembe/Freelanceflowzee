@@ -17,6 +17,39 @@ import {
   Instagram, Twitter, Facebook, Globe, Phone, Mail, Calendar,
   ThumbsUp, Send, Upload, X, Sparkles, Zap, Target, Plus, Clock, User
 } from 'lucide-react'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { CreatePostDialog } from './create-post-dialog'
+
+// Define the Post interface
+interface Post {
+  id: string
+  author: {
+    name: string
+    username?: string
+    avatar: string
+    verified?: boolean
+    rating?: number
+  }
+  title?: string
+  content: string
+  media?: Array<{
+    type: 'image' | 'video'
+    url: string
+  }>
+  mediaType?: 'image' | 'video' | 'carousel'
+  mediaUrl?: string
+  mediaUrls?: string[]
+  thumbnail?: string
+  duration?: string
+  likes: number
+  comments: number
+  shares: number
+  timestamp?: string
+  createdAt?: string
+  liked?: boolean
+  bookmarked?: boolean
+  tags?: string[]
+}
 
 const EnhancedCommunityHub = () => {
   const [activeTab, setActiveTab] = useState('feed')
@@ -30,7 +63,11 @@ const EnhancedCommunityHub = () => {
     tags: []
   })
   const [audioPlaying, setAudioPlaying] = useState(null)
-  
+  const [isPostDialogOpen, setIsPostDialogOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [posts, setPosts] = useState<Post[]>([])
+  const [creators, setCreators] = useState([])
+
   const { isOpen, shareContent, closeSharingModal, sharePost } = useSharingModal()
 
   // Top 20 creators data
@@ -573,6 +610,39 @@ const EnhancedCommunityHub = () => {
     )
   }
 
+  const handleCreatePost = async (postData: FormData) => {
+    setIsLoading(true)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      const newPost: Post = {
+        id: Date.now().toString(),
+        author: {
+          name: 'Current User',
+          avatar: '/avatars/default.jpg',
+          rating: 4.5
+        },
+        title: postData.get('title') as string,
+        content: postData.get('content') as string,
+        media: Array.from(postData.getAll('media')).map(file => ({
+          type: (file as File).type.startsWith('image/') ? 'image' : 'video',
+          url: URL.createObjectURL(file as File)
+        })),
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        createdAt: new Date().toISOString()
+      }
+      
+      setPosts(prev => [newPost, ...prev])
+    } catch (error) {
+      console.error('Failed to create post:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/20">
       <div className="max-w-7xl mx-auto p-6">
@@ -1027,6 +1097,12 @@ const EnhancedCommunityHub = () => {
           type={shareContent.type}
         />
       )}
+
+      <CreatePostDialog
+        open={isPostDialogOpen}
+        onOpenChange={setIsPostDialogOpen}
+        onSubmit={handleCreatePost}
+      />
     </div>
   )
 }

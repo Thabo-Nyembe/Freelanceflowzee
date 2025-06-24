@@ -526,7 +526,7 @@ export function EnhancedDownloadManager({
         description: `$${item.escrowAmount} secured in escrow. Download is now available.`,
       })
 
-      onEscrowPayment?.(item, item.escrowAmount)
+      onEscrowPayment?.(item, item.escrowAmount || 0)
     }, 2000)
 
     toast({

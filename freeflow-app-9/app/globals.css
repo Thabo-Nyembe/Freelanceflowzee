@@ -95,18 +95,19 @@
   }
   body {
     @apply bg-background text-foreground;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
-/* Theme-aware utility classes */
 @layer components {
   /* Header and Navigation */
   .theme-header {
-    @apply bg-white/95 backdrop-blur-md border-b border-gray-200/20;
+    @apply bg-white/95 backdrop-blur-lg border-b border-gray-200/20;
   }
   .dark .theme-header {
-    @apply bg-gray-950/95 border-gray-800/40;
+    @apply bg-gray-900/95 border-gray-800/40;
   }
 
   /* Gradients */
@@ -120,24 +121,16 @@
     @apply from-purple-400 to-indigo-400;
   }
 
-  /* Buttons */
-  .theme-button-primary {
-    @apply bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white;
-  }
-  .dark .theme-button-primary {
-    @apply from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600;
-  }
-
   /* Cards and Containers */
   .theme-card {
-    @apply bg-white/60 backdrop-blur-xl border border-white/20 shadow-lg;
+    @apply bg-white/60 backdrop-blur-lg border border-white/20 shadow-lg;
   }
   .dark .theme-card {
-    @apply bg-gray-900/60 border-gray-800/40 shadow-2xl;
+    @apply bg-gray-900/60 border-gray-800/40 shadow-xl;
   }
 
   .theme-card-glass {
-    @apply bg-white/40 backdrop-blur-xl border border-white/30;
+    @apply bg-white/40 backdrop-blur-lg border border-white/30;
   }
   .dark .theme-card-glass {
     @apply bg-gray-900/40 border-gray-800/50;
@@ -152,10 +145,10 @@
   }
 
   .theme-bg-gradient {
-    @apply bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40;
+    @apply bg-gradient-to-br from-gray-50 via-pink-50/30 to-purple-50/40;
   }
   .dark .theme-bg-gradient {
-    @apply from-gray-950 via-purple-950/20 to-indigo-950/20;
+    @apply from-gray-900 via-purple-900/20 to-indigo-900/20;
   }
 
   /* Text colors */
@@ -189,17 +182,20 @@
 
   /* Dropdown styles */
   .site-header-dropdown {
-    @apply bg-white/95 backdrop-blur-md border border-gray-200/40 rounded-xl shadow-xl;
+    @apply bg-white/95 backdrop-blur-lg border border-gray-200/40 rounded-xl shadow-xl;
   }
   .dark .site-header-dropdown {
-    @apply bg-gray-950/95 border-gray-800/40;
+    @apply bg-gray-900/95 border-gray-800/40;
   }
 
   .site-nav-dropdown-item {
-    @apply flex items-center gap-3 p-3 rounded-lg transition-all duration-200 hover:bg-purple-50 hover:shadow-sm cursor-pointer;
+    @apply flex items-center gap-3 p-3 rounded-lg transition-all cursor-pointer;
   }
-  .dark .site-nav-dropdown-item {
-    @apply hover:bg-purple-900/20;
+  .site-nav-dropdown-item:hover {
+    @apply bg-purple-50/50 shadow-sm;
+  }
+  .dark .site-nav-dropdown-item:hover {
+    @apply bg-purple-900/20;
   }
 
   .resources-dropdown-section {
@@ -215,1441 +211,159 @@
 
   /* Hero sections */
   .theme-hero-section {
-    @apply bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40 min-h-screen;
+    @apply bg-gradient-to-br from-gray-50 via-pink-50/30 to-purple-50/40 min-h-screen;
   }
   .dark .theme-hero-section {
-    @apply from-gray-950 via-purple-950/20 to-indigo-950/20;
+    @apply from-gray-900 via-purple-900/20 to-indigo-900/20;
   }
 
   /* Feature cards */
   .theme-feature-card {
-    @apply bg-white/60 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105;
+    background-color: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s;
+  }
+  .theme-feature-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
   .dark .theme-feature-card {
-    @apply bg-gray-900/60 border-gray-800/40 shadow-2xl;
+    background-color: rgba(17, 24, 39, 0.6);
+    border-color: rgba(31, 41, 55, 0.4);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   }
 
   /* Input styles */
   .theme-input {
-    @apply bg-white/50 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgb(229, 231, 235);
+  }
+  .theme-input:focus {
+    border-color: rgb(139, 92, 246);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
   }
   .dark .theme-input {
-    @apply bg-gray-900/50 border-gray-700 focus:border-purple-400 focus:ring-purple-400/20;
+    background-color: rgba(17, 24, 39, 0.5);
+    border-color: rgb(55, 65, 81);
+  }
+  .dark .theme-input:focus {
+    border-color: rgb(167, 139, 250);
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.2);
   }
 
   /* Modal and overlay */
   .theme-modal {
-    @apply bg-white/95 backdrop-blur-md border border-gray-200/40;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(229, 231, 235, 0.4);
   }
   .dark .theme-modal {
-    @apply bg-gray-950/95 border-gray-800/40;
+    background-color: rgba(3, 7, 18, 0.95);
+    border-color: rgba(31, 41, 55, 0.4);
   }
 
   .theme-overlay {
-    @apply bg-black/20 backdrop-blur-sm;
+    background-color: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
   }
   .dark .theme-overlay {
-    @apply bg-black/40;
+    background-color: rgba(0, 0, 0, 0.4);
   }
 
   /* Footer */
   .theme-footer {
-    @apply bg-white/90 backdrop-blur-md border-t border-gray-200/20;
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid rgba(229, 231, 235, 0.2);
   }
   .dark .theme-footer {
-    @apply bg-gray-950/90 border-gray-800/40;
+    background-color: rgba(3, 7, 18, 0.9);
+    border-color: rgba(31, 41, 55, 0.4);
   }
 
   /* Pricing cards */
   .theme-pricing-card {
-    @apply bg-white/80 backdrop-blur-xl border border-white/30 rounded-2xl shadow-lg;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 1rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   }
   .dark .theme-pricing-card {
-    @apply bg-gray-900/80 border-gray-800/50;
+    background-color: rgba(17, 24, 39, 0.8);
+    border-color: rgba(31, 41, 55, 0.5);
   }
 
   .theme-pricing-card-featured {
-    @apply bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200;
+    background: linear-gradient(to bottom right, rgb(245, 243, 255), rgb(238, 242, 255));
+    border-color: rgb(221, 214, 254);
   }
   .dark .theme-pricing-card-featured {
-    @apply from-purple-950/50 to-indigo-950/50 border-purple-800/50;
+    background: linear-gradient(to bottom right, rgba(46, 16, 101, 0.5), rgba(30, 41, 59, 0.5));
+    border-color: rgba(91, 33, 182, 0.5);
   }
 
   /* Testimonial cards */
   .theme-testimonial-card {
-    @apply bg-white/70 backdrop-blur-xl border border-white/25 rounded-xl p-6;
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
   }
   .dark .theme-testimonial-card {
-    @apply bg-gray-900/70 border-gray-800/40;
+    background-color: rgba(17, 24, 39, 0.7);
+    border-color: rgba(31, 41, 55, 0.4);
   }
 
   /* Dashboard elements */
   .theme-sidebar {
-    @apply bg-white/95 backdrop-blur-md border-r border-gray-200/40;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border-right: 1px solid rgba(229, 231, 235, 0.4);
   }
   .dark .theme-sidebar {
-    @apply bg-gray-950/95 border-gray-800/40;
+    background-color: rgba(3, 7, 18, 0.95);
+    border-color: rgba(31, 41, 55, 0.4);
   }
 
   .theme-nav-item {
-    @apply text-gray-600 hover:text-purple-600 hover:bg-purple-50/50 rounded-lg;
+    color: rgb(75, 85, 99);
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+  }
+  .theme-nav-item:hover {
+    color: rgb(124, 58, 237);
+    background-color: rgba(243, 232, 255, 0.5);
   }
   .dark .theme-nav-item {
-    @apply text-gray-400 hover:text-purple-400 hover:bg-purple-900/20;
+    color: rgb(156, 163, 175);
+  }
+  .dark .theme-nav-item:hover {
+    color: rgb(167, 139, 250);
+    background-color: rgba(88, 28, 135, 0.2);
   }
 
   .theme-nav-item-active {
-    @apply text-purple-600 bg-purple-50 font-medium;
+    color: rgb(124, 58, 237);
+    background-color: rgb(243, 232, 255);
+    font-weight: 500;
   }
   .dark .theme-nav-item-active {
-    @apply text-purple-400 bg-purple-900/30;
+    color: rgb(167, 139, 250);
+    background-color: rgba(88, 28, 135, 0.3);
   }
 }
-
-/* ===================================================================
-   FREEFLOWZEE COMPREHENSIVE WHITE & PURPLE THEME SYSTEM
-   Ensures consistent UI/UX across all browsers and components
-   ================================================================ */
-
-:root {
-  /* Purple Color Scale - Luxury and High-End */
-  --purple-50: #faf5ff;
-  --purple-100: #f3e8ff;
-  --purple-200: #e9d5ff;
-  --purple-300: #d8b4fe;
-  --purple-400: #c084fc;
-  --purple-500: #a855f7;
-  --purple-600: #8b5cf6;  /* Primary luxury purple */
-  --purple-700: #7c3aed;  /* Deep royal purple */
-  --purple-800: #6b21a8;  /* Rich amethyst */
-  --purple-900: #581c87;  /* Premium deep purple */
-
-  /* Indigo Complementary Colors */
-  --indigo-50: #eef2ff;
-  --indigo-100: #e0e7ff;
-  --indigo-200: #c7d2fe;
-  --indigo-300: #a5b4fc;
-  --indigo-400: #818cf8;
-  --indigo-500: #6366f1;
-  --indigo-600: #4f46e5;
-  --indigo-700: #4338ca;
-  --indigo-800: #3730a3;
-  --indigo-900: #312e81;
-
-  /* White and Gray Scale */
-  --white: #ffffff;
-  --gray-50: #f9fafb;
-  --gray-100: #f3f4f6;
-  --gray-200: #e5e7eb;
-  --gray-300: #d1d5db;
-  --gray-400: #9ca3af;
-  --gray-500: #6b7280;
-  --gray-600: #4b5563;
-  --gray-700: #374151;
-  --gray-800: #1f2937;
-  --gray-900: #111827;
-
-  /* Premium Accent Colors */
-  --royal-purple: #663399;    /* Classic royal purple */
-  --amethyst: #9966cc;       /* Luxurious amethyst */
-  --deep-violet: #4b0082;    /* Deep violet luxury */
-  --plum: #dda0dd;          /* Rich plum */
-  --lavender-luxury: #e6e6fa; /* Soft luxury lavender */
-
-  /* Theme Color Assignments */
-  --theme-primary: var(--purple-600);        /* Luxury purple */
-  --theme-primary-light: var(--purple-500);
-  --theme-primary-dark: var(--purple-800);   /* Rich amethyst */
-  --theme-secondary: var(--purple-700);        /* Deep royal purple */
-  --theme-accent: var(--indigo-600);           /* Luxurious accent */
-  --theme-bg-primary: var(--white);
-  --theme-bg-secondary: var(--gray-50);
-  --theme-bg-purple-50: var(--purple-50);
-  --theme-bg-purple-100: var(--purple-100);
-  --theme-text-primary: var(--gray-900);   /* Deep royal text */
-  --theme-text-secondary: var(--gray-600);
-  --theme-border: var(--gray-200);
-  --theme-border-purple: var(--purple-200);
-
-  /* Gradient Definitions */
-  --theme-gradient-primary: linear-gradient(135deg, var(--purple-600) 0%, var(--purple-700) 100%);
-  --theme-gradient-luxury: linear-gradient(135deg, var(--purple-600) 0%, var(--indigo-600) 50%, var(--purple-700) 100%);
-  --theme-gradient-background: linear-gradient(135deg, var(--gray-50) 0%, var(--purple-50) 50%, var(--gray-50) 100%);
-  --theme-gradient-card: linear-gradient(135deg, var(--white) 0%, var(--purple-50) 100%);
-  --theme-gradient-button: linear-gradient(135deg, var(--purple-600) 0%, var(--purple-700) 100%);
-  --theme-gradient-premium: linear-gradient(135deg, var(--royal-purple) 0%, var(--amethyst) 50%, var(--deep-violet) 100%);
-
-  /* Glass Morphism Effects */
-  --theme-glass-bg: rgba(255, 255, 255, 0.25);
-  --theme-glass-border: rgba(255, 255, 255, 0.18);
-  --theme-glass-backdrop: blur(16px);
-
-  /* Shadow System */
-  --theme-shadow-sm: 0 1px 2px 0 rgba(139, 92, 246, 0.05);
-  --theme-shadow-md: 0 4px 6px -1px rgba(139, 92, 246, 0.1), 0 2px 4px -1px rgba(139, 92, 246, 0.06);
-  --theme-shadow-lg: 0 10px 15px -3px rgba(139, 92, 246, 0.1), 0 4px 6px -2px rgba(139, 92, 246, 0.05);
-  --theme-shadow-xl: 0 20px 25px -5px rgba(139, 92, 246, 0.1), 0 10px 10px -5px rgba(139, 92, 246, 0.04);
-  --theme-shadow-purple: 0 4px 14px 0 rgba(139, 92, 246, 0.39);
-
-  /* Dashboard Layout Variables */
-  --dashboard-sidebar-width: 256px;
-  --dashboard-header-height: 64px;
-  --dashboard-content-padding: 24px;
-  --dashboard-max-width: 1400px;
-  --dashboard-gap: 24px;
-}
-
-/* ===================================================================
-   UNIVERSAL THEME APPLICATION
-   ================================================================ */
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  border-color: var(--theme-border);
-}
-
-html {
-  scroll-behavior: smooth;
-  overflow-x: hidden;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  line-height: 1.6;
-  color: var(--gray-800);
-  background-color: var(--theme-bg-secondary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
-}
-
-/* ===================================================================
-   A++ PERMANENT BLACK BACKGROUND PREVENTION SYSTEM
-   This section ensures the UI never reverts to black backgrounds
-   ================================================================ */
-
-/* CRITICAL: Force override any black backgrounds with !important */
-*[class*="bg-black"] {
-  background-color: var(--white) !important;
-  color: var(--gray-900) !important;
-}
-
-*[class*="bg-gray-900"], 
-*[class*="bg-slate-900"],
-*[class*="bg-zinc-900"] {
-  background-color: var(--gray-50) !important;
-  color: var(--gray-900) !important;
-}
-
-*[class*="bg-black/50"],
-*[class*="bg-black/60"],
-*[class*="bg-black/70"],
-*[class*="bg-black/80"],
-*[class*="bg-black/90"] {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  color: var(--gray-900) !important;
-}
-
-/* Force white text to be readable on light backgrounds */
-.text-white {
-  color: var(--gray-900) !important;
-}
-
-/* Ensure tooltips and popovers are visible */
-[role="tooltip"] {
-  background-color: var(--white) !important;
-  color: var(--gray-900) !important;
-  border: 1px solid var(--gray-200) !important;
-  box-shadow: var(--theme-shadow-lg) !important;
-}
-
-/* Code blocks and pre elements */
-pre, code {
-  background-color: var(--gray-100) !important;
-  color: var(--gray-900) !important;
-  border: 1px solid var(--gray-200) !important;
-  border-radius: 6px !important;
-}
-
-/* Force buttons to use theme colors */
-button[class*="bg-black"],
-button[class*="bg-gray-900"] {
-  background: var(--theme-gradient-primary) !important;
-  color: var(--white) !important;
-  border: none !important;
-}
-
-button[class*="bg-black"]:hover,
-button[class*="bg-gray-900"]:hover {
-  background: var(--theme-gradient-luxury) !important;
-  transform: translateY(-2px) !important;
-  box-shadow: var(--theme-shadow-lg) !important;
-}
-
-/* Gradient overrides for dark gradients */
-*[class*="from-gray-900"],
-*[class*="from-black"],
-*[class*="to-gray-900"],
-*[class*="to-black"],
-*[class*="via-gray-900"],
-*[class*="via-black"] {
-  background: var(--theme-gradient-background) !important;
-}
-
-*[class*="from-purple-900"],
-*[class*="to-purple-900"],
-*[class*="via-purple-900"] {
-  background: var(--theme-gradient-luxury) !important;
-}
-
-/* Text color fixes for readability */
-*[class*="bg-black"] *[class*="text-white"],
-*[class*="bg-gray-900"] *[class*="text-white"] {
-  color: var(--gray-900) !important;
-}
-
-*[class*="bg-purple"] *[class*="text-white"],
-*[class*="bg-indigo"] *[class*="text-white"] {
-  color: var(--white) !important;
-}
-
-/* Special handling for code syntax highlighting */
-pre[class*="bg-gray-900"],
-pre[class*="bg-black"],
-code[class*="bg-gray-900"],
-code[class*="bg-black"] {
-  background-color: var(--gray-100) !important;
-  color: var(--gray-900) !important;
-  border: 1px solid var(--gray-200) !important;
-}
-
-/* Navigation specific fixes */
-nav[data-testid="site-header"] {
-  background-color: var(--white) !important;
-  border-bottom: 1px solid var(--gray-200) !important;
-  backdrop-filter: blur(10px) !important;
-}
-
-nav[data-testid="site-header"].bg-transparent button,
-nav[data-testid="site-header"].bg-transparent a {
-  color: var(--gray-900) !important;
-}
-
-/* Dropdown and modal fixes */
-[data-radix-popper-content-wrapper] {
-  background-color: var(--white) !important;
-}
-
-[data-radix-dropdown-menu-content] {
-  background-color: var(--white) !important;
-  border: 1px solid var(--gray-200) !important;
-  box-shadow: var(--theme-shadow-lg) !important;
-}
-
-[data-radix-dropdown-menu-item] {
-  color: var(--gray-900) !important;
-}
-
-[data-radix-dropdown-menu-item]:hover {
-  background-color: var(--purple-50) !important;
-  color: var(--purple-700) !important;
-}
-
-/* Mobile menu fixes */
-nav[data-testid="site-header"].bg-transparent [data-testid="mobile-menu"] {
-  background-color: var(--white) !important;
-  color: var(--gray-900) !important;
-}
-
-nav[data-testid="site-header"].bg-transparent button:hover {
-  background-color: var(--purple-50) !important;
-  color: var(--purple-700) !important;
-}
-
-nav[data-testid="site-header"].bg-transparent [data-testid="nav-logo"] {
-  color: var(--gray-900) !important;
-}
-
-nav[data-testid="site-header"].bg-transparent .bg-indigo-600 {
-  background: var(--theme-gradient-primary) !important;
-  color: var(--white) !important;
-}
-
-/* ===================================================================
-   ENHANCED THEME UTILITIES FOR A++ GRADE
-   ================================================================ */
-
-.theme-header {
-  background-color: var(--white) !important;
-  border-bottom: 1px solid var(--gray-200) !important;
-  backdrop-filter: blur(10px) !important;
-}
-
-.theme-gradient-primary {
-  background: var(--theme-gradient-primary) !important;
-}
-
-.theme-gradient-text {
-  background: var(--theme-gradient-primary) !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-}
-
-.theme-text-primary {
-  color: var(--theme-text-primary) !important;
-}
-
-.theme-text-gray-900 {
-  color: var(--gray-900) !important;
-}
-
-.theme-text-gray-600 {
-  color: var(--gray-600) !important;
-}
-
-.theme-bg-purple-100 {
-  background-color: var(--purple-100) !important;
-}
-
-.theme-border-purple {
-  border-color: var(--purple-200) !important;
-}
-
-/* Enhanced dropdown styling */
-.site-header-dropdown {
-  background-color: var(--white) !important;
-  border: 1px solid var(--gray-200) !important;
-  border-radius: 12px !important;
-  box-shadow: var(--theme-shadow-xl) !important;
-  backdrop-filter: blur(10px) !important;
-}
-
-.site-nav-dropdown-item {
-  color: var(--gray-700) !important;
-  padding: 12px 16px !important;
-  border-radius: 8px !important;
-  transition: all 0.2s ease !important;
-  margin: 4px 8px !important;
-}
-
-.site-nav-dropdown-item:hover {
-  background-color: var(--purple-50) !important;
-  color: var(--purple-700) !important;
-  transform: translateX(4px) !important;
-}
-
-.resources-dropdown-section {
-  border-bottom: 1px solid var(--gray-100) !important;
-  padding-bottom: 12px !important;
-}
-
-.resources-dropdown-section:last-child {
-  border-bottom: none !important;
-  padding-bottom: 8px !important;
-}
-
-.resources-dropdown-title {
-  color: var(--gray-900) !important;
-  font-weight: 600 !important;
-  font-size: 14px !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
-  margin-bottom: 8px !important;
-  padding: 0 16px !important;
-}
-
-/* Z-index management for proper layering */
-.z-dropdown {
-  z-index: 50 !important;
-}
-
-.z-modal {
-  z-index: 60 !important;
-}
-
-.z-overlay {
-  z-index: 55 !important;
-}
-
-.z-header {
-  z-index: 40 !important;
-}
-
-.z-sidebar {
-  z-index: 30 !important;
-}
-
-/* ===================================================================
-   FINAL OVERRIDE SYSTEM - ABSOLUTE PROTECTION AGAINST BLACK UI
-   This is the last line of defense to ensure A++ grade is maintained
-   ================================================================ */
-
-/* Universal black background elimination */
-* {
-  /* Prevent any element from having a black background */
-}
-
-*[style*="background-color: black"],
-*[style*="background-color: #000"],
-*[style*="background-color: #000000"] {
-  background-color: var(--white) !important;
-  color: var(--gray-900) !important;
-}
-
-*[style*="background: black"],
-*[style*="background: #000"],
-*[style*="background: #000000"] {
-  background: var(--theme-gradient-background) !important;
-  color: var(--gray-900) !important;
-}
-
-/* Ensure all components maintain theme consistency */
-div, section, header, footer, nav, main, aside, article {
-  /* Default to theme colors if no background is specified */
-}
-
-/* Force theme colors on dynamic content */
-[data-theme="dark"] {
-  background-color: var(--white) !important;
-  color: var(--gray-900) !important;
-}
-
-/* React component protection */
-[class*="Component"],
-[class*="component"] {
-  background-color: inherit !important;
-}
-
-/* Tailwind class overrides for maximum protection */
-.bg-black { background-color: var(--white) !important; color: var(--gray-900) !important; }
-.bg-gray-900 { background-color: var(--gray-50) !important; color: var(--gray-900) !important; }
-.bg-slate-900 { background-color: var(--gray-50) !important; color: var(--gray-900) !important; }
-.bg-zinc-900 { background-color: var(--gray-50) !important; color: var(--gray-900) !important; }
-
-/* Text color safety */
-.text-white { color: var(--gray-900) !important; }
-.text-gray-100 { color: var(--gray-600) !important; }
-.text-slate-100 { color: var(--gray-600) !important; }
-
-/* Border safety */
-.border-black { border-color: var(--gray-200) !important; }
-.border-gray-900 { border-color: var(--gray-300) !important; }
-
-/* ===================================================================
-   END OF A++ PERMANENT THEME PROTECTION SYSTEM
-   ================================================================ */
-
-/* ===================================================================
-   COMPONENT THEME UTILITIES
-   ================================================================ */
 
 @layer utilities {
-  /* Theme Color Utilities */
-  .theme-bg-primary { background-color: var(--theme-bg-primary); }
-  .theme-bg-secondary { background-color: var(--theme-bg-secondary); }
-  .theme-bg-purple-50 { background-color: var(--theme-bg-purple-50); }
-  .theme-bg-purple-100 { background-color: var(--theme-bg-purple-100); }
-  
-  .theme-text-primary { color: var(--theme-text-primary); }
-  .theme-text-secondary { color: var(--theme-text-secondary); }
-  
-  .theme-border { border-color: var(--theme-border); }
-  .theme-border-purple { border-color: var(--theme-border-purple); }
-  
-  /* Theme Gradient Utilities */
-  .theme-gradient-primary { background: var(--theme-gradient-primary); }
-  .theme-gradient-luxury { background: var(--theme-gradient-luxury); }
-  .theme-gradient-background { background: var(--theme-gradient-background); }
-  .theme-gradient-card { background: var(--theme-gradient-card); }
-  .theme-gradient-button { background: var(--theme-gradient-button); }
-  .theme-gradient-premium { background: var(--theme-gradient-premium); }
-  .theme-gradient-text { 
-    background: var(--theme-gradient-primary);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  
-  /* Theme Glass Morphism */
-  .theme-glass {
-    background: var(--theme-glass-bg);
-    backdrop-filter: var(--theme-glass-backdrop);
-    border: 1px solid var(--theme-glass-border);
-    box-shadow: var(--theme-shadow-lg);
-  }
-  
-  /* Theme Shadows */
-  .theme-shadow-purple { box-shadow: var(--theme-shadow-purple); }
-  .theme-shadow-lg { box-shadow: var(--theme-shadow-lg); }
-  
-  /* Component-Specific Theme Classes */
-  .theme-button-primary {
-    background: var(--theme-gradient-primary);
-    color: var(--white);
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-weight: 600;
-    letter-spacing: 0.025em;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: var(--theme-shadow-md);
-  }
-  
-  .theme-button-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--theme-shadow-lg);
-  }
-  
-  .theme-button-secondary {
-    background: var(--white);
-    color: var(--theme-primary);
-    border: 2px solid var(--theme-border-purple);
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-weight: 500;
-    letter-spacing: 0.025em;
-    transition: all 0.3s ease;
-    box-shadow: var(--theme-shadow-sm);
-  }
-  
-  .theme-button-secondary:hover {
-    background: var(--theme-bg-purple-50);
-    border-color: var(--theme-primary);
-    box-shadow: var(--theme-shadow-md);
-    transform: translateY(-1px);
-  }
-  
-  .theme-card {
-    background: var(--theme-gradient-card);
-    border: 1px solid var(--theme-glass-border);
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: var(--theme-shadow-lg);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    backdrop-filter: var(--theme-glass-backdrop);
-  }
-  
-  .theme-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--theme-shadow-xl);
-  }
-  
-  .theme-header {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--theme-border-purple);
-  }
-  
-  .theme-footer {
-    background: var(--theme-gradient-primary);
-    color: var(--white);
-  }
-  
-  /* Text Balance for Better Typography */
   .text-balance {
     text-wrap: balance;
   }
-  
-  /* Enhanced Responsive Utilities */
-  .container-responsive {
-    @apply w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16;
-    max-width: 1400px;
-  }
-  
-  .container-mobile {
-    @apply w-full mx-auto px-3 sm:px-4;
-    max-width: 100%;
-  }
-  
-  .container-desktop {
-    @apply w-full mx-auto px-6 lg:px-8 xl:px-12;
-    max-width: 1400px;
-  }
-  
-  /* Responsive Grid Systems */
-  .grid-responsive {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8;
-  }
-  
-  .grid-mobile-first {
-    @apply grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4 lg:gap-8;
-  }
-  
-  .grid-cards {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6;
-  }
-  
-  /* Touch-Friendly Interface */
-  .touch-target {
-    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
-  }
-  
-  .button-touch {
-    @apply px-4 py-3 sm:px-6 sm:py-4 text-base sm:text-lg min-h-[48px] rounded-xl;
-  }
-  
-  .card-touch {
-    @apply p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl;
-  }
-  
-  /* Responsive Typography */
-  .heading-responsive {
-    @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light leading-tight tracking-tight;
-  }
-  
-  .subheading-responsive {
-    @apply text-lg sm:text-xl md:text-2xl lg:text-3xl font-light leading-relaxed;
-  }
-  
-  .text-responsive {
-    @apply text-sm sm:text-base md:text-lg leading-relaxed;
-  }
-  
-  .text-mobile {
-    @apply text-sm leading-6;
-  }
-  
-  .text-desktop {
-    @apply text-base lg:text-lg leading-7;
-  }
-  
-  /* Mobile Navigation */
-  .nav-mobile {
-    @apply fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-gray-200 p-2;
-  }
-  
-  .nav-desktop {
-    @apply fixed left-0 top-0 bottom-0 w-64 bg-white/95 backdrop-blur-xl border-r border-gray-200;
-  }
-  
-  /* Responsive Spacing */
-  .section-padding {
-    @apply py-8 sm:py-12 md:py-16 lg:py-20 xl:py-24;
-  }
-  
-  .content-padding {
-    @apply px-4 sm:px-6 lg:px-8 xl:px-12;
-  }
-  
-  .gap-responsive {
-    @apply gap-3 sm:gap-4 md:gap-6 lg:gap-8;
-  }
-  
-  /* Mobile-First Cards */
-  .card-mobile {
-    @apply bg-white rounded-2xl p-4 shadow-sm border border-gray-100;
-  }
-  
-  .card-desktop {
-    @apply bg-white rounded-3xl p-6 lg:p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300;
-  }
-  
-  .card-responsive {
-    @apply bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100;
-  }
-  
-  /* Luxury gradient utilities */
-  .luxury-gradient {
-    background: linear-gradient(135deg, 
-      var(--royal-purple) 0%, 
-      var(--amethyst) 25%, 
-      var(--purple-600) 50%, 
-      var(--deep-violet) 75%, 
-      var(--purple-700) 100%);
-  }
-  
-  .luxury-gradient-dark {
-    background: linear-gradient(135deg, 
-      var(--deep-violet) 0%, 
-      var(--purple-800) 50%, 
-      var(--purple-900) 100%);
-  }
-  
-  .glass-card {
-    @apply bg-white/60 backdrop-blur-xl border border-white/30 shadow-xl shadow-black/5;
-  }
-  
-  .glass-card-premium {
-    @apply bg-white/40 backdrop-blur-2xl border border-white/20 shadow-2xl shadow-black/10;
-  }
-  
-  .glass-card-mobile {
-    @apply bg-white/80 backdrop-blur-lg border border-white/40 shadow-lg;
-  }
-  
-  .luxury-shadow {
-    box-shadow: 
-      0 4px 14px 0 rgba(139, 92, 246, 0.39),
-      0 0 0 1px rgba(255, 255, 255, 0.05);
-  }
-  
-  .luxury-shadow-lg {
-    box-shadow: 
-      0 10px 25px -3px rgba(139, 92, 246, 0.3),
-      0 4px 6px -2px rgba(139, 92, 246, 0.15),
-      0 0 0 1px rgba(255, 255, 255, 0.1);
-  }
-  
-  .luxury-shadow-xl {
-    box-shadow: 
-      0 20px 40px -4px rgba(139, 92, 246, 0.25),
-      0 8px 16px -4px rgba(139, 92, 246, 0.1),
-      0 0 0 1px rgba(255, 255, 255, 0.15);
-  }
-  
-  .premium-text {
-    @apply text-slate-700 font-light tracking-tight;
-  }
-  
-  .premium-heading {
-    @apply text-slate-800 font-thin tracking-tight leading-tight;
-  }
-  
-  /* Responsive Image */
-  .image-responsive {
-    @apply w-full h-auto object-cover rounded-2xl sm:rounded-3xl;
-  }
-  
-  /* Mobile-First Flexbox */
-  .flex-mobile {
-    @apply flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4;
-  }
-  
-  .flex-responsive {
-    @apply flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-6 lg:space-x-8;
-  }
-  
-  /* Breakpoint-Specific Visibility */
-  .mobile-only {
-    @apply block sm:hidden;
-  }
-  
-  .tablet-only {
-    @apply hidden sm:block lg:hidden;
-  }
-  
-  .desktop-only {
-    @apply hidden lg:block;
-  }
-  
-  .mobile-tablet {
-    @apply block lg:hidden;
-  }
-  
-  .tablet-desktop {
-    @apply hidden sm:block;
-  }
 }
 
-/* Demo Modal Styles */
-.slider::-webkit-slider-thumb {
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #ffffff;
-  cursor: pointer;
-  border: 2px solid #6366f1;
-}
-
-.slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #ffffff;
-  cursor: pointer;
-  border: 2px solid #6366f1;
-}
-
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.6s ease-out forwards;
-}
-
-.delay-300 {
-  animation-delay: 0.3s;
-}
-
-.delay-500 {
-  animation-delay: 0.5s;
-}
-
-.delay-700 {
-  animation-delay: 0.7s;
-}
-
-/* ===================================== */
-/* MOBILE HEADER AND NAVIGATION */
-/* ===================================== */
-
-/* Mobile header */
-.mobile-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 64px;
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--theme-border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  z-index: 50;
-}
-
-@media (min-width: 768px) {
-  .mobile-header {
-    display: none;
-  }
-}
-
-/* Mobile menu button */
-.mobile-menu-button {
-  min-height: 44px;
-  min-width: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
-  border-radius: 8px;
-  color: var(--gray-700);
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.mobile-menu-button:hover {
-  background: rgba(139, 92, 246, 0.1);
-  color: var(--purple-600);
-}
-
-.mobile-menu-button:focus {
-  outline: 2px solid var(--purple-300);
-  outline-offset: 2px;
-}
-
-/* Mobile navigation adjustments */
-@media (max-width: 767px) {
-  .dashboard-main {
-    padding-top: 64px; /* Account for mobile header */
-  }
-}
-
-/* ===================================== */
-/* RESPONSIVE FIXES FOR DROPDOWNS */
-/* ===================================== */
-
-/* Notification dropdown improvements */
-.notification-dropdown {
-  width: 360px;
-  max-width: 90vw;
-  max-height: 500px;
-  overflow-y: auto;
-}
-
-.notification-item {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--gray-100);
-  transition: background-color 0.2s ease;
-  min-height: 60px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.notification-item:hover {
-  background-color: var(--purple-50);
-}
-
-.notification-item:last-child {
-  border-bottom: none;
-}
-
-.notification-unread {
-  background-color: rgba(139, 92, 246, 0.05);
-  border-left: 3px solid var(--purple-500);
-}
-
-/* User menu dropdown */
-.user-menu-dropdown {
-  min-width: 200px;
-  max-height: 400px;
-}
-
-/* ===================================== */
-/* LAYOUT UTILITY CLASSES */
-/* ===================================== */
-
-/* Full height utilities with better browser support */
-.min-h-screen-safe {
-  min-height: 100vh;
-  min-height: 100dvh;
-}
-
-.h-screen-safe {
-  height: 100vh;
-  height: 100dvh;
-}
-
-/* Container utilities */
-.container-dashboard {
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
-@media (min-width: 640px) {
-  .container-dashboard {
-    padding: 0 1.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .container-dashboard {
-    padding: 0 2rem;
-  }
-}
-
-/* Spacing utilities */
-.space-y-dashboard > * + * {
-  margin-top: 1.5rem;
-}
-
-.space-y-dashboard-sm > * + * {
-  margin-top: 1rem;
-}
-
-.space-y-dashboard-lg > * + * {
-  margin-top: 2rem;
-}
-
-/* ===================================== */
-/* MODAL AND OVERLAY IMPROVEMENTS */
-/* ===================================== */
-
-/* Modal responsive improvements */
-.modal-responsive {
-  width: 100%;
-  max-width: 90vw;
-  max-height: 90vh;
-  margin: 16px;
-  border-radius: 12px;
-  background: white;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-@media (min-width: 640px) {
-  .modal-responsive {
-    max-width: 640px;
-    margin: 32px auto;
-  }
-}
-
-@media (min-width: 1024px) {
-  .modal-responsive {
-    max-width: 768px;
-  }
-}
-
-/* Modal content with proper scrolling */
-.modal-content-scrollable {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1.5rem;
-}
-
-/* ===================================== */
-/* LANDING PAGE DROPDOWN FIXES */
-/* ===================================== */
-
-/* Site header dropdown improvements */
-.site-header-dropdown {
-  min-width: 200px;
-  max-height: 300px;
-  overflow-y: auto;
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--theme-border);
-  border-radius: 12px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  z-index: 50;
-  animation: dropdown-enter 0.2s ease-out;
-}
-
-/* Site navigation dropdown items */
-.site-nav-dropdown-item {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: 8px 12px;
-  border-radius: 6px;
-  text-decoration: none;
-  color: var(--gray-700);
-  transition: all 0.2s ease;
-  gap: 8px;
-  min-height: 36px;
-}
-
-.site-nav-dropdown-item:hover {
-  background-color: var(--purple-50);
-  color: var(--purple-600);
-  text-decoration: none;
-}
-
-/* Resources dropdown specific styling */
-.resources-dropdown {
-  width: 240px;
-}
-
-.resources-dropdown-section {
-  padding: 8px 0;
-  border-bottom: 1px solid var(--gray-100);
-}
-
-.resources-dropdown-section:last-child {
-  border-bottom: none;
-}
-
-.resources-dropdown-title {
-  padding: 4px 12px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: var(--gray-500);
-  letter-spacing: 0.05em;
-}
-
-/* ===================================== */
-/* Z-INDEX LAYERING SYSTEM */
-/* ===================================== */
-
-/* Ensure proper layering of elements */
-.z-dropdown {
-  z-index: 50;
-}
-
-.z-modal {
-  z-index: 60;
-}
-
-.z-overlay {
-  z-index: 55;
-}
-
-.z-header {
-  z-index: 40;
-}
-
-.z-sidebar {
-  z-index: 30;
-}
-
-/* ===================================== */
-/* COMPREHENSIVE BLACK BACKGROUND ELIMINATION */
-/* ===================================== */
-
-/* Force override all black backgrounds globally */
-*[class*="bg-black"] {
-  background: white !important;
-  color: var(--purple-700) !important;
-  border: 2px solid var(--purple-200) !important;
-}
-
-/* Force override all dark gray backgrounds */
-*[class*="bg-gray-900"], 
-*[class*="bg-slate-900"],
-*[class*="bg-neutral-900"],
-*[class*="bg-zinc-900"] {
-  background: white !important;
-  color: var(--purple-700) !important;
-  border: 2px solid var(--purple-200) !important;
-}
-
-/* Modal overlays - force white backgrounds */
-*[class*="bg-black/50"],
-*[class*="bg-black/60"], 
-*[class*="bg-black/70"],
-*[class*="bg-black/80"],
-*[class*="bg-black/90"] {
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(8px) !important;
-}
-
-/* Text visibility improvements */
-.text-white {
-  color: white !important;
-}
-
-/* Ensure tooltips are visible */
-[role="tooltip"] {
-  background: white !important;
-  color: var(--purple-700) !important;
-  border: 2px solid var(--purple-200) !important;
-  box-shadow: 0 4px 20px rgba(147, 51, 234, 0.1) !important;
-}
-
-/* Force code blocks to have proper backgrounds */
-pre, code {
-  background: white !important;
-  color: var(--purple-700) !important;
-  border: 2px solid var(--purple-200) !important;
-}
-
-/* Ensure all buttons have proper contrast */
-button[class*="bg-black"],
-button[class*="bg-gray-900"],
-.btn-dark {
-  background: var(--purple-600) !important;
-  color: white !important;
-  border: 2px solid var(--purple-700) !important;
-}
-
-button[class*="bg-black"]:hover,
-button[class*="bg-gray-900"]:hover,
-.btn-dark:hover {
-  background: var(--purple-700) !important;
-  color: white !important;
-}
-
-/* Additional overrides for specific dark patterns */
-*[class*="from-gray-900"],
-*[class*="via-gray-900"],
-*[class*="to-gray-900"],
-*[class*="from-black"],
-*[class*="via-black"],
-*[class*="to-black"],
-*[class*="from-slate-900"],
-*[class*="via-slate-900"],
-*[class*="to-slate-900"] {
-  background: var(--purple-50) !important;
-  color: var(--purple-700) !important;
-  border: 2px solid var(--purple-200) !important;
-}
-
-/* Override video and media dark backgrounds */
-*[class*="from-purple-900"],
-*[class*="via-purple-900"],
-*[class*="to-purple-900"],
-*[class*="from-blue-900"],
-*[class*="via-blue-900"],
-*[class*="to-blue-900"],
-*[class*="from-indigo-900"],
-*[class*="via-indigo-900"],
-*[class*="to-indigo-900"] {
-  background: linear-gradient(135deg, var(--purple-50) 0%, var(--blue-50) 50%, var(--indigo-50) 100%) !important;
-  color: var(--purple-700) !important;
-  border: 2px solid var(--purple-200) !important;
-}
-
-/* Ensure text visibility on problematic backgrounds only */
-*[class*="bg-black"] *[class*="text-white"],
-*[class*="bg-gray-900"] *[class*="text-white"],
-*[class*="from-gray-900"] *[class*="text-white"] {
-  color: var(--purple-700) !important;
-}
-
-/* Allow white text on colored backgrounds (buttons, badges, etc.) */
-*[class*="bg-purple"] *[class*="text-white"],
-*[class*="bg-blue"] *[class*="text-white"],
-*[class*="bg-green"] *[class*="text-white"],
-*[class*="bg-red"] *[class*="text-white"],
-*[class*="bg-indigo"] *[class*="text-white"],
-*[class*="from-purple"] *[class*="text-white"],
-*[class*="from-blue"] *[class*="text-white"],
-*[class*="from-green"] *[class*="text-white"] {
-  color: white !important;
-}
-
-/* Override code syntax highlighting with light theme */
-pre[class*="bg-gray-900"],
-code[class*="bg-gray-900"] {
-  background: var(--purple-50) !important;
-  color: var(--purple-800) !important;
-  border: 2px solid var(--purple-200) !important;
-}
-
-/* ===================================== */
-/* ENHANCED HEADER TRANSPARENCY FONT VISIBILITY FIXES */
-/* ===================================== */
-
-/* Ensure text visibility for transparent header on all backgrounds */
-nav[data-testid="site-header"] {
-  /* Enhanced text contrast for better visibility */
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Transparent header text visibility enhancements */
-nav[data-testid="site-header"].bg-transparent button,
-nav[data-testid="site-header"].bg-transparent a,
-nav[data-testid="site-header"].bg-transparent span {
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
-  font-weight: 500 !important;
-}
-
-/* Dropdown menu visibility on transparent header */
-[data-radix-popper-content-wrapper] {
-  z-index: 9999 !important;
-}
-
-/* Dropdown menu items visibility */
-[data-radix-dropdown-menu-content] {
-  background: rgba(255, 255, 255, 0.98) !important;
-  backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
-}
-
-[data-radix-dropdown-menu-item] {
-  color: rgb(55, 65, 81) !important;
-  font-weight: 500 !important;
-}
-
-[data-radix-dropdown-menu-item]:hover {
-  background: rgba(99, 102, 241, 0.1) !important;
-  color: rgb(99, 102, 241) !important;
-}
-
-/* Mobile menu visibility on transparent header */
-nav[data-testid="site-header"].bg-transparent [data-testid="mobile-menu"] {
-  background: rgba(255, 255, 255, 0.2) !important;
-  backdrop-filter: blur(8px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-}
-
-/* Enhanced button hover effects for transparent header */
-nav[data-testid="site-header"].bg-transparent button:hover {
-  background: rgba(255, 255, 255, 0.25) !important;
-  backdrop-filter: blur(8px) !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
-}
-
-/* Logo visibility enhancement on transparent header */
-nav[data-testid="site-header"].bg-transparent [data-testid="nav-logo"] {
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
-  font-weight: 700 !important;
-}
-
-/* Get Started button visibility on transparent header */
-nav[data-testid="site-header"].bg-transparent .bg-indigo-600 {
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-}
-
-/* ===================================== */
-
-/* Header theme classes for sticky navigation */
-.theme-header {
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(12px) !important;
-  border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
-}
-
-/* Theme gradient classes for consistent branding */
-.theme-gradient-primary {
-  background: linear-gradient(135deg, #8b5cf6, #a855f7) !important;
-}
-
-.theme-gradient-text {
-  background: linear-gradient(135deg, #8b5cf6, #a855f7) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  background-clip: text !important;
-}
-
-.theme-text-primary {
-  color: #8b5cf6 !important;
-}
-
-.theme-text-gray-900 {
-  color: #111827 !important;
-}
-
-.theme-text-gray-600 {
-  color: #4b5563 !important;
-}
-
-.theme-bg-purple-100 {
-  background-color: #f3e8ff !important;
-}
-
-.theme-border-purple {
-  border-color: rgba(139, 92, 246, 0.2) !important;
-}
-
-/* Header dropdown styling */
-.site-header-dropdown {
-  background: rgba(255, 255, 255, 0.98) !important;
-  backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(139, 92, 246, 0.15) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
-  overflow: hidden !important;
-  z-index: 9999 !important;
-}
-
-.site-nav-dropdown-item {
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-  padding: 12px 16px !important;
-  border-radius: 8px !important;
-  transition: all 0.2s ease !important;
-  text-decoration: none !important;
-}
-
-.site-nav-dropdown-item:hover {
-  background: rgba(139, 92, 246, 0.08) !important;
-  transform: translateY(-1px) !important;
-}
-
-.resources-dropdown-section {
-  border-bottom: 1px solid rgba(139, 92, 246, 0.1) !important;
-  padding-bottom: 8px !important;
-  margin-bottom: 8px !important;
-}
-
-.resources-dropdown-section:last-child {
-  border-bottom: none !important;
-  margin-bottom: 0 !important;
-  padding-bottom: 0 !important;
-}
-
-.resources-dropdown-title {
-  font-size: 11px !important;
-  font-weight: 600 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
-  color: #8b5cf6 !important;
-  margin-bottom: 8px !important;
-  padding: 0 16px !important;
-}
-
-/* High z-index for dropdowns */
-.z-dropdown {
-  z-index: 9999 !important;
-}
-
-/* ===================================== */
 
 

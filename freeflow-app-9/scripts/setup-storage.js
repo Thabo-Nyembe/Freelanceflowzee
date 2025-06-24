@@ -74,6 +74,26 @@ async function setupStorage() {
       public: true,
       fileSizeLimit: '50MiB',
       allowedMimeTypes: ['image/*', 'video/*', 'audio/*']
+    },
+    {
+      id: 'ai-generations',
+      public: false,
+      fileSizeLimit: '100MiB',
+      allowedMimeTypes: [
+        'image/*',
+        'video/*', 
+        'audio/*',
+        'text/*',
+        'application/json',
+        'application/javascript',
+        'application/typescript'
+      ]
+    },
+    {
+      id: 'ai-temp',
+      public: false,
+      fileSizeLimit: '10MiB',
+      allowedMimeTypes: ['*/*']
     }
   ]
 

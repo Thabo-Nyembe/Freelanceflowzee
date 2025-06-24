@@ -11,7 +11,7 @@ import { FeatureWalkthroughDemo } from './feature-walkthrough-demo';
 import { Users, TrendingUp, Briefcase, Map } from 'lucide-react';
 
 export function DemoRouter() {
-  const [activeDemo, setActiveDemo] = useState(null);
+  const [activeDemo, setActiveDemo] = useState<any>(null);
 
   const demoScenarios = [
     {

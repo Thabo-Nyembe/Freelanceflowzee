@@ -240,7 +240,7 @@ const ASSET_GENERATORS = {
       })
     }
   },
-  web: {
+  'web-development': {
     components: {
       generate: (params: any) => ({
         name: `${params.style} UI Components`,
@@ -649,7 +649,7 @@ Style: [style]
         previewUrl: '/placeholder.jpg',
         metadata: {
           dimensions: getDimensionsForType(assetType),
-          tags: [...new Set(assetTags)], // Remove duplicates
+          tags: Array.from(new Set(assetTags)), // Remove duplicates
           description: assetDescription,
           format: baseAsset.format,
           size: adjustSizeForQuality(baseAsset.size, advancedSettings.quality)

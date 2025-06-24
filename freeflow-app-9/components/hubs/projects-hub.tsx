@@ -27,7 +27,12 @@ import {
   Trash2,
   Star,
   MessageSquare,
-  Paperclip
+  Paperclip,
+  Target,
+  Upload,
+  Rocket,
+  Grid,
+  List
 } from 'lucide-react'
 import { createBrowserClient } from '@supabase/ssr'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -92,22 +97,173 @@ export function ProjectsHub({ projects: initialProjects, userId }: ProjectsHubPr
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [loading, setLoading] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
+  const [isQuickStartDialogOpen, setIsQuickStartDialogOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
-  // Handler for navigating to project creation page
-  const handleCreateProject = () => {
-    router.push('/projects/new')
+  // Handle project creation
+  const handleCreateProject = async (projectData: any) => {
+    try {
+      setLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { data, error } = await supabase
+        .from('projects')
+        .insert([
+          {
+            ...projectData,
+            user_id: user.id,
+            created_at: new Date().toISOString(),
+            status: 'active',
+            progress: 0
+          }
+        ])
+        .select()
+
+      if (error) throw error
+
+      setProjects(prev => [...prev, data[0]])
+      setIsCreateDialogOpen(false)
+    } catch (error) {
+      console.error('Error creating project:', error)
+      // TODO: Show error toast
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Handle project import
+  const handleImportProject = async (importData: any) => {
+    try {
+      setLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      let projectData
+      if (importData.source === 'url') {
+        // Handle URL import
+        const response = await fetch(importData.data)
+        projectData = await response.json()
+      } else {
+        // Handle file import
+        projectData = importData.data
+      }
+
+      const { data, error } = await supabase
+        .from('projects')
+        .insert([
+          {
+            ...projectData,
+            user_id: user.id,
+            created_at: new Date().toISOString(),
+            imported_from: importData.source
+          }
+        ])
+        .select()
+
+      if (error) throw error
+
+      setProjects(prev => [...prev, data[0]])
+      setIsImportDialogOpen(false)
+    } catch (error) {
+      console.error('Error importing project:', error)
+      // TODO: Show error toast
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Handle quick start template
+  const handleQuickStart = async (template: any) => {
+    try {
+      setLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { data, error } = await supabase
+        .from('projects')
+        .insert([
+          {
+            title: `${template.name} Project`,
+            description: template.description,
+            user_id: user.id,
+            created_at: new Date().toISOString(),
+            status: 'active',
+            progress: 0,
+            template_id: template.id,
+            deliverables: template.deliverables,
+            timeline: template.timeline
+          }
+        ])
+        .select()
+
+      if (error) throw error
+
+      setProjects(prev => [...prev, data[0]])
+      setIsQuickStartDialogOpen(false)
+    } catch (error) {
+      console.error('Error creating project from template:', error)
+      // TODO: Show error toast
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Handle project deletion
+  const handleDeleteProject = async () => {
+    if (!selectedProject) return
+
+    try {
+      setLoading(true)
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', selectedProject.id)
+
+      if (error) throw error
+
+      setProjects(prev => prev.filter(p => p.id !== selectedProject.id))
+      setIsDeleteDialogOpen(false)
+      setSelectedProject(null)
+    } catch (error) {
+      console.error('Error deleting project:', error)
+      // TODO: Show error toast
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Handle project status update
+  const handleStatusUpdate = async (projectId: string, newStatus: Project['status']) => {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({ status: newStatus })
+        .eq('id', projectId)
+
+      if (error) throw error
+
+      setProjects(prev => prev.map(p => 
+        p.id === projectId ? { ...p, status: newStatus } : p
+      ))
+    } catch (error) {
+      console.error('Error updating project status:', error)
+      // TODO: Show error toast
+    }
   }
 
   // Filter projects based on search and filters
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         project.client_name.toLowerCase().includes(searchQuery.toLowerCase())
+                         project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         project.client_name?.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesStatus = statusFilter === 'all' || project.status === statusFilter
     const matchesPriority = priorityFilter === 'all' || project.priority === priorityFilter
     
@@ -180,6 +336,21 @@ export function ProjectsHub({ projects: initialProjects, userId }: ProjectsHubPr
   };
 
   const ProjectCard = ({ project }: { project: Project }) => {
+    const statusColors = {
+      active: 'bg-green-100 text-green-800',
+      paused: 'bg-yellow-100 text-yellow-800',
+      completed: 'bg-blue-100 text-blue-800',
+      cancelled: 'bg-red-100 text-red-800',
+      draft: 'bg-gray-100 text-gray-800'
+    }
+
+    const priorityColors = {
+      low: 'bg-blue-100 text-blue-800',
+      medium: 'bg-yellow-100 text-yellow-800',
+      high: 'bg-orange-100 text-orange-800',
+      urgent: 'bg-red-100 text-red-800'
+    }
+
     const daysLeft = getDaysUntilDeadline(project.end_date);
     const isOverdue = daysLeft < 0;
     const isUrgent = daysLeft >= 0 && daysLeft <= 3;
@@ -207,20 +378,30 @@ export function ProjectsHub({ projects: initialProjects, userId }: ProjectsHubPr
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push(`/projects/${project.id}`)}>
                     <Eye className="mr-2 h-4 w-4" />
                     View Details
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push(`/projects/${project.id}/edit`)}>
                     <Edit className="mr-2 h-4 w-4" />
                     Edit Project
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push(`/projects/${project.id}/collaborate`)}>
                     <MessageSquare className="mr-2 h-4 w-4" />
-                    Add Feedback
+                    Collaborate
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push(`/projects/${project.id}/gallery`)}>
+                    <Paperclip className="mr-2 h-4 w-4" />
+                    Gallery
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600">
+                  <DropdownMenuItem
+                    className="text-red-600"
+                    onClick={() => {
+                      setSelectedProject(project)
+                      setIsDeleteDialogOpen(true)
+                    }}
+                  >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete Project
                   </DropdownMenuItem>
@@ -232,11 +413,11 @@ export function ProjectsHub({ projects: initialProjects, userId }: ProjectsHubPr
         <CardContent className="space-y-4">
           {/* Status and Progress */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Badge className={getStatusColor(project.status)}>
-                {getStatusIcon(project.status)}
-                <span className="ml-1 capitalize">{project.status.replace('-', ' ')}</span>
-              </Badge>
+                          <div className="flex items-center justify-between">
+               <Badge className={statusColors[project.status]}>
+                  {getStatusIcon(project.status)}
+                  <span className="ml-1 capitalize">{project.status.replace('-', ' ')}</span>
+               </Badge>
               <span className="text-sm text-muted-foreground">{project.progress}% complete</span>
             </div>
             <div className="h-2 rounded-full bg-secondary">
@@ -360,14 +541,31 @@ export function ProjectsHub({ projects: initialProjects, userId }: ProjectsHubPr
               Manage all your freelance projects in one place
             </CardDescription>
           </div>
-          <Button 
-            className="gap-2" 
-            onClick={handleCreateProject}
-            data-testid="create-project-btn"
-          >
-            <Plus className="h-4 w-4" />
-            New Project
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsImportDialogOpen(true)}
+              data-testid="import-project-btn"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Import Project
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsQuickStartDialogOpen(true)}
+              data-testid="quick-start-btn"
+            >
+              <Rocket className="h-4 w-4 mr-2" />
+              Quick Start
+            </Button>
+            <Button
+              onClick={() => setIsCreateDialogOpen(true)}
+              data-testid="create-project-btn"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create Project
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -498,7 +696,7 @@ export function ProjectsHub({ projects: initialProjects, userId }: ProjectsHubPr
                     ? "Get started by creating your first project." 
                     : "Try adjusting your search or filters."}
                 </p>
-                <Button onClick={handleCreateProject}>
+                <Button onClick={() => setIsCreateDialogOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create Project
                 </Button>

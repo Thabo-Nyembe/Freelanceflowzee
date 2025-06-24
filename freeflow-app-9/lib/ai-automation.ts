@@ -202,11 +202,13 @@ class AIAutomationService {
 
   // Event-driven automation
   addEventListener(eventType: string, handler: (event: CustomEvent) => void) {
-    this.eventBus.addEventListener(eventType, handler)
+    const eventListener = (event: Event) => handler(event as CustomEvent)
+    this.eventBus.addEventListener(eventType, eventListener)
   }
 
   removeEventListener(eventType: string, handler: (event: CustomEvent) => void) {
-    this.eventBus.removeEventListener(eventType, handler)
+    const eventListener = (event: Event) => handler(event as CustomEvent)
+    this.eventBus.removeEventListener(eventType, eventListener)
   }
 
   dispatchEvent(eventType: string, data: any) {

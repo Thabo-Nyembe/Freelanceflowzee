@@ -214,7 +214,7 @@ class StripeEnhancedService {
       })
 
       // Finalize invoice
-      const finalizedInvoice = await this.stripe.invoices.finalizeInvoice(invoice.id)
+      const finalizedInvoice = await this.stripe.invoices.finalizeInvoice(invoice.id as string)
 
       return {
         success: true,

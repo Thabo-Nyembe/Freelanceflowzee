@@ -25,52 +25,52 @@ const steps = [
   {
     number: 1,
     icon: Upload,
-    title: "Upload Your Work",
-    description: "Upload your creative projects, documents, and files to your secure workspace.",
+    title: "AI Create & Upload",
+    description: "Generate professional assets with AI across 6+ creative fields, then upload your complete projects.",
     details: [
-      "Drag & drop file uploads",
-      "Support for all file types", 
-      "Automatic file organization",
-      "Version control system"
-    ],
-    time: "2 minutes"
-  },
-  {
-    number: 2,
-    icon: Palette,
-    title: "Customize Your Presentation",
-    description: "Brand your project pages with custom colors, logos, and layouts.",
-    details: [
-      "Custom branding options",
-      "Professional templates",
-      "Mobile-responsive design", 
-      "White-label solutions"
+      "AI-powered asset generation (Photography, Design, Music, Video, Writing)",
+      "Premium AI model trials (GPT-4o, Claude, DALL-E)",
+      "Drag & drop file uploads with progress tracking",
+      "WeTransfer-style file sharing experience"
     ],
     time: "5 minutes"
   },
   {
+    number: 2,
+    icon: Palette,
+    title: "Customize & Brand",
+    description: "Create stunning, branded client experiences with professional portfolios and presentations.",
+    details: [
+      "AI-generated custom branding elements",
+      "Professional portfolio templates",
+      "SEO-optimized sharing pages", 
+      "Social media integration (Twitter, Facebook, LinkedIn)"
+    ],
+    time: "3 minutes"
+  },
+  {
     number: 3,
     icon: Share2,
-    title: "Share with Clients",
-    description: "Send secure, password-protected links to clients for review and approval.",
+    title: "Secure Share & Collaborate",
+    description: "Share files securely with clients using professional links and collaborative features.",
     details: [
-      "Secure sharing links",
-      "Password protection",
-      "Access controls",
-      "Real-time notifications"
+      "WeTransfer-like secure sharing links",
+      "Real-time collaboration tools",
+      "Community hub integration",
+      "Professional client communication"
     ],
     time: "1 minute"
   },
   {
     number: 4,
     icon: CreditCard,
-    title: "Get Paid Instantly",
-    description: "Clients can approve and pay for projects directly through your branded pages.",
+    title: "Escrow Payment Protection",
+    description: "Get paid safely with our escrow system that protects both freelancers and clients.",
     details: [
-      "Integrated payment processing",
-      "Multiple payment methods",
-      "Automated invoicing",
-      "Instant notifications"
+      "Secure escrow payment processing",
+      "Milestone-based payment releases",
+      "Multi-currency support",
+      "Automated invoice generation"
     ],
     time: "Instant"
   }
@@ -87,19 +87,20 @@ export default function HowItWorksPage() {
         {/* Hero Section */}
         <section className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto text-center">
-            <Badge className="mb-6 bg-green-100 text-green-800 hover:bg-green-200">
+            <Badge className="mb-6 bg-purple-100 text-purple-800 hover:bg-purple-200">
               <Target className="w-4 h-4 mr-2" />
-              Simple Process
+              AI-Powered Process
             </Badge>
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              How FreeflowZee
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">
-                {" "}Works
+              How AI-Powered
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">
+                {" "}Creative Platform
               </span>
+              {" "}Works
             </h1>
             <p className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto">
-              From upload to payment in just 4 simple steps. See how thousands of creatives 
-              are streamlining their workflow and getting paid faster.
+              From AI asset generation to secure escrow payments in just 4 simple steps. 
+              See how 25,000+ creatives are revolutionizing their workflow with premium AI models.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">

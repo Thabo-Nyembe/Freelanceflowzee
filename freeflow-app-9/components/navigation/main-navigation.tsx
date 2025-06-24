@@ -176,7 +176,7 @@ export function MainNavigation({ user, activeTab = 'dashboard', onTabChange }: M
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+              <Button variant="ghost" className="relative h-8 w-8 rounded-full" data-testid="user-menu-trigger">
                 <Avatar className="h-8 w-8">
                   <AvatarImage 
                     src={user.user_metadata?.avatar_url} 
@@ -186,7 +186,7 @@ export function MainNavigation({ user, activeTab = 'dashboard', onTabChange }: M
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" data-testid="user-menu">
               <div className="flex items-center justify-start gap-2 p-2">
                 <div className="flex flex-col space-y-1 leading-none">
                   <p className="font-medium text-sm">

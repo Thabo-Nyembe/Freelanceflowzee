@@ -343,7 +343,11 @@ export default function DashboardPage() {
               day: 'numeric' 
             })}
           </div>
-          <Button className="w-full sm:w-auto">
+          <Button 
+            className="w-full sm:w-auto"
+            data-testid="header-new-project-btn"
+            onClick={() => window.location.href = '/dashboard/projects-hub'}
+          >
             <Plus className="w-4 h-4 mr-2" />
             New Project
           </Button>

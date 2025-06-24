@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2025-06-21T19:59:25.827Z",
+  "generatedAt": "2025-06-21T20:15:58.721Z",
   "totalUsers": 25,
   "totalProjects": 30,
   "totalPosts": 60,
   "totalImages": 40,
-  "totalFiles": 77,
+  "totalFiles": 71,
   "totalTransactions": 20,
-  "totalFileSize": "373.99 KB",
+  "totalFileSize": "382.82 KB",
   "apiSources": [
     "randomuser.me - User profiles",
     "picsum.photos - Professional images",

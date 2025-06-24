@@ -5,9 +5,9 @@ import { Bell, User, Settings, Search, Menu } from 'lucide-react';
 import { useDemoContent } from './demo-content-provider';
 
 export function DemoEnhancedNav() {
-  const { users, isLoading } = useDemoContent();
+  const { content, loading } = useDemoContent();
   
-  const currentUser = users?.[0] || {
+  const currentUser = content?.users?.[0] || {
     name: 'Demo User',
     email: 'demo@freeflowzee.com',
     picture: { thumbnail: '/images/demo-avatar.jpg' }

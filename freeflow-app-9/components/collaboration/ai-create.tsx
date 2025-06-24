@@ -78,6 +78,9 @@ interface AssetGenerationState {
   currentPreset: AssetPreset | null
   realTimeMode: boolean
   qualityAnalysis: QualityAnalysis | null
+  // 🎯 FREE MARKETING TRIAL TRACKING
+  freeTrialUsage: Record<string, number> // modelId -> requests used
+  showTrialPromo: boolean
 }
 
 interface GeneratedAsset {
@@ -150,6 +153,7 @@ interface AIModel {
     dailyRequests?: number
     monthlyRequests?: number
     concurrent?: number
+    freeTrialRequests?: number // 🎯 FREE MARKETING TRIALS
   }
 }
 
@@ -211,6 +215,9 @@ type AssetGenerationAction =
   | { type: 'SET_PRESET'; payload: AssetPreset | null }
   | { type: 'TOGGLE_REAL_TIME'; payload: boolean }
   | { type: 'SET_QUALITY_ANALYSIS'; payload: QualityAnalysis | null }
+  // 🎯 FREE MARKETING TRIAL ACTIONS
+  | { type: 'USE_FREE_TRIAL'; payload: string } // modelId
+  | { type: 'DISMISS_TRIAL_PROMO' }
 
 // A+++ Enhanced Creative Fields with More Options
 const CREATIVE_FIELDS = {
@@ -270,7 +277,7 @@ const CREATIVE_FIELDS = {
       { id: 'mastering', name: 'Mastering Chains', description: 'Professional mastering templates', tier: 'enterprise' }
     ]
   },
-  web: {
+  'web-development': {
     name: 'Web Development',
     icon: Code,
     color: 'bg-orange-500',
@@ -300,7 +307,7 @@ const CREATIVE_FIELDS = {
   }
 }
 
-// A+++ Enhanced AI Models with Enterprise Options
+// A+++ Enhanced AI Models with Enterprise Options + FREE MARKETING TRIALS
 const AI_MODELS: AIModel[] = [
   {
     id: 'gpt-4o',
@@ -315,7 +322,7 @@ const AI_MODELS: AIModel[] = [
     tier: 'enterprise',
     specialty: ['creative', 'multimodal', 'precision'],
     features: ['Vision', 'Audio', 'Code', 'Ultra-high quality'],
-    limits: { dailyRequests: 1000, concurrent: 10 }
+    limits: { dailyRequests: 1000, concurrent: 10, freeTrialRequests: 3 }
   },
   {
     id: 'claude-3.5-sonnet',
@@ -330,7 +337,7 @@ const AI_MODELS: AIModel[] = [
     tier: 'enterprise',
     specialty: ['creative', 'artistic', 'detailed'],
     features: ['Artistic creativity', 'Detail-oriented', 'Long context'],
-    limits: { dailyRequests: 800, concurrent: 8 }
+    limits: { dailyRequests: 800, concurrent: 8, freeTrialRequests: 3 }
   },
   {
     id: 'gemini-pro-vision',
@@ -345,7 +352,7 @@ const AI_MODELS: AIModel[] = [
     tier: 'pro',
     specialty: ['vision', 'multimodal', 'analysis'],
     features: ['Vision analysis', 'Multimodal', 'Fast processing'],
-    limits: { dailyRequests: 500, concurrent: 5 }
+    limits: { dailyRequests: 500, concurrent: 5, freeTrialRequests: 5 }
   },
   {
     id: 'dall-e-3',
@@ -360,7 +367,7 @@ const AI_MODELS: AIModel[] = [
     tier: 'enterprise',
     specialty: ['image', 'artistic', 'photorealistic'],
     features: ['Image generation', 'Photorealistic', 'Artistic styles'],
-    limits: { dailyRequests: 100, concurrent: 3 }
+    limits: { dailyRequests: 100, concurrent: 3, freeTrialRequests: 2 }
   },
   {
     id: 'stable-diffusion-xl',
@@ -375,7 +382,7 @@ const AI_MODELS: AIModel[] = [
     tier: 'free',
     specialty: ['image', 'open-source', 'customizable'],
     features: ['Open source', 'Customizable', 'High resolution'],
-    limits: { dailyRequests: 50, concurrent: 2 }
+    limits: { dailyRequests: 50, concurrent: 2, freeTrialRequests: 999 }
   },
   {
     id: 'midjourney-api',
@@ -390,7 +397,7 @@ const AI_MODELS: AIModel[] = [
     tier: 'enterprise',
     specialty: ['artistic', 'premium', 'detailed'],
     features: ['Artistic excellence', 'Premium quality', 'Detailed rendering'],
-    limits: { dailyRequests: 200, concurrent: 5 }
+    limits: { dailyRequests: 200, concurrent: 5, freeTrialRequests: 2 }
   }
 ]
 
@@ -524,6 +531,22 @@ const assetGenerationReducer = (state: AssetGenerationState, action: AssetGenera
         qualityAnalysis: action.payload
       }
     
+    // 🎯 FREE MARKETING TRIAL REDUCER CASES
+    case 'USE_FREE_TRIAL':
+      return {
+        ...state,
+        freeTrialUsage: {
+          ...state.freeTrialUsage,
+          [action.payload]: (state.freeTrialUsage[action.payload] || 0) + 1
+        }
+      }
+    
+    case 'DISMISS_TRIAL_PROMO':
+      return {
+        ...state,
+        showTrialPromo: false
+      }
+    
     default:
       return state
   }
@@ -568,7 +591,10 @@ export default function AICreate() {
     favoriteAssets: [],
     currentPreset: null,
     realTimeMode: false,
-    qualityAnalysis: null
+    qualityAnalysis: null,
+    // 🎯 FREE MARKETING TRIAL INITIALIZATION
+    freeTrialUsage: {},
+    showTrialPromo: true
   })
 
   // Context7 Pattern: Enhanced Asset Generation with Model Selection

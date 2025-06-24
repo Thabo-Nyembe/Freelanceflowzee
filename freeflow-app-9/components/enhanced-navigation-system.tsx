@@ -414,7 +414,6 @@ export function EnhancedNavigationSystem() {
               { name: 'Team', href: '/dashboard/team', icon: Users },
               { name: 'Files', href: '/dashboard/files', icon: FileText },
               { name: 'Analytics', href: '/dashboard/analytics', icon: TrendingUp },
-              { name: 'AI Assistant', href: '/dashboard/ai-assistant', icon: Sparkles },
               { name: 'Notifications', href: '/dashboard/notifications', icon: Award }
             ].map((item) => (
               <Link key={item.name} href={item.href}>

@@ -1,0 +1,100 @@
+{
+  "timestamp": "2025-06-24T15:45:03.759Z",
+  "summary": {
+    "total": 11,
+    "passed": 3,
+    "failed": 8,
+    "successRate": 27
+  },
+  "details": [
+    {
+      "name": "Stripe Publishable Key",
+      "status": true,
+      "details": "Present"
+    },
+    {
+      "name": "Stripe Secret Key",
+      "status": true,
+      "details": "Present"
+    },
+    {
+      "name": "Webhook Endpoint",
+      "status": true,
+      "details": "Configured: http://localhost:3000/api/payments/webhooks"
+    },
+    {
+      "name": "Payment API Testing",
+      "status": false,
+      "details": "fetch failed"
+    },
+    {
+      "name": "Payment UI Components",
+      "status": false,
+      "details": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/payment\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/payment\", waiting until \"networkidle\"\u001b[22m\n"
+    },
+    {
+      "name": "Payment Flow Testing",
+      "status": false,
+      "details": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/payment\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/payment\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "name": "Escrow Integration",
+      "status": false,
+      "details": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/payment\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/payment\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "name": "SEO Optimization",
+      "status": false,
+      "details": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/payment\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/payment\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "name": "Mobile Responsive Design",
+      "status": false,
+      "details": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/payment\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/payment\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "name": "Tablet Responsive Design",
+      "status": false,
+      "details": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/payment\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/payment\", waiting until \"load\"\u001b[22m\n"
+    },
+    {
+      "name": "Desktop Responsive Design",
+      "status": false,
+      "details": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/payment\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/payment\", waiting until \"load\"\u001b[22m\n"
+    }
+  ],
+  "config": {
+    "baseUrl": "http://localhost:3000",
+    "timeout": 30000,
+    "retries": 3,
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "testData": {
+      "customer": {
+        "email": "test@freeflowzee.com",
+        "name": "Test Customer",
+        "card": {
+          "number": "4242424242424242",
+          "expiry": "12/34",
+          "cvc": "123"
+        }
+      },
+      "pricing": {
+        "free": {
+          "name": "Creator Free",
+          "price": 0
+        },
+        "pro": {
+          "name": "Pro Creator",
+          "price": 29
+        },
+        "enterprise": {
+          "name": "Agency Enterprise",
+          "price": 79
+        }
+      }
+    }
+  }
+}

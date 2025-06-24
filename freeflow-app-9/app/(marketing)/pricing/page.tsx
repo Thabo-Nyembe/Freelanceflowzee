@@ -38,27 +38,27 @@ import { useState } from 'react'
 const PRICING_PLANS = [
   {
     id: 'starter',
-    name: 'Starter',
+    name: 'Creator Free',
     price: 0,
     period: 'month',
-    description: 'Perfect for getting started',
+    description: 'Perfect for creative exploration',
     popular: false,
     features: [
-      'Up to 3 active projects',
-      'Basic client collaboration',
+      'AI Create Studio (Free models)',
+      'Stable Diffusion XL (unlimited)',
+      'Basic design templates',
       'File sharing up to 1GB',
-      'Standard templates',
-      'Email support',
-      'Basic time tracking',
-      'Invoice generation'
+      'Community hub access',
+      'Basic project tracker',
+      'WeTransfer-style file sharing'
     ],
     limitations: [
+      'No premium AI models',
+      'No escrow payments',
       'No custom branding',
-      'No advanced analytics',
-      'No team collaboration',
-      'No API access'
+      'Limited file storage'
     ],
-    cta: 'Start Free',
+    cta: 'Start Creating Free',
     savings: 0,
     roiCalculator: {
       timesSaved: '5 hours/month',
@@ -68,65 +68,66 @@ const PRICING_PLANS = [
   },
   {
     id: 'professional',
-    name: 'Professional',
-    price: 19,
+    name: 'Pro Creator',
+    price: 29,
     period: 'month',
-    description: 'For growing freelancers',
+    description: 'For serious creative professionals',
     popular: true,
     features: [
-      'Unlimited projects',
-      'Advanced client portals',
-      'File sharing up to 100GB',
-      'Custom branding',
-      'Priority support',
-      'Advanced time tracking',
-      'Automated invoicing',
-      'Payment processing',
-      'Client feedback system',
-      'Project templates',
-      'Basic analytics',
-      'Mobile app access'
+      'AI Create Studio (All models)',
+      'Premium AI model trials (GPT-4o, Claude, DALL-E)',
+      'Photography, Video, Design, Music, Writing assets',
+      'Unlimited AI asset generation',
+      'File sharing up to 500GB',
+      'Escrow payment protection',
+      'Video Studio Pro access',
+      'Custom branding & portfolios',
+      'Priority AI processing',
+      'Professional client portals',
+      'Revenue analytics dashboard',
+      'Social media integration'
     ],
     limitations: [
-      'Team members (up to 3)',
-      'Basic API access'
+      'Team members (up to 5)',
+      'Standard API access'
     ],
     cta: 'Start Free Trial',
-    savings: 20,
+    savings: 25,
     roiCalculator: {
-      timesSaved: '15 hours/month',
-      moneySaved: '$800/month',
+      timesSaved: '20 hours/month',
+      moneySaved: '$1200/month',
       projectsManaged: 'Unlimited projects'
     }
   },
   {
     id: 'enterprise',
-    name: 'Enterprise',
-    price: 49,
+    name: 'Agency Enterprise',
+    price: 79,
     period: 'month',
-    description: 'For agencies and teams',
+    description: 'For agencies and creative teams',
     popular: false,
     features: [
-      'Everything in Professional',
+      'Everything in Pro Creator',
       'Unlimited team members',
-      'White-label solution',
-      'Advanced analytics',
-      'Custom integrations',
+      'White-label AI Create Studio',
+      'Bulk AI asset generation',
+      'Advanced escrow management',
+      'Custom AI model training',
+      'Enterprise security & compliance',
       'Dedicated account manager',
-      'SLA guarantee',
-      'Custom workflows',
-      'Advanced security',
-      'API access',
-      'SSO integration',
-      'Custom training'
+      'Custom workflow automation',
+      'Advanced analytics & reporting',
+      'API access for integrations',
+      'SSO & team management',
+      'Custom training & onboarding'
     ],
     limitations: [],
     cta: 'Contact Sales',
-    savings: 20,
+    savings: 30,
     roiCalculator: {
-      timesSaved: '40 hours/month',
-      moneySaved: '$2500/month',
-      projectsManaged: 'Unlimited + team'
+      timesSaved: '60 hours/month',
+      moneySaved: '$5000/month',
+      projectsManaged: 'Unlimited + full team'
     }
   }
 ]
@@ -134,41 +135,43 @@ const PRICING_PLANS = [
 // Context7 Pattern: Interactive FAQ data
 const FAQ_DATA = [
   {
+    question: 'How do the premium AI model trials work?',
+    answer: 'Pro users get free trials of expensive premium models like GPT-4o (3 trials), Claude 3.5 Sonnet (3 trials), and DALL-E 3 (2 trials). After trials, you can use your own API keys for unlimited access at cost.'
+  },
+  {
+    question: 'What creative fields does AI Create support?',
+    answer: 'AI Create generates assets for 6+ creative fields: Photography (LUTs, presets), Design (templates, mockups), Music (samples, MIDI), Video (transitions, effects), Writing (content, campaigns), and Web Development (components, themes).'
+  },
+  {
+    question: 'How does the escrow payment system work?',
+    answer: 'Our escrow system holds client payments securely until project milestones are met. This protects both freelancers and clients, ensuring fair payment and quality delivery.'
+  },
+  {
     question: 'Can I switch plans anytime?',
     answer: 'Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and billing is prorated.'
   },
   {
-    question: 'Is there a free trial?',
-    answer: 'All paid plans come with a 14-day free trial. No credit card required to start.'
-  },
-  {
-    question: 'What payment methods do you accept?',
-    answer: 'We accept all major credit cards, PayPal, and bank transfers for annual plans.'
+    question: 'Is there a free trial for paid plans?',
+    answer: 'All paid plans come with a 14-day free trial with full access to AI Create premium models. No credit card required to start.'
   },
   {
     question: 'Do you offer refunds?',
-    answer: 'Yes, we offer a 30-day money-back guarantee on all paid plans.'
-  },
-  {
-    question: 'Can I cancel anytime?',
-    answer: 'Absolutely. You can cancel your subscription at any time. Your account will remain active until the end of your billing period.'
-  },
-  {
-    question: 'Do you offer discounts for nonprofits?',
-    answer: 'Yes! We offer a 50% discount for qualified nonprofits and educational institutions.'
+    answer: 'Yes, we offer a 30-day money-back guarantee on all paid plans. If you\'re not satisfied with AI Create or our platform, get a full refund.'
   }
 ]
 
 // Context7 Pattern: Feature comparison matrix
 const FEATURE_COMPARISON = [
-  { feature: 'Active Projects', starter: '3', professional: 'Unlimited', enterprise: 'Unlimited' },
-  { feature: 'Storage Space', starter: '1GB', professional: '100GB', enterprise: '1TB' },
-  { feature: 'Team Members', starter: '1', professional: '3', enterprise: 'Unlimited' },
-  { feature: 'Client Portals', starter: 'Basic', professional: 'Advanced', enterprise: 'White-label' },
-  { feature: 'Custom Branding', starter: false, professional: true, enterprise: true },
-  { feature: 'Analytics', starter: false, professional: 'Basic', enterprise: 'Advanced' },
-  { feature: 'API Access', starter: false, professional: 'Basic', enterprise: 'Full' },
-  { feature: 'Support', starter: 'Email', professional: 'Priority', enterprise: 'Dedicated' }
+  { feature: 'AI Create Studio', starter: 'Free models only', professional: 'All premium models', enterprise: 'Custom AI training' },
+  { feature: 'Premium AI Trials', starter: false, professional: 'GPT-4o, Claude, DALL-E', enterprise: 'Unlimited access' },
+  { feature: 'Creative Fields', starter: '2 fields', professional: '6+ fields', enterprise: 'All + custom' },
+  { feature: 'File Storage', starter: '1GB', professional: '500GB', enterprise: '2TB+' },
+  { feature: 'Escrow Payments', starter: false, professional: true, enterprise: 'Advanced' },
+  { feature: 'Video Studio', starter: false, professional: 'Pro features', enterprise: 'Enterprise suite' },
+  { feature: 'Team Members', starter: '1', professional: '5', enterprise: 'Unlimited' },
+  { feature: 'Custom Branding', starter: false, professional: true, enterprise: 'White-label' },
+  { feature: 'Analytics', starter: 'Basic', professional: 'Advanced', enterprise: 'Enterprise' },
+  { feature: 'Support', starter: 'Community', professional: 'Priority', enterprise: 'Dedicated' }
 ]
 
 export default function PricingPage() {

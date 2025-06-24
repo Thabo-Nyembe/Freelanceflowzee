@@ -275,4 +275,153 @@ VALUES (
   ARRAY['React', 'Node.js', 'TypeScript', 'Design'],
   75.00,
   'America/New_York'
-) ON CONFLICT (id) DO NOTHING; 
+) ON CONFLICT (id) DO NOTHING;
+
+-- Create users table
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email TEXT UNIQUE NOT NULL,
+  username TEXT UNIQUE,
+  avatar_url TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- Create posts table
+CREATE TABLE IF NOT EXISTS posts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  category TEXT NOT NULL,
+  media_urls TEXT[] DEFAULT '{}',
+  likes_count INTEGER DEFAULT 0,
+  comments_count INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- Create comments table
+CREATE TABLE IF NOT EXISTS comments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  post_id UUID REFERENCES posts(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- Create likes table
+CREATE TABLE IF NOT EXISTS likes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  post_id UUID REFERENCES posts(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  UNIQUE(post_id, user_id)
+);
+
+-- AI Analysis table
+CREATE TABLE IF NOT EXISTS ai_analysis (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  file_url TEXT NOT NULL,
+  type VARCHAR(20) CHECK (type IN ('image', 'document', 'code', 'design')),
+  status VARCHAR(20) DEFAULT 'analyzing' CHECK (status IN ('analyzing', 'complete', 'error')),
+  result TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- AI Generation table
+CREATE TABLE IF NOT EXISTS ai_generations (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  type VARCHAR(20) CHECK (type IN ('image', 'code', 'text', 'audio', 'video')),
+  prompt TEXT NOT NULL,
+  settings JSONB NOT NULL,
+  status VARCHAR(20) DEFAULT 'generating' CHECK (status IN ('generating', 'complete', 'error')),
+  result TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create storage buckets for AI files
+INSERT INTO storage.buckets (id, name, public) 
+VALUES 
+  ('ai-analysis', 'ai-analysis', true),
+  ('ai-generations', 'ai-generations', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- AI Analysis policies
+ALTER TABLE ai_analysis ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own analysis" ON ai_analysis
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create analysis" ON ai_analysis
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their analysis" ON ai_analysis
+  FOR UPDATE USING (auth.uid() = user_id);
+
+-- AI Generation policies
+ALTER TABLE ai_generations ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own generations" ON ai_generations
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create generations" ON ai_generations
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their generations" ON ai_generations
+  FOR UPDATE USING (auth.uid() = user_id);
+
+-- Indexes for AI tables
+CREATE INDEX IF NOT EXISTS idx_ai_analysis_user_id ON ai_analysis(user_id);
+CREATE INDEX IF NOT EXISTS idx_ai_analysis_type ON ai_analysis(type);
+CREATE INDEX IF NOT EXISTS idx_ai_analysis_status ON ai_analysis(status);
+CREATE INDEX IF NOT EXISTS idx_ai_generations_user_id ON ai_generations(user_id);
+CREATE INDEX IF NOT EXISTS idx_ai_generations_type ON ai_generations(type);
+CREATE INDEX IF NOT EXISTS idx_ai_generations_status ON ai_generations(status);
+
+-- Update triggers for AI tables
+CREATE TRIGGER update_ai_analysis_updated_at
+  BEFORE UPDATE ON ai_analysis
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_ai_generations_updated_at
+  BEFORE UPDATE ON ai_generations
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+-- Create function to update post counts
+CREATE OR REPLACE FUNCTION update_post_counts()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    IF TG_TABLE_NAME = 'likes' THEN
+      UPDATE posts SET likes_count = likes_count + 1 WHERE id = NEW.post_id;
+    ELSIF TG_TABLE_NAME = 'comments' THEN
+      UPDATE posts SET comments_count = comments_count + 1 WHERE id = NEW.post_id;
+    END IF;
+  ELSIF TG_OP = 'DELETE' THEN
+    IF TG_TABLE_NAME = 'likes' THEN
+      UPDATE posts SET likes_count = likes_count - 1 WHERE id = OLD.post_id;
+    ELSIF TG_TABLE_NAME = 'comments' THEN
+      UPDATE posts SET comments_count = comments_count - 1 WHERE id = OLD.post_id;
+    END IF;
+  END IF;
+  RETURN NULL;
+END;
+$$ language 'plpgsql';
+
+CREATE OR REPLACE TRIGGER update_post_likes_count
+  AFTER INSERT OR DELETE ON likes
+  FOR EACH ROW
+  EXECUTE FUNCTION update_post_counts();
+
+CREATE OR REPLACE TRIGGER update_post_comments_count
+  AFTER INSERT OR DELETE ON comments
+  FOR EACH ROW
+  EXECUTE FUNCTION update_post_counts(); 

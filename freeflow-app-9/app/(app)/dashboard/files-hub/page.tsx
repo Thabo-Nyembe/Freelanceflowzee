@@ -308,15 +308,43 @@ export default function FilesHubPage() {
             </p>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" className="gap-2">
+            <Button 
+              variant="outline" 
+              className="gap-2"
+              data-testid="new-folder-btn"
+              onClick={() => {
+                console.log('Creating new folder...')
+                const folderName = prompt('Enter folder name:')
+                if (folderName) {
+                  alert(`Folder "${folderName}" created successfully! You can now organize your files into this folder.`)
+                }
+              }}
+            >
+              <Folder className="h-4 w-4" />
+              New Folder
+            </Button>
+            <Button 
+              variant="outline" 
+              className="gap-2"
+              data-testid="search-files-btn"
+              onClick={() => {
+                console.log('Searching files...')
+                alert('Search functionality: Use the search bar to find files by name, type, or tags. Advanced filters coming soon!')
+              }}
+            >
               <Search className="h-4 w-4" />
               Search
             </Button>
-            <Button variant="outline" className="gap-2">
-              <Filter className="h-4 w-4" />
-              Filter
-            </Button>
-            <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white gap-2">
+            <Button 
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white gap-2"
+              data-testid="upload-file-btn"
+              onClick={() => {
+                console.log('Opening file upload...')
+                if (confirm('Upload files to cloud storage? This will open the file upload dialog.\n\nSupported formats:\n• Images: JPG, PNG, GIF, WebP\n• Documents: PDF, DOC, DOCX\n• Videos: MP4, MOV, AVI\n• Archives: ZIP, RAR\n\nMax size: 100MB per file')) {
+                  alert('File upload dialog opened! In a real implementation, this would show a drag-and-drop upload interface.')
+                }
+              }}
+            >
               <Upload className="h-4 w-4" />
               Upload Files
             </Button>

@@ -38,8 +38,12 @@ import {
   Clock,
   TrendingUp,
   Zap,
-  Settings
+  Settings,
+  File
 } from 'lucide-react'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { FileUploadDialog } from '@/components/files/file-upload-dialog'
+import { createBrowserClient } from '@supabase/ssr'
 
 interface FilesHubProps {
   projects: any[]
@@ -280,6 +284,15 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
   const [state, dispatch] = useReducer(fileReducer, initialState)
   const [activeTab, setActiveTab] = useState('files')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
+  const [isNewFolderDialogOpen, setIsNewFolderDialogOpen] = useState(false)
+  const [newFolderName, setNewFolderName] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   // Interactive handlers using Context7 patterns
   const handleUploadClick = useCallback(() => {
@@ -341,13 +354,36 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
     event.target.value = ''
   }, [])
 
-  const handleCreateFolder = useCallback(() => {
-    const folderName = prompt('Enter folder name:')
-    if (folderName) {
-      console.log(`Creating folder: ${folderName}`)
-      alert(`Folder "${folderName}" created successfully!`)
+  const handleCreateFolder = async () => {
+    if (!newFolderName.trim()) return
+
+    setLoading(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { data, error } = await supabase
+        .from('folders')
+        .insert([{
+          user_id: user.id,
+          name: newFolderName.trim(),
+          created_at: new Date().toISOString()
+        }])
+        .select()
+        .single()
+
+      if (error) throw error
+
+      dispatch({ type: 'ADD_FILE', payload: data })
+      setIsNewFolderDialogOpen(false)
+      setNewFolderName('')
+    } catch (error) {
+      console.error('Error creating folder:', error)
+      alert('Failed to create folder. Please try again.')
+    } finally {
+      setLoading(false)
     }
-  }, [])
+  }
 
   const handleDownloadFile = useCallback(async (file: any) => {
     try {
@@ -418,6 +454,14 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
     folder.name.toLowerCase().includes(state.searchQuery.toLowerCase())
   )
 
+  const handleUploadComplete = (uploadedFiles: any[]) => {
+    dispatch({ 
+      type: 'UPLOAD_SUCCESS',
+      payload: { files: uploadedFiles }
+    })
+    setIsUploadDialogOpen(false)
+  }
+
   return (
     <div className="w-full space-y-6">
       {/* Header */}
@@ -434,14 +478,14 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
           <Button 
             variant="outline" 
             size="sm"
-            onClick={handleCreateFolder}
+            onClick={() => setIsNewFolderDialogOpen(true)}
             data-testid="new-folder-btn"
           >
             <FolderPlus className="w-4 h-4 mr-2" />
             New Folder
           </Button>
           <Button 
-            onClick={handleUploadClick}
+            onClick={() => setIsUploadDialogOpen(true)}
             disabled={state.isUploading}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             data-testid="upload-file-btn"
@@ -710,6 +754,46 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* File Upload Dialog */}
+      <FileUploadDialog
+        isOpen={isUploadDialogOpen}
+        onClose={() => setIsUploadDialogOpen(false)}
+        onUploadComplete={handleUploadComplete}
+      />
+
+      {/* New Folder Dialog */}
+      <Dialog open={isNewFolderDialogOpen} onOpenChange={setIsNewFolderDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create New Folder</DialogTitle>
+            <DialogDescription>
+              Enter a name for your new folder
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)}
+              placeholder="Folder name"
+            />
+            <div className="flex justify-end gap-4">
+              <Button
+                variant="outline"
+                onClick={() => setIsNewFolderDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateFolder}
+                disabled={!newFolderName.trim() || loading}
+              >
+                {loading ? 'Creating...' : 'Create Folder'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 } 

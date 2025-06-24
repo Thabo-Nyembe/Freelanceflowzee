@@ -33,35 +33,81 @@ import Link from 'next/link'
 // Context7 Pattern: Interactive Features Data
 const FEATURES_DATA = [
   {
-    icon: Users,
-    title: 'Client Collaboration',
-    description: 'Real-time feedback, comments, and approval workflows that keep projects moving forward.',
-    benefits: ['Real-time commenting', 'Approval workflows', 'Client portals'],
-    demo: '/demo/collaboration',
-    interactive: true
-  },
-  {
     icon: Zap,
-    title: 'Payment Processing',
-    description: 'Automated invoicing, secure payments, and escrow protection for your peace of mind.',
-    benefits: ['Automated invoicing', 'Escrow protection', 'Global payments'],
-    demo: '/demo/payments',
+    title: 'AI Create Studio',
+    description: 'Revolutionary AI-powered asset generation for all creative fields with premium model access.',
+    benefits: [
+      'Generate assets for 6+ creative fields instantly',
+      'Access to premium AI models (GPT-4o, Claude, DALL-E)',
+      'Free trials of expensive premium models',
+      'Photography, Design, Music, Video & more'
+    ],
+    demo: '/dashboard/ai-create',
     interactive: true
   },
   {
-    icon: Shield,
-    title: 'Project Management',
-    description: 'Keep projects organized with timelines, milestones, and team collaboration tools.',
-    benefits: ['Timeline tracking', 'Milestone management', 'Team coordination'],
-    demo: '/demo/projects',
+    icon: Upload,
+    title: 'Files & Escrow System',
+    description: 'Professional file sharing with WeTransfer-like experience plus secure payment protection.',
+    benefits: [
+      'WeTransfer-style professional file sharing',
+      'Secure escrow payment protection',
+      'Real-time upload/download progress',
+      'SEO-optimized sharing pages with social integration'
+    ],
+    demo: '/dashboard/files-escrow',
     interactive: true
   },
   {
-    icon: Globe,
-    title: 'File Sharing',
-    description: 'Secure cloud storage with version control and real-time collaboration features.',
-    benefits: ['Version control', 'Secure sharing', 'Real-time sync'],
-    demo: '/demo/files',
+    icon: Palette,
+    title: 'Video Studio Pro',
+    description: 'Complete video editing suite with AI-powered features and professional templates.',
+    benefits: [
+      'Professional video editing tools',
+      'AI-powered video enhancement',
+      'Template library and effects',
+      'Direct client collaboration on videos'
+    ],
+    demo: '/dashboard/video-studio',
+    interactive: true
+  },
+  {
+    icon: Users,
+    title: 'Community Hub',
+    description: 'Connect, collaborate, and grow with a thriving community of creative professionals.',
+    benefits: [
+      'Network with 10,000+ creatives worldwide',
+      'Share projects and get feedback',
+      'Collaborative project opportunities',
+      'Professional networking and referrals'
+    ],
+    demo: '/dashboard/community-hub',
+    interactive: true
+  },
+  {
+    icon: Target,
+    title: 'Smart Project Tracker',
+    description: 'AI-enhanced project management with milestone tracking and automated client updates.',
+    benefits: [
+      'Visual progress tracking with analytics',
+      'Automated client milestone notifications',
+      'AI-powered project insights',
+      'Integrated payment milestone triggers'
+    ],
+    demo: '/dashboard/project-tracker',
+    interactive: true
+  },
+  {
+    icon: CreditCard,
+    title: 'Global Payment System',
+    description: 'Instant payments, automated invoicing, and multi-currency support with escrow protection.',
+    benefits: [
+      'Instant global payment processing',
+      'Automated invoice generation',
+      'Multi-currency and tax handling',
+      'Secure escrow for project protection'
+    ],
+    demo: '/dashboard/financial',
     interactive: true
   }
 ]
@@ -69,25 +115,25 @@ const FEATURES_DATA = [
 const TESTIMONIALS = [
   {
     name: 'Sarah Chen',
-    role: 'Freelance Designer',
-    company: 'Design Studios Inc.',
-    content: 'FreeflowZee transformed how I work with clients. The collaboration features are game-changing.',
+    role: 'Creative Director',
+    company: 'Digital Atelier Studio',
+    content: 'The AI Create feature is revolutionary! I generate professional assets in seconds across photography, design, and video - saving 15+ hours per project.',
     rating: 5,
     image: '/avatars/sarah-chen.jpg'
   },
   {
     name: 'Marcus Rivera',
-    role: 'Creative Director',
+    role: 'Freelance Designer',
     company: 'Rivera Creative',
-    content: 'Best investment for my agency. Client communication is now seamless and professional.',
+    content: 'WeTransfer-like file sharing with escrow payments? Game changer! Clients love the professional experience and I get paid faster with protection.',
     rating: 5,
     image: '/avatars/marcus.jpg'
   },
   {
     name: 'Emily Watson',
-    role: 'Freelance Developer',
-    company: 'Watson Tech',
-    content: 'The payment system alone saved me hours of administrative work every week.',
+    role: 'Video Producer',
+    company: 'Watson Media',
+    content: 'From AI-generated LUTs to secure client galleries - this platform has everything. The premium AI model trials let me test expensive tools for free!',
     rating: 5,
     image: '/avatars/emily.jpg'
   }
@@ -95,10 +141,10 @@ const TESTIMONIALS = [
 
 // Context7 Pattern: Stats with real-time updates
 const PLATFORM_STATS = [
-  { label: 'Active Users', value: '10,000+', icon: Users, growth: '+23%' },
-  { label: 'Projects Completed', value: '50,000+', icon: CheckCircle, growth: '+45%' },
-  { label: 'Countries Served', value: '120+', icon: Globe, growth: '+12%' },
-  { label: 'Client Satisfaction', value: '98%', icon: Star, growth: '+2%' }
+  { label: 'AI Assets Generated', value: '100K+', icon: Zap, growth: '+156%' },
+  { label: 'Files Shared Securely', value: '2M+', icon: Upload, growth: '+89%' },
+  { label: 'Creative Professionals', value: '25,000+', icon: Users, growth: '+67%' },
+  { label: 'Escrow Transactions', value: '$5M+', icon: Shield, growth: '+234%' }
 ]
 
 export function HomePageClient() {
@@ -119,19 +165,19 @@ export function HomePageClient() {
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
               <div className="flex items-center justify-center gap-4 mb-2">
                 <div className="p-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full">
-                  <Rocket className="w-8 h-8 md:w-12 md:h-12 text-white" />
+                  <Zap className="w-8 h-8 md:w-12 md:h-12 text-white" />
                 </div>
               </div>
               <span className="bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 bg-clip-text text-transparent">
-                Create, Share & Get Paid
+                AI-Powered Creative Platform
               </span>
               <br />
-              <span className="text-gray-800">Like a Pro</span>
+              <span className="text-gray-800">For Modern Professionals</span>
             </h1>
             
             <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto">
-              The ultimate freelance management platform for creators, agencies, and clients. 
-              Streamline projects, collaborate seamlessly, and get paid faster.
+              Generate creative assets with AI, share files like WeTransfer, manage projects with escrow payments, 
+              and build your creative business - all in one revolutionary platform.
             </p>
             
             {/* Interactive CTA Section */}
@@ -170,16 +216,16 @@ export function HomePageClient() {
             {/* Trust Indicators */}
             <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-gray-500">
               <div className="flex items-center">
-                <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
-                No Credit Card Required
+                <Zap className="w-4 h-4 mr-2 text-purple-500" />
+                AI-Powered Asset Generation
               </div>
               <div className="flex items-center">
                 <Shield className="w-4 h-4 mr-2 text-blue-500" />
-                Enterprise Security
+                Escrow Payment Protection
               </div>
               <div className="flex items-center">
-                <Clock className="w-4 h-4 mr-2 text-purple-500" />
-                Setup in 5 Minutes
+                <Globe className="w-4 h-4 mr-2 text-green-500" />
+                WeTransfer-Style File Sharing
               </div>
             </div>
           </div>

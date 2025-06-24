@@ -1,193 +1,110 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 
-// Rate limiting helper
-const loginAttempts = new Map<string, { count: number; lastAttempt: number }>()
+const attempts = new Map()
+const MAX_ATTEMPTS = 5
+const LOCKOUT_TIME = 15 * 60 * 1000 // 15 minutes
 
-function checkRateLimit(email: string): boolean {
+function isLockedOut(email: string): boolean {
   const now = Date.now()
-  const key = email.toLowerCase()
-  const attempt = loginAttempts.get(key)
-
+  const attempt = attempts.get(email)
+  
   if (!attempt) {
-    loginAttempts.set(key, { count: 1, lastAttempt: now })
-    return true
-  }
-
-  // Reset after 15 minutes
-  if (now - attempt.lastAttempt > 15 * 60 * 1000) {
-    loginAttempts.set(key, { count: 1, lastAttempt: now })
-    return true
-  }
-
-  // Allow 5 attempts per 15 minutes
-  if (attempt.count >= 5) {
+    attempts.set(email, { count: 0, lastAttempt: now })
     return false
   }
 
-  attempt.count++
+  if (attempt.count >= MAX_ATTEMPTS) {
+    const timeSinceLastAttempt = now - attempt.lastAttempt
+    if (timeSinceLastAttempt < LOCKOUT_TIME) {
+      return true
+    }
+    attempt.count = 0
+  }
+
   attempt.lastAttempt = now
-  return true
+  return false
 }
 
 export async function login(formData: FormData) {
-  const supabase = await createClient()
-  
-  // Validate client creation
-  if (!supabase) {
-    throw new Error('Authentication service unavailable')
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+  const redirectTo = formData.get('redirectTo') as string || '/dashboard'
+
+  if (isLockedOut(email)) {
+    return { error: 'Too many login attempts. Please try again later.' }
   }
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-  }
-
-  // Basic validation
-  if (!data.email || !data.password) {
-    throw new Error('Email and password are required')
-  }
-
-  // Check rate limiting
-  if (!checkRateLimit(data.email)) {
-    throw new Error('Too many login attempts. Please try again in 15 minutes.')
-  }
+  const supabase = createServerComponentClient({ cookies })
 
   try {
-    const { error, data: authData } = await supabase.auth.signInWithPassword(data)
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
 
-    if (error) {
-      console.error('Login error:', error)
-      
-      // Handle specific error types
-      if (error.code === 'email_not_confirmed') {
-        // For unconfirmed emails, allow login but show verification reminder
-        console.log('User login with unconfirmed email - allowing access with verification reminder')
-        
-        // Try to sign in again - Supabase should allow this even with unconfirmed email
-        // The email confirmation is just for security, not a hard requirement
-        const { error: retryError, data: retryData } = await supabase.auth.signInWithPassword({
-          email: data.email,
-          password: data.password,
-        })
-        
-        if (!retryError && retryData.session) {
-          // Clear rate limiting on successful login
-          loginAttempts.delete(data.email.toLowerCase())
-          revalidatePath('/', 'layout')
-          redirect('/dashboard?verification_reminder=true')
-        }
-        
-        // If retry also fails, show helpful message
-        throw new Error('Please check your email for a verification link, or contact support if you need help.')
-      } else if (error.message.includes('rate limit')) {
-        throw new Error('Too many requests. Please try again later.')
-      } else if (error.message.includes('Invalid login credentials')) {
-        throw new Error('Invalid email or password')
+    if (signInError) {
+      const attempt = attempts.get(email)
+      if (attempt) {
+        attempt.count++
       } else {
-        throw new Error('Login failed. Please check your credentials and try again.')
+        attempts.set(email, { count: 1, lastAttempt: Date.now() })
       }
+      return { error: signInError.message }
     }
 
-    // Clear rate limiting on successful login
-    loginAttempts.delete(data.email.toLowerCase())
+    if (data?.session) {
+      // Successful login, redirect to the intended destination
+      redirect(redirectTo)
+    }
 
-    revalidatePath('/', 'layout')
-    redirect('/dashboard')
+    return { error: 'Login failed. Please try again.' }
   } catch (error: any) {
-    // Check if this is a Next.js redirect error and re-throw it
-    if (error?.digest?.startsWith('NEXT_REDIRECT')) {
-      throw error
-    }
-    
-    console.error('Unexpected login error:', error)
-    
-    // If it's already a known error, re-throw it
-    if (error instanceof Error) {
-      throw error
-    }
-    
-    throw new Error('An unexpected error occurred. Please try again.')
+    console.error('Login error:', error)
+    return { error: 'An unexpected error occurred. Please try again.' }
   }
 }
 
 export async function signup(formData: FormData) {
-  const supabase = await createClient()
-  
-  // Validate client creation
-  if (!supabase) {
-    throw new Error('Authentication service unavailable')
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+  const confirmPassword = formData.get('confirmPassword') as string
+
+  if (password !== confirmPassword) {
+    return { error: 'Passwords do not match' }
   }
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
+  const supabase = createServerComponentClient({ cookies })
+
+  const { error: signUpError } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+    },
+  })
+
+  if (signUpError) {
+    return { error: signUpError.message }
   }
 
-  // Basic validation
-  if (!data.email || !data.password) {
-    throw new Error('Email and password are required')
-  }
-
-  if (data.password.length < 6) {
-    throw new Error('Password must be at least 6 characters long')
-  }
-
-  try {
-    const { error } = await supabase.auth.signUp(data)
-
-    if (error) {
-      console.error('Signup error:', error)
-      throw new Error('Could not create account: ' + error.message)
-    }
-
-    revalidatePath('/', 'layout')
-    redirect('/login?message=Account created successfully! You can log in now. Email verification is optional but recommended for security.')
-  } catch (error: any) {
-    // Check if this is a Next.js redirect error and re-throw it
-    if (error?.digest?.startsWith('NEXT_REDIRECT')) {
-      throw error
-    }
-    
-    console.error('Unexpected signup error:', error)
-    
-    // If it's already a known error, re-throw it
-    if (error instanceof Error) {
-      throw error
-    }
-    
-    throw new Error('An unexpected error occurred during signup. Please try again.')
-  }
+  return { success: true }
 }
 
 export async function resendVerification(email: string) {
-  try {
-    const supabase = await createClient()
-    
-    if (!supabase) {
-      throw new Error('Authentication service unavailable')
-    }
+  const supabase = createServerComponentClient({ cookies })
 
-    const { error } = await supabase.auth.resend({
-      type: 'signup',
-      email: email
-    })
+  const { error } = await supabase.auth.resend({
+    type: 'signup',
+    email,
+  })
 
-    if (error) {
-      console.error('Resend verification error:', error)
-      throw new Error('Failed to resend verification email')
-    }
-
-    return { success: true, message: 'Verification email sent successfully!' }
-  } catch (error) {
-    console.error('Unexpected resend verification error:', error)
-    throw new Error('Failed to resend verification email. Please try again.')
+  if (error) {
+    return { error: error.message }
   }
+
+  return { success: true }
 } 

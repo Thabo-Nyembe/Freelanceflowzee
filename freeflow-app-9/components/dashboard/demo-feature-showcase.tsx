@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 export function DemoFeatureShowcase() {
-  const [activeDemo, setActiveDemo] = useState(null);
+  const [activeDemo, setActiveDemo] = useState<string | null>(null);
 
   const features = [
     {

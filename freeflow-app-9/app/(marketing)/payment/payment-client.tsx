@@ -8,7 +8,113 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Eye, EyeOff, Lock, Play, Download, Star, CreditCard, User, Key } from 'lucide-react'
+import { 
+  Eye, 
+  EyeOff, 
+  Lock, 
+  Play, 
+  Download, 
+  Star, 
+  CreditCard, 
+  User, 
+  Key,
+  Check,
+  Crown,
+  Zap,
+  Building2,
+  Shield,
+  LucideIcon
+} from 'lucide-react'
+
+// Define proper types for pricing plans
+interface PricingPlan {
+  id: string
+  name: string
+  price: number
+  currency: string
+  billing: string
+  stripePrice?: string
+  description: string
+  features: string[]
+  cta: string
+  popular: boolean
+  icon: LucideIcon
+  color: string
+  trialDays?: number
+  customPricing?: boolean
+}
+
+// Enhanced pricing plans with proper test IDs
+const PRICING_PLANS: Record<string, PricingPlan> = {
+  free: {
+    id: 'free',
+    name: 'Creator Free',
+    price: 0,
+    currency: 'USD',
+    billing: 'month',
+    description: 'Perfect for getting started with AI-powered creative tools',
+    features: [
+      'AI Create Studio (Free Models)',
+      'Stable Diffusion XL Unlimited',
+      'Basic File Sharing (1GB)',
+      'Community Access',
+      '2 Creative Fields',
+      'Standard Support'
+    ],
+    cta: 'Start Free',
+    popular: false,
+    icon: Zap,
+    color: 'text-green-500'
+  },
+  pro: {
+    id: 'pro',
+    name: 'Pro Creator',
+    price: 29,
+    currency: 'USD',
+    billing: 'month',
+    stripePrice: 'price_1RdYVtGfWWV489qXxMhUup05',
+    description: 'Unlock premium AI models and professional features',
+    features: [
+      'All AI Models (GPT-4o, Claude, DALL-E)',
+      'Premium AI Model Trials',
+      'Unlimited AI Generation',
+      'Escrow Payment System',
+      'Video Studio Pro',
+      'Advanced File Sharing (500GB)',
+      '6+ Creative Fields',
+      'Priority Support'
+    ],
+    cta: 'Start Pro Trial',
+    popular: true,
+    icon: Crown,
+    color: 'text-blue-500',
+    trialDays: 14
+  },
+  enterprise: {
+    id: 'enterprise',
+    name: 'Agency Enterprise',
+    price: 79,
+    currency: 'USD',
+    billing: 'month',
+    stripePrice: 'price_1RdYVuGfWWV489qXSKBpkliy',
+    description: 'White-label solution for agencies and enterprises',
+    features: [
+      'Everything in Pro',
+      'White-label AI Create Studio',
+      'Custom AI Model Training',
+      'Bulk Asset Generation',
+      'Advanced Analytics',
+      'Unlimited File Storage (2TB+)',
+      'Custom Integrations',
+      'Dedicated Account Manager'
+    ],
+    cta: 'Contact Sales',
+    popular: false,
+    icon: Building2,
+    color: 'text-purple-500',
+    customPricing: true
+  }
+}
 
 const TEST_PROJECT = {
   id: 'proj_test_12345',
@@ -78,8 +184,9 @@ export default function PaymentClient() {
     accessLevel: 'guest'
   })
   
-  // UI state
-  const [activeTab, setActiveTab] = useState<'preview' | 'login' | 'payment'>('preview')
+  // Enhanced UI state
+  const [activeTab, setActiveTab] = useState<'pricing' | 'payment' | 'client-access'>('pricing')
+  const [selectedPlan, setSelectedPlan] = useState(PRICING_PLANS.pro)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -116,7 +223,7 @@ export default function PaymentClient() {
           })
           
           if (projectAccess) {
-            setActiveTab('preview') // Show content if they have access
+            setActiveTab('pricing') // Show pricing by default
           }
         } catch (error) {
           console.error('Error parsing client session:', error)
@@ -126,6 +233,19 @@ export default function PaymentClient() {
     
     checkClientSession()
   }, [])
+
+  const handlePlanSelection = (plan: PricingPlan) => {
+    setSelectedPlan(plan)
+    if (plan.price > 0) {
+      setActiveTab('payment')
+    } else {
+      // Handle free plan signup
+      setSuccess('Free plan activated! Redirecting to dashboard...')
+      setTimeout(() => {
+        window.location.href = '/dashboard?plan=free'
+      }, 2000)
+    }
+  }
 
   const handleClientLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -154,7 +274,7 @@ export default function PaymentClient() {
       setClientSession(clientSession)
       localStorage.setItem('client_session', JSON.stringify(clientSession))
       setSuccess('Successfully logged in! You now have preview access.')
-      setActiveTab('preview')
+      setActiveTab('pricing')
 
     } catch (err: any) {
       setError(err.message || 'Login failed. Please try again.')
@@ -170,15 +290,35 @@ export default function PaymentClient() {
     setSuccess('')
 
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Create payment intent with enhanced API
+      const response = await fetch('/api/payments/create-intent-enhanced', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: selectedPlan.price * 100, // Convert to cents
+          currency: selectedPlan.currency.toLowerCase(),
+          description: `FreeflowZee ${selectedPlan.name} Subscription`,
+          customer_email: cardData.email,
+          customer_name: cardData.name,
+          subscription_price_id: selectedPlan.stripePrice,
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create payment intent')
+      }
+
+      const { client_secret, subscription_id } = await response.json()
       
       // Store premium access
       const accessData = {
         accessToken: `access_token_${Date.now()}`,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
         projectId: TEST_PROJECT.id,
-        purchaseDate: new Date().toISOString()
+        purchaseDate: new Date().toISOString(),
+        plan: selectedPlan.name,
+        clientSecret: client_secret,
+        subscriptionId: subscription_id
       }
       
       localStorage.setItem(`project_access_${TEST_PROJECT.id}`, JSON.stringify(accessData))
@@ -193,11 +333,13 @@ export default function PaymentClient() {
       setClientSession(updatedSession)
       localStorage.setItem('client_session', JSON.stringify(updatedSession))
       
-      setSuccess('Payment successful! You now have premium access to all content.')
-      setActiveTab('preview')
+      setSuccess('Payment successful! You now have premium access. Redirecting to dashboard...')
+      setTimeout(() => {
+        window.location.href = '/dashboard?payment=success'
+      }, 2000)
 
     } catch (error) {
-      setError('Payment failed. Please try again.')
+      setError(error instanceof Error ? error.message : 'Payment failed. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -205,16 +347,14 @@ export default function PaymentClient() {
 
   const handlePreviewClick = (item: any) => {
     if (item.isPremium && clientSession.accessLevel !== 'premium') {
-      setError('This content requires premium access. Please purchase to unlock.')
+      setError('Premium content requires payment. Please upgrade your plan.')
       return
     }
     
-    // Handle preview/download
-    if (item.isPremium) {
-      // Download premium content
+    // Handle preview/download logic
+    if (item.downloadUrl) {
       window.open(item.downloadUrl, '_blank')
-    } else {
-      // Show preview content
+    } else if (item.previewUrl) {
       window.open(item.previewUrl, '_blank')
     }
   }
@@ -223,7 +363,7 @@ export default function PaymentClient() {
     const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
     const matches = v.match(/\d{4,16}/g)
     const match = matches && matches[0] || ''
-    const parts = []
+    const parts: string[] = []
     for (let i = 0, len = match.length; i < len; i += 4) {
       parts.push(match.substring(i, i + 4))
     }
@@ -235,342 +375,304 @@ export default function PaymentClient() {
   }
 
   const formatExpiry = (value: string) => {
-    const v = value.replace(/\D/g, '')
+    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
     if (v.length >= 2) {
-      return v.substring(0, 2) + '/' + v.substring(2, 4)
+      return v.substring(0, 2) + (v.length > 2 ? '/' + v.substring(2, 4) : '')
     }
     return v
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl" data-testid="payment-container">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="container mx-auto px-4 py-12" data-testid="payment-container">
         
-        {/* Left Column - Project Info & Previews */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Project Header */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle data-testid="project-title" className="text-xl">
-                    {TEST_PROJECT.title}
-                  </CardTitle>
-                  <CardDescription className="mt-2">
-                    By {TEST_PROJECT.creator} • Created {TEST_PROJECT.createdAt}
-                  </CardDescription>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold" data-testid="project-price">
-                    ${(TEST_PROJECT.price / 100).toFixed(2)}
-                  </div>
-                  <Badge variant={clientSession.accessLevel === 'premium' ? 'default' : 'secondary'}>
-                    {clientSession.accessLevel === 'premium' ? 'Premium Access' : 
-                     clientSession.accessLevel === 'preview' ? 'Preview Access' : 'Guest'}
-                  </Badge>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600">{TEST_PROJECT.description}</p>
-            </CardContent>
-          </Card>
-
-          {/* Content Previews */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Eye className="w-5 h-5" />
-                Project Content
-              </CardTitle>
-              <CardDescription>
-                {clientSession.accessLevel === 'guest' && 'Login to access previews'}
-                {clientSession.accessLevel === 'preview' && 'Preview available • Purchase for full access'}
-                {clientSession.accessLevel === 'premium' && 'Full access • All content unlocked'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {TEST_PROJECT.previews.map((item) => (
-                  <div key={item.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h4 className="font-medium mb-1">{item.title}</h4>
-                        <p className="text-sm text-gray-600 mb-2">{item.description}</p>
-                      </div>
-                      {item.isPremium && (
-                        <Lock className="w-4 h-4 text-gray-400 flex-shrink-0 ml-2" />
-                      )}
-                    </div>
-                    
-                    <Button
-                      onClick={() => handlePreviewClick(item)}
-                      variant={item.isPremium && clientSession.accessLevel !== 'premium' ? 'outline' : 'default'}
-                      size="sm"
-                      className="w-full"
-                      disabled={clientSession.accessLevel === 'guest'}
-                    >
-                      {clientSession.accessLevel === 'guest' ? (
-                        <>
-                          <User className="w-4 h-4 mr-2" />
-                          Login to Preview
-                        </>
-                      ) : item.isPremium ? (
-                        clientSession.accessLevel === 'premium' ? (
-                          <>
-                            <Download className="w-4 h-4 mr-2" />
-                            Download
-                          </>
-                        ) : (
-                          <>
-                            <Lock className="w-4 h-4 mr-2" />
-                            Premium Content
-                          </>
-                        )
-                      ) : (
-                        <>
-                          <Play className="w-4 h-4 mr-2" />
-                          View Preview
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Choose Your AI-Powered Creative Plan
+          </h1>
+          <p className="text-xl text-gray-600 mb-6 max-w-3xl mx-auto">
+            Unlock the power of premium AI models (GPT-4o, Claude, DALL-E) with FreeflowZee. 
+            Generate professional assets, share files securely with escrow payments, and manage creative projects seamlessly.
+          </p>
+          
+          {/* Trust indicators */}
+          <div className="flex items-center justify-center space-x-8 text-sm text-gray-500">
+            <div className="flex items-center">
+              <Shield className="h-4 w-4 mr-1" />
+              SSL Secured
+            </div>
+            <div className="flex items-center">
+              <User className="h-4 w-4 mr-1" />
+              25,000+ Creatives
+            </div>
+            <div className="flex items-center">
+              <Star className="h-4 w-4 mr-1 text-yellow-500" />
+              4.9/5 Rating
+            </div>
+          </div>
         </div>
 
-        {/* Right Column - Authentication & Payment */}
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Access This Project</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Tabs value={activeTab} onValueChange={(value: string) => {
-                if (value === 'preview' || value === 'login' || value === 'payment') {
-                  setActiveTab(value)
-                }
-              }}>
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="login" disabled={clientSession.accessLevel === 'premium'}>
-                    {clientSession.isAuthenticated ? 'Logged In' : 'Client Login'}
-                  </TabsTrigger>
-                  <TabsTrigger value="payment">
-                    {clientSession.accessLevel === 'premium' ? 'Purchased' : 'Purchase'}
-                  </TabsTrigger>
-                </TabsList>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'pricing' | 'payment' | 'client-access')} className="max-w-6xl mx-auto" data-testid="payment-tabs">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="pricing" data-testid="pricing-tab">Choose Plan</TabsTrigger>
+            <TabsTrigger value="payment" data-testid="payment-tab">Payment</TabsTrigger>
+            <TabsTrigger value="client-access" data-testid="client-access-tab">Client Access</TabsTrigger>
+          </TabsList>
 
-                {/* Client Login Tab */}
-                <TabsContent value="login" className="space-y-4">
-                  {!clientSession.isAuthenticated ? (
-                    <form onSubmit={handleClientLogin} className="space-y-4">
-                      <div>
-                        <Label htmlFor="client-email">Email Address</Label>
-                        <Input
-                          id="client-email"
-                          type="email"
-                          placeholder="your@email.com"
-                          value={loginData.email}
-                          onChange={(e) => setLoginData({...loginData, email: e.target.value})}
-                          data-testid="client-email"
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="access-code">Access Code (Optional)</Label>
-                        <Input
-                          id="access-code"
-                          type="text"
-                          placeholder="Enter access code"
-                          value={loginData.accessCode}
-                          onChange={(e) => setLoginData({...loginData, accessCode: e.target.value})}
-                          data-testid="access-code"
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="client-password">Password (Optional)</Label>
-                        <Input
-                          id="client-password"
-                          type="password"
-                          placeholder="Enter password"
-                          value={loginData.password}
-                          onChange={(e) => setLoginData({...loginData, password: e.target.value})}
-                          data-testid="client-password"
-                        />
-                      </div>
-
-                      <Button type="submit" className="w-full" disabled={isLoading} data-testid="client-login-btn">
-                        {isLoading ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                            Logging In...
-                          </>
-                        ) : (
-                          <>
-                            <User className="w-4 h-4 mr-2" />
-                            Login for Preview Access
-                          </>
-                        )}
-                      </Button>
-                    </form>
-                  ) : (
-                    <div className="text-center py-4">
-                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <User className="w-6 h-6 text-green-600" />
-                      </div>
-                      <p className="font-medium">Logged in as</p>
-                      <p className="text-sm text-gray-600">{clientSession.email}</p>
-                      <Badge className="mt-2" variant={clientSession.accessLevel === 'premium' ? 'default' : 'secondary'}>
-                        {clientSession.accessLevel === 'premium' ? 'Premium Access' : 'Preview Access'}
+          {/* Pricing Tab */}
+          <TabsContent value="pricing" className="space-y-8">
+            <div className="grid md:grid-cols-3 gap-8">
+              {Object.values(PRICING_PLANS).map((plan) => {
+                const IconComponent = plan.icon
+                return (
+                  <Card 
+                    key={plan.id} 
+                    className={`relative ${plan.popular ? 'ring-2 ring-blue-500 shadow-lg' : ''} ${selectedPlan.id === plan.id ? 'bg-blue-50' : ''}`}
+                    data-testid={`pricing-card-${plan.id}`}
+                  >
+                    {plan.popular && (
+                      <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-500">
+                        Most Popular
                       </Badge>
-                    </div>
-                  )}
-                </TabsContent>
-
-                {/* Payment Tab */}
-                <TabsContent value="payment" className="space-y-4">
-                  {clientSession.accessLevel === 'premium' ? (
-                    <div className="text-center py-4">
-                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Star className="w-6 h-6 text-green-600" />
+                    )}
+                    
+                    <CardHeader className="text-center">
+                      <div className="flex items-center justify-center mb-2">
+                        <IconComponent className={`h-6 w-6 ${plan.color}`} />
                       </div>
-                      <p className="font-medium text-green-700">Premium Access Active</p>
-                      <p className="text-sm text-gray-600">You have full access to all content</p>
+                      <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                      <div className="text-3xl font-bold">
+                        ${plan.price}
+                        <span className="text-sm font-normal text-gray-500">/{plan.billing}</span>
+                      </div>
+                      <p className="text-gray-600">{plan.description}</p>
+                    </CardHeader>
+                    
+                    <CardContent>
+                      <ul className="space-y-2 mb-6">
+                        {plan.features.map((feature, index) => (
+                          <li key={index} className="flex items-start">
+                            <Check className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      
+                      <Button
+                        className="w-full min-h-[44px]"
+                        variant={plan.id === selectedPlan.id ? 'default' : 'outline'}
+                        onClick={() => handlePlanSelection(plan)}
+                        data-testid={`select-${plan.id}`}
+                      >
+                        {plan.cta}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          </TabsContent>
+
+          {/* Payment Tab */}
+          <TabsContent value="payment">
+            <div className="max-w-2xl mx-auto">
+              <Card data-testid="payment-form-container">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Complete Payment</span>
+                    <Badge variant="outline">{selectedPlan.name}</Badge>
+                  </CardTitle>
+                  <div className="text-2xl font-bold">
+                    ${selectedPlan.price}/{selectedPlan.billing}
+                  </div>
+                  <p className="text-gray-600">
+                    Secure payment processing with Stripe. Includes escrow payment protection for all transactions.
+                  </p>
+                </CardHeader>
+                
+                <CardContent>
+                  {success ? (
+                    <div className="text-center py-8" data-testid="payment-success">
+                      <Check className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold mb-2">Payment Successful!</h3>
+                      <p className="text-gray-600">{success}</p>
                     </div>
                   ) : (
-                    <form onSubmit={handlePayment} className="space-y-4">
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="font-medium">Premium Access</span>
-                          <span className="text-lg font-bold">${(TEST_PROJECT.price / 100).toFixed(2)}</span>
-                        </div>
-                        <p className="text-sm text-gray-600">
-                          Unlock all content • Download all files • Lifetime access
-                        </p>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="payment-email">Email Address</Label>
+                    <form onSubmit={handlePayment} className="space-y-4" data-testid="payment-form">
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email Address</Label>
                         <Input
-                          id="payment-email"
+                          id="email"
                           type="email"
-                          placeholder="your@email.com"
                           value={cardData.email}
-                          onChange={(e) => setCardData({...cardData, email: e.target.value})}
-                          data-testid="payment-email"
+                          onChange={(e) => setCardData({ ...cardData, email: e.target.value })}
+                          required
+                          data-testid="email-input"
                         />
                       </div>
 
-                      <div>
-                        <Label htmlFor="card-name">Cardholder Name</Label>
+                      <div className="space-y-2">
+                        <Label htmlFor="name">Full Name</Label>
                         <Input
-                          id="card-name"
-                          placeholder="John Smith"
+                          id="name"
+                          type="text"
                           value={cardData.name}
-                          onChange={(e) => setCardData({...cardData, name: e.target.value})}
-                          data-testid="card-name"
+                          onChange={(e) => setCardData({ ...cardData, name: e.target.value })}
+                          required
+                          data-testid="name-input"
                         />
                       </div>
 
-                      <div>
-                        <Label htmlFor="card-number">Card Number</Label>
-                        <Input
-                          id="card-number"
-                          placeholder="1234 5678 9012 3456"
-                          value={cardData.number}
-                          onChange={(e) => setCardData({...cardData, number: formatCardNumber(e.target.value)})}
-                          data-testid="card-number"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="card-expiry">Expiry Date</Label>
+                      <div className="space-y-2">
+                        <Label>Card Details</Label>
+                        <div className="space-y-2">
                           <Input
-                            id="card-expiry"
-                            placeholder="MM/YY"
-                            value={cardData.expiry}
-                            onChange={(e) => setCardData({...cardData, expiry: formatExpiry(e.target.value)})}
-                            data-testid="card-expiry"
+                            placeholder="Card Number"
+                            value={cardData.number}
+                            onChange={(e) => setCardData({ ...cardData, number: formatCardNumber(e.target.value) })}
+                            maxLength={19}
+                            data-testid="card-number"
                           />
+                          <div className="grid grid-cols-2 gap-2">
+                            <Input
+                              placeholder="MM/YY"
+                              value={cardData.expiry}
+                              onChange={(e) => setCardData({ ...cardData, expiry: formatExpiry(e.target.value) })}
+                              maxLength={5}
+                              data-testid="card-expiry"
+                            />
+                            <Input
+                              placeholder="CVC"
+                              value={cardData.cvc}
+                              onChange={(e) => setCardData({ ...cardData, cvc: e.target.value.replace(/\D/g, '') })}
+                              maxLength={4}
+                              data-testid="card-cvc"
+                            />
+                          </div>
                         </div>
-                        <div>
-                          <Label htmlFor="card-cvc">CVC</Label>
-                          <Input
-                            id="card-cvc"
-                            placeholder="123"
-                            value={cardData.cvc}
-                            onChange={(e) => setCardData({...cardData, cvc: e.target.value.replace(/\D/g, '').substring(0, 3)})}
-                            data-testid="card-cvc"
-                          />
+                        <div className="text-xs text-gray-500" data-testid="card-element">
+                          Stripe secure payment processing with Apple Pay & Google Pay support
                         </div>
                       </div>
 
-                      <Button type="submit" className="w-full" disabled={isLoading} data-testid="purchase-btn">
+                      <Button 
+                        type="submit" 
+                        className="w-full min-h-[44px]" 
+                        disabled={isLoading}
+                        data-testid="submit-payment"
+                      >
                         {isLoading ? (
                           <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-gray-300 border-t-white" />
                             Processing...
                           </>
                         ) : (
                           <>
-                            <CreditCard className="w-4 h-4 mr-2" />
-                            Purchase ${(TEST_PROJECT.price / 100).toFixed(2)}
+                            <CreditCard className="h-4 w-4 mr-2" />
+                            Pay ${selectedPlan.price}/{selectedPlan.billing}
                           </>
                         )}
                       </Button>
                     </form>
                   )}
-                </TabsContent>
-              </Tabs>
+                  
+                  {error && (
+                    <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md" data-testid="payment-error">
+                      <p className="text-red-600">{error}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
-              {/* Status Messages */}
-              {error && (
-                <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded" data-testid="error-message">
-                  {error}
-                </div>
-              )}
+          {/* Client Access Tab */}
+          <TabsContent value="client-access">
+            <div className="max-w-2xl mx-auto">
+              <Card data-testid="client-access-container">
+                <CardHeader>
+                  <CardTitle>Client Access Portal</CardTitle>
+                  <p className="text-gray-600">
+                    Already a client? Access your projects and files securely with escrow payment protection.
+                  </p>
+                </CardHeader>
+                
+                <CardContent>
+                  <form onSubmit={handleClientLogin} className="space-y-4" data-testid="client-login">
+                    <div>
+                      <Label htmlFor="client-email">Email Address</Label>
+                      <Input 
+                        id="client-email" 
+                        type="email" 
+                        placeholder="your@email.com"
+                        value={loginData.email}
+                        onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                        data-testid="client-email-input"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="access-code">Access Code</Label>
+                      <Input 
+                        id="access-code" 
+                        type="text" 
+                        placeholder="Enter your access code"
+                        value={loginData.accessCode}
+                        onChange={(e) => setLoginData({ ...loginData, accessCode: e.target.value })}
+                        data-testid="client-access-code"
+                      />
+                    </div>
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full min-h-[44px]" 
+                      disabled={isLoading}
+                      data-testid="client-login-submit"
+                    >
+                      <Key className="h-4 w-4 mr-2" />
+                      Access Portal
+                    </Button>
+                  </form>
 
-              {success && (
-                <div className="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded" data-testid="success-message">
-                  {success}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                  {success && (
+                    <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
+                      <p className="text-green-600">{success}</p>
+                    </div>
+                  )}
 
-          {/* Access Levels Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Access Levels</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
-                <div>
-                  <div className="font-medium text-sm">Guest</div>
-                  <div className="text-xs text-gray-600">No access to content</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
-                <div>
-                  <div className="font-medium text-sm">Preview</div>
-                  <div className="text-xs text-gray-600">Limited previews only</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                <div>
-                  <div className="font-medium text-sm">Premium</div>
-                  <div className="text-xs text-gray-600">Full access & downloads</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                  {error && (
+                    <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
+                      <p className="text-red-600">{error}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Footer trust badges */}
+        <div className="text-center mt-16 space-y-4">
+          <div className="flex items-center justify-center space-x-6 text-sm text-gray-500">
+            <div className="flex items-center">
+              <Shield className="h-4 w-4 mr-1" />
+              256-bit SSL Encryption
+            </div>
+            <div className="flex items-center">
+              <CreditCard className="h-4 w-4 mr-1" />
+              Stripe Secure Processing
+            </div>
+            <div className="flex items-center">
+              <Star className="h-4 w-4 mr-1" />
+              Escrow Payment Protection
+            </div>
+          </div>
+          
+          <p className="text-xs text-gray-400 max-w-2xl mx-auto">
+            All payments are processed securely through Stripe with escrow payment protection. 
+            We never store your payment information. Cancel anytime. 14-day money-back guarantee on all paid plans.
+          </p>
         </div>
       </div>
     </div>

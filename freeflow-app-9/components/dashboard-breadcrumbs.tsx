@@ -6,7 +6,7 @@ import { ChevronRight } from 'lucide-react'
 
 export function DashboardBreadcrumbs() {
   const pathname = usePathname()
-  const segments = pathname.split('/').filter(Boolean)
+  const segments = pathname?.split('/').filter(Boolean) || []
 
   return (
     <nav className="flex items-center space-x-1 text-sm text-muted-foreground">

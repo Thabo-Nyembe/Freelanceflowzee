@@ -492,4 +492,82 @@ test.describe('AI Create API', () => {
     const data = await response.json()
     expect(data.error).toContain('Missing required fields')
   })
+})
+
+test.describe('AI Create Component', () => {
+  test.beforeEach(async ({ page }) => {
+    // Navigate to the AI Create page
+    await page.goto('/dashboard/ai-create')
+  })
+
+  test('should render all tabs and basic functionality', async ({ page }) => {
+    // Check if all tabs are present
+    await expect(page.getByTestId('create-tab')).toBeVisible()
+    await expect(page.getByTestId('library-tab')).toBeVisible()
+    await expect(page.getByTestId('settings-tab')).toBeVisible()
+
+    // Check if the create tab is active by default
+    await expect(page.getByTestId('create-tab')).toHaveAttribute('data-state', 'active')
+
+    // Test tab switching
+    await page.getByTestId('library-tab').click()
+    await expect(page.getByTestId('library-tab')).toHaveAttribute('data-state', 'active')
+
+    await page.getByTestId('settings-tab').click()
+    await expect(page.getByTestId('settings-tab')).toHaveAttribute('data-state', 'active')
+  })
+
+  test('should handle content generation flow', async ({ page }) => {
+    // Type in the prompt
+    await page.getByTestId('prompt-input').fill('Create a test image')
+    
+    // Select image type
+    await page.getByRole('combobox').first().click()
+    await page.getByText('Image').click()
+
+    // Select quality
+    await page.getByRole('combobox').nth(1).click()
+    await page.getByText('Premium').click()
+
+    // Generate button should be enabled
+    const generateButton = page.getByTestId('generate-btn')
+    await expect(generateButton).toBeEnabled()
+
+    // Click generate and check loading state
+    await generateButton.click()
+    await expect(generateButton).toBeDisabled()
+    await expect(generateButton).toHaveText('Generating...')
+
+    // Wait for generation to complete
+    await expect(generateButton).toBeEnabled({ timeout: 10000 })
+    await expect(generateButton).toHaveText('Generate')
+  })
+
+  test('should handle settings changes', async ({ page }) => {
+    // Go to settings tab
+    await page.getByTestId('settings-tab').click()
+
+    // Change creativity level
+    await page.getByText('Creativity level').click()
+    await page.getByText('Experimental').click()
+    await expect(page.getByText('Experimental')).toBeVisible()
+
+    // Change AI model
+    await page.getByText('Select AI model').click()
+    await page.getByText('GPT-4').click()
+    await expect(page.getByText('GPT-4')).toBeVisible()
+  })
+
+  test('should validate input requirements', async ({ page }) => {
+    // Generate button should be disabled without prompt
+    await expect(page.getByTestId('generate-btn')).toBeDisabled()
+
+    // Type short prompt
+    await page.getByTestId('prompt-input').fill('test')
+    await expect(page.getByTestId('generate-btn')).toBeEnabled()
+
+    // Clear prompt
+    await page.getByTestId('prompt-input').fill('')
+    await expect(page.getByTestId('generate-btn')).toBeDisabled()
+  })
 }) 

@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, ReactNode, useState } from 'react'
+import { createContext, useContext, ReactNode, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { DashboardNav } from '@/components/dashboard-nav'
 import { DashboardBreadcrumbs } from '@/components/dashboard-breadcrumbs'
@@ -40,6 +40,13 @@ export function DashboardLayoutClient({ user, children }: DashboardLayoutClientP
   const router = useRouter()
   const supabase = createClient()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isContentLoading, setIsContentLoading] = useState(true)
+
+  useEffect(() => {
+    // Simulate content loading
+    const timer = setTimeout(() => setIsContentLoading(false), 1000)
+    return () => clearTimeout(timer)
+  }, [])
 
   const handleLogout = async () => {
     try {
@@ -104,6 +111,7 @@ export function DashboardLayoutClient({ user, children }: DashboardLayoutClientP
               size="sm"
               onClick={handleLogout}
               className="bg-white/80 backdrop-blur-sm border-gray-200 hover:bg-white"
+              data-testid="user-menu-trigger"
             >
               <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline ml-2">Logout</span>
@@ -142,7 +150,16 @@ export function DashboardLayoutClient({ user, children }: DashboardLayoutClientP
           
           {/* Scrollable Content Area */}
           <div className="dashboard-content">
-            {children}
+            {isContentLoading ? (
+              <div className="flex items-center justify-center min-h-[60vh]">
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="w-8 h-8 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin"></div>
+                  <p className="text-sm text-gray-500">Loading your dashboard...</p>
+                </div>
+              </div>
+            ) : (
+              children
+            )}
           </div>
         </main>
       </div>
