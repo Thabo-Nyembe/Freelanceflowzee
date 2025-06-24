@@ -2,14 +2,39 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
 // Initialize enhanced Stripe with latest API version
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_for_build'
-const stripe = new Stripe(stripeSecretKey, {
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+const stripe = new Stripe(stripeSecretKey || '', {
   apiVersion: '2025-05-28.basil',
   typescript: true,
 })
 
+export async function GET() {
+  return NextResponse.json({
+    success: true,
+    features: [
+      'payment_intents',
+      'subscriptions',
+      'apple_pay',
+      'google_pay',
+      'webhooks',
+      'escrow'
+    ]
+  })
+}
+
 export async function POST(request: NextRequest) {
   try {
+    // Validate Stripe configuration
+    if (!stripeSecretKey) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Stripe is not configured properly' 
+        },
+        { status: 503 }
+      )
+    }
+
     const body = await request.json()
     const {
       amount,
@@ -26,7 +51,10 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!amount || amount <= 0) {
       return NextResponse.json(
-        { error: 'Valid amount is required' },
+        { 
+          success: false,
+          error: 'Valid amount is required' 
+        },
         { status: 400 }
       )
     }
@@ -35,51 +63,75 @@ export async function POST(request: NextRequest) {
 
     // Create or retrieve customer if email provided
     if (customer_email) {
-      const existingCustomers = await stripe.customers.list({
-        email: customer_email,
-        limit: 1,
-      })
-
-      if (existingCustomers.data.length > 0) {
-        customerId = existingCustomers.data[0].id
-      } else {
-        const customer = await stripe.customers.create({
+      try {
+        const existingCustomers = await stripe.customers.list({
           email: customer_email,
-          name: customer_name,
-          metadata: {
-            created_via: 'freeflowzee-enhanced',
-            created_at: new Date().toISOString(),
-          },
+          limit: 1,
         })
-        customerId = customer.id
+
+        if (existingCustomers.data.length > 0) {
+          customerId = existingCustomers.data[0].id
+        } else {
+          const customer = await stripe.customers.create({
+            email: customer_email,
+            name: customer_name,
+            metadata: {
+              created_via: 'freeflowzee-enhanced',
+              created_at: new Date().toISOString(),
+            },
+          })
+          customerId = customer.id
+        }
+      } catch (error) {
+        console.error('Customer creation/retrieval failed:', error)
+        return NextResponse.json(
+          { 
+            success: false,
+            error: 'Failed to process customer information' 
+          },
+          { status: 500 }
+        )
       }
     }
 
     // Handle subscription vs one-time payment
     if (subscription_price_id) {
-      // Create subscription
-      const subscription = await stripe.subscriptions.create({
-        customer: customerId!,
-        items: [{ price: subscription_price_id }],
-        payment_behavior: 'default_incomplete',
-        payment_settings: {
-          save_default_payment_method: 'on_subscription',
-        },
-        expand: ['latest_invoice.payment_intent'],
-        metadata: {
-          description: description || 'FreeflowZee Subscription',
-          created_via: 'freeflowzee-enhanced',
-        },
-      })
+      try {
+        // Create subscription
+        const subscription = await stripe.subscriptions.create({
+          customer: customerId!,
+          items: [{ price: subscription_price_id }],
+          payment_behavior: 'default_incomplete',
+          payment_settings: {
+            save_default_payment_method: 'on_subscription',
+          },
+          expand: ['latest_invoice.payment_intent'],
+          metadata: {
+            description: description || 'FreeflowZee Subscription',
+            created_via: 'freeflowzee-enhanced',
+          },
+        })
 
-      return NextResponse.json({
-        success: true,
-        client_secret: (subscription.latest_invoice as Stripe.Invoice & { payment_intent?: Stripe.PaymentIntent })?.payment_intent?.client_secret,
-        subscription_id: subscription.id,
-        customer_id: customerId,
-        publishable_key: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
-      })
-    } else {
+        return NextResponse.json({
+          success: true,
+          client_secret: (subscription.latest_invoice as Stripe.Invoice & { payment_intent?: Stripe.PaymentIntent })?.payment_intent?.client_secret,
+          subscription_id: subscription.id,
+          customer_id: customerId,
+          publishable_key: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+        })
+      } catch (error) {
+        console.error('Subscription creation failed:', error)
+        return NextResponse.json(
+          { 
+            success: false,
+            error: 'Failed to create subscription' 
+          },
+          { status: 500 }
+        )
+      }
+    }
+
+    try {
       // Create enhanced payment intent for one-time payment
       const paymentIntentData: Stripe.PaymentIntentCreateParams = {
         amount,
@@ -90,7 +142,6 @@ export async function POST(request: NextRequest) {
           created_via: 'freeflowzee-enhanced',
           created_at: new Date().toISOString(),
         },
-        // Use automatic_payment_methods for broader payment method support
         automatic_payment_methods: {
           enabled: true,
           allow_redirects: 'always',
@@ -116,16 +167,24 @@ export async function POST(request: NextRequest) {
         customer_id: customerId,
         publishable_key: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
       })
+    } catch (error) {
+      console.error('Payment intent creation failed:', error)
+      return NextResponse.json(
+        { 
+          success: false,
+          error: error instanceof Error ? error.message : 'Failed to create payment intent' 
+        },
+        { status: 500 }
+      )
     }
   } catch (error) {
-    console.error('Enhanced payment intent creation failed:', error)
-    
+    console.error('Request processing failed:', error)
     return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : 'Payment intent creation failed',
+      { 
         success: false,
+        error: 'Invalid request format' 
       },
-      { status: 500 }
+      { status: 400 }
     )
   }
 }

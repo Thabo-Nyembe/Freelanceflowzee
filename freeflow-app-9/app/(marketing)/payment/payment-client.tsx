@@ -185,8 +185,8 @@ export default function PaymentClient() {
   })
   
   // Enhanced UI state
-  const [activeTab, setActiveTab] = useState<'pricing' | 'payment' | 'client-access'>('pricing')
-  const [selectedPlan, setSelectedPlan] = useState(PRICING_PLANS.pro)
+  const [activeTab, setActiveTab] = useState('pricing')
+  const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -207,6 +207,13 @@ export default function PaymentClient() {
     name: '',
     email: ''
   })
+
+  // Automatically switch to payment tab when plan is selected
+  useEffect(() => {
+    if (selectedPlan && activeTab === 'pricing') {
+      setActiveTab('payment')
+    }
+  }, [selectedPlan])
 
   // Check for existing client session on mount
   useEffect(() => {
@@ -234,17 +241,10 @@ export default function PaymentClient() {
     checkClientSession()
   }, [])
 
-  const handlePlanSelection = (plan: PricingPlan) => {
+  const handlePlanSelect = (plan: PricingPlan) => {
     setSelectedPlan(plan)
-    if (plan.price > 0) {
-      setActiveTab('payment')
-    } else {
-      // Handle free plan signup
-      setSuccess('Free plan activated! Redirecting to dashboard...')
-      setTimeout(() => {
-        window.location.href = '/dashboard?plan=free'
-      }, 2000)
-    }
+    setActiveTab('payment') // Explicitly set payment tab
+    setError('') // Clear any previous errors
   }
 
   const handleClientLogin = async (e: React.FormEvent) => {
@@ -290,6 +290,10 @@ export default function PaymentClient() {
     setSuccess('')
 
     try {
+      if (!selectedPlan) {
+        throw new Error('Please select a plan first')
+      }
+
       // Create payment intent with enhanced API
       const response = await fetch('/api/payments/create-intent-enhanced', {
         method: 'POST',
@@ -305,7 +309,8 @@ export default function PaymentClient() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to create payment intent')
+        const errorData = await response.json().catch(() => ({ error: 'Payment processing failed' }))
+        throw new Error(errorData.error || 'Failed to create payment intent')
       }
 
       const { client_secret, subscription_id } = await response.json()
@@ -339,7 +344,8 @@ export default function PaymentClient() {
       }, 2000)
 
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Payment failed. Please try again.')
+      console.error('Payment processing error:', error)
+      setError(error instanceof Error ? error.message : 'Payment processing failed')
     } finally {
       setIsLoading(false)
     }
@@ -413,7 +419,7 @@ export default function PaymentClient() {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'pricing' | 'payment' | 'client-access')} className="max-w-6xl mx-auto" data-testid="payment-tabs">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-6xl mx-auto" data-testid="payment-tabs">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="pricing" data-testid="pricing-tab">Choose Plan</TabsTrigger>
             <TabsTrigger value="payment" data-testid="payment-tab">Payment</TabsTrigger>
@@ -428,7 +434,7 @@ export default function PaymentClient() {
                 return (
                   <Card 
                     key={plan.id} 
-                    className={`relative ${plan.popular ? 'ring-2 ring-blue-500 shadow-lg' : ''} ${selectedPlan.id === plan.id ? 'bg-blue-50' : ''}`}
+                    className={`relative ${plan.popular ? 'ring-2 ring-blue-500 shadow-lg' : ''} ${selectedPlan?.id === plan.id ? 'bg-blue-50' : ''}`}
                     data-testid={`pricing-card-${plan.id}`}
                   >
                     {plan.popular && (
@@ -461,8 +467,8 @@ export default function PaymentClient() {
                       
                       <Button
                         className="w-full min-h-[44px]"
-                        variant={plan.id === selectedPlan.id ? 'default' : 'outline'}
-                        onClick={() => handlePlanSelection(plan)}
+                        variant={selectedPlan?.id === plan.id ? 'default' : 'outline'}
+                        onClick={() => handlePlanSelect(plan)}
                         data-testid={`select-${plan.id}`}
                       >
                         {plan.cta}
@@ -481,107 +487,108 @@ export default function PaymentClient() {
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <span>Complete Payment</span>
-                    <Badge variant="outline">{selectedPlan.name}</Badge>
+                    {selectedPlan && (
+                      <Badge variant="outline">{selectedPlan.name}</Badge>
+                    )}
                   </CardTitle>
-                  <div className="text-2xl font-bold">
-                    ${selectedPlan.price}/{selectedPlan.billing}
-                  </div>
+                  {selectedPlan && (
+                    <div className="text-2xl font-bold">
+                      ${selectedPlan.price}/{selectedPlan.billing}
+                    </div>
+                  )}
                   <p className="text-gray-600">
                     Secure payment processing with Stripe. Includes escrow payment protection for all transactions.
                   </p>
                 </CardHeader>
                 
                 <CardContent>
-                  {success ? (
-                    <div className="text-center py-8" data-testid="payment-success">
-                      <Check className="h-16 w-16 text-green-500 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold mb-2">Payment Successful!</h3>
-                      <p className="text-gray-600">{success}</p>
+                  {error && (
+                    <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-md" data-testid="card-errors">
+                      {error}
                     </div>
-                  ) : (
-                    <form onSubmit={handlePayment} className="space-y-4" data-testid="payment-form">
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email Address</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={cardData.email}
-                          onChange={(e) => setCardData({ ...cardData, email: e.target.value })}
-                          required
-                          data-testid="email-input"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Full Name</Label>
-                        <Input
-                          id="name"
-                          type="text"
-                          value={cardData.name}
-                          onChange={(e) => setCardData({ ...cardData, name: e.target.value })}
-                          required
-                          data-testid="name-input"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Card Details</Label>
-                        <div className="space-y-2">
-                          <Input
-                            placeholder="Card Number"
-                            value={cardData.number}
-                            onChange={(e) => setCardData({ ...cardData, number: formatCardNumber(e.target.value) })}
-                            maxLength={19}
-                            data-testid="card-number"
-                          />
-                          <div className="grid grid-cols-2 gap-2">
-                            <Input
-                              placeholder="MM/YY"
-                              value={cardData.expiry}
-                              onChange={(e) => setCardData({ ...cardData, expiry: formatExpiry(e.target.value) })}
-                              maxLength={5}
-                              data-testid="card-expiry"
-                            />
-                            <Input
-                              placeholder="CVC"
-                              value={cardData.cvc}
-                              onChange={(e) => setCardData({ ...cardData, cvc: e.target.value.replace(/\D/g, '') })}
-                              maxLength={4}
-                              data-testid="card-cvc"
-                            />
-                          </div>
-                        </div>
-                        <div className="text-xs text-gray-500" data-testid="card-element">
-                          Stripe secure payment processing with Apple Pay & Google Pay support
-                        </div>
-                      </div>
-
-                      <Button 
-                        type="submit" 
-                        className="w-full min-h-[44px]" 
-                        disabled={isLoading}
-                        data-testid="submit-payment"
-                      >
-                        {isLoading ? (
-                          <>
-                            <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-gray-300 border-t-white" />
-                            Processing...
-                          </>
-                        ) : (
-                          <>
-                            <CreditCard className="h-4 w-4 mr-2" />
-                            Pay ${selectedPlan.price}/{selectedPlan.billing}
-                          </>
-                        )}
-                      </Button>
-                    </form>
+                  )}
+                  {success && (
+                    <div className="mb-4 p-4 bg-green-50 text-green-600 rounded-md" data-testid="payment-success">
+                      {success}
+                    </div>
                   )}
                   
-                  {error && (
-                    <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md" data-testid="payment-error">
-                      <p className="text-red-600">{error}</p>
+                  <form onSubmit={handlePayment} className="space-y-4" data-testid="payment-form">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email Address</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={cardData.email}
+                        onChange={(e) => setCardData({ ...cardData, email: e.target.value })}
+                        required
+                        data-testid="email-input"
+                      />
                     </div>
-                  )}
+
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Full Name</Label>
+                      <Input
+                        id="name"
+                        type="text"
+                        value={cardData.name}
+                        onChange={(e) => setCardData({ ...cardData, name: e.target.value })}
+                        required
+                        data-testid="name-input"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Card Details</Label>
+                      <div className="space-y-2">
+                        <Input
+                          placeholder="Card Number"
+                          value={cardData.number}
+                          onChange={(e) => setCardData({ ...cardData, number: formatCardNumber(e.target.value) })}
+                          maxLength={19}
+                          data-testid="card-number"
+                        />
+                        <div className="grid grid-cols-2 gap-2">
+                          <Input
+                            placeholder="MM/YY"
+                            value={cardData.expiry}
+                            onChange={(e) => setCardData({ ...cardData, expiry: formatExpiry(e.target.value) })}
+                            maxLength={5}
+                            data-testid="card-expiry"
+                          />
+                          <Input
+                            placeholder="CVC"
+                            value={cardData.cvc}
+                            onChange={(e) => setCardData({ ...cardData, cvc: e.target.value.replace(/\D/g, '') })}
+                            maxLength={4}
+                            data-testid="card-cvc"
+                          />
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-500" data-testid="card-element">
+                        Stripe secure payment processing with Apple Pay & Google Pay support
+                      </div>
+                    </div>
+
+                    <Button 
+                      type="submit" 
+                      className="w-full min-h-[44px]" 
+                      disabled={isLoading}
+                      data-testid="submit-payment"
+                    >
+                      {isLoading ? (
+                        <>
+                          <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-gray-300 border-t-white" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Pay ${selectedPlan?.price}/{selectedPlan?.billing}
+                        </>
+                      )}
+                    </Button>
+                  </form>
                 </CardContent>
               </Card>
             </div>

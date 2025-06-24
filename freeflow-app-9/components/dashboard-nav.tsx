@@ -102,6 +102,22 @@ const navigationItems: NavigationItem[] = [
     description: 'Main dashboard overview'
   },
   {
+    href: '/dashboard/ai-assistant',
+    title: 'AI Assistant',
+    icon: Sparkles,
+    badge: 'NEW',
+    description: 'Intelligent AI assistance',
+    features: ['Smart suggestions', 'Task automation', 'Workflow optimization']
+  },
+  {
+    href: '/dashboard/ai-create',
+    title: 'AI Create',
+    icon: Cpu,
+    badge: 'A+++',
+    description: 'AI-powered creation tools',
+    features: ['Design assistance', 'Content generation', 'Style analysis']
+  },
+  {
     href: '/dashboard/projects-hub',
     title: 'Projects Hub',
     icon: FolderOpen,
@@ -156,6 +172,14 @@ const navigationItems: NavigationItem[] = [
     badge: 'A+++',
     description: 'Advanced Analytics',
     features: ['Revenue tracking', 'Project metrics', 'Performance insights']
+  },
+  {
+    href: '/dashboard/community',
+    title: 'Community Hub',
+    icon: Globe,
+    badge: 'A+++',
+    description: 'Creator Community',
+    features: ['Social networking', 'Resource sharing', 'Collaboration']
   }
 ]
 

@@ -15,135 +15,135 @@
       "url": "/dashboard",
       "status": "failed",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.290Z"
+      "timestamp": "2025-06-24T23:30:02.233Z"
     },
     "projectsHub": {
       "name": "Projects Hub",
       "url": "/dashboard/projects-hub",
       "status": "failed",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/projects-hub\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/projects-hub\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.397Z"
+      "timestamp": "2025-06-24T23:30:02.275Z"
     },
     "videoStudio": {
       "name": "Video Studio",
       "url": "/dashboard/video-studio",
       "status": "failed",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/video-studio\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/video-studio\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.490Z"
+      "timestamp": "2025-06-24T23:30:02.315Z"
     },
     "canvas": {
       "name": "Canvas",
       "url": "/dashboard/canvas",
       "status": "failed",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/canvas\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/canvas\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.568Z"
+      "timestamp": "2025-06-24T23:30:02.356Z"
     },
     "community": {
       "name": "Community Hub",
       "url": "/dashboard/community",
       "status": "failed",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/community\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/community\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.648Z"
+      "timestamp": "2025-06-24T23:30:02.395Z"
     },
     "aiAssistant": {
       "name": "AI Assistant",
       "url": "/dashboard/ai-assistant",
       "status": "failed",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/ai-assistant\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/ai-assistant\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.724Z"
+      "timestamp": "2025-06-24T23:30:02.436Z"
     },
     "myDay": {
       "name": "My Day",
       "url": "/dashboard/my-day",
       "status": "failed",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/my-day\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/my-day\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.787Z"
+      "timestamp": "2025-06-24T23:30:02.476Z"
     },
     "escrow": {
       "name": "Escrow",
       "url": "/dashboard/escrow",
       "status": "failed",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/escrow\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/escrow\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.841Z"
+      "timestamp": "2025-06-24T23:30:02.515Z"
     },
     "filesHub": {
       "name": "Files Hub",
       "url": "/dashboard/files-hub",
       "status": "failed",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/files-hub\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/files-hub\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.890Z"
+      "timestamp": "2025-06-24T23:30:02.555Z"
     },
     "collaboration": {
       "name": "Collaboration",
       "url": "/dashboard/collaboration",
       "status": "failed",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/collaboration\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/collaboration\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.939Z"
+      "timestamp": "2025-06-24T23:30:02.594Z"
     },
     "notifications": {
       "name": "Notifications",
       "url": "/dashboard/notifications",
       "status": "failed",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/notifications\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/notifications\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.987Z"
+      "timestamp": "2025-06-24T23:30:02.634Z"
     }
   },
   "errors": [
     {
       "component": "Dashboard",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.273Z"
+      "timestamp": "2025-06-24T23:30:02.232Z"
     },
     {
       "component": "Projects Hub",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/projects-hub\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/projects-hub\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.397Z"
+      "timestamp": "2025-06-24T23:30:02.275Z"
     },
     {
       "component": "Video Studio",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/video-studio\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/video-studio\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.490Z"
+      "timestamp": "2025-06-24T23:30:02.315Z"
     },
     {
       "component": "Canvas",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/canvas\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/canvas\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.568Z"
+      "timestamp": "2025-06-24T23:30:02.356Z"
     },
     {
       "component": "Community Hub",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/community\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/community\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.648Z"
+      "timestamp": "2025-06-24T23:30:02.395Z"
     },
     {
       "component": "AI Assistant",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/ai-assistant\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/ai-assistant\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.724Z"
+      "timestamp": "2025-06-24T23:30:02.436Z"
     },
     {
       "component": "My Day",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/my-day\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/my-day\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.787Z"
+      "timestamp": "2025-06-24T23:30:02.476Z"
     },
     {
       "component": "Escrow",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/escrow\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/escrow\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.841Z"
+      "timestamp": "2025-06-24T23:30:02.515Z"
     },
     {
       "component": "Files Hub",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/files-hub\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/files-hub\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.890Z"
+      "timestamp": "2025-06-24T23:30:02.555Z"
     },
     {
       "component": "Collaboration",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/collaboration\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/collaboration\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.939Z"
+      "timestamp": "2025-06-24T23:30:02.594Z"
     },
     {
       "component": "Notifications",
       "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3002/dashboard/notifications\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/dashboard/notifications\", waiting until \"networkidle\"\u001b[22m\n",
-      "timestamp": "2025-06-24T21:05:48.987Z"
+      "timestamp": "2025-06-24T23:30:02.634Z"
     }
   ],
-  "timestamp": "2025-06-24T21:05:49.583Z"
+  "timestamp": "2025-06-24T23:30:02.989Z"
 }
