@@ -292,412 +292,87 @@ export default function ProjectsHubPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              Projects Hub
-            </h1>
-            <p className="text-gray-600 mt-2 text-lg">
-              Manage projects, collaborate with clients, and showcase your work
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <Button 
-              variant="outline" 
-              className="gap-2"
-              data-testid="import-project-btn"
-              onClick={handleImportClick}
-            >
-              <Filter className="h-4 w-4" />
-              Import Project
-            </Button>
-            <Button 
-              variant="outline" 
-              className="gap-2"
-              data-testid="quick-start-btn"
-              onClick={handleQuickStartClick}
-            >
-              <Search className="h-4 w-4" />
-              Quick Start
-            </Button>
-            <Button 
-              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white gap-2"
-              data-testid="create-project-btn"
-              onClick={handleCreateClick}
-            >
-              <Plus className="h-4 w-4" />
-              Create Project
-            </Button>
-          </div>
+    <div className="container mx-auto p-6 space-y-8">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Projects Hub</h1>
+        <div className="flex gap-2">
+          <Button onClick={handleCreateClick}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Project
+          </Button>
         </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-purple-700 flex items-center gap-2">
-                <Target className="h-4 w-4" />
-                Active Projects
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-purple-900">12</div>
-              <p className="text-xs text-purple-600 mt-1">3 due this week</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-blue-700 flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" />
-                Unread Comments
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-blue-900">8</div>
-              <p className="text-xs text-blue-600 mt-1">Across 4 projects</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-yellow-700 flex items-center gap-2">
-                <Eye className="h-4 w-4" />
-                Gallery Views
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-yellow-900">247</div>
-              <p className="text-xs text-yellow-600 mt-1">+12% this week</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-green-700 flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                Completed
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-900">24</div>
-              <p className="text-xs text-green-600 mt-1">This month</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Content Tabs */}
-        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-white shadow-sm">
-            <TabsTrigger value="overview" className="gap-2" data-testid="overview-tab">
-              <Target className="h-4 w-4" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="tracking" className="gap-2" data-testid="tracking-tab">
-              <Clock className="h-4 w-4" />
-              Project Tracking
-            </TabsTrigger>
-            <TabsTrigger value="collaboration" className="gap-2" data-testid="collaboration-tab">
-              <MessageSquare className="h-4 w-4" />
-              Collaboration
-            </TabsTrigger>
-            <TabsTrigger value="galleries" className="gap-2" data-testid="galleries-tab">
-              <Image className="h-4 w-4" />
-              Client Galleries
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6 mt-6">
-            {/* Quick Actions */}
-            <div className="flex gap-3 mb-6">
-              <Button 
-                variant="outline" 
-                className="gap-2"
-                data-testid="view-all-btn"
-                onClick={handleViewAllClick}
-              >
-                <Eye className="h-4 w-4" />
-                View All
-              </Button>
-              <Button 
-                variant="outline" 
-                className="gap-2"
-                data-testid="export-data-btn"
-                onClick={handleExportDataClick}
-              >
-                <Download className="h-4 w-4" />
-                Export Data
-              </Button>
-            </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {mockProjects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Project Tracking Tab */}
-          <TabsContent value="tracking" className="space-y-6 mt-6">
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-semibold flex items-center gap-2">
-                  <Target className="h-6 w-6 text-purple-600" />
-                  Project Tracking
-                </h2>
-                <Link href="/dashboard/project-tracker">
-                  <Button variant="outline" className="gap-2">
-                    View Full Tracker
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-              
-              {/* Quick tracking overview */}
-              <div className="space-y-4">
-                {mockProjects.map((project) => (
-                  <div key={project.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-semibold">
-                        {project.name.charAt(0)}
-                      </div>
-                      <div>
-                        <h3 className="font-medium">{project.name}</h3>
-                        <p className="text-sm text-gray-600">{project.client}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <div className="text-sm font-medium">{project.progress}%</div>
-                        <Progress value={project.progress} className="h-2 w-20" />
-                      </div>
-                      <Badge variant="outline" className={statusConfig[project.status as keyof typeof statusConfig] ? '' : ''}>
-                        {statusConfig[project.status as keyof typeof statusConfig]?.label}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </TabsContent>
-
-          {/* Collaboration Tab */}
-          <TabsContent value="collaboration" className="space-y-6 mt-6">
-            {/* Universal Pinpoint Feedback Integration */}
-            <UniversalPinpointFeedbackSystem 
-              projectId="current-project"
-              currentUser={{
-                id: "user_1",
-                name: "John Designer",
-                avatar: "/avatars/john.jpg",
-                role: "freelancer"
-              }}
-              className="mb-8"
-            />
-
-            {/* Enhanced Media Previews */}
-            <Card className="p-6">
-              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Eye className="h-5 w-5 text-purple-600" />
-                Enhanced Media Preview Samples
-              </h3>
-              <UniversalMediaPreviewsEnhanced />
-            </Card>
-            
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-semibold flex items-center gap-2">
-                  <MessageSquare className="h-6 w-6 text-blue-600" />
-                  Recent Activity
-                </h2>
-                <Link href="/dashboard/collaboration">
-                  <Button variant="outline" className="gap-2">
-                    Open Collaboration Hub
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-              
-              {/* Recent activity */}
-              <div className="space-y-4">
-                <div className="p-4 border-l-4 border-l-blue-500 bg-blue-50 rounded-r-lg">
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-blue-600 text-white text-xs">SJ</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-sm">Sarah Johnson</span>
-                        <span className="text-xs text-gray-500">2 hours ago</span>
-                      </div>
-                      <p className="text-sm text-gray-700">Left feedback on Brand Identity Design with 3 revision requests</p>
-                    </div>
-                    <Button size="sm" variant="outline">View</Button>
-                  </div>
-                </div>
-                
-                <div className="p-4 border-l-4 border-l-yellow-500 bg-yellow-50 rounded-r-lg">
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-yellow-600 text-white text-xs">TC</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-sm">TechCorp Team</span>
-                        <span className="text-xs text-gray-500">5 hours ago</span>
-                      </div>
-                      <p className="text-sm text-gray-700">Approved milestone 3 and released next payment from escrow</p>
-                    </div>
-                    <Button size="sm" variant="outline">View</Button>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </TabsContent>
-
-          {/* Client Galleries Tab */}
-          <TabsContent value="galleries" className="space-y-6 mt-6">
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-semibold flex items-center gap-2">
-                  <Image className="h-6 w-6 text-yellow-600" />
-                  Client Galleries
-                </h2>
-                <Link href="/dashboard/client-zone">
-                  <Button variant="outline" className="gap-2">
-                    Manage All Galleries
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-              
-              {/* Gallery grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockProjects.map((project) => {
-                  const galleryInfo = galleryConfig[project.galleryAccess as keyof typeof galleryConfig]
-                  const GalleryIcon = galleryInfo.icon
-                  
-                  return (
-                    <Card key={project.id} className="hover:shadow-lg transition-all duration-200">
-                      <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-t-lg relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                        <div className="absolute bottom-4 left-4 text-white">
-                          <h3 className="font-medium">{project.name}</h3>
-                          <p className="text-sm opacity-90">{project.client}</p>
-                        </div>
-                        <div className="absolute top-4 right-4">
-                          <Badge variant="secondary" className="bg-white/20 text-white">
-                            <GalleryIcon className="h-3 w-3 mr-1" />
-                            {galleryInfo.label}
-                          </Badge>
-                        </div>
-                      </div>
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="text-sm text-gray-600">
-                            247 views • Last viewed 2h ago
-                          </div>
-                          <div className="flex gap-2">
-                            <Button size="sm" variant="outline">
-                              <Eye className="h-3 w-3" />
-                            </Button>
-                            <Button size="sm" variant="outline">
-                              <Download className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )
-                })}
-              </div>
-            </Card>
-          </TabsContent>
-        </Tabs>
       </div>
 
-      {/* Dialogs */}
-      {createDialogOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-            <h2 className="text-xl font-bold mb-4">Create New Project</h2>
-            <p className="text-gray-600 mb-4">This is a test dialog to verify functionality.</p>
-            <div className="flex gap-2">
-              <button 
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-                onClick={() => setCreateDialogOpen(false)}
-              >
-                Cancel
-              </button>
-              <button 
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                onClick={() => {
-                  console.log('Create project submitted');
-                  setCreateDialogOpen(false);
-                }}
-              >
-                Create
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Tabs defaultValue="overview" className="w-full" onValueChange={setSelectedTab}>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="active">Active Projects</TabsTrigger>
+          <TabsTrigger value="archived">Archived</TabsTrigger>
+          <TabsTrigger value="templates">Templates</TabsTrigger>
+        </TabsList>
 
-      {importDialogOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-            <h2 className="text-xl font-bold mb-4">Import Project</h2>
-            <p className="text-gray-600 mb-4">This is a test dialog to verify functionality.</p>
-            <div className="flex gap-2">
-              <button 
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-                onClick={() => setImportDialogOpen(false)}
-              >
-                Cancel
-              </button>
-              <button 
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                onClick={() => {
-                  console.log('Import project submitted');
-                  setImportDialogOpen(false);
-                }}
-              >
-                Import
-              </button>
-            </div>
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {mockProjects.map((project) => (
+              <ProjectCard key={project.id} project={project} />
+            ))}
           </div>
-        </div>
-      )}
+        </TabsContent>
 
-      {quickStartDialogOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-            <h2 className="text-xl font-bold mb-4">Quick Start</h2>
-            <p className="text-gray-600 mb-4">This is a test dialog to verify functionality.</p>
-            <div className="flex gap-2">
-              <button 
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-                onClick={() => setQuickStartDialogOpen(false)}
-              >
-                Cancel
-              </button>
-              <button 
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                onClick={() => {
-                  console.log('Quick start submitted');
-                  setQuickStartDialogOpen(false);
-                }}
-              >
-                Start
-              </button>
-            </div>
+        <TabsContent value="active" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {mockProjects
+              .filter((project) => project.status === 'in-progress')
+              .map((project) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
           </div>
-        </div>
-      )}
+        </TabsContent>
+
+        <TabsContent value="archived" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {mockProjects
+              .filter((project) => project.status === 'completed')
+              .map((project) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="templates" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Add template cards here */}
+            <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer">
+              <CardHeader>
+                <CardTitle>Start from Template</CardTitle>
+                <CardDescription>Choose from our pre-built project templates</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={handleQuickStartClick} className="w-full">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Use Template
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      <CreateProjectDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onSubmit={handleCreateProject}
+      />
+      <ImportProjectDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onImport={handleImportProject}
+      />
+      <QuickStartDialog
+        open={quickStartDialogOpen}
+        onOpenChange={setQuickStartDialogOpen}
+        onSelect={handleQuickStart}
+      />
     </div>
   )
 } 

@@ -335,7 +335,7 @@ export function InteractiveContactSystem({
   }
 
   return (
-    <div className={`space-y-8 ${className}`}>
+    <div className={`space-y-8 ${className}`} suppressHydrationWarning>
       {/* Contact Methods */}
       {showMethods && (
         <div className="space-y-6">
@@ -463,7 +463,7 @@ export function InteractiveContactSystem({
                 </AlertDescription>
               </Alert>
             ) : (
-              <form onSubmit={handleFormSubmit} className="space-y-6">
+              <form onSubmit={handleFormSubmit} className="space-y-6" suppressHydrationWarning>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -478,6 +478,7 @@ export function InteractiveContactSystem({
                         value: e.target.value 
                       })}
                       placeholder="Your full name"
+                      suppressHydrationWarning
                     />
                   </div>
                   <div>
@@ -494,6 +495,7 @@ export function InteractiveContactSystem({
                         value: e.target.value 
                       })}
                       placeholder="your@email.com"
+                      suppressHydrationWarning
                     />
                   </div>
                 </div>
@@ -511,6 +513,7 @@ export function InteractiveContactSystem({
                         value: e.target.value 
                       })}
                       placeholder="Your company name"
+                      suppressHydrationWarning
                     />
                   </div>
                   <div>
@@ -526,6 +529,7 @@ export function InteractiveContactSystem({
                         value: e.target.value 
                       })}
                       placeholder="+1 (555) 123-4567"
+                      suppressHydrationWarning
                     />
                   </div>
                 </div>
@@ -543,6 +547,7 @@ export function InteractiveContactSystem({
                       value: e.target.value 
                     })}
                     placeholder="How can we help you?"
+                    suppressHydrationWarning
                   />
                 </div>
 
@@ -560,6 +565,7 @@ export function InteractiveContactSystem({
                       value: e.target.value 
                     })}
                     placeholder="Tell us more about your project and how we can help..."
+                    suppressHydrationWarning
                   />
                 </div>
 
@@ -567,6 +573,7 @@ export function InteractiveContactSystem({
                   type="submit"
                   disabled={state.ui.isSubmitting}
                   className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                  suppressHydrationWarning
                 >
                   {state.ui.isSubmitting ? (
                     'Sending...'

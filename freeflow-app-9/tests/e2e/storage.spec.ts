@@ -5,7 +5,7 @@ import fs from 'fs'
 // Test configuration
 const TEST_PROJECT_ID = 'test-project-12345'
 const TEST_TIMEOUT = 30000
-const BASE_URL = 'http://localhost:3000'
+const BASE_URL = 'http://localhost:3001'
 
 // Helper function to create test files
 function createTestFile(filename: string, content: string, mimeType: string): File {

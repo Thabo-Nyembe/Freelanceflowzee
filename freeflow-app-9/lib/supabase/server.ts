@@ -2,7 +2,12 @@
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import type { Database } from '@/types/supabase'
+import { Database } from '@/types/supabase'
+
+// Force dynamic rendering since we're using cookies
+export async function getDynamicConfig() {
+  return 'force-dynamic'
+}
 
 export async function createClient() {
   const cookieStore = await cookies()
@@ -17,16 +22,20 @@ export async function createClient() {
         },
         set(name: string, value: string, options: CookieOptions) {
           try {
-            cookieStore.set(name, value, options)
+            cookieStore.set({ name, value, ...options })
           } catch (error) {
-            // Handle cookie error
+            // The `set` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
           }
         },
         remove(name: string, options: CookieOptions) {
           try {
-            cookieStore.set(name, '', { ...options, maxAge: 0 })
+            cookieStore.delete({ name, ...options })
           } catch (error) {
-            // Handle cookie error
+            // The `delete` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
           }
         }
       }

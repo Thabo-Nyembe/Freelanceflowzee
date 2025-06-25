@@ -18,8 +18,7 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const [authError, setAuthError] = useState<string | null>(null)
-  const supabase = createClient()
-  
+
   const urlError = searchParams?.get('error')
   const urlMessage = searchParams?.get('message')
   const redirectTo = searchParams?.get('redirect') || '/dashboard'
@@ -28,60 +27,64 @@ function LoginForm() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Clear any corrupted session data first
-        try {
-          await supabase.auth.signOut()
-        } catch (signOutError) {
-          console.log('Sign out attempt (clearing session):', signOutError)
+        const supabase = createClient()
+        
+        if (!supabase) {
+          console.error('Failed to initialize Supabase client')
+          setAuthError('Service temporarily unavailable')
+          setIsCheckingAuth(false)
+          return
         }
 
-        const { data: { user }, error: getUserError } = await supabase.auth.getUser()
+        // First try to get session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
-        if (getUserError) {
-          console.log('Auth check error:', getUserError)
-          setAuthError(`Authentication system error: ${getUserError.message}`)
+        if (sessionError) {
+          console.error('Session error:', sessionError)
+          // Clear any corrupted session data
+          await supabase.auth.signOut()
+          localStorage.clear()
+          sessionStorage.clear()
           
-          // If there's a session parsing error, clear everything
-          if (getUserError.message.includes('Failed to parse') || 
-              getUserError.message.includes('Invalid') ||
-              getUserError.message.includes('JWT')) {
-            console.log('Clearing corrupted session...')
-            
-            // Clear all possible storage locations
-            try {
-              localStorage.clear()
-              sessionStorage.clear()
-              
-              // Clear all cookies starting with sb-
-              document.cookie.split(";").forEach(cookie => {
-                const [name] = cookie.split("=")
-                if (name.trim().startsWith('sb-')) {
-                  document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
-                  document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${location.hostname};`
-                }
-              })
-              
-              console.log('✅ Corrupted session cleared')
-              setAuthError('Session cleared due to corruption. Please try logging in again.')
-            } catch (clearError) {
-              console.error('Error clearing session:', clearError)
+          // Clear auth cookies
+          document.cookie.split(";").forEach(cookie => {
+            const [name] = cookie.split("=")
+            if (name.trim().startsWith('sb-')) {
+              document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
             }
-          }
-        } else if (user) {
-          console.log('User authenticated, redirecting to:', redirectTo)
+          })
+          
+          setAuthError('Session error. Please try logging in again.')
+          setIsCheckingAuth(false)
+          return
+        }
+
+        // Then get user data
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        
+        if (userError) {
+          console.error('User data error:', userError)
+          setAuthError('Failed to get user data. Please try logging in again.')
+          setIsCheckingAuth(false)
+          return
+        }
+
+        if (session && user) {
+          // User is authenticated, redirect
           router.push(redirectTo)
           return
         }
+
+        setIsCheckingAuth(false)
       } catch (error) {
         console.error('Auth check failed:', error)
-        setAuthError(`Authentication check failed: ${error}`)
-      } finally {
+        setAuthError('Authentication check failed. Please try again.')
         setIsCheckingAuth(false)
       }
     }
 
     checkAuth()
-  }, [router, redirectTo, supabase.auth])
+  }, [router, redirectTo])
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -124,21 +127,63 @@ function LoginForm() {
     }
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const supabase = createClient()
+      
+      if (!supabase) {
+        setError('Service temporarily unavailable. Please try again later.')
+        setIsPending(false)
+        return
+      }
+
+      // First try to clear any existing session
+      try {
+        await supabase.auth.signOut()
+      } catch (signOutError) {
+        console.error('Error clearing existing session:', signOutError)
+      }
+
+      // Clear any existing cookies
+      document.cookie.split(";").forEach(cookie => {
+        const [name] = cookie.split("=")
+        if (name.trim().startsWith('sb-')) {
+          document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
+        }
+      })
+
+      // Attempt to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      if (error) {
-        setError('Invalid login credentials')
+      if (signInError) {
+        console.error('Sign in error:', signInError)
+        if (signInError.message.includes('Invalid login credentials')) {
+          setError('Invalid email or password')
+        } else if (signInError.message.includes('Email not confirmed')) {
+          setError('Please verify your email address before logging in')
+        } else {
+          setError('Failed to sign in. Please try again.')
+        }
+        setIsPending(false)
+        return
+      }
+
+      // Verify session after sign in
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      
+      if (sessionError || !session) {
+        console.error('Session verification error:', sessionError)
+        setError('Failed to establish session. Please try again.')
+        setIsPending(false)
         return
       }
 
       router.push(redirectTo)
       router.refresh()
     } catch (error) {
-      setError('An unexpected error occurred')
-    } finally {
+      console.error('Unexpected error:', error)
+      setError('An unexpected error occurred. Please try again.')
       setIsPending(false)
     }
   }

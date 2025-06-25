@@ -280,21 +280,17 @@ export interface AILayoutOptimization {
 export interface CanvasState {
   objects: { [key: string]: CanvasObject }
   selectedObjects: string[]
-  activeTool: string
+  activeTool: string | null
   zoom: number
-  panX: number
-  panY: number
-  isCollaborating: boolean
-  showGrid: boolean
-  snapToGrid: boolean
-  gridSize: number
-  undoStack: CanvasState[]
-  redoStack: CanvasState[]
-  comments: UPFComment[]
-  showComments: boolean
-  isAddingComment: boolean
-  selectedCommentId: string | null
+  pan: { x: number; y: number }
+  history: CanvasObject[][]
+  undoStack: CanvasObject[][]
+  redoStack: CanvasObject[][]
+  collaborators: string[]
   aiAnalysisEnabled: boolean
+  selectedTemplate: Template | null
+  templateAnalysis: TemplateAnalysis | null
+  cursors: CursorPosition[]
 }
 
 export interface Viewport {
@@ -302,4 +298,31 @@ export interface Viewport {
   top: number
   right: number
   bottom: number
+}
+
+export interface CursorPosition {
+  userId: string
+  x: number
+  y: number
+  timestamp: number
+}
+
+export interface Template {
+  id: string
+  name: string
+  metadata?: {
+    license?: string
+    tags?: string[]
+    category?: string
+  }
+  aiStyle?: {
+    brandConsistency?: {
+      score?: number
+    }
+  }
+}
+
+export interface TemplateAnalysis {
+  score: number
+  suggestions: string[]
 }

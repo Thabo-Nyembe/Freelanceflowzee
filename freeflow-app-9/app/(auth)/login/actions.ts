@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
@@ -38,9 +38,8 @@ export async function login(formData: FormData) {
     return { error: 'Too many login attempts. Please try again later.' }
   }
 
-  const supabase = createServerComponentClient({ cookies })
-
   try {
+    const supabase = await createClient()
     const { data, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -77,34 +76,42 @@ export async function signup(formData: FormData) {
     return { error: 'Passwords do not match' }
   }
 
-  const supabase = createServerComponentClient({ cookies })
+  try {
+    const supabase = await createClient()
+    const { error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      },
+    })
 
-  const { error: signUpError } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
-    },
-  })
+    if (signUpError) {
+      return { error: signUpError.message }
+    }
 
-  if (signUpError) {
-    return { error: signUpError.message }
+    return { success: true }
+  } catch (error: any) {
+    console.error('Signup error:', error)
+    return { error: 'An unexpected error occurred. Please try again.' }
   }
-
-  return { success: true }
 }
 
 export async function resendVerification(email: string) {
-  const supabase = createServerComponentClient({ cookies })
+  try {
+    const supabase = await createClient()
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+    })
 
-  const { error } = await supabase.auth.resend({
-    type: 'signup',
-    email,
-  })
+    if (error) {
+      return { error: error.message }
+    }
 
-  if (error) {
-    return { error: error.message }
+    return { success: true }
+  } catch (error: any) {
+    console.error('Resend verification error:', error)
+    return { error: 'An unexpected error occurred. Please try again.' }
   }
-
-  return { success: true }
 } 

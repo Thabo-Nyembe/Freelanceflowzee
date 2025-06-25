@@ -2,7 +2,7 @@ const https = require('https');
 const http = require('http');
 
 // Configuration
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://localhost:3001';
 const TEST_ENDPOINTS = [
   // Public Routes (should return 200)
   { path: '/', name: 'Landing Page', expectedStatus: 200 },

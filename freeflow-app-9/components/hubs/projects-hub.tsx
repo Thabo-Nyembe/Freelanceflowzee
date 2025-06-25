@@ -114,6 +114,20 @@ export function ProjectsHub({ projects: initialProjects, userId }: ProjectsHubPr
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      // Validate required fields
+      if (!projectData.title?.trim()) {
+        throw new Error('Title is required')
+      }
+      if (!projectData.description?.trim()) {
+        throw new Error('Description is required')
+      }
+      if (projectData.client_email && !isValidEmail(projectData.client_email)) {
+        throw new Error('Invalid client email format')
+      }
+      if (projectData.budget && isNaN(Number(projectData.budget))) {
+        throw new Error('Budget must be a valid number')
+      }
+
       const { data, error } = await supabase
         .from('projects')
         .insert([
@@ -121,8 +135,9 @@ export function ProjectsHub({ projects: initialProjects, userId }: ProjectsHubPr
             ...projectData,
             user_id: user.id,
             created_at: new Date().toISOString(),
-            status: 'active',
-            progress: 0
+            status: projectData.status || 'active',
+            progress: 0,
+            budget: projectData.budget ? Number(projectData.budget) : 0
           }
         ])
         .select()
@@ -133,10 +148,17 @@ export function ProjectsHub({ projects: initialProjects, userId }: ProjectsHubPr
       setIsCreateDialogOpen(false)
     } catch (error) {
       console.error('Error creating project:', error)
-      // TODO: Show error toast
+      // Show error toast or alert
+      alert(error instanceof Error ? error.message : 'Failed to create project')
     } finally {
       setLoading(false)
     }
+  }
+
+  // Helper function to validate email format
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
   }
 
   // Handle project import
@@ -529,248 +551,250 @@ export function ProjectsHub({ projects: initialProjects, userId }: ProjectsHubPr
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2 text-2xl">
-              <FileText className="h-6 w-6 text-primary" />
-              Projects Hub
-            </CardTitle>
-            <CardDescription>
-              Manage all your freelance projects in one place
-            </CardDescription>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setIsImportDialogOpen(true)}
-              data-testid="import-project-btn"
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              Import Project
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setIsQuickStartDialogOpen(true)}
-              data-testid="quick-start-btn"
-            >
-              <Rocket className="h-4 w-4 mr-2" />
-              Quick Start
-            </Button>
-            <Button
-              onClick={() => setIsCreateDialogOpen(true)}
-              data-testid="create-project-btn"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create Project
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="active">Active</TabsTrigger>
-            <TabsTrigger value="completed">Completed</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          </TabsList>
-
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            {/* Project Statistics */}
-            <div className="grid gap-4 md:grid-cols-4">
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Total Projects</p>
-                      <p className="text-2xl font-bold">{projectStats.total}</p>
-                    </div>
-                    <FileText className="h-8 w-8 text-primary/60" />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Active</p>
-                      <p className="text-2xl font-bold text-green-600">{projectStats.active}</p>
-                    </div>
-                    <PlayCircle className="h-8 w-8 text-green-500/60" />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Completed</p>
-                      <p className="text-2xl font-bold text-blue-600">{projectStats.completed}</p>
-                    </div>
-                    <CheckCircle className="h-8 w-8 text-blue-500/60" />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Total Budget</p>
-                      <p className="text-2xl font-bold">{formatCurrency(projectStats.totalBudget)}</p>
-                    </div>
-                    <DollarSign className="h-8 w-8 text-yellow-500/60" />
-                  </div>
-                </CardContent>
-              </Card>
+    <div data-testid="projects-hub">
+      <Card className="w-full">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-2xl">
+                <FileText className="h-6 w-6 text-primary" />
+                Projects Hub
+              </CardTitle>
+              <CardDescription>
+                Manage all your freelance projects in one place
+              </CardDescription>
             </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsImportDialogOpen(true)}
+                data-testid="import-project-btn"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Import Project
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setIsQuickStartDialogOpen(true)}
+                data-testid="quick-start-btn"
+              >
+                <Rocket className="h-4 w-4 mr-2" />
+                Quick Start
+              </Button>
+              <Button
+                onClick={() => setIsCreateDialogOpen(true)}
+                data-testid="create-project-btn"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create Project
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="overview" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="active">Active</TabsTrigger>
+              <TabsTrigger value="completed">Completed</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            </TabsList>
 
-            {/* Search and Filters */}
-            <div className="flex flex-wrap gap-4 items-center">
-              <div className="flex-1 min-w-64">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input
-                    placeholder="Search projects..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
+            {/* Overview Tab */}
+            <TabsContent value="overview" className="space-y-6">
+              {/* Project Statistics */}
+              <div className="grid gap-4 md:grid-cols-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Total Projects</p>
+                        <p className="text-2xl font-bold">{projectStats.total}</p>
+                      </div>
+                      <FileText className="h-8 w-8 text-primary/60" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Active</p>
+                        <p className="text-2xl font-bold text-green-600">{projectStats.active}</p>
+                      </div>
+                      <PlayCircle className="h-8 w-8 text-green-500/60" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Completed</p>
+                        <p className="text-2xl font-bold text-blue-600">{projectStats.completed}</p>
+                      </div>
+                      <CheckCircle className="h-8 w-8 text-blue-500/60" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Total Budget</p>
+                        <p className="text-2xl font-bold">{formatCurrency(projectStats.totalBudget)}</p>
+                      </div>
+                      <DollarSign className="h-8 w-8 text-yellow-500/60" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Search and Filters */}
+              <div className="flex flex-wrap gap-4 items-center">
+                <div className="flex-1 min-w-64">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Input
+                      placeholder="Search projects..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-3 py-2 border rounded-md bg-background"
+                >
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="completed">Completed</option>
+                  <option value="paused">Paused</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+                <select
+                  value={priorityFilter}
+                  onChange={(e) => setPriorityFilter(e.target.value)}
+                  className="px-3 py-2 border rounded-md bg-background"
+                >
+                  <option value="all">All Priority</option>
+                  <option value="urgent">Urgent</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+                <div className="flex border rounded-md">
+                  <Button
+                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('grid')}
+                  >
+                    Grid
+                  </Button>
+                  <Button
+                    variant={viewMode === 'list' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('list')}
+                  >
+                    List
+                  </Button>
                 </div>
               </div>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-2 border rounded-md bg-background"
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="completed">Completed</option>
-                <option value="paused">Paused</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-              <select
-                value={priorityFilter}
-                onChange={(e) => setPriorityFilter(e.target.value)}
-                className="px-3 py-2 border rounded-md bg-background"
-              >
-                <option value="all">All Priority</option>
-                <option value="urgent">Urgent</option>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
-              </select>
-              <div className="flex border rounded-md">
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                >
-                  Grid
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                >
-                  List
-                </Button>
-              </div>
-            </div>
 
-            {/* Projects Grid */}
-            {filteredProjects.length > 0 ? (
-              <div className={`grid gap-6 ${viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-                {filteredProjects.map((project) => (
+              {/* Projects Grid */}
+              {filteredProjects.length > 0 ? (
+                <div className={`grid gap-6 ${viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+                  {filteredProjects.map((project) => (
+                    <ProjectCard key={project.id} project={project} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="font-medium text-lg mb-2">No projects found</h3>
+                  <p className="text-muted-foreground mb-4">
+                    {projects.length === 0 
+                      ? "Get started by creating your first project." 
+                      : "Try adjusting your search or filters."}
+                  </p>
+                  <Button onClick={() => setIsCreateDialogOpen(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Project
+                  </Button>
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Active Tab */}
+            <TabsContent value="active">
+              <div className="space-y-4">
+                {projects.filter(p => p.status === 'active').map((project) => (
                   <ProjectCard key={project.id} project={project} />
                 ))}
               </div>
-            ) : (
-              <div className="text-center py-12">
-                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-medium text-lg mb-2">No projects found</h3>
-                <p className="text-muted-foreground mb-4">
-                  {projects.length === 0 
-                    ? "Get started by creating your first project." 
-                    : "Try adjusting your search or filters."}
-                </p>
-                <Button onClick={() => setIsCreateDialogOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Project
-                </Button>
+            </TabsContent>
+
+            {/* Completed Tab */}
+            <TabsContent value="completed">
+              <div className="space-y-4">
+                {projects.filter(p => p.status === 'completed').map((project) => (
+                  <ProjectCard key={project.id} project={project} />
+                ))}
               </div>
-            )}
-          </TabsContent>
+            </TabsContent>
 
-          {/* Active Tab */}
-          <TabsContent value="active">
-            <div className="space-y-4">
-              {projects.filter(p => p.status === 'active').map((project) => (
-                <ProjectCard key={project.id} project={project} />
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Completed Tab */}
-          <TabsContent value="completed">
-            <div className="space-y-4">
-              {projects.filter(p => p.status === 'completed').map((project) => (
-                <ProjectCard key={project.id} project={project} />
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Analytics Tab */}
-          <TabsContent value="analytics">
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Project Performance</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span>Average Completion Rate</span>
-                      <span className="font-semibold">85%</span>
+            {/* Analytics Tab */}
+            <TabsContent value="analytics">
+              <div className="grid gap-6 md:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Project Performance</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span>Average Completion Rate</span>
+                        <span className="font-semibold">85%</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span>On-time Delivery</span>
+                        <span className="font-semibold">92%</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span>Client Satisfaction</span>
+                        <span className="font-semibold">4.8/5</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span>On-time Delivery</span>
-                      <span className="font-semibold">92%</span>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Financial Overview</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span>Total Budget</span>
+                        <span className="font-semibold">{formatCurrency(projectStats.totalBudget)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span>Total Spent</span>
+                        <span className="font-semibold">{formatCurrency(projectStats.totalSpent)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span>Remaining Budget</span>
+                        <span className="font-semibold">{formatCurrency(projectStats.totalBudget - projectStats.totalSpent)}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span>Client Satisfaction</span>
-                      <span className="font-semibold">4.8/5</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Financial Overview</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span>Total Budget</span>
-                      <span className="font-semibold">{formatCurrency(projectStats.totalBudget)}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Total Spent</span>
-                      <span className="font-semibold">{formatCurrency(projectStats.totalSpent)}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Remaining Budget</span>
-                      <span className="font-semibold">{formatCurrency(projectStats.totalBudget - projectStats.totalSpent)}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+    </div>
   )
 } 

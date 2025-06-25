@@ -1,6 +1,6 @@
 import React from 'react'
 import { isTestMode } from '@/lib/utils/test-mode'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import FeedbackWrapper from '@/components/feedback/feedback-wrapper'
@@ -20,10 +20,8 @@ export default async function FeedbackPage({ searchParams }: FeedbackPageProps) 
   const testMode = await isTestMode()
   
   if (!testMode) {
-    // Create Supabase client for authentication check
-    const supabase = createServerComponentClient({ cookies })
-    
     try {
+      const supabase = await createClient()
       const { data: { session }, error } = await supabase.auth.getSession()
       
       if (error || !session) {

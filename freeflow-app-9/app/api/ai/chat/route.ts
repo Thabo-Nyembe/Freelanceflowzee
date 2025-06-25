@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import OpenAI from 'openai'
 import { aiConfig } from '@/app/config/ai'
@@ -165,9 +165,9 @@ What would you like to focus on first?`,
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = await createClient()
     const { data: { session } } = await supabase.auth.getSession()
 
     if (!session) {
@@ -200,17 +200,19 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
-  return NextResponse.json({
-    status: 'AI Chat API is running',
-    endpoints: {
-      POST: '/api/ai/chat - Generate AI responses',
-      capabilities: [
-        'Revenue optimization advice',
-        'Project management suggestions', 
-        'Client relationship tips',
-        'Productivity improvements',
-        'Business automation ideas'
-      ]
+  try {
+    const supabase = await createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+
+    if (!session) {
+      return new NextResponse('Unauthorized', { status: 401 })
     }
-  })
+
+    return NextResponse.json({
+      message: 'AI chat service is ready',
+    })
+  } catch (error) {
+    console.error('Chat service check error:', error)
+    return new NextResponse('Internal Server Error', { status: 500 })
+  }
 } 

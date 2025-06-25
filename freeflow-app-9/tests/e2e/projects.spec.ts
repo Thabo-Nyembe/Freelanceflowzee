@@ -4,6 +4,7 @@
 // Comprehensive coverage: 55 tests across 5 browsers = 275 total tests
 
 import { test, expect, Page } from '@playwright/test';
+import { test as fixtureTest } from '../fixtures/test-fixtures';
 
 // Configuration for Context7 enhanced testing with test mode headers
 test.use({

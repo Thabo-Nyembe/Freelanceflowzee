@@ -390,7 +390,7 @@ export default function PaymentClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="container mx-auto px-4 py-12" data-testid="payment-container">
+      <div className="container mx-auto px-4 py-12" data-testid="payment-container" suppressHydrationWarning>
         
         {/* Header */}
         <div className="text-center mb-12">
@@ -419,15 +419,15 @@ export default function PaymentClient() {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-6xl mx-auto" data-testid="payment-tabs">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-6xl mx-auto" data-testid="payment-tabs" suppressHydrationWarning>
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="pricing" data-testid="pricing-tab">Choose Plan</TabsTrigger>
-            <TabsTrigger value="payment" data-testid="payment-tab">Payment</TabsTrigger>
-            <TabsTrigger value="client-access" data-testid="client-access-tab">Client Access</TabsTrigger>
+            <TabsTrigger value="pricing" data-testid="pricing-tab" suppressHydrationWarning>Choose Plan</TabsTrigger>
+            <TabsTrigger value="payment" data-testid="payment-tab" suppressHydrationWarning>Payment</TabsTrigger>
+            <TabsTrigger value="client-access" data-testid="client-access-tab" suppressHydrationWarning>Client Access</TabsTrigger>
           </TabsList>
 
           {/* Pricing Tab */}
-          <TabsContent value="pricing" className="space-y-8">
+          <TabsContent value="pricing" className="space-y-8" suppressHydrationWarning>
             <div className="grid md:grid-cols-3 gap-8">
               {Object.values(PRICING_PLANS).map((plan) => {
                 const IconComponent = plan.icon
@@ -436,9 +436,10 @@ export default function PaymentClient() {
                     key={plan.id} 
                     className={`relative ${plan.popular ? 'ring-2 ring-blue-500 shadow-lg' : ''} ${selectedPlan?.id === plan.id ? 'bg-blue-50' : ''}`}
                     data-testid={`pricing-card-${plan.id}`}
+                    suppressHydrationWarning
                   >
                     {plan.popular && (
-                      <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-500">
+                      <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-500" suppressHydrationWarning>
                         Most Popular
                       </Badge>
                     )}
@@ -470,6 +471,7 @@ export default function PaymentClient() {
                         variant={selectedPlan?.id === plan.id ? 'default' : 'outline'}
                         onClick={() => handlePlanSelect(plan)}
                         data-testid={`select-${plan.id}`}
+                        suppressHydrationWarning
                       >
                         {plan.cta}
                       </Button>
@@ -481,7 +483,7 @@ export default function PaymentClient() {
           </TabsContent>
 
           {/* Payment Tab */}
-          <TabsContent value="payment">
+          <TabsContent value="payment" suppressHydrationWarning>
             <div className="max-w-2xl mx-auto">
               <Card data-testid="payment-form-container">
                 <CardHeader>
@@ -513,7 +515,7 @@ export default function PaymentClient() {
                     </div>
                   )}
                   
-                  <form onSubmit={handlePayment} className="space-y-4" data-testid="payment-form">
+                  <form onSubmit={handlePayment} className="space-y-4" data-testid="payment-form" suppressHydrationWarning>
                     <div className="space-y-2">
                       <Label htmlFor="email">Email Address</Label>
                       <Input
@@ -523,6 +525,7 @@ export default function PaymentClient() {
                         onChange={(e) => setCardData({ ...cardData, email: e.target.value })}
                         required
                         data-testid="email-input"
+                        suppressHydrationWarning
                       />
                     </div>
 
@@ -535,6 +538,7 @@ export default function PaymentClient() {
                         onChange={(e) => setCardData({ ...cardData, name: e.target.value })}
                         required
                         data-testid="name-input"
+                        suppressHydrationWarning
                       />
                     </div>
 
@@ -547,6 +551,7 @@ export default function PaymentClient() {
                           onChange={(e) => setCardData({ ...cardData, number: formatCardNumber(e.target.value) })}
                           maxLength={19}
                           data-testid="card-number"
+                          suppressHydrationWarning
                         />
                         <div className="grid grid-cols-2 gap-2">
                           <Input
@@ -555,6 +560,7 @@ export default function PaymentClient() {
                             onChange={(e) => setCardData({ ...cardData, expiry: formatExpiry(e.target.value) })}
                             maxLength={5}
                             data-testid="card-expiry"
+                            suppressHydrationWarning
                           />
                           <Input
                             placeholder="CVC"
@@ -562,6 +568,7 @@ export default function PaymentClient() {
                             onChange={(e) => setCardData({ ...cardData, cvc: e.target.value.replace(/\D/g, '') })}
                             maxLength={4}
                             data-testid="card-cvc"
+                            suppressHydrationWarning
                           />
                         </div>
                       </div>
@@ -575,6 +582,7 @@ export default function PaymentClient() {
                       className="w-full min-h-[44px]" 
                       disabled={isLoading}
                       data-testid="submit-payment"
+                      suppressHydrationWarning
                     >
                       {isLoading ? (
                         <>
@@ -616,6 +624,7 @@ export default function PaymentClient() {
                         value={loginData.email}
                         onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                         data-testid="client-email-input"
+                        suppressHydrationWarning
                       />
                     </div>
                     
@@ -628,6 +637,7 @@ export default function PaymentClient() {
                         value={loginData.accessCode}
                         onChange={(e) => setLoginData({ ...loginData, accessCode: e.target.value })}
                         data-testid="client-access-code"
+                        suppressHydrationWarning
                       />
                     </div>
                     
@@ -636,6 +646,7 @@ export default function PaymentClient() {
                       className="w-full min-h-[44px]" 
                       disabled={isLoading}
                       data-testid="client-login-submit"
+                      suppressHydrationWarning
                     >
                       <Key className="h-4 w-4 mr-2" />
                       Access Portal

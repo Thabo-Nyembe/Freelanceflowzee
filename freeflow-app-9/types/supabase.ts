@@ -88,6 +88,195 @@ export interface Database {
           progress?: number
         }
       }
+      posts: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          content: string
+          category: string
+          media_urls: string[]
+          likes_count: number
+          comments_count: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          content: string
+          category: string
+          media_urls?: string[]
+          likes_count?: number
+          comments_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          content?: string
+          category?: string
+          media_urls?: string[]
+          likes_count?: number
+          comments_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      comments: {
+        Row: {
+          id: string
+          post_id: string
+          user_id: string
+          content: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          user_id: string
+          content: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          user_id?: string
+          content?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      likes: {
+        Row: {
+          id: string
+          post_id: string
+          user_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          user_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          user_id?: string
+          created_at?: string
+        }
+      }
+      ai_analysis: {
+        Row: {
+          id: string
+          user_id: string
+          file_type: string
+          status: string
+          result: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          file_type: string
+          status: string
+          result: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          file_type?: string
+          status?: string
+          result?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      ai_generations: {
+        Row: {
+          id: string
+          user_id: string
+          type: string
+          prompt: string
+          settings: {
+            creativity: number
+            quality: string
+            model: string
+          }
+          status: string
+          result: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: string
+          prompt: string
+          settings: {
+            creativity: number
+            quality: string
+            model: string
+          }
+          status: string
+          result: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: string
+          prompt?: string
+          settings?: {
+            creativity: number
+            quality: string
+            model: string
+          }
+          status?: string
+          result?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      collaboration_sessions: {
+        Row: {
+          id: string
+          project_id: string
+          session_type: string
+          participants: string[]
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          session_type: string
+          participants: string[]
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          session_type?: string
+          participants?: string[]
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

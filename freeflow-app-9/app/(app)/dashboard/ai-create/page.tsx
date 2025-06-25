@@ -10,9 +10,49 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
+import { Wand2, Camera, Video, PenTool, Music2, Code2, FileText, Library, Settings2 } from 'lucide-react'
+
+const CREATIVE_FIELDS = [
+  {
+    id: 'photography',
+    name: 'Photography',
+    icon: Camera,
+    description: 'Professional photo editing and enhancement'
+  },
+  {
+    id: 'videography',
+    name: 'Videography',
+    icon: Video,
+    description: 'Video production and post-processing'
+  },
+  {
+    id: 'graphic-design',
+    name: 'Graphic Design',
+    icon: PenTool,
+    description: 'Visual design and branding assets'
+  },
+  {
+    id: 'music-production',
+    name: 'Music Production',
+    icon: Music2,
+    description: 'Audio creation and sound design'
+  },
+  {
+    id: 'web-development',
+    name: 'Web Development',
+    icon: Code2,
+    description: 'Web components and code generation'
+  },
+  {
+    id: 'content-writing',
+    name: 'Content Writing',
+    icon: FileText,
+    description: 'Professional content and copywriting'
+  }
+]
 
 export default function AICreatePage() {
-  const [generationResult, setGenerationResult] = useState('')
+  const [selectedField, setSelectedField] = useState('')
   const [libraryItems, setLibraryItems] = useState([
     { id: 1, type: 'Image', title: 'Brand Logo Variation', timestamp: '1h ago' },
     { id: 2, type: 'Text', title: 'Product Description', timestamp: '3h ago' },
@@ -24,116 +64,88 @@ export default function AICreatePage() {
     realTimePreview: false
   })
 
-  const handleGenerate = async () => {
-    console.log('Generating AI content...')
-    
-    // Show loading state
-    setGenerationResult('🤖 AI is generating your content... This may take a few moments.')
-    
-    // Simulate AI processing time
-    setTimeout(() => {
-      const results = [
-        'Generated a stunning brand logo with modern typography and gradient effects. The design incorporates your brand colors and maintains scalability across all platforms.',
-        'Created professional marketing copy with compelling headlines, persuasive body text, and clear call-to-action elements optimized for conversion.',
-        'Designed a social media template series with consistent branding, engaging visuals, and platform-optimized dimensions for Instagram, Facebook, and Twitter.',
-        'Generated product descriptions with SEO-friendly keywords, benefit-focused language, and emotional triggers to drive sales.',
-        'Created website banner designs with responsive layouts, compelling messaging, and conversion-optimized placement strategies.'
-      ]
-      
-      const randomResult = results[Math.floor(Math.random() * results.length)]
-      setGenerationResult(`✅ ${randomResult}`)
-      
-      // Add to library
-      const newItem = {
-        id: Date.now(),
-        type: ['Image', 'Text', 'Design', 'Copy', 'Banner'][Math.floor(Math.random() * 5)],
-        title: 'AI Generated Content #' + Date.now(),
-        timestamp: 'Just now'
-      }
-      setLibraryItems(prev => [newItem, ...prev])
-      
-      // Show success notification
-      setTimeout(() => {
-        alert('🎉 AI content generation completed successfully!\n\n• Content added to your library\n• Ready for download and use\n• Professional quality guaranteed\n\nCheck the Library tab to view all generated content.')
-      }, 500)
-    }, 2000)
-  }
-
-  const handleSettingChange = (setting: keyof typeof settings) => {
-    setSettings(prev => ({ ...prev, [setting]: !prev[setting] }))
-  }
-
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">AI Create</h1>
-          <p className="text-gray-600">Generate professional content with AI</p>
+    <div className="w-full max-w-7xl mx-auto p-6 space-y-6">
+      <div className="text-center space-y-4">
+        <div className="flex items-center justify-center gap-3">
+          <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full">
+            <Wand2 className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            AI Create
+          </h1>
         </div>
-        <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200">
-          A+++ Enterprise Ready
-        </Badge>
+        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          Generate professional assets tailored to your creative field. From LUTs and presets to templates and components - powered by advanced AI.
+        </p>
       </div>
 
-      <Tabs defaultValue="create" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 lg:w-[600px]">
-          <TabsTrigger value="create">Create</TabsTrigger>
-          <TabsTrigger value="library">Library</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+      <Tabs defaultValue="generate" className="space-y-8">
+        <TabsList className="grid w-full max-w-[600px] grid-cols-3 mx-auto">
+          <TabsTrigger value="generate" className="flex items-center gap-2">
+            <Wand2 className="w-4 h-4" />
+            Generate Assets
+          </TabsTrigger>
+          <TabsTrigger value="library" className="flex items-center gap-2">
+            <Library className="w-4 h-4" />
+            Asset Library
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="flex items-center gap-2">
+            <Settings2 className="w-4 h-4" />
+            Advanced Settings
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="create" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Content Generation</CardTitle>
-              <CardDescription>Create professional content with AI assistance</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid w-full gap-4">
-                <Input 
-                  placeholder="Enter content type (e.g., logo, banner, description)" 
-                  data-testid="content-type-input"
-                />
-                <Textarea 
-                  placeholder="Describe what you want to create..." 
-                  className="min-h-[100px]"
-                  data-testid="content-description-input"
-                />
-                <Button onClick={handleGenerate} data-testid="generate-btn">
-                  Generate Content
-                </Button>
-              </div>
-              {generationResult && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-lg" data-testid="generation-result">
-                  <h3 className="font-medium mb-2">Generation Results</h3>
-                  <p className="text-gray-600">{generationResult}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+        <TabsContent value="generate" className="space-y-6">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-semibold mb-2">Select Your Creative Field</h2>
+            <p className="text-gray-600">Choose your area of expertise to get field-specific AI assistance</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {CREATIVE_FIELDS.map((field) => {
+              const Icon = field.icon
+              return (
+                <Card 
+                  key={field.id}
+                  className={`cursor-pointer transition-all hover:shadow-lg ${
+                    selectedField === field.id ? 'border-purple-500 shadow-purple-100' : ''
+                  }`}
+                  onClick={() => setSelectedField(field.id)}
+                >
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <Icon className="w-6 h-6 text-purple-600" />
+                      </div>
+                      <CardTitle>{field.name}</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">{field.description}</p>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
         </TabsContent>
 
-        <TabsContent value="library" className="space-y-4">
+        <TabsContent value="library" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Generated Content Library</CardTitle>
-              <CardDescription>Access your AI-generated content</CardDescription>
+              <CardTitle>Asset Library</CardTitle>
+              <CardDescription>Browse and manage your generated assets</CardDescription>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[400px] pr-4">
-                <div className="space-y-4" data-testid="library-list">
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-4">
                   {libraryItems.map((item) => (
-                    <div 
-                      key={item.id}
-                      className="p-4 border rounded-lg bg-white"
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-100">
-                          {item.type}
-                        </Badge>
-                        <span className="text-sm text-gray-500">{item.timestamp}</span>
+                    <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h3 className="font-medium">{item.title}</h3>
+                        <p className="text-sm text-gray-500">{item.type} • {item.timestamp}</p>
                       </div>
-                      <p className="text-gray-700">{item.title}</p>
+                      <Button variant="outline" size="sm">Download</Button>
                     </div>
                   ))}
                 </div>
@@ -142,44 +154,42 @@ export default function AICreatePage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="settings" className="space-y-4">
+        <TabsContent value="settings" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Generation Settings</CardTitle>
-              <CardDescription>Customize your AI generation preferences</CardDescription>
+              <CardTitle>Advanced Settings</CardTitle>
+              <CardDescription>Configure your AI generation preferences</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-6" data-testid="settings-list">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Enhanced Quality</Label>
-                    <p className="text-sm text-gray-500">Generate higher quality content</p>
-                  </div>
-                  <Switch
-                    checked={settings.enhancedQuality}
-                    onCheckedChange={() => handleSettingChange('enhancedQuality')}
-                  />
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Enhanced Quality</Label>
+                  <p className="text-sm text-gray-500">Generate higher quality assets (may take longer)</p>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Auto Save</Label>
-                    <p className="text-sm text-gray-500">Automatically save generated content</p>
-                  </div>
-                  <Switch
-                    checked={settings.autoSave}
-                    onCheckedChange={() => handleSettingChange('autoSave')}
-                  />
+                <Switch
+                  checked={settings.enhancedQuality}
+                  onCheckedChange={(checked) => setSettings({ ...settings, enhancedQuality: checked })}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Auto Save</Label>
+                  <p className="text-sm text-gray-500">Automatically save generated assets to library</p>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Real-time Preview</Label>
-                    <p className="text-sm text-gray-500">Show preview while generating</p>
-                  </div>
-                  <Switch
-                    checked={settings.realTimePreview}
-                    onCheckedChange={() => handleSettingChange('realTimePreview')}
-                  />
+                <Switch
+                  checked={settings.autoSave}
+                  onCheckedChange={(checked) => setSettings({ ...settings, autoSave: checked })}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Real-time Preview</Label>
+                  <p className="text-sm text-gray-500">See generation results in real-time (Beta)</p>
                 </div>
+                <Switch
+                  checked={settings.realTimePreview}
+                  onCheckedChange={(checked) => setSettings({ ...settings, realTimePreview: checked })}
+                />
               </div>
             </CardContent>
           </Card>
@@ -187,4 +197,4 @@ export default function AICreatePage() {
       </Tabs>
     </div>
   )
-} 
+}

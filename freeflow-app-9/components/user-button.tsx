@@ -1,9 +1,11 @@
 'use client'
 
 import { Fragment } from 'react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import { Menu, Transition } from '@headlessui/react'
 import { useRouter } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -11,7 +13,7 @@ function classNames(...classes: string[]) {
 
 export function UserButton(props: React.HTMLAttributes<HTMLButtonElement>) {
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()

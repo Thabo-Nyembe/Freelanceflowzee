@@ -10,7 +10,7 @@ import { LogOut, Menu, X } from 'lucide-react'
 
 interface User {
   id: string
-  email: string
+  email?: string | undefined
   user_metadata: {
     full_name?: string
     role?: string
@@ -36,7 +36,7 @@ interface DashboardLayoutClientProps {
   children: ReactNode
 }
 
-export function DashboardLayoutClient({ user, children }: DashboardLayoutClientProps) {
+export default function DashboardLayoutClient({ user, children }: DashboardLayoutClientProps) {
   const router = useRouter()
   const supabase = createClient()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)

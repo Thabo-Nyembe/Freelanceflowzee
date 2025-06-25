@@ -37,6 +37,10 @@ class CommunityService {
 
   // Posts Methods
   async createPost(post: Omit<Post, 'id' | 'likesCount' | 'commentsCount' | 'createdAt' | 'updatedAt'>): Promise<Post> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized')
+    }
+
     try {
       const { data, error } = await this.supabase
         .from('community_posts')
@@ -60,6 +64,10 @@ class CommunityService {
   }
 
   async getPosts(category?: string): Promise<Post[]> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized')
+    }
+
     try {
       let query = this.supabase
         .from('community_posts')
@@ -83,6 +91,10 @@ class CommunityService {
   }
 
   async likePost(postId: string, userId: string): Promise<void> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized')
+    }
+
     try {
       const { error } = await this.supabase
         .from('post_likes')
@@ -96,6 +108,10 @@ class CommunityService {
   }
 
   async unlikePost(postId: string, userId: string): Promise<void> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized')
+    }
+
     try {
       const { error } = await this.supabase
         .from('post_likes')
@@ -111,6 +127,10 @@ class CommunityService {
 
   // Comments Methods
   async createComment(comment: Omit<Comment, 'id' | 'createdAt' | 'updatedAt'>): Promise<Comment> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized')
+    }
+
     try {
       const { data, error } = await this.supabase
         .from('post_comments')
@@ -132,6 +152,10 @@ class CommunityService {
   }
 
   async getComments(postId: string): Promise<Comment[]> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized')
+    }
+
     try {
       const { data, error } = await this.supabase
         .from('post_comments')
@@ -185,4 +209,4 @@ class CommunityService {
   }
 }
 
-export const communityService = new CommunityService() 
+export const communityService = new CommunityService()

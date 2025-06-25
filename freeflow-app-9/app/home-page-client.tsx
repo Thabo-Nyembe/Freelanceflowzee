@@ -153,16 +153,16 @@ export function HomePageClient() {
   return (
     <>
       {/* Hero Section with Enhanced Interactivity */}
-      <section className="relative pt-32 pb-20 overflow-hidden">
+      <section className="relative pt-32 pb-20 overflow-hidden" suppressHydrationWarning>
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-purple-500/10" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium bg-white/90 backdrop-blur-sm border border-purple-200">
+            <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium bg-white/90 backdrop-blur-sm border border-purple-200" suppressHydrationWarning>
               <Star className="w-4 h-4 mr-2 text-yellow-500" />
               Trusted by 10,000+ freelancers worldwide
             </Badge>
             
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight" suppressHydrationWarning>
               <div className="flex items-center justify-center gap-4 mb-2">
                 <div className="p-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full">
                   <Zap className="w-8 h-8 md:w-12 md:h-12 text-white" />
@@ -181,11 +181,12 @@ export function HomePageClient() {
             </p>
             
             {/* Interactive CTA Section */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12" suppressHydrationWarning>
               <Button 
                 size="lg" 
                 className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
                 asChild
+                suppressHydrationWarning
               >
                 <Link href="/login?redirect=/dashboard">
                   Creator Login
@@ -197,6 +198,7 @@ export function HomePageClient() {
                 size="lg" 
                 className="border-2 border-purple-300 text-purple-700 hover:bg-purple-50 px-8 py-4 text-lg font-semibold group transition-all duration-300"
                 onClick={() => setIsDemoOpen(true)}
+                suppressHydrationWarning
               >
                 <Play className="mr-2 w-5 h-5 group-hover:scale-110 transition-transform" />
                 Watch Demo
@@ -206,6 +208,7 @@ export function HomePageClient() {
                 size="lg"
                 className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
                 asChild
+                suppressHydrationWarning
               >
                 <Link href="/projects">
                   View Projects
@@ -291,6 +294,7 @@ export function HomePageClient() {
                   <Button 
                     className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
                     asChild
+                    suppressHydrationWarning
                   >
                     <Link href={feature.demo}>
                       Try Interactive Demo
@@ -409,6 +413,7 @@ export function HomePageClient() {
                   size="lg" 
                   className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white"
                   asChild
+                  suppressHydrationWarning
                 >
                   <Link href="/login?redirect=/dashboard">
                     Start Creating
@@ -452,6 +457,7 @@ export function HomePageClient() {
                   size="lg" 
                   className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white"
                   asChild
+                  suppressHydrationWarning
                 >
                   <Link href="/projects">
                     View Projects
@@ -469,6 +475,7 @@ export function HomePageClient() {
               variant="outline" 
               onClick={() => setIsDemoOpen(true)}
               className="border-2 border-purple-300 text-purple-700 hover:bg-purple-50"
+              suppressHydrationWarning
             >
               <BookOpen className="w-4 h-4 mr-2" />
               Explore Demo
@@ -539,6 +546,7 @@ export function HomePageClient() {
               size="lg" 
               className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
               asChild
+              suppressHydrationWarning
             >
               <Link href="/login?redirect=/dashboard">
                 Get Started Free
@@ -550,6 +558,7 @@ export function HomePageClient() {
               size="lg" 
               className="border-white text-white hover:bg-white hover:text-purple-600 px-8 py-4 text-lg font-semibold transition-all duration-300"
               onClick={() => setIsDemoOpen(true)}
+              suppressHydrationWarning
             >
               <Play className="w-5 h-5 mr-2" />
               Watch Demo

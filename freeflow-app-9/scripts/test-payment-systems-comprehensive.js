@@ -17,7 +17,7 @@ dotenv.config({ path: path.join(__dirname, '..', '.env.local') });
 
 // Test configuration
 const TEST_CONFIG = {
-  baseUrl: 'http://localhost:3000',
+  baseUrl: 'http://localhost:3001',
   timeout: 30000,
   retries: 3,
   viewport: { width: 1920, height: 1080 },

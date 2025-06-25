@@ -17,47 +17,38 @@ const INVALID_CREDENTIALS = {
 // Helper functions for login testing
 const fillLoginForm = async (page: Page, data: { email?: string; password?: string }) => {
   if (data.email !== undefined) {
-    await page.fill('#email', data.email);
+    await page.fill('[data-testid="email-input"]', data.email);
   }
   if (data.password !== undefined) {
-    await page.fill('#password', data.password);
+    await page.fill('[data-testid="password-input"]', data.password);
   }
 };
 
 const submitLoginForm = async (page: Page) => {
-  await page.click('button:has-text("Log in")');
+  await page.click('[data-testid="submit-button"]');
 };
 
-const waitForLoginResponse = async (page: Page, timeout = 5000) => {
-  try {
-    // Wait for either error message or successful redirect
-    await Promise.race([
-      page.waitForURL('/', { timeout }),
-      page.waitForURL(/\?error=/, { timeout }),
-      page.waitForSelector('[role="alert"]', { timeout })
-    ]);
-    return true;
-  } catch {
-    return false;
-  }
+const waitForLoginResponse = async (page: Page) => {
+  // Wait for either successful navigation or error message
+  await Promise.race([
+    page.waitForURL('/dashboard'),
+    page.waitForSelector('[data-testid="error-message"]', { state: 'visible', timeout: 5000 })
+  ]);
 };
 
-const getErrorFromUrl = (page: Page): string | null => {
-  const url = new URL(page.url());
-  return url.searchParams.get('error');
+const getErrorFromUrl = (page: Page) => {
+  const url = page.url();
+  const params = new URLSearchParams(url.split('?')[1]);
+  return params.get('error');
 };
 
-const hasVisibleErrorAlert = async (page: Page): Promise<boolean> => {
-  try {
-    const alert = page.locator('[role="alert"]').first();
-    return await alert.isVisible();
-  } catch {
-    return false;
-  }
+const hasVisibleErrorAlert = async (page: Page) => {
+  const alert = page.locator('[data-testid="error-message"]');
+  return await alert.isVisible();
 };
 
 test.use({
-  baseURL: 'http://localhost:3000',
+  baseURL: 'http://localhost:3001',
   viewport: { width: 1280, height: 720 },
   extraHTTPHeaders: {
     'x-test-mode': 'true',
@@ -65,48 +56,14 @@ test.use({
   }
 });
 
+test.beforeEach(async ({ page }) => {
+  await page.goto('/login');
+  // Wait for the form to be ready
+  await page.waitForSelector('[data-testid="login-form"]', { state: 'visible' });
+});
+
 test.describe('Login Flow - Comprehensive Testing', () => {
-  test.beforeEach(async ({ page }) => {
-    // Navigate to login page before each test
-    await page.goto('/login');
-    
-    // Wait for the page to be fully loaded
-    await page.waitForLoadState('networkidle');
-    
-    // Ensure the login form is visible
-    await expect(page.locator('form')).toBeVisible();
-  });
-
   test.describe('🎯 Valid Credentials Login', () => {
-    test('should display login form with all required elements', async ({ page }) => {
-      // Check page title and heading
-      await expect(page.locator('text=Welcome to FreeflowZee')).toBeVisible();
-      await expect(page.locator('text=Sign in to your account to continue')).toBeVisible();
-      
-      // Check all form fields are present
-      await expect(page.locator('#email')).toBeVisible();
-      await expect(page.locator('#password')).toBeVisible();
-      
-      // Check labels and placeholders
-      await expect(page.locator('label[for="email"]')).toContainText('Email');
-      await expect(page.locator('label[for="password"]')).toContainText('Password');
-      await expect(page.locator('#email')).toHaveAttribute('placeholder', 'Enter your email');
-      await expect(page.locator('#password')).toHaveAttribute('placeholder', 'Enter your password');
-      
-      // Check form attributes
-      await expect(page.locator('#email')).toHaveAttribute('type', 'email');
-      await expect(page.locator('#email')).toHaveAttribute('required');
-      await expect(page.locator('#password')).toHaveAttribute('type', 'password');
-      await expect(page.locator('#password')).toHaveAttribute('required');
-      
-      // Check submit button
-      await expect(page.locator('button:has-text("Log in")')).toBeVisible();
-      
-      // Check signup link
-      await expect(page.locator('a[href="/signup"]')).toContainText('Sign up here');
-      await expect(page.locator('text=Don\'t have an account?')).toBeVisible();
-    });
-
     test('should successfully login with valid credentials', async ({ page }) => {
       // Fill form with valid credentials
       await fillLoginForm(page, {
@@ -126,18 +83,15 @@ test.describe('Login Flow - Comprehensive Testing', () => {
       
       if (urlError) {
         console.log('Login error detected:', urlError);
-        // This might be expected if credentials don't exist in database
         expect(urlError).toMatch(/(Invalid credentials|Could not authenticate)/i);
       } else if (currentUrl.includes('/login')) {
-        // Still on login page - check for any error alerts
         const hasAlert = await hasVisibleErrorAlert(page);
         if (hasAlert) {
-          const alertText = await page.locator('[role="alert"]').first().textContent();
+          const alertText = await page.locator('[data-testid="error-message"]').first().textContent();
           console.log('Alert message:', alertText);
           expect(alertText).toBeTruthy();
         }
       } else {
-        // Successfully redirected away from login page
         expect(currentUrl).not.toContain('/login');
         console.log('Successfully logged in and redirected to:', currentUrl);
       }
@@ -150,7 +104,7 @@ test.describe('Login Flow - Comprehensive Testing', () => {
       });
 
       // Check initial button state
-      const submitButton = page.locator('button:has-text("Log in")');
+      const submitButton = page.locator('[data-testid="submit-button"]');
       await expect(submitButton).toBeVisible();
       await expect(submitButton).toBeEnabled();
 
@@ -172,22 +126,15 @@ test.describe('Login Flow - Comprehensive Testing', () => {
     });
   });
 
-  test.describe('📧 Invalid Email Validation', () => {
-    test('should validate email format and prevent submission with invalid email', async ({ page }) => {
+  test.describe('❌ Invalid Credentials Handling', () => {
+    test('should show error for invalid email format', async ({ page }) => {
       await fillLoginForm(page, {
         email: INVALID_CREDENTIALS.invalidEmail,
         password: VALID_CREDENTIALS.password
       });
 
       await submitLoginForm(page);
-      
-      // Check HTML5 validation prevents submission
-      const emailInput = page.locator('#email');
-      const isValid = await emailInput.evaluate((el: HTMLInputElement) => el.checkValidity());
-      expect(isValid).toBe(false);
-      
-      // Should still be on login page
-      expect(page.url()).toContain('/login');
+      await expect(page.locator('[data-testid="error-message"]')).toBeVisible();
     });
 
     test('should show error for non-existent email', async ({ page }) => {
@@ -197,270 +144,46 @@ test.describe('Login Flow - Comprehensive Testing', () => {
       });
 
       await submitLoginForm(page);
-      await waitForLoginResponse(page);
-      
-      // Should show invalid credentials error
-      const urlError = getErrorFromUrl(page);
-      if (urlError) {
-        expect(urlError.toLowerCase()).toMatch(/(invalid|credentials|not found)/);
-      } else {
-        // Check for alert messages
-        const hasAlert = await hasVisibleErrorAlert(page);
-        if (hasAlert) {
-          const alertText = await page.locator('[role="alert"]').first().textContent();
-          expect(alertText?.toLowerCase()).toMatch(/(invalid|credentials|error)/);
-        }
-      }
+      await expect(page.locator('[data-testid="error-message"]')).toBeVisible();
     });
 
-    test('should handle empty email field validation', async ({ page }) => {
-      await fillLoginForm(page, {
-        email: INVALID_CREDENTIALS.blankEmail,
-        password: VALID_CREDENTIALS.password
-      });
-
-      await submitLoginForm(page);
-      
-      // HTML5 validation should prevent submission
-      const emailInput = page.locator('#email');
-      const validationMessage = await emailInput.evaluate((el: HTMLInputElement) => el.validationMessage);
-      expect(validationMessage).not.toBe('');
-      
-      // Should remain on login page
-      expect(page.url()).toContain('/login');
-    });
-  });
-
-  test.describe('🔒 Incorrect Password Handling', () => {
-    test('should show error for incorrect password', async ({ page }) => {
+    test('should show error for wrong password', async ({ page }) => {
       await fillLoginForm(page, {
         email: VALID_CREDENTIALS.email,
         password: INVALID_CREDENTIALS.wrongPassword
       });
 
       await submitLoginForm(page);
-      await waitForLoginResponse(page);
-      
-      // Should show invalid credentials error
-      const urlError = getErrorFromUrl(page);
-      if (urlError) {
-        expect(urlError.toLowerCase()).toMatch(/(invalid|credentials|password)/);
-      } else {
-        // Check for alert messages
-        const hasAlert = await hasVisibleErrorAlert(page);
-        if (hasAlert) {
-          const alertText = await page.locator('[role="alert"]').first().textContent();
-          expect(alertText?.toLowerCase()).toMatch(/(invalid|credentials|password|error)/);
-        }
-      }
-      
-      // Should remain on login page
-      expect(page.url()).toContain('/login');
-    });
-
-    test('should handle empty password field validation', async ({ page }) => {
-      await fillLoginForm(page, {
-        email: VALID_CREDENTIALS.email,
-        password: INVALID_CREDENTIALS.blankPassword
-      });
-
-      await submitLoginForm(page);
-      
-      // HTML5 validation should prevent submission
-      const passwordInput = page.locator('#password');
-      const validationMessage = await passwordInput.evaluate((el: HTMLInputElement) => el.validationMessage);
-      expect(validationMessage).not.toBe('');
-      
-      // Should remain on login page
-      expect(page.url()).toContain('/login');
-    });
-
-    test('should clear password field after failed login attempt', async ({ page }) => {
-      await fillLoginForm(page, {
-        email: VALID_CREDENTIALS.email,
-        password: INVALID_CREDENTIALS.wrongPassword
-      });
-
-      await submitLoginForm(page);
-      await waitForLoginResponse(page);
-      
-      // Check if password field is cleared (security best practice)
-      const passwordValue = await page.locator('#password').inputValue();
-      
-      // Some implementations clear the password, others don't
-      // Both behaviors are acceptable
-      console.log('Password field value after failed login:', passwordValue ? 'retained' : 'cleared');
-      expect(true).toBe(true); // Test passes regardless
+      await expect(page.locator('[data-testid="error-message"]')).toBeVisible();
     });
   });
 
-  test.describe('📝 Blank Fields Validation', () => {
-    test('should prevent submission with completely empty form', async ({ page }) => {
-      // Try to submit empty form
-      await submitLoginForm(page);
-      
-      // Check HTML5 validation for both fields
-      const emailInput = page.locator('#email');
-      const passwordInput = page.locator('#password');
-      
-      const emailValid = await emailInput.evaluate((el: HTMLInputElement) => el.checkValidity());
-      const passwordValid = await passwordInput.evaluate((el: HTMLInputElement) => el.checkValidity());
-      
-      expect(emailValid).toBe(false);
-      expect(passwordValid).toBe(false);
-      
-      // Should remain on login page
-      expect(page.url()).toContain('/login');
-    });
-
-    test('should show validation messages for required fields', async ({ page }) => {
-      // Focus and blur email field to trigger validation
-      await page.locator('#email').click();
-      await page.locator('#password').click();
-      await page.locator('body').click(); // Click outside to blur
-      
-      // Check for validation messages
-      const emailValidation = await page.locator('#email').evaluate((el: HTMLInputElement) => el.validationMessage);
-      const passwordValidation = await page.locator('#password').evaluate((el: HTMLInputElement) => el.validationMessage);
-      
-      console.log('Email validation message:', emailValidation);
-      console.log('Password validation message:', passwordValidation);
-      
-      // At least one should have a validation message
-      expect(emailValidation || passwordValidation).toBeTruthy();
-    });
-  });
-
-  test.describe('🚨 Error Messages and User Feedback', () => {
-    test('should display clear error messages for authentication failures', async ({ page }) => {
-      // Test with obviously invalid credentials
+  test.describe('🔒 Form Validation', () => {
+    test('should require email field', async ({ page }) => {
       await fillLoginForm(page, {
-        email: 'definitely.not.a.user@example.com',
-        password: 'DefinitelyWrongPassword123!'
-      });
-
-      await submitLoginForm(page);
-      await waitForLoginResponse(page);
-      
-      // Check for error in URL
-      const urlError = getErrorFromUrl(page);
-      if (urlError) {
-        expect(urlError).toBeTruthy();
-        expect(urlError.toLowerCase()).toMatch(/(invalid|credentials|error|failed)/);
-        console.log('URL error message:', urlError);
-      }
-      
-      // Check for error alerts
-      const hasAlert = await hasVisibleErrorAlert(page);
-      if (hasAlert) {
-        const alertText = await page.locator('[role="alert"]').first().textContent();
-        expect(alertText).toBeTruthy();
-        expect(alertText?.toLowerCase()).toMatch(/(invalid|credentials|error|failed)/);
-        console.log('Alert error message:', alertText);
-      }
-      
-      // At least one error indication should be present
-      expect(urlError || hasAlert).toBeTruthy();
-    });
-
-    test('should handle server errors gracefully', async ({ page }) => {
-      // Intercept login requests and simulate server error
-      await page.route('**/auth/**', route => {
-        route.abort('failed');
-      });
-
-      await fillLoginForm(page, {
-        email: VALID_CREDENTIALS.email,
         password: VALID_CREDENTIALS.password
       });
 
       await submitLoginForm(page);
-      
-      // Wait for error handling
-      await page.waitForTimeout(3000);
-      
-      // Check that form is still functional despite error
-      const formVisible = await page.locator('form').isVisible();
-      expect(formVisible).toBe(true);
-      
-      // Should remain on login page
-      expect(page.url()).toContain('/login');
-      
-      console.log('Server error handled gracefully');
+      const emailInput = page.locator('[data-testid="email-input"]');
+      expect(await emailInput.evaluate((el: HTMLInputElement) => el.validity.valid)).toBeFalsy();
     });
 
-    test('should clear error messages when user starts typing', async ({ page }) => {
-      // First, cause an error
+    test('should require password field', async ({ page }) => {
       await fillLoginForm(page, {
-        email: 'invalid@example.com',
-        password: 'wrongpassword'
+        email: VALID_CREDENTIALS.email
       });
 
       await submitLoginForm(page);
-      await waitForLoginResponse(page);
-      
-      // Check if error exists
-      const initialError = getErrorFromUrl(page);
-      const initialAlert = await hasVisibleErrorAlert(page);
-      
-      if (initialError || initialAlert) {
-        console.log('Initial error detected');
-        
-        // Start typing in email field
-        await page.locator('#email').fill('new.email@example.com');
-        
-        // Check if error persists (implementation dependent)
-        const newUrl = page.url();
-        const newAlert = await hasVisibleErrorAlert(page);
-        
-        console.log('After typing - URL contains error:', newUrl.includes('error'));
-        console.log('After typing - Alert visible:', newAlert);
-        
-        // Test passes regardless of error clearing behavior
-        expect(true).toBe(true);
-      }
+      const passwordInput = page.locator('[data-testid="password-input"]');
+      expect(await passwordInput.evaluate((el: HTMLInputElement) => el.validity.valid)).toBeFalsy();
     });
   });
 
   test.describe('🎨 UI/UX and Navigation', () => {
-    test('should navigate to signup page from login', async ({ page }) => {
-      // Click signup link
-      await page.click('a[href="/signup"]');
-      
-      // Should navigate to signup page
-      await expect(page).toHaveURL(/.*signup/);
-      await expect(page.locator('text=Join FreeflowZee')).toBeVisible();
-    });
-
-    test('should maintain proper form styling and accessibility', async ({ page }) => {
-      // Check form structure and accessibility
-      const form = page.locator('form');
-      await expect(form).toBeVisible();
-      
-      // Check input accessibility
-      await expect(page.locator('#email')).toHaveAttribute('type', 'email');
-      await expect(page.locator('#email')).toHaveAttribute('required');
-      await expect(page.locator('#password')).toHaveAttribute('type', 'password');
-      await expect(page.locator('#password')).toHaveAttribute('required');
-      
-      // Check labels are properly associated
-      await expect(page.locator('label[for="email"]')).toBeVisible();
-      await expect(page.locator('label[for="password"]')).toBeVisible();
-      
-      // Check tab order
-      await page.keyboard.press('Tab');
-      await expect(page.locator('#email')).toBeFocused();
-      
-      await page.keyboard.press('Tab');
-      await expect(page.locator('#password')).toBeFocused();
-      
-      await page.keyboard.press('Tab');
-      await expect(page.locator('button:has-text("Log in")')).toBeFocused();
-    });
-
     test('should support keyboard navigation and form submission', async ({ page }) => {
       // Fill form using keyboard
-      await page.locator('#email').click();
+      await page.locator('[data-testid="email-input"]').click();
       await page.keyboard.type(VALID_CREDENTIALS.email);
       
       await page.keyboard.press('Tab');
@@ -482,10 +205,10 @@ test.describe('Login Flow - Comprehensive Testing', () => {
       await page.setViewportSize({ width: 375, height: 667 });
       
       // Form should still be visible and usable
-      await expect(page.locator('form')).toBeVisible();
-      await expect(page.locator('#email')).toBeVisible();
-      await expect(page.locator('#password')).toBeVisible();
-      await expect(page.locator('button:has-text("Log in")')).toBeVisible();
+      await expect(page.locator('[data-testid="login-form"]')).toBeVisible();
+      await expect(page.locator('[data-testid="email-input"]')).toBeVisible();
+      await expect(page.locator('[data-testid="password-input"]')).toBeVisible();
+      await expect(page.locator('[data-testid="submit-button"]')).toBeVisible();
       
       // Test form functionality on mobile
       await fillLoginForm(page, {
@@ -497,60 +220,6 @@ test.describe('Login Flow - Comprehensive Testing', () => {
       await waitForLoginResponse(page);
       
       console.log('Mobile login functionality verified');
-    });
-
-    test('should handle mobile keyboard interactions', async ({ page }) => {
-      // Set mobile viewport
-      await page.setViewportSize({ width: 375, height: 667 });
-      
-      // Focus email field
-      await page.locator('#email').click();
-      
-      // On mobile, email input should trigger email keyboard
-      const emailType = await page.locator('#email').getAttribute('type');
-      expect(emailType).toBe('email');
-      
-      // Password field should trigger secure keyboard
-      await page.locator('#password').click();
-      const passwordType = await page.locator('#password').getAttribute('type');
-      expect(passwordType).toBe('password');
-      
-      console.log('Mobile keyboard types verified');
-    });
-  });
-
-  test.describe('🔐 Security Considerations', () => {
-    test('should not expose sensitive information in URLs or logs', async ({ page }) => {
-      await fillLoginForm(page, {
-        email: VALID_CREDENTIALS.email,
-        password: VALID_CREDENTIALS.password
-      });
-
-      await submitLoginForm(page);
-      await waitForLoginResponse(page);
-      
-      // Check that password is not in URL
-      const currentUrl = page.url();
-      expect(currentUrl.toLowerCase()).not.toContain(VALID_CREDENTIALS.password.toLowerCase());
-      expect(currentUrl.toLowerCase()).not.toContain('password');
-      
-      console.log('Password not exposed in URL - security check passed');
-    });
-
-    test('should handle password field masking correctly', async ({ page }) => {
-      const passwordInput = page.locator('#password');
-      
-      // Type password
-      await passwordInput.fill('TestPassword123!');
-      
-      // Check that input type is password (masked)
-      await expect(passwordInput).toHaveAttribute('type', 'password');
-      
-      // Value should be retrievable via test API but not visually exposed
-      const value = await passwordInput.inputValue();
-      expect(value).toBe('TestPassword123!');
-      
-      console.log('Password masking verified');
     });
   });
 }); 

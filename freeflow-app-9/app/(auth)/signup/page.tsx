@@ -39,21 +39,56 @@ function SignUpForm() {
         const supabase = createClient()
         
         if (!supabase) {
+          console.error('Failed to initialize Supabase client')
+          setError('Service temporarily unavailable')
           setIsCheckingAuth(false)
           return
         }
+
+        // First try to get session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
-        const { data: { user } } = await supabase.auth.getUser()
+        if (sessionError) {
+          console.error('Session error:', sessionError)
+          // Clear any corrupted session data
+          await supabase.auth.signOut()
+          localStorage.clear()
+          sessionStorage.clear()
+          
+          // Clear auth cookies
+          document.cookie.split(";").forEach(cookie => {
+            const [name] = cookie.split("=")
+            if (name.trim().startsWith('sb-')) {
+              document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
+            }
+          })
+          
+          setError('Session error. Please try signing up again.')
+          setIsCheckingAuth(false)
+          return
+        }
+
+        // Then get user data
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
         
-        if (user) {
-          // User is already authenticated, redirect to dashboard or intended destination
+        if (userError) {
+          console.error('User data error:', userError)
+          setError('Failed to get user data. Please try signing up again.')
+          setIsCheckingAuth(false)
+          return
+        }
+
+        if (session && user) {
+          // User is authenticated, redirect
           const destination = redirectTo === '/' ? '/dashboard' : redirectTo
           router.push(destination)
           return
         }
+
+        setIsCheckingAuth(false)
       } catch (error) {
-        console.error('Auth check error:', error)
-      } finally {
+        console.error('Auth check failed:', error)
+        setError('Authentication check failed. Please try again.')
         setIsCheckingAuth(false)
       }
     }
@@ -64,6 +99,7 @@ function SignUpForm() {
   const handleSubmit = async (formData: FormData) => {
     const password = formData.get('password') as string
     const confirmPassword = formData.get('confirmPassword') as string
+    const email = formData.get('email') as string
 
     if (password !== confirmPassword) {
       setError('Passwords do not match')
@@ -75,20 +111,70 @@ function SignUpForm() {
       return
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address')
+      return
+    }
+
     setIsLoading(true)
     setError('')
     setSuccess('')
 
     try {
-      const result = await signup(formData)
-      if (result?.error) {
-        setError(result.error)
-      } else {
-        setSuccess('Account created successfully! Please check your email to confirm your account.')
+      const supabase = createClient()
+      
+      if (!supabase) {
+        setError('Service temporarily unavailable. Please try again later.')
+        setIsLoading(false)
+        return
       }
+
+      // First try to clear any existing session
+      try {
+        await supabase.auth.signOut()
+      } catch (signOutError) {
+        console.error('Error clearing existing session:', signOutError)
+      }
+
+      // Clear any existing cookies
+      document.cookie.split(";").forEach(cookie => {
+        const [name] = cookie.split("=")
+        if (name.trim().startsWith('sb-')) {
+          document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
+        }
+      })
+
+      // Attempt to sign up
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            full_name: formData.get('fullName'),
+          }
+        }
+      })
+
+      if (signUpError) {
+        console.error('Sign up error:', signUpError)
+        if (signUpError.message.includes('already registered')) {
+          setError('This email is already registered. Please sign in instead.')
+        } else if (signUpError.message.includes('valid email')) {
+          setError('Please enter a valid email address')
+        } else {
+          setError('Failed to create account. Please try again.')
+        }
+        setIsLoading(false)
+        return
+      }
+
+      setSuccess('Account created successfully! Please check your email to confirm your account.')
     } catch (err) {
+      console.error('Unexpected error:', err)
       setError('An unexpected error occurred. Please try again.')
-    } finally {
       setIsLoading(false)
     }
   }

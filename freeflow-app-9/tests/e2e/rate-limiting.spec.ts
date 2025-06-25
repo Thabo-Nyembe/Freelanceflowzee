@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
 
 // Configuration for accessing the API
 test.use({
-  baseURL: 'http://localhost:3000',
+  baseURL: 'http://localhost:3001',
   extraHTTPHeaders: {
     'Content-Type': 'application/json'
   },

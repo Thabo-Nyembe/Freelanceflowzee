@@ -34,7 +34,7 @@ class BatchedTestRunner {
       }
     ]
     this.results = []
-    this.serverPort = process.env.PORT || 3000
+    this.serverPort = process.env.PORT || 3001
   }
 
   log(message, color = 'reset') {

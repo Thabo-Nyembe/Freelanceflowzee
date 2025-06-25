@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { FileType } from '@/types/files'
+import type { Database } from '@/types/supabase'
+import { SupabaseClient } from '@supabase/supabase-js'
 
 export interface AIAnalysisResult {
   id: string
@@ -11,20 +13,30 @@ export interface AIAnalysisResult {
   result: string
 }
 
-export interface AIGenerationResult {
-  id: string
-  type: 'image' | 'code' | 'text' | 'audio' | 'video'
-  status: 'generating' | 'complete' | 'error'
-  result: string
-  settings: {
-    creativity: number
-    quality: 'draft' | 'standard' | 'premium'
-    model: string
-  }
+export interface AIGenerationSettings {
+  creativity: number
+  quality: string
+  model: string
 }
 
-class AIService {
-  private supabase = createClient()
+export interface AIGenerationResult {
+  id: string
+  timestamp: string
+  type: string
+  status: 'generating' | 'complete' | 'error'
+  result: string
+}
+
+export class AIService {
+  private supabase: SupabaseClient<Database>
+
+  constructor() {
+    const client = createClient()
+    if (!client) {
+      throw new Error('Failed to initialize Supabase client')
+    }
+    this.supabase = client
+  }
 
   // AI Assistant Methods
   async analyzeFile(file: File, type: FileType): Promise<AIAnalysisResult> {
@@ -40,14 +52,18 @@ class AIService {
       const { data, error } = await this.supabase
         .from('ai_analysis')
         .insert({
-          file_url: uploadData.path,
-          type,
-          status: 'analyzing'
+          file_type: type,
+          status: 'analyzing',
+          result: ''
         })
         .select()
         .single()
 
       if (error) throw error
+
+      if (!data) {
+        throw new Error('No data returned from insert operation')
+      }
 
       // Start analysis process (simulated for now)
       setTimeout(async () => {
@@ -63,9 +79,9 @@ class AIService {
       return {
         id: data.id,
         timestamp: data.created_at,
-        type: data.type,
-        status: data.status,
-        result: data.result || ''
+        type: data.file_type as FileType,
+        status: data.status as 'analyzing' | 'complete' | 'error',
+        result: data.result
       }
     } catch (error) {
       console.error('Error analyzing file:', error)
@@ -74,6 +90,10 @@ class AIService {
   }
 
   async getAnalysisHistory(): Promise<AIAnalysisResult[]> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized')
+    }
+
     try {
       const { data, error } = await this.supabase
         .from('ai_analysis')
@@ -85,8 +105,8 @@ class AIService {
       return data.map(item => ({
         id: item.id,
         timestamp: item.created_at,
-        type: item.type,
-        status: item.status,
+        type: item.file_type as FileType,
+        status: item.status as 'analyzing' | 'complete' | 'error',
         result: item.result || ''
       }))
     } catch (error) {
@@ -99,44 +119,48 @@ class AIService {
   async generateAsset(
     type: 'image' | 'code' | 'text' | 'audio' | 'video',
     prompt: string,
-    settings: {
-      creativity: number
-      quality: 'draft' | 'standard' | 'premium'
-      model: string
-    }
+    settings: AIGenerationSettings
   ): Promise<AIGenerationResult> {
     try {
-      // Create generation record
-      const { data, error } = await this.supabase
+      // Get current user
+      const { data: { user }, error: userError } = await this.supabase.auth.getUser()
+      if (userError) throw userError
+      if (!user) throw new Error('User not authenticated')
+
+      // Create initial record
+      const { data, error: insertError } = await this.supabase
         .from('ai_generations')
         .insert({
+          user_id: user.id,
           type,
           prompt,
           settings,
-          status: 'generating'
+          status: 'generating',
+          result: ''
         })
         .select()
         .single()
 
-      if (error) throw error
+      if (insertError) throw insertError
+      if (!data) throw new Error('No data returned from insert operation')
 
-      // Start generation process (simulated for now)
+      // Simulate generation process
       setTimeout(async () => {
         await this.supabase
           .from('ai_generations')
           .update({
             status: 'complete',
-            result: 'Generated content will be here'
+            result: 'Generation completed successfully'
           })
           .eq('id', data.id)
       }, 5000)
 
       return {
         id: data.id,
+        timestamp: data.created_at,
         type: data.type,
-        status: data.status,
-        result: data.result || '',
-        settings: data.settings
+        status: data.status as 'generating' | 'complete' | 'error',
+        result: data.result
       }
     } catch (error) {
       console.error('Error generating asset:', error)
@@ -145,6 +169,10 @@ class AIService {
   }
 
   async getGenerationLibrary(): Promise<AIGenerationResult[]> {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized')
+    }
+
     try {
       const { data, error } = await this.supabase
         .from('ai_generations')
@@ -155,10 +183,10 @@ class AIService {
 
       return data.map(item => ({
         id: item.id,
+        timestamp: item.created_at,
         type: item.type,
-        status: item.status,
-        result: item.result || '',
-        settings: item.settings
+        status: item.status as 'generating' | 'complete' | 'error',
+        result: item.result || ''
       }))
     } catch (error) {
       console.error('Error fetching generation library:', error)

@@ -1,7 +1,7 @@
 // Force deployment update - Production Ready V2.1
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { updateSession } from '@/lib/supabase/middleware'
+import { updateSession } from '@/utils/supabase/middleware'
 
 // Define public routes that don't require authentication
 const publicRoutes = [
@@ -133,14 +133,11 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - avatars (avatar images)
-     * - fonts (font files)
-     * - public folder assets
+     * Feel free to modify this pattern to include more paths.
      */
-    '/((?!api|_next/static|_next/image|favicon|avatars|fonts|images|icons|media|videos|public|sw\\.js|manifest\\.json|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|json|txt|xml|js|css|woff|woff2|ttf|eot|mp4|wav|pdf)$).*)' 
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 } 

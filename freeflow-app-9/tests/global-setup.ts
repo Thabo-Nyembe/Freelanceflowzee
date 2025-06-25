@@ -1,4 +1,6 @@
 import { chromium, FullConfig } from '@playwright/test';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 async function globalSetup(config: FullConfig) {
   const { baseURL } = config.projects[0].use;
@@ -12,6 +14,20 @@ async function globalSetup(config: FullConfig) {
   });
 
   try {
+    // Wait for server to be ready
+    let retries = 5;
+    while (retries > 0) {
+      try {
+        await page.goto(baseURL);
+        break;
+      } catch (error) {
+        console.log(`Waiting for server to be ready... (${retries} retries left)`);
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        retries--;
+        if (retries === 0) throw error;
+      }
+    }
+
     // Navigate to login page
     await page.goto(`${baseURL}/login`);
 
@@ -23,9 +39,13 @@ async function globalSetup(config: FullConfig) {
     // Wait for successful login and navigation
     await page.waitForURL('**/dashboard');
 
+    // Ensure storage directory exists
+    const storageDir = path.join(process.cwd(), 'tests', 'storage');
+    await fs.mkdir(storageDir, { recursive: true });
+
     // Store authentication state
     await page.context().storageState({
-      path: './tests/storage-state.json'
+      path: path.join(storageDir, 'storage-state.json')
     });
 
   } catch (error) {

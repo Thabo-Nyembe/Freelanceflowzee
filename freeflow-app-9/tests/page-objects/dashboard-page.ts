@@ -66,6 +66,19 @@ export class DashboardPage {
   readonly confirmationModal: Locator;
   readonly loadingSpinner: Locator;
 
+  // Project form elements
+  readonly projectTitleInput: Locator;
+  readonly projectDescriptionInput: Locator;
+  readonly projectClientNameInput: Locator;
+  readonly projectClientEmailInput: Locator;
+  readonly projectBudgetInput: Locator;
+  readonly projectStartDateInput: Locator;
+  readonly projectEndDateInput: Locator;
+  readonly projectPrioritySelect: Locator;
+  readonly projectStatusSelect: Locator;
+  readonly projectSubmitButton: Locator;
+  readonly projectErrorMessage: Locator;
+
   constructor(page: Page) {
     this.page = page;
     
@@ -131,6 +144,19 @@ export class DashboardPage {
     this.modal = page.locator('[role="dialog"]');
     this.confirmationModal = page.locator('[data-testid="confirmation-modal"]');
     this.loadingSpinner = page.locator('[data-testid="loading-spinner"]');
+
+    // Project form elements
+    this.projectTitleInput = page.locator('input[name="title"], input[id="title"], input[placeholder*="title" i]').first();
+    this.projectDescriptionInput = page.locator('textarea[name="description"], textarea[id="description"], textarea[placeholder*="description" i]').first();
+    this.projectClientNameInput = page.locator('input[name="clientName"], input[id="clientName"], input[placeholder*="client name" i]').first();
+    this.projectClientEmailInput = page.locator('input[name="clientEmail"], input[id="clientEmail"], input[placeholder*="client email" i]').first();
+    this.projectBudgetInput = page.locator('input[name="budget"], input[id="budget"], input[placeholder*="budget" i]').first();
+    this.projectStartDateInput = page.locator('input[name="startDate"], input[id="startDate"], input[placeholder*="start date" i]').first();
+    this.projectEndDateInput = page.locator('input[name="endDate"], input[id="endDate"], input[placeholder*="end date" i]').first();
+    this.projectPrioritySelect = page.locator('select[name="priority"], select[id="priority"]').first();
+    this.projectStatusSelect = page.locator('select[name="status"], select[id="status"]').first();
+    this.projectSubmitButton = page.locator('button[type="submit"]');
+    this.projectErrorMessage = page.locator('[data-testid="error-message"]');
   }
 
   async goto() {
@@ -405,5 +431,62 @@ export class DashboardPage {
     await this.userAvatar.click();
     await this.page.getByRole('menuitem', { name: 'Logout' }).click();
     await this.page.waitForURL('**/login');
+  }
+
+  async openProjectCreationForm() {
+    await this.newProjectButton.click();
+    await this.modal.waitFor({ state: 'visible' });
+    await this.projectTitleInput.waitFor({ state: 'visible' });
+  }
+
+  async createProject(data: {
+    title: string;
+    description: string;
+    clientName?: string;
+    clientEmail?: string;
+    budget?: string;
+    startDate?: string;
+    endDate?: string;
+    priority?: string;
+    status?: string;
+  }) {
+    await this.projectTitleInput.fill(data.title);
+    await this.projectDescriptionInput.fill(data.description);
+
+    if (data.clientName) {
+      await this.projectClientNameInput.fill(data.clientName);
+    }
+    if (data.clientEmail) {
+      await this.projectClientEmailInput.fill(data.clientEmail);
+    }
+    if (data.budget) {
+      await this.projectBudgetInput.fill(data.budget);
+    }
+    if (data.startDate) {
+      await this.projectStartDateInput.fill(data.startDate);
+    }
+    if (data.endDate) {
+      await this.projectEndDateInput.fill(data.endDate);
+    }
+    if (data.priority) {
+      await this.page.selectOption('select[name="priority"], select[id="priority"]', data.priority);
+    }
+    if (data.status) {
+      await this.page.selectOption('select[name="status"], select[id="status"]', data.status);
+    }
+
+    await this.projectSubmitButton.click();
+  }
+
+  async getProjectByTitle(title: string) {
+    return this.projectCards.filter({ hasText: title }).first();
+  }
+
+  async getErrorMessage(): Promise<string | null> {
+    try {
+      return await this.projectErrorMessage.textContent();
+    } catch (error) {
+      return null;
+    }
   }
 } 

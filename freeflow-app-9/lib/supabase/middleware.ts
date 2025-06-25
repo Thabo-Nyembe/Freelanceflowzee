@@ -2,6 +2,20 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies'
 
+// Define protected routes that require authentication
+const protectedRoutes = [
+  '/dashboard',
+  '/projects',
+  '/analytics',
+  '/feedback',
+  '/settings'
+]
+
+// Helper function to check if a route is protected
+function isProtectedRoute(pathname: string): boolean {
+  return protectedRoutes.some(route => pathname.startsWith(route))
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -76,50 +90,79 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  try {
+    // First try to get session
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    
+    if (sessionError) {
+      console.error('Session error in middleware:', sessionError)
+      // Clear any corrupted session data
+      await supabase.auth.signOut()
+      
+      // Clear all auth cookies
+      request.cookies.getAll().forEach(cookie => {
+        if (cookie.name.startsWith('sb-')) {
+          request.cookies.delete(cookie.name)
+          supabaseResponse.cookies.delete(cookie.name)
+        }
+      })
+      
+      // Redirect to login with error message
+      const loginUrl = request.nextUrl.clone()
+      loginUrl.pathname = '/login'
+      loginUrl.searchParams.set('error', 'Session error. Please log in again.')
+      return NextResponse.redirect(loginUrl)
+    }
 
-  // Define public routes that don't require authentication
-  const publicRoutes = [
-    '/login', '/signup', '/', '/landing', '/payment', '/contact', '/support', 
-    '/privacy', '/terms', '/blog', '/newsletter', '/demo', '/community', 
-    '/features', '/how-it-works', '/docs', '/tutorials', '/api-docs', '/unified',
-    '/book-appointment', '/resources', '/tools', '/pricing', '/careers', '/press',
-    '/changelog', '/status', '/enhanced-collaboration-demo', '/media-preview-demo'
-  ]
-  const isPublicRoute = publicRoutes.some(route => 
-    request.nextUrl.pathname === route || 
-    request.nextUrl.pathname.startsWith('/api/') ||
-    request.nextUrl.pathname.startsWith('/payment') ||
-    request.nextUrl.pathname.startsWith('/blog/') ||
-    request.nextUrl.pathname.startsWith('/docs/') ||
-    request.nextUrl.pathname.startsWith('/tutorials/') ||
-    request.nextUrl.pathname.startsWith('/community/')
-  )
+    // Then get user data
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    
+    if (userError) {
+      console.error('User data error in middleware:', userError)
+      // Clear any corrupted session data
+      await supabase.auth.signOut()
+      
+      // Clear all auth cookies
+      request.cookies.getAll().forEach(cookie => {
+        if (cookie.name.startsWith('sb-')) {
+          request.cookies.delete(cookie.name)
+          supabaseResponse.cookies.delete(cookie.name)
+        }
+      })
+      
+      // Redirect to login with error message
+      const loginUrl = request.nextUrl.clone()
+      loginUrl.pathname = '/login'
+      loginUrl.searchParams.set('error', 'Failed to get user data. Please log in again.')
+      return NextResponse.redirect(loginUrl)
+    }
 
-  // If user is not authenticated and trying to access protected routes, redirect to login
-  if (!user && !isPublicRoute) {
+    // If no session and user is trying to access protected route, redirect to login
+    if (!session && !user && isProtectedRoute(request.nextUrl.pathname)) {
+      const loginUrl = request.nextUrl.clone()
+      loginUrl.pathname = '/login'
+      loginUrl.searchParams.set('redirect', request.nextUrl.pathname)
+      return NextResponse.redirect(loginUrl)
+    }
+
+    return supabaseResponse
+  } catch (error) {
+    console.error('Unexpected error in middleware:', error)
+    // Clear any corrupted session data
+    await supabase.auth.signOut()
+    
+    // Clear all auth cookies
+    request.cookies.getAll().forEach(cookie => {
+      if (cookie.name.startsWith('sb-')) {
+        request.cookies.delete(cookie.name)
+        supabaseResponse.cookies.delete(cookie.name)
+      }
+    })
+    
+    // Redirect to login with error message
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = '/login'
-    loginUrl.searchParams.set('redirect', request.nextUrl.pathname)
+    loginUrl.searchParams.set('error', 'An unexpected error occurred. Please try again.')
     return NextResponse.redirect(loginUrl)
   }
-
-  // If user is authenticated and trying to access auth pages, redirect to dashboard
-  if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup')) {
-    const dashboardUrl = request.nextUrl.clone()
-    dashboardUrl.pathname = '/dashboard'
-    // Preserve any query parameters (like verification_reminder)
-    return NextResponse.redirect(dashboardUrl)
-  }
-
-  // If user is authenticated and trying to access landing page, redirect to dashboard
-  if (user && request.nextUrl.pathname === '/') {
-    const dashboardUrl = request.nextUrl.clone()
-    dashboardUrl.pathname = '/dashboard'
-    return NextResponse.redirect(dashboardUrl)
-  }
-
-  return supabaseResponse
-} 
+}

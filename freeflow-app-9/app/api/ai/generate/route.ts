@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import OpenAI from 'openai'
 import { aiConfig } from '@/app/config/ai'
@@ -8,10 +8,17 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const cookieStore = cookies()
+  const supabase = await createClient()
+
   try {
-    const supabase = createRouteHandlerClient({ cookies })
-    const { data: { session } } = await supabase.auth.getSession()
+    const { data: { session }, error } = await supabase.auth.getSession()
+
+    if (error) {
+      console.error('Auth error:', error)
+      return new NextResponse('Authentication error', { status: 401 })
+    }
 
     if (!session) {
       return new NextResponse('Unauthorized', { status: 401 })
@@ -78,7 +85,7 @@ export async function POST(request: Request) {
       })
     }
   } catch (error) {
-    console.error('Generation error:', error)
+    console.error('Error:', error)
     return new NextResponse('Internal Server Error', { status: 500 })
   }
 } 

@@ -34,11 +34,14 @@ export async function isTestMode(): Promise<boolean> {
 }
 
 /**
- * Mock user data for test mode
+ * Mock user data for test mode - matches test file expectations
  */
 export const mockTestUser = {
-  id: 'test-user-123',
-  email: 'test@example.com',
-  name: 'Test User',
-  role: 'authenticated'
+  id: 'test-user-id-projects',
+  email: 'test@freeflowzee.com',
+  email_confirmed_at: new Date().toISOString(),
+  last_sign_in_at: new Date().toISOString(),
+  app_metadata: {},
+  user_metadata: {},
+  aud: 'authenticated'
 } 

@@ -1,31 +1,53 @@
 {
-  "title": "Imported Test Project",
-  "description": "This is an imported test project",
-  "status": "active",
-  "priority": "high",
-  "progress": 0,
-  "client_name": "Test Client",
-  "start_date": "2024-03-01",
-  "end_date": "2024-04-01",
-  "team_members": [],
-  "attachments": [],
-  "deliverables": [
-    "Project Plan",
-    "Design Assets",
-    "Final Deliverables"
+  "title": "Imported Project",
+  "description": "This is an imported project for testing purposes",
+  "clientName": "Import Test Client",
+  "clientEmail": "import.test@example.com",
+  "budget": "7500",
+  "startDate": "2024-04-01",
+  "endDate": "2024-06-30",
+  "priority": "High",
+  "status": "Active",
+  "team": [
+    {
+      "name": "John Doe",
+      "role": "Project Manager",
+      "email": "john@example.com"
+    },
+    {
+      "name": "Jane Smith",
+      "role": "Designer",
+      "email": "jane@example.com"
+    }
   ],
-  "timeline": {
-    "planning": "1 week",
-    "execution": "3 weeks",
-    "review": "1 week"
-  },
-  "budget": {
-    "currency": "USD",
-    "amount": 5000
-  },
-  "tags": [
-    "design",
-    "development",
-    "testing"
+  "attachments": [
+    {
+      "name": "project-brief.pdf",
+      "type": "document",
+      "size": "2.4 MB"
+    },
+    {
+      "name": "initial-mockups.fig",
+      "type": "design",
+      "size": "15.7 MB"
+    }
+  ],
+  "tags": ["web-design", "e-commerce", "responsive"],
+  "milestones": [
+    {
+      "title": "Project Setup",
+      "dueDate": "2024-04-15",
+      "status": "pending"
+    },
+    {
+      "title": "Design Phase",
+      "dueDate": "2024-05-15",
+      "status": "pending"
+    },
+    {
+      "title": "Development",
+      "dueDate": "2024-06-15",
+      "status": "pending"
+    }
   ]
 } 

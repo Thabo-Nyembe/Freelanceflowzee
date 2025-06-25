@@ -1,13 +1,12 @@
 /** @type {import('next').NextConfig} */
+const path = require('path');
+
 const nextConfig = {
   // Core Configuration
   reactStrictMode: true,
   poweredByHeader: false,
   generateEtags: true,
   compress: true,
-  
-  // Server external packages
-  serverExternalPackages: ['@supabase/supabase-js', '@aws-sdk/client-s3', '@aws-sdk/s3-request-presigner', '@aws-sdk/lib-storage'],
   
   // Experimental features
   experimental: {
@@ -19,14 +18,19 @@ const nextConfig = {
       'date-fns'
     ],
     
-    // Server actions
-    serverActions: {
-      allowedOrigins: ['localhost:3000'],
-    },
-    
     // Build optimizations
     swcPlugins: [],
     forceSwcTransforms: true,
+    
+    // Server actions
+    serverActions: {
+      enabled: true,
+      allowedOrigins: ['localhost:3001', 'freeflow-app-9.vercel.app'],
+      bodySizeLimit: '2mb'
+    },
+    
+    // External packages
+    externalDir: true
   },
   
   // Compiler optimizations
@@ -59,14 +63,10 @@ const nextConfig = {
     // Handle media files
     config.module.rules.push({
       test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
-      use: {
-        loader: 'file-loader',
-        options: {
-          publicPath: '/_next/static/media/',
-          outputPath: 'static/media/',
-          name: '[name].[hash].[ext]',
-        },
-      },
+      type: 'asset/resource',
+      generator: {
+        filename: 'static/media/[name].[hash][ext]'
+      }
     });
 
     // Fix module resolution issues
@@ -84,14 +84,16 @@ const nextConfig = {
     };
 
     // Optimize webpack cache
-    if (!dev) {
-      config.cache = {
-        type: 'filesystem',
-        buildDependencies: {
-          config: [__filename]
-        }
-      };
-    }
+    config.cache = {
+      type: 'filesystem',
+      version: `${process.env.NODE_ENV}-${config.mode}-${process.version}`,
+      cacheDirectory: path.resolve(__dirname, '.next/cache/webpack'),
+      store: 'pack',
+      buildDependencies: {
+        config: [__filename],
+        tsconfig: [path.resolve(__dirname, 'tsconfig.json')],
+      }
+    };
 
     // Handle SVG files
     config.module.rules.push({
@@ -105,8 +107,8 @@ const nextConfig = {
   // Environment variables
   env: {
     NEXT_PUBLIC_APP_URL: process.env.NODE_ENV === 'production' 
-      ? 'https://freeflowzee.com' 
-      : 'http://localhost:3000',
+      ? 'https://freeflow-app-9.vercel.app' 
+      : 'http://localhost:3001'
   },
 
   // TypeScript configuration

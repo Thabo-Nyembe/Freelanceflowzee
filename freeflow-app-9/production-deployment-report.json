@@ -1,0 +1,23 @@
+{
+  "timestamp": "2025-06-25T00:44:31.027Z",
+  "checks": {
+    "environment": false,
+    "security": false,
+    "build": false,
+    "tests": false,
+    "performance": false,
+    "accessibility": false
+  },
+  "errors": [
+    "Missing environment variables: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, STRIPE_SECRET_KEY",
+    "Security audit failed: Command failed: npm audit --audit-level=moderate",
+    "Build failed: Command failed: npm run build:production",
+    "Tests failed: Command failed: npm run test:smoke"
+  ],
+  "warnings": [
+    "Performance check failed: Command failed: lighthouse http://localhost:3000 --output=json --output-path=./lighthouse-production.json --chrome-flags=\"--headless --no-sandbox\"\n/bin/sh: lighthouse: command not found\n",
+    "Accessibility check failed: Command failed: npm run test:accessibility"
+  ],
+  "passed": false,
+  "ready": false
+}

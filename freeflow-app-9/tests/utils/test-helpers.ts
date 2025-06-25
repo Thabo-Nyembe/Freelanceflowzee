@@ -1,65 +1,39 @@
 import { Page, expect } from '@playwright/test';
 
 export class TestHelpers {
-  readonly page: Page;
+  constructor(protected readonly page: Page) {}
 
-  constructor(page: Page) {
-    this.page = page;
+  async goto() {
+    await this.page.goto('/');
+    await this.waitForLoadState();
+  }
+
+  async waitForLoadState() {
+    await this.page.waitForLoadState('networkidle');
+  }
+
+  async measureLoadTime(): Promise<number> {
+    const metrics = await this.page.evaluate(() => {
+      const { navigationStart, loadEventEnd } = performance.timing;
+      return loadEventEnd - navigationStart;
+    });
+    
+    console.log(`Page load time: ${metrics}ms`);
+    return metrics;
   }
 
   // Wait for app to be ready
   async waitForAppReady() {
     await this.page.waitForLoadState('networkidle');
-    await this.page.waitForSelector('[data-testid]', { timeout: 15000 });
+    await this.page.waitForSelector('[data-testid]', { timeout: 10000 });
   }
 
-  // Authentication helper with test mode
-  async authenticateUser(email: string, password: string) {
+  // Authentication helper
+  async authenticateUser(email = 'test@freeflowzee.com', password = 'testpassword') {
     await this.page.goto('/login');
-    await this.page.waitForSelector('[data-testid="email-input"]', { timeout: 10000 });
-    await this.page.fill('[data-testid="email-input"]', email);
-    await this.page.fill('[data-testid="password-input"]', password);
-    await this.page.click('[data-testid="login-button"]');
-    
-    try {
-      await this.page.waitForURL('/dashboard', { timeout: 45000 });
-    } catch (error) {
-      // Take screenshot on failure
-      await this.takeTimestampedScreenshot('auth-failure');
-      throw error;
-    }
-  }
-
-  async fillLoginForm(email: string, password: string) {
-    // Wait for loading state to finish
-    await this.page.waitForSelector('text=Loading...', { state: 'hidden', timeout: 30000 });
-    
-    // Wait for form elements with increased timeout
-    await this.page.waitForSelector('[data-testid="email-input"]', { timeout: 30000, state: 'visible' });
-    await this.page.fill('[data-testid="email-input"]', email);
-    await this.page.fill('[data-testid="password-input"]', password);
-  }
-
-  async submitLoginForm() {
-    await this.page.click('[data-testid="login-button"]');
-  }
-
-  async checkForErrorMessage() {
-    const errorElement = await this.page.locator('[data-testid="error-message"]');
-    return errorElement.isVisible();
-  }
-
-  async getErrorMessage() {
-    const errorElement = await this.page.locator('[data-testid="error-message"]');
-    return errorElement.textContent();
-  }
-
-  async waitForLoginResponse() {
-    // Wait for either success navigation or error message
-    await Promise.race([
-      this.page.waitForURL('/dashboard'),
-      this.page.waitForSelector('[data-testid="error-message"]', { state: 'visible', timeout: 5000 })
-    ]);
+    await this.fillLoginForm(email, password);
+    await this.submitLoginForm();
+    await this.waitForLoginResponse();
   }
 
   // Dashboard navigation helper
@@ -67,6 +41,57 @@ export class TestHelpers {
     await this.page.goto('/dashboard');
     await this.waitForAppReady();
     await expect(this.page.locator('[data-testid="dashboard-container"]')).toBeVisible();
+  }
+
+  async fillLoginForm(email: string, password: string) {
+    // Wait for form to be ready
+    await this.page.waitForSelector('[data-testid="login-form"]', { timeout: 10000 });
+    
+    // Fill email
+    await this.page.fill('[data-testid="email-input"]', email);
+    
+    // Fill password
+    await this.page.fill('[data-testid="password-input"]', password);
+  }
+
+  async submitLoginForm() {
+    await this.page.click('[data-testid="submit-button"]');
+  }
+
+  async waitForLoginResponse() {
+    try {
+      // Wait for either successful navigation or error message
+      await Promise.race([
+        this.page.waitForURL('/dashboard', { timeout: 10000 }),
+        this.page.waitForSelector('[data-testid="error-message"]', { state: 'visible', timeout: 5000 })
+      ]);
+    } catch (error) {
+      // Take screenshot on failure
+      await this.takeTimestampedScreenshot('login-failure');
+      throw error;
+    }
+  }
+
+  async checkForErrorMessage() {
+    const errorMessage = this.page.locator('[data-testid="error-message"]');
+    return await errorMessage.isVisible();
+  }
+
+  async getErrorMessage() {
+    const errorMessage = this.page.locator('[data-testid="error-message"]');
+    if (await errorMessage.isVisible()) {
+      return await errorMessage.textContent();
+    }
+    return null;
+  }
+
+  // Take screenshot with timestamp
+  async takeTimestampedScreenshot(name: string) {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    await this.page.screenshot({ 
+      path: `test-results/screenshots/${name}-${timestamp}.png`,
+      fullPage: true 
+    });
   }
 
   // Check for console errors
@@ -78,15 +103,6 @@ export class TestHelpers {
       }
     });
     return errors;
-  }
-
-  // Take screenshot with timestamp
-  async takeTimestampedScreenshot(name: string) {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    await this.page.screenshot({ 
-      path: `test-results/screenshots/${name}-${timestamp}.png`,
-      fullPage: true 
-    });
   }
 
   // Wait for element with better error handling
@@ -131,8 +147,18 @@ export class TestHelpers {
 
   // Check for accessibility issues
   async checkAccessibility() {
-    // Add your accessibility testing logic here
-    // For example, using axe-core or similar tools
+    const headings = await this.page.locator('h1, h2, h3').count();
+    const buttons = await this.page.locator('button').count();
+    const images = await this.page.locator('img[alt]').count();
+    
+    console.log(`
+      Accessibility check results:
+      - Headings: ${headings}
+      - Buttons: ${buttons}
+      - Images with alt text: ${images}
+    `);
+    
+    return { headings, buttons, images };
   }
 
   // Get all form validation errors
@@ -205,15 +231,16 @@ export class TestHelpers {
     const loadEventEnd = await this.page.evaluate(() => performance.timing.loadEventEnd);
     const loadTime = loadEventEnd - navigationStart;
     
-    console.log(`${pageName} load time: ${loadTime}ms`);
+    console.log(`Performance metrics for ${pageName}:
+      - Load time: ${loadTime}ms
+      - Navigation start: ${navigationStart}
+      - Load event end: ${loadEventEnd}
+    `);
     
-    // Log performance metrics
-    const performanceEntries = await this.page.evaluate(() => {
-      return JSON.stringify(performance.getEntriesByType('navigation'));
-    });
-    
-    console.log(`${pageName} performance:`, performanceEntries);
-    
-    return { loadTime, performanceEntries };
+    return {
+      loadTime,
+      navigationStart,
+      loadEventEnd
+    };
   }
 }

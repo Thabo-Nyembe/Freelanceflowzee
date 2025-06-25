@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["../*"],
+      "@/tests/*": ["./*"],
+      "@/fixtures/*": ["./fixtures/*"],
+      "@/utils/*": ["./utils/*"]
+    },
+    "types": [
+      "node",
+      "jest",
+      "@playwright/test",
+      "@testing-library/jest-dom",
+      "@testing-library/react"
+    ],
+    "noImplicitAny": false,
+    "noImplicitReturns": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "types/global.d.ts",
+    "../types/*.d.ts",
+    "./fixtures/**/*",
+    "./utils/**/*"
+  ],
+  "exclude": ["node_modules"]
+} 

@@ -11,10 +11,11 @@ const createProjectSchema = z.object({
   client_name: z.string().optional(),
   client_email: z.string().email('Invalid email format').optional().or(z.literal('')),
   budget: z.coerce.number().min(0, 'Budget must be a positive number').optional(),
-  priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
   start_date: z.string().optional(),
   end_date: z.string().optional(),
-  userId: z.string().min(1, 'User ID is required')
+  priority: z.enum(['low', 'medium', 'high', 'urgent']).default('medium'),
+  status: z.enum(['draft', 'active', 'paused', 'completed', 'cancelled']).default('active'),
+  user_id: z.string().min(1, 'User ID is required')
 })
 
 interface CreateProjectResult {
@@ -47,10 +48,11 @@ export async function createProject(formData: FormData): Promise<CreateProjectRe
       client_name: formData.get('client_name') as string,
       client_email: formData.get('client_email') as string,
       budget: formData.get('budget') as string,
-      priority: formData.get('priority') as string,
       start_date: formData.get('start_date') as string,
       end_date: formData.get('end_date') as string,
-      userId: user.id
+      priority: formData.get('priority') as string,
+      status: formData.get('status') as string,
+      user_id: user.id
     }
 
     // Validate the data
@@ -80,13 +82,11 @@ export async function createProject(formData: FormData): Promise<CreateProjectRe
       client_name: validatedData.client_name || null,
       client_email: validatedData.client_email || null,
       budget: validatedData.budget || 0,
-      priority: validatedData.priority || 'medium',
       start_date: validatedData.start_date || null,
       end_date: validatedData.end_date || null,
-      status: 'active' as const,
-      progress: 0,
-      spent: 0,
-      user_id: user.id,
+      priority: validatedData.priority,
+      status: validatedData.status,
+      user_id: validatedData.user_id,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     }

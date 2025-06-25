@@ -1,132 +1,16 @@
-import type { Metadata, Viewport } from 'next'
+import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { Toaster } from '@/components/ui/toaster'
-import { Providers } from '@/components/providers/providers'
-import { AnalyticsProvider } from '@/components/providers/analytics-provider'
+import { cn } from '@/lib/utils'
+import { Analytics } from '@vercel/analytics/react'
+import { Providers } from '@/components/providers'
 
-const inter = Inter({ 
-  subsets: ['latin'],
-  display: 'swap',
-  preload: true,
-  variable: '--font-inter',
-})
+const inter = Inter({ subsets: ['latin'] })
 
-// Enhanced metadata for production
 export const metadata: Metadata = {
-  title: {
-    default: 'FreeflowZee - AI-Powered Creative Platform | Generate Assets with Premium AI Models',
-    template: '%s | FreeflowZee'
-  },
-  description: 'Revolutionary AI-powered creative platform with premium model access (GPT-4o, Claude, DALL-E). Generate professional assets, share files like WeTransfer with escrow payments, and manage creative projects seamlessly.',
-  keywords: [
-    'AI creative platform',
-    'AI asset generation',
-    'GPT-4o creative tools',
-    'Claude AI for creatives',
-    'DALL-E integration',
-    'premium AI model trials',
-    'WeTransfer alternative',
-    'escrow payment system',
-    'file sharing with payments',
-    'creative project management',
-    'AI-powered design tools',
-    'video studio platform',
-    'freelance management',
-    'creative workflow automation',
-    'professional creative tools'
-  ],
-  authors: [{ name: 'FreeflowZee Team' }],
-  creator: 'FreeflowZee',
-  publisher: 'FreeflowZee',
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://freeflowzee.com'),
-  alternates: {
-    canonical: '/',
-  },
-  openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: '/',
-    title: 'FreeflowZee - AI-Powered Creative Platform | Generate Assets with Premium AI Models',
-    description: 'Revolutionary AI-powered creative platform with premium model access (GPT-4o, Claude, DALL-E). Generate professional assets, share files like WeTransfer with escrow payments.',
-    siteName: 'FreeflowZee',
-    images: [
-      {
-        url: '/images/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'FreeflowZee - AI-Powered Creative Platform with Asset Generation and File Sharing',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'FreeflowZee - AI-Powered Creative Platform | Generate Assets with Premium AI Models',
-    description: 'Revolutionary AI-powered creative platform with premium model access (GPT-4o, Claude, DALL-E). Generate professional assets, share files like WeTransfer with escrow payments.',
-    images: ['/images/twitter-image.jpg'],
-    creator: '@freeflowzee',
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
-  verification: {
-    google: process.env.GOOGLE_SITE_VERIFICATION,
-    yandex: process.env.YANDEX_VERIFICATION,
-    yahoo: process.env.YAHOO_VERIFICATION,
-  },
-  category: 'technology',
-  classification: 'Business',
-  referrer: 'origin-when-cross-origin',
-  generator: 'Next.js',
-  applicationName: 'FreeflowZee',
-  appleWebApp: {
-    capable: true,
-    title: 'FreeflowZee',
-    statusBarStyle: 'default',
-  },
-  manifest: '/manifest.json',
-  icons: {
-    icon: [
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-    ],
-    apple: [
-      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
-    ],
-    other: [
-      {
-        rel: 'mask-icon',
-        url: '/safari-pinned-tab.svg',
-        color: '#3b82f6',
-      },
-    ],
-  },
-}
-
-// Enhanced viewport configuration
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 5,
-  userScalable: true,
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
-  ],
-  colorScheme: 'light dark',
+  title: 'FreeflowZee',
+  description: 'Professional freelance project management platform',
+  metadataBase: new URL('http://localhost:3001'),
 }
 
 export default function RootLayout({
@@ -135,8 +19,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <head>
+    <html lang="en" suppressHydrationWarning>
+      <head suppressHydrationWarning>
         {/* Preconnect to external domains for performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -201,25 +85,30 @@ export default function RootLayout({
               }
             })
           }}
+          suppressHydrationWarning
         />
       </head>
-      <body className={`${inter.className} antialiased`} suppressHydrationWarning>
-        <Providers>
-          {children}
-          <Toaster />
-          <AnalyticsProvider />
-        </Providers>
-        
-        {/* Performance monitoring script */}
-        {process.env.NODE_ENV === 'production' && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                // Add performance monitoring here if needed
-              `
-            }}
-          />
+      <body 
+        className={cn(
+          inter.className,
+          'min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50'
         )}
+      >
+        <Providers>
+          <main className="relative min-h-screen">
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px)] bg-[size:30px_30px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
+            <div className="relative">
+              <div className="relative flex min-h-screen flex-col">
+                <div className="flex-1">
+                  <div className="glass-card mx-auto max-w-screen-2xl p-6">
+                    {children}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </main>
+        </Providers>
+        <Analytics />
       </body>
     </html>
   )
