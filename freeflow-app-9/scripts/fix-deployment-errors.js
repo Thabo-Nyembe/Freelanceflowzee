@@ -279,9 +279,11 @@ export default openRouterService`;
     log('   ✅ Vercel deployment successful', colors.green);
     
     // Extract deployment URL
-    const deploymentUrl = deployResult.output.match(/https:\/\/[^\s]+/);
-    if (deploymentUrl) {
+    const deploymentUrl = deployResult.output?.match(/https:\/\/[^\s]+/);
+    if (deploymentUrl && deploymentUrl[0]) {
       log(`   🌐 Live URL: ${deploymentUrl[0]}`, colors.cyan);
+    } else {
+      log(`   🌐 Deployment successful - check Vercel dashboard for URL`, colors.cyan);
     }
   } else {
     fixes.push('❌ Vercel deployment failed');
