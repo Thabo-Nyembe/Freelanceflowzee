@@ -44,13 +44,13 @@ const sampleFiles = [
 
 export default function CollaborationPage() {
   return (
-    <div className="container-responsive py-6 space-y-8">
+    <div className="collaboration-container">
       {/* Header */}
-      <div className="text-center space-y-4">
-        <h1 className="heading-responsive font-bold text-slate-900">
+      <div className="collaboration-tabs-container text-center space-y-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
           Enhanced Collaboration Hub
         </h1>
-        <p className="text-responsive text-slate-600 max-w-3xl mx-auto">
+        <p className="text-sm md:text-base text-slate-600 max-w-3xl mx-auto">
           Experience the future of creative collaboration with real-time feedback, 
           AI-powered insights, and seamless client communication.
         </p>
@@ -71,85 +71,89 @@ export default function CollaborationPage() {
       </div>
 
       {/* Collaboration Tabs */}
-      <Tabs defaultValue="chat" className="space-y-6">
-        <TabsList className="bg-white/60 backdrop-blur-sm border-slate-200/50">
-          <TabsTrigger value="chat" className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4" />
-            <span className="hidden sm:inline">Enhanced Chat</span>
-          </TabsTrigger>
-          <TabsTrigger value="feedback" className="flex items-center gap-2">
-            <Target className="w-4 h-4" />
-            <span className="hidden sm:inline">Feedback</span>
-          </TabsTrigger>
-          <TabsTrigger value="media" className="flex items-center gap-2">
-            <ImageIcon className="w-4 h-4" />
-            <span className="hidden sm:inline">Media</span>
-          </TabsTrigger>
-          <TabsTrigger value="gallery" className="flex items-center gap-2">
-            <FolderOpen className="w-4 h-4" />
-            <span className="hidden sm:inline">Gallery</span>
-          </TabsTrigger>
-        </TabsList>
+      <div className="tab-content-container">
+        <Tabs defaultValue="chat" className="h-full flex flex-col">
+          <TabsList className="bg-white/60 backdrop-blur-sm border-slate-200/50 flex-shrink-0">
+            <TabsTrigger value="chat" className="flex items-center gap-2">
+              <MessageSquare className="w-4 h-4" />
+              <span className="hidden sm:inline">Enhanced Chat</span>
+            </TabsTrigger>
+            <TabsTrigger value="feedback" className="flex items-center gap-2">
+              <Target className="w-4 h-4" />
+              <span className="hidden sm:inline">Feedback</span>
+            </TabsTrigger>
+            <TabsTrigger value="media" className="flex items-center gap-2">
+              <ImageIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">Media</span>
+            </TabsTrigger>
+            <TabsTrigger value="gallery" className="flex items-center gap-2">
+              <FolderOpen className="w-4 h-4" />
+              <span className="hidden sm:inline">Gallery</span>
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="chat" className="mt-6">
-          <Card className="glass-card">
-            <CardContent className="p-6">
-              <RealTimeCollaborationSystem />
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <div className="flex-1 overflow-hidden">
+            <TabsContent value="chat" className="h-full">
+              <Card className="glass-card">
+                <CardContent className="tab-panel">
+                  <RealTimeCollaborationSystem />
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-        <TabsContent value="feedback" className="mt-6">
-          <Card className="glass-card">
-            <CardContent>
-              <UniversalPinpointFeedbackSystem 
-                projectId="current-project"
-                files={sampleFiles}
-                currentUser={{
-                  id: currentUser.id,
-                  name: currentUser.name,
-                  avatar: currentUser.avatar,
-                  role: 'freelancer'
-                }}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
+            <TabsContent value="feedback" className="h-full">
+              <Card className="glass-card">
+                <CardContent className="tab-panel">
+                  <UniversalPinpointFeedbackSystem 
+                    projectId="current-project"
+                    files={sampleFiles}
+                    currentUser={{
+                      id: currentUser.id,
+                      name: currentUser.name,
+                      avatar: currentUser.avatar,
+                      role: 'freelancer'
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-        <TabsContent value="media" className="mt-6">
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ImageIcon className="w-5 h-5 text-purple-600" />
-                Universal Media Previews
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <UniversalMediaPreviewsEnhanced />
-            </CardContent>
-          </Card>
-        </TabsContent>
+            <TabsContent value="media" className="h-full">
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ImageIcon className="w-5 h-5 text-purple-600" />
+                    Universal Media Previews
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="tab-panel">
+                  <UniversalMediaPreviewsEnhanced />
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-        <TabsContent value="gallery" className="mt-6">
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FolderOpen className="w-5 h-5 text-orange-600" />
-                Project Gallery
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <FolderOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Project Gallery</h3>
-                <p className="text-gray-600">
-                  Browse and manage all project files and assets in one place.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            <TabsContent value="gallery" className="h-full">
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FolderOpen className="w-5 h-5 text-orange-600" />
+                    Project Gallery
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="tab-panel">
+                  <div className="text-center py-12">
+                    <FolderOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Project Gallery</h3>
+                    <p className="text-gray-600">
+                      Browse and manage all project files and assets in one place.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </div>
+        </Tabs>
+      </div>
     </div>
   )
 }

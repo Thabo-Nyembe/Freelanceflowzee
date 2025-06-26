@@ -551,9 +551,9 @@ export function ProjectsHub({ projects: initialProjects, userId }: ProjectsHubPr
   }
 
   return (
-    <div data-testid="projects-hub">
-      <Card className="w-full">
-        <CardHeader>
+    <div data-testid="projects-hub" className="h-full">
+      <Card className="w-full h-full flex flex-col">
+        <CardHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2 text-2xl">
@@ -591,9 +591,9 @@ export function ProjectsHub({ projects: initialProjects, userId }: ProjectsHubPr
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+        <CardContent className="flex-1 overflow-hidden">
+          <Tabs defaultValue="overview" className="h-full flex flex-col">
+            <TabsList className="grid w-full grid-cols-4 flex-shrink-0">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="active">Active</TabsTrigger>
               <TabsTrigger value="completed">Completed</TabsTrigger>
@@ -601,7 +601,7 @@ export function ProjectsHub({ projects: initialProjects, userId }: ProjectsHubPr
             </TabsList>
 
             {/* Overview Tab */}
-            <TabsContent value="overview" className="space-y-6">
+            <TabsContent value="overview" className="dashboard-tab-content space-y-6">
               {/* Project Statistics */}
               <div className="grid gap-4 md:grid-cols-4">
                 <Card>
@@ -728,7 +728,7 @@ export function ProjectsHub({ projects: initialProjects, userId }: ProjectsHubPr
             </TabsContent>
 
             {/* Active Tab */}
-            <TabsContent value="active">
+            <TabsContent value="active" className="dashboard-tab-content">
               <div className="space-y-4">
                 {projects.filter(p => p.status === 'active').map((project) => (
                   <ProjectCard key={project.id} project={project} />
@@ -737,7 +737,7 @@ export function ProjectsHub({ projects: initialProjects, userId }: ProjectsHubPr
             </TabsContent>
 
             {/* Completed Tab */}
-            <TabsContent value="completed">
+            <TabsContent value="completed" className="dashboard-tab-content">
               <div className="space-y-4">
                 {projects.filter(p => p.status === 'completed').map((project) => (
                   <ProjectCard key={project.id} project={project} />
@@ -746,7 +746,7 @@ export function ProjectsHub({ projects: initialProjects, userId }: ProjectsHubPr
             </TabsContent>
 
             {/* Analytics Tab */}
-            <TabsContent value="analytics">
+            <TabsContent value="analytics" className="dashboard-tab-content">
               <div className="grid gap-6 md:grid-cols-2">
                 <Card>
                   <CardHeader>

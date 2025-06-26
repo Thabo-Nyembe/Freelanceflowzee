@@ -510,20 +510,20 @@ export function RealTimeCollaborationSystem() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="collaboration-container">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-shrink-0 mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             🤝 Real-Time Collaboration Hub
           </h1>
-          <p className="text-muted-foreground mt-2 flex items-center gap-2">
-            Enhanced workflow management with live feedback and approvals
+          <div className="text-muted-foreground mt-2 flex items-center gap-2">
+            <span>Enhanced workflow management with live feedback and approvals</span>
             <Badge className={isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
               {isConnected ? <Wifi className="h-3 w-3 mr-1" /> : <WifiOff className="h-3 w-3 mr-1" />}
               {isConnected ? 'Connected' : 'Disconnected'}
             </Badge>
-          </p>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           {/* Connected Users */}
@@ -614,9 +614,9 @@ export function RealTimeCollaborationSystem() {
         </Card>
       )}
 
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="collaboration-content grid lg:grid-cols-3 gap-8 h-full overflow-hidden">
         {/* Main Content Area */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6 overflow-y-auto pr-2">
           {/* File Selector */}
           <Card>
             <CardHeader>
@@ -844,7 +844,7 @@ export function RealTimeCollaborationSystem() {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-6 overflow-y-auto pl-2 h-full">
           {/* Approval Workflow */}
           <Card>
             <CardHeader>

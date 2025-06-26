@@ -102,6 +102,118 @@
 }
 
 @layer components {
+  /* Dashboard Layout System */
+  .dashboard-layout {
+    @apply flex min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-violet-50/40;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .dark .dashboard-layout {
+    @apply from-gray-900 via-purple-900/20 to-violet-900/20;
+  }
+
+  /* Mobile Header */
+  .mobile-header {
+    @apply lg:hidden fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-b border-gray-200/50 px-4 py-3 flex items-center justify-between;
+  }
+  
+  .dark .mobile-header {
+    @apply bg-gray-900/95 border-gray-800/50;
+  }
+
+  .mobile-menu-button {
+    @apply p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100/50 transition-colors;
+  }
+  
+  .dark .mobile-menu-button {
+    @apply text-gray-400 hover:text-gray-100 hover:bg-gray-800/50;
+  }
+
+  /* Dashboard Sidebar */
+  .dashboard-sidebar {
+    @apply fixed lg:static inset-y-0 left-0 z-40 w-64 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out;
+    @apply bg-white/80 backdrop-blur-xl border-r border-gray-200/50;
+    @apply flex flex-col;
+  }
+  
+  .dashboard-sidebar.open {
+    @apply translate-x-0;
+  }
+  
+  .dark .dashboard-sidebar {
+    @apply bg-gray-900/80 border-gray-800/50;
+  }
+
+  /* Mobile Navigation Overlay */
+  .dashboard-nav-mobile-overlay {
+    @apply lg:hidden fixed inset-0 z-30 bg-black/20 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300;
+  }
+  
+  .dashboard-nav-mobile-overlay.active {
+    @apply opacity-100 pointer-events-auto;
+  }
+
+  /* Main Content Area */
+  .dashboard-main {
+    @apply flex-1 flex flex-col min-w-0;
+    @apply lg:ml-0 pt-16 lg:pt-0;
+    min-height: 100vh;
+    max-width: calc(100vw - 16rem); /* Account for sidebar width */
+  }
+  
+  @media (max-width: 1024px) {
+    .dashboard-main {
+      max-width: 100vw;
+      margin-left: 0;
+    }
+  }
+
+  /* Dashboard Header */
+  .dashboard-header {
+    @apply flex-shrink-0 bg-white/60 backdrop-blur-lg border-b border-gray-200/50 px-6 py-4;
+  }
+  
+  .dark .dashboard-header {
+    @apply bg-gray-900/60 border-gray-800/50;
+  }
+
+  /* Dashboard Content */
+  .dashboard-content {
+    @apply flex-1 overflow-hidden;
+    @apply p-6;
+    min-height: calc(100vh - 5rem); /* Account for header */
+    max-height: calc(100vh - 5rem);
+  }
+
+  /* Content Container for Tabs */
+  .dashboard-tab-content {
+    @apply h-full overflow-auto flex-1;
+    height: calc(100vh - 12rem); /* Account for header + tabs */
+    min-height: 0; /* Allow content to shrink */
+  }
+
+  /* Collaboration Container */
+  .collaboration-container {
+    @apply h-full flex flex-col gap-6;
+    height: calc(100vh - 8rem); /* Account for header */
+  }
+
+  /* Collaboration Content */
+  .collaboration-content {
+    @apply flex-1 flex flex-col min-h-0; /* min-h-0 allows flex child to shrink */
+  }
+
+  /* Skip to content accessibility */
+  .skip-to-content {
+    @apply absolute -top-10 left-4 z-50 bg-white px-4 py-2 text-sm font-medium text-gray-900 rounded-md shadow-md transition-all;
+    @apply focus:top-4;
+  }
+  
+  .dark .skip-to-content {
+    @apply bg-gray-900 text-gray-100;
+  }
+
   /* Header and Navigation */
   .theme-header {
     @apply bg-white/95 backdrop-blur-lg border-b border-gray-200/20;
@@ -356,6 +468,34 @@
   .dark .theme-nav-item-active {
     color: rgb(167, 139, 250);
     background-color: rgba(88, 28, 135, 0.3);
+  }
+
+  /* Glass Card Styles */
+  .glass-card {
+    @apply bg-white/60 backdrop-blur-xl border border-white/20 shadow-lg;
+    @apply flex flex-col; /* Add flex column layout */
+    @apply h-full; /* Take full height */
+  }
+
+  .dark .glass-card {
+    @apply bg-gray-900/60 border-gray-800/20;
+  }
+
+  /* Tab Content Container */
+  .tab-content-container {
+    @apply flex-1 overflow-hidden flex flex-col;
+    min-height: 0; /* Allow content to shrink */
+  }
+
+  /* Tab Panel */
+  .tab-panel {
+    @apply flex-1 overflow-auto p-6;
+    min-height: 0; /* Allow content to shrink */
+  }
+
+  /* Tabs Header */
+  .collaboration-tabs-container {
+    @apply flex-shrink-0 pb-6;
   }
 }
 
