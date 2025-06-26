@@ -191,6 +191,7 @@
     "@babel/preset-typescript": "^7.27.1",
     "@next/bundle-analyzer": "^15.3.3",
     "@playwright/test": "^1.53.1",
+    "@svgr/webpack": "^8.1.0",
     "@tailwindcss/postcss": "^4.1.10",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^14.3.1",
