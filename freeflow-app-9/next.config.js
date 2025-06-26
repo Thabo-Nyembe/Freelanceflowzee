@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const path = require('path');
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
 
 const nextConfig = {
   // Core Configuration
@@ -24,13 +27,16 @@ const nextConfig = {
     
     // Server actions
     serverActions: {
-      enabled: true,
-      allowedOrigins: ['localhost:3001', 'freeflow-app-9.vercel.app'],
-      bodySizeLimit: '2mb'
+      allowedOrigins: ["localhost:3001"]
     },
     
     // External packages
-    externalDir: true
+    externalDir: true,
+    
+    // Performance optimizations
+    optimizeCss: true,
+    serverMinification: true,
+    optimizeServerReact: true
   },
   
   // Compiler optimizations
@@ -84,22 +90,51 @@ const nextConfig = {
     };
 
     // Optimize webpack cache
-    config.cache = {
-      type: 'filesystem',
-      version: `${process.env.NODE_ENV}-${config.mode}-${process.version}`,
-      cacheDirectory: path.resolve(__dirname, '.next/cache/webpack'),
-      store: 'pack',
-      buildDependencies: {
-        config: [__filename],
-        tsconfig: [path.resolve(__dirname, 'tsconfig.json')],
-      }
-    };
+    if (!dev) {
+      config.cache = {
+        type: 'filesystem',
+        version: `${process.env.NODE_ENV}-${config.mode}-${process.version}`,
+        cacheDirectory: path.resolve(__dirname, '.next/cache/webpack'),
+        store: 'pack',
+        buildDependencies: {
+          config: [__filename],
+          tsconfig: [path.resolve(__dirname, 'tsconfig.json')],
+        }
+      };
+    }
 
     // Handle SVG files
     config.module.rules.push({
       test: /\.svg$/,
       use: ['@svgr/webpack'],
     });
+
+    // Optimize chunks
+    if (!dev && !isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          minSize: 20000,
+          maxSize: 244000,
+          minChunks: 1,
+          maxAsyncRequests: 30,
+          maxInitialRequests: 30,
+          cacheGroups: {
+            defaultVendors: {
+              test: /[\\/]node_modules[\\/]/,
+              priority: -10,
+              reuseExistingChunk: true,
+            },
+            default: {
+              minChunks: 2,
+              priority: -20,
+              reuseExistingChunk: true,
+            },
+          },
+        },
+      };
+    }
 
     return config;
   },
@@ -125,4 +160,4 @@ const nextConfig = {
   output: 'standalone',
 };
 
-module.exports = nextConfig;
+module.exports = withBundleAnalyzer(nextConfig);

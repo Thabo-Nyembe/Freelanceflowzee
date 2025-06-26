@@ -9,6 +9,16 @@ const { execSync, spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+// Colors for console output
+const colors = {
+  reset: '\x1b[0m',
+  bright: '\x1b[1m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  red: '\x1b[31m',
+  cyan: '\x1b[36m'
+};
+
 class ProductionDeployer {
   constructor() {
     this.checks = {
@@ -47,7 +57,10 @@ class ProductionDeployer {
         'NEXT_PUBLIC_SUPABASE_ANON_KEY',
         'SUPABASE_SERVICE_ROLE_KEY',
         'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY',
-        'STRIPE_SECRET_KEY'
+        'STRIPE_SECRET_KEY',
+        'WASABI_ACCESS_KEY_ID',
+        'WASABI_SECRET_ACCESS_KEY',
+        'WASABI_BUCKET_NAME'
       ];
       
       const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
