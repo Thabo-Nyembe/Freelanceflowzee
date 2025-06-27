@@ -158,7 +158,7 @@ const navigationItems: NavigationItem[] = [
     features: ['Milestone tracking', 'Secure payments', 'Project protection']
   },
   {
-    href: '/dashboard/client-portal',
+          href: '/dashboard/client-zone',
     title: 'Client Portal',
     icon: Users,
     badge: 'A+++',

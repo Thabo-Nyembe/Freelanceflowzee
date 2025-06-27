@@ -136,11 +136,11 @@ const NAVIGATION_ITEMS = [
         testId: 'nav-community'
       },
       {
-        href: '/dashboard/client-portal',
+        href: '/dashboard/client-zone',
         title: 'Client Portal',
         icon: Users,
         description: 'Client management',
-        testId: 'nav-client-portal'
+        testId: 'nav-client-zone'
       }
     ]
   }
