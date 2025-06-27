@@ -15,7 +15,7 @@ describe(&apos;AI Features&apos;, () => {
       email: &apos;test@example.com&apos;,
       password: &apos;test123&apos;,
     })
-    authToken = session?.access_token || '&apos;'
+    authToken = session?.access_token || '&apos;
   })
 
   afterAll(async () => {

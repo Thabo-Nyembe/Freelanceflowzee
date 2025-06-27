@@ -1,6 +1,6 @@
-'use client'
+'use client
 
-import React, { useState } from 'react'
+import React, { useState } from 'react
 import { Button } from '@/components/ui/button'
  </span>
                         <span className= "text-purple-400">from</span>
@@ -92,7 +92,7 @@ import { Button } from '@/components/ui/button'
                         <span className= "text-gray-100"> </span>
                         <span className= "text-blue-400">className</span>
                         <span className= "text-gray-100">=</span>
-                        <span className= "text-green-400">"container"</span>"
+                        <span className= "text-green-400">"container"</span>
                         <span className= "text-gray-100">{`>`}</span>
                       </div>
                     </div>
@@ -184,18 +184,18 @@ import { Button } from '@/components/ui/button'
                   {showingComments && sampleComments.screenshot.map((comment) => (
                     <div
                       key={comment.id}
-                      className= "absolute transform -translate-x-1/2 -translate-y-1/2 group"
+                      className= "absolute transform -translate-x-1/2 -translate-y-1/2 group
                       style={{ left: `${comment.x}%`, top: `${comment.y}%` }}
                     >
                       <div className={`w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold shadow-lg cursor-pointer ${
-                        comment.status === 'resolved' ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'
+                        comment.status === 'resolved' ? 'bg-green-500 text-white' : 'bg-blue-500 text-white
                       }`}>
                         {comment.id}
                       </div>
                       <div className= "absolute top-8 left-1/2 transform -translate-x-1/2 bg-white border rounded-lg shadow-lg p-3 w-64 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                         <div className= "flex items-start gap-2">
                           <Avatar className= "h-6 w-6">
-                            <AvatarFallback className= "text-xs">{comment.author.split(&apos; ')[0][0]}</AvatarFallback>'
+                            <AvatarFallback className= "text-xs">{comment.author.split(&apos; ')[0][0]}</AvatarFallback>
                           </Avatar>
                           <div className= "flex-1">
                             <p className= "text-sm">{comment.content}</p>
@@ -228,7 +228,7 @@ import { Button } from '@/components/ui/button'
             <div className= "flex items-center gap-2">
               <Button 
                 variant={showingComments ? "default" : "outline"} 
-                size= "sm"
+                size= "sm
                 onClick={() => setShowingComments(!showingComments)}
               >
                 <MessageSquare className= "h-4 w-4 mr-2" />

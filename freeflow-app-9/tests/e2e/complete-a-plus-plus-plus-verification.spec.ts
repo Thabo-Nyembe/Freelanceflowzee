@@ -197,7 +197,7 @@ test.describe(&apos;🔥 A+++ Enterprise Features - Complete Interactive Verific
     const timeBlockButton = page.locator(&apos;button:has-text(&quot;Time Blocks&quot;)&apos;)
     if (await timeBlockButton.isVisible()) {
       await timeBlockButton.click()
-      await expect(page.locator(&apos;text=Today\'s Schedule&apos;)).toBeVisible()'
+      await expect(page.locator(&apos;text=Today\'s Schedule&apos;)).toBeVisible()
     }
     
     // Test AI insights

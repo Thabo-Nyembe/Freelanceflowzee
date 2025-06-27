@@ -1,4 +1,4 @@
-'use client'
+'use client
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -75,7 +75,7 @@ export function StandaloneDemo() {
       color: "bg-blue-500",
       audience: "Business clients, decision makers",
       duration: "10-15 minutes",
-      type: "client"
+      type: "client
     },
     {
       id: "investor",
@@ -85,7 +85,7 @@ export function StandaloneDemo() {
       color: "bg-green-500",
       audience: "Investors, stakeholders",
       duration: "15-20 minutes",
-      type: "investor"
+      type: "investor
     },
     {
       id: "features",
@@ -95,76 +95,76 @@ export function StandaloneDemo() {
       color: "bg-purple-500",
       audience: "Product evaluators, new users",
       duration: "12-18 minutes",
-      type: "features"
+      type: "features
     }
   ];
 
   const clientSlides = [
     {
       title: "FreeflowZee: Your Complete Freelance Solution",
-      content: "overview"
+      content: "overview
     },
     {
       title: "Proven Results & Success Metrics", 
-      content: "metrics"
+      content: "metrics
     },
     {
       title: "Project Portfolio Showcase",
-      content: "portfolio"
+      content: "portfolio
     },
     {
       title: "Client Success Stories",
-      content: "testimonials"
+      content: "testimonials
     },
     {
       title: "Ready to Get Started?",
-      content: "cta"
+      content: "cta
     }
   ];
 
   const investorSlides = [
     {
       title: "Market Opportunity & Growth",
-      content: "market"
+      content: "market
     },
     {
       title: "Platform Metrics & Traction",
-      content: "traction"
+      content: "traction
     },
     {
       title: "Revenue Model & Projections",
-      content: "revenue"
+      content: "revenue
     },
     {
       title: "Competitive Advantage",
-      content: "advantage"
+      content: "advantage
     },
     {
       title: "Growth Strategy & Roadmap",
-      content: "roadmap"
+      content: "roadmap
     }
   ];
 
   const featureSlides = [
     {
       title: "Project Management Hub",
-      content: "projects"
+      content: "projects
     },
     {
       title: "Secure Escrow System",
-      content: "escrow"
+      content: "escrow
     },
     {
       title: "AI-Powered Tools",
-      content: "ai"
+      content: "ai
     },
     {
       title: "Community & Collaboration",
-      content: "community"
+      content: "community
     },
     {
       title: "Analytics & Reporting",
-      content: "analytics"
+      content: "analytics
     }
   ];
 
@@ -292,7 +292,7 @@ export function StandaloneDemo() {
                         <Star key={i} className= "h-4 w-4 fill-yellow-400 text-yellow-400" />
                       ))}
                     </div>
-                    <p className= "italic mb-4">"{testimonial.text}"</p>"
+                    <p className= "italic mb-4">"{testimonial.text}"</p>
                     <div className= "font-semibold">- {testimonial.author}, {testimonial.role}</div>
                   </CardContent>
                 </Card>
@@ -793,7 +793,7 @@ export function StandaloneDemo() {
             {demoTypes.map((demo) => (
               <Card 
                 key={demo.id}
-                className= "hover:shadow-lg transition-shadow cursor-pointer"
+                className= "hover:shadow-lg transition-shadow cursor-pointer
                 onClick={() => {
                   setCurrentDemo(demo.id);
                   setCurrentSlide(0);
@@ -837,7 +837,7 @@ export function StandaloneDemo() {
               <div className= "flex gap-2">
                 <Button 
                   variant= "outline" 
-                  size= "sm"
+                  size= "sm
                   disabled={currentSlide === 0}
                   onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
                 >
@@ -845,7 +845,7 @@ export function StandaloneDemo() {
                 </Button>
                 <Button 
                   variant= "outline" 
-                  size= "sm"
+                  size= "sm
                   disabled={currentSlide === clientSlides.length - 1}
                   onClick={() => setCurrentSlide(Math.min(clientSlides.length - 1, currentSlide + 1))}
                 >

@@ -10,8 +10,8 @@ const INVALID_CREDENTIALS = {
   invalidEmail: &apos;invalid.email.format&apos;,
   nonExistentEmail: &apos;nonexistent@example.com&apos;,
   wrongPassword: &apos;WrongPassword123!&apos;,
-  blankEmail: '&apos;,'
-  blankPassword: '&apos;'
+  blankEmail: '&apos;,
+  blankPassword: '&apos;
 };
 
 // Helper functions for login testing
@@ -38,7 +38,7 @@ const waitForLoginResponse = async (page: Page) => {
 
 const getErrorFromUrl = (page: Page) => {
   const url = page.url();
-  const params = new URLSearchParams(url.split(&apos;?')[1]);'
+  const params = new URLSearchParams(url.split(&apos;?')[1]);
   return params.get(&apos;error&apos;);
 };
 

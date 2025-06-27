@@ -1,17 +1,17 @@
-'use client'
+'use client
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query
+import { toast } from 'sonner
 
 interface AIGenerationParams {
   prompt: string
-  type: 'design' | 'content' | 'asset'
+  type: 'design' | 'content' | 'asset
   settings?: Record<string, any>
 }
 
 interface AIAnalysisParams {
   content: string
-  type: 'design' | 'performance' | 'seo'
+  type: 'design' | 'performance' | 'seo
   options?: Record<string, any>
 }
 

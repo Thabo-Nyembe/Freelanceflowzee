@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freeflow-app-9-6egesbwif-thabo-5265s-projects.vercel.app'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freeflow-app-9-6egesbwif-thabo-5265s-projects.vercel.app
   
   const robots = `User-agent: *
 Allow: /
@@ -73,7 +73,7 @@ User-agent: AhrefsBot
 Disallow: /
 
 User-agent: SemrushBot
-Disallow: /`
+Disallow: /
 
   return new NextResponse(robots, {
     headers: {

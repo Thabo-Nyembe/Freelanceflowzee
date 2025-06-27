@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from '@playwright/test
 
 test.describe('JavaScript Disabled Tests', () => {
   test.use({ javaScriptEnabled: false })

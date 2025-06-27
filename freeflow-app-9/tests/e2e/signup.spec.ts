@@ -108,7 +108,7 @@ test.describe(&apos;Signup Flow&apos;, () => {
       
       // Browser should prevent submission due to invalid email
       const validationMessage = await emailInput.evaluate((el: HTMLInputElement) => el.validationMessage);
-      expect(validationMessage).not.toBe('&apos;);'
+      expect(validationMessage).not.toBe('&apos;);
     });
 
     test(&apos;should show error for invalid email format - missing domain&apos;, async ({ page }) => {
@@ -123,7 +123,7 @@ test.describe(&apos;Signup Flow&apos;, () => {
       
       const emailInput = page.locator(&apos;#email&apos;);
       const validationMessage = await emailInput.evaluate((el: HTMLInputElement) => el.validationMessage);
-      expect(validationMessage).not.toBe('&apos;);'
+      expect(validationMessage).not.toBe('&apos;);
     });
 
     test(&apos;should show error for invalid email format - special characters&apos;, async ({ page }) => {
@@ -138,7 +138,7 @@ test.describe(&apos;Signup Flow&apos;, () => {
       
       const emailInput = page.locator(&apos;#email&apos;);
       const validationMessage = await emailInput.evaluate((el: HTMLInputElement) => el.validationMessage);
-      expect(validationMessage).not.toBe('&apos;);'
+      expect(validationMessage).not.toBe('&apos;);
     });
 
     test(&apos;should handle duplicate email registration&apos;, async ({ page }) => {
@@ -182,8 +182,8 @@ test.describe(&apos;Signup Flow&apos;, () => {
       await fillSignupForm(page, {
         fullName: VALID_USER.fullName,
         email: VALID_USER.email,
-        password: '&apos;,'
-        confirmPassword: '&apos;'
+        password: '&apos;,
+        confirmPassword: '&apos;
       });
 
       await submitForm(page);
@@ -191,7 +191,7 @@ test.describe(&apos;Signup Flow&apos;, () => {
       // Check HTML5 required validation
       const passwordInput = page.locator(&apos;#password&apos;);
       const validationMessage = await passwordInput.evaluate((el: HTMLInputElement) => el.validationMessage);
-      expect(validationMessage).not.toBe('&apos;);'
+      expect(validationMessage).not.toBe('&apos;);
     });
 
     test(&apos;should show error for mismatched passwords&apos;, async ({ page }) => {
@@ -260,10 +260,10 @@ test.describe(&apos;Signup Flow&apos;, () => {
       const passwordValidation = await passwordInput.evaluate((el: HTMLInputElement) => el.validationMessage);
       const confirmPasswordValidation = await confirmPasswordInput.evaluate((el: HTMLInputElement) => el.validationMessage);
       
-      expect(fullNameValidation).not.toBe('&apos;);'
-      expect(emailValidation).not.toBe('&apos;);'
-      expect(passwordValidation).not.toBe('&apos;);'
-      expect(confirmPasswordValidation).not.toBe('&apos;);'
+      expect(fullNameValidation).not.toBe('&apos;);
+      expect(emailValidation).not.toBe('&apos;);
+      expect(passwordValidation).not.toBe('&apos;);
+      expect(confirmPasswordValidation).not.toBe('&apos;);
     });
 
     test(&apos;should show error for missing full name&apos;, async ({ page }) => {
@@ -277,7 +277,7 @@ test.describe(&apos;Signup Flow&apos;, () => {
       
       const fullNameInput = page.locator(&apos;#fullName&apos;);
       const validationMessage = await fullNameInput.evaluate((el: HTMLInputElement) => el.validationMessage);
-      expect(validationMessage).not.toBe('&apos;);'
+      expect(validationMessage).not.toBe('&apos;);
     });
 
     test(&apos;should show error for missing email&apos;, async ({ page }) => {
@@ -291,7 +291,7 @@ test.describe(&apos;Signup Flow&apos;, () => {
       
       const emailInput = page.locator(&apos;#email&apos;);
       const validationMessage = await emailInput.evaluate((el: HTMLInputElement) => el.validationMessage);
-      expect(validationMessage).not.toBe('&apos;);'
+      expect(validationMessage).not.toBe('&apos;);
     });
   });
 

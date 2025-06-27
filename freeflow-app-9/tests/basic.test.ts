@@ -9,25 +9,25 @@ test.describe(&apos;Basic Application Tests&apos;, () => {
   });
 
   test(&apos;homepage loads successfully&apos;, async ({ page }) => {
-    await helpers.navigateTo(&apos;/');'
+    await helpers.navigateTo(&apos;/');
     await expect(page).toHaveTitle(/Freeflow/);
   });
 
   test(&apos;navigation works correctly&apos;, async ({ page }) => {
-    await helpers.navigateTo(&apos;/');'
+    await helpers.navigateTo(&apos;/');
     
     // Click on navigation links using more specific selectors
-    const projectsLink = page.locator(&apos;a', { hasText: &apos;Projects Hub&apos; });'
+    const projectsLink = page.locator(&apos;a', { hasText: &apos;Projects Hub&apos; });
     await projectsLink.click();
     await helpers.verifyNavigation(&apos;projects&apos;);
     
-    const dashboardLink = page.locator(&apos;a', { hasText: &apos;Dashboard&apos; });'
+    const dashboardLink = page.locator(&apos;a', { hasText: &apos;Dashboard&apos; });
     await dashboardLink.click();
     await helpers.verifyNavigation(&apos;dashboard&apos;);
   });
 
   test(&apos;theme toggle works&apos;, async ({ page }) => {
-    await helpers.navigateTo(&apos;/');'
+    await helpers.navigateTo(&apos;/');
     
     // Test dark theme
     await helpers.toggleTheme(&apos;dark&apos;);
@@ -40,7 +40,7 @@ test.describe(&apos;Basic Application Tests&apos;, () => {
   });
 
   test(&apos;responsive design&apos;, async ({ page }) => {
-    await helpers.navigateTo(&apos;/');'
+    await helpers.navigateTo(&apos;/');
     
     // Test mobile layout
     await helpers.setViewportSize(&apos;mobile&apos;);

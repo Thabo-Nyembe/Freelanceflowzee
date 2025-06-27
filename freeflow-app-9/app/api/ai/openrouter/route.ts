@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { openRouterService } from '@/lib/ai/openrouter-service'
+import { NextRequest, NextResponse } from 'next/server
+import { openRouterService } from '@/lib/ai/openrouter-service
 
 export async function POST(request: NextRequest) {
   try {
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
       success: true,
       message: 'OpenRouter AI API is ready',
       endpoints: {
-        'POST /api/ai/openrouter': 'Generate AI responses', 'GET /api/ai/openrouter?test=connection': 'Test connection', 'GET /api/ai/openrouter?test=models': 'List available models'
+        'POST /api/ai/openrouter': 'Generate AI responses', 'GET /api/ai/openrouter?test=connection': 'Test connection', 'GET /api/ai/openrouter?test=models': 'List available models
       },
       timestamp: new Date().toISOString()
     })
@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: error.message || 'Failed to process request'
+        error: error.message || 'Failed to process request
       },
       { status: 500 }
     )

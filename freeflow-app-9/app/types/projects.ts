@@ -2,8 +2,8 @@ export interface Project {
   id: string
   title: string
   description: string
-  status: 'active' | 'completed' | 'archived' | 'draft'
-  priority: 'low' | 'medium' | 'high'
+  status: 'active' | 'completed' | 'archived' | 'draft
+  priority: 'low' | 'medium' | 'high
   budget: number
   spent: number
   client_name: string

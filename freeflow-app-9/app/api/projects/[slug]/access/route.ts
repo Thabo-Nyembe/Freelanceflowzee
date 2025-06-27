@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server
 import {
   isRateLimited,
   getRemainingTime,
@@ -6,7 +6,7 @@ import {
   clearRateLimit,
   getAttemptsRemaining,
   LOCKOUT_PERIOD
-} from '@/app/lib/rate-limit-store'
+} from '@/app/lib/rate-limit-store
 
 // Valid test credentials matching the test file
 const VALID_CREDENTIALS = {
@@ -18,11 +18,11 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1
   console.log(`Request from IP: ${ip}`)
 
   // Check if this is a test environment
-  const testMode = request.headers.get('x-test-mode') === 'true'
+  const testMode = request.headers.get('x-test-mode') === 'true
 
   // Check rate limiting if not in test mode
   if (!testMode && isRateLimited(ip)) {
@@ -45,15 +45,15 @@ export async function POST(
     const { password, accessCode } = body
 
     // Validate that at least one credential is provided and not empty
-    const hasPassword = password && password.trim() !== '
-    const hasAccessCode = accessCode && accessCode.trim() !== '
+    const hasPassword = password && password.trim() !== 
+    const hasAccessCode = accessCode && accessCode.trim() !== 
     
     if (!hasPassword && !hasAccessCode) {
       return NextResponse.json(
         { 
           success: false, 
           error: 'Please enter either a password or access code',
-          code: 'validation_error'
+          code: 'validation_error
         },
         { status: 400 }
       )
@@ -111,7 +111,7 @@ export async function POST(
     // Generate access token with correct format expected by tests
     const accessToken = `access_token_${Date.now()}_${Math.random()
       .toString(36)
-      .substr(2, 9)}`
+      .substr(2, 9)}
 
     return NextResponse.json({
       success: true,
@@ -140,7 +140,7 @@ export async function GET(
   try {
     const { slug } = await params
     const url = new URL(request.url)
-    const token = url.searchParams.get('token') || request.headers.get('authorization')?.replace('Bearer ', )'
+    const token = url.searchParams.get('token') || request.headers.get('authorization')?.replace('Bearer ', )
     
     if (token) {
       // Validate token format
@@ -150,14 +150,14 @@ export async function GET(
           valid: true,
           projectSlug: slug,
           accessLevel: 'premium',
-          message: 'Token is valid'
+          message: 'Token is valid
         })
       } else {
         return NextResponse.json(
           { 
             success: false, 
             error: 'Invalid access token',
-            code: 'invalid_token'
+            code: 'invalid_token
           },
           { status: 401 }
         )
@@ -167,7 +167,7 @@ export async function GET(
         { 
           success: false, 
           error: 'Access token required',
-          code: 'missing_token'
+          code: 'missing_token
         },
         { status: 401 }
       )

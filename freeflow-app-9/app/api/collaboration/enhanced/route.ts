@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { NextRequest, NextResponse } from 'next/server
+import { createClient } from '@/lib/supabase/server
 
 interface VideoAnnotation {
   id: string
@@ -7,9 +7,9 @@ interface VideoAnnotation {
   userId: string
   content: string
   timestamp: number
-  type: 'comment' | 'note' | 'suggestion' | 'issue' | 'approval_required'
+  type: 'comment' | 'note' | 'suggestion' | 'issue' | 'approval_required
   isResolved: boolean
-  priority: 'low' | 'medium' | 'high' | 'urgent'
+  priority: 'low' | 'medium' | 'high' | 'urgent
   mentions: string[]
   reactions: Reaction[]
   createdAt: string
@@ -21,9 +21,9 @@ interface ImageAnnotation {
   userId: string
   content: string
   position: { x: number; y: number }
-  type: 'comment' | 'note' | 'suggestion' | 'issue' | 'approval_required'
+  type: 'comment' | 'note' | 'suggestion' | 'issue' | 'approval_required
   isResolved: boolean
-  priority: 'low' | 'medium' | 'high' | 'urgent'
+  priority: 'low' | 'medium' | 'high' | 'urgent
   mentions: string[]
   reactions: Reaction[]
   createdAt: string
@@ -31,14 +31,14 @@ interface ImageAnnotation {
 
 interface Reaction {
   userId: string
-  type: 'like' | 'love' | 'laugh' | 'wow' | 'sad' | 'angry' | 'approve' | 'reject'
+  type: 'like' | 'love' | 'laugh' | 'wow' | 'sad' | 'angry' | 'approve' | 'reject
   createdAt: string
 }
 
 interface ProjectCollaboration {
   id: string
   projectId: string
-  escrowStatus: 'pending' | 'funded' | 'milestone_released' | 'fully_released'
+  escrowStatus: 'pending' | 'funded' | 'milestone_released' | 'fully_released
   downloadPassword?: string
   videoAnnotations: VideoAnnotation[]
   imageAnnotations: ImageAnnotation[]
@@ -51,7 +51,7 @@ interface ApprovalStep {
   id: string
   name: string
   description: string
-  status: 'pending' | 'in_progress' | 'approved' | 'rejected' | 'revision_requested'
+  status: 'pending' | 'in_progress' | 'approved' | 'rejected' | 'revision_requested
   requiredApprovers: string[]
   completedApprovers: string[]
   dueDate?: string
@@ -61,19 +61,19 @@ interface ApprovalStep {
 
 interface ActivityEvent {
   id: string
-  type: 'annotation_added' | 'approval_given' | 'file_uploaded' | 'escrow_updated' | 'download_unlocked'
+  type: 'annotation_added' | 'approval_given' | 'file_uploaded' | 'escrow_updated' | 'download_unlocked
   userId: string
   data: unknown
   timestamp: string
   isRead: boolean
-  priority: 'low' | 'medium' | 'high' | 'urgent'
+  priority: 'low' | 'medium' | 'high' | 'urgent
 }
 
 interface ClientPreference {
   id: string
   fileId: string
   userId: string
-  type: 'favorite' | 'like' | 'dislike' | 'selected_for_final'
+  type: 'favorite' | 'like' | 'dislike' | 'selected_for_final
   notes?: string
   createdAt: string
 }
@@ -196,7 +196,7 @@ async function handleAddVideoAnnotation(data: unknown, supabase: unknown, user: 
         content: content.substring(0, 100),
         priority
       },
-      priority: type === 'approval_required' ? 'high' : 'medium'
+      priority: type === 'approval_required' ? 'high' : 'medium
     })
 
     // Send real-time notifications to mentioned users
@@ -226,7 +226,7 @@ async function handleAddVideoAnnotation(data: unknown, supabase: unknown, user: 
     return NextResponse.json({
       success: true,
       annotation: savedAnnotation,
-      message: 'Video annotation added successfully'
+      message: 'Video annotation added successfully
     })
   } catch (error) {
     console.error('Add video annotation error:', error)
@@ -298,7 +298,7 @@ async function handleAddImageAnnotation(data: unknown, supabase: unknown, user: 
         content: content.substring(0, 100),
         priority
       },
-      priority: type === 'approval_required' ? 'high' : 'medium'
+      priority: type === 'approval_required' ? 'high' : 'medium
     })
 
     // Send real-time notifications to mentioned users
@@ -318,7 +318,7 @@ async function handleAddImageAnnotation(data: unknown, supabase: unknown, user: 
     return NextResponse.json({
       success: true,
       annotation: savedAnnotation,
-      message: 'Image annotation added successfully'
+      message: 'Image annotation added successfully
     })
   } catch (error) {
     console.error('Add image annotation error:', error)
@@ -410,13 +410,13 @@ async function handleUpdateClientPreference(data: unknown, supabase: unknown, us
         preferenceType: type,
         notes
       },
-      priority: type === 'selected_for_final' ? 'high' : 'low'
+      priority: type === 'selected_for_final' ? 'high' : 'low
     })
 
     return NextResponse.json({
       success: true,
       preference,
-      message: `File ${type.replace('_', ' ')} successfully`
+      message: `File ${type.replace('_', ' ')} successfully
     })
   } catch (error) {
     console.error('Update client preference error:', error)
@@ -502,14 +502,14 @@ async function handleSubmitApproval(data: unknown, supabase: unknown, user: unkn
         comments,
         allApproved
       },
-      priority: status === 'rejected' ? 'high' : 'medium'
+      priority: status === 'rejected' ? 'high' : 'medium
     })
 
     return NextResponse.json({
       success: true,
       step: updatedStep,
       allApproved,
-      message: `Approval ${status} successfully`
+      message: `Approval ${status} successfully
     })
   } catch (error) {
     console.error('Submit approval error:', error)
@@ -548,7 +548,7 @@ async function handleEscrowRelease(data: unknown, supabase: unknown, user: unkno
     // Determine release type
     const releaseAmount = amount || project.escrow_amount
     const isFullRelease = releaseAmount === project.escrow_amount
-    const newEscrowStatus = isFullRelease ? 'fully_released' : 'milestone_released'
+    const newEscrowStatus = isFullRelease ? 'fully_released' : 'milestone_released
 
     // Update project escrow status
     const { data: updatedProject, error: updateError } = await supabase
@@ -591,7 +591,7 @@ async function handleEscrowRelease(data: unknown, supabase: unknown, user: unkno
         .update({
           status: 'unlocked',
           unlocked_at: new Date().toISOString(),
-          unlock_method: 'escrow_release'
+          unlock_method: 'escrow_release
         })
         .eq('project_id', projectId)
         .eq('status', 'locked')
@@ -608,7 +608,7 @@ async function handleEscrowRelease(data: unknown, supabase: unknown, user: unkno
         newStatus: newEscrowStatus,
         downloadPassword: isFullRelease ? downloadPassword : null
       },
-      priority: 'high'
+      priority: 'high
     })
 
     // Send notification to client about download access
@@ -626,7 +626,7 @@ async function handleEscrowRelease(data: unknown, supabase: unknown, user: unkno
       escrowStatus: newEscrowStatus,
       downloadPassword: isFullRelease ? downloadPassword : null,
       unlockedDeliverables: isFullRelease,
-      message: `Escrow ${isFullRelease ? 'fully' : 'partially'} released successfully`
+      message: `Escrow ${isFullRelease ? 'fully' : 'partially'} released successfully
     })
   } catch (error) {
     console.error('Escrow release error:', error)
@@ -719,16 +719,16 @@ async function handleGenerateDownloadAccess(data: unknown, supabase: unknown, us
       userId: user.id,
       data: {
         deliverableCount: downloadTokens.length,
-        accessMethod: 'password'
+        accessMethod: 'password
       },
-      priority: 'medium'
+      priority: 'medium
     })
 
     return NextResponse.json({
       success: true,
       downloadTokens,
       expiresIn: '24 hours',
-      message: 'Download access granted successfully'
+      message: 'Download access granted successfully
     })
   } catch (error) {
     console.error('Generate download access error:', error)
@@ -750,7 +750,7 @@ async function createActivityEvent(supabase: unknown, eventData: unknown) {
       data: eventData.data,
       timestamp: new Date().toISOString(),
       is_read: false,
-      priority: eventData.priority || 'medium'
+      priority: eventData.priority || 'medium
     })
 
     // Trigger real-time notification (WebSocket/SSE)
@@ -793,7 +793,7 @@ async function checkApprovalWorkflow(supabase: unknown, projectId: string, data:
     // Check if there are pending approval steps that need attention
     const { data: pendingSteps } = await supabase
       .from('approval_steps')
-      .select('*')'
+      .select('*')
       .eq('project_id', projectId)
       .eq('status', 'pending')
       .order('order')
@@ -824,7 +824,7 @@ async function checkAllApproversCompleted(supabase: unknown, stepId: string): Pr
 
     // Check if all required approvers have submitted their approval
     const approvalFields = step.required_approvers.map((approverId: string) => 
-      `${approverId}_approved_at`
+      `${approverId}_approved_at
     )
 
     return approvalFields.every((field: string) => step[field] !== null)
@@ -838,7 +838,7 @@ async function advanceToNextApprovalStep(supabase: unknown, projectId: string, c
   try {
     const { data: nextStep } = await supabase
       .from('approval_steps')
-      .select('*')'
+      .select('*')
       .eq('project_id', projectId)
       .eq('status', 'pending')
       .order('order')
@@ -860,8 +860,8 @@ async function advanceToNextApprovalStep(supabase: unknown, projectId: string, c
 }
 
 function generateSecurePassword(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-  let password = '
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789
+  let password = 
   for (let i = 0; i < 12; i++) {
     password += chars.charAt(Math.floor(Math.random() * chars.length))
   }
@@ -869,7 +869,7 @@ function generateSecurePassword(): string {
 }
 
 async function generateDownloadToken(supabase: unknown, data: unknown): Promise<string> {
-  const token = `dt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  const token = `dt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}
   
   await supabase.from('download_tokens').insert({
     token,
@@ -995,7 +995,7 @@ async function getClientPreferences(supabase: unknown, projectId: string | null,
 
   const { data: preferences, error } = await supabase
     .from('client_preferences')
-    .select(`
+    .select(
       *,
       media_file:media_files(id, name, type, thumbnail_url)
     `)
@@ -1029,7 +1029,7 @@ async function getRealTimeActivity(supabase: unknown, projectId: string | null, 
 
   const { data: activity, error } = await supabase
     .from('real_time_activity')
-    .select(`
+    .select(
       *,
       user:users(id, email, full_name, avatar_url)
     `)
@@ -1060,7 +1060,7 @@ async function getApprovalStatus(supabase: unknown, projectId: string | null, us
 
   const { data: steps, error } = await supabase
     .from('approval_steps')
-    .select('*')'
+    .select('*')
     .eq('project_id', projectId)
     .order('order')
 

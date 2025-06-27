@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     // Return mock data for testing while database is being set up
     const mockComments = [
       {
-        id: '1','
+        id: '1',
         fileId: fileId || 'test-file-1',
         projectId: 'project-1',
         userId: 'user-1',
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
           themes: ['Animation', 'Pacing'],
           sentiment: 'constructive',
           priority: 'medium',
-          estimatedEffort: '2-3 hours'
+          estimatedEffort: '2-3 hours
         },
         reactions: [
           { type: 'thumbs_up', count: 2, users: ['user-2', 'user-3'] }
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
         updatedAt: new Date().toISOString()
       },
       {
-        id: '2','
+        id: '2',
         fileId: fileId || 'test-file-1',
         projectId: 'project-1',
         userId: 'user-2',
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
           themes: ['Colors', 'UI Elements'],
           sentiment: 'positive',
           priority: 'low',
-          estimatedEffort: '1 hour'
+          estimatedEffort: '1 hour
         },
         reactions: [
           { type: 'love', count: 1, users: ['user-1'] },
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
           success: true,
           comments: mockComments,
           stats: mockStats,
-          message: '🧪 Mock data - Database setup required for full functionality'
+          message: '🧪 Mock data - Database setup required for full functionality
         })
 
       case 'get_ai_insights':
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
               'Design Feedback': 1, 'Timing Feedback': 1
             }
           },
-          message: '🧪 Mock AI insights - Real AI analysis coming soon'
+          message: '🧪 Mock AI insights - Real AI analysis coming soon
         })
 
       default:
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
           success: true,
           message: '🧪 UPF Test API is working! Database setup required for full functionality.',
           availableActions: ['get_comments', 'get_ai_insights'],
-          nextSteps: ['1. Complete database setup in Supabase SQL Editor', '2. Copy SQL from scripts/create-upf-tables.sql', '3. Restart server and test again'
+          nextSteps: ['1. Complete database setup in Supabase SQL Editor', '2. Copy SQL from scripts/create-upf-tables.sql', '3. Restart server and test again
           ]
         })
     }
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
       { 
         error: 'Test API error', 
         details: error instanceof Error ? error.message : 'Unknown error',
-        note: 'This is the test endpoint - main endpoint requires database setup'
+        note: 'This is the test endpoint - main endpoint requires database setup
       },
       { status: 500 }
     )
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: '🧪 Test POST successful - Database required for real operations',
       received: body,
-      nextSteps: ['Complete database setup to enable real comment creation', 'Use the main /api/collaboration/upf endpoint after setup'
+      nextSteps: ['Complete database setup to enable real comment creation', 'Use the main /api/collaboration/upf endpoint after setup
       ]
     })
 

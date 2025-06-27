@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server
 
 export async function GET(request: NextRequest) {
   try {
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
                   userId: 'freelancer_1',
                   userName: 'Alex Designer',
                   userAvatar: '/avatars/alex.jpg',
-                  content: 'Thanks for the feedback! I\'ll increase the font size and test on mobile.','
+                  content: 'Thanks for the feedback! I\'ll increase the font size and test on mobile.',
                   type: 'text',
                   fileType: 'figma',
                   status: 'in_review',
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
                 url: '/audio/comment_voice_1.mp3',
                 duration: 15,
                 waveform: [12, 25, 18, 30, 22, 35, 28, 15, 40, 25, 18, 32, 20, 28, 15],
-                transcript: 'The footer text is too small and hard to read on mobile.'
+                transcript: 'The footer text is too small and hard to read on mobile.
               },
               isResolved: false
             }
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
             urgentIssues: 1,
             overallSentiment: 'positive',
             estimatedWorkRequired: '2-3 hours',
-            keyActionItems: ['Increase footer font size for mobile', 'Test mobile responsiveness across devices', 'Consider hero section approved for production', 'Implement accessibility improvements for text contrast'
+            keyActionItems: ['Increase footer font size for mobile', 'Test mobile responsiveness across devices', 'Consider hero section approved for production', 'Implement accessibility improvements for text contrast
             ],
             categoryBreakdown: {
               'color_corrections': { count: 1, avgPriority: 'medium' }, 'typo_fixes': { count: 0, avgPriority: 'low' }, 'layout_changes': { count: 1, avgPriority: 'high' }, 'functionality': { count: 0, avgPriority: 'low' }, 'content': { count: 0, avgPriority: 'low' }, 'design': { count: 2, avgPriority: 'medium' }
@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
               uploadedBy: 'Alex Designer',
               changelog: 'Updated hero section, improved mobile responsiveness',
               status: 'review',
-              thumbnail: '/images/figma-v3-thumb.jpg'
+              thumbnail: '/images/figma-v3-thumb.jpg
             },
             {
               id: 'v2',
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
               uploadedBy: 'Alex Designer',
               changelog: 'Added pricing section, updated color scheme',
               status: 'approved',
-              thumbnail: '/images/figma-v2-thumb.jpg'
+              thumbnail: '/images/figma-v2-thumb.jpg
             },
             {
               id: 'v1',
@@ -137,7 +137,7 @@ export async function GET(request: NextRequest) {
               uploadedBy: 'Alex Designer',
               changelog: 'Initial design concept',
               status: 'archived',
-              thumbnail: '/images/figma-v1-thumb.jpg'
+              thumbnail: '/images/figma-v1-thumb.jpg
             }
           ]
         })
@@ -148,7 +148,7 @@ export async function GET(request: NextRequest) {
           approvalStatus: {
             overall: 'pending',
             elements: {
-              'hero_section': 'approved', 'pricing_section': 'pending', 'footer': 'rejected', 'navigation': 'approved', 'cta_buttons': 'pending'
+              'hero_section': 'approved', 'pricing_section': 'pending', 'footer': 'rejected', 'navigation': 'approved', 'cta_buttons': 'pending
             },
             approvedBy: [],
             rejectedBy: ['client_1'],
@@ -173,7 +173,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           success: true,
           message: 'Client feedback API endpoint working',
-          supportedActions: ['get_comments', 'get_ai_summary', 'get_file_versions', 'get_approval_status', 'get_notification_summary'
+          supportedActions: ['get_comments', 'get_ai_summary', 'get_file_versions', 'get_approval_status', 'get_notification_summary
           ]
         })
     }
@@ -183,7 +183,7 @@ export async function GET(request: NextRequest) {
       { 
         success: false, 
         error: 'Failed to process client feedback request',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error
       },
       { status: 500 }
     )
@@ -212,7 +212,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           comment: newComment,
-          message: 'Comment added successfully'
+          message: 'Comment added successfully
         })
 
       case 'add_voice_comment':
@@ -227,12 +227,12 @@ export async function POST(request: NextRequest) {
               url: '/audio/voice_comment_' + Date.now() + '.mp3',
               duration: data.duration || 10,
               waveform: Array.from({ length: 20 }, () => Math.floor(Math.random() * 40) + 10),
-              transcript: data.transcript || 'Voice comment transcription pending...'
+              transcript: data.transcript || 'Voice comment transcription pending...
             },
             createdAt: new Date().toISOString(),
             isResolved: false
           },
-          message: 'Voice comment uploaded successfully'
+          message: 'Voice comment uploaded successfully
         })
 
       case 'add_screen_recording':
@@ -246,12 +246,12 @@ export async function POST(request: NextRequest) {
             screenRecording: {
               url: '/videos/screen_recording_' + Date.now() + '.mp4',
               duration: data.duration || 30,
-              thumbnail: '/images/screen_thumb_' + Date.now() + '.jpg'
+              thumbnail: '/images/screen_thumb_' + Date.now() + '.jpg
             },
             createdAt: new Date().toISOString(),
             isResolved: false
           },
-          message: 'Screen recording uploaded successfully'
+          message: 'Screen recording uploaded successfully
         })
 
       case 'update_comment_status':
@@ -264,7 +264,7 @@ export async function POST(request: NextRequest) {
             resolvedBy: data.resolvedBy,
             resolvedAt: data.status === 'resolved' ? new Date().toISOString() : undefined
           },
-          message: `Comment ${data.status} successfully`
+          message: `Comment ${data.status} successfully
         })
 
       case 'approve_file':
@@ -277,7 +277,7 @@ export async function POST(request: NextRequest) {
             approvedAt: new Date().toISOString(),
             elements: data.elements || {}
           },
-          message: 'File approved successfully'
+          message: 'File approved successfully
         })
 
       case 'request_changes':
@@ -289,9 +289,9 @@ export async function POST(request: NextRequest) {
             requestedBy: data.requestedBy,
             requestedAt: new Date().toISOString(),
             reason: data.reason,
-            priority: data.priority || 'medium'
+            priority: data.priority || 'medium
           },
-          message: 'Change request submitted successfully'
+          message: 'Change request submitted successfully
         })
 
       case 'generate_ai_summary':
@@ -303,19 +303,19 @@ export async function POST(request: NextRequest) {
             sentiment: 'positive',
             urgentItems: data.comments?.filter((c: unknown) => c.priority === 'urgent').length || 0,
             estimatedWork: '3-5 hours',
-            keyInsights: ['Most feedback focuses on visual design elements', 'Mobile responsiveness is a recurring concern', 'Overall client satisfaction is high', 'Quick fixes can resolve 60% of issues'
+            keyInsights: ['Most feedback focuses on visual design elements', 'Mobile responsiveness is a recurring concern', 'Overall client satisfaction is high', 'Quick fixes can resolve 60% of issues
             ],
-            actionItems: ['Address footer typography issues', 'Test mobile responsiveness', 'Implement color scheme feedback', 'Schedule client review call'
+            actionItems: ['Address footer typography issues', 'Test mobile responsiveness', 'Implement color scheme feedback', 'Schedule client review call
             ]
           },
-          message: 'AI summary generated successfully'
+          message: 'AI summary generated successfully
         })
 
       default:
         return NextResponse.json({
           success: false,
           error: 'Unknown action',
-          supportedActions: ['add_comment', 'add_voice_comment', 'add_screen_recording', 'update_comment_status', 'approve_file', 'request_changes', 'generate_ai_summary'
+          supportedActions: ['add_comment', 'add_voice_comment', 'add_screen_recording', 'update_comment_status', 'approve_file', 'request_changes', 'generate_ai_summary
           ]
         }, { status: 400 })
     }
@@ -325,7 +325,7 @@ export async function POST(request: NextRequest) {
       { 
         success: false, 
         error: 'Failed to process client feedback request',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error
       },
       { status: 500 }
     )

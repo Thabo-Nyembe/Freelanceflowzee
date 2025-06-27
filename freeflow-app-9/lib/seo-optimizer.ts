@@ -1,4 +1,4 @@
-import { Metadata } from 'next'
+import { Metadata } from 'next
 
 // Context7 Pattern: Centralized SEO Configuration
 export const SEO_CONFIG = {
@@ -12,7 +12,7 @@ export const SEO_CONFIG = {
     publisher: 'FreeflowZee Inc.',
     locale: 'en_US',
     alternateLocales: ['es_ES', 'fr_FR', 'de_DE'],
-    type: 'website'
+    type: 'website
   },
   contact: {
     email: 'hello@freeflowzee.com',
@@ -22,19 +22,19 @@ export const SEO_CONFIG = {
       twitter: 'https://twitter.com/freeflowzee',
       linkedin: 'https://linkedin.com/company/freeflowzee',
       github: 'https://github.com/freeflowzee',
-      instagram: 'https://instagram.com/freeflowzee'
+      instagram: 'https://instagram.com/freeflowzee
     }
   },
   features: {
-    primary: ['Project Management', 'Client Collaboration', 'Payment Processing', 'Time Tracking', 'File Sharing', 'Team Management'
+    primary: ['Project Management', 'Client Collaboration', 'Payment Processing', 'Time Tracking', 'File Sharing', 'Team Management
     ],
-    benefits: ['Increase productivity by 40%', 'Reduce project turnaround time', 'Streamline client communication', 'Automate invoicing and payments', 'Secure file collaboration', 'Real-time project tracking'
+    benefits: ['Increase productivity by 40%', 'Reduce project turnaround time', 'Streamline client communication', 'Automate invoicing and payments', 'Secure file collaboration', 'Real-time project tracking
     ]
   },
   keywords: {
     primary: 'freelance management, project collaboration, client portal, payment processing',
     secondary: 'creative workflow, team collaboration, invoice automation, file sharing, time tracking',
-    longTail: 'best freelance management software 2024, client collaboration platform for designers, automated invoicing for freelancers'
+    longTail: 'best freelance management software 2024, client collaboration platform for designers, automated invoicing for freelancers
   }
 }
 
@@ -44,37 +44,37 @@ export const SEO_TEMPLATES = {
     title: `${SEO_CONFIG.site.name} - ${SEO_CONFIG.site.tagline}`,
     description: SEO_CONFIG.site.description,
     keywords: `${SEO_CONFIG.keywords.primary}, ${SEO_CONFIG.keywords.secondary}`,
-    schema: 'Organization'
+    schema: 'Organization
   },
   features: {
     title: `Features - ${SEO_CONFIG.site.name}`,
     description: 'Discover powerful features that make FreeflowZee the best freelance management platform. From project tracking to client collaboration, we have everything you need.',
     keywords: `${SEO_CONFIG.keywords.primary}, feature list, platform capabilities`,
-    schema: 'Product'
+    schema: 'Product
   },
   pricing: {
     title: `Pricing Plans - ${SEO_CONFIG.site.name}`,
     description: 'Choose the perfect plan for your freelance business. Transparent pricing, no hidden fees. Start free and scale as you grow.',
     keywords: 'freelance software pricing, subscription plans, free trial',
-    schema: 'Offer'
+    schema: 'Offer
   },
   blog: {
     title: `Blog - ${SEO_CONFIG.site.name}`,
     description: 'Expert insights on freelance management, client relationships, and business growth. Stay updated with the latest trends and best practices.',
     keywords: 'freelance tips, business growth, client management, productivity',
-    schema: 'Blog'
+    schema: 'Blog
   },
   contact: {
     title: `Contact Us - ${SEO_CONFIG.site.name}`,
-    description: 'Get in touch with our team. We\'re here to help you succeed with your freelance business. Multiple ways to reach us.','
+    description: 'Get in touch with our team. We\'re here to help you succeed with your freelance business. Multiple ways to reach us.',
     keywords: 'contact freeflowzee, customer support, sales inquiry',
-    schema: 'ContactPage'
+    schema: 'ContactPage
   },
   demo: {
     title: `Live Demo - ${SEO_CONFIG.site.name}`,
     description: 'Experience FreeflowZee in action. See how our platform can transform your freelance workflow with this interactive demo.',
     keywords: 'product demo, live preview, interactive tour',
-    schema: 'SoftwareApplication'
+    schema: 'SoftwareApplication
   }
 }
 
@@ -92,7 +92,7 @@ export interface BlogPostSEO {
 }
 
 export function generateBlogPostSEO(post: BlogPostSEO): Metadata {
-  const title = `${post.title} | ${SEO_CONFIG.site.name} Blog`
+  const title = `${post.title} | ${SEO_CONFIG.site.name} Blog
   const description = post.description.length > 160 
     ? post.description.substring(0, 157) + '...' 
     : post.description
@@ -131,7 +131,7 @@ export function generateBlogPostSEO(post: BlogPostSEO): Metadata {
       images: [`${SEO_CONFIG.site.url}/images/blog/${slugify(post.title)}-twitter.jpg`]
     },
     alternates: {
-      canonical: `${SEO_CONFIG.site.url}/blog/${slugify(post.title)}`
+      canonical: `${SEO_CONFIG.site.url}/blog/${slugify(post.title)}
     }
   }
 }
@@ -141,7 +141,7 @@ export interface SalesPageSEO {
   product: string
   price: number
   currency: string
-  availability: 'InStock' | 'PreOrder' | 'OutOfStock'
+  availability: 'InStock' | 'PreOrder' | 'OutOfStock
   features: string[]
   benefits: string[]
   testimonials?: number
@@ -150,8 +150,8 @@ export interface SalesPageSEO {
 }
 
 export function generateSalesPageSEO(sales: SalesPageSEO): Metadata {
-  const title = `${sales.product} - Professional ${SEO_CONFIG.site.tagline}`
-  const description = `Get ${sales.product} for ${sales.currency}${sales.price}. ${sales.benefits.slice(0, 2).join('. ')}. Trusted by thousands of freelancers worldwide.`
+  const title = `${sales.product} - Professional ${SEO_CONFIG.site.tagline}
+  const description = `Get ${sales.product} for ${sales.currency}${sales.price}. ${sales.benefits.slice(0, 2).join('. ')}. Trusted by thousands of freelancers worldwide.
 
   return {
     title,
@@ -207,7 +207,7 @@ export function generatePageSEO(
       title: template.title,
       description: template.description,
       type: SEO_CONFIG.site.type as any,
-      url: `${SEO_CONFIG.site.url}/${page === 'homepage' ?  : page}`,'
+      url: `${SEO_CONFIG.site.url}/${page === 'homepage' ?  : page}`,
       siteName: SEO_CONFIG.site.name,
       locale: SEO_CONFIG.site.locale,
       images: [
@@ -215,7 +215,7 @@ export function generatePageSEO(
           url: SEO_CONFIG.site.image,
           width: 1200,
           height: 630,
-          alt: `${SEO_CONFIG.site.name} - ${template.title}`
+          alt: `${SEO_CONFIG.site.name} - ${template.title}
         }
       ]
     },
@@ -228,9 +228,9 @@ export function generatePageSEO(
       images: [SEO_CONFIG.site.image]
     },
     alternates: {
-      canonical: `${SEO_CONFIG.site.url}/${page === 'homepage' ?  : page}`,'
+      canonical: `${SEO_CONFIG.site.url}/${page === 'homepage' ?  : page}`,
       languages: SEO_CONFIG.site.alternateLocales.reduce((acc, locale) => {
-        acc[locale] = `${SEO_CONFIG.site.url}/${locale}/${page === 'homepage' ?  : page}`'
+        acc[locale] = `${SEO_CONFIG.site.url}/${locale}/${page === 'homepage' ?  : page}
         return acc
       }, {} as Record<string, string>)
     },
@@ -239,7 +239,7 @@ export function generatePageSEO(
       yandex: 'your-yandex-verification-code',
       yahoo: 'your-yahoo-verification-code',
       other: {
-        'facebook-domain-verification': 'your-facebook-verification-code'
+        'facebook-domain-verification': 'your-facebook-verification-code
       }
     }
   }
@@ -257,7 +257,7 @@ export function generateStructuredData(
     "@context": "https://schema.org", "@type": "Organization", "name": SEO_CONFIG.site.name, "description": SEO_CONFIG.site.description, "url": SEO_CONFIG.site.url, "logo": `${SEO_CONFIG.site.url}/images/logo.png`, "contactPoint": {
       "@type": "ContactPoint", "telephone": SEO_CONFIG.contact.phone, "contactType": "customer service", "email": SEO_CONFIG.contact.email
     }, "address": {
-      "@type": "PostalAddress", "streetAddress": "123 Creative Street", "addressLocality": "San Francisco", "addressRegion": "CA", "postalCode": "94103", "addressCountry": "US"
+      "@type": "PostalAddress", "streetAddress": "123 Creative Street", "addressLocality": "San Francisco", "addressRegion": "CA", "postalCode": "94103", "addressCountry": "US
     }, "sameAs": Object.values(SEO_CONFIG.contact.social)
   }
 
@@ -268,8 +268,8 @@ export function generateStructuredData(
     case 'Product':
       return {
         "@context": "https://schema.org", "@type": "SoftwareApplication", "name": SEO_CONFIG.site.name, "description": SEO_CONFIG.site.description, "url": SEO_CONFIG.site.url, "applicationCategory": "BusinessApplication", "operatingSystem": "Web Browser", "offers": {
-          "@type": "Offer", "price": "0","
-          "priceCurrency": "USD", "availability": "https://schema.org/InStock"
+          "@type": "Offer", "price": "0",
+          "priceCurrency": "USD", "availability": "https://schema.org/InStock
         }, "provider": baseOrganization, "screenshot": `${SEO_CONFIG.site.url}/images/app-screenshot.jpg`, "featureList": SEO_CONFIG.features.primary
       }
 
@@ -292,15 +292,15 @@ export function generateStructuredData(
 
     case 'Offer':
       return {
-        "@context": "https://schema.org", "@type": "Offer", "name": data?.product || SEO_CONFIG.site.name, "description": data?.description, "price": data?.price || "0","
-        "priceCurrency": data?.currency || "USD", "availability": "https://schema.org/InStock", "seller": baseOrganization, "url": data?.url || `${SEO_CONFIG.site.url}/pricing`
+        "@context": "https://schema.org", "@type": "Offer", "name": data?.product || SEO_CONFIG.site.name, "description": data?.description, "price": data?.price || "0",
+        "priceCurrency": data?.currency || "USD", "availability": "https://schema.org/InStock", "seller": baseOrganization, "url": data?.url || `${SEO_CONFIG.site.url}/pricing
       }
 
     case 'SoftwareApplication':
       return {
         "@context": "https://schema.org", "@type": "SoftwareApplication", "name": SEO_CONFIG.site.name, "description": SEO_CONFIG.site.description, "url": SEO_CONFIG.site.url, "applicationCategory": "BusinessApplication", "operatingSystem": "Web Browser", "offers": {
-          "@type": "Offer", "price": "0","
-          "priceCurrency": "USD"
+          "@type": "Offer", "price": "0",
+          "priceCurrency": "USD
         }, "provider": baseOrganization
       }
 
@@ -319,7 +319,7 @@ export function analyzeSEO(content: string, metadata: Metadata) {
   }
 
   // Title analysis
-  const titleLength = (typeof metadata.title === 'string' ? metadata.title : metadata.title?.toString() || ).length'
+  const titleLength = (typeof metadata.title === 'string' ? metadata.title : metadata.title?.toString() || ).length
   if (titleLength < 30) {
     analysis.issues.push('Title is too short (< 30 characters)')
   } else if (titleLength > 60) {
@@ -341,7 +341,7 @@ export function analyzeSEO(content: string, metadata: Metadata) {
   }
 
   // Content analysis
-  const wordCount = content.split(' ').length'
+  const wordCount = content.split(' ').length
   if (wordCount < 300) {
     analysis.issues.push('Content is too short (< 300 words)')
   } else {
@@ -398,26 +398,26 @@ export function analyzeSEO(content: string, metadata: Metadata) {
 export function slugify(text: string): string {
   return text
     .toLowerCase()
-    .replace(/[^\w ]+/g, '')'
-    .replace(/ +/g, '-')'
+    .replace(/[^\w ]+/g, '')
+    .replace(/ +/g, '-')
 }
 
 export function generateSitemap(pages: string[]): string {
   const urls = pages.map(page => {
-    const url = page === '/' ? SEO_CONFIG.site.url : `${SEO_CONFIG.site.url}${page}`'
-    return `
+    const url = page === '/' ? SEO_CONFIG.site.url : `${SEO_CONFIG.site.url}${page}
+    return 
   <url>
     <loc>${url}</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>${page === '/' ? &apos;1.0&apos; : &apos;0.8&apos;}</priority>'
-  </url>`
-  }).join('')'
+    <priority>${page === '/' ? &apos;1.0&apos; : &apos;0.8&apos;}</priority>
+  </url>
+  }).join('')
 
   return `<?xml version= "1.0" encoding= "UTF-8"?>
 <urlset xmlns= "http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls}
-</urlset>`
+</urlset>
 }
 
 export function generateRobotsTxt(): string {
@@ -437,5 +437,5 @@ Allow: /features
 Allow: /pricing
 Allow: /blog
 Allow: /contact
-Allow: /demo`
+Allow: /demo
 } 

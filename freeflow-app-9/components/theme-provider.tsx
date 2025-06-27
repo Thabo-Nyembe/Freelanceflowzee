@@ -1,20 +1,20 @@
-"use client
+"use client"
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react
 
-type Theme = 'dark' | 'light' | 'system'
+type Theme = 'dark' | 'light' | 'system
 
 type ThemeProviderProps = {
   children: React.ReactNode
   defaultTheme?: Theme
   storageKey?: string
   attribute?: string
-  defaultSystemTheme?: 'dark' | 'light'
+  defaultSystemTheme?: 'dark' | 'light
   value?: {
     theme: Theme
     setTheme: (theme: Theme) => void
-    resolvedTheme: 'dark' | 'light'
-    systemTheme: 'dark' | 'light'
+    resolvedTheme: 'dark' | 'light
+    systemTheme: 'dark' | 'light
     themes: Theme[]
   }
 }
@@ -22,8 +22,8 @@ type ThemeProviderProps = {
 type ThemeProviderState = {
   theme: Theme
   setTheme: (theme: Theme) => void
-  resolvedTheme: 'dark' | 'light'
-  systemTheme: 'dark' | 'light'
+  resolvedTheme: 'dark' | 'light
+  systemTheme: 'dark' | 'light
   themes: Theme[]
 }
 
@@ -46,7 +46,7 @@ export function ThemeProvider({
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(defaultTheme)
-  const [systemTheme, setSystemTheme] = useState<&apos;dark&apos; | &apos;light&apos;>(defaultSystemTheme)
+  const [systemTheme, setSystemTheme] = useState<'dark' | 'light'>(defaultSystemTheme)
   const [mounted, setMounted] = useState(false)
 
   // Get resolved theme (actual theme being applied)
@@ -99,13 +99,13 @@ export function ThemeProvider({
     }
 
     // Update meta theme-color for mobile browsers
-    const metaThemeColor = document.querySelector('meta[name= "theme-color"]')
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]')
     if (metaThemeColor) {
       metaThemeColor.setAttribute('content', resolvedTheme === 'dark' ? '#1a1a1a' : '#ffffff')
     } else {
       const meta = document.createElement('meta')
-      meta.name = 'theme-color'
-      meta.content = resolvedTheme === 'dark' ? '#1a1a1a' : '#ffffff'
+      meta.name = 'theme-color
+      meta.content = resolvedTheme === 'dark' ? '#1a1a1a' : '#ffffff
       document.head.appendChild(meta)
     }
   }, [resolvedTheme, attribute, mounted])
@@ -131,7 +131,7 @@ export function ThemeProvider({
   // Prevent hydration mismatch by not rendering until mounted
   if (!mounted) {
     return (
-      <div className= "min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50">
         {children}
       </div>
     )

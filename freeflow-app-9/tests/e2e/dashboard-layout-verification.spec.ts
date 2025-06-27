@@ -209,7 +209,7 @@ test.describe(&apos;Dashboard Layout Verification&apos;, () => {
 test.describe(&apos;Landing Page Dropdown Verification&apos;, () => {
   
   test.beforeEach(async ({ page }) => {
-    await page.goto(&apos;/', { waitUntil: &apos;networkidle&apos; })'
+    await page.goto(&apos;/', { waitUntil: &apos;networkidle&apos; })
   })
 
   test(&apos;product dropdown appears and positions correctly&apos;, async ({ page }) => {
@@ -293,7 +293,7 @@ test.describe(&apos;Performance and Accessibility&apos;, () => {
   })
 
   test(&apos;focus management works correctly&apos;, async ({ page }) => {
-    await page.goto(&apos;/')'
+    await page.goto(&apos;/')
     
     // Tab through navigation
     await page.keyboard.press(&apos;Tab&apos;) // Skip link

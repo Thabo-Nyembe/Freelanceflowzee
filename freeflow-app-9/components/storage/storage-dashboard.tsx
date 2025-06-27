@@ -1,4 +1,4 @@
-'use client'
+'use client
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
@@ -44,7 +44,7 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];'
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }, []);
 
   // Load analytics data
@@ -129,7 +129,7 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
     }
 
     // Reset file input
-    event.target.value = '';'
+    event.target.value = '';
   }, [loadAnalytics, loadFiles]);
 
   useEffect(() => {
@@ -173,10 +173,10 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
           {/* Upload Button */}
           <div className= "relative">
             <input
-              type= "file"
+              type= "file
               onChange={handleFileUpload}
-              className= "absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              accept= "image/*,video/*,audio/*,.pdf,.zip,.txt,.json"
+              className= "absolute inset-0 w-full h-full opacity-0 cursor-pointer
+              accept= "image/*,video/*,audio/*,.pdf,.zip,.txt,.json
             />
             <Button className= "flex items-center space-x-2">
               <Upload className= "w-4 h-4" />
@@ -391,7 +391,7 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
               <Button 
                 onClick={optimizeStorage}
                 disabled={optimizing}
-                className= "w-full"
+                className= "w-full
               >
                 {optimizing ? 'Optimizing...' : 'Run Storage Optimization'}
               </Button>

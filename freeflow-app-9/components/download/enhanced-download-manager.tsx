@@ -1,6 +1,6 @@
-"use client
+"use client"
 
-import React, { useReducer, useCallback, useEffect } from 'react'
+import React, { useReducer, useCallback, useEffect } from 'react
  payload: DownloadItem }
   | { type: &apos;UPDATE_DOWNLOAD&apos;; payload: { id: string; updates: Partial<DownloadItem> } }
   | { type: 'REMOVE_DOWNLOAD'; payload: string }
@@ -102,7 +102,7 @@ export function EnhancedDownloadManager({
   onEscrowPayment,
   enableAnalytics = true,
   enableEscrow = true,
-  brandName = 'FreeflowZee'
+  brandName = 'FreeflowZee
 }: EnhancedDownloadManagerProps) {
 
   // Context7 Pattern: Central State Management
@@ -132,7 +132,7 @@ export function EnhancedDownloadManager({
         unlockPrice: 2500,
         paymentRequired: false,
         projectId: 'proj_001',
-        clientId: 'client_001'
+        clientId: 'client_001
       },
       {
         id: 'dl_002',
@@ -158,7 +158,7 @@ export function EnhancedDownloadManager({
         unlockPrice: 5000,
         paymentRequired: true,
         projectId: 'proj_002',
-        clientId: 'client_002'
+        clientId: 'client_002
       },
       {
         id: 'dl_003',
@@ -183,7 +183,7 @@ export function EnhancedDownloadManager({
         unlockPrice: 1500,
         paymentRequired: true,
         projectId: 'proj_003',
-        clientId: 'client_003'
+        clientId: 'client_003
       }
     ],
     filter: 'all',
@@ -213,22 +213,22 @@ export function EnhancedDownloadManager({
   }, [])
 
   const formatFileSize = useCallback((bytes: number) => {
-    if (bytes === 0) return '0 Bytes'
+    if (bytes === 0) return '0 Bytes
     const k = 1024
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]'
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }, [])
 
   const formatSpeed = useCallback((bytesPerSecond: number) => {
-    return `${formatFileSize(bytesPerSecond)}/s`
+    return `${formatFileSize(bytesPerSecond)}/s
   }, [formatFileSize])
 
   const formatTime = useCallback((seconds: number) => {
-    if (!seconds || seconds === Infinity) return '--'
+    if (!seconds || seconds === Infinity) return '--
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}`'
+    return `${mins}:${secs.toString().padStart(2, '0')}
   }, [])
 
   // Context7 Pattern: Enhanced Action Handlers
@@ -384,7 +384,7 @@ export function EnhancedDownloadManager({
       currency: 'USD',
       status: 'processing',
       clientName: 'Client Name',
-      projectTitle: item.fileName.replace(/\.[^/.]+$/, ""),"
+      projectTitle: item.fileName.replace(/\.[^/.]+$/, ""),
       createdAt: new Date()
     }
 
@@ -407,7 +407,7 @@ export function EnhancedDownloadManager({
           updates: {
             escrowStatus: 'secured',
             paymentRequired: false,
-            status: 'pending'
+            status: 'pending
           }
         }
       })
@@ -451,11 +451,11 @@ export function EnhancedDownloadManager({
   const filteredDownloads = state.downloads.filter(item => {
     switch (state.filter) {
       case 'downloading':
-        return item.status === 'downloading' || item.status === 'paused'
+        return item.status === 'downloading' || item.status === 'paused
       case 'completed':
-        return item.status === 'completed'
+        return item.status === 'completed
       case 'error':
-        return item.status === 'error' || item.status === 'cancelled'
+        return item.status === 'error' || item.status === 'cancelled
       case 'escrow_locked':
         return item.status === 'escrow_locked' || item.paymentRequired
       default:
@@ -590,7 +590,7 @@ export function EnhancedDownloadManager({
                   </Button>
                   <Button 
                     size= "sm" 
-                    variant= "outline"
+                    variant= "outline
                     onClick={() => dispatch({ type: 'CLEAR_SELECTION' })}
                   >
                     Clear Selection
@@ -619,7 +619,7 @@ export function EnhancedDownloadManager({
                 return (
                   <Card key={item.id} className={cn(
                     "transition-all duration-200",
-                    isSelected && "ring-2 ring-primary"
+                    isSelected && "ring-2 ring-primary
                   )}>
                     <CardContent className= "p-6">
                       <div className= "flex items-start gap-4">
@@ -685,8 +685,8 @@ export function EnhancedDownloadManager({
                                 This file is protected by escrow. Complete payment to download.
                               </p>
                               <Button
-                                size= "sm"
-                                className= "bg-amber-600 hover:bg-amber-700"
+                                size= "sm
+                                className= "bg-amber-600 hover:bg-amber-700
                                 onClick={() => handleEscrowPayment(item)}
                               >
                                 <CreditCard className= "h-4 w-4 mr-2" />
@@ -741,7 +741,7 @@ export function EnhancedDownloadManager({
                             
                             <Button 
                               size= "sm" 
-                              variant= "outline"
+                              variant= "outline
                               onClick={() => copyToClipboard(item.downloadUrl, item.id)}
                             >
                               {isCopied ? (
@@ -760,7 +760,7 @@ export function EnhancedDownloadManager({
                             {item.status !== 'downloading' && (
                               <Button 
                                 size= "sm" 
-                                variant= "outline"
+                                variant= "outline
                                 onClick={() => removeDownload(item.id)}
                               >
                                 <Trash2 className= "h-4 w-4 mr-1" />
@@ -772,8 +772,8 @@ export function EnhancedDownloadManager({
                             {item.escrowProtected && item.escrowStatus === 'secured' && (
                               <Button 
                                 size= "sm" 
-                                variant= "outline"
-                                className= "border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                                variant= "outline
+                                className= "border-emerald-200 text-emerald-700 hover:bg-emerald-50
                               >
                                 <Unlock className= "h-4 w-4 mr-1" />
                                 Release Escrow
@@ -889,13 +889,13 @@ export function EnhancedDownloadManager({
                 <div className= "flex gap-2 pt-4">
                   <Button 
                     variant= "outline" 
-                    className= "flex-1"
+                    className= "flex-1
                     onClick={() => dispatch({ type: 'TOGGLE_PAYMENT_MODAL', payload: { open: false } })}
                   >
                     Cancel
                   </Button>
                   <Button 
-                    className= "flex-1 bg-emerald-600 hover:bg-emerald-700"
+                    className= "flex-1 bg-emerald-600 hover:bg-emerald-700
                     onClick={() => handleEscrowPayment(item)}
                   >
                     <CreditCard className= "h-4 w-4 mr-2" />

@@ -1,16 +1,16 @@
-'use client'
+'use client
 
-import React, { useReducer, useState, useCallback, useEffect } from 'react'
+import React, { useReducer, useState, useCallback, useEffect } from 'react
  end: string } | null
   }
-  sortBy: 'name' | 'date' | 'size' | 'views' | 'likes' | 'rating'
-  sortOrder: 'asc' | 'desc'
+  sortBy: 'name' | 'date' | 'size' | 'views' | 'likes' | 'rating
+  sortOrder: 'asc' | 'desc
   loading: boolean
   error: string | null
   shareDialog: {
     open: boolean
     fileId: string | null
-    type: 'public' | 'private' | 'password'
+    type: 'public' | 'private' | 'password
   }
   uploadProgress: { [key: string]: number }
 }
@@ -41,7 +41,7 @@ const initialState: GalleryState = {
   selectedFiles: [],
   viewMode: 'grid',
   gridSize: 'medium',
-  searchQuery: '','
+  searchQuery: '',
   filters: {
     type: [],
     category: [],
@@ -57,7 +57,7 @@ const initialState: GalleryState = {
   shareDialog: {
     open: false,
     fileId: null,
-    type: 'public'
+    type: 'public
   },
   uploadProgress: {}
 }
@@ -190,14 +190,14 @@ const mockFiles: GalleryFile[] = [
       comments: 28,
       rating: 4.8,
       featured: true,
-      status: 'published'
+      status: 'published
     },
     sharing: {
       public: true,
       downloadable: true,
       commentable: true,
       price: 299,
-      license: 'commercial'
+      license: 'commercial
     },
     analytics: {
       totalViews: 2847,
@@ -230,14 +230,14 @@ const mockFiles: GalleryFile[] = [
       comments: 15,
       rating: 4.6,
       featured: false,
-      status: 'published'
+      status: 'published
     },
     sharing: {
       public: true,
       downloadable: false,
       commentable: true,
       price: 499,
-      license: 'extended'
+      license: 'extended
     },
     analytics: {
       totalViews: 1456,
@@ -269,14 +269,14 @@ const mockFiles: GalleryFile[] = [
       comments: 42,
       rating: 4.9,
       featured: true,
-      status: 'published'
+      status: 'published
     },
     sharing: {
       public: true,
       downloadable: true,
       commentable: true,
       price: 199,
-      license: 'standard'
+      license: 'standard
     },
     analytics: {
       totalViews: 3251,
@@ -307,14 +307,14 @@ const mockFiles: GalleryFile[] = [
       comments: 31,
       rating: 4.7,
       featured: false,
-      status: 'published'
+      status: 'published
     },
     sharing: {
       public: true,
       downloadable: false,
       commentable: true,
       price: 399,
-      license: 'extended'
+      license: 'extended
     },
     analytics: {
       totalViews: 1834,
@@ -336,7 +336,7 @@ const mockCollections: GalleryCollection[] = [
     totalViews: 8456,
     isPublic: true,
     createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-25T00:00:00Z'
+    updatedAt: '2024-01-25T00:00:00Z
   },
   {
     id: 'col_2',
@@ -347,7 +347,7 @@ const mockCollections: GalleryCollection[] = [
     totalViews: 5234,
     isPublic: true,
     createdAt: '2024-01-05T00:00:00Z',
-    updatedAt: '2024-01-28T00:00:00Z'
+    updatedAt: '2024-01-28T00:00:00Z
   },
   {
     id: 'col_3',
@@ -358,7 +358,7 @@ const mockCollections: GalleryCollection[] = [
     totalViews: 12879,
     isPublic: true,
     createdAt: '2024-01-10T00:00:00Z',
-    updatedAt: '2024-01-30T00:00:00Z'
+    updatedAt: '2024-01-30T00:00:00Z
   }
 ]
 
@@ -367,15 +367,15 @@ interface EnhancedGalleryProps {
   showCollections?: boolean
   allowUpload?: boolean
   showAnalytics?: boolean
-  mode?: 'portfolio' | 'client' | 'admin'
+  mode?: 'portfolio' | 'client' | 'admin
 }
 
 export function EnhancedGallery({ 
-  className = '','
+  className = '',
   showCollections = true,
   allowUpload = true,
   showAnalytics = true,
-  mode = 'portfolio'
+  mode = 'portfolio
 }: EnhancedGalleryProps) {
   const [state, dispatch] = useReducer(galleryReducer, initialState)
   const [selectedView, setSelectedView] = useState<&apos;files&apos; | &apos;collections&apos;>('files')
@@ -448,10 +448,10 @@ export function EnhancedGallery({
 
   const getGridSizeClass = () => {
     switch (state.gridSize) {
-      case 'small': return 'grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8'
-      case 'medium': return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-      case 'large': return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3'
-      default: return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+      case 'small': return 'grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8
+      case 'medium': return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4
+      case 'large': return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3
+      default: return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4
     }
   }
 
@@ -489,10 +489,10 @@ export function EnhancedGallery({
               <div className= "relative">
                 <Search className= "absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                 <Input
-                  placeholder= "Search files, tags, or collections..."
+                  placeholder= "Search files, tags, or collections...
                   value={state.searchQuery}
                   onChange={(e) => dispatch({ type: 'SET_SEARCH', payload: e.target.value })}
-                  className= "pl-10 bg-white/60 border-white/20 focus:bg-white"
+                  className= "pl-10 bg-white/60 border-white/20 focus:bg-white
                 />
               </div>
             </div>
@@ -502,25 +502,25 @@ export function EnhancedGallery({
               <div className= "flex items-center border rounded-lg bg-white/60 border-white/20">
                 <Button
                   variant={state.viewMode === 'grid' ? 'default' : 'ghost'}
-                  size= "sm"
+                  size= "sm
                   onClick={() => dispatch({ type: 'SET_VIEW_MODE', payload: 'grid' })}
-                  className= "rounded-r-none"
+                  className= "rounded-r-none
                 >
                   <Grid className= "w-4 h-4" />
                 </Button>
                 <Button
                   variant={state.viewMode === 'list' ? 'default' : 'ghost'}
-                  size= "sm"
+                  size= "sm
                   onClick={() => dispatch({ type: 'SET_VIEW_MODE', payload: 'list' })}
-                  className= "rounded-none border-x"
+                  className= "rounded-none border-x
                 >
                   <List className= "w-4 h-4" />
                 </Button>
                 <Button
                   variant={state.viewMode === 'masonry' ? 'default' : 'ghost'}
-                  size= "sm"
+                  size= "sm
                   onClick={() => dispatch({ type: 'SET_VIEW_MODE', payload: 'masonry' })}
-                  className= "rounded-l-none"
+                  className= "rounded-l-none
                 >
                   <Layers className= "w-4 h-4" />
                 </Button>
@@ -531,25 +531,25 @@ export function EnhancedGallery({
                 <div className= "flex items-center border rounded-lg bg-white/60 border-white/20">
                   <Button
                     variant={state.gridSize === 'small' ? 'default' : 'ghost'}
-                    size= "sm"
+                    size= "sm
                     onClick={() => dispatch({ type: 'SET_GRID_SIZE', payload: 'small' })}
-                    className= "rounded-r-none text-xs"
+                    className= "rounded-r-none text-xs
                   >
                     S
                   </Button>
                   <Button
                     variant={state.gridSize === 'medium' ? 'default' : 'ghost'}
-                    size= "sm"
+                    size= "sm
                     onClick={() => dispatch({ type: 'SET_GRID_SIZE', payload: 'medium' })}
-                    className= "rounded-none border-x text-xs"
+                    className= "rounded-none border-x text-xs
                   >
                     M
                   </Button>
                   <Button
                     variant={state.gridSize === 'large' ? 'default' : 'ghost'}
-                    size= "sm"
+                    size= "sm
                     onClick={() => dispatch({ type: 'SET_GRID_SIZE', payload: 'large' })}
-                    className= "rounded-l-none text-xs"
+                    className= "rounded-l-none text-xs
                   >
                     L
                   </Button>
@@ -568,10 +568,10 @@ export function EnhancedGallery({
             <select 
               value={`${state.sortBy}-${state.sortOrder}`}
               onChange={(e) => {
-                const [sortBy, sortOrder] = e.target.value.split('-')'
+                const [sortBy, sortOrder] = e.target.value.split('-')
                 dispatch({ type: 'SET_SORT', payload: { sortBy, sortOrder: sortOrder as 'asc' | 'desc' } })
               }}
-              className= "px-3 py-1.5 text-sm border rounded-md bg-white/60 border-white/20 focus:bg-white"
+              className= "px-3 py-1.5 text-sm border rounded-md bg-white/60 border-white/20 focus:bg-white
             >
               <option value= "date-desc">Newest First</option>
               <option value= "date-asc">Oldest First</option>
@@ -607,7 +607,7 @@ export function EnhancedGallery({
                 {sortedFiles.map((file, index) => (
                   <Card 
                     key={file.id} 
-                    className= "group bg-white/60 backdrop-blur-xl border-white/20 shadow-luxury hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
+                    className= "group bg-white/60 backdrop-blur-xl border-white/20 shadow-luxury hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden
                     onClick={() => handleFileSelect(file)}
                   >
                     {/* Thumbnail */}
@@ -627,7 +627,7 @@ export function EnhancedGallery({
                           <Button 
                             size= "sm" 
                             variant= "outline" 
-                            className= "w-8 h-8 p-0 bg-purple-100/80 backdrop-blur-sm border-purple-200 hover:bg-purple-200/80"
+                            className= "w-8 h-8 p-0 bg-purple-100/80 backdrop-blur-sm border-purple-200 hover:bg-purple-200/80
                             onClick={(e) => {
                               e.stopPropagation()
                               handleLike(file.id)
@@ -638,7 +638,7 @@ export function EnhancedGallery({
                           <Button 
                             size= "sm" 
                             variant= "outline" 
-                            className= "w-8 h-8 p-0 bg-purple-100/80 backdrop-blur-sm border-purple-200 hover:bg-purple-200/80"
+                            className= "w-8 h-8 p-0 bg-purple-100/80 backdrop-blur-sm border-purple-200 hover:bg-purple-200/80
                             onClick={(e) => {
                               e.stopPropagation()
                               dispatch({ type: 'TOGGLE_SHARE_DIALOG', payload: { fileId: file.id } })
@@ -724,7 +724,7 @@ export function EnhancedGallery({
                 {sortedFiles.map((file) => (
                   <Card 
                     key={file.id} 
-                    className= "group bg-white/60 backdrop-blur-xl border-white/20 shadow-luxury hover:shadow-xl transition-all duration-300 cursor-pointer"
+                    className= "group bg-white/60 backdrop-blur-xl border-white/20 shadow-luxury hover:shadow-xl transition-all duration-300 cursor-pointer
                     onClick={() => handleFileSelect(file)}
                   >
                     <CardContent className= "p-4">
@@ -785,7 +785,7 @@ export function EnhancedGallery({
                           <Button 
                             size= "sm" 
                             variant= "outline" 
-                            className= "w-8 h-8 p-0"
+                            className= "w-8 h-8 p-0
                             onClick={(e) => {
                               e.stopPropagation()
                               handleLike(file.id)
@@ -796,7 +796,7 @@ export function EnhancedGallery({
                           <Button 
                             size= "sm" 
                             variant= "outline" 
-                            className= "w-8 h-8 p-0"
+                            className= "w-8 h-8 p-0
                             onClick={(e) => {
                               e.stopPropagation()
                               dispatch({ type: 'TOGGLE_SHARE_DIALOG', payload: { fileId: file.id } })
@@ -822,7 +822,7 @@ export function EnhancedGallery({
               {mockCollections.map((collection) => (
                 <Card 
                   key={collection.id} 
-                  className= "group bg-white/60 backdrop-blur-xl border-white/20 shadow-luxury hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
+                  className= "group bg-white/60 backdrop-blur-xl border-white/20 shadow-luxury hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden
                   onClick={() => dispatch({ type: 'SET_FILTERS', payload: { collection: collection.name } })}
                 >
                   {/* Thumbnail */}
@@ -905,7 +905,7 @@ export function EnhancedGallery({
               <Input 
                 value= "https://portfolio.alexcreative.com/file/brand-identity-system" 
                 readOnly 
-                className= "flex-1"
+                className= "flex-1
               />
               <Button size= "sm" variant= "outline">
                 <Copy className= "w-4 h-4" />

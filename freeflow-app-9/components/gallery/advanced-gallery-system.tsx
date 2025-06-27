@@ -1,6 +1,6 @@
-'use client'
+'use client
 
-import { useState, } from 'react'
+import { useState, } from 'react
  timestamp: string; details: string }>
 }
 
@@ -24,9 +24,9 @@ interface ItemPricing {
 
 interface Watermark {
   enabled: boolean
-  type: 'text' | 'logo'
+  type: 'text' | 'logo
   content: string
-  position: 'center' | 'corner' | 'repeated'
+  position: 'center' | 'corner' | 'repeated
   opacity: number
 }
 
@@ -97,7 +97,7 @@ export function AdvancedGallerySystem() {
             format: 'RAW',
             createdAt: '2024-02-01T14:30:00Z',
             location: 'Central Park, NYC',
-            camera: 'Canon EOS R5'
+            camera: 'Canon EOS R5
           },
           pricing: {
             digital: 25,
@@ -123,7 +123,7 @@ export function AdvancedGallerySystem() {
             duration: 180,
             size: '245 MB',
             format: '4K MP4',
-            createdAt: '2024-02-01T21:00:00Z'
+            createdAt: '2024-02-01T21:00:00Z
           },
           pricing: {
             digital: 150,
@@ -186,7 +186,7 @@ export function AdvancedGallerySystem() {
                 {
                   type: 'download',
                   timestamp: new Date().toISOString(),
-                  details: `Downloaded ${item.name}`
+                  details: `Downloaded ${item.name}
                 },
                 ...collection.analytics.recentActivity.slice(0, 4)
               ]
@@ -235,7 +235,7 @@ export function AdvancedGallerySystem() {
         </div>
         <div className= "flex gap-3">
           <Button
-            variant= "outline"
+            variant= "outline
             onClick={() => setSharingPanelOpen(!sharingPanelOpen)}
           >
             <Share2 className= "mr-2 h-4 w-4" />
@@ -254,7 +254,7 @@ export function AdvancedGallerySystem() {
           <CardHeader>
             <CardTitle className= "flex items-center gap-2">
               <Share2 className= "h-5 w-5 text-purple-600" />
-              Share "{selectedCollection.name}"
+              Share "{selectedCollection.name}
             </CardTitle>
           </CardHeader>
           <CardContent className= "space-y-6">
@@ -268,17 +268,17 @@ export function AdvancedGallerySystem() {
                 <Input
                   value={selectedCollection.sharing.publicUrl}
                   readOnly
-                  className= "flex-1"
+                  className= "flex-1
                 />
                 <Button
-                  size= "sm"
+                  size= "sm
                   onClick={() => copyToClipboard(selectedCollection.sharing.publicUrl, 'url')}
                 >
                   {copiedText === 'url' ? <Check className= "h-4 w-4" /> : <Copy className= "h-4 w-4" />}
                 </Button>
                 <Button
-                  size= "sm"
-                  variant= "outline"
+                  size= "sm
+                  variant= "outline
                   onClick={() => window.open(selectedCollection.sharing.publicUrl, '_blank')}
                 >
                   <ExternalLink className= "h-4 w-4" />
@@ -289,25 +289,25 @@ export function AdvancedGallerySystem() {
             {/* Quick Share Options */}
             <div className= "grid md:grid-cols-3 gap-4">
               <Button
-                variant= "outline"
+                variant= "outline
                 onClick={() => handleShare('email')}
-                className= "h-20 flex-col gap-2"
+                className= "h-20 flex-col gap-2
               >
                 <Mail className= "h-6 w-6" />
                 Email Share
               </Button>
               <Button
-                variant= "outline"
+                variant= "outline
                 onClick={() => handleShare('social')}
-                className= "h-20 flex-col gap-2"
+                className= "h-20 flex-col gap-2
               >
                 <Share2 className= "h-6 w-6" />
                 Social Media
               </Button>
               <Button
-                variant= "outline"
+                variant= "outline
                 onClick={() => handleShare('direct')}
-                className= "h-20 flex-col gap-2"
+                className= "h-20 flex-col gap-2
               >
                 <Link2 className= "h-6 w-6" />
                 Copy Link
@@ -321,10 +321,10 @@ export function AdvancedGallerySystem() {
                 <Input
                   value={selectedCollection.sharing.embedCode}
                   readOnly
-                  className= "flex-1 text-xs"
+                  className= "flex-1 text-xs
                 />
                 <Button
-                  size= "sm"
+                  size= "sm
                   onClick={() => copyToClipboard(selectedCollection.sharing.embedCode, 'embed')}
                 >
                   {copiedText === 'embed' ? <Check className= "h-4 w-4" /> : <Copy className= "h-4 w-4" />}
@@ -380,14 +380,14 @@ export function AdvancedGallerySystem() {
                 </div>
                 <div className= "flex items-center gap-2">
                   <Button
-                    size= "sm"
+                    size= "sm
                     variant={viewMode === 'grid' ? 'default' : 'outline'}
                     onClick={() => setViewMode('grid')}
                   >
                     <Grid3X3 className= "h-4 w-4" />
                   </Button>
                   <Button
-                    size= "sm"
+                    size= "sm
                     variant={viewMode === 'list' ? 'default' : 'outline'}
                     onClick={() => setViewMode('list')}
                   >
@@ -402,7 +402,7 @@ export function AdvancedGallerySystem() {
           <div className={`grid gap-6 ${
             viewMode === 'grid' 
               ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-              : 'grid-cols-1'
+              : 'grid-cols-1
           }`}>
             {selectedCollection.items.map(item => (
               <Card key={item.id} className= "group hover:shadow-lg transition-all duration-300">
@@ -417,7 +417,7 @@ export function AdvancedGallerySystem() {
                         <Badge className={`${
                           item.type === 'video' 
                             ? 'bg-blue-600 text-white' 
-                            : 'bg-green-600 text-white'
+                            : 'bg-green-600 text-white
                         }`}>
                           {item.type === 'video' ? (
                             <><Video className= "h-3 w-3 mr-1" />Video</>
@@ -432,9 +432,9 @@ export function AdvancedGallerySystem() {
                         <Badge className={`${
                           item.status === 'ready' 
                             ? 'bg-green-100 text-green-800' 
-                            : item.status === 'processing'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-gray-100 text-gray-800'
+                            : item.status === 'processing
+                            ? 'bg-yellow-100 text-yellow-800
+                            : 'bg-gray-100 text-gray-800
                         }`}>
                           {item.status === 'ready' && <Check className= "h-3 w-3 mr-1" />}
                           {item.status === 'processing' && <Clock className= "h-3 w-3 mr-1" />}
@@ -456,7 +456,7 @@ export function AdvancedGallerySystem() {
                           <Button 
                             size= "sm" 
                             variant= "ghost" 
-                            className= "text-white hover:bg-white/20"
+                            className= "text-white hover:bg-white/20
                             onClick={() => handleDownloadItem(item)}
                           >
                             <Download className= "h-4 w-4" />
@@ -505,7 +505,7 @@ export function AdvancedGallerySystem() {
                       <div className= "flex items-center justify-between text-sm text-gray-500">
                         <div className= "flex items-center gap-3">
                           <span className= "flex items-center gap-1">
-                            <Heart className={`w-4 h-4 ${item.isFavorited ? 'fill-red-500 text-red-500&apos; : '&apos;}`} />'
+                            <Heart className={`w-4 h-4 ${item.isFavorited ? 'fill-red-500 text-red-500&apos; : '&apos;}`} />
                             {item.favorites}
                           </span>
                           <span className= "flex items-center gap-1">
@@ -525,18 +525,18 @@ export function AdvancedGallerySystem() {
                       {/* Actions */}
                       <div className= "flex gap-2">
                         <Button
-                          size= "sm"
-                          variant= "outline"
+                          size= "sm
+                          variant= "outline
                           onClick={() => handleFavorite(item)}
                           className={`flex-1 ${item.isFavorited ? 'text-red-600 border-red-200' : }`}
                         >
-                          <Heart className={`w-4 h-4 mr-1 ${item.isFavorited ? 'fill-current&apos; : '&apos;}`} />'
+                          <Heart className={`w-4 h-4 mr-1 ${item.isFavorited ? 'fill-current&apos; : '&apos;}`} />
                           {item.isFavorited ? 'Favorited' : 'Favorite'}
                         </Button>
                         <Button
-                          size= "sm"
+                          size= "sm
                           onClick={() => handleDownloadItem(item)}
-                          className= "bg-purple-600 hover:bg-purple-700"
+                          className= "bg-purple-600 hover:bg-purple-700
                         >
                           <Download className= "w-4 h-4 mr-1" />
                           Download
@@ -638,7 +638,7 @@ export function AdvancedGallerySystem() {
                     <div className={`p-1 rounded-full ${
                       activity.type === 'download' ? 'bg-blue-100' :
                       activity.type === 'view' ? 'bg-green-100' :
-                      'bg-purple-100'
+                      'bg-purple-100
                     }`}>
                       {activity.type === 'download' && <Download className= "h-3 w-3 text-blue-600" />}
                       {activity.type === 'view' && <Eye className= "h-3 w-3 text-green-600" />}

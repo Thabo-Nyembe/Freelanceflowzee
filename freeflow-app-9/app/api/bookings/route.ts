@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { BookingService, Booking } from '@/types/booking'
-import { stripeEnhanced } from '@/lib/stripe-enhanced-v2'
-import { createClient } from '@/lib/supabase/server'
+import { NextRequest, NextResponse } from 'next/server
+import { BookingService, Booking } from '@/types/booking
+import { stripeEnhanced } from '@/lib/stripe-enhanced-v2
+import { createClient } from '@/lib/supabase/server
 
 // Use the exported instance
 const stripeService = stripeEnhanced
@@ -96,8 +96,8 @@ const MOCK_BOOKINGS: Booking[] = [
 ]
 
 // Use inline type definitions
-type BookingStatus = 'pending' | 'confirmed' | 'paid' | 'in-progress' | 'completed' | 'cancelled' | 'no-show'
-type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded'
+type BookingStatus = 'pending' | 'confirmed' | 'paid' | 'in-progress' | 'completed' | 'cancelled' | 'no-show
+type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded
 
 // POST: Create a new booking with Stripe payment
 export async function POST(request: NextRequest) {
@@ -171,8 +171,8 @@ export async function POST(request: NextRequest) {
         client_name: clientName,
         client_email: clientEmail,
         duration: service.duration.toString(),
-        selected_date: selectedDate || '','
-        selected_time: selectedTime || '
+        selected_date: selectedDate || 
+        selected_time: selectedTime || 
       },
       paymentMethods: ['card', 'apple_pay', 'google_pay', 'link'],
       setupFutureUsage: 'off_session' // Save payment method for future bookings
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
     const endTime = new Date(new Date(startTime).getTime() + service.duration * 60 * 1000).toISOString()
 
     // Create booking
-    const bookingId = `booking-${Date.now()}`
+    const bookingId = `booking-${Date.now()}
     const newBooking: Booking = {
       id: bookingId,
       clientId: customerResult.customer?.id || 'unknown-client',
@@ -224,7 +224,7 @@ export async function POST(request: NextRequest) {
       booking: newBooking,
       clientSecret: paymentResult.clientSecret,
       publishableKey: paymentResult.publishableKey,
-      message: 'Booking created successfully. Complete payment to confirm.'
+      message: 'Booking created successfully. Complete payment to confirm.
     })
 
   } catch (error) {
@@ -244,7 +244,7 @@ export async function GET(request: NextRequest) {
     const clientEmail = searchParams.get('clientEmail')
     const freelancerId = searchParams.get('freelancerId')
     const limit = parseInt(searchParams.get('limit') || '50')
-    const offset = parseInt(searchParams.get('offset') || '0')'
+    const offset = parseInt(searchParams.get('offset') || '0')
 
     let filteredBookings = [...MOCK_BOOKINGS]
 
@@ -339,7 +339,7 @@ export async function PUT(request: NextRequest) {
       
       // Auto-confirm booking if payment succeeds
       if (paymentStatus === 'paid' && booking.status === 'pending') {
-        booking.status = 'confirmed'
+        booking.status = 'confirmed
       }
     }
     
@@ -351,7 +351,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       booking,
-      message: 'Booking updated successfully'
+      message: 'Booking updated successfully
     })
 
   } catch (error) {

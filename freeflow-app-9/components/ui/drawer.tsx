@@ -1,7 +1,7 @@
-"use client
+"use client"
 
 import * as React from "react"
-import { Drawer as DrawerPrimitive } from "vaul"
+import { Drawer as DrawerPrimitive } from "vaul
 
 import { cn } from "@/lib/utils"
 
@@ -14,7 +14,7 @@ const Drawer = ({
     {...props}
   />
 )
-Drawer.displayName = "Drawer"
+Drawer.displayName = "Drawer
 
 const DrawerTrigger = DrawerPrimitive.Trigger
 
@@ -53,7 +53,7 @@ const DrawerContent = React.forwardRef<
     </DrawerPrimitive.Content>
   </DrawerPortal>
 ))
-DrawerContent.displayName = "DrawerContent"
+DrawerContent.displayName = "DrawerContent
 
 const DrawerHeader = ({
   className,
@@ -64,7 +64,7 @@ const DrawerHeader = ({
     {...props}
   />
 )
-DrawerHeader.displayName = "DrawerHeader"
+DrawerHeader.displayName = "DrawerHeader
 
 const DrawerFooter = ({
   className,
@@ -75,7 +75,7 @@ const DrawerFooter = ({
     {...props}
   />
 )
-DrawerFooter.displayName = "DrawerFooter"
+DrawerFooter.displayName = "DrawerFooter
 
 const DrawerTitle = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Title>,

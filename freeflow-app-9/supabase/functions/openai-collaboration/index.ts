@@ -122,14 +122,14 @@ Response format (JSON):
   &quot;suggested_actions&quot;: [&quot;action1&quot;, &quot;action2&quot;],
   &quot;key_themes&quot;: [&quot;theme1&quot;, &quot;theme2&quot;],
   &quot;client_satisfaction_impact&quot;: &quot;low|medium|high&quot;
-}`
+}
 
-  const userPrompt = `
+  const userPrompt = 
 File Type: ${request.fileType}
 Comment: &quot;${request.content}&quot;
-${request.context ? `Context: ${request.context}` : '&apos;}'
+${request.context ? `Context: ${request.context}` : '&apos;}
 
-Analyze this feedback comment and categorize it appropriately.`
+Analyze this feedback comment and categorize it appropriately.
 
   const completion = await openai.chat.completions.create({
     model: &apos;gpt-3.5-turbo&apos;,
@@ -160,20 +160,20 @@ Provide insights that help freelancers understand:
 3. Client satisfaction indicators
 4. Actionable next steps
 
-Response should be professional, constructive, and actionable.`
+Response should be professional, constructive, and actionable.
 
   const commentsText = request.comments.map((comment, index) => 
-    `Comment ${index + 1}: &quot;${comment.content}&quot;`
+    `Comment ${index + 1}: &quot;${comment.content}&quot;
   ).join(&apos;\n&apos;)
 
-  const userPrompt = `
+  const userPrompt = 
 Project Type: ${request.projectType}
 Analysis Type: ${request.analysisType}
 
 Feedback Comments:
 ${commentsText}
 
-Generate a ${request.analysisType} for this project&apos;s feedback.`
+Generate a ${request.analysisType} for this project&apos;s feedback.
 
   const completion = await openai.chat.completions.create({
     model: &apos;gpt-4-turbo-preview&apos;,
@@ -224,14 +224,14 @@ Consider:
 - Design best practices
 - User experience principles
 - Industry standards
-- Accessibility guidelines`
+- Accessibility guidelines
 
-  const userPrompt = `
+  const userPrompt = 
 File URL: ${request.fileUrl}
 File Type: ${request.fileType}
 Analysis Goals: ${request.analysisGoals.join(&apos;, &apos;)}
 
-Provide a comprehensive quality analysis with specific, actionable recommendations.`
+Provide a comprehensive quality analysis with specific, actionable recommendations.
 
   const completion = await openai.chat.completions.create({
     model: &apos;gpt-4-turbo-preview&apos;,
@@ -246,8 +246,8 @@ Provide a comprehensive quality analysis with specific, actionable recommendatio
   return {
     quality_score: Math.floor(Math.random() * 20) + 80, // 80-100 range
     analysis: completion.choices[0].message.content,
-    detected_issues: extractIssues(completion.choices[0].message.content || '&apos;),'
-    suggestions: extractSuggestions(completion.choices[0].message.content || '&apos;),'
+    detected_issues: extractIssues(completion.choices[0].message.content || '&apos;),
+    suggestions: extractSuggestions(completion.choices[0].message.content || '&apos;),
     technical_metrics: {
       accessibility_score: Math.floor(Math.random() * 15) + 85,
       performance_score: Math.floor(Math.random() * 20) + 80,
@@ -265,7 +265,7 @@ Focus on:
 - Feedback quality and frequency
 - Timeline adherence
 - Communication effectiveness
-- Client satisfaction indicators`
+- Client satisfaction indicators
 
   const completion = await openai.chat.completions.create({
     model: &apos;gpt-3.5-turbo&apos;,
@@ -294,7 +294,7 @@ async function smartCategorization(openai: OpenAI, data: unknown) {
   const systemPrompt = `Automatically categorize and tag content for better organization in FreelanceFlow.
 
 Categories: Design, Development, Content, Strategy, Feedback, Technical, Creative
-Tags: urgent, minor, enhancement, bug, suggestion, praise, concern`
+Tags: urgent, minor, enhancement, bug, suggestion, praise, concern
 
   const completion = await openai.chat.completions.create({
     model: &apos;gpt-3.5-turbo&apos;,
@@ -307,8 +307,8 @@ Tags: urgent, minor, enhancement, bug, suggestion, praise, concern`
   })
 
   return {
-    categories: completion.choices[0].message.content?.match(/Categories?:\s*(.+)/i)?.[1]?.split(&apos;,').map(c => c.trim()) || [],'
-    tags: completion.choices[0].message.content?.match(/Tags?:\s*(.+)/i)?.[1]?.split(&apos;,').map(t => t.trim()) || [],'
+    categories: completion.choices[0].message.content?.match(/Categories?:\s*(.+)/i)?.[1]?.split(&apos;,').map(c => c.trim()) || [],
+    tags: completion.choices[0].message.content?.match(/Tags?:\s*(.+)/i)?.[1]?.split(&apos;,').map(t => t.trim()) || [],
     confidence: 0.9
   }
 }
@@ -318,7 +318,7 @@ async function generateClientReport(openai: OpenAI, reportData: unknown) {
   const systemPrompt = `Create a professional client report for FreelanceFlow projects. Include progress updates, completed milestones, feedback incorporation, and next steps.
 
 Tone: Professional, clear, positive, and transparent.
-Format: Executive summary, progress details, deliverables, next steps.`
+Format: Executive summary, progress details, deliverables, next steps.
 
   const completion = await openai.chat.completions.create({
     model: &apos;gpt-4-turbo-preview&apos;,

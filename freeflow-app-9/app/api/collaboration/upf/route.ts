@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { verifySession } from '@/lib/dal'
+import { NextRequest, NextResponse } from 'next/server
+import { createClient } from '@/lib/supabase/server
+import { verifySession } from '@/lib/dal
 
 // Comment interface for type safety
 interface Comment {
@@ -9,10 +9,10 @@ interface Comment {
   project_id?: string
   user_id?: string
   content: string
-  comment_type: 'image' | 'video' | 'code' | 'audio' | 'doc' | 'text'
+  comment_type: 'image' | 'video' | 'code' | 'audio' | 'doc' | 'text
   position_data?: unknown
-  priority: 'low' | 'medium' | 'high' | 'urgent'
-  status: 'open' | 'resolved' | 'in_progress'
+  priority: 'low' | 'medium' | 'high' | 'urgent
+  status: 'open' | 'resolved' | 'in_progress
   created_at?: string
   updated_at?: string
   voice_note_url?: string
@@ -30,7 +30,7 @@ interface UPFUser {
 interface UPFCommentRequest {
   fileId: string
   content: string
-  type: 'image' | 'video' | 'code' | 'audio' | 'doc' | 'text'
+  type: 'image' | 'video' | 'code' | 'audio' | 'doc' | 'text
   position?: {
     x?: number
     y?: number
@@ -39,7 +39,7 @@ interface UPFCommentRequest {
     startChar?: number
     endChar?: number
   }
-  priority: 'low' | 'medium' | 'high' | 'urgent'
+  priority: 'low' | 'medium' | 'high' | 'urgent
   mentions?: string[]
   voiceNoteUrl?: string
   voiceNoteDuration?: number
@@ -53,7 +53,7 @@ interface UPFCommentRequest {
 
 interface UPFReactionRequest {
   commentId: string
-  reactionType: 'like' | 'love' | 'laugh' | 'angry' | 'sad' | 'thumbs_up' | 'thumbs_down'
+  reactionType: 'like' | 'love' | 'laugh' | 'angry' | 'sad' | 'thumbs_up' | 'thumbs_down
 }
 
 interface AIAnalysisRequest {
@@ -75,7 +75,7 @@ function hasValidEnvironment() {
 // Mock data for fallback mode
 const mockComments = [
   {
-    id: '1','
+    id: '1',
     file_id: 'brand-animation.mp4',
     project_id: 'project-1',
     user_id: 'user-1',
@@ -90,13 +90,13 @@ const mockComments = [
       themes: ['Animation', 'Pacing'],
       sentiment: 'constructive',
       priority: 'medium',
-      estimatedEffort: '2-3 hours'
+      estimatedEffort: '2-3 hours
     },
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   },
   {
-    id: '2','
+    id: '2',
     file_id: 'homepage-mockup.jpg',
     project_id: 'project-1',
     user_id: 'user-2',
@@ -111,7 +111,7 @@ const mockComments = [
       themes: ['Colors', 'UI Elements'],
       sentiment: 'positive',
       priority: 'low',
-      estimatedEffort: '1 hour'
+      estimatedEffort: '1 hour
     },
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
         message: '⚠️ Fallback mode - Mock operation successful',
         received: body,
         mode: 'fallback',
-        note: 'Complete database setup for real operations'
+        note: 'Complete database setup for real operations
       })
     }
 
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: false,
         error: 'Database connection failed',
-        message: 'Unable to connect to database'
+        message: 'Unable to connect to database
       }, { status: 500 })
     }
     
@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
               comment_type: body.commentType || 'text',
               position_data: body.positionData || {},
               priority: body.priority || 'medium',
-              status: 'open'
+              status: 'open
             }])
             .select()
 
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
               success: false,
               error: error.message,
               fallback: 'Database operation failed, but system continues to work',
-              mode: 'database_error'
+              mode: 'database_error
             }, { status: 500 })
           }
 
@@ -176,7 +176,7 @@ export async function POST(request: NextRequest) {
             success: true,
             comment: data?.[0],
             message: '✅ Comment added successfully!',
-            mode: 'database'
+            mode: 'database
           })
 
         } catch (dbError) {
@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
             message: '⚠️ Mock comment operation - Database setup required',
             received: body,
             mode: 'database_fallback',
-            error: dbError instanceof Error ? dbError.message : 'Unknown error'
+            error: dbError instanceof Error ? dbError.message : 'Unknown error
           })
         }
 
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
       message: 'POST operation failed',
-      mode: 'error'
+      mode: 'error
     }, { status: 500 })
   }
 }
@@ -251,7 +251,7 @@ export async function GET(request: NextRequest) {
         openComments: filteredComments.filter(c => c.status === 'open').length,
         resolvedComments: filteredComments.filter(c => c.status === 'resolved').length,
         avgResponseTime: '2.5 hours',
-        completionRate: '85%'
+        completionRate: '85%
       },
       analytics: {
         totalComments: filteredComments.length,
@@ -270,11 +270,11 @@ export async function GET(request: NextRequest) {
         trends: {
           thisWeek: filteredComments.length,
           lastWeek: Math.max(0, filteredComments.length - 2),
-          growth: '+15%'
+          growth: '+15%
         }
       },
       mode: 'fallback',
-      message: '⚠️ Using mock data - Complete database setup for real operations'
+      message: '⚠️ Using mock data - Complete database setup for real operations
     })
   }
 
@@ -286,7 +286,7 @@ export async function GET(request: NextRequest) {
       success: true,
       comments: mockComments,
       mode: 'fallback',
-      message: '⚠️ Database unavailable - using mock data'
+      message: '⚠️ Database unavailable - using mock data
     })
   }
 
@@ -297,7 +297,7 @@ export async function GET(request: NextRequest) {
         try {
           const { data: comments, error } = await supabase
             .from('upf_comments')
-            .select('*')'
+            .select('*')
             .eq('file_id', fileId || 'test-file')
             .order('created_at', { ascending: false })
 
@@ -325,7 +325,7 @@ export async function GET(request: NextRequest) {
           // Get analytics
           const { data: analytics } = await supabase
             .from('upf_analytics')
-            .select('*')'
+            .select('*')
             .eq('project_id', 'project-1')
             .order('date', { ascending: false })
             .limit(1)
@@ -340,7 +340,7 @@ export async function GET(request: NextRequest) {
               highPriorityComments: comments?.filter(c => c.priority === 'high').length || 0
             },
             mode: 'database',
-            message: '✅ Database connection successful!'
+            message: '✅ Database connection successful!
           })
 
         } catch (dbError) {
@@ -360,7 +360,7 @@ export async function GET(request: NextRequest) {
             },
             mode: 'error_fallback',
             message: '💾 Database connection failed, using mock data',
-            error: dbError instanceof Error ? dbError.message : 'Unknown database error'
+            error: dbError instanceof Error ? dbError.message : 'Unknown database error
           })
         }
 
@@ -376,7 +376,7 @@ export async function GET(request: NextRequest) {
             }
           },
           mode: hasValidEnvironment() ? 'database' : 'fallback',
-          message: '🤖 AI insights generated'
+          message: '🤖 AI insights generated
         })
 
       default:
@@ -392,7 +392,7 @@ export async function GET(request: NextRequest) {
           availableActions: ['get_comments', 'get_ai_insights'],
           endpoints: {
             test: '/api/collaboration/upf/test',
-            main: '/api/collaboration/upf'
+            main: '/api/collaboration/upf
           }
         })
     }
@@ -417,7 +417,7 @@ export async function GET(request: NextRequest) {
       mode: 'error_fallback',
       message: '⚠️ API error occurred, using fallback data',
       error: error instanceof Error ? error.message : 'Unknown error',
-      note: 'System is resilient and continues to work with mock data'
+      note: 'System is resilient and continues to work with mock data
     })
   }
 }
@@ -467,7 +467,7 @@ async function handleAddComment(
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
-      .select(`
+      .select(
         *,
         user:users(id, email, full_name, avatar_url),
         file:project_files(id, name, file_type)
@@ -530,7 +530,7 @@ async function handleAddComment(
       success: true,
       comment,
       aiAnalysis,
-      message: 'Comment added successfully'
+      message: 'Comment added successfully
     })
   } catch (error) {
     console.error('Add comment error:', error)
@@ -584,7 +584,7 @@ async function handleUpdateComment(body: unknown, supabase: unknown, user: unkno
         updated_at: new Date().toISOString()
       })
       .eq('id', commentId)
-      .select(`
+      .select(
         *,
         user:users(id, email, full_name, avatar_url),
         replies:upf_comments!parent_id(*),
@@ -613,7 +613,7 @@ async function handleUpdateComment(body: unknown, supabase: unknown, user: unkno
     return NextResponse.json({
       success: true,
       comment: updatedComment,
-      message: 'Comment updated successfully'
+      message: 'Comment updated successfully
     })
   } catch (error) {
     console.error('Update comment error:', error)
@@ -684,7 +684,7 @@ async function handleDeleteComment(body: unknown, supabase: unknown, user: unkno
 
     return NextResponse.json({
       success: true,
-      message: 'Comment deleted successfully'
+      message: 'Comment deleted successfully
     })
   } catch (error) {
     console.error('Delete comment error:', error)
@@ -716,7 +716,7 @@ async function handleAddReaction(
         reaction_type: reactionData.reactionType,
         created_at: new Date().toISOString()
       })
-      .select('*')'
+      .select('*')
       .single()
 
     if (error) {
@@ -729,7 +729,7 @@ async function handleAddReaction(
     return NextResponse.json({
       success: true,
       reaction,
-      message: 'Reaction added successfully'
+      message: 'Reaction added successfully
     })
   } catch (error) {
     console.error('Add reaction error:', error)
@@ -754,7 +754,7 @@ async function handleAIAnalysis(
     return NextResponse.json({
       success: true,
       analysis,
-      message: 'AI analysis completed'
+      message: 'AI analysis completed
     })
   } catch (error) {
     console.error('AI analysis error:', error)
@@ -770,7 +770,7 @@ async function handleVoiceNoteUpload(body: unknown, supabase: unknown, user: unk
     const { fileName, fileData, duration, waveform } = body
 
     // In production, upload to storage service (S3, Supabase Storage, etc.)
-    const voiceNoteUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/voice-notes/${fileName}`
+    const voiceNoteUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/voice-notes/${fileName}
 
     // Store voice note metadata
     const { data: voiceNote, error } = await supabase
@@ -783,7 +783,7 @@ async function handleVoiceNoteUpload(body: unknown, supabase: unknown, user: unk
         waveform_data: waveform,
         created_at: new Date().toISOString()
       })
-      .select('*')'
+      .select('*')
       .single()
 
     if (error) {
@@ -797,7 +797,7 @@ async function handleVoiceNoteUpload(body: unknown, supabase: unknown, user: unk
       success: true,
       voiceNote,
       url: voiceNoteUrl,
-      message: 'Voice note uploaded successfully'
+      message: 'Voice note uploaded successfully
     })
   } catch (error) {
     console.error('Voice note upload error:', error)
@@ -828,7 +828,7 @@ async function handleRemoveReaction(body: unknown, supabase: unknown, user: unkn
 
     return NextResponse.json({
       success: true,
-      message: 'Reaction removed successfully'
+      message: 'Reaction removed successfully
     })
   } catch (error) {
     console.error('Remove reaction error:', error)
@@ -873,7 +873,7 @@ async function handleMarkResolved(body: unknown, supabase: unknown, user: unknow
     }
 
     // Update comment status
-    const newStatus = resolved ? 'resolved' : 'open'
+    const newStatus = resolved ? 'resolved' : 'open
     const { data: updatedComment, error: updateError } = await supabase
       .from('upf_comments')
       .update({
@@ -881,7 +881,7 @@ async function handleMarkResolved(body: unknown, supabase: unknown, user: unknow
         updated_at: new Date().toISOString()
       })
       .eq('id', commentId)
-      .select('*')'
+      .select('*')
       .single()
 
     if (updateError) {
@@ -908,7 +908,7 @@ async function handleMarkResolved(body: unknown, supabase: unknown, user: unknow
     return NextResponse.json({
       success: true,
       comment: updatedComment,
-      message: `Comment ${resolved ? 'resolved' : 'reopened'} successfully`
+      message: `Comment ${resolved ? 'resolved' : 'reopened'} successfully
     })
   } catch (error) {
     console.error('Mark resolved error:', error)
@@ -952,7 +952,7 @@ async function handleAddReply(body: unknown, supabase: unknown, user: unknown) {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
-      .select(`
+      .select(
         *,
         user:users(id, email, full_name, avatar_url)
       `)
@@ -981,7 +981,7 @@ async function handleAddReply(body: unknown, supabase: unknown, user: unknown) {
     return NextResponse.json({
       success: true,
       reply,
-      message: 'Reply added successfully'
+      message: 'Reply added successfully
     })
   } catch (error) {
     console.error('Add reply error:', error)
@@ -998,7 +998,7 @@ async function handleGenerateSummary(body: unknown, supabase: unknown, user: unk
 
     let query = supabase
       .from('upf_comments')
-      .select(`
+      .select(
         *,
         user:users(id, email, full_name),
         reactions:upf_reactions(*)
@@ -1032,7 +1032,7 @@ async function handleGenerateSummary(body: unknown, supabase: unknown, user: unk
     return NextResponse.json({
       success: true,
       summary,
-      message: 'Summary generated successfully'
+      message: 'Summary generated successfully
     })
   } catch (error) {
     console.error('Generate summary error:', error)
@@ -1054,7 +1054,7 @@ async function getComments(supabase: unknown, fileId: string | null, user: unkno
 
   const { data: comments, error } = await supabase
     .from('upf_comments')
-    .select(`
+    .select(
       *,
       user:users(id, email, full_name, avatar_url),
       replies:upf_comments!parent_id(
@@ -1103,7 +1103,7 @@ async function getProjectComments(supabase: unknown, projectId: string | null, u
 
   const { data: comments, error } = await supabase
     .from('upf_comments')
-    .select(`
+    .select(
       *,
       user:users(id, email, full_name, avatar_url),
       file:project_files(id, name, file_type),
@@ -1179,7 +1179,7 @@ async function generateAIAnalysis(
   fileType: string,
   context?: unknown): Promise<any> {
   // Simulate AI analysis - in production, integrate with OpenAI, Claude, etc.
-  const categories = ['UX Enhancement', 'Accessibility', 'Performance', 'Visual Design', 'Content Strategy', 'Technical Implementation', 'User Flow', 'Responsive Design'
+  const categories = ['UX Enhancement', 'Accessibility', 'Performance', 'Visual Design', 'Content Strategy', 'Technical Implementation', 'User Flow', 'Responsive Design
   ]
 
   const severities = ['info', 'warning', 'error'] as const
@@ -1187,7 +1187,7 @@ async function generateAIAnalysis(
   const severity = severities[Math.floor(Math.random() * severities.length)]
 
   const summaries = {
-    'UX Enhancement': 'Suggestion focuses on improving user experience and interaction flow', 'Accessibility': 'Important accessibility consideration for inclusive design', 'Performance': 'Performance optimization opportunity identified', 'Visual Design': 'Visual design improvement with aesthetic and functional benefits', 'Content Strategy': 'Content-related suggestion for better communication', 'Technical Implementation': 'Technical implementation detail requiring attention', 'User Flow': 'User journey and flow optimization suggestion', 'Responsive Design': 'Responsive design issue affecting cross-device experience'
+    'UX Enhancement': 'Suggestion focuses on improving user experience and interaction flow', 'Accessibility': 'Important accessibility consideration for inclusive design', 'Performance': 'Performance optimization opportunity identified', 'Visual Design': 'Visual design improvement with aesthetic and functional benefits', 'Content Strategy': 'Content-related suggestion for better communication', 'Technical Implementation': 'Technical implementation detail requiring attention', 'User Flow': 'User journey and flow optimization suggestion', 'Responsive Design': 'Responsive design issue affecting cross-device experience
   }
 
   return {
@@ -1195,7 +1195,7 @@ async function generateAIAnalysis(
     category,
     severity,
     confidence: Math.random() * 0.3 + 0.7, // 70-100% confidence
-    suggestions: ['Consider implementing this change in the next iteration', 'Test with user feedback before finalizing', 'Align with design system guidelines'
+    suggestions: ['Consider implementing this change in the next iteration', 'Test with user feedback before finalizing', 'Align with design system guidelines
     ],
     estimatedEffort: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)],
     tags: generateRelevantTags(content, fileType)
@@ -1215,7 +1215,7 @@ async function generateCommentsSummary(comments: unknown[]): Promise<any> {
     totalComments: comments.length,
     mainThemes: themes,
     priorityDistribution,
-    recommendations: ['Focus on high-priority items first', 'Consider grouping similar feedback', 'Schedule review session for complex items'
+    recommendations: ['Focus on high-priority items first', 'Consider grouping similar feedback', 'Schedule review session for complex items
     ],
     estimatedResolutionTime: calculateEstimatedTime(comments)
   }
@@ -1259,10 +1259,10 @@ function calculateEstimatedTime(comments: unknown[]): string {
     return sum + (priorityWeights[comment.priority as keyof typeof priorityWeights] || 1)
   }, 0)
 
-  if (totalWeight <= 10) return '2-4 hours'
-  if (totalWeight <= 20) return '1-2 days'
-  if (totalWeight <= 40) return '3-5 days'
-  return '1+ weeks'
+  if (totalWeight <= 10) return '2-4 hours
+  if (totalWeight <= 20) return '1-2 days
+  if (totalWeight <= 40) return '3-5 days
+  return '1+ weeks
 }
 
 function calculateTrends(analytics: unknown[]): any {
@@ -1278,7 +1278,7 @@ function calculateTrends(analytics: unknown[]): any {
     weeklyActivity: weeklyComments,
     monthlyActivity: monthlyComments,
     averagePerDay: monthlyComments / 30,
-    trend: weeklyComments > monthlyComments / 4 ? 'increasing' : 'stable'
+    trend: weeklyComments > monthlyComments / 4 ? 'increasing' : 'stable
   }
 }
 
@@ -1300,7 +1300,7 @@ async function sendMentionNotifications(
         project_id: file.project_id,
         comment_type: comment.comment_type
       },
-      priority: comment.priority === 'urgent' ? 'high' : 'medium'
+      priority: comment.priority === 'urgent' ? 'high' : 'medium
     })
   }
 }
@@ -1328,7 +1328,7 @@ async function getCommentThread(supabase: unknown, commentId: string | null, use
 
   const { data: thread, error } = await supabase
     .from('upf_comments')
-    .select(`
+    .select(
       *,
       user:users(id, email, full_name, avatar_url),
       replies:upf_comments!parent_id(
@@ -1456,7 +1456,7 @@ async function generateAIInsights(comments: unknown[]): Promise<any> {
     severityDistribution,
     trends,
     predictions,
-    topRecommendations: ['Prioritize high-severity issues first', 'Focus on UX enhancements for better user experience', 'Address accessibility concerns for inclusive design', 'Consider performance optimizations for better speed'
+    topRecommendations: ['Prioritize high-severity issues first', 'Focus on UX enhancements for better user experience', 'Address accessibility concerns for inclusive design', 'Consider performance optimizations for better speed
     ],
     confidenceScore: calculateOverallConfidence(comments),
     lastAnalysis: new Date().toISOString()
@@ -1468,8 +1468,8 @@ function extractDetailedThemes(comments: unknown[]): unknown[] {
   const themeMap = new Map()
 
   comments.forEach(comment => {
-    const category = comment.ai_analysis?.category || 'General'
-    const severity = comment.ai_analysis?.severity || 'info'
+    const category = comment.ai_analysis?.category || 'General
+    const severity = comment.ai_analysis?.severity || 'info
     
     if (!themeMap.has(category)) {
       themeMap.set(category, {
@@ -1501,7 +1501,7 @@ function analyzeUserActivity(comments: unknown[]): unknown[] {
 
   comments.forEach(comment => {
     const userId = comment.user_id
-    const userName = comment.user?.full_name || comment.user?.email || 'Unknown'
+    const userName = comment.user?.full_name || comment.user?.email || 'Unknown
     
     if (!userActivity.has(userId)) {
       userActivity.set(userId, {
@@ -1537,12 +1537,12 @@ function analyzeTimeline(comments: unknown[]): any {
   for (let i = 6; i >= 0; i--) {
     const date = new Date(now)
     date.setDate(date.getDate() - i)
-    const dateKey = date.toISOString().split('T')[0]'
+    const dateKey = date.toISOString().split('T')[0]
     dailyActivity.set(dateKey, { date: dateKey, comments: 0, resolved: 0 })
   }
 
   comments.forEach(comment => {
-    const dateKey = comment.created_at.split('T')[0]'
+    const dateKey = comment.created_at.split('T')[0]
     if (dailyActivity.has(dateKey)) {
       const day = dailyActivity.get(dateKey)
       day.comments++
@@ -1628,7 +1628,7 @@ function generatePredictions(comments: unknown[]): any {
     estimatedCompletionTime: calculateProjectedCompletion(comments),
     recommendedFocus: recentComments.length > 0 ? 
       recentComments[0].ai_analysis?.category || 'General' : 'No recent activity',
-    riskLevel: urgentRatio > 0.5 ? 'high' : urgentRatio > 0.2 ? 'medium' : 'low'
+    riskLevel: urgentRatio > 0.5 ? 'high' : urgentRatio > 0.2 ? 'medium' : 'low
   }
 }
 
@@ -1644,24 +1644,24 @@ function calculateOverallConfidence(comments: unknown[]): number {
 }
 
 function calculateTrendDirection(dailyData: unknown[]): string {
-  if (dailyData.length < 2) return 'stable'
+  if (dailyData.length < 2) return 'stable
   
   const recent = dailyData.slice(-3).reduce((sum, day) => sum + day.comments, 0)
   const previous = dailyData.slice(-6, -3).reduce((sum, day) => sum + day.comments, 0)
   
-  if (recent > previous * 1.2) return 'increasing'
-  if (recent < previous * 0.8) return 'decreasing'
-  return 'stable'
+  if (recent > previous * 1.2) return 'increasing
+  if (recent < previous * 0.8) return 'decreasing
+  return 'stable
 }
 
 function calculateProjectedCompletion(comments: unknown[]): string {
   const openComments = comments.filter(c => c.status === 'open').length
   const avgResolutionTime = calculateAverageResponseTime(comments)
   
-  if (avgResolutionTime === 0) return 'Unable to estimate'
+  if (avgResolutionTime === 0) return 'Unable to estimate
   
   const estimatedHours = openComments * avgResolutionTime
   const estimatedDays = Math.ceil(estimatedHours / 8) // 8 hour work day
   
-  return estimatedDays === 1 ? '1 day' : `${estimatedDays} days`
+  return estimatedDays === 1 ? '1 day' : `${estimatedDays} days
 }

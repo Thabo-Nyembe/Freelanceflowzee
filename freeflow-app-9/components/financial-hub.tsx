@@ -1,4 +1,4 @@
-"use client
+"use client"
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -26,18 +26,18 @@ export function FinancialHub({ onNavigate = () => {} }: FinancialHubProps) {
       <div className= "flex space-x-1 bg-slate-100/50 p-1 rounded-lg w-fit">
         <Button
           variant={activeTab === "escrow" ? "default" : "ghost"}
-          size= "sm"
+          size= "sm
           onClick={() => setActiveTab("escrow")}
-          className={activeTab === "escrow" ? "bg-white shadow-sm" : }"
+          className={activeTab === "escrow" ? "bg-white shadow-sm" : }
         >
           <Shield className= "h-4 w-4 mr-2" />
           Escrow & Payments
         </Button>
         <Button
           variant={activeTab === "invoices" ? "default" : "ghost"}
-          size= "sm"
+          size= "sm
           onClick={() => setActiveTab("invoices")}
-          className={activeTab === "invoices" ? "bg-white shadow-sm" : }"
+          className={activeTab === "invoices" ? "bg-white shadow-sm" : }
         >
           <FileText className= "h-4 w-4 mr-2" />
           Invoices

@@ -1,4 +1,4 @@
-'use client&apos;'
+'use client&apos;
 
 import React, { useEffect, useCallback, useRef } from &apos;react&apos;
 import { usePathname } from &apos;next/navigation&apos;
@@ -35,7 +35,7 @@ class AnalyticsClient {
   }
 
   private generateSessionId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}
   }
 
   private initializeIfNeeded() {
@@ -158,7 +158,7 @@ class AnalyticsClient {
   private setupUnloadTracking() {
     const trackSessionEnd = () => {
       this.trackEvent(&apos;session&apos;, &apos;session_ended&apos;, {
-        session_duration: Date.now() - parseInt(this.sessionId.split(&apos;-')[0])'
+        session_duration: Date.now() - parseInt(this.sessionId.split(&apos;-')[0])
       })
       
       // Send any queued events before page unload
@@ -332,7 +332,7 @@ const getAnalytics = () => {
 // React hook for analytics
 export function useAnalytics() {
   const pathname = usePathname()
-  const previousPath = useRef<string>('&apos;)'
+  const previousPath = useRef<string>('&apos;)
 
   // Track page views when pathname changes
   useEffect(() => {

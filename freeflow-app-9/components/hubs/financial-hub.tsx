@@ -1,6 +1,6 @@
-"use client
+"use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react
   const netIncome = paidAmount - totalExpenses
   const netProfit = totalRevenue - totalExpenses;
   const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
@@ -13,7 +13,7 @@ import React, { useState, useEffect } from 'react'
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'USD
     }).format(amount)
   }
 
@@ -21,23 +21,23 @@ import React, { useState, useEffect } from 'react'
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric
     }).format(new Date(date))
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'paid': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
-      case 'sent': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
-      case 'overdue': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
-      case 'draft': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
-      case 'cancelled': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
-      case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300'
-      case 'held': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
-      case 'released': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
-      case 'disputed': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
-      case 'refunded': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300'
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
+      case 'paid': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300
+      case 'sent': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300
+      case 'overdue': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300
+      case 'draft': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300
+      case 'cancelled': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300
+      case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300
+      case 'held': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300
+      case 'released': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300
+      case 'disputed': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300
+      case 'refunded': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300
     }
   }
 
@@ -83,7 +83,7 @@ import React, { useState, useEffect } from 'react'
   ]
 
   const InvoiceCard = ({ invoice }: { invoice: Invoice }) => {
-    const isOverdue = invoice.status === 'overdue'
+    const isOverdue = invoice.status === 'overdue
     const daysOverdue = isOverdue ? 
       Math.floor((new Date().getTime() - new Date(invoice.due_date).getTime()) / (1000 * 60 * 60 * 24)) : 0
 
@@ -287,7 +287,7 @@ import React, { useState, useEffect } from 'react'
                   <Label htmlFor= "description">Description</Label>
                   <Textarea 
                     id= "description" 
-                    placeholder= "Invoice description..."
+                    placeholder= "Invoice description...
                     rows={3}
                   />
                 </div>
@@ -347,7 +347,7 @@ import React, { useState, useEffect } from 'react'
                   <Label htmlFor= "escrow-terms">Terms & Conditions</Label>
                   <Textarea 
                     id= "escrow-terms" 
-                    placeholder= "Define the conditions for payment release..."
+                    placeholder= "Define the conditions for payment release...
                     rows={4}
                   />
                 </div>
@@ -469,12 +469,12 @@ import React, { useState, useEffect } from 'react'
               <PieChart>
                 <Pie
                   data={expenseCategories}
-                  cx= "50%"
-                  cy= "50%"
+                  cx= "50%
+                  cy= "50%
                   innerRadius={60}
                   outerRadius={120}
                   paddingAngle={5}
-                  dataKey= "value"
+                  dataKey= "value
                 >
                   {expenseCategories.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -515,10 +515,10 @@ import React, { useState, useEffect } from 'react'
             <div className= "relative flex-1">
               <Search className= "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder= "Search invoices..."
+                placeholder= "Search invoices...
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className= "pl-10"
+                className= "pl-10
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -547,8 +547,8 @@ import React, { useState, useEffect } from 'react'
               <Receipt className= "mx-auto h-12 w-12 text-gray-400" />
               <h3 className= "mt-2 text-sm font-medium text-gray-900">No invoices found</h3>
               <p className= "mt-1 text-sm text-gray-500">
-                {searchQuery || statusFilter !== 'all'
-                  ? 'Try adjusting your search or filters.'
+                {searchQuery || statusFilter !== 'all
+                  ? 'Try adjusting your search or filters.
                   : 'Get started by creating your first invoice.'}
               </p>
               {!searchQuery && statusFilter === 'all' && (
@@ -579,7 +579,7 @@ import React, { useState, useEffect } from 'react'
                     status: invoice.status === 'paid' ? 'released' : 'held',
                     created_at: invoice.created_at,
                     released_at: invoice.paid_date,
-                    milestone: `Invoice ${invoice.invoice_number}`
+                    milestone: `Invoice ${invoice.invoice_number}
                   };
                   return (
                     <EscrowCard key={invoice.id} transaction={escrowTransaction} />

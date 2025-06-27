@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server
 
 // Context7 Pattern: Enhanced request interface with model configuration
 interface AssetGenerationRequest {
@@ -59,7 +59,7 @@ const ASSET_GENERATORS = {
         format: '.cube',
         description: 'Professional color grading lookup table for cinematic looks',
         tags: ['color-grading', 'cinematic', params.style, params.colorScheme],
-        size: '2.4 MB'
+        size: '2.4 MB
       })
     },
     presets: {
@@ -68,7 +68,7 @@ const ASSET_GENERATORS = {
         format: '.xmp',
         description: 'Professional photo editing preset for Adobe Lightroom',
         tags: ['lightroom', 'photo-editing', params.style],
-        size: '1.2 MB'
+        size: '1.2 MB
       })
     },
     actions: {
@@ -77,7 +77,7 @@ const ASSET_GENERATORS = {
         format: '.atn',
         description: 'Automated photo effect for Adobe Photoshop',
         tags: ['photoshop', 'automation', params.style],
-        size: '3.7 MB'
+        size: '3.7 MB
       })
     },
     overlays: {
@@ -86,7 +86,7 @@ const ASSET_GENERATORS = {
         format: '.png',
         description: 'High-quality photo overlays for creative enhancement',
         tags: ['overlays', 'creative', params.style],
-        size: '45.2 MB'
+        size: '45.2 MB
       })
     },
     templates: {
@@ -95,7 +95,7 @@ const ASSET_GENERATORS = {
         format: '.psd',
         description: 'Professional portfolio layout template',
         tags: ['portfolio', 'template', params.style],
-        size: '125.8 MB'
+        size: '125.8 MB
       })
     }
   },
@@ -106,7 +106,7 @@ const ASSET_GENERATORS = {
         format: '.prproj',
         description: 'Smooth scene transitions for video editing',
         tags: ['transitions', 'video-editing', params.style],
-        size: '12.5 MB'
+        size: '12.5 MB
       })
     },
     luts: {
@@ -115,7 +115,7 @@ const ASSET_GENERATORS = {
         format: '.cube',
         description: 'Film-style color grading for cinematic look',
         tags: ['cinematic', 'color-grading', params.style],
-        size: '3.1 MB'
+        size: '3.1 MB
       })
     },
     titles: {
@@ -124,7 +124,7 @@ const ASSET_GENERATORS = {
         format: '.mogrt',
         description: 'Animated text overlays for video projects',
         tags: ['titles', 'animation', params.style],
-        size: '8.9 MB'
+        size: '8.9 MB
       })
     },
     effects: {
@@ -133,7 +133,7 @@ const ASSET_GENERATORS = {
         format: '.aep',
         description: 'Professional visual effects for After Effects',
         tags: ['vfx', 'after-effects', params.style],
-        size: '67.3 MB'
+        size: '67.3 MB
       })
     },
     audio: {
@@ -142,7 +142,7 @@ const ASSET_GENERATORS = {
         format: '.wav',
         description: 'Background music and sound effects',
         tags: ['audio', 'music', params.style],
-        size: '23.7 MB'
+        size: '23.7 MB
       })
     }
   },
@@ -153,7 +153,7 @@ const ASSET_GENERATORS = {
         format: '.ai',
         description: 'Professional design template for various projects',
         tags: ['design', 'template', params.style],
-        size: '15.6 MB'
+        size: '15.6 MB
       })
     },
     patterns: {
@@ -162,7 +162,7 @@ const ASSET_GENERATORS = {
         format: '.pat',
         description: 'Repeating background patterns for design projects',
         tags: ['patterns', 'backgrounds', params.style],
-        size: '7.2 MB'
+        size: '7.2 MB
       })
     },
     icons: {
@@ -171,7 +171,7 @@ const ASSET_GENERATORS = {
         format: '.svg',
         description: 'Consistent icon collection for UI/UX projects',
         tags: ['icons', 'ui-ux', params.style],
-        size: '4.8 MB'
+        size: '4.8 MB
       })
     },
     fonts: {
@@ -180,7 +180,7 @@ const ASSET_GENERATORS = {
         format: '.otf',
         description: 'Brand-specific typography for design projects',
         tags: ['typography', 'fonts', params.style],
-        size: '2.1 MB'
+        size: '2.1 MB
       })
     },
     mockups: {
@@ -189,7 +189,7 @@ const ASSET_GENERATORS = {
         format: '.psd',
         description: '3D product presentation mockups',
         tags: ['mockups', '3d', params.style],
-        size: '89.4 MB'
+        size: '89.4 MB
       })
     }
   },
@@ -200,7 +200,7 @@ const ASSET_GENERATORS = {
         format: '.wav',
         description: 'High-quality drum hits, loops, and one-shots',
         tags: ['samples', 'drums', params.style],
-        size: '156.7 MB'
+        size: '156.7 MB
       })
     },
     presets: {
@@ -209,7 +209,7 @@ const ASSET_GENERATORS = {
         format: '.fxp',
         description: 'Professional synthesizer sound presets',
         tags: ['synth', 'presets', params.style],
-        size: '12.3 MB'
+        size: '12.3 MB
       })
     },
     midi: {
@@ -218,7 +218,7 @@ const ASSET_GENERATORS = {
         format: '.mid',
         description: 'Chord progressions and melodic patterns',
         tags: ['midi', 'patterns', params.style],
-        size: '0.8 MB'
+        size: '0.8 MB
       })
     },
     stems: {
@@ -227,7 +227,7 @@ const ASSET_GENERATORS = {
         format: '.wav',
         description: 'Individual track elements for remixing',
         tags: ['stems', 'remix', params.style],
-        size: '234.5 MB'
+        size: '234.5 MB
       })
     },
     effects: {
@@ -236,7 +236,7 @@ const ASSET_GENERATORS = {
         format: '.fxp',
         description: 'Reverb, delay, and distortion presets',
         tags: ['effects', 'audio-processing', params.style],
-        size: '18.9 MB'
+        size: '18.9 MB
       })
     }
   }, 'web-development': {
@@ -246,7 +246,7 @@ const ASSET_GENERATORS = {
         format: '.tsx',
         description: 'Reusable React/Vue component library',
         tags: ['react', 'components', params.style],
-        size: '5.4 MB'
+        size: '5.4 MB
       })
     },
     animations: {
@@ -255,7 +255,7 @@ const ASSET_GENERATORS = {
         format: '.css',
         description: 'Smooth micro-interactions and animations',
         tags: ['css', 'animations', params.style],
-        size: '1.7 MB'
+        size: '1.7 MB
       })
     },
     themes: {
@@ -264,7 +264,7 @@ const ASSET_GENERATORS = {
         format: '.json',
         description: 'Complete design system with color variables',
         tags: ['themes', 'design-system', params.style],
-        size: '0.3 MB'
+        size: '0.3 MB
       })
     },
     templates: {
@@ -273,7 +273,7 @@ const ASSET_GENERATORS = {
         format: '.html',
         description: 'Complete landing page or dashboard template',
         tags: ['templates', 'html', params.style],
-        size: '8.2 MB'
+        size: '8.2 MB
       })
     },
     snippets: {
@@ -282,7 +282,7 @@ const ASSET_GENERATORS = {
         format: '.js',
         description: 'Utility functions and helper libraries',
         tags: ['javascript', 'utilities', params.style],
-        size: '2.1 MB'
+        size: '2.1 MB
       })
     }
   },
@@ -293,7 +293,7 @@ const ASSET_GENERATORS = {
         format: '.docx',
         description: 'Professional content templates for various formats',
         tags: ['content', 'templates', params.style],
-        size: '1.5 MB'
+        size: '1.5 MB
       })
     },
     prompts: {
@@ -302,7 +302,7 @@ const ASSET_GENERATORS = {
         format: '.txt',
         description: 'Creative inspiration starters for writers',
         tags: ['prompts', 'creative-writing', params.style],
-        size: '0.2 MB'
+        size: '0.2 MB
       })
     },
     outlines: {
@@ -311,7 +311,7 @@ const ASSET_GENERATORS = {
         format: '.md',
         description: 'Structured content frameworks and outlines',
         tags: ['outlines', 'structure', params.style],
-        size: '0.4 MB'
+        size: '0.4 MB
       })
     },
     headlines: {
@@ -320,7 +320,7 @@ const ASSET_GENERATORS = {
         format: '.txt',
         description: 'Compelling title options for content',
         tags: ['headlines', 'copywriting', params.style],
-        size: '0.1 MB'
+        size: '0.1 MB
       })
     },
     hooks: {
@@ -329,7 +329,7 @@ const ASSET_GENERATORS = {
         format: '.txt',
         description: 'Attention-grabbing introduction templates',
         tags: ['hooks', 'engagement', params.style],
-        size: '0.3 MB'
+        size: '0.3 MB
       })
     }
   }
@@ -342,14 +342,14 @@ const AI_MODEL_CONFIGS: Record<string, AIModelConfig> = {
     provider: 'OpenAI',
     apiEndpoint: 'https://api.openai.com/v1/chat/completions',
     headers: {
-      'Content-Type': 'application/json', 'Authorization': 'Bearer {API_KEY}'
+      'Content-Type': 'application/json', 'Authorization': 'Bearer {API_KEY}
     },
     requestFormat: (prompt: string, params: unknown) => ({
       model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
-          content: 'You are a professional creative asset generator. Generate detailed descriptions and metadata for creative assets.'
+          content: 'You are a professional creative asset generator. Generate detailed descriptions and metadata for creative assets.
         },
         {
           role: 'user',
@@ -359,20 +359,20 @@ const AI_MODEL_CONFIGS: Record<string, AIModelConfig> = {
       max_tokens: params.maxTokens || 1000,
       temperature: 0.7
     }),
-    responseParser: (response: unknown) => response.choices[0]?.message?.content || '
+    responseParser: (response: unknown) => response.choices[0]?.message?.content || 
   }, 'gpt-3.5-turbo': {
     id: 'gpt-3.5-turbo',
     provider: 'OpenAI',
     apiEndpoint: 'https://api.openai.com/v1/chat/completions',
     headers: {
-      'Content-Type': 'application/json', 'Authorization': 'Bearer {API_KEY}'
+      'Content-Type': 'application/json', 'Authorization': 'Bearer {API_KEY}
     },
     requestFormat: (prompt: string, params: unknown) => ({
       model: 'gpt-3.5-turbo',
       messages: [
         {
           role: 'system',
-          content: 'You are a professional creative asset generator.'
+          content: 'You are a professional creative asset generator.
         },
         {
           role: 'user',
@@ -382,13 +382,13 @@ const AI_MODEL_CONFIGS: Record<string, AIModelConfig> = {
       max_tokens: params.maxTokens || 800,
       temperature: 0.7
     }),
-    responseParser: (response: unknown) => response.choices[0]?.message?.content || '
+    responseParser: (response: unknown) => response.choices[0]?.message?.content || 
   }, 'claude-3-haiku': {
     id: 'claude-3-haiku',
     provider: 'Anthropic',
     apiEndpoint: 'https://api.anthropic.com/v1/messages',
     headers: {
-      'Content-Type': 'application/json', 'x-api-key': '{API_KEY}', 'anthropic-version': '2023-06-01'
+      'Content-Type': 'application/json', 'x-api-key': '{API_KEY}', 'anthropic-version': '2023-06-01
     },
     requestFormat: (prompt: string, params: unknown) => ({
       model: 'claude-3-haiku-20240307',
@@ -400,13 +400,13 @@ const AI_MODEL_CONFIGS: Record<string, AIModelConfig> = {
         }
       ]
     }),
-    responseParser: (response: unknown) => response.content[0]?.text || '
+    responseParser: (response: unknown) => response.content[0]?.text || 
   }, 'gemini-pro': {
     id: 'gemini-pro',
     provider: 'Google',
     apiEndpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json
     },
     requestFormat: (prompt: string, params: unknown) => ({
       contents: [
@@ -419,13 +419,13 @@ const AI_MODEL_CONFIGS: Record<string, AIModelConfig> = {
         }
       ]
     }),
-    responseParser: (response: unknown) => response.candidates[0]?.content?.parts[0]?.text || '
+    responseParser: (response: unknown) => response.candidates[0]?.content?.parts[0]?.text || 
   }, 'llama-2-7b': {
     id: 'llama-2-7b',
     provider: 'Hugging Face',
     apiEndpoint: 'https://api-inference.huggingface.co/models/meta-llama/Llama-2-7b-chat-hf',
     headers: {
-      'Content-Type': 'application/json', 'Authorization': 'Bearer {API_KEY}'
+      'Content-Type': 'application/json', 'Authorization': 'Bearer {API_KEY}
     },
     requestFormat: (prompt: string, params: unknown) => ({
       inputs: prompt,
@@ -435,13 +435,13 @@ const AI_MODEL_CONFIGS: Record<string, AIModelConfig> = {
         return_full_text: false
       }
     }),
-    responseParser: (response: unknown) => response[0]?.generated_text || '
+    responseParser: (response: unknown) => response[0]?.generated_text || 
   }, 'mistral-7b': {
     id: 'mistral-7b',
     provider: 'Hugging Face',
     apiEndpoint: 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1',
     headers: {
-      'Content-Type': 'application/json', 'Authorization': 'Bearer {API_KEY}'
+      'Content-Type': 'application/json', 'Authorization': 'Bearer {API_KEY}
     },
     requestFormat: (prompt: string, params: unknown) => ({
       inputs: prompt,
@@ -451,7 +451,7 @@ const AI_MODEL_CONFIGS: Record<string, AIModelConfig> = {
         return_full_text: false
       }
     }),
-    responseParser: (response: unknown) => response[0]?.generated_text || '
+    responseParser: (response: unknown) => response[0]?.generated_text || 
   }
 }
 
@@ -470,7 +470,7 @@ async function generateWithAI(prompt: string, modelConfig: AIModelConfig, apiKey
     // For Google Gemini, append API key as query parameter
     let endpoint = modelConfig.apiEndpoint
     if (modelConfig.provider === 'Google' && apiKey) {
-      endpoint += `?key=${apiKey}`
+      endpoint += `?key=${apiKey}
     }
 
     const requestBody = modelConfig.requestFormat(prompt, {})
@@ -489,7 +489,7 @@ async function generateWithAI(prompt: string, modelConfig: AIModelConfig, apiKey
     return modelConfig.responseParser(data)
   } catch (error) {
     console.error('AI generation error:', error)
-    return '
+    return 
   }
 }
 
@@ -499,7 +499,7 @@ export async function POST(request: NextRequest) {
     const { field, assetType, parameters, advancedSettings, modelConfig } = body
 
     // Context7 Pattern: Extract model configuration from headers
-    const modelId = request.headers.get('X-AI-Model') || modelConfig?.modelId || 'gpt-4o-mini'
+    const modelId = request.headers.get('X-AI-Model') || modelConfig?.modelId || 'gpt-4o-mini
     const useCustomApi = request.headers.get('X-Use-Custom-API') === 'true' || modelConfig?.useCustomApi || false
     const customApiKey = request.headers.get('X-Custom-API-Key') || modelConfig?.customApiKey
 
@@ -567,7 +567,7 @@ export async function POST(request: NextRequest) {
     let aiEnhancedDescriptions: string[] = []
     if (parameters.customPrompt && useCustomApi && customApiKey) {
       try {
-        const aiPrompt = `
+        const aiPrompt = 
 Generate ${assetCount} creative variations for ${field} ${assetType} assets with the following requirements:
 - Style: ${parameters.style}
 - Color Scheme: ${parameters.colorScheme}
@@ -586,7 +586,7 @@ Description: [description]
 Tags: [tags]
 Style: [style]
 ---
-`
+
 
         const aiResponse = await generateWithAI(aiPrompt, selectedModel, customApiKey)
         if (aiResponse) {
@@ -603,7 +603,7 @@ Style: [style]
       const baseAsset = assetGenerator.generate(parameters)
       const defaultVariations = ['Professional', 'Creative', 'Minimalist', 'Bold', 'Elegant']
       let variation = defaultVariations[i % defaultVariations.length]
-      let assetName = `${variation} ${baseAsset.name}`
+      let assetName = `${variation} ${baseAsset.name}
       let assetDescription = baseAsset.description
       let assetTags = [...baseAsset.tags, variation.toLowerCase()]
 
@@ -619,7 +619,7 @@ Style: [style]
           if (nameMatch) assetName = nameMatch[1].trim()
           if (descMatch) assetDescription = descMatch[1].trim()
           if (tagsMatch) {
-            const aiTags = tagsMatch[1].split(',').map(tag => tag.trim().toLowerCase())'
+            const aiTags = tagsMatch[1].split(',').map(tag => tag.trim().toLowerCase())
             assetTags = [...baseAsset.tags, ...aiTags]
           }
           if (styleMatch) variation = styleMatch[1].trim()
@@ -699,10 +699,10 @@ function getDimensionsForType(assetType: string): string {
     components: 'Responsive',
     animations: 'CSS3',
     themes: 'JSON',
-    snippets: 'ES6+'
+    snippets: 'ES6+
   }
   
-  return dimensionMap[assetType] || '1920x1080'
+  return dimensionMap[assetType] || '1920x1080
 }
 
 function adjustSizeForQuality(baseSize: string, quality: string): string {
@@ -714,10 +714,10 @@ function adjustSizeForQuality(baseSize: string, quality: string): string {
   }
   
   const multiplier = multipliers[quality as keyof typeof multipliers] || 1
-  const sizeNum = parseFloat(baseSize.replace(/[^\d.]/g, ''))'
-  const unit = baseSize.replace(/[\d.]/g, '')'
+  const sizeNum = parseFloat(baseSize.replace(/[^\d.]/g, ''))
+  const unit = baseSize.replace(/[\d.]/g, '')
   
-  return `${(sizeNum * multiplier).toFixed(1)}${unit}`
+  return `${(sizeNum * multiplier).toFixed(1)}${unit}
 }
 
 function calculateTotalSize(assets: GeneratedAsset[]): string {
@@ -725,8 +725,8 @@ function calculateTotalSize(assets: GeneratedAsset[]): string {
   
   assets.forEach(asset => {
     const sizeStr = asset.metadata.size
-    const sizeNum = parseFloat(sizeStr.replace(/[^\d.]/g, ''))'
-    const unit = sizeStr.replace(/[\d.]/g, '').trim().toLowerCase()'
+    const sizeNum = parseFloat(sizeStr.replace(/[^\d.]/g, ''))
+    const unit = sizeStr.replace(/[\d.]/g, '').trim().toLowerCase()
     
     if (unit.includes('gb')) {
       totalMB += sizeNum * 1024
@@ -738,9 +738,9 @@ function calculateTotalSize(assets: GeneratedAsset[]): string {
   })
   
   if (totalMB > 1024) {
-    return `${(totalMB / 1024).toFixed(1)} GB`
+    return `${(totalMB / 1024).toFixed(1)} GB
   } else {
-    return `${totalMB.toFixed(1)} MB`
+    return `${totalMB.toFixed(1)} MB
   }
 }
 
@@ -749,7 +749,7 @@ export async function GET() {
     message: 'AI Asset Generation API',
     supportedFields: Object.keys(ASSET_GENERATORS),
     version: '1.0.0',
-    features: ['Field-specific asset generation', 'Quality-based generation', 'Multiple format support', 'Batch asset creation', 'Professional metadata'
+    features: ['Field-specific asset generation', 'Quality-based generation', 'Multiple format support', 'Batch asset creation', 'Professional metadata
     ]
   })
 } 

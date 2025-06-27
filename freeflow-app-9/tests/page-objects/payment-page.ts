@@ -258,10 +258,10 @@ export class PaymentPage {
   }
 
   async areRequiredFieldsFilled() {
-    const cardFilled = await this.cardNumberInput.inputValue() !== '&apos;;'
-    const expiryFilled = await this.expiryDateInput.inputValue() !== '&apos;;'
-    const cvcFilled = await this.cvcInput.inputValue() !== '&apos;;'
-    const nameFilled = await this.cardholderNameInput.inputValue() !== '&apos;;'
+    const cardFilled = await this.cardNumberInput.inputValue() !== '&apos;;
+    const expiryFilled = await this.expiryDateInput.inputValue() !== '&apos;;
+    const cvcFilled = await this.cvcInput.inputValue() !== '&apos;;
+    const nameFilled = await this.cardholderNameInput.inputValue() !== '&apos;;
     
     return {
       card: cardFilled,

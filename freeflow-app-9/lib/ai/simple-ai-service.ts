@@ -13,7 +13,7 @@ interface AIResponse {
   actionItems?: Array<{
     title: string
     action: string
-    priority: 'high' | 'medium' | 'low'
+    priority: 'high' | 'medium' | 'low
     estimatedTime?: string
     impact?: string
   }>
@@ -45,7 +45,7 @@ export function generateAIResponse(input: string, context: AIContext): AIRespons
 • Consider productizing your services (templates, courses, done-for-you solutions)
 
 Based on similar freelancers, these changes typically result in 35-50% revenue growth within 6 months.`,
-      suggestions: ['Show me pricing optimization strategies', 'Analyze my most profitable project types', 'Help me create retainer packages', 'What upselling opportunities do I have?'
+      suggestions: ['Show me pricing optimization strategies', 'Analyze my most profitable project types', 'Help me create retainer packages', 'What upselling opportunities do I have?
       ],
       actionItems: [
         { title: 'Update pricing for new clients', action: 'increase_rates', priority: 'high', estimatedTime: '1 hour', impact: 'high' },
@@ -74,7 +74,7 @@ Based on similar freelancers, these changes typically result in 35-50% revenue g
 • Set up automated project status emails for clients
 • Use calendar blocking to batch similar tasks
 • Create standardized project kickoff and completion checklists`,
-      suggestions: ['Review my current project deadlines', 'Suggest workflow automation for projects', 'Help me improve project communication', 'Analyze project profitability patterns'
+      suggestions: ['Review my current project deadlines', 'Suggest workflow automation for projects', 'Help me improve project communication', 'Analyze project profitability patterns
       ],
       actionItems: [
         { title: 'Review project timeline', action: 'review_timeline', priority: 'high', estimatedTime: '30 minutes', impact: 'medium' },
@@ -103,7 +103,7 @@ Based on similar freelancers, these changes typically result in 35-50% revenue g
 • Offer strategic consulting beyond project delivery
 • Share industry insights and trends relevant to their business
 • Introduce clients to each other when synergies exist (builds loyalty)`,
-      suggestions: ['Draft a client check-in email template', 'Create a client onboarding sequence', 'Suggest ways to get more referrals', 'Help me handle difficult client situations'
+      suggestions: ['Draft a client check-in email template', 'Create a client onboarding sequence', 'Suggest ways to get more referrals', 'Help me handle difficult client situations
       ],
       actionItems: [
         { title: 'Create client onboarding template', action: 'create_onboarding', priority: 'medium', estimatedTime: '2 hours', impact: 'high' },
@@ -139,7 +139,7 @@ Based on similar freelancers, these changes typically result in 35-50% revenue g
 • Review weekly to identify time drains and optimize
 
 These optimizations typically result in 25-35% productivity gains and 10-15 extra billable hours per week.`,
-      suggestions: ['Help me create a time blocking schedule', 'Suggest automation tools for my workflow', 'Analyze my time tracking patterns', 'Create productivity improvement plan'
+      suggestions: ['Help me create a time blocking schedule', 'Suggest automation tools for my workflow', 'Analyze my time tracking patterns', 'Create productivity improvement plan
       ],
       actionItems: [
         { title: 'Set up time blocking schedule', action: 'time_blocking', priority: 'high', estimatedTime: '1 hour', impact: 'high' },
@@ -169,13 +169,13 @@ These optimizations typically result in 25-35% productivity gains and 10-15 extr
 
 🚀 **Getting Started:**
 Ask me specific questions about any of these areas, or try commands like:
-• "How can I increase my revenue?"
-• "Help me manage my current projects better"
-• "What automation should I implement?"
-• "How do I improve client relationships?"
+• "How can I increase my revenue?
+• "Help me manage my current projects better
+• "What automation should I implement?
+• "How do I improve client relationships?
 
 What would you like to focus on first?`,
-    suggestions: ['Show me revenue optimization tips', 'Analyze my business performance', 'Suggest workflow improvements', 'Help me plan this week priorities'
+    suggestions: ['Show me revenue optimization tips', 'Analyze my business performance', 'Suggest workflow improvements', 'Help me plan this week priorities
     ],
     actionItems: [
       { title: 'Complete business assessment', action: 'assessment', priority: 'medium', estimatedTime: '15 minutes', impact: 'high' },

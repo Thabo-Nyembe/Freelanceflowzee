@@ -1,6 +1,6 @@
-'use client'
+'use client
 
-import React, { useState, useEffect, useRef, useReducer, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useReducer, useCallback } from 'react
  position?: number }
   | { type: &apos;UPDATE_BLOCK&apos;; id: string; updates: Partial<ContentBlock> }
   | { type: 'DELETE_BLOCK'; id: string }
@@ -24,7 +24,7 @@ const initialState: EditorState = {
       properties: { alignment: 'left', fontSize: 'xl' },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      userId: 'user-1'
+      userId: 'user-1
     },
     {
       id: 'block-2',
@@ -34,7 +34,7 @@ const initialState: EditorState = {
       properties: { alignment: 'left', fontSize: 'normal' },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      userId: 'user-1'
+      userId: 'user-1
     },
     {
       id: 'block-3',
@@ -51,7 +51,7 @@ const initialState: EditorState = {
       properties: { alignment: 'left' },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      userId: 'user-1'
+      userId: 'user-1
     }
   ],
   selectedBlockId: null,
@@ -121,7 +121,7 @@ const initialState: EditorState = {
       isConnected: true
     }
   ],
-  searchQuery: '','
+  searchQuery: '',
   filterBy: 'all',
   sortBy: 'position',
   viewMode: 'edit',
@@ -249,7 +249,7 @@ export function BlockBasedContentEditor({
   currentUser,
   onSave,
   onShare,
-  className = '
+  className = 
 }: BlockBasedContentEditorProps) {
   const [state, dispatch] = useReducer(editorReducer, initialState)
   const [showBlockMenu, setShowBlockMenu] = useState(false)
@@ -286,7 +286,7 @@ export function BlockBasedContentEditor({
   useEffect(() => {
     const wordCount = state.blocks.reduce((count, block) => {
       if (block.type === 'text' || block.type === 'heading') {
-        const text = block.content.text || '
+        const text = block.content.text || 
         return count + text.split(/\s+/).filter(word => word.length > 0).length
       }
       return count
@@ -317,22 +317,22 @@ export function BlockBasedContentEditor({
     
     switch (type) {
       case 'text':
-        content = { text: '' }'
+        content = { text: '' }
         break
       case 'heading':
-        content = { text: '', level: 1 }'
+        content = { text: '', level: 1 }
         break
       case 'list':
-        content = { items: [''] }'
+        content = { items: [''] }
         break
       case 'checklist':
-        content = { items: [{ id: `item-${Date.now()}`, text: '', checked: false }] }'
+        content = { items: [{ id: `item-${Date.now()}`, text: '', checked: false }] }
         break
       case 'quote':
         content = { text: '', author:  }
         break
       case 'code':
-        content = { code: '', language: 'javascript' }'
+        content = { code: '', language: 'javascript' }
         break
       case 'table':
         content = { 
@@ -375,19 +375,19 @@ export function BlockBasedContentEditor({
         case 'text':
           return isEditing ? (
             <Textarea
-              value={block.content.text || ''}'
+              value={block.content.text || ''}
               onChange={(e) => dispatch({
                 type: 'UPDATE_BLOCK',
                 id: block.id,
                 updates: { content: { ...block.content, text: e.target.value } }
               })}
               onBlur={() => dispatch({ type: 'SET_EDITING', editing: false })}
-              className= "border-none p-0 resize-none focus:ring-0"
+              className= "border-none p-0 resize-none focus:ring-0
               autoFocus
             />
           ) : (
             <p 
-              className= "cursor-text"
+              className= "cursor-text
               onClick={() => dispatch({ type: 'SET_EDITING', editing: true })}
             >
               {block.content.text || 'Type something...'}
@@ -398,24 +398,24 @@ export function BlockBasedContentEditor({
           const headingLevel = block.content.level || 1
           return isEditing ? (
             <Input
-              value={block.content.text || ''}'
+              value={block.content.text || ''}
               onChange={(e) => dispatch({
                 type: 'UPDATE_BLOCK',
                 id: block.id,
                 updates: { content: { ...block.content, text: e.target.value } }
               })}
               onBlur={() => dispatch({ type: 'SET_EDITING', editing: false })}
-              className= "border-none p-0 text-2xl font-bold focus:ring-0"
+              className= "border-none p-0 text-2xl font-bold focus:ring-0
               autoFocus
             />
           ) : (
             <div 
-              className= "cursor-text text-2xl font-bold"
+              className= "cursor-text text-2xl font-bold
               onClick={() => dispatch({ type: 'SET_EDITING', editing: true })}
               style={{
                 fontSize: headingLevel === 1 ? '2rem' : 
                          headingLevel === 2 ? '1.75rem' : 
-                         headingLevel === 3 ? '1.5rem' : '1.25rem'
+                         headingLevel === 3 ? '1.5rem' : '1.25rem
               }}
             >
               {block.content.text || 'Heading'}
@@ -428,7 +428,7 @@ export function BlockBasedContentEditor({
               {block.content.items?.map((item: unknown, index: number) => (
                 <div key={item.id || index} className= "flex items-center gap-2">
                   <input
-                    type= "checkbox"
+                    type= "checkbox
                     checked={item.checked || false}
                     onChange={(e) => {
                       const updatedItems = [...block.content.items]
@@ -439,10 +439,10 @@ export function BlockBasedContentEditor({
                         updates: { content: { ...block.content, items: updatedItems } }
                       })
                     }}
-                    className= "rounded"
+                    className= "rounded
                   />
                   <Input
-                    value={item.text || ''}'
+                    value={item.text || ''}
                     onChange={(e) => {
                       const updatedItems = [...block.content.items]
                       updatedItems[index] = { ...item, text: e.target.value }
@@ -452,8 +452,8 @@ export function BlockBasedContentEditor({
                         updates: { content: { ...block.content, items: updatedItems } }
                       })
                     }}
-                    className= "border-none p-0 focus:ring-0"
-                    placeholder= "To-do item"
+                    className= "border-none p-0 focus:ring-0
+                    placeholder= "To-do item
                   />
                 </div>
               ))}
@@ -471,7 +471,7 @@ export function BlockBasedContentEditor({
                     id: block.id,
                     updates: { content: { ...block.content, language: e.target.value } }
                   })}
-                  className= "bg-gray-800 text-gray-200 text-sm border-gray-700 rounded px-2 py-1"
+                  className= "bg-gray-800 text-gray-200 text-sm border-gray-700 rounded px-2 py-1
                 >
                   <option value= "javascript">JavaScript</option>
                   <option value= "typescript">TypeScript</option>
@@ -484,14 +484,14 @@ export function BlockBasedContentEditor({
                 </Button>
               </div>
               <Textarea
-                value={block.content.code || ''}'
+                value={block.content.code || ''}
                 onChange={(e) => dispatch({
                   type: 'UPDATE_BLOCK',
                   id: block.id,
                   updates: { content: { ...block.content, code: e.target.value } }
                 })}
-                className= "bg-transparent border-none text-gray-100 font-mono text-sm resize-none focus:ring-0"
-                placeholder= "// Enter your code here"
+                className= "bg-transparent border-none text-gray-100 font-mono text-sm resize-none focus:ring-0
+                placeholder= "// Enter your code here
                 rows={6}
               />
             </div>
@@ -501,14 +501,14 @@ export function BlockBasedContentEditor({
           return (
             <blockquote className= "border-l-4 border-purple-500 pl-4 italic text-gray-700">
               <Textarea
-                value={block.content.text || ''}'
+                value={block.content.text || ''}
                 onChange={(e) => dispatch({
                   type: 'UPDATE_BLOCK',
                   id: block.id,
                   updates: { content: { ...block.content, text: e.target.value } }
                 })}
-                className= "border-none p-0 italic resize-none focus:ring-0"
-                placeholder= "Enter quote..."
+                className= "border-none p-0 italic resize-none focus:ring-0
+                placeholder= "Enter quote...
               />
               {block.content.author && (
                 <footer className= "text-sm text-gray-500 mt-2">
@@ -540,7 +540,7 @@ export function BlockBasedContentEditor({
                               updates: { content: { ...block.content, headers: updatedHeaders } }
                             })
                           }}
-                          className= "border-none p-0 font-medium focus:ring-0"
+                          className= "border-none p-0 font-medium focus:ring-0
                         />
                       </th>
                     ))}
@@ -562,7 +562,7 @@ export function BlockBasedContentEditor({
                                 updates: { content: { ...block.content, rows: updatedRows } }
                               })
                             }}
-                            className= "border-none p-0 focus:ring-0"
+                            className= "border-none p-0 focus:ring-0
                           />
                         </td>
                       ))}
@@ -633,9 +633,9 @@ export function BlockBasedContentEditor({
                     <Database className= "h-12 w-12 mx-auto mb-2 text-gray-300" />
                     <p>Select a database to display</p>
                     <Button
-                      size= "sm"
-                      variant= "outline"
-                      className= "mt-2"
+                      size= "sm
+                      variant= "outline
+                      className= "mt-2
                       onClick={() => dispatch({ type: 'TOGGLE_DATABASE' })}
                     >
                       Choose Database
@@ -655,7 +655,7 @@ export function BlockBasedContentEditor({
       <div
         key={block.id}
         className={`group relative p-2 rounded-lg transition-colors ${
-          isSelected ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'
+          isSelected ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50
         }`}
         onClick={(e) => handleBlockClick(block.id, e)}
         draggable
@@ -683,7 +683,7 @@ export function BlockBasedContentEditor({
             <Button 
               size= "sm" 
               variant= "ghost" 
-              className= "h-6 w-6 p-0"
+              className= "h-6 w-6 p-0
               onClick={() => dispatch({ type: 'DELETE_BLOCK', id: block.id })}
             >
               <Trash2 className= "h-3 w-3" />
@@ -712,14 +712,14 @@ export function BlockBasedContentEditor({
         <div className= "flex items-center gap-2">
           <Badge variant= "outline">
             {state.blocks.filter(b => b.type === 'text' || b.type === 'heading').reduce((count, block) => {
-              const text = block.content.text || '
+              const text = block.content.text || 
               return count + text.split(/\s+/).filter(word => word.length > 0).length
             }, 0)} words
           </Badge>
 
           <Button
-            size= "sm"
-            variant= "outline"
+            size= "sm
+            variant= "outline
             onClick={() => dispatch({ type: 'TOGGLE_TEMPLATES' })}
           >
             <Template className= "h-4 w-4 mr-2" />
@@ -727,8 +727,8 @@ export function BlockBasedContentEditor({
           </Button>
 
           <Button
-            size= "sm"
-            variant= "outline"
+            size= "sm
+            variant= "outline
             onClick={() => dispatch({ type: 'TOGGLE_DATABASE' })}
           >
             <Database className= "h-4 w-4 mr-2" />
@@ -736,7 +736,7 @@ export function BlockBasedContentEditor({
           </Button>
 
           <Button
-            size= "sm"
+            size= "sm
             variant={state.viewMode === 'preview' ? 'default' : 'outline'}
             onClick={() => dispatch({ 
               type: 'SET_VIEW_MODE', 
@@ -770,9 +770,9 @@ export function BlockBasedContentEditor({
                 {/* Add Block Button */}
                 <div className= "flex items-center justify-center py-4">
                   <Button
-                    variant= "ghost"
+                    variant= "ghost
                     onClick={handleAddBlockClick}
-                    className= "text-gray-400 hover:text-gray-600"
+                    className= "text-gray-400 hover:text-gray-600
                   >
                     <Plus className= "h-4 w-4 mr-2" />
                     Add a block
@@ -795,7 +795,7 @@ export function BlockBasedContentEditor({
                 {state.templates.map(template => (
                   <div
                     key={template.id}
-                    className= "p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                    className= "p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors
                     onClick={() => dispatch({ type: 'APPLY_TEMPLATE', template })}
                   >
                     <div className= "font-medium text-sm">{template.name}</div>
@@ -830,7 +830,7 @@ export function BlockBasedContentEditor({
                       {database.tables.map(table => (
                         <div
                           key={table.id}
-                          className= "text-xs p-1 bg-gray-50 rounded cursor-pointer hover:bg-gray-100"
+                          className= "text-xs p-1 bg-gray-50 rounded cursor-pointer hover:bg-gray-100
                           onClick={() => {
                             const block = createBlock('database', {
                               databaseId: database.id,
@@ -858,9 +858,9 @@ export function BlockBasedContentEditor({
               {blockTypes.map(blockType => (
                 <Button
                   key={blockType.type}
-                  variant= "ghost"
-                  size= "sm"
-                  className= "w-full justify-start h-auto p-2"
+                  variant= "ghost
+                  size= "sm
+                  className= "w-full justify-start h-auto p-2
                   onClick={() => addBlock(blockType.type as ContentBlock['type'])}
                 >
                   <blockType.icon className= "h-4 w-4 mr-3 text-gray-400" />
@@ -887,7 +887,7 @@ export function BlockBasedContentEditor({
                 <span>Words:</span>
                 <span>
                   {state.blocks.filter(b => b.type === 'text' || b.type === 'heading').reduce((count, block) => {
-                    const text = block.content.text || '
+                    const text = block.content.text || 
                     return count + text.split(/\s+/).filter(word => word.length > 0).length
                   }, 0)}
                 </span>
@@ -896,7 +896,7 @@ export function BlockBasedContentEditor({
                 <span>Characters:</span>
                 <span>
                   {state.blocks.filter(b => b.type === 'text' || b.type === 'heading').reduce((count, block) => {
-                    return count + (block.content.text || '').length'
+                    return count + (block.content.text || '').length
                   }, 0)}
                 </span>
               </div>
@@ -920,9 +920,9 @@ export function BlockBasedContentEditor({
               {blockTypes.map(blockType => (
                 <Button
                   key={blockType.type}
-                  variant= "ghost"
-                  size= "sm"
-                  className= "w-full justify-start h-auto p-3"
+                  variant= "ghost
+                  size= "sm
+                  className= "w-full justify-start h-auto p-3
                   onClick={() => addBlock(blockType.type as ContentBlock['type'])}
                 >
                   <blockType.icon className= "h-5 w-5 mr-3 text-gray-400" />

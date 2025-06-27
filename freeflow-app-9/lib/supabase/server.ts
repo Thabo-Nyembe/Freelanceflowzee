@@ -1,12 +1,12 @@
-'use server'
+'use server
 
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import { cookies } from 'next/headers'
-import { Database } from '@/types/supabase'
+import { createServerClient, type CookieOptions } from '@supabase/ssr
+import { cookies } from 'next/headers
+import { Database } from '@/types/supabase
 
 // Force dynamic rendering since we're using cookies
 export async function getDynamicConfig() {
-  return 'force-dynamic'
+  return 'force-dynamic
 }
 
 export async function createClient() {

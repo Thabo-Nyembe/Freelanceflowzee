@@ -17,7 +17,7 @@ test.describe(&apos;Smoke tests&apos;, () => {
   });
 
   test(&apos;should load the homepage&apos;, async ({ page }) => {
-    await page.goto(&apos;/');'
+    await page.goto(&apos;/');
     await expect(page).toHaveTitle(/FreeflowZee/);
   });
 

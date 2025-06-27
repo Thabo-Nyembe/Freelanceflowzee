@@ -1,6 +1,6 @@
-'use client'
+'use client
 
-import React, { useReducer, useState, useCallback } from 'react'
+import React, { useReducer, useState, useCallback } from 'react
  payload: FileItem }
   | { type: 'DELETE_FILE'; payload: string }
   | { type: 'TOGGLE_SELECTION'; payload: string }
@@ -16,7 +16,7 @@ import React, { useReducer, useState, useCallback } from 'react'
 const initialState: FileStorageState = {
   files: [
     {
-      id: '1','
+      id: '1',
       name: 'Brand_Guidelines_Final.pdf',
       type: 'document',
       size: 2457600, // 2.4MB
@@ -31,7 +31,7 @@ const initialState: FileStorageState = {
       tags: ['branding', 'guidelines', 'final']
     },
     {
-      id: '2','
+      id: '2',
       name: 'Hero_Animation_v3.mp4',
       type: 'video',
       size: 15728640, // 15MB
@@ -47,7 +47,7 @@ const initialState: FileStorageState = {
       tags: ['animation', 'hero', 'website']
     },
     {
-      id: '3','
+      id: '3',
       name: 'Logo_Variations.zip',
       type: 'archive',
       size: 5242880, // 5MB
@@ -62,7 +62,7 @@ const initialState: FileStorageState = {
       tags: ['logo', 'variations', 'assets']
     },
     {
-      id: '4','
+      id: '4',
       name: 'Product_Photos.zip',
       type: 'archive',
       size: 52428800, // 50MB
@@ -86,7 +86,7 @@ const initialState: FileStorageState = {
       size: 25165824, // 24MB
       dateModified: new Date('2024-01-15'),
       isShared: true,
-      permissions: 'view'
+      permissions: 'view
     },
     {
       id: 'f2',
@@ -96,14 +96,14 @@ const initialState: FileStorageState = {
       size: 73400320, // 70MB
       dateModified: new Date('2024-01-14'),
       isShared: true,
-      permissions: 'edit'
+      permissions: 'edit
     }
   ],
   selectedItems: [],
   uploadProgress: [],
   viewMode: 'grid',
   currentFolder: null,
-  searchQuery: '','
+  searchQuery: '',
   filterType: 'all',
   sortBy: 'date',
   sortOrder: 'desc',
@@ -119,21 +119,21 @@ const initialState: FileStorageState = {
         action: 'upload',
         fileName: 'Brand_Guidelines_Final.pdf',
         timestamp: new Date('2024-01-15T10:30:00'),
-        user: 'John Doe'
+        user: 'John Doe
       },
       {
         id: 'a2',
         action: 'share',
         fileName: 'Hero_Animation_v3.mp4',
         timestamp: new Date('2024-01-14T14:22:00'),
-        user: 'Sarah Wilson'
+        user: 'Sarah Wilson
       },
       {
         id: 'a3',
         action: 'download',
         fileName: 'Logo_Variations.zip',
         timestamp: new Date('2024-01-13T09:15:00'),
-        user: 'Mike Chen'
+        user: 'Mike Chen
       }
     ]
   }
@@ -224,7 +224,7 @@ function fileStorageReducer(state: FileStorageState, action: FileStorageAction):
 interface EnhancedFileStorageProps {
   showAnalytics?: boolean
   allowUpload?: boolean
-  mode?: 'personal' | 'team' | 'client'
+  mode?: 'personal' | 'team' | 'client
   className?: string
 }
 
@@ -232,7 +232,7 @@ export function EnhancedFileStorage({
   showAnalytics = true, 
   allowUpload = true,
   mode = 'personal',
-  className = '
+  className = 
 }: EnhancedFileStorageProps) {
   const [state, dispatch] = useReducer(fileStorageReducer, initialState)
   const [dragOver, setDragOver] = useState(false)
@@ -251,11 +251,11 @@ export function EnhancedFileStorage({
 
   // Format file size
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes'
+    if (bytes === 0) return '0 Bytes
     const k = 1024
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]'
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
   // Filter and sort files
@@ -357,7 +357,7 @@ export function EnhancedFileStorage({
           </div>
           <Progress 
             value={(state.analytics.usedStorage / state.analytics.totalStorage) * 100} 
-            className= "h-2 bg-white/20"
+            className= "h-2 bg-white/20
           />
         </div>
       </div>
@@ -390,7 +390,7 @@ export function EnhancedFileStorage({
                 className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
                   dragOver 
                     ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-300 hover:border-gray-400'
+                    : 'border-gray-300 hover:border-gray-400
                 }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -416,10 +416,10 @@ export function EnhancedFileStorage({
                 <div className= "relative flex-1 max-w-md">
                   <Search className= "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input
-                    placeholder= "Search files, tags, or content..."
+                    placeholder= "Search files, tags, or content...
                     value={state.searchQuery}
                     onChange={(e) => dispatch({ type: 'SET_SEARCH_QUERY', payload: e.target.value })}
-                    className= "pl-10"
+                    className= "pl-10
                   />
                 </div>
                 
@@ -429,7 +429,7 @@ export function EnhancedFileStorage({
                     type: 'SET_FILTER_TYPE', 
                     payload: e.target.value as FileStorageState['filterType'] 
                   })}
-                  className= "px-3 py-2 border rounded-lg"
+                  className= "px-3 py-2 border rounded-lg
                 >
                   <option value= "all">All Files</option>
                   <option value= "images">Images</option>
@@ -442,14 +442,14 @@ export function EnhancedFileStorage({
               <div className= "flex items-center gap-2">
                 <Button
                   variant={state.viewMode === 'grid' ? 'default' : 'outline'}
-                  size= "sm"
+                  size= "sm
                   onClick={() => dispatch({ type: 'SET_VIEW_MODE', payload: 'grid' })}
                 >
                   <Grid className= "w-4 h-4" />
                 </Button>
                 <Button
                   variant={state.viewMode === 'list' ? 'default' : 'outline'}
-                  size= "sm"
+                  size= "sm
                   onClick={() => dispatch({ type: 'SET_VIEW_MODE', payload: 'list' })}
                 >
                   <List className= "w-4 h-4" />
@@ -464,7 +464,7 @@ export function EnhancedFileStorage({
                   <Card 
                     key={file.id} 
                     className={`cursor-pointer transition-all hover:shadow-lg ${
-                      state.selectedItems.includes(file.id) ? 'ring-2 ring-blue-500' : '
+                      state.selectedItems.includes(file.id) ? 'ring-2 ring-blue-500' : 
                     }`}
                     onClick={() => dispatch({ type: 'TOGGLE_SELECTION', payload: file.id })}
                   >
@@ -515,7 +515,7 @@ export function EnhancedFileStorage({
                   <div
                     key={file.id}
                     className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-gray-50 ${
-                      state.selectedItems.includes(file.id) ? 'bg-blue-50 border-blue-200' : '
+                      state.selectedItems.includes(file.id) ? 'bg-blue-50 border-blue-200' : 
                     }`}
                     onClick={() => dispatch({ type: 'TOGGLE_SELECTION', payload: file.id })}
                   >
@@ -615,7 +615,7 @@ export function EnhancedFileStorage({
             </Button>
             <Button 
               size= "sm" 
-              variant= "outline"
+              variant= "outline
               onClick={() => dispatch({ type: 'CLEAR_SELECTION' })}
             >
               <Trash2 className= "w-4 h-4 mr-1" />

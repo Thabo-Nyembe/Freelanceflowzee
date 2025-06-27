@@ -1,4 +1,4 @@
-'use client'
+'use client
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -103,8 +103,8 @@ export function DemoRouter() {
                     <div className= "text-sm text-gray-600">{scenario.duration}</div>
                   </div>
                   <Button 
-                    className= "w-full group-hover:bg-primary group-hover:text-white transition-colors"
-                    variant= "outline"
+                    className= "w-full group-hover:bg-primary group-hover:text-white transition-colors
+                    variant= "outline
                     onClick={() => setActiveDemo(scenario)}
                   >
                     Start Demo

@@ -1,6 +1,6 @@
-"use client
+"use client"
 
-import React from 'react'
+import React from 'react
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -35,75 +35,75 @@ export function ProjectCreationForm({ onSubmit, loading = false }: ProjectCreati
       <div>
         <Label htmlFor= "title">Project Title *</Label>
         <Input
-          id= "title"
-          name= "title"
-          placeholder= "Enter project title"
+          id= "title
+          name= "title
+          placeholder= "Enter project title
           required
-          data-testid= "project-title-input"
+          data-testid= "project-title-input
         />
       </div>
 
       <div>
         <Label htmlFor= "description">Project Description *</Label>
         <Textarea
-          id= "description"
-          name= "description"
-          placeholder= "Enter project description"
+          id= "description
+          name= "description
+          placeholder= "Enter project description
           required
-          data-testid= "project-description-input"
+          data-testid= "project-description-input
         />
       </div>
 
       <div>
         <Label htmlFor= "client_name">Client Name</Label>
         <Input
-          id= "client_name"
-          name= "client_name"
-          placeholder= "Enter client name"
-          data-testid= "project-client-name-input"
+          id= "client_name
+          name= "client_name
+          placeholder= "Enter client name
+          data-testid= "project-client-name-input
         />
       </div>
 
       <div>
         <Label htmlFor= "client_email">Client Email</Label>
         <Input
-          id= "client_email"
-          name= "client_email"
-          type= "email"
-          placeholder= "Enter client email"
-          data-testid= "project-client-email-input"
+          id= "client_email
+          name= "client_email
+          type= "email
+          placeholder= "Enter client email
+          data-testid= "project-client-email-input
         />
       </div>
 
       <div>
         <Label htmlFor= "budget">Budget</Label>
         <Input
-          id= "budget"
-          name= "budget"
-          type= "number"
+          id= "budget
+          name= "budget
+          type= "number
           min="0
-          placeholder= "Enter project budget"
-          data-testid= "project-budget-input"
+          placeholder= "Enter project budget
+          data-testid= "project-budget-input
         />
       </div>
 
       <div>
         <Label htmlFor= "start_date">Start Date</Label>
         <Input
-          id= "start_date"
-          name= "start_date"
-          type= "date"
-          data-testid= "project-start-date-input"
+          id= "start_date
+          name= "start_date
+          type= "date
+          data-testid= "project-start-date-input
         />
       </div>
 
       <div>
         <Label htmlFor= "end_date">End Date</Label>
         <Input
-          id= "end_date"
-          name= "end_date"
-          type= "date"
-          data-testid= "project-end-date-input"
+          id= "end_date
+          name= "end_date
+          type= "date
+          data-testid= "project-end-date-input
         />
       </div>
 

@@ -1,6 +1,6 @@
-'use client'
+'use client
 
-import React, { useState, useRef, useReducer, useCallback } from 'react'
+import React, { useState, useRef, useReducer, useCallback } from 'react
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -40,7 +40,7 @@ function clientCollabReducer(state: ClientCollabState, action: ClientCollabActio
       return { 
         ...state, 
         comments: newComments,
-        commentContent: '','
+        commentContent: '',
         selectedPosition: null,
         voiceBlob: null,
         screenBlob: null
@@ -69,7 +69,7 @@ function clientCollabReducer(state: ClientCollabState, action: ClientCollabActio
       }
     
     case 'STOP_RECORDING':
-      const blobField = state.recordingType === 'voice' ? 'voiceBlob' : 'screenBlob'
+      const blobField = state.recordingType === 'voice' ? 'voiceBlob' : 'screenBlob
       return { 
         ...state, 
         isRecording: false,
@@ -106,7 +106,7 @@ const sampleFiles: ProjectFile[] = [
       uploadedAt: '2024-01-15T10:30:00Z',
       uploadedBy: 'Alex Designer',
       changelog: 'Updated hero section, improved mobile responsiveness',
-      status: 'review'
+      status: 'review
     },
     versions: [
       {
@@ -117,7 +117,7 @@ const sampleFiles: ProjectFile[] = [
         uploadedAt: '2024-01-12T14:20:00Z',
         uploadedBy: 'Alex Designer',
         changelog: 'Added pricing section, updated color scheme',
-        status: 'approved'
+        status: 'approved
       }
     ],
     url: '/files/homepage-v3.figma',
@@ -126,7 +126,7 @@ const sampleFiles: ProjectFile[] = [
     approvalStatus: {
       overall: 'pending',
       elements: {
-        'hero_section': 'approved', 'pricing_section': 'pending', 'footer': 'rejected'
+        'hero_section': 'approved', 'pricing_section': 'pending', 'footer': 'rejected
       }
     },
     comments: [
@@ -169,7 +169,7 @@ const sampleFiles: ProjectFile[] = [
             userId: 'freelancer_1',
             userName: 'Alex Designer',
             userAvatar: '/avatars/alex.jpg',
-            content: 'Thanks for the feedback! I\'ll increase the font size and test on mobile.','
+            content: 'Thanks for the feedback! I\'ll increase the font size and test on mobile.',
             type: 'text',
             fileType: 'figma',
             status: 'in_review',
@@ -187,7 +187,7 @@ const sampleFiles: ProjectFile[] = [
           url: '/audio/comment_voice_1.mp3',
           duration: 15,
           waveform: [12, 25, 18, 30, 22, 35, 28, 15, 40, 25, 18, 32, 20, 28, 15],
-          transcript: 'The footer text is too small and hard to read on mobile.'
+          transcript: 'The footer text is too small and hard to read on mobile.
         },
         isResolved: false
       }
@@ -200,7 +200,7 @@ const sampleFiles: ProjectFile[] = [
       urgentIssues: 1,
       overallSentiment: 'positive',
       estimatedWorkRequired: '2-3 hours',
-      keyActionItems: ['Increase footer font size for mobile', 'Test mobile responsiveness', 'Consider hero section approved'
+      keyActionItems: ['Increase footer font size for mobile', 'Test mobile responsiveness', 'Consider hero section approved
       ]
     }
   }
@@ -212,7 +212,7 @@ interface EnhancedClientCollaborationProps {
     id: string
     name: string
     avatar?: string
-    role: 'client' | 'freelancer'
+    role: 'client' | 'freelancer
   }
   onCommentAdd?: (comment: ClientComment) => void
   onCommentUpdate?: (commentId: string, updates: Partial<ClientComment>) => void
@@ -226,7 +226,7 @@ export function EnhancedClientCollaboration({
   onCommentAdd,
   onCommentUpdate,
   onFileApproval,
-  className = '
+  className = 
 }: EnhancedClientCollaborationProps) {
   const [state, dispatch] = useReducer(clientCollabReducer, {
     activeFile: sampleFiles[0],
@@ -236,7 +236,7 @@ export function EnhancedClientCollaboration({
     recordingType: null,
     recordingDuration: 0,
     selectedPosition: null,
-    commentContent: '','
+    commentContent: '',
     voiceBlob: null,
     screenBlob: null,
     viewMode: 'inline',
@@ -298,7 +298,7 @@ export function EnhancedClientCollaboration({
       screenRecording: state.screenBlob ? {
         url: URL.createObjectURL(state.screenBlob),
         duration: state.recordingDuration,
-        thumbnail: '/images/screen-thumb.jpg'
+        thumbnail: '/images/screen-thumb.jpg
       } : undefined,
       isResolved: false
     }
@@ -309,11 +309,11 @@ export function EnhancedClientCollaboration({
 
   const getStatusColor = (status: ClientComment['status']) => {
     switch (status) {
-      case 'approved': return 'bg-green-100 text-green-700 border-green-200'
-      case 'changes_required': return 'bg-red-100 text-red-700 border-red-200'
-      case 'in_review': return 'bg-yellow-100 text-yellow-700 border-yellow-200'
-      case 'resolved': return 'bg-blue-100 text-blue-700 border-blue-200'
-      default: return 'bg-gray-100 text-gray-700 border-gray-200'
+      case 'approved': return 'bg-green-100 text-green-700 border-green-200
+      case 'changes_required': return 'bg-red-100 text-red-700 border-red-200
+      case 'in_review': return 'bg-yellow-100 text-yellow-700 border-yellow-200
+      case 'resolved': return 'bg-blue-100 text-blue-700 border-blue-200
+      default: return 'bg-gray-100 text-gray-700 border-gray-200
     }
   }
 
@@ -378,19 +378,19 @@ export function EnhancedClientCollaboration({
 
         <div className= "flex items-center gap-2">
           <Button
-            variant= "outline"
-            size= "sm"
+            variant= "outline
+            size= "sm
             onClick={() => dispatch({ type: 'TOGGLE_COMPARISON_MODE' })}
-            className={state.comparisonMode ? 'bg-blue-100 text-blue-700' : }'
+            className={state.comparisonMode ? 'bg-blue-100 text-blue-700' : }
           >
             <GitCompare className= "w-4 h-4 mr-2" />
             Compare Versions
           </Button>
           <Button
-            variant= "outline"
-            size= "sm"
+            variant= "outline
+            size= "sm
             onClick={() => dispatch({ type: 'TOGGLE_AI_SUMMARY' })}
-            className={state.showAISummary ? 'bg-purple-100 text-purple-700' : }'
+            className={state.showAISummary ? 'bg-purple-100 text-purple-700' : }
           >
             <Sparkles className= "w-4 h-4 mr-2" />
             AI Insights
@@ -414,8 +414,8 @@ export function EnhancedClientCollaboration({
               {currentUser.role === 'client' && (
                 <>
                   <Button
-                    size= "sm"
-                    className= "bg-green-600 hover:bg-green-700 text-white"
+                    size= "sm
+                    className= "bg-green-600 hover:bg-green-700 text-white
                     onClick={() => {
                       if (state.activeFile) {
                         onFileApproval?.(state.activeFile.id, 'approved')
@@ -426,9 +426,9 @@ export function EnhancedClientCollaboration({
                     Approve File
                   </Button>
                   <Button
-                    size= "sm"
-                    variant= "outline"
-                    className= "border-red-300 text-red-600 hover:bg-red-50"
+                    size= "sm
+                    variant= "outline
+                    className= "border-red-300 text-red-600 hover:bg-red-50
                     onClick={() => {
                       if (state.activeFile) {
                         onFileApproval?.(state.activeFile.id, 'changes_required')
@@ -492,14 +492,14 @@ export function EnhancedClientCollaboration({
                   comment.position && (
                     <div 
                       key={comment.id}
-                      className= "absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2"
+                      className= "absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2
                       style={{ left: `${comment.position.x}%`, top: `${comment.position.y}%` }}
                     >
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-semibold shadow-lg hover:scale-110 transition-transform ${
                         comment.status === 'approved' ? 'bg-green-500' :
                         comment.status === 'changes_required' ? 'bg-red-500' :
                         comment.status === 'resolved' ? 'bg-blue-500' :
-                        'bg-yellow-500'
+                        'bg-yellow-500
                       }`}>
                         <Pin className= "w-3 h-3" />
                       </div>
@@ -511,11 +511,11 @@ export function EnhancedClientCollaboration({
               {/* Recording Controls */}
               <div className= "mt-4 flex items-center gap-2">
                 <Button
-                  size= "sm"
-                  variant= "outline"
+                  size= "sm
+                  variant= "outline
                   onClick={startVoiceRecording}
                   disabled={state.isRecording}
-                  className= "flex items-center gap-2"
+                  className= "flex items-center gap-2
                 >
                   {state.isRecording && state.recordingType === 'voice' ? (
                     <>
@@ -531,11 +531,11 @@ export function EnhancedClientCollaboration({
                 </Button>
                 
                 <Button
-                  size= "sm"
-                  variant= "outline"
+                  size= "sm
+                  variant= "outline
                   onClick={startScreenRecording}
                   disabled={state.isRecording}
-                  className= "flex items-center gap-2"
+                  className= "flex items-center gap-2
                 >
                   {state.isRecording && state.recordingType === 'screen' ? (
                     <>
@@ -551,10 +551,10 @@ export function EnhancedClientCollaboration({
                 </Button>
 
                 <Input
-                  placeholder= "Add a text comment..."
+                  placeholder= "Add a text comment...
                   value={state.commentContent}
                   onChange={(e) => dispatch({ type: 'SET_COMMENT_CONTENT', content: e.target.value })}
-                  className= "flex-1"
+                  className= "flex-1
                 />
 
                 {(state.voiceBlob || state.screenBlob || state.commentContent) && (
@@ -606,7 +606,7 @@ export function EnhancedClientCollaboration({
                               {comment.voiceNote.waveform.slice(0, 10).map((height, i) => (
                                 <div
                                   key={i}
-                                  className= "w-1 bg-blue-500 rounded"
+                                  className= "w-1 bg-blue-500 rounded
                                   style={{ height: `${height/3}px` }}
                                 />
                               ))}
@@ -620,18 +620,18 @@ export function EnhancedClientCollaboration({
                         <span>{new Date(comment.createdAt).toLocaleTimeString()}</span>
                         <div className= "flex items-center gap-2">
                           <Button
-                            size= "sm"
-                            variant= "ghost"
-                            className= "h-6 px-2"
+                            size= "sm
+                            variant= "ghost
+                            className= "h-6 px-2
                           >
                             <ThumbsUp className= "w-3 h-3" />
                           </Button>
                           
                           {currentUser.role === 'freelancer' && !comment.isResolved && (
                             <Button
-                              size= "sm"
-                              variant= "ghost"
-                              className= "h-6 px-2"
+                              size= "sm
+                              variant= "ghost
+                              className= "h-6 px-2
                               onClick={() => dispatch({
                                 type: 'RESOLVE_COMMENT',
                                 id: comment.id,

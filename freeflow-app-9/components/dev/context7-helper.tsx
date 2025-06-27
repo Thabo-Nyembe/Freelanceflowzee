@@ -1,4 +1,4 @@
-"use client";"
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -13,16 +13,16 @@ interface Context7HelperProps {
 }
 
 export function Context7Helper({ isVisible = false, onToggle }: Context7HelperProps) {
-  const [searchQuery, setSearchQuery] = useState('');'
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedLibrary, setSelectedLibrary] = useState('next.js');
   const [libraryDoc, setLibraryDoc] = useState<LibraryDoc | null>(null);
   const [loading, setLoading] = useState(false);
   const [quickHelp, setQuickHelp] = useState<CodeSnippet[]>([]);
 
-  const libraries = ['next.js', 'react', 'supabase', 'tailwindcss', '@radix-ui/react-dialog', 'react-hook-form', 'zod'
+  const libraries = ['next.js', 'react', 'supabase', 'tailwindcss', '@radix-ui/react-dialog', 'react-hook-form', 'zod
   ];
 
-  const quickHelpTasks = ['authentication', 'routing', 'forms', 'styling', 'state', 'database', 'api'
+  const quickHelpTasks = ['authentication', 'routing', 'forms', 'styling', 'state', 'database', 'api
   ];
 
   useEffect(() => {
@@ -64,8 +64,8 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
     return (
       <Button
         onClick={onToggle}
-        className= "fixed bottom-4 right-4 z-50 shadow-lg"
-        size= "sm"
+        className= "fixed bottom-4 right-4 z-50 shadow-lg
+        size= "sm
       >
         <Book className= "h-4 w-4 mr-2" />
         Context7 Docs
@@ -104,7 +104,7 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
                 <select
                   value={selectedLibrary}
                   onChange={(e) => setSelectedLibrary(e.target.value)}
-                  className= "w-full p-2 border rounded-md"
+                  className= "w-full p-2 border rounded-md
                 >
                   {libraries.map((lib) => (
                     <option key={lib} value={lib}>
@@ -119,7 +119,7 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
                 <label className= "text-sm font-medium">Topic (optional):</label>
                 <div className= "flex gap-2">
                   <Input
-                    placeholder= "e.g. authentication, routing..."
+                    placeholder= "e.g. authentication, routing...
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyPress={(e) => {
@@ -129,7 +129,7 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
                     }}
                   />
                   <Button
-                    size= "sm"
+                    size= "sm
                     onClick={() => loadLibraryDocs(selectedLibrary, searchQuery)}
                     disabled={loading}
                   >
@@ -176,8 +176,8 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
                                     <div className= "flex items-center justify-between">
                                       <CardTitle className= "text-sm">{snippet.title}</CardTitle>
                                       <Button
-                                        size= "sm"
-                                        variant= "ghost"
+                                        size= "sm
+                                        variant= "ghost
                                         onClick={() => copyToClipboard(snippet.code)}
                                       >
                                         <Copy className= "h-3 w-3" />
@@ -217,7 +217,7 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
             <div className= "space-y-4">
               <div className= "flex gap-2">
                 <Input
-                  placeholder= "Search across all libraries..."
+                  placeholder= "Search across all libraries...
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -240,11 +240,11 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
                   {quickHelpTasks.map((task) => (
                     <Button
                       key={task}
-                      variant= "outline"
-                      size= "sm"
+                      variant= "outline
+                      size= "sm
                       onClick={() => handleQuickHelp(task)}
                       disabled={loading}
-                      className= "justify-start"
+                      className= "justify-start
                     >
                       {task}
                     </Button>
@@ -262,8 +262,8 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
                             <div className= "flex items-center justify-between">
                               <CardTitle className= "text-sm">{snippet.title}</CardTitle>
                               <Button
-                                size= "sm"
-                                variant= "ghost"
+                                size= "sm
+                                variant= "ghost
                                 onClick={() => copyToClipboard(snippet.code)}
                               >
                                 <Copy className= "h-3 w-3" />

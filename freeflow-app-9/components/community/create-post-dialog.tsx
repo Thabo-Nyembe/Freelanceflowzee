@@ -1,12 +1,12 @@
-"use client
+"use client"
 
-import { useState } from 'react'
+import { useState } from 'react
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Image, Video, X } from 'lucide-react'
+import { Image, Video, X } from 'lucide-react
 
 interface CreatePostDialogProps {
   open: boolean
@@ -15,8 +15,8 @@ interface CreatePostDialogProps {
 }
 
 export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDialogProps) {
-  const [title, setTitle] = useState('')'
-  const [content, setContent] = useState('')'
+  const [title, setTitle] = useState('')
+  const [content, setContent] = useState('')
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -34,8 +34,8 @@ export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDia
 
     try {
       await onSubmit(formData)
-      setTitle('')'
-      setContent('')'
+      setTitle('')
+      setContent('')
       setSelectedFiles([])
       onOpenChange(false)
     } catch (error) {
@@ -64,19 +64,19 @@ export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDia
           <div className= "space-y-2">
             <Label htmlFor= "title">Title</Label>
             <Input
-              id= "title"
+              id= "title
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder= "Give your post a title..."
+              placeholder= "Give your post a title...
             />
           </div>
           <div className= "space-y-2">
             <Label htmlFor= "content">Content</Label>
             <Textarea
-              id= "content"
+              id= "content
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder= "What's on your mind?"
+              placeholder= "What's on your mind?
               rows={4}
             />
           </div>

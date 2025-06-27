@@ -1,7 +1,7 @@
-'use client'
+'use client
 
-import React from 'react'
-import { AlertCircle, RefreshCw } from 'lucide-react'
+import React from 'react
+import { AlertCircle, RefreshCw } from 'lucide-react
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
@@ -61,7 +61,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             <Button
               onClick={this.handleRetry}
               className="w-full"
-              data-testid="retry-button"
+              data-testid="retry-button
             >
               <RefreshCw className="mr-2 h-4 w-4" />
               Try Again

@@ -1,19 +1,19 @@
 import React from 'react'
-import { isTestMode } from '@/lib/utils/test-mode'
-import { createClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+import { isTestMode } from '@/lib/utils/test-mode
+import { createClient } from '@/lib/supabase/server
+import { cookies } from 'next/headers
+import { redirect } from 'next/navigation
 import FeedbackWrapper from '@/components/feedback/feedback-wrapper'
 
 interface FeedbackPageProps {
   searchParams: Promise<{
-    type?: 'video' | 'audio' | 'image'
+    type?: 'video' | 'audio' | 'image
     file?: string
   }>
 }
 
 // Force dynamic to avoid static generation issues
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic
 
 export default async function FeedbackPage({ searchParams }: FeedbackPageProps) {
   // Check if we're in test mode to bypass authentication

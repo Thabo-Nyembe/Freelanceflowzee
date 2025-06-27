@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom
 
 // Mock IntersectionObserver
 const mockIntersectionObserver = jest.fn()
@@ -39,7 +39,7 @@ window.scrollTo = jest.fn()
 // Mock TextEncoder/TextDecoder
 if (typeof TextEncoder === 'undefined') {
   global.TextEncoder = class {
-    encoding = 'utf-8'
+    encoding = 'utf-8
     encode(str: string): Uint8Array {
       const arr = new Uint8Array(str.length)
       for (let i = 0; i < str.length; i++) {
@@ -57,16 +57,16 @@ if (typeof TextEncoder === 'undefined') {
 
 if (typeof TextDecoder === 'undefined') {
   global.TextDecoder = class {
-    encoding = 'utf-8'
+    encoding = 'utf-8
     fatal = false
     ignoreBOM = false
     constructor(label?: string, options?: TextDecoderOptions) {
-      this.encoding = label || 'utf-8'
+      this.encoding = label || 'utf-8
       this.fatal = options?.fatal || false
       this.ignoreBOM = options?.ignoreBOM || false
     }
     decode(input?: ArrayBuffer | ArrayBufferView | null, options?: { stream?: boolean }): string {
-      if (!input) return ''
+      if (!input) return 
       const arr = input instanceof Uint8Array ? input : new Uint8Array(input as ArrayBuffer)
       return String.fromCharCode.apply(null, Array.from(arr))
     }
@@ -137,9 +137,9 @@ afterAll(() => {
 })
 
 // Set up environment variables
-process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
-process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-key'
-process.env.STRIPE_PUBLISHABLE_KEY = 'test-key'
+process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-key
+process.env.STRIPE_PUBLISHABLE_KEY = 'test-key
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
@@ -168,7 +168,7 @@ jest.mock('next/navigation', () => ({
     back: jest.fn(),
     pathname: '/',
     query: {},
-    asPath: '/'
+    asPath: '/
   }),
   usePathname: () => '/',
   useSearchParams: () => new URLSearchParams()

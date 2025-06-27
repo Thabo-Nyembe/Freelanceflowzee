@@ -1,4 +1,4 @@
-"use client
+"use client"
 
   width: 16px;
   height: 16px;

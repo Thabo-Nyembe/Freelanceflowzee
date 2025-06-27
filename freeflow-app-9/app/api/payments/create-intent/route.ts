@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
+import { NextRequest, NextResponse } from 'next/server
+import Stripe from 'stripe
 
 // Initialize Stripe with latest API version
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
@@ -35,7 +35,7 @@ export async function GET() {
     console.error('Payment system health check failed:', error)
     return new Response(JSON.stringify({
       status: 'error',
-      message: 'Payment system health check failed'
+      message: 'Payment system health check failed
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
         currency: currency.toLowerCase(),
         metadata: {
           description: description || 'FreeflowZee Payment',
-          customer_email: customer_email || '','
+          customer_email: customer_email || 
           created_via: 'freeflowzee-enhanced',
           created_at: new Date().toISOString(),
         },
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
 
       // Set up future usage if requested
       if (save_payment_method || setup_future_usage) {
-        paymentIntentData.setup_future_usage = setup_future_usage || 'off_session'
+        paymentIntentData.setup_future_usage = setup_future_usage || 'off_session
       }
 
       const paymentIntent = await stripe.paymentIntents.create(paymentIntentData)
@@ -221,7 +221,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Payment intent ID is required'
+          error: 'Payment intent ID is required
         },
         { status: 400 }
       )
@@ -241,7 +241,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to update payment intent'
+        error: error instanceof Error ? error.message : 'Failed to update payment intent
       },
       { status: 500 }
     )

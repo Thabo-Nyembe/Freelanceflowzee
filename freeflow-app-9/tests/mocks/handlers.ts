@@ -23,7 +23,7 @@ export const handlers = [
       ctx.status(200),
       ctx.json([
         {
-          id: &apos;1','
+          id: &apos;1',
           title: &apos;Test Project&apos;,
           description: &apos;A test project&apos;,
           created_at: new Date().toISOString(),
@@ -38,7 +38,7 @@ export const handlers = [
       ctx.status(200),
       ctx.json([
         {
-          id: &apos;1','
+          id: &apos;1',
           title: &apos;Test Post&apos;,
           content: &apos;Test content&apos;,
           author: &apos;Test Author&apos;,
@@ -54,7 +54,7 @@ export const handlers = [
       ctx.status(200),
       ctx.json([
         {
-          id: &apos;1','
+          id: &apos;1',
           title: &apos;Test Video&apos;,
           url: &apos;https://example.com/video.mp4&apos;,
           thumbnail: &apos;https://example.com/thumbnail.jpg&apos;,

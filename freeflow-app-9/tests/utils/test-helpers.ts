@@ -4,7 +4,7 @@ export class TestHelpers {
   constructor(protected readonly page: Page) {}
 
   async goto() {
-    await this.page.goto(&apos;/');'
+    await this.page.goto(&apos;/');
     await this.waitForLoadState();
   }
 
@@ -87,7 +87,7 @@ export class TestHelpers {
 
   // Take screenshot with timestamp
   async takeTimestampedScreenshot(name: string) {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, &apos;-');'
+    const timestamp = new Date().toISOString().replace(/[:.]/g, &apos;-');
     await this.page.screenshot({ 
       path: `test-results/screenshots/${name}-${timestamp}.png`,
       fullPage: true 
@@ -151,7 +151,7 @@ export class TestHelpers {
     const buttons = await this.page.locator(&apos;button&apos;).count();
     const images = await this.page.locator(&apos;img[alt]&apos;).count();
     
-    console.log(`
+    console.log(
       Accessibility check results:
       - Headings: ${headings}
       - Buttons: ${buttons}
@@ -166,7 +166,7 @@ export class TestHelpers {
     return await this.page.evaluate(() => {
       const errors: string[] = [];
       document.querySelectorAll(&apos;[data-testid*=&quot;error&quot;]&apos;).forEach((el) => {
-        errors.push(el.textContent || '&apos;);'
+        errors.push(el.textContent || '&apos;);
       });
       return errors;
     });

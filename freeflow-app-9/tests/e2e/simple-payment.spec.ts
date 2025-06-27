@@ -23,7 +23,7 @@ test.describe(&apos;🔧 Payment Flow Debugging&apos;, () => {
 
   test(&apos;should access home page without redirecting to login&apos;, async ({ page }) => {
     // Navigate to home page
-    await page.goto(&apos;/');'
+    await page.goto(&apos;/');
     
     // Should not redirect to login
     const url = page.url();

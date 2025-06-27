@@ -1,4 +1,4 @@
-"use client
+"use client"
 
 import { useState, useReducer } from "react"
  id: string; reminder: Partial<Reminder> }
@@ -87,7 +87,7 @@ function myDayReducer(state: MyDayState, action: MyDayAction): MyDayState {
 const initialState: MyDayState = {
   reminders: [
     {
-      id: '1','
+      id: '1',
       title: 'Complete logo variations for TechCorp',
       description: 'Finalize the logo variations and prepare for client presentation',
       time: '10:00',
@@ -95,10 +95,10 @@ const initialState: MyDayState = {
       completed: false,
       estimatedDuration: '2h',
       project: 'TechCorp Brand Identity',
-      type: 'task'
+      type: 'task
     },
     {
-      id: '2','
+      id: '2',
       title: 'Review and update wireframes',
       description: 'Update wireframes based on client feedback from yesterday',
       time: '14:30',
@@ -106,21 +106,21 @@ const initialState: MyDayState = {
       completed: false,
       estimatedDuration: '1.5h',
       project: 'E-commerce Platform',
-      type: 'task'
+      type: 'task
     },
     {
-      id: '3','
+      id: '3',
       title: 'Prepare client presentation',
-      description: 'Organize presentation materials for tomorrow\'s client meeting','
+      description: 'Organize presentation materials for tomorrow\'s client meeting',
       time: '16:00',
       priority: 'high',
       completed: false,
       estimatedDuration: '1h',
       project: 'Fashion Brand Campaign',
-      type: 'meeting'
+      type: 'meeting
     },
     {
-      id: '4','
+      id: '4',
       title: 'Team feedback incorporation',
       description: 'Implement team suggestions on the mobile app design',
       time: '17:00',
@@ -128,31 +128,31 @@ const initialState: MyDayState = {
       completed: false,
       estimatedDuration: '30m',
       project: 'Mobile App Design',
-      type: 'followup'
+      type: 'followup
     }
   ],
   emails: [
     {
-      id: '1','
+      id: '1',
       to: 'client@techcorp.com',
       subject: 'Logo Design Update - Ready for Review',
-      content: 'Hi there,\n\nI\'ve completed the logo variations as discussed. Please find the files attached for your review.\n\nBest regards,\nJohn','
+      content: 'Hi there,\n\nI\'ve completed the logo variations as discussed. Please find the files attached for your review.\n\nBest regards,\nJohn',
       scheduled: true,
       scheduledTime: '09:00',
       sent: false,
       priority: 'high',
-      template: 'client_update'
+      template: 'client_update
     },
     {
-      id: '2','
+      id: '2',
       to: 'team@agency.com',
       subject: 'Project Status Update',
-      content: 'Team,\n\nHere\'s the weekly project status update...\n\nBest,\nJohn','
+      content: 'Team,\n\nHere\'s the weekly project status update...\n\nBest,\nJohn',
       scheduled: true,
       scheduledTime: '17:30',
       sent: false,
       priority: 'normal',
-      template: 'team_update'
+      template: 'team_update
     }
   ],
   emailConnected: true,
@@ -165,12 +165,12 @@ const initialState: MyDayState = {
 const priorityColors = {
   high: "bg-red-100 text-red-800 border-red-200",
   medium: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  low: "bg-green-100 text-green-800 border-green-200"
+  low: "bg-green-100 text-green-800 border-green-200
 }
 
 const statusColors = {
   completed: "text-green-600", "in-progress": "text-blue-600", 
-  upcoming: "text-slate-600"
+  upcoming: "text-slate-600
 }
 
 const typeIcons = {
@@ -181,34 +181,34 @@ const typeIcons = {
 export function MyDayToday() {
   const [state, dispatch] = useReducer(myDayReducer, initialState)
   const [newReminder, setNewReminder] = useState({
-    title: '','
-    description: '','
-    time: '','
+    title: '',
+    description: '',
+    time: '',
     priority: 'medium' as const,
-    estimatedDuration: '','
-    project: '','
+    estimatedDuration: '',
+    project: '',
     type: 'task' as const
   })
   const [newEmail, setNewEmail] = useState({
-    to: '','
-    subject: '','
-    content: '','
+    to: '',
+    subject: '',
+    content: '',
     scheduled: false,
-    scheduledTime: '','
+    scheduledTime: '',
     priority: 'normal' as const,
-    template: ''
+    template: 
   })
 
   const currentTime = new Date()
   const currentHour = currentTime.getHours()
-  const greeting = currentHour < 12 ? 'Good morning' : currentHour < 17 ? 'Good afternoon' : 'Good evening'
+  const greeting = currentHour < 12 ? 'Good morning' : currentHour < 17 ? 'Good afternoon' : 'Good evening
 
   const getPriorityColor = (priority: string) => {
     const colors = {
       low: 'bg-blue-100 text-blue-700 border-blue-200',
       medium: 'bg-yellow-100 text-yellow-700 border-yellow-200',
       high: 'bg-orange-100 text-orange-700 border-orange-200',
-      urgent: 'bg-red-100 text-red-700 border-red-200'
+      urgent: 'bg-red-100 text-red-700 border-red-200
     }
     return colors[priority as keyof typeof colors] || colors.medium
   }
@@ -235,13 +235,13 @@ export function MyDayToday() {
 
     dispatch({ type: 'ADD_REMINDER', reminder })
     setNewReminder({
-      title: '','
-      description: '','
-      time: '','
+      title: '',
+      description: '',
+      time: '',
       priority: 'medium',
-      estimatedDuration: '','
-      project: '','
-      type: 'task'
+      estimatedDuration: '',
+      project: '',
+      type: 'task
     })
   }
 
@@ -256,13 +256,13 @@ export function MyDayToday() {
 
     dispatch({ type: 'ADD_EMAIL', email })
     setNewEmail({
-      to: '','
-      subject: '','
-      content: '','
+      to: '',
+      subject: '',
+      content: '',
       scheduled: false,
-      scheduledTime: '','
+      scheduledTime: '',
       priority: 'normal',
-      template: ''
+      template: 
     })
   }
 
@@ -280,8 +280,8 @@ export function MyDayToday() {
         </div>
         <div className= "flex gap-3">
           <Button
-            variant= "outline"
-            className= "border-purple-200 text-purple-600 hover:bg-purple-50"
+            variant= "outline
+            className= "border-purple-200 text-purple-600 hover:bg-purple-50
             onClick={() => dispatch({ type: 'SET_EMAIL_MODAL', show: true })}
           >
             <Mail className= "h-4 w-4 mr-2" />
@@ -289,7 +289,7 @@ export function MyDayToday() {
           </Button>
           <Button
             onClick={() => dispatch({ type: 'SET_REMINDER_MODAL', show: true })}
-            className= "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+            className= "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white
           >
             <Plus className= "h-4 w-4 mr-2" />
             Add Reminder
@@ -523,19 +523,19 @@ export function MyDayToday() {
                       <div>
                         <Label htmlFor= "reminder-title">Title</Label>
                         <Input
-                          id= "reminder-title"
+                          id= "reminder-title
                           value={newReminder.title}
                           onChange={(e) => setNewReminder(prev => ({ ...prev, title: e.target.value }))}
-                          placeholder= "Enter reminder title"
+                          placeholder= "Enter reminder title
                         />
                       </div>
                       <div>
                         <Label htmlFor= "reminder-description">Description</Label>
                         <Textarea
-                          id= "reminder-description"
+                          id= "reminder-description
                           value={newReminder.description}
                           onChange={(e) => setNewReminder(prev => ({ ...prev, description: e.target.value }))}
-                          placeholder= "Enter description"
+                          placeholder= "Enter description
                           rows={2}
                         />
                       </div>
@@ -543,8 +543,8 @@ export function MyDayToday() {
                         <div>
                           <Label htmlFor= "reminder-time">Time</Label>
                           <Input
-                            id= "reminder-time"
-                            type= "time"
+                            id= "reminder-time
+                            type= "time
                             value={newReminder.time}
                             onChange={(e) => setNewReminder(prev => ({ ...prev, time: e.target.value }))}
                           />
@@ -552,10 +552,10 @@ export function MyDayToday() {
                         <div>
                           <Label htmlFor= "reminder-duration">Duration</Label>
                           <Input
-                            id= "reminder-duration"
+                            id= "reminder-duration
                             value={newReminder.estimatedDuration}
                             onChange={(e) => setNewReminder(prev => ({ ...prev, estimatedDuration: e.target.value }))}
-                            placeholder= "e.g., 1h 30m"
+                            placeholder= "e.g., 1h 30m
                           />
                         </div>
                       </div>
@@ -598,15 +598,15 @@ export function MyDayToday() {
                       <div>
                         <Label htmlFor= "reminder-project">Project (Optional)</Label>
                         <Input
-                          id= "reminder-project"
+                          id= "reminder-project
                           value={newReminder.project}
                           onChange={(e) => setNewReminder(prev => ({ ...prev, project: e.target.value }))}
-                          placeholder= "Associated project"
+                          placeholder= "Associated project
                         />
                       </div>
                       <div className= "flex justify-end space-x-2">
                         <Button
-                          variant= "outline"
+                          variant= "outline
                           onClick={() => dispatch({ type: 'SET_REMINDER_MODAL', show: false })}
                         >
                           Cancel
@@ -625,14 +625,14 @@ export function MyDayToday() {
                 <div
                   key={reminder.id}
                   className={`p-3 rounded-lg border transition-all duration-200 ${
-                    reminder.completed ? 'bg-green-50 border-green-200' : 'bg-slate-50 border-slate-200'
+                    reminder.completed ? 'bg-green-50 border-green-200' : 'bg-slate-50 border-slate-200
                   }`}
                 >
                   <div className= "flex items-start justify-between">
                     <div className= "flex-1">
                       <div className= "flex items-center gap-2 mb-1">
                         <h4 className={`font-medium text-sm ${
-                          reminder.completed ? 'line-through text-slate-500' : 'text-slate-800'
+                          reminder.completed ? 'line-through text-slate-500' : 'text-slate-800
                         }`}>
                           {reminder.title}
                         </h4>
@@ -661,10 +661,10 @@ export function MyDayToday() {
                     </div>
                     <div className= "flex items-center gap-1">
                       <Button
-                        size= "sm"
-                        variant= "ghost"
+                        size= "sm
+                        variant= "ghost
                         onClick={() => dispatch({ type: 'TOGGLE_REMINDER', id: reminder.id })}
-                        className= "h-6 w-6 p-0"
+                        className= "h-6 w-6 p-0
                       >
                         {reminder.completed ? (
                           <CheckCircle className= "h-4 w-4 text-green-600" />
@@ -673,10 +673,10 @@ export function MyDayToday() {
                         )}
                       </Button>
                       <Button
-                        size= "sm"
-                        variant= "ghost"
+                        size= "sm
+                        variant= "ghost
                         onClick={() => dispatch({ type: 'DELETE_REMINDER', id: reminder.id })}
-                        className= "h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                        className= "h-6 w-6 p-0 text-red-500 hover:text-red-700
                       >
                         <Trash2 className= "h-3 w-3" />
                       </Button>
@@ -739,10 +739,10 @@ export function MyDayToday() {
                       <div>
                         <Label htmlFor= "email-to">To</Label>
                         <Input
-                          id= "email-to"
+                          id= "email-to
                           value={newEmail.to}
                           onChange={(e) => setNewEmail(prev => ({ ...prev, to: e.target.value }))}
-                          placeholder= "recipient@email.com"
+                          placeholder= "recipient@email.com
                         />
                       </div>
                       <div>
@@ -767,47 +767,47 @@ export function MyDayToday() {
                     <div>
                       <Label htmlFor= "email-subject">Subject</Label>
                       <Input
-                        id= "email-subject"
+                        id= "email-subject
                         value={newEmail.subject}
                         onChange={(e) => setNewEmail(prev => ({ ...prev, subject: e.target.value }))}
-                        placeholder= "Email subject"
+                        placeholder= "Email subject
                       />
                     </div>
                     <div>
                       <Label htmlFor= "email-content">Content</Label>
                       <Textarea
-                        id= "email-content"
+                        id= "email-content
                         value={newEmail.content}
                         onChange={(e) => setNewEmail(prev => ({ ...prev, content: e.target.value }))}
-                        placeholder= "Email content"
+                        placeholder= "Email content
                         rows={4}
                       />
                     </div>
                     <div className= "flex items-center space-x-4">
                       <div className= "flex items-center space-x-2">
                         <input
-                          type= "checkbox"
-                          id= "email-scheduled"
+                          type= "checkbox
+                          id= "email-scheduled
                           checked={newEmail.scheduled}
                           onChange={(e) => setNewEmail(prev => ({ ...prev, scheduled: e.target.checked }))}
-                          className= "rounded"
+                          className= "rounded
                         />
                         <Label htmlFor= "email-scheduled" className= "text-sm">Schedule for later</Label>
                       </div>
                       {newEmail.scheduled && (
                         <div>
                           <Input
-                            type= "time"
+                            type= "time
                             value={newEmail.scheduledTime}
                             onChange={(e) => setNewEmail(prev => ({ ...prev, scheduledTime: e.target.value }))}
-                            className= "w-32"
+                            className= "w-32
                           />
                         </div>
                       )}
                     </div>
                     <div className= "flex justify-end space-x-2">
                       <Button
-                        variant= "outline"
+                        variant= "outline
                         onClick={() => dispatch({ type: 'SET_EMAIL_MODAL', show: false })}
                       >
                         Cancel

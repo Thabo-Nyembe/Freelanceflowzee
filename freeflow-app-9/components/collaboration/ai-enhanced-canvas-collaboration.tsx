@@ -1,8 +1,8 @@
-import React, { useRef, useEffect, useReducer } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { TemplateAnalysisService } from '@/lib/services/template-scoring-service'
-import { CanvasState, Template } from './canvas-types'
-import { canvasReducer } from './canvas-reducer'
+import React, { useRef, useEffect, useReducer } from 'react
+import { createClient } from '@/lib/supabase/client
+import { TemplateAnalysisService } from '@/lib/services/template-scoring-service
+import { CanvasState, Template } from './canvas-types
+import { canvasReducer } from './canvas-reducer
 
 interface AIEnhancedCanvasCollaborationProps {
   projectId: string
@@ -11,7 +11,7 @@ interface AIEnhancedCanvasCollaborationProps {
 
 export function AIEnhancedCanvasCollaboration({
   projectId,
-  className = '
+  className = 
 }: AIEnhancedCanvasCollaborationProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const supabase = createClient()

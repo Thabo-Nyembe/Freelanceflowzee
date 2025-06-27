@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { track } from '@vercel/analytics'
+import { NextRequest, NextResponse } from 'next/server
+import { track } from '@vercel/analytics
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       event_type,
       ...properties,
       timestamp: new Date().toISOString(),
-      source: 'custom_api'
+      source: 'custom_api
     })
 
     // Generate mock analytics data for demo
@@ -30,14 +30,14 @@ export async function POST(request: NextRequest) {
       event_id: `demo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       tracked_with: 'vercel_analytics',
       timestamp: new Date().toISOString(),
-      status: 'recorded'
+      status: 'recorded
     }
 
     return NextResponse.json({
       success: true,
       data: mockData,
       message: 'Event tracked with Vercel Analytics',
-      note: 'This is a demo endpoint. Data will appear in Vercel Analytics dashboard.'
+      note: 'This is a demo endpoint. Data will appear in Vercel Analytics dashboard.
     })
 
   } catch (error) {
@@ -103,7 +103,7 @@ export async function GET() {
       }
     },
     message: 'Demo analytics data - Vercel Analytics is tracking real data',
-    note: 'Real analytics available in Vercel dashboard after deployment'
+    note: 'Real analytics available in Vercel dashboard after deployment
   }
 
   return NextResponse.json(mockAnalytics)

@@ -53,7 +53,7 @@ test.describe(&apos;Dashboard Navigation&apos;, () => {
       await page.waitForTimeout(1000)
       
       // Check URL changed
-      await expect(page).toHaveURL(new RegExp(section.url.replace(&apos;/dashboard/&apos;, '&apos;)))'
+      await expect(page).toHaveURL(new RegExp(section.url.replace(&apos;/dashboard/&apos;, '&apos;)))
     }
   })
 }) 

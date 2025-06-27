@@ -1,8 +1,8 @@
-'use client'
+'use client
 
-import React, { useState, useEffect, useRef, memo } from 'react'
-import Image from 'next/image'
-import { cn } from '@/lib/utils'
+import React, { useState, useEffect, useRef, memo } from 'react
+import Image from 'next/image
+import { cn } from '@/lib/utils
 
 // Enhanced Optimized Image Component for Phase 9
 interface OptimizedImageProps {
@@ -13,16 +13,16 @@ interface OptimizedImageProps {
   className?: string
   priority?: boolean
   quality?: number
-  placeholder?: 'blur' | 'empty'
+  placeholder?: 'blur' | 'empty
   blurDataURL?: string
   sizes?: string
   fill?: boolean
-  loading?: 'lazy' | 'eager'
+  loading?: 'lazy' | 'eager
   onLoad?: () => void
   onError?: () => void
   onClick?: () => void
   style?: React.CSSProperties
-  objectFit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down'
+  objectFit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down
   objectPosition?: string
   fallbackSrc?: string
   enableWebP?: boolean
@@ -91,7 +91,7 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
       },
       {
         threshold: threshold,
-        rootMargin: '50px'
+        rootMargin: '50px
       }
     )
 
@@ -124,7 +124,7 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
     if (sizes) return sizes
     if (!responsive) return undefined
     
-    return '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
+    return '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw
   }
 
   // Generate optimized image source with format support
@@ -142,7 +142,7 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
     if (blurDataURL) return blurDataURL
     
     // Simple base64 placeholder
-    return 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k= '
+    return 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k= 
   }
 
   // Image container styles
@@ -167,8 +167,8 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
   const ErrorFallback = () => (
     <div className={cn(
       'flex items-center justify-center bg-gray-100 text-gray-400 text-sm',
-      fill ? 'absolute inset-0' : ,'
-      !fill && width && height ? `w-[${width}px] h-[${height}px]` : 'min-h-[200px]'
+      fill ? 'absolute inset-0' : ,
+      !fill && width && height ? `w-[${width}px] h-[${height}px]` : 'min-h-[200px]
     )}>
       <div className= "text-center">
         <svg className= "mx-auto h-12 w-12 text-gray-300 mb-2" fill= "none" viewBox= "0 0 24 24" stroke= "currentColor">
@@ -183,8 +183,8 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
   const LoadingPlaceholder = () => (
     <div className={cn(
       'animate-pulse bg-gray-200',
-      fill ? 'absolute inset-0' : ,'
-      !fill && width && height ? `w-[${width}px] h-[${height}px]` : 'min-h-[200px]'
+      fill ? 'absolute inset-0' : ,
+      !fill && width && height ? `w-[${width}px] h-[${height}px]` : 'min-h-[200px]
     )} />
   )
 
@@ -238,7 +238,7 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
   )
 })
 
-OptimizedImageEnhanced.displayName = 'OptimizedImageEnhanced'
+OptimizedImageEnhanced.displayName = 'OptimizedImageEnhanced
 
 // Higher-order component for lazy loading images
 export const withLazyLoading = <P extends object>(
@@ -302,17 +302,17 @@ export const ImageGallery: React.FC<{
 }> = ({ images, columns = 3, gap = 16, onImageClick }) => {
   return (
     <div 
-      className= "grid"
+      className= "grid
       style={{
         gridTemplateColumns: `repeat(${columns}, 1fr)`,
-        gap: `${gap}px`
+        gap: `${gap}px
       }}
     >
       {images.map((image, index) => (
         <OptimizedImageEnhanced
           key={index}
           {...image}
-          className= "w-full h-auto cursor-pointer hover:opacity-80 transition-opacity"
+          className= "w-full h-auto cursor-pointer hover:opacity-80 transition-opacity
           zoomOnHover
           onClick={() => onImageClick?.(index)}
         />
@@ -323,7 +323,7 @@ export const ImageGallery: React.FC<{
 
 // Progressive image loading hook
 export const useProgressiveImage = (src: string, fallbackSrc?: string) => {
-  const [currentSrc, setCurrentSrc] = useState(fallbackSrc || '')'
+  const [currentSrc, setCurrentSrc] = useState(fallbackSrc || '')
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
 
@@ -367,7 +367,7 @@ export const useImagePerformance = () => {
       // Get image size if available
       fetch(src, { method: 'HEAD' })
         .then(response => {
-          const size = parseInt(response.headers.get('content-length') || '0')'
+          const size = parseInt(response.headers.get('content-length') || '0')
           
           setMetrics({
             loadTime,

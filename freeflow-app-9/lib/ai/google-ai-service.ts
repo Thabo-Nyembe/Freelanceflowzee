@@ -50,7 +50,7 @@ export class GoogleAIService {
     layout: string;
     score: number;
   }> {
-    const prompt = `
+    const prompt = 
       As an expert UI/UX designer and brand strategist, create a comprehensive design concept for:
       
       **Prompt**: ${request.prompt}
@@ -92,7 +92,7 @@ export class GoogleAIService {
    */
   async analyzeDesign(request: DesignAnalysisRequest): Promise<AIAnalysisResult> {
     const prompts = {
-      accessibility: `
+      accessibility: 
         Analyze this design for accessibility compliance:
         ${request.designDescription}
         
@@ -106,7 +106,7 @@ export class GoogleAIService {
         
         Provide a score (0-100), insights, and specific recommendations.
       `,
-      performance: `
+      performance: 
         Analyze this design for performance optimization:
         ${request.designDescription}
         
@@ -119,7 +119,7 @@ export class GoogleAIService {
         
         Provide a score (0-100), insights, and optimization recommendations.
       `,
-      responsiveness: `
+      responsiveness: 
         Analyze this design for responsive behavior:
         ${request.designDescription}
         
@@ -131,7 +131,7 @@ export class GoogleAIService {
         - Flexible layouts
         
         Provide a score (0-100), insights, and responsive design recommendations.
-      `, 'brand-consistency': `
+      `, 'brand-consistency': 
         Analyze this design for brand consistency:
         ${request.designDescription}
         
@@ -143,10 +143,10 @@ export class GoogleAIService {
         - Market positioning
         
         Provide a score (0-100), insights, and brand alignment recommendations.
-      `
+      
     };
 
-    const prompt = prompts[request.type] + `
+    const prompt = prompts[request.type] + 
       
       Context: ${request.context || 'General web application'}
       
@@ -184,7 +184,7 @@ export class GoogleAIService {
       implementation: string[];
     }>;
   }> {
-    const prompt = `
+    const prompt = 
       As a senior React/Next.js developer and conversion optimization expert, recommend 5-7 smart UI components for:
       
       Context: ${context}
@@ -233,7 +233,7 @@ export class GoogleAIService {
       confidence: number;
     }>;
   }> {
-    const prompt = `
+    const prompt = 
       As a design strategist and UX researcher, provide 5-6 actionable design insights for:
       
       Project Type: ${projectType}

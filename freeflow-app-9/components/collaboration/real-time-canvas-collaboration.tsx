@@ -1,6 +1,6 @@
-'use client'
+'use client
 
-import React, { useState, useEffect, useRef, useReducer, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useReducer, useCallback } from 'react
  id: string; updates: Partial<CanvasObject> }
   | { type: 'DELETE_OBJECTS'; ids: string[] }
   | { type: 'SELECT_OBJECTS'; ids: string[] }
@@ -164,7 +164,7 @@ export function RealTimeCanvasCollaboration({
   currentUser,
   onSave,
   onShare,
-  className = '
+  className = 
 }: RealTimeCanvasCollaborationProps) {
   const [state, dispatch] = useReducer(canvasReducer, initialState)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -216,7 +216,7 @@ export function RealTimeCanvasCollaboration({
 
     // Draw grid if enabled
     if (state.showGrid) {
-      ctx.strokeStyle = '#e5e7eb'
+      ctx.strokeStyle = '#e5e7eb
       ctx.lineWidth = 1
       for (let x = 0; x < canvas.width; x += state.gridSize) {
         ctx.beginPath()
@@ -266,16 +266,16 @@ export function RealTimeCanvasCollaboration({
 
         case 'text':
           ctx.fillStyle = obj.fill
-          ctx.font = `${obj.fontSize || 16}px ${obj.fontFamily || 'Arial'}`
-          ctx.textAlign = 'center'
-          ctx.textBaseline = 'middle'
+          ctx.font = `${obj.fontSize || 16}px ${obj.fontFamily || 'Arial'}
+          ctx.textAlign = 'center
+          ctx.textBaseline = 'middle
           ctx.fillText(obj.text || 'Text', 0, 0)
           break
       }
 
       // Draw selection indicator
       if (state.selectedObjects.includes(obj.id)) {
-        ctx.strokeStyle = '#6366f1'
+        ctx.strokeStyle = '#6366f1
         ctx.lineWidth = 2
         ctx.setLineDash([5, 5])
         ctx.strokeRect(-obj.width / 2 - 5, -obj.height / 2 - 5, obj.width + 10, obj.height + 10)
@@ -304,10 +304,10 @@ export function RealTimeCanvasCollaboration({
         ctx.fill()
 
         // Draw user name
-        ctx.fillStyle = 'white'
+        ctx.fillStyle = 'white
         ctx.fillRect(16, -8, cursor.userName.length * 8, 16)
         ctx.fillStyle = cursor.userColor
-        ctx.font = '12px Arial'
+        ctx.font = '12px Arial
         ctx.fillText(cursor.userName, 18, 2)
         
         ctx.restore()
@@ -421,7 +421,7 @@ export function RealTimeCanvasCollaboration({
       timestamp: new Date().toISOString(),
       objects: [...state.objects],
       createdBy: currentUser.id,
-      description: 'Auto-save checkpoint'
+      description: 'Auto-save checkpoint
     }
     dispatch({ type: 'SAVE_VERSION', version })
   }
@@ -430,8 +430,8 @@ export function RealTimeCanvasCollaboration({
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const link = document.createElement('a')'
-    link.download = `canvas-${projectId}.png`
+    const link = document.createElement('a')
+    link.download = `canvas-${projectId}.png
     link.href = canvas.toDataURL()
     link.click()
   }
@@ -525,7 +525,7 @@ export function RealTimeCanvasCollaboration({
             <CardContent >
               {state.objects.map(obj => (
                 <div key={obj.id} className={`flex items-center justify-between p-1 rounded text-xs ${
-                    state.selectedObjects.includes(obj.id) ? 'bg-purple-100' : 'hover:bg-gray-50'
+                    state.selectedObjects.includes(obj.id) ? 'bg-purple-100' : 'hover:bg-gray-50
                   }> dispatch({ type: 'SELECT_OBJECTS', ids: [obj.id] })}
                 >
                   <span >
@@ -576,7 +576,7 @@ export function RealTimeCanvasCollaboration({
                       min={10}
                       max={500}
                       step={10}
-                      className= "w-20"
+                      className= "w-20
                     />
                     <span >{state.zoom}%</span>
                   </div>
@@ -611,7 +611,7 @@ export function RealTimeCanvasCollaboration({
                             })
                           })
                         }}
-                        className= "w-8 h-8 rounded border"
+                        className= "w-8 h-8 rounded border
                       />
                       <Palette >
                     </div>
@@ -632,7 +632,7 @@ export function RealTimeCanvasCollaboration({
                       min={0}
                       max={100}
                       step={1}
-                      className= "mt-1"
+                      className= "mt-1
                     />
                   </div>
 

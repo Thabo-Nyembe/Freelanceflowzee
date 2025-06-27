@@ -265,10 +265,10 @@ export class TestFramework {
   private async setupMockServer(): Promise<void> {
     const handlers = [
       rest.post(&apos;/api/auth/login&apos;, (req, res, ctx) => {
-        return res(ctx.json({ token: &apos;mock-token&apos;, user: { id: &apos;1', email: &apos;test@example.com&apos; } }))'
+        return res(ctx.json({ token: &apos;mock-token&apos;, user: { id: &apos;1', email: &apos;test@example.com&apos; } }))
       }),
       rest.get(&apos;/api/projects&apos;, (req, res, ctx) => {
-        return res(ctx.json([{ id: &apos;1', name: &apos;Mock Project&apos; }]))'
+        return res(ctx.json([{ id: &apos;1', name: &apos;Mock Project&apos; }]))
       }),
       rest.post(&apos;/api/payments/create-intent-enhanced&apos;, (req, res, ctx) => {
         return res(ctx.json({ clientSecret: &apos;mock-client-secret&apos; }))
@@ -341,7 +341,7 @@ export class TestFramework {
       {
         name: &apos;Format Currency&apos;,
         test: () => {
-          const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`
+          const formatCurrency = (amount: number) => `$${amount.toFixed(2)}
           expect(formatCurrency(10.5)).toBe(&apos;$10.50&apos;)
         }
       }
@@ -584,7 +584,7 @@ export class TestFramework {
 class AITestGenerator {
   async generateTests(component: string, context: unknown): Promise<GeneratedTest[]> {
     // AI-powered test generation using OpenRouter API
-    const prompt = `Generate comprehensive test cases for the ${component} component with context: ${JSON.stringify(context)}`
+    const prompt = `Generate comprehensive test cases for the ${component} component with context: ${JSON.stringify(context)}
     
     // In production, this would use the OpenRouter API with the provided key
     // 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
@@ -755,9 +755,9 @@ export const testFramework = new TestFramework()
 
 // Export test utilities
 export const testUtils = {
-  createMockUser: () => ({ id: &apos;1', email: &apos;test@example.com&apos; }),'
-  createMockProject: () => ({ id: &apos;1', name: &apos;Test Project&apos; }),'
-  createMockPayment: () => ({ id: &apos;1', amount: 5000, currency: &apos;usd&apos; }),'
+  createMockUser: () => ({ id: &apos;1', email: &apos;test@example.com&apos; }),
+  createMockProject: () => ({ id: &apos;1', name: &apos;Test Project&apos; }),
+  createMockPayment: () => ({ id: &apos;1', amount: 5000, currency: &apos;usd&apos; }),
   waitForElement: async (selector: string) => {
     return await waitFor(() => screen.getByTestId(selector))
   },

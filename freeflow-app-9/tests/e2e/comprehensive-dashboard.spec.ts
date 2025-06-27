@@ -260,7 +260,7 @@ test.describe(&apos;🎛️ Comprehensive Dashboard Tests&apos;, () => {
       await dashboardPage.page.waitForTimeout(500);
       
       // Clear search
-      await dashboardPage.searchProjects('&apos;);'
+      await dashboardPage.searchProjects('&apos;);
       await dashboardPage.page.waitForTimeout(500);
       
       // Should show all projects again
@@ -387,7 +387,7 @@ test.describe(&apos;🎛️ Comprehensive Dashboard Tests&apos;, () => {
         document.activeElement?.tagName
       );
       
-      expect([&apos;BUTTON&apos;, &apos;A', &apos;INPUT&apos;]).toContain(focusedElement);'
+      expect([&apos;BUTTON&apos;, &apos;A', &apos;INPUT&apos;]).toContain(focusedElement);
     });
 
     test(&apos;should have proper ARIA labels&apos;, async ({ dashboardPage }) => {

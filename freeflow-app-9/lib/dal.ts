@@ -1,7 +1,7 @@
-import 'server-only'
-import { cache } from 'react'
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import 'server-only
+import { cache } from 'react
+import { createClient } from '@/lib/supabase/server
+import { redirect } from 'next/navigation
 
 export const verifySession = cache(async () => {
   try {
@@ -31,7 +31,7 @@ export const verifySession = cache(async () => {
         id: user.id,
         email: user.email,
         name: user.user_metadata?.name || user.email,
-        role: user.user_metadata?.role || 'user'
+        role: user.user_metadata?.role || 'user
       }
     }
   } catch (error) {

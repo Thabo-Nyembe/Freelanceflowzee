@@ -3,7 +3,7 @@ import { test, expect } from &apos;@playwright/test&apos;;
 test.describe(&apos;🎨 Theme System - Dark, Light & System Mode&apos;, () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to homepage and wait for it to load
-    await page.goto(&apos;/');'
+    await page.goto(&apos;/');
     await page.waitForLoadState(&apos;networkidle&apos;);
   });
 
@@ -223,7 +223,7 @@ async function activateTheme(page: unknown, theme: &apos;light&apos; | &apos;dar
     
     // Method 1: Direct theme button
     const themeButton = page.locator(`[data-theme=&quot;${theme}&quot;]`)
-      .or(page.locator(`button`).filter({ hasText: new RegExp(theme, &apos;i') }));'
+      .or(page.locator(`button`).filter({ hasText: new RegExp(theme, &apos;i') }));
     
     if (await themeButton.first().isVisible().catch(() => false)) {
       await themeButton.first().click();
@@ -240,7 +240,7 @@ async function activateTheme(page: unknown, theme: &apos;light&apos; | &apos;dar
       
       const themeOption = page.locator(`text=${theme}`)
         .or(page.locator(`[data-value=&quot;${theme}&quot;]`))
-        .or(page.locator(`li`).filter({ hasText: new RegExp(theme, &apos;i') }));'
+        .or(page.locator(`li`).filter({ hasText: new RegExp(theme, &apos;i') }));
       
       if (await themeOption.first().isVisible().catch(() => false)) {
         await themeOption.first().click();
@@ -255,7 +255,7 @@ async function activateTheme(page: unknown, theme: &apos;light&apos; | &apos;dar
       await page.waitForTimeout(300);
       
       const themeMenuItem = page.locator(`text=${theme}`)
-        .or(page.locator(&apos;a, button&apos;).filter({ hasText: new RegExp(theme, &apos;i') }));'
+        .or(page.locator(&apos;a, button&apos;).filter({ hasText: new RegExp(theme, &apos;i') }));
       
       if (await themeMenuItem.first().isVisible().catch(() => false)) {
         await themeMenuItem.first().click();

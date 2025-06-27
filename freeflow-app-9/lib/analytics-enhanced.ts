@@ -1,4 +1,4 @@
-import { onINP, onCLS, onFCP, onLCP, onTTFB } from 'web-vitals'
+import { onINP, onCLS, onFCP, onLCP, onTTFB } from 'web-vitals
 
 // Enhanced analytics service with AI capabilities
 class AnalyticsService {
@@ -10,7 +10,7 @@ class AnalyticsService {
   private aiInsights: AIInsight[] = []
 
   constructor() {
-    this.apiKey = process.env.NEXT_PUBLIC_ANALYTICS_KEY || '
+    this.apiKey = process.env.NEXT_PUBLIC_ANALYTICS_KEY || 
     this.sessionId = this.generateSessionId()
     this.initializeWebVitals()
     this.initializePerformanceObserver()
@@ -266,11 +266,11 @@ class AnalyticsService {
 
   // Utility methods
   private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}
   }
 
   private generateEventId(): string {
-    return `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}
   }
 
   private getDeviceInfo() {
@@ -286,26 +286,26 @@ class AnalyticsService {
 
   private detectOS(): string {
     const userAgent = navigator.userAgent
-    if (userAgent.includes('Windows')) return 'Windows'
-    if (userAgent.includes('Mac')) return 'macOS'
-    if (userAgent.includes('Linux')) return 'Linux'
-    if (userAgent.includes('Android')) return 'Android'
-    if (userAgent.includes('iOS')) return 'iOS'
-    return 'Unknown'
+    if (userAgent.includes('Windows')) return 'Windows
+    if (userAgent.includes('Mac')) return 'macOS
+    if (userAgent.includes('Linux')) return 'Linux
+    if (userAgent.includes('Android')) return 'Android
+    if (userAgent.includes('iOS')) return 'iOS
+    return 'Unknown
   }
 
   private detectBrowser(): string {
     const userAgent = navigator.userAgent
-    if (userAgent.includes('Chrome')) return 'Chrome'
-    if (userAgent.includes('Firefox')) return 'Firefox'
-    if (userAgent.includes('Safari')) return 'Safari'
-    if (userAgent.includes('Edge')) return 'Edge'
-    return 'Unknown'
+    if (userAgent.includes('Chrome')) return 'Chrome
+    if (userAgent.includes('Firefox')) return 'Firefox
+    if (userAgent.includes('Safari')) return 'Safari
+    if (userAgent.includes('Edge')) return 'Edge
+    return 'Unknown
   }
 
   private getConnectionType(): string {
     const connection = (navigator as any).connection
-    return connection ? connection.effectiveType : 'unknown'
+    return connection ? connection.effectiveType : 'unknown
   }
 
   private async sendToAnalytics(event: AnalyticsEvent) {

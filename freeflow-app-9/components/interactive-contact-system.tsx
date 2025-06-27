@@ -1,6 +1,6 @@
-'use client'
+'use client
 
-import React, { useState, useReducer, useEffect } from 'react'
+import React, { useState, useReducer, useEffect } from 'react
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -32,14 +32,14 @@ function contactReducer(state: ContactState, action: ContactAction): ContactStat
       return {
         ...state,
         formData: {
-          name: '','
-          email: '','
-          company: '','
-          phone: '','
-          subject: '','
-          message: '','
+          name: '',
+          email: '',
+          company: '',
+          phone: '',
+          subject: '',
+          message: '',
           priority: 'medium',
-          department: 'general'
+          department: 'general
         },
         ui: { ...state.ui, isSuccess: false }
       }
@@ -51,14 +51,14 @@ function contactReducer(state: ContactState, action: ContactAction): ContactStat
 const initialState: ContactState = {
   activeMethod: 'email',
   formData: {
-    name: '','
-    email: '','
-    company: '','
-    phone: '','
-    subject: '','
-    message: '','
+    name: '',
+    email: '',
+    company: '',
+    phone: '',
+    subject: '',
+    message: '',
     priority: 'medium',
-    department: 'general'
+    department: 'general
   },
   ui: {
     isSubmitting: false,
@@ -69,12 +69,12 @@ const initialState: ContactState = {
   preferences: {
     preferredContact: 'email',
     timezone: 'PST',
-    language: 'en'
+    language: 'en
   }
 }
 
 interface InteractiveContactSystemProps {
-  variant?: 'full' | 'compact' | 'sidebar'
+  variant?: 'full' | 'compact' | 'sidebar
   showMethods?: boolean
   showForm?: boolean
   showScheduler?: boolean
@@ -86,10 +86,10 @@ export function InteractiveContactSystem({
   showMethods = true,
   showForm = true,
   showScheduler = true,
-  className = '
+  className = 
 }: InteractiveContactSystemProps) {
   const [state, dispatch] = useReducer(contactReducer, initialState)
-  const [localTime, setLocalTime] = useState('')'
+  const [localTime, setLocalTime] = useState('')
 
   // Context7 Pattern: Real-time local time display
   useEffect(() => {
@@ -119,13 +119,13 @@ export function InteractiveContactSystem({
   const handleDirectAction = (action: string, value: string) => {
     switch (action) {
       case 'email':
-        window.location.href = `mailto:${value}?subject=Contact from FreeflowZee Website`
+        window.location.href = `mailto:${value}?subject=Contact from FreeflowZee Website
         break
       case 'phone':
-        window.location.href = `tel:${value}`
+        window.location.href = `tel:${value}
         break
       case 'maps':
-        const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(value)}`
+        const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(value)}
         window.open(mapsUrl, '_blank', 'noopener,noreferrer')
         break
       case 'social':
@@ -192,13 +192,13 @@ export function InteractiveContactSystem({
             )}
             <div className= "flex items-center mt-3 space-x-2">
               <Button
-                variant= "ghost"
-                size= "sm"
+                variant= "ghost
+                size= "sm
                 onClick={(e) => {
                   e.stopPropagation()
                   handleCopyToClipboard(value, title)
                 }}
-                className= "h-8 px-2"
+                className= "h-8 px-2
               >
                 {state.ui.copiedItem === title ? (
                   <Check className= "w-3 h-3 text-green-600" />
@@ -219,9 +219,9 @@ export function InteractiveContactSystem({
       <div className={`space-y-4 ${className}`}>
         <div className= "grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Button
-            variant= "outline"
+            variant= "outline
             onClick={() => handleDirectAction('email', CONTACT_CONFIG.email.primary)}
-            className= "justify-start h-auto p-4"
+            className= "justify-start h-auto p-4
           >
             <Mail className= "w-5 h-5 mr-3" />
             <div className= "text-left">
@@ -230,9 +230,9 @@ export function InteractiveContactSystem({
             </div>
           </Button>
           <Button
-            variant= "outline"
+            variant= "outline
             onClick={() => handleDirectAction('phone', CONTACT_CONFIG.phone.primary)}
-            className= "justify-start h-auto p-4"
+            className= "justify-start h-auto p-4
           >
             <Phone className= "w-5 h-5 mr-3" />
             <div className= "text-left">
@@ -264,35 +264,35 @@ export function InteractiveContactSystem({
           <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <ContactMethod
               icon={Mail}
-              title= "Email"
+              title= "Email
               value={CONTACT_CONFIG.email.primary}
               action={() => handleDirectAction('email', CONTACT_CONFIG.email.primary)}
               description={`Response time: ${CONTACT_CONFIG.responseTime.general}`}
-              badge= "Primary"
+              badge= "Primary
             />
             <ContactMethod
               icon={Phone}
-              title= "Phone"
+              title= "Phone
               value={CONTACT_CONFIG.phone.primary}
               action={() => handleDirectAction('phone', CONTACT_CONFIG.phone.primary)}
-              description= "Available during business hours"
-              badge= "Direct"
+              description= "Available during business hours
+              badge= "Direct
             />
             <ContactMethod
               icon={MessageCircle}
-              title= "Live Chat"
-              value= "Start Chat"
+              title= "Live Chat
+              value= "Start Chat
               action={() => dispatch({ type: 'SET_ACTIVE_METHOD', method: 'chat' })}
-              description= "Available 24/7"
-              badge= "Instant"
+              description= "Available 24/7
+              badge= "Instant
             />
             <ContactMethod
               icon={Calendar}
-              title= "Schedule Call"
-              value= "Book Meeting"
+              title= "Schedule Call
+              value= "Book Meeting
               action={() => dispatch({ type: 'TOGGLE_SCHEDULER', show: true })}
-              description= "Choose your preferred time"
-              badge= "Personal"
+              description= "Choose your preferred time
+              badge= "Personal
             />
           </div>
 
@@ -301,9 +301,9 @@ export function InteractiveContactSystem({
             <h3 className= "font-semibold text-gray-900 mb-4">Specialized Support</h3>
             <div className= "grid grid-cols-1 md:grid-cols-3 gap-4">
               <Button
-                variant= "ghost"
+                variant= "ghost
                 onClick={() => handleDirectAction('email', CONTACT_CONFIG.email.sales)}
-                className= "justify-start h-auto p-4 hover:bg-green-50"
+                className= "justify-start h-auto p-4 hover:bg-green-50
               >
                 <div className= "flex items-center space-x-3">
                   <div className= "p-2 bg-green-100 rounded-full">
@@ -318,9 +318,9 @@ export function InteractiveContactSystem({
                 </div>
               </Button>
               <Button
-                variant= "ghost"
+                variant= "ghost
                 onClick={() => handleDirectAction('email', CONTACT_CONFIG.email.support)}
-                className= "justify-start h-auto p-4 hover:bg-blue-50"
+                className= "justify-start h-auto p-4 hover:bg-blue-50
               >
                 <div className= "flex items-center space-x-3">
                   <div className= "p-2 bg-blue-100 rounded-full">
@@ -335,9 +335,9 @@ export function InteractiveContactSystem({
                 </div>
               </Button>
               <Button
-                variant= "ghost"
+                variant= "ghost
                 onClick={() => handleDirectAction('email', CONTACT_CONFIG.email.partnerships)}
-                className= "justify-start h-auto p-4 hover:bg-purple-50"
+                className= "justify-start h-auto p-4 hover:bg-purple-50
               >
                 <div className= "flex items-center space-x-3">
                   <div className= "p-2 bg-purple-100 rounded-full">
@@ -388,7 +388,7 @@ export function InteractiveContactSystem({
                         field: 'name', 
                         value: e.target.value 
                       })}
-                      placeholder= "Your full name"
+                      placeholder= "Your full name
                       suppressHydrationWarning
                     />
                   </div>
@@ -397,7 +397,7 @@ export function InteractiveContactSystem({
                       Email *
                     </label>
                     <Input
-                      type= "email"
+                      type= "email
                       required
                       value={state.formData.email}
                       onChange={(e) => dispatch({ 
@@ -405,7 +405,7 @@ export function InteractiveContactSystem({
                         field: 'email', 
                         value: e.target.value 
                       })}
-                      placeholder= "your@email.com"
+                      placeholder= "your@email.com
                       suppressHydrationWarning
                     />
                   </div>
@@ -423,7 +423,7 @@ export function InteractiveContactSystem({
                         field: 'company', 
                         value: e.target.value 
                       })}
-                      placeholder= "Your company name"
+                      placeholder= "Your company name
                       suppressHydrationWarning
                     />
                   </div>
@@ -432,14 +432,14 @@ export function InteractiveContactSystem({
                       Phone
                     </label>
                     <Input
-                      type= "tel"
+                      type= "tel
                       value={state.formData.phone}
                       onChange={(e) => dispatch({ 
                         type: 'UPDATE_FORM_FIELD', 
                         field: 'phone', 
                         value: e.target.value 
                       })}
-                      placeholder= "+1 (555) 123-4567"
+                      placeholder= "+1 (555) 123-4567
                       suppressHydrationWarning
                     />
                   </div>
@@ -457,7 +457,7 @@ export function InteractiveContactSystem({
                       field: 'subject', 
                       value: e.target.value 
                     })}
-                    placeholder= "How can we help you?"
+                    placeholder= "How can we help you?
                     suppressHydrationWarning
                   />
                 </div>
@@ -475,19 +475,19 @@ export function InteractiveContactSystem({
                       field: 'message', 
                       value: e.target.value 
                     })}
-                    placeholder= "Tell us more about your project and how we can help..."
+                    placeholder= "Tell us more about your project and how we can help...
                     suppressHydrationWarning
                   />
                 </div>
 
                 <Button
-                  type= "submit"
+                  type= "submit
                   disabled={state.ui.isSubmitting}
-                  className= "w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                  className= "w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700
                   suppressHydrationWarning
                 >
                   {state.ui.isSubmitting ? (
-                    'Sending...'
+                    'Sending...
                   ) : (
                     <>
                       Send Message

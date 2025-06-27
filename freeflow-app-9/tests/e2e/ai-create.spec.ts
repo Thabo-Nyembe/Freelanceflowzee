@@ -567,7 +567,7 @@ test.describe(&apos;AI Create Component&apos;, () => {
     await expect(page.getByTestId(&apos;generate-btn&apos;)).toBeEnabled()
 
     // Clear prompt
-    await page.getByTestId(&apos;prompt-input&apos;).fill('&apos;)'
+    await page.getByTestId(&apos;prompt-input&apos;).fill('&apos;)
     await expect(page.getByTestId(&apos;generate-btn&apos;)).toBeDisabled()
   })
 }) 

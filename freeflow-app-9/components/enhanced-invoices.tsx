@@ -1,6 +1,6 @@
-'use client'
+'use client
 
-import { useState, useReducer } from 'react'
+import { useState, useReducer } from 'react
  invoice: Invoice | null }
   | { type: 'SET_CREATE_MODAL'; show: boolean }
   | { type: 'SET_TEMPLATE_MODAL'; show: boolean }
@@ -26,7 +26,7 @@ const defaultTemplates: InvoiceTemplate[] = [
     headerStyle: 'logo-left',
     showDividers: true,
     showBackground: false,
-    previewImage: '/templates/modern-minimal.png'
+    previewImage: '/templates/modern-minimal.png
   },
   {
     id: 'classic-business',
@@ -40,7 +40,7 @@ const defaultTemplates: InvoiceTemplate[] = [
     headerStyle: 'logo-center',
     showDividers: true,
     showBackground: true,
-    previewImage: '/templates/classic-business.png'
+    previewImage: '/templates/classic-business.png
   },
   {
     id: 'creative-studio',
@@ -54,7 +54,7 @@ const defaultTemplates: InvoiceTemplate[] = [
     headerStyle: 'logo-right',
     showDividers: false,
     showBackground: true,
-    previewImage: '/templates/creative-studio.png'
+    previewImage: '/templates/creative-studio.png
   },
   {
     id: 'elegant-professional',
@@ -68,20 +68,20 @@ const defaultTemplates: InvoiceTemplate[] = [
     headerStyle: 'logo-left',
     showDividers: true,
     showBackground: false,
-    previewImage: '/templates/elegant-professional.png'
+    previewImage: '/templates/elegant-professional.png
   }
 ]
 
 // Sample invoices with template data
 const sampleInvoices: Invoice[] = [
   {
-    id: '1','
+    id: '1',
     number: 'INV-2024-001',
     client: {
       name: 'John Smith',
       email: 'john@techcorp.com',
       company: 'TechCorp Solutions',
-      address: '123 Business St, San Francisco, CA 94105'
+      address: '123 Business St, San Francisco, CA 94105
     },
     project: 'Website Redesign',
     date: '2024-06-01',
@@ -90,14 +90,14 @@ const sampleInvoices: Invoice[] = [
     currency: 'USD',
     items: [
       {
-        id: '1','
+        id: '1',
         description: 'UI/UX Design - Homepage',
         quantity: 1,
         rate: 2500,
         amount: 2500
       },
       {
-        id: '2','
+        id: '2',
         description: 'Frontend Development',
         quantity: 40,
         rate: 125,
@@ -114,11 +114,11 @@ const sampleInvoices: Invoice[] = [
       logoUrl: '/logo.png',
       brandColors: {
         primary: '#3B82F6',
-        secondary: '#E5E7EB'
+        secondary: '#E5E7EB
       },
       paymentTerms: 'Net 15',
       headerText: 'Professional Design Services',
-      footerText: 'Thank you for choosing FreeflowZee'
+      footerText: 'Thank you for choosing FreeflowZee
     }
   }
 ]
@@ -186,23 +186,23 @@ const initialState: InvoiceState = {
 export function EnhancedInvoices() {
   const [state, dispatch] = useReducer(invoiceReducer, initialState)
   const [newInvoice, setNewInvoice] = useState({
-    client: { name: '', email: , company: '', address:  },
-    project: '','
-    dueDate: '','
-    items: [{ description: '', quantity: 1, rate: 0 }],'
-    notes: '','
+    client: { name: '', email: , company: ', address:  },
+    project: '',
+    dueDate: '',
+    items: [{ description: '', quantity: 1, rate: 0 }],
+    notes: '',
     terms: 'Payment due within 15 days',
-    currency: 'USD'
+    currency: 'USD
   })
   const [customization, setCustomization] = useState<InvoiceCustomization>({
-    logoUrl: '','
+    logoUrl: '',
     brandColors: { primary: '#3B82F6', secondary: '#E5E7EB' },
     paymentTerms: 'Net 15',
-    headerText: '','
-    footerText: '','
+    headerText: '',
+    footerText: '',
     backgroundColor: '#FFFFFF',
     textColor: '#1F2937',
-    accentColor: '#3B82F6'
+    accentColor: '#3B82F6
   })
 
   const getStatusColor = (status: string) => {
@@ -211,7 +211,7 @@ export function EnhancedInvoices() {
       sent: 'bg-blue-100 text-blue-700',
       paid: 'bg-green-100 text-green-700',
       overdue: 'bg-red-100 text-red-700',
-      cancelled: 'bg-red-100 text-red-700'
+      cancelled: 'bg-red-100 text-red-700
     }
     return colors[status as keyof typeof colors] || colors.draft
   }
@@ -221,7 +221,7 @@ export function EnhancedInvoices() {
       modern: 'bg-blue-50 border-blue-200 text-blue-700',
       classic: 'bg-gray-50 border-gray-200 text-gray-700',
       creative: 'bg-purple-50 border-purple-200 text-purple-700',
-      elegant: 'bg-green-50 border-green-200 text-green-700'
+      elegant: 'bg-green-50 border-green-200 text-green-700
     }
     return colors[category as keyof typeof colors] || colors.modern
   }
@@ -229,7 +229,7 @@ export function EnhancedInvoices() {
   const templateStats = {
     total: state.templates.length,
     used: Object.keys(state.template).length,
-    favorite: 'modern-minimal'
+    favorite: 'modern-minimal
   }
 
   const invoiceStats = {
@@ -249,8 +249,8 @@ export function EnhancedInvoices() {
         </div>
         <div className= "flex space-x-3">
           <Button
-            variant= "outline"
-            className= "border-purple-200 text-purple-600 hover:bg-purple-50"
+            variant= "outline
+            className= "border-purple-200 text-purple-600 hover:bg-purple-50
             onClick={() => dispatch({ type: 'SET_TEMPLATE_MODAL', show: true })}
           >
             <Palette className= "h-4 w-4 mr-2" />
@@ -348,7 +348,7 @@ export function EnhancedInvoices() {
                   <Card 
                     key={template.id} 
                     className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                      state.selectedTemplate?.id === template.id ? 'ring-2 ring-blue-500' : '
+                      state.selectedTemplate?.id === template.id ? 'ring-2 ring-blue-500' : 
                     }`}
                     onClick={() => dispatch({ type: 'SET_SELECTED_TEMPLATE', template })}
                   >
@@ -356,7 +356,7 @@ export function EnhancedInvoices() {
                       <div className= "space-y-4">
                         {/* Template Preview */}
                         <div 
-                          className= "w-full h-48 rounded-lg border-2 border-dashed border-slate-200 flex items-center justify-center"
+                          className= "w-full h-48 rounded-lg border-2 border-dashed border-slate-200 flex items-center justify-center
                           style={{ backgroundColor: template.secondaryColor }}
                         >
                           <div className= "text-center">
@@ -418,7 +418,7 @@ export function EnhancedInvoices() {
                           <Button 
                             size= "sm" 
                             variant= "outline" 
-                            className= "flex-1"
+                            className= "flex-1
                             onClick={(e) => {
                               e.stopPropagation()
                               dispatch({ type: 'SET_PREVIEW_MODE', mode: 'preview' })
@@ -429,7 +429,7 @@ export function EnhancedInvoices() {
                           </Button>
                           <Button 
                             size= "sm" 
-                            className= "flex-1"
+                            className= "flex-1
                             onClick={(e) => {
                               e.stopPropagation()
                               dispatch({ type: 'SET_SELECTED_TEMPLATE', template })
@@ -464,8 +464,8 @@ export function EnhancedInvoices() {
                           <Label htmlFor= "primary-color">Primary Color</Label>
                           <div className= "flex gap-2 mt-1">
                             <Input
-                              id= "primary-color"
-                              type= "color"
+                              id= "primary-color
+                              type= "color
                               value={customization.brandColors?.primary || state.selectedTemplate.primaryColor}
                               onChange={(e) => setCustomization(prev => ({
                                 ...prev,
@@ -474,7 +474,7 @@ export function EnhancedInvoices() {
                                   primary: e.target.value
                                 }
                               }))}
-                              className= "w-16 h-10"
+                              className= "w-16 h-10
                             />
                             <Input
                               value={customization.brandColors?.primary || state.selectedTemplate.primaryColor}
@@ -485,7 +485,7 @@ export function EnhancedInvoices() {
                                   primary: e.target.value
                                 }
                               }))}
-                              className= "flex-1"
+                              className= "flex-1
                             />
                           </div>
                         </div>
@@ -494,8 +494,8 @@ export function EnhancedInvoices() {
                           <Label htmlFor= "secondary-color">Secondary Color</Label>
                           <div className= "flex gap-2 mt-1">
                             <Input
-                              id= "secondary-color"
-                              type= "color"
+                              id= "secondary-color
+                              type= "color
                               value={customization.brandColors?.secondary || state.selectedTemplate.secondaryColor}
                               onChange={(e) => setCustomization(prev => ({
                                 ...prev,
@@ -504,7 +504,7 @@ export function EnhancedInvoices() {
                                   secondary: e.target.value
                                 }
                               }))}
-                              className= "w-16 h-10"
+                              className= "w-16 h-10
                             />
                             <Input
                               value={customization.brandColors?.secondary || state.selectedTemplate.secondaryColor}
@@ -515,7 +515,7 @@ export function EnhancedInvoices() {
                                   secondary: e.target.value
                                 }
                               }))}
-                              className= "flex-1"
+                              className= "flex-1
                             />
                           </div>
                         </div>
@@ -523,26 +523,26 @@ export function EnhancedInvoices() {
                         <div>
                           <Label htmlFor= "header-text">Header Text</Label>
                           <Input
-                            id= "header-text"
-                            value={customization.headerText || ''}'
+                            id= "header-text
+                            value={customization.headerText || ''}
                             onChange={(e) => setCustomization(prev => ({
                               ...prev,
                               headerText: e.target.value
                             }))}
-                            placeholder= "Professional Services"
+                            placeholder= "Professional Services
                           />
                         </div>
 
                         <div>
                           <Label htmlFor= "footer-text">Footer Text</Label>
                           <Input
-                            id= "footer-text"
-                            value={customization.footerText || ''}'
+                            id= "footer-text
+                            value={customization.footerText || ''}
                             onChange={(e) => setCustomization(prev => ({
                               ...prev,
                               footerText: e.target.value
                             }))}
-                            placeholder= "Thank you for your business"
+                            placeholder= "Thank you for your business
                           />
                         </div>
 
@@ -571,13 +571,13 @@ export function EnhancedInvoices() {
                         <div>
                           <Label htmlFor= "late-fees">Late Fees</Label>
                           <Input
-                            id= "late-fees"
-                            value={customization.lateFees || ''}'
+                            id= "late-fees
+                            value={customization.lateFees || ''}
                             onChange={(e) => setCustomization(prev => ({
                               ...prev,
                               lateFees: e.target.value
                             }))}
-                            placeholder= "2.5% per month on overdue amounts"
+                            placeholder= "2.5% per month on overdue amounts
                           />
                         </div>
                       </div>
@@ -586,7 +586,7 @@ export function EnhancedInvoices() {
                       <div className= "bg-slate-50 rounded-lg p-4">
                         <h4 className= "font-semibold text-slate-800 mb-3">Live Preview</h4>
                         <div 
-                          className= "bg-white rounded-lg shadow-sm p-6 border-2"
+                          className= "bg-white rounded-lg shadow-sm p-6 border-2
                           style={{ 
                             borderColor: customization.brandColors?.primary || state.selectedTemplate.primaryColor,
                             fontFamily: state.selectedTemplate.fontFamily 
@@ -597,7 +597,7 @@ export function EnhancedInvoices() {
                             <div className= "flex justify-between items-start">
                               <div>
                                 <h5 
-                                  className= "text-xl font-bold"
+                                  className= "text-xl font-bold
                                   style={{ color: customization.brandColors?.primary || state.selectedTemplate.primaryColor }}
                                 >
                                   {customization.headerText || 'INVOICE'}
@@ -611,7 +611,7 @@ export function EnhancedInvoices() {
                             </div>
 
                             <div 
-                              className= "h-px"
+                              className= "h-px
                               style={{ backgroundColor: customization.brandColors?.secondary || state.selectedTemplate.secondaryColor }}
                             ></div>
 
@@ -623,7 +623,7 @@ export function EnhancedInvoices() {
                               <div>
                                 <p className= "text-slate-600">Amount Due:</p>
                                 <p 
-                                  className= "font-bold text-lg"
+                                  className= "font-bold text-lg
                                   style={{ color: customization.brandColors?.primary || state.selectedTemplate.primaryColor }}
                                 >
                                   $2,500.00
@@ -659,7 +659,7 @@ export function EnhancedInvoices() {
                       <div key={invoice.id} className= "flex items-center justify-between p-4 border rounded-lg">
                         <div className= "flex items-center gap-4">
                           <div 
-                            className= "w-10 h-10 rounded-lg flex items-center justify-center"
+                            className= "w-10 h-10 rounded-lg flex items-center justify-center
                             style={{ backgroundColor: invoice.template.secondaryColor }}
                           >
                             <FileText 
@@ -703,11 +703,11 @@ export function EnhancedInvoices() {
             {state.invoices.map((invoice) => (
               <div 
                 key={invoice.id} 
-                className= "flex items-center justify-between p-4 border rounded-lg hover:shadow-sm transition-all duration-200 bg-white/50"
+                className= "flex items-center justify-between p-4 border rounded-lg hover:shadow-sm transition-all duration-200 bg-white/50
               >
                 <div className= "flex items-center gap-4">
                   <div 
-                    className= "w-12 h-12 rounded-lg flex items-center justify-center"
+                    className= "w-12 h-12 rounded-lg flex items-center justify-center
                     style={{ backgroundColor: invoice.template.secondaryColor }}
                   >
                     <FileText 
@@ -739,7 +739,7 @@ export function EnhancedInvoices() {
                   <div className= "flex gap-2">
                     <Button 
                       variant= "outline" 
-                      size= "sm"
+                      size= "sm
                       onClick={() => {
                         dispatch({ type: 'SET_SELECTED_INVOICE', invoice })
                         dispatch({ type: 'SET_PREVIEW_MODAL', show: true })

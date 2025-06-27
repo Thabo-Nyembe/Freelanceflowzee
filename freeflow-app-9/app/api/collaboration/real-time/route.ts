@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { NextRequest, NextResponse } from 'next/server
+import { createClient } from '@/lib/supabase/server
 
 interface CommentRequest {
   fileId: string
   content: string
-  type: 'comment' | 'note' | 'suggestion' | 'issue'
+  type: 'comment' | 'note' | 'suggestion' | 'issue
   timestamp?: number
   position?: { x: number; y: number }
   mentions?: string[]
@@ -12,7 +12,7 @@ interface CommentRequest {
 
 interface ApprovalRequest {
   fileId: string
-  status: 'approved' | 'rejected' | 'revision_requested'
+  status: 'approved' | 'rejected' | 'revision_requested
   message?: string
   conditions?: string[]
 }
@@ -23,7 +23,7 @@ interface NotificationRequest {
   title: string
   message: string
   data?: unknown
-  priority?: 'low' | 'medium' | 'high' | 'urgent'
+  priority?: 'low' | 'medium' | 'high' | 'urgent
 }
 
 export async function POST(request: NextRequest) {
@@ -133,7 +133,7 @@ async function handleAddComment(
             file_id: commentData.fileId,
             project_id: file.project_id
           },
-          priority: commentData.type === 'issue' ? 'high' : 'medium'
+          priority: commentData.type === 'issue' ? 'high' : 'medium
         })
       }
     }
@@ -153,7 +153,7 @@ async function handleAddComment(
     return NextResponse.json({
       success: true,
       comment,
-      message: 'Comment added successfully'
+      message: 'Comment added successfully
     })
   } catch (error) {
     console.error('Add comment error:', error)
@@ -208,13 +208,13 @@ async function handleAddApproval(
     let newFileStatus = file.status
     switch (approvalData.status) {
       case 'approved':
-        newFileStatus = 'approved'
+        newFileStatus = 'approved
         break
       case 'rejected':
-        newFileStatus = 'rejected'
+        newFileStatus = 'rejected
         break
       case 'revision_requested':
-        newFileStatus = 'revision_requested'
+        newFileStatus = 'revision_requested
         break
     }
 
@@ -239,7 +239,7 @@ async function handleAddApproval(
       success: true,
       approval,
       newFileStatus,
-      message: `File ${approvalData.status.replace('_', ' ')} successfully`
+      message: `File ${approvalData.status.replace('_', ' ')} successfully
     })
   } catch (error) {
     console.error('Add approval error:', error)
@@ -284,7 +284,7 @@ async function handleSendNotification(
     return NextResponse.json({
       success: true,
       notification,
-      message: 'Notification sent successfully'
+      message: 'Notification sent successfully
     })
   } catch (error) {
     console.error('Send notification error:', error)
@@ -323,7 +323,7 @@ async function handleUpdateFileStatus(
     return NextResponse.json({
       success: true,
       file: updatedFile,
-      message: 'File status updated successfully'
+      message: 'File status updated successfully
     })
   } catch (error) {
     console.error('Update file status error:', error)
@@ -363,7 +363,7 @@ async function createFileActivityNotification(supabase: unknown, data: unknown) 
             action: data.action,
             details: data.details
           },
-          priority: 'medium'
+          priority: 'medium
         })
       }
     }
@@ -398,7 +398,7 @@ async function createApprovalNotification(supabase: unknown, data: unknown) {
             approval_status: data.status,
             approver_id: data.approverId
           },
-          priority: data.status === 'rejected' ? 'high' : 'medium'
+          priority: data.status === 'rejected' ? 'high' : 'medium
         })
       }
     }
@@ -413,7 +413,7 @@ async function checkWorkflowProgression(supabase: unknown, projectId: string, ap
       // Check if this approval completes a workflow step
       const { data: workflow } = await supabase
         .from('workflow_steps')
-        .select('*')'
+        .select('*')
         .eq('project_id', projectId)
         .eq('is_completed', false)
         .order('order')
@@ -440,7 +440,7 @@ async function checkWorkflowProgression(supabase: unknown, projectId: string, ap
             project_id: projectId,
             workflow_step_id: workflow.id
           },
-          priority: 'medium'
+          priority: 'medium
         })
       }
     }
@@ -524,7 +524,7 @@ async function getComments(supabase: unknown, fileId: string | null, user: unkno
 
   const { data: comments, error } = await supabase
     .from('comments')
-    .select(`
+    .select(
       *,
       user:users(id, email, full_name, avatar_url),
       replies:comments!parent_id(*),
@@ -557,7 +557,7 @@ async function getApprovals(supabase: unknown, fileId: string | null, user: unkn
 
   const { data: approvals, error } = await supabase
     .from('approvals')
-    .select(`
+    .select(
       *,
       user:users(id, email, full_name, avatar_url)
     `)
@@ -580,7 +580,7 @@ async function getApprovals(supabase: unknown, fileId: string | null, user: unkn
 async function getNotifications(supabase: unknown, userId: string, user: unknown) {
   const { data: notifications, error } = await supabase
     .from('notifications')
-    .select('*')'
+    .select('*')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(50)
@@ -611,7 +611,7 @@ async function getProjectActivity(supabase: unknown, projectId: string | null, u
 
   const { data: activity, error } = await supabase
     .from('project_activity')
-    .select(`
+    .select(
       *,
       user:users(id, email, full_name, avatar_url)
     `)

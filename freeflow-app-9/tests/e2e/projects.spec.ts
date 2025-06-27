@@ -32,8 +32,8 @@ const VALID_PROJECT_DATA = {
 };
 
 const INVALID_PROJECT_DATA = {
-  emptyTitle: '&apos;,'
-  emptyDescription: '&apos;,'
+  emptyTitle: '&apos;,
+  emptyDescription: '&apos;,
   invalidEmail: &apos;invalid.email.format&apos;,
   invalidBudget: &apos;not-a-number&apos;,
   invalidStartDate: &apos;2024-13-45&apos;, // Invalid date
@@ -97,7 +97,7 @@ async function setupProjectAPIMocking(page: Page) {
       const postData = route.request().postDataJSON();
       
       // Simulate validation errors for missing required fields
-      if (!postData?.title || postData.title.trim() === '&apos;) {'
+      if (!postData?.title || postData.title.trim() === '&apos;) {
         await route.fulfill({
           status: 400,
           contentType: &apos;application/json&apos;,
@@ -109,7 +109,7 @@ async function setupProjectAPIMocking(page: Page) {
         return;
       }
       
-      if (!postData?.description || postData.description.trim() === '&apos;) {'
+      if (!postData?.description || postData.description.trim() === '&apos;) {
         await route.fulfill({
           status: 400,
           contentType: &apos;application/json&apos;,
@@ -129,8 +129,8 @@ async function setupProjectAPIMocking(page: Page) {
           id: &apos;proj_&apos; + Date.now(),
           title: postData.title,
           description: postData.description,
-          client_name: postData.client_name || '&apos;,'
-          client_email: postData.client_email || '&apos;,'
+          client_name: postData.client_name || '&apos;,
+          client_email: postData.client_email || '&apos;,
           budget: postData.budget || 0,
           start_date: postData.start_date || null,
           end_date: postData.end_date || null,
@@ -156,7 +156,7 @@ async function setupProjectAPIMocking(page: Page) {
     const method = route.request().method();
     
     if (method === &apos;POST&apos;) {
-      const contentType = route.request().headers()[&apos;content-type&apos;] || '&apos;;'
+      const contentType = route.request().headers()[&apos;content-type&apos;] || '&apos;;
       
       // Simulate invalid file type rejection
       if (contentType.includes(&apos;application/x-executable&apos;) || 

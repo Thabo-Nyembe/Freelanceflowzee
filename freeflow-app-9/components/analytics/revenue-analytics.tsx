@@ -1,7 +1,7 @@
 // Context7 Enhanced Revenue Analytics with Monetization Tracking
-'use client'
+'use client
 
-import React, { useReducer, useCallback, useEffect } from 'react'
+import React, { useReducer, useCallback, useEffect } from 'react
  payload: Partial<RevenueState['engagement']> }
   | { type: &apos;UPDATE_MONETIZATION&apos;; payload: Partial<RevenueState['monetization']> }
   | { type: &apos;UPDATE_ANALYTICS&apos;; payload: Partial<RevenueState['analytics']> }
@@ -30,7 +30,7 @@ const revenueReducer = (state: RevenueState, action: RevenueAction): RevenueStat
 
 interface RevenueAnalyticsProps {
   userId?: string
-  timeRange?: 'today' | 'week' | 'month' | 'year'
+  timeRange?: 'today' | 'week' | 'month' | 'year
   showAdMetrics?: boolean
   enableRealtimeUpdates?: boolean
 }
@@ -72,9 +72,9 @@ export function RevenueAnalytics({
     },
     analytics: {
       topPerformingFiles: [
-        { id: '1', fileName: 'portfolio-design.zip', views: 5420, downloads: 2340, revenue: 450, conversionRate: 43.2, shareCount: 890 },'
-        { id: '2', fileName: 'brand-assets.pdf', views: 4320, downloads: 1890, revenue: 320, conversionRate: 43.7, shareCount: 670 },'
-        { id: '3', fileName: 'client-presentation.pptx', views: 3890, downloads: 1650, revenue: 280, conversionRate: 42.4, shareCount: 560 }'
+        { id: '1', fileName: 'portfolio-design.zip', views: 5420, downloads: 2340, revenue: 450, conversionRate: 43.2, shareCount: 890 },
+        { id: '2', fileName: 'brand-assets.pdf', views: 4320, downloads: 1890, revenue: 320, conversionRate: 43.7, shareCount: 670 },
+        { id: '3', fileName: 'client-presentation.pptx', views: 3890, downloads: 1650, revenue: 280, conversionRate: 42.4, shareCount: 560 }
       ],
       trafficSources: [
         { source: 'Direct', users: 12450, revenue: 5680, conversionRate: 9.2, percentage: 35.4 },
@@ -108,13 +108,13 @@ export function RevenueAnalytics({
   const formatCurrency = useCallback((amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'USD
     }).format(amount)
   }, [])
 
   // Format percentage
   const formatPercentage = useCallback((value: number) => {
-    return `${value.toFixed(1)}%`
+    return `${value.toFixed(1)}%
   }, [])
 
   // Format number with commas

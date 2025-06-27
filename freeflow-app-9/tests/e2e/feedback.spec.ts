@@ -28,9 +28,9 @@ const VALID_FEEDBACK_DATA = {
 };
 
 const INVALID_FEEDBACK_DATA = {
-  emptyComment: '&apos;,'
+  emptyComment: '&apos;,
   whitespaceOnlyComment: &apos;   \n\t   &apos;,
-  tooLongComment: &apos;a'.repeat(2001), // Assuming 2000 char limit'
+  tooLongComment: &apos;a'.repeat(2001), // Assuming 2000 char limit
   invalidPosition: { x: -10, y: 150 } // Out of bounds
 };
 
@@ -68,7 +68,7 @@ async function setupFeedbackAPIMocking(page: Page) {
       const postData = route.request().postDataJSON();
       
       // Validate required fields
-      if (!postData?.content || postData.content.trim() === '&apos;) {'
+      if (!postData?.content || postData.content.trim() === '&apos;) {
         await route.fulfill({
           status: 400,
           contentType: &apos;application/json&apos;,
@@ -103,7 +103,7 @@ async function setupFeedbackAPIMocking(page: Page) {
         status: 200,
         contentType: &apos;application/json&apos;,
         body: JSON.stringify({
-          id: url.split(&apos;/').pop(),'
+          id: url.split(&apos;/').pop(),
           content: postData.content,
           updated_at: new Date().toISOString()
         })
@@ -131,7 +131,7 @@ async function setupFeedbackAPIMocking(page: Page) {
 async function createFeedbackTestPage(page: Page, mediaType: &apos;image&apos; | &apos;video&apos; | &apos;audio&apos;) {
   const mediaFile = MEDIA_FILES[mediaType];
   
-  const mockHtml = `
+  const mockHtml = 
   <!DOCTYPE html>
   <html lang=&quot;en&quot;>
   <head>
@@ -186,22 +186,22 @@ async function createFeedbackTestPage(page: Page, mediaType: &apos;image&apos; |
                  </div>` :
                 mediaType === &apos;video&apos; ?
                 `<div class=&quot;media-placeholder&quot; data-testid=&quot;media-placeholder&quot;>
-                     <div>🎥 Video: ${mediaFile.name}<br>Duration: ${Math.floor(mediaFile.duration / 60)}:${(mediaFile.duration % 60).toString().padStart(2, &apos;0')}</div>'
+                     <div>🎥 Video: ${mediaFile.name}<br>Duration: ${Math.floor(mediaFile.duration / 60)}:${(mediaFile.duration % 60).toString().padStart(2, &apos;0')}</div>
                  </div>` :
                 `<div class=&quot;media-placeholder&quot; data-testid=&quot;media-placeholder&quot;>
-                     <div>🎵 Audio: ${mediaFile.name}<br>Duration: ${Math.floor(mediaFile.duration / 60)}:${(mediaFile.duration % 60).toString().padStart(2, &apos;0')}</div>'
-                 </div>`
+                     <div>🎵 Audio: ${mediaFile.name}<br>Duration: ${Math.floor(mediaFile.duration / 60)}:${(mediaFile.duration % 60).toString().padStart(2, &apos;0')}</div>
+                 </div>
               }
               
               <!-- Feedback markers will be added here dynamically -->
           </div>
           
-          ${mediaType !== &apos;image&apos; ? `
+          ${mediaType !== &apos;image&apos; ? 
           <div class=&quot;timeline&quot; id=&quot;timeline&quot; data-testid=&quot;timeline&quot;>
               <div class=&quot;timeline-progress&quot; style=&quot;width: 0%;&quot; data-testid=&quot;timeline-progress&quot;></div>
               <!-- Timeline markers will be added here -->
           </div>
-          ` : '&apos;}'
+          ` : '&apos;}
           
           <button class=&quot;button button-primary&quot; onclick=&quot;showCommentDialog()&quot; data-testid=&quot;add-comment-btn&quot;>
               Add Comment
@@ -293,7 +293,7 @@ async function createFeedbackTestPage(page: Page, mediaType: &apos;image&apos; |
               showCommentDialog();
           });
           
-          ${mediaType !== &apos;image&apos; ? `
+          ${mediaType !== &apos;image&apos; ? 
           // Timeline click handler for time-based comments
           document.getElementById(&apos;timeline&apos;).addEventListener(&apos;click&apos;, function(e) {
               const rect = this.getBoundingClientRect();
@@ -303,7 +303,7 @@ async function createFeedbackTestPage(page: Page, mediaType: &apos;image&apos; |
               currentPosition = { timestamp };
               showCommentDialog();
           });
-          ` : '&apos;}'
+          ` : '&apos;}
           
           function showCommentDialog() {
               document.getElementById(&apos;overlay&apos;).classList.remove(&apos;hidden&apos;);
@@ -419,13 +419,13 @@ async function createFeedbackTestPage(page: Page, mediaType: &apos;image&apos; |
           
           function renderComments() {
               const container = document.getElementById(&apos;commentsList&apos;);
-              container.innerHTML = comments.map(comment => \`
+              container.innerHTML = comments.map(comment => \
                   <div class=&quot;comment-item&quot; data-testid=&quot;comment-\${comment.id}&quot;>
                       <div class=&quot;comment-header&quot;>
                           <strong>\${comment.author}</strong>
                           <span style=&quot;color: #6b7280; font-size: 12px;&quot;>
                               \${new Date(comment.created_at).toLocaleString()}
-                              \${comment.updated_at ? &apos; (edited)&apos; : '&apos;}'
+                              \${comment.updated_at ? &apos; (edited)&apos; : '&apos;}
                           </span>
                       </div>
                       <div class=&quot;comment-content&quot;>\${comment.content}</div>
@@ -436,7 +436,7 @@ async function createFeedbackTestPage(page: Page, mediaType: &apos;image&apos; |
                                   data-testid=&quot;delete-comment-\${comment.id}&quot;>Delete</button>
                       </div>
                   </div>
-              \`).join('&apos;);'
+              \`).join('&apos;);
           }
           
           function renderMarkers() {
@@ -452,8 +452,8 @@ async function createFeedbackTestPage(page: Page, mediaType: &apos;image&apos; |
                           // Position-based marker (image/video)
                           const marker = document.createElement(&apos;div&apos;);
                           marker.className = &apos;feedback-marker&apos;;
-                          marker.style.left = comment.position.x + &apos;%';'
-                          marker.style.top = comment.position.y + &apos;%';'
+                          marker.style.left = comment.position.x + &apos;%';
+                          marker.style.top = comment.position.y + &apos;%';
                           marker.textContent = index + 1;
                           marker.title = comment.content;
                           marker.setAttribute(&apos;data-testid&apos;, \`marker-\${comment.id}\`);
@@ -464,8 +464,8 @@ async function createFeedbackTestPage(page: Page, mediaType: &apos;image&apos; |
                           if (timeline) {
                               const marker = document.createElement(&apos;div&apos;);
                               marker.className = &apos;timeline-marker&apos;;
-                              marker.style.left = (comment.position.timestamp / ${mediaFile.duration || 100}) * 100 + &apos;%';'
-                              marker.title = \`\${Math.floor(comment.position.timestamp / 60)}:\${Math.floor(comment.position.timestamp % 60).toString().padStart(2, &apos;0')} - \${comment.content}\`;'
+                              marker.style.left = (comment.position.timestamp / ${mediaFile.duration || 100}) * 100 + &apos;%';
+                              marker.title = \`\${Math.floor(comment.position.timestamp / 60)}:\${Math.floor(comment.position.timestamp % 60).toString().padStart(2, &apos;0')} - \${comment.content}\`;
                               marker.setAttribute(&apos;data-testid&apos;, \`timeline-marker-\${comment.id}\`);
                               timeline.appendChild(marker);
                           }
@@ -483,7 +483,7 @@ async function createFeedbackTestPage(page: Page, mediaType: &apos;image&apos; |
           function clearErrors() {
               document.querySelectorAll(&apos;.error-message&apos;).forEach(el => {
                   el.classList.add(&apos;hidden&apos;);
-                  el.textContent = '&apos;;'
+                  el.textContent = '&apos;;
               });
           }
           
@@ -711,7 +711,7 @@ test.describe(&apos;Media Feedback System Testing&apos;, () => {
       await page.locator(&apos;[data-testid=&quot;media-viewer&quot;]&apos;).click({ position: { x: 100, y: 100 } });
       
       // Try overly long comment
-      const longComment = &apos;a'.repeat(2001);'
+      const longComment = &apos;a'.repeat(2001);
       await page.locator(&apos;[data-testid=&quot;comment-content&quot;]&apos;).fill(longComment);
       await page.locator(&apos;[data-testid=&quot;submit-btn&quot;]&apos;).click();
       

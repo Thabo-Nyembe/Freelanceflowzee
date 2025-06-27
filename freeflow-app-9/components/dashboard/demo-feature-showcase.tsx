@@ -1,4 +1,4 @@
-'use client'
+'use client
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ export function DemoFeatureShowcase() {
       icon: FileText,
       color: 'bg-blue-500',
       metrics: { active: 12, completed: 47, revenue: '$45.6K' },
-      demoUrl: '/dashboard/projects-hub'
+      demoUrl: '/dashboard/projects-hub
     },
     {
       id: 'community',
@@ -23,7 +23,7 @@ export function DemoFeatureShowcase() {
       icon: Users,
       color: 'bg-purple-500',
       metrics: { members: 1247, posts: 89, engagement: '94%' },
-      demoUrl: '/dashboard/community'
+      demoUrl: '/dashboard/community
     },
     {
       id: 'analytics',
@@ -32,7 +32,7 @@ export function DemoFeatureShowcase() {
       icon: BarChart3,
       color: 'bg-green-500',
       metrics: { views: '12.4K', conversion: '8.2%', growth: '+15%' },
-      demoUrl: '/dashboard/analytics'
+      demoUrl: '/dashboard/analytics
     },
     {
       id: 'escrow',
@@ -41,7 +41,7 @@ export function DemoFeatureShowcase() {
       icon: DollarSign,
       color: 'bg-emerald-500',
       metrics: { secured: '$127K', transactions: 156, success: '99.8%' },
-      demoUrl: '/dashboard/escrow'
+      demoUrl: '/dashboard/escrow
     },
     {
       id: 'calendar',
@@ -50,7 +50,7 @@ export function DemoFeatureShowcase() {
       icon: Calendar,
       color: 'bg-orange-500',
       metrics: { meetings: 24, upcoming: 8, efficiency: '92%' },
-      demoUrl: '/dashboard/calendar'
+      demoUrl: '/dashboard/calendar
     },
     {
       id: 'ai',
@@ -59,7 +59,7 @@ export function DemoFeatureShowcase() {
       icon: Zap,
       color: 'bg-yellow-500',
       metrics: { queries: 342, accuracy: '96%', time_saved: '4.2h' },
-      demoUrl: '/dashboard/ai-assistant'
+      demoUrl: '/dashboard/ai-assistant
     }
   ];
 
@@ -79,7 +79,7 @@ export function DemoFeatureShowcase() {
         {features.map((feature) => (
           <Card 
             key={feature.id} 
-            className= "hover:shadow-xl transition-all duration-300 cursor-pointer group"
+            className= "hover:shadow-xl transition-all duration-300 cursor-pointer group
             onClick={() => setActiveDemo(feature.id)}
           >
             <CardHeader>
@@ -111,8 +111,8 @@ export function DemoFeatureShowcase() {
                 </div>
                 
                 <Button 
-                  className= "w-full group-hover:bg-primary group-hover:text-white transition-colors"
-                  variant= "outline"
+                  className= "w-full group-hover:bg-primary group-hover:text-white transition-colors
+                  variant= "outline
                   onClick={(e) => {
                     e.stopPropagation();
                     window.open(feature.demoUrl, '_blank');
@@ -140,7 +140,7 @@ export function DemoFeatureShowcase() {
             </div>
             <Button 
               variant= "outline" 
-              size= "sm"
+              size= "sm
               onClick={() => setActiveDemo(null)}
             >
               Close

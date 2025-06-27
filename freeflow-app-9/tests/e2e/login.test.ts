@@ -12,9 +12,9 @@ const INVALID_CREDENTIALS = {
   nonExistentEmail: &apos;nonexistent@example.com&apos;,
   wrongPassword: &apos;WrongPassword123!&apos;,
   malformedEmail: &apos;not-an-email&apos;,
-  emptyEmail: '&apos;,'
-  emptyPassword: '&apos;,'
-  sqlInjection: &quot;&apos; OR &apos;1'=&apos;1&quot;,'
+  emptyEmail: '&apos;,
+  emptyPassword: '&apos;,
+  sqlInjection: &quot;&apos; OR &apos;1'=&apos;1&quot;,
   xssAttempt: &apos;<script>alert(&quot;xss&quot;)</script>@example.com&apos;
 };
 

@@ -352,8 +352,8 @@ test.describe(&apos;🔐 Comprehensive Authentication Tests&apos;, () => {
       const emailValue = await authPage.emailInput.inputValue();
       const passwordValue = await authPage.passwordInput.inputValue();
       
-      expect(emailValue).toBe('&apos;);'
-      expect(passwordValue).toBe('&apos;);'
+      expect(emailValue).toBe('&apos;);
+      expect(passwordValue).toBe('&apos;);
     });
 
     test(&apos;should handle form submission with empty fields&apos;, async ({ authPage }) => {

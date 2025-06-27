@@ -1,6 +1,6 @@
-'use client'
+'use client
 
-import { track } from '@vercel/analytics'
+import { track } from '@vercel/analytics
 
 interface AnalyticsEvent {
   event_type: string
@@ -28,7 +28,7 @@ class IntegratedAnalyticsClient {
   }
 
   private generateSessionId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}
   }
 
   private initializeIfNeeded() {
@@ -75,7 +75,7 @@ class IntegratedAnalyticsClient {
 
     window.addEventListener('unhandledrejection', (event) => {
       this.trackError('promise_rejection', {
-        message: event.reason?.toString() || 'Unknown promise rejection'
+        message: event.reason?.toString() || 'Unknown promise rejection
       })
     })
   }
@@ -87,7 +87,7 @@ class IntegratedAnalyticsClient {
       timestamp: Date.now(),
       session_id: this.sessionId,
       user_agent: navigator.userAgent,
-      viewport: `${window.innerWidth}x${window.innerHeight}`
+      viewport: `${window.innerWidth}x${window.innerHeight}
     }
 
     // Send to internal analytics API
@@ -107,7 +107,7 @@ class IntegratedAnalyticsClient {
     const pageData = {
       path,
       title: title || document.title,
-      referrer: document.referrer || 'direct'
+      referrer: document.referrer || 'direct
     }
 
     this.trackEvent('page_view', pageData)
@@ -163,7 +163,7 @@ class IntegratedAnalyticsClient {
 
   // Helper methods
   private isImportantEvent(eventName: string): boolean {
-    const importantEvents = ['page_view', 'conversion', 'signup', 'login', 'purchase', 'subscription', 'error', 'performance'
+    const importantEvents = ['page_view', 'conversion', 'signup', 'login', 'purchase', 'subscription', 'error', 'performance
     ]
     return importantEvents.includes(eventName)
   }

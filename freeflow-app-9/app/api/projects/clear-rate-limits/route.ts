@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { clearAllRateLimits, rateLimitStore } from '@/app/lib/rate-limit-store'
+import { NextRequest, NextResponse } from 'next/server
+import { clearAllRateLimits, rateLimitStore } from '@/app/lib/rate-limit-store
 
 export async function POST(request: NextRequest) {
   // Only allow clearing rate limits with admin key

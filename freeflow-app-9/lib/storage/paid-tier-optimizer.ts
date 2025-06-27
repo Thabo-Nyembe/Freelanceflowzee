@@ -1,6 +1,6 @@
 import { multiCloudStorage } from './multi-cloud-storage';
 
-// Define proper types instead of using 'any'
+// Define proper types instead of using 'any
 interface FileMetadata {
   size: number;
   provider: 'supabase' | 'wasabi';
@@ -355,7 +355,7 @@ export class PaidTierOptimizer {
     const budgetStatus = await this.monitorPaidTierBudget();
     const utilizationImproved = budgetStatus.status === 'optimal' || budgetStatus.status === 'efficient';
     
-    const nextSteps = ['📊 Monitor usage in Vercel Pro dashboard', '🗄️ Check Supabase Pro metrics for efficiency', '💾 Review Wasabi dashboard for cost tracking', '🔄 Schedule weekly optimization reviews', '📈 Plan for scaling when usage grows'
+    const nextSteps = ['📊 Monitor usage in Vercel Pro dashboard', '🗄️ Check Supabase Pro metrics for efficiency', '💾 Review Wasabi dashboard for cost tracking', '🔄 Schedule weekly optimization reviews', '📈 Plan for scaling when usage grows
     ];
     
     return {

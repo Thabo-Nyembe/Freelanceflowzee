@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { headers } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server
+import { createClient } from '@/lib/supabase/server
+import { headers } from 'next/headers
 
 // Context7 Enhanced Analytics Tracking for Monetization
 export async function POST(request: NextRequest) {
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     const headersList = await headers()
     const forwarded = headersList.get('x-forwarded-for')
     const realIp = headersList.get('x-real-ip')
-    const clientIp = forwarded ? forwarded.split(',')[0] : (realIp || null)'
+    const clientIp = forwarded ? forwarded.split(',')[0] : (realIp || null)
 
     // Initialize Supabase client
     const supabase = await createClient()
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
         revenue_potential: calculateRevenuePotential(event, data),
         conversion_value: calculateConversionValue(event, data),
         traffic_source: getTrafficSource(referrer),
-        device_type: getDeviceType(userAgent || ''),'
+        device_type: getDeviceType(userAgent || ''),
         utm_data: extractUTMParams(referrer)
       }
     }
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     // Properly type the error and provide structured error details
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred
     const errorDetails = error instanceof Error && error.cause ? error.cause : undefined
     
     console.error('Analytics tracking error:', {
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
 function generateSessionId(userAgent: string | undefined, ip: string | undefined | null): string {
   const timestamp = Date.now()
   const hash = btoa(`${userAgent || 'unknown'}-${ip || 'unknown'}-${timestamp}`).substring(0, 16)
-  return `session_${hash}`
+  return `session_${hash}
 }
 
 // Calculate revenue potential based on event type
@@ -124,23 +124,23 @@ function calculateConversionValue(event: string, data: unknown): number {
 
 // Extract traffic source from referrer
 function getTrafficSource(referrer: string): string {
-  if (!referrer) return 'direct'
+  if (!referrer) return 'direct
   
-  if (referrer.includes('google.com')) return 'google'
-  if (referrer.includes('facebook.com')) return 'facebook'
-  if (referrer.includes('twitter.com') || referrer.includes('t.co')) return 'twitter'
-  if (referrer.includes('linkedin.com')) return 'linkedin'
-  if (referrer.includes('youtube.com')) return 'youtube'
-  if (referrer.includes('instagram.com')) return 'instagram'
+  if (referrer.includes('google.com')) return 'google
+  if (referrer.includes('facebook.com')) return 'facebook
+  if (referrer.includes('twitter.com') || referrer.includes('t.co')) return 'twitter
+  if (referrer.includes('linkedin.com')) return 'linkedin
+  if (referrer.includes('youtube.com')) return 'youtube
+  if (referrer.includes('instagram.com')) return 'instagram
   
-  return 'referral'
+  return 'referral
 }
 
 // Detect device type from user agent
 function getDeviceType(userAgent: string): string {
-  if (/mobile/i.test(userAgent)) return 'mobile'
-  if (/tablet|ipad/i.test(userAgent)) return 'tablet'
-  return 'desktop'
+  if (/mobile/i.test(userAgent)) return 'mobile
+  if (/tablet|ipad/i.test(userAgent)) return 'tablet
+  return 'desktop
 }
 
 // Extract UTM parameters
@@ -163,7 +163,7 @@ function extractUTMParams(referrer: string) {
 
 // Check if event generates revenue
 function isRevenueEvent(event: string): boolean {
-  return ['payment_initiated', 'premium_upgrade', 'subscription_started', 'download_completed'
+  return ['payment_initiated', 'premium_upgrade', 'subscription_started', 'download_completed
   ].includes(event)
 }
 
@@ -187,12 +187,12 @@ async function trackRevenueEvent(supabase: unknown, event: string, data: unknown
 
 // Update aggregated metrics for real-time dashboards
 async function updateAggregatedMetrics(supabase: unknown, event: string, data: unknown, userId: string | undefined | null) {
-  const today = new Date().toISOString().split('T')[0]'
+  const today = new Date().toISOString().split('T')[0]
   
   // Update daily aggregates
   const { data: existing } = await supabase
     .from('daily_analytics')
-    .select('*')'
+    .select('*')
     .eq('date', today)
     .single()
 
@@ -228,12 +228,12 @@ async function updateAggregatedMetrics(supabase: unknown, event: string, data: u
 async function updateFileAnalytics(supabase: unknown, fileId: string, event: string, data: unknown) {
   const { data: existing } = await supabase
     .from('file_analytics')
-    .select('*')'
+    .select('*')
     .eq('file_id', fileId)
     .single()
 
   const eventMap = {
-    'file_view': 'view_count', 'download_started': 'download_count', 'download_completed': 'download_count', 'link_copied': 'share_count', 'social_share': 'share_count'
+    'file_view': 'view_count', 'download_started': 'download_count', 'download_completed': 'download_count', 'link_copied': 'share_count', 'social_share': 'share_count
   }
 
   const field = eventMap[event]
@@ -272,13 +272,13 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const eventType = searchParams.get('event')
     const fileId = searchParams.get('fileId')
-    const timeRange = searchParams.get('timeRange') || '7d'
+    const timeRange = searchParams.get('timeRange') || '7d
 
     const supabase = await createClient()
 
     let query = supabase
       .from('analytics_events')
-      .select('*')'
+      .select('*')
       .order('timestamp', { ascending: false })
       .limit(100)
 
@@ -318,14 +318,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       events,
       summary,
-      timeRange: `${days} days`
+      timeRange: `${days} days
     })
 
   } catch (error) {
     console.error('Analytics retrieval error:', error)
     return NextResponse.json({ 
       error: 'Failed to retrieve analytics',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error
     }, { status: 500 })
   }
 } 

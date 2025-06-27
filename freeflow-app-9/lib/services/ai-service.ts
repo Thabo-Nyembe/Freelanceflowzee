@@ -1,15 +1,15 @@
 "use client
 
-import { createClient } from '@/lib/supabase/client'
-import { FileType } from '@/types/files'
-import type { Database } from '@/types/supabase'
-import { SupabaseClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/client
+import { FileType } from '@/types/files
+import type { Database } from '@/types/supabase
+import { SupabaseClient } from '@supabase/supabase-js
 
 export interface AIAnalysisResult {
   id: string
   timestamp: string
   type: FileType
-  status: 'analyzing' | 'complete' | 'error'
+  status: 'analyzing' | 'complete' | 'error
   result: string
 }
 
@@ -23,7 +23,7 @@ export interface AIGenerationResult {
   id: string
   timestamp: string
   type: string
-  status: 'generating' | 'complete' | 'error'
+  status: 'generating' | 'complete' | 'error
   result: string
 }
 
@@ -54,7 +54,7 @@ export class AIService {
         .insert({
           file_type: type,
           status: 'analyzing',
-          result: '
+          result: 
         })
         .select()
         .single()
@@ -71,7 +71,7 @@ export class AIService {
           .from('ai_analysis')
           .update({
             status: 'complete',
-            result: 'Analysis completed successfully'
+            result: 'Analysis completed successfully
           })
           .eq('id', data.id)
       }, 3000)
@@ -97,7 +97,7 @@ export class AIService {
     try {
       const { data, error } = await this.supabase
         .from('ai_analysis')
-        .select('*')'
+        .select('*')
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -107,7 +107,7 @@ export class AIService {
         timestamp: item.created_at,
         type: item.file_type as FileType,
         status: item.status as 'analyzing' | 'complete' | 'error',
-        result: item.result || '
+        result: item.result || 
       }))
     } catch (error) {
       console.error('Error fetching analysis history:', error)
@@ -136,7 +136,7 @@ export class AIService {
           prompt,
           settings,
           status: 'generating',
-          result: '
+          result: 
         })
         .select()
         .single()
@@ -150,7 +150,7 @@ export class AIService {
           .from('ai_generations')
           .update({
             status: 'complete',
-            result: 'Generation completed successfully'
+            result: 'Generation completed successfully
           })
           .eq('id', data.id)
       }, 5000)
@@ -176,7 +176,7 @@ export class AIService {
     try {
       const { data, error } = await this.supabase
         .from('ai_generations')
-        .select('*')'
+        .select('*')
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -186,7 +186,7 @@ export class AIService {
         timestamp: item.created_at,
         type: item.type,
         status: item.status as 'generating' | 'complete' | 'error',
-        result: item.result || '
+        result: item.result || 
       }))
     } catch (error) {
       console.error('Error fetching generation library:', error)

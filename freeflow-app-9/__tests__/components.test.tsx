@@ -1,10 +1,10 @@
-import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import React from 'react
+import { render, screen, fireEvent, waitFor } from '@testing-library/react
 import { FileUpload } from '@/components/file-upload'
 import { DownloadButton } from '@/components/download-button'
 import { SiteHeader } from '@/components/site-header'
-import AICreatePage from '@/app/dashboard/ai-create/page'
-import PaymentPage from '@/app/payment/page'
+import AICreatePage from '@/app/dashboard/ai-create/page
+import PaymentPage from '@/app/payment/page
 
 // Mock fetch for download tests
 global.fetch = jest.fn(() =>
@@ -102,8 +102,8 @@ describe('Component Tests', () => {
 
     it('should handle successful download', async () => {
       const onDownloadComplete = jest.fn()
-      const url = 'test.txt'
-      const filename = 'test.txt'
+      const url = 'test.txt
+      const filename = 'test.txt
       
       render(
         <DownloadButton
@@ -127,7 +127,7 @@ describe('Component Tests', () => {
       (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Download failed'))
       
       const onError = jest.fn()
-      const url = 'test.txt'
+      const url = 'test.txt
       
       renderWithProviders(
         <DownloadButton

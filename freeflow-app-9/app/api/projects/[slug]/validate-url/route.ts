@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server
 
 export async function GET(
   request: NextRequest,
@@ -58,7 +58,7 @@ export async function GET(
       price: 4999,
       currency: 'usd',
       isLocked: false, // Unlocked after validation
-      createdBy: 'designer@example.com'
+      createdBy: 'designer@example.com
     }
 
     return NextResponse.json({

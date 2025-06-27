@@ -1,13 +1,13 @@
-'use client'
+'use client
 
-import { useState } from 'react'
-import Link from 'next/link'
+import { useState } from 'react
+import Link from 'next/link
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Mail, Phone, MapPin, ExternalLink, HelpCircle, Shield, FileText, Home, Twitter, Github, Linkedin } from 'lucide-react'
+import { Mail, Phone, MapPin, ExternalLink, HelpCircle, Shield, FileText, Home, Twitter, Github, Linkedin } from 'lucide-react
 
 interface SiteFooterProps {
-  variant?: 'default' | 'minimal'
+  variant?: 'default' | 'minimal
 }
 
 const socialLinks = [
@@ -26,11 +26,11 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
   }
 
   const handleEmailClick = () => {
-    window.location.href = 'mailto:hello@freelanceflowzee.com'
+    window.location.href = 'mailto:hello@freelanceflowzee.com
   }
 
   const handlePhoneClick = () => {
-    window.location.href = 'tel:+15551234567'
+    window.location.href = 'tel:+15551234567
   }
 
   const handleAddressClick = () => {
@@ -82,10 +82,10 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
                   Contact Us
                 </h4>
                 <Button
-                  variant="ghost"
-                  className="w-full justify-start h-auto p-0 text-gray-400 hover:text-white hover:bg-transparent"
+                  variant="ghost
+                  className="w-full justify-start h-auto p-0 text-gray-400 hover:text-white hover:bg-transparent
                   onClick={handleEmailClick}
-                >
+                >"
                   <div className="flex items-center space-x-3">
                     <Mail className="w-4 h-4" />
                     <span className="text-sm">hello@freelanceflowzee.com</span>
@@ -93,10 +93,10 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
                   </div>
                 </Button>
                 <Button
-                  variant="ghost"
-                  className="w-full justify-start h-auto p-0 text-gray-400 hover:text-white hover:bg-transparent"
+                  variant="ghost
+                  className="w-full justify-start h-auto p-0 text-gray-400 hover:text-white hover:bg-transparent
                   onClick={handlePhoneClick}
-                >
+                >"
                   <div className="flex items-center space-x-3">
                     <Phone className="w-4 h-4" />
                     <span className="text-sm">+1 (555) 123-4567</span>
@@ -104,10 +104,10 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
                   </div>
                 </Button>
                 <Button
-                  variant="ghost"
-                  className="w-full justify-start h-auto p-0 text-gray-400 hover:text-white hover:bg-transparent"
-                  onClick={handleAddressClick}
-                  title="Open in Google Maps"
+                  variant="ghost
+                  className="w-full justify-start h-auto p-0 text-gray-400 hover:text-white hover:bg-transparent
+                  onClick={handleAddressClick}"
+                  title="Open in Google Maps
                 >
                   <div className="flex items-center space-x-3">
                     <MapPin className="w-4 h-4" />
@@ -134,9 +134,9 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
                   <li key={item.href}>
                     <Link 
                       href={item.href}
-                      className="text-gray-400 hover:text-white transition-colors text-sm flex items-center"
+                      className="text-gray-400 hover:text-white transition-colors text-sm flex items-center
                     >
-                      {item.label}
+                      {item.label}"
                       {item.icon && <item.icon className="w-3 h-3 ml-1" />}
                     </Link>
                   </li>
@@ -160,7 +160,7 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
                   <li key={item.href}>
                     <Link 
                       href={item.href}
-                      className="text-gray-400 hover:text-white transition-colors text-sm flex items-center"
+                      className="text-gray-400 hover:text-white transition-colors text-sm flex items-center
                     >
                       {item.label}
                     </Link>
@@ -170,7 +170,7 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
             </div>
 
             {/* Company Links */}
-            <div>
+            <div>"
               <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">
                 Company
               </h4>
@@ -184,8 +184,8 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
                   <li key={item.href}>
                     <Link 
                       href={item.href}
-                      className="text-gray-400 hover:text-white transition-colors text-sm flex items-center"
-                    >
+                      className="text-gray-400 hover:text-white transition-colors text-sm flex items-center
+                    >"
                       {item.icon && <item.icon className="w-3 h-3 mr-2" />}
                       {item.label}
                     </Link>
@@ -213,17 +213,17 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
                 ) : (
                   <form onSubmit={handleNewsletterSubmit} className="space-y-3">
                     <Input
-                      type="email"
-                      placeholder="Enter your email"
+                      type="email
+                      placeholder="Enter your email
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="bg-white border-purple-300 text-gray-900 placeholder-gray-500 focus:border-purple-500"
+                      className="bg-white border-purple-300 text-gray-900 placeholder-gray-500 focus:border-purple-500
                       required
                       suppressHydrationWarning
                     />
-                    <Button 
-                      type="submit"
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                    <Button "
+                      type="submit
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white
                     >
                       Subscribe
                     </Button>
@@ -231,18 +231,18 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
                 )}
 
                 {/* Social Links */}
-                <div>
+                <div>"
                   <h5 className="text-sm font-medium text-white mb-3">Follow Us</h5>
                   <div className="flex space-x-3">
                     {socialLinks.map((social) => (
                       <Link
                         key={social.label}
                         href={social.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-gray-400 hover:text-white transition-colors"
+                        target="_blank
+                        rel="noopener noreferrer
+                        className="text-gray-400 hover:text-white transition-colors
                         title={`Follow us on ${social.label} (${social.handle})`}
-                      >
+                      >"
                         <social.icon className="w-5 h-5" />
                       </Link>
                     ))}

@@ -60,33 +60,33 @@ export const projectTemplates = {
   brandIdentity: {
     title: &apos;Brand Identity Design&apos;,
     description: &apos;Complete brand identity package including logo, color palette, typography, and brand guidelines&apos;,
-    clientName: '&apos;,'
-    clientEmail: '&apos;,'
+    clientName: '&apos;,
+    clientEmail: '&apos;,
     budget: &apos;2500&apos;,
-    startDate: '&apos;,'
-    endDate: '&apos;,'
+    startDate: '&apos;,
+    endDate: '&apos;,
     priority: &apos;High&apos;,
     status: &apos;Draft&apos;
   },
   webDesign: {
     title: &apos;Website Redesign&apos;,
     description: &apos;Modern website redesign with responsive layouts and improved user experience&apos;,
-    clientName: '&apos;,'
-    clientEmail: '&apos;,'
+    clientName: '&apos;,
+    clientEmail: '&apos;,
     budget: &apos;5000&apos;,
-    startDate: '&apos;,'
-    endDate: '&apos;,'
+    startDate: '&apos;,
+    endDate: '&apos;,
     priority: &apos;Medium&apos;,
     status: &apos;Draft&apos;
   },
   marketing: {
     title: &apos;Digital Marketing Campaign&apos;,
     description: &apos;Comprehensive digital marketing campaign including social media, email, and content strategy&apos;,
-    clientName: '&apos;,'
-    clientEmail: '&apos;,'
+    clientName: '&apos;,
+    clientEmail: '&apos;,
     budget: &apos;3000&apos;,
-    startDate: '&apos;,'
-    endDate: '&apos;,'
+    startDate: '&apos;,
+    endDate: '&apos;,
     priority: &apos;Medium&apos;,
     status: &apos;Draft&apos;
   }
@@ -94,8 +94,8 @@ export const projectTemplates = {
 
 export const invalidData = {
   missingRequired: {
-    title: '&apos;,'
-    description: '&apos;,'
+    title: '&apos;,
+    description: '&apos;,
     clientName: &apos;Test Client&apos;,
     clientEmail: &apos;client@test.com&apos;,
     budget: &apos;1000&apos;,

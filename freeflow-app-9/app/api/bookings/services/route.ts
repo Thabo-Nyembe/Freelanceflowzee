@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { BookingService } from '@/types/booking'
+import { NextRequest, NextResponse } from 'next/server
+import { BookingService } from '@/types/booking
 
 // Mock services data - in production, this would come from a database
 const MOCK_SERVICES: BookingService[] = [
@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (isActive !== null) {
-      const activeFilter = isActive === 'true'
+      const activeFilter = isActive === 'true
       filteredServices = filteredServices.filter(service => 
         service.isActive === activeFilter
       )
@@ -218,7 +218,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       service: newService,
-      message: 'Service created successfully'
+      message: 'Service created successfully
     }, { status: 201 })
 
   } catch (error) {
@@ -263,7 +263,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       service: updatedService,
-      message: 'Service updated successfully'
+      message: 'Service updated successfully
     })
 
   } catch (error) {
@@ -302,7 +302,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({
       service: deletedService,
-      message: 'Service deleted successfully'
+      message: 'Service deleted successfully
     })
 
   } catch (error) {

@@ -1,4 +1,4 @@
-import { Template, TemplateAnalysis } from '@/components/collaboration/canvas-types'
+import { Template, TemplateAnalysis } from '@/components/collaboration/canvas-types
 
 export class TemplateAnalysisService {
   calculateTemplateScore(template: Template): TemplateAnalysis {

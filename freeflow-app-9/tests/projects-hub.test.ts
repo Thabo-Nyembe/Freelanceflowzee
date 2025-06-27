@@ -150,7 +150,7 @@ test.describe(&apos;Projects Hub&apos;, () => {
       await projectsHub.expectProjectDetails({
         title: &apos;Brand Identity Project&apos;,
         description: projectTemplates.brandIdentity.description,
-        clientName: '&apos;,'
+        clientName: '&apos;,
         status: &apos;active&apos;,
         priority: &apos;high&apos;
       })

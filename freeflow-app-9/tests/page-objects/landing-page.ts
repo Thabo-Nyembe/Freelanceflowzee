@@ -104,7 +104,7 @@ export class LandingPage {
   }
 
   async goto() {
-    await this.page.goto(&apos;/');'
+    await this.page.goto(&apos;/');
     await this.page.waitForLoadState(&apos;networkidle&apos;);
   }
 

@@ -1,20 +1,60 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
+import Link from 'next/link
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { Button } from '@/components/ui/button'
-`,
-    python: `import requests
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { 
+  Code, 
+  Key, 
+  Download, 
+  Search, 
+  BookOpen, 
+  Zap, 
+  Shield, 
+  Copy, 
+  CheckCircle,
+  AlertCircle,
+  ExternalLink
+} from 'lucide-react
+
+const apiSections = [
+  {
+    id: 'authentication',
+    title: 'Authentication',
+    description: 'Secure your API requests with OAuth 2.0',
+    endpoints: [
+      { method: 'POST', path: '/auth/token', description: 'Get access token' }
+    ]
+  },
+  {
+    id: 'projects',
+    title: 'Projects',
+    description: 'Manage client projects and deliverables',
+    endpoints: [
+      { method: 'GET', path: '/projects', description: 'List all projects' },
+      { method: 'POST', path: '/projects', description: 'Create new project' }
+    ]
+  }
+]
+
+const codeExamples = {
+  authentication: {
+    curl: `curl -X POST https://api.freeflowzee.com/auth/token \\
+  -H "Content-Type: application/json" \\
+  -d '{"api_key": "your_api_key", "scope": "projects:read projects:write"}
 
 response = requests.post('https://api.freeflowzee.com/auth/token', 
   json={
-    'api_key': 'your_api_key', 'scope': 'projects:read projects:write'
+    'api_key': 'your_api_key', 'scope': 'projects:read projects:write
   }
 )
 
-data = response.json()`
+data = response.json()
   },
   projects: {
     curl: `curl -X GET https://api.freeflowzee.com/projects \\
@@ -22,7 +62,7 @@ data = response.json()`
   -H "Content-Type: application/json"`,
     javascript: `const response = await fetch('https://api.freeflowzee.com/projects', {
   headers: {
-    'Authorization': 'Bearer your_access_token', 'Content-Type': 'application/json'
+    'Authorization': 'Bearer your_access_token', 'Content-Type': 'application/json
   }
 });
 
@@ -30,11 +70,11 @@ const projects = await response.json();`,
     python: `import requests
 
 headers = {
-  'Authorization': 'Bearer your_access_token', 'Content-Type': 'application/json'
+  'Authorization': 'Bearer your_access_token', 'Content-Type': 'application/json
 }
 
 response = requests.get('https://api.freeflowzee.com/projects', headers=headers)
-projects = response.json()`
+projects = response.json()
   }
 }
 
@@ -43,42 +83,42 @@ const quickStart = [
     step: 1,
     title: "Get API Key",
     description: "Generate your API key from the dashboard",
-    action: "Go to Dashboard"
+    action: "Go to Dashboard
   },
   {
     step: 2,
     title: "Authenticate",
     description: "Use your API key to get an access token",
-    action: "View Example"
+    action: "View Example
   },
   {
     step: 3,
     title: "Make Requests",
     description: "Start making API calls to manage your projects",
-    action: "Try API"
+    action: "Try API
   },
   {
     step: 4,
     title: "Handle Webhooks",
     description: "Set up webhooks for real-time notifications",
-    action: "Setup Webhooks"
+    action: "Setup Webhooks
   }
 ]
 
 const sdks = [
-  { name: 'JavaScript/Node.js', status: 'Available', link: '#' },'
-  { name: 'Python', status: 'Available', link: '#' },'
-  { name: 'PHP', status: 'Available', link: '#' },'
-  { name: 'Ruby', status: 'Coming Soon', link: '#' },'
-  { name: 'Go', status: 'Coming Soon', link: '#' },'
-  { name: 'Java', status: 'Coming Soon', link: '#' }'
+  { name: 'JavaScript/Node.js', status: 'Available', link: '#' },
+  { name: 'Python', status: 'Available', link: '#' },
+  { name: 'PHP', status: 'Available', link: '#' },
+  { name: 'Ruby', status: 'Coming Soon', link: '#' },
+  { name: 'Go', status: 'Coming Soon', link: '#' },
+  { name: 'Java', status: 'Coming Soon', link: '#' }
 ]
 
 export default function ApiDocsPage() {
-  const [searchQuery, setSearchQuery] = useState('')'
+  const [searchQuery, setSearchQuery] = useState('')
   const [selectedSection, setSelectedSection] = useState('authentication')
   const [selectedLanguage, setSelectedLanguage] = useState('curl')
-  const [copiedCode, setCopiedCode] = useState('')'
+  const [copiedCode, setCopiedCode] = useState('')
 
   const filteredSections = apiSections.filter(section =>
     section.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -95,7 +135,7 @@ export default function ApiDocsPage() {
   const copyToClipboard = (code: string) => {
     navigator.clipboard.writeText(code)
     setCopiedCode(code)
-    setTimeout(() => setCopiedCode(''), 2000)'
+    setTimeout(() => setCopiedCode(''), 2000)
   }
 
   const handleQuickStartAction = (action: string) => {
@@ -119,11 +159,11 @@ export default function ApiDocsPage() {
 
   const getMethodColor = (method: string) => {
     switch (method) {
-      case 'GET': return 'bg-green-100 text-green-800'
-      case 'POST': return 'bg-blue-100 text-blue-800'
-      case 'PUT': return 'bg-yellow-100 text-yellow-800'
-      case 'DELETE': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'GET': return 'bg-green-100 text-green-800
+      case 'POST': return 'bg-blue-100 text-blue-800
+      case 'PUT': return 'bg-yellow-100 text-yellow-800
+      case 'DELETE': return 'bg-red-100 text-red-800
+      default: return 'bg-gray-100 text-gray-800
     }
   }
 
@@ -162,9 +202,9 @@ export default function ApiDocsPage() {
               <div className= "max-w-2xl mx-auto relative">
                 <Search className= "absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400 w-5 h-5" />
                 <Input
-                  type= "text"
-                  placeholder= "Search API endpoints..."
-                  className= "pl-12 pr-4 py-3 text-lg bg-white border-purple-200 text-purple-700 placeholder-purple-400 focus:border-purple-600 rounded-lg"
+                  type= "text
+                  placeholder= "Search API endpoints...
+                  className= "pl-12 pr-4 py-3 text-lg bg-white border-purple-200 text-purple-700 placeholder-purple-400 focus:border-purple-600 rounded-lg
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -195,7 +235,7 @@ export default function ApiDocsPage() {
                     <Button 
                       size= "sm" 
                       variant= "outline" 
-                      className= "group-hover:bg-blue-600 group-hover:text-white transition-colors"
+                      className= "group-hover:bg-blue-600 group-hover:text-white transition-colors
                       onClick={() => handleQuickStartAction(item.action)}
                     >
                       {item.action}
@@ -226,7 +266,7 @@ export default function ApiDocsPage() {
                     <Button
                       key={section.id}
                       variant={selectedSection === section.id ? "default" : "ghost"}
-                      className= "w-full justify-start"
+                      className= "w-full justify-start
                       onClick={() => setSelectedSection(section.id)}
                     >
                       <section.icon className= "w-4 h-4 mr-2" />
@@ -278,7 +318,7 @@ export default function ApiDocsPage() {
                             {Object.keys(currentCodeExample).map((lang) => (
                               <Button
                                 key={lang}
-                                size= "sm"
+                                size= "sm
                                 variant={selectedLanguage === lang ? "default" : "outline"}
                                 onClick={() => setSelectedLanguage(lang)}
                               >
@@ -293,9 +333,9 @@ export default function ApiDocsPage() {
                               <code>{currentCodeExample[selectedLanguage as keyof typeof currentCodeExample]}</code>
                             </pre>
                             <Button
-                              size= "sm"
-                              variant= "outline"
-                              className= "absolute top-2 right-2 bg-white border-purple-200 text-purple-700 hover:bg-purple-100"
+                              size= "sm
+                              variant= "outline
+                              className= "absolute top-2 right-2 bg-white border-purple-200 text-purple-700 hover:bg-purple-100
                               onClick={() => copyToClipboard(currentCodeExample[selectedLanguage as keyof typeof currentCodeExample])}
                             >
                               {copiedCode === currentCodeExample[selectedLanguage as keyof typeof currentCodeExample] ? (
@@ -333,14 +373,14 @@ export default function ApiDocsPage() {
                       <h3 className= "font-semibold text-gray-900">{sdk.name}</h3>
                       <Badge 
                         variant={sdk.status === 'Available' ? 'default' : 'secondary'}
-                        className={sdk.status === 'Available' ? 'bg-green-100 text-green-800' : }'
+                        className={sdk.status === 'Available' ? 'bg-green-100 text-green-800' : }
                       >
                         {sdk.status}
                       </Badge>
                     </div>
                     <Button 
                       variant= "outline" 
-                      className= "w-full"
+                      className= "w-full
                       disabled={sdk.status !== 'Available'}
                     >
                       <Download className= "w-4 h-4 mr-2" />

@@ -1,11 +1,11 @@
-import { Metadata } from 'next'
+import { Metadata } from 'next
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
-import { HomePageClient } from './home-page-client'
-import { createClient } from '@/lib/supabase/server'
-import Image from 'next/image'
+import { HomePageClient } from './home-page-client
+import { createClient } from '@/lib/supabase/server
+import Image from 'next/image
 import { Button } from '@/components/ui/button'
-import Link from 'next/link'
+import Link from 'next/link
 
 // Generate metadata for better SEO
 export const metadata: Metadata = {
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
         url: '/images/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'FreeflowZee Platform Preview'
+        alt: 'FreeflowZee Platform Preview
       }
     ]
   },
@@ -50,12 +50,12 @@ function generateStructuredData() {
     offers: {
       '@type': 'Offer',
       price: '0',
-      priceCurrency: 'USD'
+      priceCurrency: 'USD
     },
     aggregateRating: {
       '@type': 'AggregateRating',
       ratingValue: '4.8',
-      ratingCount: '10000'
+      ratingCount: '10000
     }
   }
 }
@@ -66,7 +66,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-indigo-50/40" suppressHydrationWarning>
       {/* Server-side Structured Data */}
       <script
-        type="application/ld+json"
+        type="application/ld+json
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(generateStructuredData())
         }}
@@ -90,11 +90,11 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
+        <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-['] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
           <Image
             className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-            src="/next.svg"
-            alt="Next.js Logo"
+            src="/next.svg
+            alt="Next.js Logo
             width={180}
             height={37}
             priority

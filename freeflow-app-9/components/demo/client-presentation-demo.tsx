@@ -1,4 +1,4 @@
-'use client'
+'use client
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -13,27 +13,27 @@ export function ClientPresentationDemo() {
     {
       title: "FreeflowZee: Your Complete Freelance Solution",
       content: "overview",
-      description: "Comprehensive platform for project management and collaboration"
+      description: "Comprehensive platform for project management and collaboration
     },
     {
       title: "Proven Results & Success Metrics", 
       content: "metrics",
-      description: "Real performance data from our thriving community"
+      description: "Real performance data from our thriving community
     },
     {
       title: "Project Portfolio Showcase",
       content: "portfolio", 
-      description: "Successful projects delivered through our platform"
+      description: "Successful projects delivered through our platform
     },
     {
       title: "Client Success Stories",
       content: "testimonials",
-      description: "What our clients say about working with our freelancers"
+      description: "What our clients say about working with our freelancers
     },
     {
       title: "Ready to Get Started?",
       content: "cta",
-      description: "Join thousands of satisfied clients and freelancers"
+      description: "Join thousands of satisfied clients and freelancers
     }
   ];
 
@@ -153,7 +153,7 @@ export function ClientPresentationDemo() {
                       <Star key={i} className= "h-4 w-4 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
-                  <p className= "italic mb-4">"FreeflowZee helped us find the perfect freelancer for our web development project. The quality exceeded our expectations!&quot;</p>"
+                  <p className= "italic mb-4">"FreeflowZee helped us find the perfect freelancer for our web development project. The quality exceeded our expectations!&quot;</p>
                   <div className= "font-semibold">- Sarah Johnson, Tech Startup CEO</div>
                 </CardContent>
               </Card>
@@ -164,7 +164,7 @@ export function ClientPresentationDemo() {
                       <Star key={i} className= "h-4 w-4 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
-                  <p className= "italic mb-4">"The escrow system gave us confidence in the payment process. Communication tools made collaboration seamless.&quot;</p>"
+                  <p className= "italic mb-4">"The escrow system gave us confidence in the payment process. Communication tools made collaboration seamless.&quot;</p>
                   <div className= "font-semibold">- Michael Chen, Marketing Director</div>
                 </CardContent>
               </Card>
@@ -218,7 +218,7 @@ export function ClientPresentationDemo() {
           </div>
           <div className= "w-full bg-gray-200 rounded-full h-2">
             <div 
-              className= "bg-blue-500 h-2 rounded-full transition-all duration-300"
+              className= "bg-blue-500 h-2 rounded-full transition-all duration-300
               style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
             ></div>
           </div>
@@ -244,7 +244,7 @@ export function ClientPresentationDemo() {
               <button
                 key={index}
                 className={`w-3 h-3 rounded-full transition-colors ${
-                  index === currentSlide ? 'bg-blue-500' : 'bg-gray-300'
+                  index === currentSlide ? 'bg-blue-500' : 'bg-gray-300
                 }`}
                 onClick={() => setCurrentSlide(index)}
               />

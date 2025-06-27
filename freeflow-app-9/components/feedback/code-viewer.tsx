@@ -1,8 +1,8 @@
-"use client
+"use client"
 
 import { useState } from "react"
 import { MessageSquare } from "lucide-react"
-import { CommentDialog } from "./comment-dialog"
+import { CommentDialog } from "./comment-dialog
 
 interface CodeViewerProps {
   file: Record<string, unknown>
@@ -10,5 +10,5 @@ interface CodeViewerProps {
   onAddComment: (comments: Record<string, unknown>[]) => void
 }
 
-const sampleCode = `import React, { useState } from 'react'
+const sampleCode = `import React, { useState } from 'react
 import { Button } from '@/components/ui/button'

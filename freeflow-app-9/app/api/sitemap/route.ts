@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server
 
 // Define all static routes for the sitemap
 const staticRoutes = [
-  '','
+  '',
   '/features', '/how-it-works', '/pricing', '/contact', '/blog', '/community', '/docs', '/tutorials', '/api-docs', '/newsletter', '/privacy', '/terms', '/support', '/careers', '/press', '/demo', '/book-appointment', '/enhanced-collaboration-demo', '/media-preview-demo', '/tools/rate-calculator', '/tools/scope-generator', '/login', '/signup',
 ]
 
@@ -12,16 +12,16 @@ const dynamicRoutes: Array<{ path: string; lastmod: string }> = [
 ]
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freeflow-app-9-6egesbwif-thabo-5265s-projects.vercel.app'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freeflow-app-9-6egesbwif-thabo-5265s-projects.vercel.app
   const currentDate = new Date().toISOString()
 
   // Generate sitemap XML
   const sitemap = `<?xml version= "1.0" encoding= "UTF-8"?>
-<urlset xmlns= "http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:news= "http://www.google.com/schemas/sitemap-news/0.9"
-        xmlns:xhtml= "http://www.w3.org/1999/xhtml"
-        xmlns:mobile= "http://www.google.com/schemas/sitemap-mobile/1.0"
-        xmlns:image= "http://www.google.com/schemas/sitemap-image/1.1"
+<urlset xmlns= "http://www.sitemaps.org/schemas/sitemap/0.9
+        xmlns:news= "http://www.google.com/schemas/sitemap-news/0.9
+        xmlns:xhtml= "http://www.w3.org/1999/xhtml
+        xmlns:mobile= "http://www.google.com/schemas/sitemap-mobile/1.0
+        xmlns:image= "http://www.google.com/schemas/sitemap-image/1.1
         xmlns:video= "http://www.google.com/schemas/sitemap-video/1.1">
 ${staticRoutes
   .map((route) => {
@@ -33,7 +33,7 @@ ${staticRoutes
     <lastmod>${currentDate}</lastmod>
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
-  </url>`
+  </url>
   })
   .join('\n')}
 ${dynamicRoutes
@@ -43,10 +43,10 @@ ${dynamicRoutes
     <lastmod>${route.lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-  </url>`
+  </url>
   })
   .join('\n')}
-</urlset>`
+</urlset>
 
   return new NextResponse(sitemap, {
     headers: {
@@ -61,30 +61,30 @@ function getPriority(route: string): string {
   
   // Important pages
   if (['/features', '/pricing', '/contact', '/demo'].includes(route)) {
-    return '0.9'
+    return '0.9
   }
   
   // Secondary pages
   if (['/how-it-works', '/blog', '/community', '/docs'].includes(route)) {
-    return '0.8'
+    return '0.8
   }
   
   // Tool pages
   if (route.startsWith('/tools/')) {
-    return '0.7'
+    return '0.7
   }
   
   // Auth pages
   if (['/login', '/signup'].includes(route)) {
-    return '0.6'
+    return '0.6
   }
   
   // Legal pages
   if (['/privacy', '/terms', '/support'].includes(route)) {
-    return '0.5'
+    return '0.5
   }
   
-  return '0.6'
+  return '0.6
 }
 
 function getChangeFreq(route: string): string {
@@ -93,18 +93,18 @@ function getChangeFreq(route: string): string {
   
   // Feature and pricing pages change weekly
   if (['/features', '/pricing', '/community'].includes(route)) {
-    return 'weekly'
+    return 'weekly
   }
   
   // Documentation changes monthly
   if (['/docs', '/tutorials', '/api-docs'].includes(route)) {
-    return 'monthly'
+    return 'monthly
   }
   
   // Legal pages change yearly
   if (['/privacy', '/terms'].includes(route)) {
-    return 'yearly'
+    return 'yearly
   }
   
-  return 'monthly'
+  return 'monthly
 } 

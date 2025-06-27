@@ -11,7 +11,7 @@ test.describe(&apos;FreeflowZee Interactive Elements Comprehensive Test&apos;, (
   test(&apos;All navigation routes should be accessible&apos;, async ({ page }) => {
     // Test public routes
     const publicRoutes = [
-      { path: &apos;/', expected: 200 },'
+      { path: &apos;/', expected: 200 },
       { path: &apos;/features&apos;, expected: 200 },
       { path: &apos;/demo&apos;, expected: 200 },
       { path: &apos;/payment&apos;, expected: 200 },
@@ -318,7 +318,7 @@ test.describe(&apos;FreeflowZee Navigation System&apos;, () => {
       for (let i = 0; i < Math.min(3, footerLinkCount); i++) {
         const link = footerLinks.nth(i)
         const href = await link.getAttribute(&apos;href&apos;)
-        if (href && href.startsWith(&apos;/')) {'
+        if (href && href.startsWith(&apos;/')) {
           await link.click()
           await page.waitForTimeout(500)
           await page.goBack()

@@ -1,4 +1,4 @@
-'use client'
+'use client
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -51,8 +51,8 @@ export function StartupCostDashboard() {
           database: 0.50    // Supabase free tier
         },
         recommendations: [
-          '✅ Great savings! You\'re 72% below standard cloud costs','
-          '🚀 Consider scaling up - you have budget room', '💡 Move 3 more files to Wasabi for extra $2.10/month savings'
+          '✅ Great savings! You\'re 72% below standard cloud costs',
+          '🚀 Consider scaling up - you have budget room', '💡 Move 3 more files to Wasabi for extra $2.10/month savings
         ]
       });
       
@@ -76,7 +76,7 @@ export function StartupCostDashboard() {
         wasabiSavings: prev.wasabiSavings + 2.10,
         optimizationScore: Math.min(100, prev.optimizationScore + 5),
         potentialSavings: Math.max(0, prev.potentialSavings - 2.10),
-        recommendations: ['🎉 Optimization complete! Moved 3 files to Wasabi', '💰 Additional $2.10/month saved', '✅ Storage now 95% optimized for startup budget'
+        recommendations: ['🎉 Optimization complete! Moved 3 files to Wasabi', '💰 Additional $2.10/month saved', '✅ Storage now 95% optimized for startup budget
         ]
       } : null);
       
@@ -131,7 +131,7 @@ export function StartupCostDashboard() {
         </div>
         <Badge 
           variant={budgetStatus === 'safe' ? 'default' : budgetStatus === 'warning' ? 'secondary' : 'destructive'}
-          className= "text-sm"
+          className= "text-sm
         >
           {budgetStatus === 'safe' ? '✅ Budget Healthy' : 
            budgetStatus === 'warning' ? '⚠️ Approaching Limit' : 
@@ -199,7 +199,7 @@ export function StartupCostDashboard() {
               <Button 
                 size= "sm" 
                 variant= "outline" 
-                className= "mt-2 text-xs"
+                className= "mt-2 text-xs
                 onClick={runOptimization}
                 disabled={optimizing}
               >
@@ -271,7 +271,7 @@ export function StartupCostDashboard() {
               {costData.recommendations.map((recommendation, index) => (
                 <div 
                   key={index}
-                  className= "flex items-start gap-3 p-3 rounded-lg bg-muted/50"
+                  className= "flex items-start gap-3 p-3 rounded-lg bg-muted/50
                 >
                   <div className= "text-sm flex-1">
                     {recommendation}

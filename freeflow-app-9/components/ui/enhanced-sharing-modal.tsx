@@ -1,4 +1,4 @@
-'use client'
+'use client
 
 import React, { useState } from 'react';
 import { X, Copy, Share2, Facebook, Twitter, Linkedin, Instagram, Mail, Link, Code, Download } from 'lucide-react';
@@ -30,42 +30,42 @@ export function EnhancedSharingModal({
   const shareUrl = `${window.location.origin}${url}`;
   const encodedUrl = encodeURIComponent(shareUrl);
   const encodedTitle = encodeURIComponent(title);
-  const encodedDescription = encodeURIComponent(description || '');'
+  const encodedDescription = encodeURIComponent(description || '');
 
   const socialPlatforms = [
     {
       name: 'Facebook',
       icon: Facebook,
       url: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-      color: 'bg-blue-600 hover:bg-blue-700'
+      color: 'bg-blue-600 hover:bg-blue-700
     },
     {
       name: 'Twitter',
       icon: Twitter,
       url: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
-      color: 'bg-sky-500 hover:bg-sky-600'
+      color: 'bg-sky-500 hover:bg-sky-600
     },
     {
       name: 'LinkedIn',
       icon: Linkedin,
       url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-      color: 'bg-blue-700 hover:bg-blue-800'
+      color: 'bg-blue-700 hover:bg-blue-800
     },
     {
       name: 'Instagram',
       icon: Instagram,
-      url: '#','
-      color: 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'
+      url: '#',
+      color: 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600
     },
     {
       name: 'Email',
       icon: Mail,
       url: `mailto:?subject=${encodedTitle}&body=${encodedDescription}%0A%0A${encodedUrl}`,
-      color: 'bg-gray-600 hover:bg-gray-700'
+      color: 'bg-gray-600 hover:bg-gray-700
     }
   ];
 
-  const embedCode = `<iframe src= "${shareUrl}" width= "800" height= "600" frameborder="0" allowfullscreen></iframe>`;"
+  const embedCode = `<iframe src= "${shareUrl}" width= "800" height= "600" frameborder="0" allowfullscreen></iframe>`;
 
   const handleCopyLink = async () => {
     try {
@@ -107,7 +107,7 @@ export function EnhancedSharingModal({
           </div>
           <button
             onClick={onClose}
-            className= "p-1 hover:bg-gray-100 rounded-full transition-colors"
+            className= "p-1 hover:bg-gray-100 rounded-full transition-colors
           >
             <X className= "w-5 h-5" />
           </button>
@@ -157,7 +157,7 @@ export function EnhancedSharingModal({
             <button onClick={handleCopyLink} className={`px-4 py-3 rounded-lg font-medium transition-colors ${
                 copied 
                   ? 'bg-green-100 text-green-700' 
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-blue-600 text-white hover:bg-blue-700
               }>
               {copied ? &apos;Copied!&apos; : <Copy >}
             </button>
@@ -173,7 +173,7 @@ export function EnhancedSharingModal({
               <button onClick={handleCopyEmbed} className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
                   embedCopied 
                     ? 'bg-green-100 text-green-700' 
-                    : 'bg-gray-600 text-white hover:bg-gray-700'
+                    : 'bg-gray-600 text-white hover:bg-gray-700
                 }>
                 {embedCopied ? 'Embed Code Copied!' : 'Copy Embed Code'}
               </button>

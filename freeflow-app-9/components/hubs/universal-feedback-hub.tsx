@@ -1,6 +1,6 @@
-"use client
+"use client"
 
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef } from 'react
 )
   const [status setStatus] = useState('all')
   const [project setProject] = useState('all')
@@ -9,7 +9,7 @@ import React, { useState, useRef } from 'react'
   const [isViewerOpen, setIsViewerOpen] = useState(false)
   const [feedbackPoints, setFeedbackPoints] = useState<Array<{x: number, y: number, comment: string}>>([])
   const [currentPosition, setCurrentPosition] = useState<{x: number, y: number} | null>(null)
-  const [newComment, setNewComment] = useState('')'
+  const [newComment, setNewComment] = useState('')
   
   const fileInputRef = useRef<HTMLInputElement>(null)
   const mediaViewerRef = useRef<HTMLDivElement>(null)
@@ -35,7 +35,7 @@ import React, { useState, useRef } from 'react'
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit
     })
   }
 
@@ -60,7 +60,7 @@ import React, { useState, useRef } from 'react'
     
     setFeedbackPoints([...feedbackPoints, newPoint])
     setCurrentPosition(null)
-    setNewComment('')'
+    setNewComment('')
   }
 
   const MediaViewer = ({ feedback }: { feedback: FeedbackItem }) => {
@@ -70,7 +70,7 @@ import React, { useState, useRef } from 'react'
       <div className= "relative">
         <div 
           ref={mediaViewerRef}
-          className= "relative bg-gray-100 rounded-lg overflow-hidden cursor-crosshair"
+          className= "relative bg-gray-100 rounded-lg overflow-hidden cursor-crosshair
           style={{ aspectRatio: '16/9' }}
           onClick={(e) => handleMediaClick(e, feedback)}
         >
@@ -79,7 +79,7 @@ import React, { useState, useRef } from 'react'
             <img src={feedback.media_url} alt={feedback.title}> {
                 // Show placeholder if image fails to load
                 const target = e.target as HTMLImageElement
-                target.style.display = 'none'
+                target.style.display = 'none
                 target.nextElementSibling?.classList.remove('hidden')
               }}
             />
@@ -117,8 +117,8 @@ import React, { useState, useRef } from 'react'
           <div >
             <Label >Add feedback comment:</Label>
             <Textarea value={newComment}> setNewComment(e.target.value)}
-              placeholder= "Enter your feedback..."
-              className= "mt-2"
+              placeholder= "Enter your feedback...
+              className= "mt-2
               rows={3}
             />
             <div >
@@ -127,7 +127,7 @@ import React, { useState, useRef } from 'react'
               </Button>
               <Button > {
                   setCurrentPosition(null)
-                  setNewComment('')'
+                  setNewComment('')
                 }}
               >
                 Cancel
@@ -341,7 +341,7 @@ import React, { useState, useRef } from 'react'
         <div >
           <Search >
           <Input value={searchQuery}> setSearchQuery(e.target.value)}
-            className= "pl-10"
+            className= "pl-10
           />
         </div>
         <div >
@@ -385,8 +385,8 @@ import React, { useState, useRef } from 'react'
           <MessageSquare >
           <h3 >No feedback items found</h3>
           <p >
-            {searchQuery || mediaType !== 'all' || status !== 'all'
-              ? 'Try adjusting your search or filters.'
+            {searchQuery || mediaType !== 'all' || status !== 'all
+              ? 'Try adjusting your search or filters.
               : 'Get started by uploading your first media file.'}
           </p>
           {!searchQuery && mediaType === 'all' && status === 'all' && (

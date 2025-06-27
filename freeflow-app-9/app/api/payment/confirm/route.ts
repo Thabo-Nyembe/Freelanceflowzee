@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
-import { createClient } from '@/lib/supabase/server'
+import { NextRequest, NextResponse } from 'next/server
+import Stripe from 'stripe
+import { createClient } from '@/lib/supabase/server
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY
 
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     // Check if payment succeeded
     if (paymentIntent.status === 'succeeded') {
       // Generate access token for the project
-      const accessToken = `access_token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      const accessToken = `access_token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}
       const projectId = paymentIntent.metadata?.projectId
 
       // In a real app, you'd store this in your database

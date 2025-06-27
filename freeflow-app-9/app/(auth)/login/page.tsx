@@ -1,9 +1,54 @@
-"use client
+"use client"
 
-").forEach(cookie => {
-            const [name] = cookie.split("=")"
+import React, { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation
+import { createClient } from '@/lib/supabase/client
+import { SiteHeader } from '@/components/site-header'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Loader2, AlertCircle, CheckCircle, Mail, Lock, ArrowLeft } from 'lucide-react
+import Link from 'next/link
+
+interface LoginProps {}
+
+export default function Login({}: LoginProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [error, setError] = useState<string | null>(null)
+  const [isPending, setIsPending] = useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+  const [authError, setAuthError] = useState<string | null>(null)
+
+  // Get URL parameters
+  const redirectTo = searchParams.get('redirect') || '/dashboard
+  const urlError = searchParams.get('error')
+  const urlMessage = searchParams.get('message')
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const supabase = createClient()
+        
+        if (!supabase) {
+          setAuthError('Service temporarily unavailable.')
+          setIsCheckingAuth(false)
+          return
+        }
+
+        // Get current session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        
+        if (sessionError) {
+          console.error('Session error:', sessionError)
+          
+          // Clear potentially corrupted cookies
+          document.cookie.split(";").forEach(cookie => {
+            const [name] = cookie.split("=")
             if (name.trim().startsWith('sb-')) {
-              document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
+              document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;
             }
           })
           
@@ -96,10 +141,10 @@
       }
 
       // Clear any existing cookies
-      document.cookie.split(";).forEach(cookie => {"
-        const [name] = cookie.split("=")"
+      document.cookie.split(";").forEach(cookie => {
+        const [name] = cookie.split("=")
         if (name.trim().startsWith('sb-')) {
-          document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
+          document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;
         }
       })
 
@@ -143,26 +188,26 @@
 
   if (isCheckingAuth) {
     return (
-      <div className= "flex min-h-screen items-center justify-center bg-background">
-        <div className= "mx-auto w-full max-w-md space-y-6 rounded-lg border bg-card p-6 shadow-lg">
-          <div className= "space-y-2 text-center">
-            <h1 className= "text-3xl font-bold text-indigo-600">FreeflowZee</h1>
-            <p className= "text-muted-foreground">
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="mx-auto w-full max-w-md space-y-6 rounded-lg border bg-card p-6 shadow-lg">
+          <div className="space-y-2 text-center">
+            <h1 className="text-3xl font-bold text-indigo-600">FreeflowZee</h1>
+            <p className="text-muted-foreground">
               {authError ? authError : 'Checking authentication...'}
             </p>
           </div>
-          <div className= "flex justify-center">
-            <Loader2 className= "h-8 w-8 animate-spin text-indigo-600" />
+          <div className="flex justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
           </div>
           {authError && (
-            <div className= "text-center">
+            <div className="text-center">
               <Button 
                 onClick={() => {
                   setIsCheckingAuth(false)
                   setAuthError(null)
                 }}
-                variant= "outline"
-                className= "mt-4"
+                variant="outline
+                className="mt-4
               >
                 Continue to Login
               </Button>
@@ -173,21 +218,21 @@
     )
   }
 
-  return (
-    <div className= "min-h-screen">
-      <SiteHeader variant= "minimal" />
-      <div className= "flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
-        <div className= "w-full max-w-md space-y-6 rounded-lg border bg-white/70 backdrop-blur-sm p-6 shadow-lg">
-          <div className= "space-y-2 text-center">
-            <h1 className= "text-3xl font-bold text-indigo-600">Welcome Back</h1>
-            <p className= "text-muted-foreground">
+  return ("
+    <div className="min-h-screen">
+      <SiteHeader variant="minimal" />
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+        <div className="w-full max-w-md space-y-6 rounded-lg border bg-white/70 backdrop-blur-sm p-6 shadow-lg">
+          <div className="space-y-2 text-center">
+            <h1 className="text-3xl font-bold text-indigo-600">Welcome Back</h1>
+            <p className="text-muted-foreground">
               Sign in to your account to continue
             </p>
           </div>
 
           {(error || urlError || authError) && (
-            <Alert variant= "destructive" data-testid= "error-message">
-              <AlertCircle className= "h-4 w-4" />
+            <Alert variant="destructive" data-testid="error-message">
+              <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 {error || urlError || authError}
               </AlertDescription>
@@ -195,98 +240,92 @@
           )}
 
           {urlMessage && (
-            <Alert variant= "default" className= "border-green-200 bg-green-50" data-testid= "success-message">
-              <CheckCircle className= "h-4 w-4 text-green-600" />
-              <AlertDescription className= "text-green-700">
+            <Alert variant="default" className="border-green-200 bg-green-50" data-testid="success-message">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-700">
                 {urlMessage}
               </AlertDescription>
             </Alert>
           )}
 
-          <form onSubmit={handleSubmit} className= "space-y-4" data-testid= "login-form">
-            <div className= "space-y-2">
-              <label htmlFor= "email" className= "text-sm font-medium">
-                Email:
-              </label>
-              <Input 
-                id= "email" 
-                name= "email" 
-                type= "email" 
-                required 
-                disabled={isPending}
-                className= "w-full"
-                placeholder= "Enter your email"
-                autoComplete= "email"
-                data-testid= "email-input"
-                onChange={(e) => validateEmail(e.target.value)}
-              />
+          <form onSubmit={handleSubmit} className="space-y-4" suppressHydrationWarning>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-medium">
+                Email
+              </Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  id="email
+                  name="email
+                  type="email
+                  placeholder="Enter your email
+                  required
+                  className="pl-10 bg-white/50 border-gray-200 focus:bg-white transition-colors
+                  suppressHydrationWarning
+                />
+              </div>
             </div>
-            <div className= "space-y-2">
-              <label htmlFor= "password" className= "text-sm font-medium">
-                Password:
-              </label>
-              <Input 
-                id= "password" 
-                name= "password" 
-                type= "password" 
-                required 
-                disabled={isPending}
-                className= "w-full"
-                placeholder= "Enter your password"
-                autoComplete= "current-password"
-                data-testid= "password-input"
-                onChange={(e) => validatePassword(e.target.value)}
-              />
+            "
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-medium">
+                Password
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  id="password
+                  name="password
+                  type="password
+                  placeholder="Enter your password
+                  required
+                  className="pl-10 bg-white/50 border-gray-200 focus:bg-white transition-colors
+                  suppressHydrationWarning
+                />
+              </div>
             </div>
-            <Button 
-              type= "submit"
-              disabled={isPending}
-              className= "w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-              data-testid= "submit-button"
+
+            <Button "
+              type="submit" 
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white
+              disabled={isPending}"
+              data-testid="login-button
             >
               {isPending ? (
                 <>
-                  <Loader2 className= "h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Signing in...
                 </>
               ) : (
-                'Sign in'
+                'Sign In
               )}
             </Button>
           </form>
 
-          <div className= "text-center space-y-4">
-            <div className= "text-sm">
+          <div className="space-y-4">
+            <div className="text-center">
               <Link 
-                href= "/forgot-password" 
-                className= "text-indigo-600 hover:text-indigo-500 hover:underline"
-                data-testid= "forgot-password-link"
+                href="/signup" 
+                className="text-sm text-indigo-600 hover:text-indigo-700 underline
               >
-                Forgot your password?
+                Don&apos;t have an account? Sign up
               </Link>
             </div>
-            <div className= "text-sm text-muted-foreground">
-              Don't have an account?{' '}'
-              <Link 
-                href= "/signup" 
-                className= "text-indigo-600 hover:text-indigo-500 hover:underline font-medium"
-                data-testid= "signup-link"
-              >
-                Sign up
-              </Link>
-            </div>
+            
+            {redirectTo !== '/dashboard' && ("
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground mb-2">
+                  You&apos;ll be redirected to {redirectTo} after login
+                </p>
+                <Link href="/" className="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-700">
+                  <ArrowLeft className="mr-1 h-3 w-3" />
+                  Back to home
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>
-      <SiteFooter />
     </div>
-  )
-}
-
-export default function Login() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <LoginForm />
-    </Suspense>
   )
 } 

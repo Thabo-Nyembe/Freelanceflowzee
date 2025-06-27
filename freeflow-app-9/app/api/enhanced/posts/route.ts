@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     
     // Add pagination
     const limit = parseInt(searchParams.get('limit') || '10');
-    const offset = parseInt(searchParams.get('offset') || '0');'
+    const offset = parseInt(searchParams.get('offset') || '0');
     const paginatedData = Array.isArray(data) ? data.slice(offset, offset + limit) : data;
     
     // Add filtering by tags if provided
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     let filteredData = paginatedData;
     
     if (tags && Array.isArray(paginatedData)) {
-      const tagArray = tags.split(',');'
+      const tagArray = tags.split(',');
       filteredData = paginatedData.filter(item => 
         item.tags && tagArray.some(tag => item.tags.includes(tag.trim()))
       );
@@ -39,14 +39,14 @@ export async function GET(request: NextRequest) {
       metadata: {
         source: 'enhanced-api',
         lastUpdated: new Date().toISOString(),
-        apiVersion: '2.0'
+        apiVersion: '2.0
       }
     });
   } catch (error) {
     return NextResponse.json({
       success: false,
       error: 'Failed to fetch posts data',
-      message: error instanceof Error ? error.message : 'Unknown error occurred'
+      message: error instanceof Error ? error.message : 'Unknown error occurred
     }, { status: 500 });
   }
 }
@@ -66,13 +66,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: newItem,
-      message: 'Item created successfully'
+      message: 'Item created successfully
     }, { status: 201 });
   } catch (error) {
     return NextResponse.json({
       success: false,
       error: 'Failed to create posts item',
-      message: error instanceof Error ? error.message : 'Unknown error occurred'
+      message: error instanceof Error ? error.message : 'Unknown error occurred
     }, { status: 500 });
   }
 }

@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server"
-import { enhancedAIService } from '@/lib/ai/enhanced-ai-service'
+import { NextRequest, NextResponse } from "next/server
+import { enhancedAIService } from '@/lib/ai/enhanced-ai-service
 
 export async function GET() {
   try {
@@ -8,7 +8,7 @@ export async function GET() {
       serviceExists: !!enhancedAIService,
       generateResponseExists: typeof enhancedAIService.generateResponse === 'function',
       generateContentExists: typeof enhancedAIService.generateContent === 'function',
-      suggestAutomationsExists: typeof enhancedAIService.suggestAutomations === 'function'
+      suggestAutomationsExists: typeof enhancedAIService.suggestAutomations === 'function
     }
 
     if (!enhancedAIService.generateResponse) {

@@ -5,9 +5,9 @@ const INVALID_CREDENTIALS = {
   invalidEmail: &apos;invalid@example.com&apos;,
   invalidPassword: &apos;wrongpassword&apos;,
   malformedEmail: &apos;not-an-email&apos;,
-  emptyEmail: '&apos;,'
-  emptyPassword: '&apos;,'
-  sqlInjection: &quot;&apos; OR &apos;1'=&apos;1&quot;,'
+  emptyEmail: '&apos;,
+  emptyPassword: '&apos;,
+  sqlInjection: &quot;&apos; OR &apos;1'=&apos;1&quot;,
   xssAttempt: &apos;<script>alert(&quot;xss&quot;)</script>@example.com&apos;
 };
 
@@ -42,7 +42,7 @@ test.describe(&apos;Authentication Flow&apos;, () => {
 
   test(&apos;should require password&apos;, async ({ page }) => {
     await page.goto(&apos;/login&apos;);
-    await authHelper.fillLoginForm(TEST_CREDENTIALS.email, '&apos;);'
+    await authHelper.fillLoginForm(TEST_CREDENTIALS.email, '&apos;);
     await authHelper.submitLoginForm();
     const errorMessage = await authHelper.getErrorMessage();
     expect(errorMessage).toContain(&apos;Password is required&apos;);

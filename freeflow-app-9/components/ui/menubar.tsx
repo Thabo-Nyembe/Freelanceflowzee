@@ -1,7 +1,7 @@
-"use client
+"use client"
 
 import * as React from "react"
-import * as MenubarPrimitive from "@radix-ui/react-menubar"
+import * as MenubarPrimitive from "@radix-ui/react-menubar
 import { Check, ChevronRight, Circle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -214,7 +214,7 @@ const MenubarShortcut = ({
     />
   )
 }
-MenubarShortcut.displayname = "MenubarShortcut"
+MenubarShortcut.displayname = "MenubarShortcut
 
 export {
   Menubar,

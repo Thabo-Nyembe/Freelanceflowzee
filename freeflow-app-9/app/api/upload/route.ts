@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { uploadFile, getUploadPresignedUrl, testConnection } from '@/lib/s3-client'
+import { NextRequest, NextResponse } from 'next/server
+import { uploadFile, getUploadPresignedUrl, testConnection } from '@/lib/s3-client
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'application/pdf', 'text/plain', 'application/json'
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'application/pdf', 'text/plain', 'application/json
     ]
     
     if (!allowedTypes.includes(file.type)) {
@@ -47,15 +47,15 @@ export async function POST(request: NextRequest) {
     
     // Generate unique filename
     const timestamp = Date.now()
-    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')'
-    const filename = `${timestamp}-${sanitizedName}`
+    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+    const filename = `${timestamp}-${sanitizedName}
     
     // Determine folder based on file type
-    let folder = 'general'
+    let folder = 'general
     if (file.type.startsWith('image/')) {
-      folder = 'images'
+      folder = 'images
     } else if (file.type === 'application/pdf') {
-      folder = 'documents'
+      folder = 'documents
     }
 
     // Upload file to S3
@@ -117,8 +117,8 @@ export async function PUT(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const filename = searchParams.get('filename')
-    const contentType = searchParams.get('contentType') || 'application/octet-stream'
-    const folder = searchParams.get('folder') || 'uploads'
+    const contentType = searchParams.get('contentType') || 'application/octet-stream
+    const folder = searchParams.get('folder') || 'uploads
     
     if (!filename) {
       return NextResponse.json(
@@ -129,8 +129,8 @@ export async function PUT(request: NextRequest) {
 
     // Generate unique key
     const timestamp = Date.now()
-    const sanitizedName = filename.replace(/[^a-zA-Z0-9.-]/g, '_')'
-    const key = `${folder}/${timestamp}-${sanitizedName}`
+    const sanitizedName = filename.replace(/[^a-zA-Z0-9.-]/g, '_')
+    const key = `${folder}/${timestamp}-${sanitizedName}
     
     // Generate presigned URL (valid for 1 hour)
     const presignedUrl = await getUploadPresignedUrl(key, contentType, 3600)

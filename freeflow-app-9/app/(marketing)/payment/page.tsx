@@ -1,15 +1,15 @@
 import { Suspense } from 'react'
-import { Metadata } from 'next'
-import PaymentClient from './payment-client'
+import { Metadata } from 'next
+import PaymentClient from './payment-client
 
 // Ensure this page is dynamically rendered
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic
 
 // Enhanced SEO metadata for payment page
 export const metadata: Metadata = {
   title: 'Secure Payment & Pricing Plans | FreeflowZee AI-Powered Creative Platform',
   description: 'Choose from Creator Free, Pro Creator, or Agency Enterprise plans. Access premium AI models (GPT-4o, Claude, DALL-E) with secure escrow payment protection. Start your free trial today.',
-  keywords: ['AI creative platform pricing', 'premium AI model access', 'secure payment processing', 'escrow payment protection', 'GPT-4o subscription', 'Claude AI pricing', 'DALL-E access plans', 'creative asset generation', 'AI studio subscription', 'professional creative tools'
+  keywords: ['AI creative platform pricing', 'premium AI model access', 'secure payment processing', 'escrow payment protection', 'GPT-4o subscription', 'Claude AI pricing', 'DALL-E access plans', 'creative asset generation', 'AI studio subscription', 'professional creative tools
   ],
   openGraph: {
     title: 'Secure Payment & Pricing Plans | FreeflowZee AI-Powered Creative Platform',
@@ -39,14 +39,17 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: {
       index: true,
-      follow: true, 'max-video-preview': -1, 'max-image-preview': 'large', 'max-snippet': -1,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
     },
   },
   alternates: {
     canonical: 'https://freeflowzee.com/payment',
   },
   other: {
-    'stripe:publishable_key': process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ,'
+    'stripe:publishable_key': process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ',
   },
 }
 
@@ -82,21 +85,52 @@ function PaymentFallback() {
 
 // Structured data for payment page
 const paymentStructuredData = {
-  "@context": "https://schema.org", "@type": "Product", "name": "FreeflowZee AI-Powered Creative Platform", "description": "Revolutionary AI-powered creative platform with premium model access and secure payment processing", "category": "SoftwareApplication", "applicationCategory": "CreativeApplication", "offers": [
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "FreeflowZee AI-Powered Creative Platform",
+  "description": "Revolutionary AI-powered creative platform with premium model access and secure payment processing",
+  "category": "SoftwareApplication",
+  "applicationCategory": "CreativeApplication",
+  "offers": [
     {
-      "@type": "Offer", "name": "Creator Free", "price": "0","
-      "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "/payment?plan=free", "description": "AI Create Studio with free models, basic file sharing, and community access"
+      "@type": "Offer",
+      "name": "Creator Free",
+      "price": "0",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "url": "/payment?plan=free",
+      "description": "AI Create Studio with free models, basic file sharing, and community access
     },
     {
-      "@type": "Offer", "name": "Pro Creator", "price": "29", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "/payment?plan=pro", "description": "Premium AI models (GPT-4o, Claude, DALL-E), escrow payments, and professional features"
+      "@type": "Offer",
+      "name": "Pro Creator",
+      "price": "29",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "url": "/payment?plan=pro",
+      "description": "Premium AI models (GPT-4o, Claude, DALL-E), escrow payments, and professional features
     },
     {
-      "@type": "Offer", "name": "Agency Enterprise", "price": "79", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "/payment?plan=enterprise", "description": "White-label solution with custom AI training and enterprise features"
+      "@type": "Offer",
+      "name": "Agency Enterprise",
+      "price": "79",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "url": "/payment?plan=enterprise",
+      "description": "White-label solution with custom AI training and enterprise features
     }
-  ], "provider": {
-    "@type": "Organization", "name": "FreeflowZee", "url": "https://freeflowzee.com"
-  }, "paymentAccepted": ["Visa", "MasterCard", "American Express", "Apple Pay", "Google Pay"], "aggregateRating": {
-    "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "2547", "bestRating": "5
+  ],
+  "provider": {
+    "@type": "Organization",
+    "name": "FreeflowZee",
+    "url": "https://freeflowzee.com
+  },
+  "paymentAccepted": ["Visa", "MasterCard", "American Express", "Apple Pay", "Google Pay"],
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "ratingCount": "2547",
+    "bestRating": "5
   }
 }
 
@@ -105,7 +139,7 @@ export default function PaymentPage() {
     <>
       {/* Structured Data for SEO */}
       <script
-        type= "application/ld+json"
+        type= "application/ld+json
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(paymentStructuredData)
         }}

@@ -13,7 +13,7 @@ function getViewportCategory(page: Page): ViewportInfo {
   if (!viewport) throw new Error(&apos;No viewport size available&apos;);
   
   let category: &apos;desktop&apos; | &apos;tablet&apos; | &apos;mobile&apos;;
-  let name = '&apos;;'
+  let name = '&apos;;
   
   if (viewport.width >= 1024) {
     category = &apos;desktop&apos;;
@@ -46,7 +46,7 @@ test.describe(&apos;Responsive UI/UX Testing Suite&apos;, () => {
     test(&apos;should display properly on all viewport sizes&apos;, async ({ page }) => {
       const viewport = getViewportCategory(page);
       
-      await page.goto(&apos;/');'
+      await page.goto(&apos;/');
       await waitForPageReady(page);
       
       // Take screenshot for visual regression testing
@@ -92,7 +92,7 @@ test.describe(&apos;Responsive UI/UX Testing Suite&apos;, () => {
     test(&apos;should handle navigation interactions properly&apos;, async ({ page }) => {
       const viewport = getViewportCategory(page);
       
-      await page.goto(&apos;/');'
+      await page.goto(&apos;/');
       await waitForPageReady(page);
       
       if (viewport.category === &apos;mobile&apos;) {
@@ -434,7 +434,7 @@ test.describe(&apos;Responsive UI/UX Testing Suite&apos;, () => {
     test(&apos;should maintain consistent branding and styling&apos;, async ({ page }) => {
       const viewport = getViewportCategory(page);
       
-      await page.goto(&apos;/');'
+      await page.goto(&apos;/');
       await waitForPageReady(page);
       
       // Test logo visibility and sizing

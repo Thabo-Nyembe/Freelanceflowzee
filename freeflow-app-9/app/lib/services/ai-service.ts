@@ -1,22 +1,22 @@
-import { SupabaseClient } from '@supabase/supabase-js'
-import OpenAI from 'openai'
-import Anthropic from '@anthropic-ai/sdk'
-import Replicate from 'replicate'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { SupabaseClient } from '@supabase/supabase-js
+import OpenAI from 'openai
+import Anthropic from '@anthropic-ai/sdk
+import Replicate from 'replicate
+import { GoogleGenerativeAI } from '@google/generative-ai
 
 export interface AIGenerationSettings {
   creativity: number
-  quality: 'draft' | 'standard' | 'premium'
+  quality: 'draft' | 'standard' | 'premium
   model: string
 }
 
 export interface AIGenerationResult {
   id: string
   user_id: string
-  type: 'image' | 'code' | 'text' | 'audio' | 'video'
+  type: 'image' | 'code' | 'text' | 'audio' | 'video
   prompt: string
   settings: AIGenerationSettings
-  status: 'generating' | 'complete' | 'failed'
+  status: 'generating' | 'complete' | 'failed
   output?: string
   error?: string
   created_at: string
@@ -29,7 +29,7 @@ export interface AIAnalysisResult {
   file_id: string
   type: string
   results: unknown
-  status: 'analyzing' | 'complete' | 'failed'
+  status: 'analyzing' | 'complete' | 'failed
   error?: string
   created_at: string
 }
@@ -54,7 +54,7 @@ export class AIServiceError extends Error {
     public originalError?: Error
   ) {
     super(message)
-    this.name = 'AIServiceError'
+    this.name = 'AIServiceError
   }
 }
 
@@ -154,7 +154,7 @@ export class AIService {
 
       if (error) {
         throw new AIServiceError(
-          `Failed to upload file to storage: ${error.message}`, 'STORAGE_ERROR'
+          `Failed to upload file to storage: ${error.message}`, 'STORAGE_ERROR
         )
       }
       
@@ -186,25 +186,25 @@ export class AIService {
         type,
         prompt,
         settings,
-        status: 'generating'
+        status: 'generating
       })
       .select()
       .single()
 
     if (insertError) {
       throw new AIServiceError(
-        `Failed to create generation record: ${insertError.message}`, 'DATABASE_ERROR'
+        `Failed to create generation record: ${insertError.message}`, 'DATABASE_ERROR
       )
     }
 
     try {
-      let output = '
+      let output = 
       
       switch (type) {
         case 'image': {
           if (!this.openai && !this.replicate) {
             throw new AIServiceError(
-              'No image generation provider available. Please configure OpenAI or Replicate API keys.', 'NO_PROVIDER'
+              'No image generation provider available. Please configure OpenAI or Replicate API keys.', 'NO_PROVIDER
             )
           }
 
@@ -216,7 +216,7 @@ export class AIService {
                 n: 1,
                 size: settings.quality === 'premium' ? "1024x1024" : "512x512",
                 quality: settings.quality === 'draft' ? "standard" : "hd",
-                style: settings.creativity > 0.7 ? "vivid" : "natural"
+                style: settings.creativity > 0.7 ? "vivid" : "natural
               })
               const imageUrl = response.data?.[0]?.url
               if (!imageUrl) {
@@ -250,7 +250,7 @@ export class AIService {
         case 'code': {
           if (!this.openai) {
             throw new AIServiceError(
-              'OpenAI API key required for code generation', 'NO_PROVIDER', 'openai'
+              'OpenAI API key required for code generation', 'NO_PROVIDER', 'openai
             )
           }
 
@@ -260,7 +260,7 @@ export class AIService {
               messages: [
                 {
                   role: "system",
-                  content: "You are an expert programmer. Generate clean, well-documented code based on the user's request."
+                  content: "You are an expert programmer. Generate clean, well-documented code based on the user's request.
                 },
                 {
                   role: "user",
@@ -270,7 +270,7 @@ export class AIService {
               temperature: settings.creativity,
               max_tokens: settings.quality === 'premium' ? 4000 : 2000
             })
-            output = response.choices[0]?.message?.content || '
+            output = response.choices[0]?.message?.content || 
             if (!output) {
               throw new Error('No code content returned from OpenAI')
             }
@@ -283,7 +283,7 @@ export class AIService {
         case 'text': {
           if (!this.openai && !this.anthropic) {
             throw new AIServiceError(
-              'No text generation provider available. Please configure OpenAI or Anthropic API keys.', 'NO_PROVIDER'
+              'No text generation provider available. Please configure OpenAI or Anthropic API keys.', 'NO_PROVIDER
             )
           }
 
@@ -311,7 +311,7 @@ export class AIService {
                 temperature: settings.creativity,
                 max_tokens: settings.quality === 'premium' ? 4000 : 2000
               })
-              output = response.choices[0]?.message?.content || '
+              output = response.choices[0]?.message?.content || 
               if (!output) {
                 throw new Error('No text content returned from OpenAI')
               }
@@ -325,7 +325,7 @@ export class AIService {
         case 'audio': {
           if (!this.openai) {
             throw new AIServiceError(
-              'OpenAI API key required for audio generation', 'NO_PROVIDER', 'openai'
+              'OpenAI API key required for audio generation', 'NO_PROVIDER', 'openai
             )
           }
 
@@ -337,7 +337,7 @@ export class AIService {
             })
             
             const buffer = Buffer.from(await response.arrayBuffer())
-            const path = `${user.id}/${generation.id}/audio.mp3`
+            const path = `${user.id}/${generation.id}/audio.mp3
             output = await this.uploadToStorage(buffer, path)
           } catch (error) {
             this.handleError(error, 'Audio generation', 'openai')
@@ -348,7 +348,7 @@ export class AIService {
         case 'video': {
           if (!this.replicate) {
             throw new AIServiceError(
-              'Replicate API token required for video generation', 'NO_PROVIDER', 'replicate'
+              'Replicate API token required for video generation', 'NO_PROVIDER', 'replicate
             )
           }
 
@@ -386,7 +386,7 @@ export class AIService {
 
       if (updateError) {
         throw new AIServiceError(
-          `Failed to update generation record: ${updateError.message}`, 'DATABASE_ERROR'
+          `Failed to update generation record: ${updateError.message}`, 'DATABASE_ERROR
         )
       }
       return updatedGeneration
@@ -394,7 +394,7 @@ export class AIService {
       console.error('Error in AI generation:', error)
       
       // Update record with error status
-      const errorMessage = error instanceof AIServiceError ? error.message : 'Unknown error occurred'
+      const errorMessage = error instanceof AIServiceError ? error.message : 'Unknown error occurred
       await this.supabase
         .from('ai_generations')
         .update({
@@ -416,13 +416,13 @@ export class AIService {
 
       const { data, error } = await this.supabase
         .from('ai_generations')
-        .select('*')'
+        .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
       if (error) {
         throw new AIServiceError(
-          `Failed to fetch generation library: ${error.message}`, 'DATABASE_ERROR'
+          `Failed to fetch generation library: ${error.message}`, 'DATABASE_ERROR
         )
       }
       return data || []
@@ -440,13 +440,13 @@ export class AIService {
 
       const { data, error } = await this.supabase
         .from('ai_analysis')
-        .select('*')'
+        .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
       if (error) {
         throw new AIServiceError(
-          `Failed to fetch analysis history: ${error.message}`, 'DATABASE_ERROR'
+          `Failed to fetch analysis history: ${error.message}`, 'DATABASE_ERROR
         )
       }
       return data || []
@@ -460,40 +460,40 @@ export class AIService {
     
     if (!this.openai && !this.anthropic) {
       throw new AIServiceError(
-        'No text analysis provider available. Please configure OpenAI or Anthropic API keys.', 'NO_PROVIDER'
+        'No text analysis provider available. Please configure OpenAI or Anthropic API keys.', 'NO_PROVIDER
       )
     }
 
-    let analysisPrompt = '
-    let systemPrompt = '
+    let analysisPrompt = 
+    let systemPrompt = 
 
     // Build analysis prompts based on file type
     switch (fileType) {
       case 'image':
         if (!this.openai) {
           throw new AIServiceError(
-            'OpenAI API key required for image analysis', 'NO_PROVIDER', 'openai'
+            'OpenAI API key required for image analysis', 'NO_PROVIDER', 'openai
           )
         }
-        systemPrompt = 'You are an expert visual analyst. Analyze the image and provide insights about design, composition, colors, and potential improvements.'
-        analysisPrompt = `Analyze this image${fileName ? ` (${fileName})` : ''}. Provide insights on:'
+        systemPrompt = 'You are an expert visual analyst. Analyze the image and provide insights about design, composition, colors, and potential improvements.
+        analysisPrompt = `Analyze this image${fileName ? ` (${fileName})` : ''}. Provide insights on:
 1. Visual composition and design elements
 2. Color scheme and harmony
 3. Overall aesthetic quality
 4. Potential improvements
 5. Use case recommendations
 
-${metadata?.mimeType ? `Image type: ${metadata.mimeType}` : ''}'
-${metadata?.size ? `File size: ${(metadata.size / 1024).toFixed(2)} KB` : ''}`'
+${metadata?.mimeType ? `Image type: ${metadata.mimeType}` : ''}
+${metadata?.size ? `File size: ${(metadata.size / 1024).toFixed(2)} KB` : ''}
         break
 
       case 'code':
-        systemPrompt = 'You are an expert code reviewer. Analyze the code for quality, performance, security, and best practices.'
-        analysisPrompt = `Analyze this code${fileName ? ` from ${fileName}` : ''}:'
+        systemPrompt = 'You are an expert code reviewer. Analyze the code for quality, performance, security, and best practices.
+        analysisPrompt = `Analyze this code${fileName ? ` from ${fileName}` : ''}:
 
-\`\`\`
+\`\`\
 ${content}
-\`\`\`
+\`\`\
 
 Provide analysis on:
 1. Code quality and structure
@@ -501,12 +501,12 @@ Provide analysis on:
 3. Security vulnerabilities
 4. Best practices adherence
 5. Suggested improvements
-6. Documentation quality`
+6. Documentation quality
         break
 
       case 'document':
-        systemPrompt = 'You are an expert content analyst. Analyze documents for structure, clarity, and effectiveness.'
-        analysisPrompt = `Analyze this document${fileName ? ` (${fileName})` : ''}:'
+        systemPrompt = 'You are an expert content analyst. Analyze documents for structure, clarity, and effectiveness.
+        analysisPrompt = `Analyze this document${fileName ? ` (${fileName})` : ''}:
 
 ${content}
 
@@ -516,12 +516,12 @@ Provide analysis on:
 3. Tone and style
 4. Completeness and accuracy
 5. Suggested improvements
-6. Target audience fit`
+6. Target audience fit
         break
 
       case 'design':
-        systemPrompt = 'You are an expert design analyst. Analyze design files for usability, aesthetics, and best practices.'
-        analysisPrompt = `Analyze this design file${fileName ? ` (${fileName})` : ''}:'
+        systemPrompt = 'You are an expert design analyst. Analyze design files for usability, aesthetics, and best practices.
+        analysisPrompt = `Analyze this design file${fileName ? ` (${fileName})` : ''}:
 
 ${content || 'Design file metadata and description available for analysis.'}
 
@@ -531,12 +531,12 @@ Provide analysis on:
 3. Accessibility compliance
 4. Brand consistency
 5. Mobile responsiveness
-6. Recommended improvements`
+6. Recommended improvements
         break
 
       default:
-        systemPrompt = 'You are a general file analyst. Provide comprehensive analysis of the file content.'
-        analysisPrompt = `Analyze this file${fileName ? ` (${fileName})` : ''}:'
+        systemPrompt = 'You are a general file analyst. Provide comprehensive analysis of the file content.
+        analysisPrompt = `Analyze this file${fileName ? ` (${fileName})` : ''}:
 
 ${content}
 
@@ -545,7 +545,7 @@ Provide general analysis including:
 2. Quality assessment
 3. Structure and organization
 4. Potential improvements
-5. Use case recommendations`
+5. Use case recommendations
     }
 
     try {
@@ -586,7 +586,7 @@ Provide general analysis including:
           messages: [
             {
               role: "user",
-              content: `${systemPrompt}\n\n${analysisPrompt}`
+              content: `${systemPrompt}\n\n${analysisPrompt}
             }
           ]
         })
@@ -623,7 +623,7 @@ Provide general analysis including:
     for (const line of lines) {
       const trimmed = line.trim()
       if (trimmed.match(/^[\d\-\*•]\s*/) || trimmed.toLowerCase().includes('insight')) {
-        insights.push(trimmed.replace(/^[\d\-\*•]\s*/, ''))'
+        insights.push(trimmed.replace(/^[\d\-\*•]\s*/, ''))
       }
     }
     
@@ -677,14 +677,14 @@ Provide general analysis including:
         user_id: user.id,
         file_id: fileId,
         type,
-        status: 'analyzing'
+        status: 'analyzing
       })
       .select()
       .single()
 
     if (insertError) {
       throw new AIServiceError(
-        `Failed to create analysis record: ${insertError.message}`, 'DATABASE_ERROR'
+        `Failed to create analysis record: ${insertError.message}`, 'DATABASE_ERROR
       )
     }
 
@@ -697,13 +697,13 @@ Provide general analysis including:
         // Fetch file from storage and analyze
         const { data: fileData, error: fileError } = await this.supabase
           .from('files')
-          .select('*')'
+          .select('*')
           .eq('id', fileId)
           .single()
 
         if (fileError) {
           throw new AIServiceError(
-            `Failed to fetch file: ${fileError.message}`, 'DATABASE_ERROR'
+            `Failed to fetch file: ${fileError.message}`, 'DATABASE_ERROR
           )
         }
 
@@ -715,9 +715,9 @@ Provide general analysis including:
           fileName: fileData.name,
           confidence: 0.8,
           timestamp: new Date().toISOString(),
-          insights: ['File structure appears well-organized', 'Content follows standard conventions', 'Quality appears to be good'
+          insights: ['File structure appears well-organized', 'Content follows standard conventions', 'Quality appears to be good
           ],
-          recommendations: ['Consider adding more detailed documentation', 'Review for optimization opportunities', 'Ensure accessibility compliance'
+          recommendations: ['Consider adding more detailed documentation', 'Review for optimization opportunities', 'Ensure accessibility compliance
           ],
           score: 0.75,
           metadata: {
@@ -733,7 +733,7 @@ Provide general analysis including:
         .from('ai_analysis')
         .update({
           results,
-          status: 'complete'
+          status: 'complete
         })
         .eq('id', analysis.id)
         .select()
@@ -741,7 +741,7 @@ Provide general analysis including:
 
       if (updateError) {
         throw new AIServiceError(
-          `Failed to update analysis record: ${updateError.message}`, 'DATABASE_ERROR'
+          `Failed to update analysis record: ${updateError.message}`, 'DATABASE_ERROR
         )
       }
       return updatedAnalysis
@@ -749,7 +749,7 @@ Provide general analysis including:
       console.error('Error in file analysis:', error)
       
       // Update record with error status
-      const errorMessage = error instanceof AIServiceError ? error.message : 'Unknown error occurred'
+      const errorMessage = error instanceof AIServiceError ? error.message : 'Unknown error occurred
       await this.supabase
         .from('ai_analysis')
         .update({

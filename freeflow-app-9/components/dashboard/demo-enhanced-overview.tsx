@@ -1,4 +1,4 @@
-'use client'
+'use client
 
 import React from 'react';
 import { useDashboardMetrics, useCommunityMetrics } from './demo-content-provider';
@@ -17,28 +17,28 @@ export function DemoEnhancedOverview() {
       value: dashboardMetrics?.totalRevenue || '$45,630',
       change: '+12.5%',
       icon: DollarSign,
-      color: 'text-green-600'
+      color: 'text-green-600
     },
     {
       title: 'Active Projects',
       value: dashboardMetrics?.activeProjects || '12',
       change: '+3',
       icon: FileText,
-      color: 'text-blue-600'
+      color: 'text-blue-600
     },
     {
       title: 'Community Engagement',
       value: communityMetrics?.totalEngagement || '1,247',
       change: '+8.2%',
       icon: Users,
-      color: 'text-purple-600'
+      color: 'text-purple-600
     },
     {
       title: 'Completion Rate',
       value: dashboardMetrics?.completionRate || '94.2%',
       change: '+2.1%',
       icon: TrendingUp,
-      color: 'text-emerald-600'
+      color: 'text-emerald-600
     }
   ];
 
@@ -81,7 +81,7 @@ export function DemoEnhancedOverview() {
               {[
                 { title: 'New project "Brand Identity" started', time: '2 hours ago' },
                 { title: 'Payment received from Client A', time: '4 hours ago' },
-                { title: 'File uploaded to "Creative Assets"', time: '6 hours ago' },
+                { title: 'File uploaded to "Creative Assets", time: '6 hours ago' },
                 { title: 'Project "Website Redesign" completed', time: '1 day ago' },
                 { title: 'New team member joined', time: '2 days ago' }
               ].map((activity, index) => (

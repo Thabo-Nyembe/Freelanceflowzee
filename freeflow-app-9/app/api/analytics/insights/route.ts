@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { headers } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server
+import { headers } from 'next/headers
 
 // AI-powered analytics insights endpoint
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
-    const timeRange = searchParams.get('timeRange') || '30d'
+    const timeRange = searchParams.get('timeRange') || '30d
     const userId = searchParams.get('userId')
-    const metric = searchParams.get('metric') || 'all'
+    const metric = searchParams.get('metric') || 'all
 
     // Get authorization headers
     const headersList = await headers()
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: insights,
       generated_at: new Date().toISOString(),
-      ai_version: '2.0.0'
+      ai_version: '2.0.0
     })
 
   } catch (error) {
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { 
         error: 'Failed to generate insights',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error
       },
       { status: 500 }
     )
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
         { 
           success: false,
           error: 'Invalid input',
-          message: 'Events array is required'
+          message: 'Events array is required
         },
         { status: 400 }
       )
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     // Properly type the error and provide structured error details
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred
     const errorDetails = error instanceof Error && error.cause ? error.cause : undefined
     
     console.error('Event analysis error:', {
@@ -164,14 +164,14 @@ async function generateAIInsights(params: {
           confidence: 0.87,
           description: 'Users abandon checkout 3x more on mobile devices',
           suggested_action: 'Optimize mobile checkout flow',
-          impact_potential: 'high'
+          impact_potential: 'high
         },
         {
           pattern: 'feature_discovery_issue',
           confidence: 0.73,
           description: 'Premium features have low discovery rate',
           suggested_action: 'Add feature tour or onboarding',
-          impact_potential: 'medium'
+          impact_potential: 'medium
         }
       ],
       
@@ -201,7 +201,7 @@ async function generateAIInsights(params: {
         ],
         overall_rate: 0.0206,
         benchmark_rate: 0.025,
-        improvement_potential: '21%'
+        improvement_potential: '21%
       },
       
       optimization_opportunities: [
@@ -254,14 +254,14 @@ async function generateAIInsights(params: {
           target_segment: 'power_users',
           predicted_revenue: 12000,
           confidence: 0.68,
-          timeline: '30 days'
+          timeline: '30 days
         },
         {
           strategy: 'retention_program',
           target_segment: 'at_risk_users',
           predicted_savings: 8500,
           confidence: 0.74,
-          timeline: '60 days'
+          timeline: '60 days
         }
       ]
     },
@@ -301,14 +301,14 @@ async function generateAIInsights(params: {
           impact_score: 8.7,
           effort_score: 4.2,
           roi_estimate: 2.1,
-          timeline: '6-8 weeks'
+          timeline: '6-8 weeks
         },
         {
           opportunity: 'ai_recommendations',
           impact_score: 9.1,
           effort_score: 7.8,
           roi_estimate: 1.2,
-          timeline: '12-16 weeks'
+          timeline: '12-16 weeks
         }
       ]
     },
@@ -319,7 +319,7 @@ async function generateAIInsights(params: {
         category: 'performance',
         title: 'Address API Performance Degradation',
         description: 'API response times have increased 40% in the last 24 hours',
-        action_items: ['Investigate database query performance', 'Check for memory leaks in recent deployments', 'Scale API infrastructure if needed'
+        action_items: ['Investigate database query performance', 'Check for memory leaks in recent deployments', 'Scale API infrastructure if needed
         ],
         expected_impact: 'Prevent user churn and improve satisfaction',
         deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
@@ -329,7 +329,7 @@ async function generateAIInsights(params: {
         category: 'conversion',
         title: 'Optimize Mobile Checkout Experience',
         description: 'Mobile conversion rate is 67% lower than desktop',
-        action_items: ['Simplify mobile checkout form', 'Add mobile payment options (Apple Pay, Google Pay)', 'Implement progressive form saving'
+        action_items: ['Simplify mobile checkout form', 'Add mobile payment options (Apple Pay, Google Pay)', 'Implement progressive form saving
         ],
         expected_impact: 'Increase mobile conversions by 25-35%',
         deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
@@ -339,7 +339,7 @@ async function generateAIInsights(params: {
         category: 'engagement',
         title: 'Implement Feature Discovery Tour',
         description: 'Premium features have 23% discovery rate vs 45% industry average',
-        action_items: ['Design interactive feature tour', 'Add contextual feature hints', 'Create feature spotlight emails'
+        action_items: ['Design interactive feature tour', 'Add contextual feature hints', 'Create feature spotlight emails
         ],
         expected_impact: 'Increase feature adoption by 40%',
         deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
@@ -387,7 +387,7 @@ async function processEventsWithAI(params: {
         pattern_type: 'temporal',
         confidence: 0.72,
         description: 'Peak activity occurs between 2-4 PM EST',
-        supporting_data: 'Based on timestamp analysis'
+        supporting_data: 'Based on timestamp analysis
       }
     ],
     

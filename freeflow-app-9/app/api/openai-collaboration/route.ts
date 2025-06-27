@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,14 +17,14 @@ export async function POST(request: NextRequest) {
 
     // Forward the request to the Supabase edge function
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const edgeFunctionUrl = `${supabaseUrl}/functions/v1/openai-collaboration`
+    const edgeFunctionUrl = `${supabaseUrl}/functions/v1/openai-collaboration
 
     console.log('🤖 OpenAI Collaboration API called:', { action, hasRequestData: !!requestData })
 
     const response = await fetch(edgeFunctionUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json', 'Authorization': authHeader, 'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '
+        'Content-Type': 'application/json', 'Authorization': authHeader, 'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 
       },
       body: JSON.stringify({
         action,
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
     success: true,
     message: 'OpenAI Collaboration API is running',
     timestamp: new Date().toISOString(),
-    available_actions: ['analyze_comment', 'generate_feedback_summary', 'analyze_file', 'generate_project_insights', 'smart_categorization', 'generate_client_report'
+    available_actions: ['analyze_comment', 'generate_feedback_summary', 'analyze_file', 'generate_project_insights', 'smart_categorization', 'generate_client_report
     ]
   })
 }
@@ -107,18 +107,18 @@ function generateFallbackResponse(action: string, requestData: unknown) {
         priority: 'medium',
         sentiment: 'constructive',
         effort_estimate: '30 minutes',
-        suggested_actions: ['Review design alignment with brand guidelines', 'Test accessibility compliance', 'Get stakeholder approval before implementation'
+        suggested_actions: ['Review design alignment with brand guidelines', 'Test accessibility compliance', 'Get stakeholder approval before implementation
         ],
         key_themes: ['design improvement', 'user experience'],
         client_satisfaction_impact: 'medium',
         confidence_score: 0.85,
-        ai_reasoning: 'Analysis based on content semantics and creative industry best practices'
+        ai_reasoning: 'Analysis based on content semantics and creative industry best practices
       }
 
     case 'generate_feedback_summary':
       return {
         summary: 'The project feedback indicates strong positive reception of the overall design direction and typography choices. Key areas for improvement include accessibility (contrast ratios), mobile responsiveness (touch targets), and spacing refinements. The feedback suggests the project is on track with minor adjustments needed for optimal user experience.',
-        recommendations: ['Prioritize accessibility improvements for better compliance', 'Optimize mobile layout for better touch interaction', 'Refine spacing consistency across all design elements', 'Consider user testing for validation of design decisions'
+        recommendations: ['Prioritize accessibility improvements for better compliance', 'Optimize mobile layout for better touch interaction', 'Refine spacing consistency across all design elements', 'Consider user testing for validation of design decisions
         ],
         feedback_metrics: {
           total_comments: requestData.comments?.length || 4,
@@ -135,9 +135,9 @@ function generateFallbackResponse(action: string, requestData: unknown) {
       return {
         quality_score: 87,
         analysis: 'The file demonstrates strong visual hierarchy and brand consistency. Technical quality is high with proper resolution and format. Minor improvements suggested for accessibility and mobile optimization.',
-        detected_issues: ['Contrast ratio below WCAG AA standards in some areas', 'Small touch targets for mobile devices', 'Missing alt text for accessibility'
+        detected_issues: ['Contrast ratio below WCAG AA standards in some areas', 'Small touch targets for mobile devices', 'Missing alt text for accessibility
         ],
-        suggestions: ['Increase color contrast for better readability', 'Enlarge interactive elements for mobile', 'Add descriptive alt text for screen readers'
+        suggestions: ['Increase color contrast for better readability', 'Enlarge interactive elements for mobile', 'Add descriptive alt text for screen readers
         ],
         technical_metrics: {
           accessibility_score: 78,
@@ -151,7 +151,7 @@ function generateFallbackResponse(action: string, requestData: unknown) {
         insights: 'Project collaboration is showing healthy engagement patterns with consistent feedback frequency. Team communication is effective with constructive comments and timely responses. Client satisfaction indicators are positive with minor adjustments needed.',
         project_health_score: 82,
         collaboration_effectiveness: 88,
-        recommendations: ['Maintain current feedback frequency for optimal collaboration', 'Consider scheduling weekly alignment calls', 'Document decisions for future reference'
+        recommendations: ['Maintain current feedback frequency for optimal collaboration', 'Consider scheduling weekly alignment calls', 'Document decisions for future reference
         ]
       }
 

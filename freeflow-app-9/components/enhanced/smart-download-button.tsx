@@ -1,7 +1,7 @@
 // Context7 Enhanced Smart Download Button with External Links & Monetization
-'use client'
+'use client
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback } from 'react
 import { Button } from '@/components/ui/button'
  progress += 10) {
       await new Promise(resolve => setTimeout(resolve, 200))
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
     }
 
     // Trigger actual download
-    const link = document.createElement('a')'
+    const link = document.createElement('a')
     link.href = file.url
     link.download = file.name
     document.body.appendChild(link)
@@ -58,7 +58,7 @@ import { Button } from '@/components/ui/button'
       toast({
         title: "Copy Failed",
         description: "Could not copy link to clipboard.",
-        variant: "destructive"
+        variant: "destructive
       })
     }
   }
@@ -68,22 +68,22 @@ import { Button } from '@/components/ui/button'
     const link = generateExternalShareLink()
     const text = encodeURIComponent(`Check out this file: ${file.name}`)
     
-    let shareUrl = '
+    let shareUrl = 
     
     switch (platform) {
       case 'twitter':
-        shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(link)}`
+        shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(link)}
         break
       case 'facebook':
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}
         break
       case 'linkedin':
-        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(link)}`
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(link)}
         break
       case 'email':
         const subject = encodeURIComponent(`Download: ${file.name}`)
         const body = encodeURIComponent(`Please download the file using this link: ${link}`)
-        shareUrl = `mailto:?subject=${subject}&body=${body}`
+        shareUrl = `mailto:?subject=${subject}&body=${body}
         break
     }
 
@@ -95,7 +95,7 @@ import { Button } from '@/components/ui/button'
         await trackEvent('social_share', { 
           fileId: file.id, 
           platform,
-          linkType: 'external_share'
+          linkType: 'external_share
         })
         
         // Update metrics
@@ -163,9 +163,9 @@ import { Button } from '@/components/ui/button'
   // Format file size
   const formatFileSize = (bytes: number) => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    if (bytes === 0) return '0 Bytes'
+    if (bytes === 0) return '0 Bytes
     const i = Math.floor(Math.log(bytes) / Math.log(1024))
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i]'
+    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i]
   }
 
   // Format currency
@@ -186,7 +186,7 @@ import { Button } from '@/components/ui/button'
           className={`flex-1 gap-2 ${
             variant === 'premium' ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700' :
             variant === 'freemium' ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700' :
-            '
+            
           }`}
         >
           {isDownloading ? (
@@ -225,11 +225,11 @@ import { Button } from '@/components/ui/button'
                   <Input
                     value={generateExternalShareLink()}
                     readOnly
-                    className= "flex-1"
+                    className= "flex-1
                   />
                   <Button
-                    size= "icon"
-                    variant= "outline"
+                    size= "icon
+                    variant= "outline
                     onClick={copyExternalLink}
                   >
                     {copiedLink ? <Check className= "h-4 w-4" /> : <Copy className= "h-4 w-4" />}
@@ -245,33 +245,33 @@ import { Button } from '@/components/ui/button'
                 <Label>Share on Social Media</Label>
                 <div className= "grid grid-cols-2 gap-2">
                   <Button
-                    variant= "outline"
+                    variant= "outline
                     onClick={() => shareToSocial('twitter')}
-                    className= "gap-2"
+                    className= "gap-2
                   >
                     <Twitter className= "h-4 w-4" />
                     Twitter
                   </Button>
                   <Button
-                    variant= "outline"
+                    variant= "outline
                     onClick={() => shareToSocial('facebook')}
-                    className= "gap-2"
+                    className= "gap-2
                   >
                     <Facebook className= "h-4 w-4" />
                     Facebook
                   </Button>
                   <Button
-                    variant= "outline"
+                    variant= "outline
                     onClick={() => shareToSocial('linkedin')}
-                    className= "gap-2"
+                    className= "gap-2
                   >
                     <Linkedin className= "h-4 w-4" />
                     LinkedIn
                   </Button>
                   <Button
-                    variant= "outline"
+                    variant= "outline
                     onClick={() => shareToSocial('email')}
-                    className= "gap-2"
+                    className= "gap-2
                   >
                     <Mail className= "h-4 w-4" />
                     Email

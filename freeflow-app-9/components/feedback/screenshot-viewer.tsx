@@ -1,11 +1,11 @@
-"use client
+"use client"
 
 import type React from "react"
 
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { ZoomIn, ZoomOut, MessageSquare, Pen, Square } from "lucide-react"
-import { CommentDialog } from "./comment-dialog"
+import { CommentDialog } from "./comment-dialog
 
 interface ScreenshotViewerProps {
   file: Record<string, unknown>
@@ -87,12 +87,12 @@ export function ScreenshotViewer({ file, comments, onAddComment }: ScreenshotVie
         <div className= "flex items-center justify-center min-h-full p-4">
           <div
             ref={imageRef}
-            className= "relative"
+            className= "relative
             style={{ transform: `scale(${zoom})`, transformOrigin: "center" }}
             onClick={handleImageClick}
           >
             <img src={file.url || "/placeholder.svg"} alt={file.name} className={`max-w-full max-h-full shadow-lg rounded ${
-                tool === "comment" ? "cursor-crosshair" : "cursor-crosshair"
+                tool === "comment" ? "cursor-crosshair" : "cursor-crosshair
               } draggable={false}>
 
             {/* Comment Pins */}

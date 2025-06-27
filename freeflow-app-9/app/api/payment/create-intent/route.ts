@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
+import { NextRequest, NextResponse } from 'next/server
+import Stripe from 'stripe
 
 // Use environment variable for Stripe secret key
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY
@@ -34,8 +34,8 @@ export async function POST(request: NextRequest) {
 
     // Return mock data for test environments
     if (isTestMode) {
-      const mockPaymentIntentId = `pi_3QdGhJ2eZvKYlo2C${Date.now()}`
-      const mockClientSecret = `${mockPaymentIntentId}_secret_${Math.random().toString(36).substring(2, 15)}`
+      const mockPaymentIntentId = `pi_3QdGhJ2eZvKYlo2C${Date.now()}
+      const mockClientSecret = `${mockPaymentIntentId}_secret_${Math.random().toString(36).substring(2, 15)}
       
       console.log('✅ Returning mock payment intent for test mode')
       return NextResponse.json({
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     console.error('Payment intent creation failed:', error)
     
     // Provide more detailed error information in development
-    const isDevelopment = process.env.NODE_ENV === 'development'
+    const isDevelopment = process.env.NODE_ENV === 'development
     
     return NextResponse.json(
       { 

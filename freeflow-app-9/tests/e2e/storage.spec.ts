@@ -150,7 +150,7 @@ test.describe(&apos;File Storage System&apos;, () => {
           const formData = new FormData()
           
           // Create a mock large file by setting size property
-          const largeContent = &apos;x'.repeat(1000) // Small content but we&apos;ll modify the size check'
+          const largeContent = &apos;x'.repeat(1000) // Small content but we&apos;ll modify the size check
           const blob = new Blob([largeContent], { type: &apos;application/pdf&apos; })
           
           // Override the size property to simulate a large file

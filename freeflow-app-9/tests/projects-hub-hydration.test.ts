@@ -2,7 +2,7 @@ import { test, expect } from &apos;@playwright/test&apos;
 
 // Mock data
 const mockProjects = [{
-  id: &apos;1','
+  id: &apos;1',
   title: &apos;Test Project&apos;,
   status: &apos;active&apos;,
   progress: 50
@@ -10,7 +10,7 @@ const mockProjects = [{
 
 const mockStateChanges = {
   projectUpdates: {
-    id: &apos;1','
+    id: &apos;1',
     progress: 75,
     status: &apos;completed&apos;
   }

@@ -38,7 +38,7 @@ test.describe(&apos;🚫 Rate Limiting&apos;, () => {
     for (let i = 0; i < 5; i++) {
       const response = await request.post(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
         data: {
-          password: `wrong-password-${i}`
+          password: `wrong-password-${i}
         }
       });
       
@@ -75,7 +75,7 @@ test.describe(&apos;🚫 Rate Limiting&apos;, () => {
     for (let i = 0; i < 3; i++) {
       const response = await request.post(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
         data: {
-          password: `wrong-password-${i}`
+          password: `wrong-password-${i}
         }
       });
       const data = await response.json();

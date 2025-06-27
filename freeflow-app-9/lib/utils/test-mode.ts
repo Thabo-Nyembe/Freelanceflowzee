@@ -1,4 +1,4 @@
-import { headers } from 'next/headers'
+import { headers } from 'next/headers
 
 /**
  * Checks if the current request is in test mode
@@ -43,5 +43,5 @@ export const mockTestUser = {
   last_sign_in_at: new Date().toISOString(),
   app_metadata: {},
   user_metadata: {},
-  aud: 'authenticated'
+  aud: 'authenticated
 } 

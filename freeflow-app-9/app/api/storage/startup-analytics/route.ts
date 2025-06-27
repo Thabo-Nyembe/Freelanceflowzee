@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: startupAnalytics,
       timestamp: new Date().toISOString(),
-      startup_mode: process.env.STARTUP_MODE === 'true'
+      startup_mode: process.env.STARTUP_MODE === 'true
     });
     
   } catch (error) {
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       { 
         success: false, 
         error: 'Failed to fetch startup analytics',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error
       },
       { status: 500 }
     );
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       const optimization = {
         moved: 0,
         saved: 0,
-        message: 'Optimization functionality coming soon'
+        message: 'Optimization functionality coming soon
       };
       
       // Calculate cost impact
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
           ...optimization,
           cost_impact: costImpact
         },
-        message: 'Startup optimization completed successfully'
+        message: 'Startup optimization completed successfully
       });
       
     } else if (action === 'budget_check') {
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       { 
         success: false, 
         error: 'Action failed',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error
       },
       { status: 500 }
     );
@@ -189,8 +189,8 @@ function calculateOptimizationImpact(optimization: unknown) {
     bytes_optimized: savedBytes,
     files_moved: optimization.moved,
     roi_description: monthlySavings > 1 
-      ? `Saves ${budgetPercentageSaved.toFixed(1)}% of your monthly budget!`
-      : 'Meaningful cost reduction for your startup budget'
+      ? `Saves ${budgetPercentageSaved.toFixed(1)}% of your monthly budget!
+      : 'Meaningful cost reduction for your startup budget
   };
 }
 
@@ -226,8 +226,8 @@ async function checkStartupBudget() {
     current_spend: startupMetrics.current_spend,
     alerts,
     next_action: startupMetrics.status === 'safe' 
-      ? 'Continue monitoring - optimization on track'
-      : 'Run storage optimization to reduce costs'
+      ? 'Continue monitoring - optimization on track
+      : 'Run storage optimization to reduce costs
   };
 }
 

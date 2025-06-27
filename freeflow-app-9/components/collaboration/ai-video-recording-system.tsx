@@ -1,7 +1,69 @@
-'use client'
+'use client
 
-import React, { useState, useEffect, useRef, useReducer } from 'react'
- description: string; score: number }[]
+import React, { useState, useEffect, useRef, useReducer } from 'react
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Slider } from '@/components/ui/slider'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { 
+  Play, 
+  Pause, 
+  Square, 
+  Volume2, 
+  VolumeX, 
+  Maximize, 
+  Download, 
+  Share2, 
+  MessageSquare, 
+  Eye, 
+  BarChart3, 
+  Settings, 
+  Monitor, 
+  Camera, 
+  Video,
+  Mic,
+  MicOff
+} from 'lucide-react
+
+interface VideoAnnotation {
+  id: string
+  timestamp: number
+  x: number
+  y: number
+  type: 'comment' | 'hotspot' | 'highlight
+  content: string
+  userId: string
+  userName: string
+  createdAt: string
+  responses: {
+    id: string
+    userId: string
+    userName: string
+    content: string
+    timestamp: number
+    createdAt: string
+  }[]
+}
+
+interface TranscriptionSegment {
+  id: string
+  startTime: number
+  endTime: number
+  text: string
+  confidence: number
+  speaker: string
+  keywords: string[]
+}
+
+interface VideoAnalytics {
+  totalViews: number
+  uniqueViewers: number
+  averageWatchTime: number
+  completionRate: number
+  engagementScore: number
+  heatmapData: { timestamp: number; engagement: number }[]
+  topMoments: { timestamp: number; description: string; score: number }[]
 }
 
 interface RecordingState {
@@ -12,8 +74,8 @@ interface RecordingState {
   currentTime: number
   volume: number
   isMuted: boolean
-  recordingMode: 'screen' | 'camera' | 'both'
-  quality: 'hd' | 'fullhd' | '4k'
+  recordingMode: 'screen' | 'camera' | 'both
+  quality: 'hd' | 'fullhd' | '4k
   annotations: VideoAnnotation[]
   transcription: TranscriptionSegment[]
   analytics: VideoAnalytics
@@ -268,7 +330,7 @@ export function AIVideoRecordingSystem({
   currentUser,
   onSave,
   onShare,
-  className = '
+  className = 
 }: AIVideoRecordingSystemProps) {
   const [state, dispatch] = useReducer(recordingReducer, initialState)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -404,14 +466,14 @@ export function AIVideoRecordingSystem({
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}`'
+    return `${mins}:${secs.toString().padStart(2, '0')}
   }
 
   const exportVideo = () => {
     if (state.recordedBlob) {
-      const link = document.createElement('a')'
+      const link = document.createElement('a')
       link.href = URL.createObjectURL(state.recordedBlob)
-      link.download = `recording-${projectId}.webm`
+      link.download = `recording-${projectId}.webm
       link.click()
     }
   }
@@ -529,7 +591,7 @@ export function AIVideoRecordingSystem({
                 <CardTitle>Video Player</CardTitle>
                 <div className= "flex items-center gap-2">
                   <Button
-                    size= "sm"
+                    size= "sm
                     variant={state.showAnnotations ? 'default' : 'outline'}
                     onClick={() => dispatch({ type: 'TOGGLE_ANNOTATIONS' })}
                   >
@@ -537,7 +599,7 @@ export function AIVideoRecordingSystem({
                     Annotations
                   </Button>
                   <Button
-                    size= "sm"
+                    size= "sm
                     variant={isAddingAnnotation ? 'default' : 'outline'}
                     onClick={() => setIsAddingAnnotation(!isAddingAnnotation)}
                   >
@@ -552,7 +614,7 @@ export function AIVideoRecordingSystem({
                 <video
                   ref={videoRef}
                   src={state.videoUrl || undefined}
-                  className= "w-full rounded-lg bg-black cursor-pointer"
+                  className= "w-full rounded-lg bg-black cursor-pointer
                   controls={false}
                   onClick={handleVideoClick}
                   onPlay={() => dispatch({ type: 'SET_PLAYING', playing: true })}
@@ -563,11 +625,11 @@ export function AIVideoRecordingSystem({
                 {state.showAnnotations && state.annotations.map(annotation => (
                   <div
                     key={annotation.id}
-                    className= "absolute bg-purple-500 text-white p-2 rounded-lg cursor-pointer hover:bg-purple-600 transition-colors transform -translate-x-1/2 -translate-y-1/2"
+                    className= "absolute bg-purple-500 text-white p-2 rounded-lg cursor-pointer hover:bg-purple-600 transition-colors transform -translate-x-1/2 -translate-y-1/2
                     style={{
                       left: `${annotation.x}%`,
                       top: `${annotation.y}%`,
-                      display: Math.abs(state.currentTime - annotation.timestamp) < 2 ? 'block' : 'none'
+                      display: Math.abs(state.currentTime - annotation.timestamp) < 2 ? 'block' : 'none
                     }}
                     onClick={() => jumpToTimestamp(annotation.timestamp)}
                     title={annotation.content}
@@ -579,10 +641,10 @@ export function AIVideoRecordingSystem({
                 {/* New Annotation Marker */}
                 {newAnnotationPos && (
                   <div
-                    className= "absolute bg-yellow-400 text-black p-2 rounded-lg transform -translate-x-1/2 -translate-y-1/2 animate-pulse"
+                    className= "absolute bg-yellow-400 text-black p-2 rounded-lg transform -translate-x-1/2 -translate-y-1/2 animate-pulse
                     style={{
                       left: `${newAnnotationPos.x}%`,
-                      top: `${newAnnotationPos.y}%`
+                      top: `${newAnnotationPos.y}%
                     }}
                   >
                     <MapPin className= "h-4 w-4" />
@@ -594,8 +656,8 @@ export function AIVideoRecordingSystem({
               <div className= "mt-4 space-y-3">
                 <div className= "flex items-center gap-3">
                   <Button
-                    size= "sm"
-                    variant= "outline"
+                    size= "sm
+                    variant= "outline
                     onClick={() => {
                       if (videoRef.current) {
                         if (state.isPlaying) {
@@ -610,16 +672,16 @@ export function AIVideoRecordingSystem({
                   </Button>
 
                   <Button
-                    size= "sm"
-                    variant= "outline"
+                    size= "sm
+                    variant= "outline
                     onClick={() => jumpToTimestamp(Math.max(0, state.currentTime - 10))}
                   >
                     <SkipBack className= "h-4 w-4" />
                   </Button>
 
                   <Button
-                    size= "sm"
-                    variant= "outline"
+                    size= "sm
+                    variant= "outline
                     onClick={() => jumpToTimestamp(state.currentTime + 10)}
                   >
                     <SkipForward className= "h-4 w-4" />
@@ -628,7 +690,7 @@ export function AIVideoRecordingSystem({
                   <div className= "flex-1">
                     <Progress 
                       value={(state.currentTime / (videoRef.current?.duration || 1)) * 100} 
-                      className= "cursor-pointer"
+                      className= "cursor-pointer
                       onClick={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect()
                         const percent = (e.clientX - rect.left) / rect.width
@@ -643,8 +705,8 @@ export function AIVideoRecordingSystem({
                   </span>
 
                   <Button
-                    size= "sm"
-                    variant= "outline"
+                    size= "sm
+                    variant= "outline
                     onClick={() => dispatch({ type: 'TOGGLE_MUTE' })}
                   >
                     {state.isMuted ? <VolumeX className= "h-4 w-4" /> : <Volume2 className= "h-4 w-4" />}
@@ -659,7 +721,7 @@ export function AIVideoRecordingSystem({
                         videoRef.current.playbackRate = speed
                       }
                     }}
-                    className= "px-2 py-1 text-sm border rounded"
+                    className= "px-2 py-1 text-sm border rounded
                   >
                     <option value={0.5}>0.5x</option>
                     <option value={0.75}>0.75x</option>
@@ -677,41 +739,41 @@ export function AIVideoRecordingSystem({
                   <CardContent className= "p-4">
                     <h4 className= "font-medium text-purple-800 mb-2">Add Video Annotation</h4>
                     <Textarea
-                      placeholder= "Describe what's happening at this moment..."
-                      className= "mb-3"
+                      placeholder= "Describe what's happening at this moment...
+                      className= "mb-3
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                           e.preventDefault()
                           addAnnotation(e.currentTarget.value)
-                          e.currentTarget.value = '
+                          e.currentTarget.value = 
                         }
                       }}
                     />
                     <div className= "flex gap-2">
                       <Button
-                        size= "sm"
+                        size= "sm
                         onClick={() => {
                           const textarea = document.querySelector('textarea') as HTMLTextAreaElement
                           addAnnotation(textarea.value, 'comment')
-                          textarea.value = '
+                          textarea.value = 
                         }}
                       >
                         Add Comment
                       </Button>
                       <Button
-                        size= "sm"
-                        variant= "outline"
+                        size= "sm
+                        variant= "outline
                         onClick={() => {
                           const textarea = document.querySelector('textarea') as HTMLTextAreaElement
                           addAnnotation(textarea.value, 'hotspot')
-                          textarea.value = '
+                          textarea.value = 
                         }}
                       >
                         Add Hotspot
                       </Button>
                       <Button
-                        size= "sm"
-                        variant= "ghost"
+                        size= "sm
+                        variant= "ghost
                         onClick={() => {
                           setIsAddingAnnotation(false)
                           setNewAnnotationPos(null)
@@ -738,8 +800,8 @@ export function AIVideoRecordingSystem({
                   AI Transcription
                 </CardTitle>
                 <Button
-                  size= "sm"
-                  variant= "outline"
+                  size= "sm
+                  variant= "outline
                   onClick={() => dispatch({ type: 'TOGGLE_TRANSCRIPTION' })}
                 >
                   {state.showTranscription ? <EyeOff className= "h-3 w-3" /> : <Eye className= "h-3 w-3" />}
@@ -753,8 +815,8 @@ export function AIVideoRecordingSystem({
                     key={segment.id}
                     className={`p-2 rounded text-sm cursor-pointer transition-colors ${
                       state.currentTime >= segment.startTime && state.currentTime <= segment.endTime
-                        ? 'bg-purple-100 border-purple-200'
-                        : 'hover:bg-gray-50'
+                        ? 'bg-purple-100 border-purple-200
+                        : 'hover:bg-gray-50
                     }`}
                     onClick={() => jumpToTimestamp(segment.startTime)}
                   >
@@ -794,7 +856,7 @@ export function AIVideoRecordingSystem({
               {state.annotations.map(annotation => (
                 <div
                   key={annotation.id}
-                  className= "p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                  className= "p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors
                   onClick={() => jumpToTimestamp(annotation.timestamp)}
                 >
                   <div className= "flex items-center justify-between mb-1">
@@ -829,8 +891,8 @@ export function AIVideoRecordingSystem({
                   Video Analytics
                 </CardTitle>
                 <Button
-                  size= "sm"
-                  variant= "outline"
+                  size= "sm
+                  variant= "outline
                   onClick={() => dispatch({ type: 'TOGGLE_ANALYTICS' })}
                 >
                   {state.showAnalytics ? <EyeOff className= "h-3 w-3" /> : <Eye className= "h-3 w-3" />}
@@ -863,7 +925,7 @@ export function AIVideoRecordingSystem({
                   {state.analytics.topMoments.map((moment, index) => (
                     <div
                       key={index}
-                      className= "flex items-center justify-between p-2 bg-gray-50 rounded text-xs cursor-pointer hover:bg-gray-100"
+                      className= "flex items-center justify-between p-2 bg-gray-50 rounded text-xs cursor-pointer hover:bg-gray-100
                       onClick={() => jumpToTimestamp(moment.timestamp)}
                     >
                       <span>{moment.description}</span>

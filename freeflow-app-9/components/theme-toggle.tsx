@@ -1,4 +1,4 @@
-"use client
+"use client"
 
 import * as React from "react"
 import { Moon, Sun, Monitor, Check } from "lucide-react"
@@ -48,10 +48,10 @@ export function ThemeToggle() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant= "ghost"
-          size= "sm"
-          className= "relative h-9 w-9 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          aria-label= "Toggle theme"
+          variant= "ghost
+          size= "sm
+          className= "relative h-9 w-9 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors
+          aria-label= "Toggle theme
         >
           <CurrentIcon className= "h-4 w-4 transition-all" />
           <span className= "sr-only">Toggle theme</span>
@@ -59,7 +59,7 @@ export function ThemeToggle() {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align= "end" 
-        className= "w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg"
+        className= "w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg
       >
         <div className= "p-1">
           {themes.map((themeOption) => {
@@ -72,7 +72,7 @@ export function ThemeToggle() {
                 onClick={() => setTheme(themeOption.value)}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 text-sm rounded-md cursor-pointer transition-colors", "hover:bg-gray-100 dark:hover:bg-gray-800", "focus:bg-gray-100 dark:focus:bg-gray-800",
-                  isSelected && "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300"
+                  isSelected && "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300
                 )}
               >
                 <Icon className= "h-4 w-4" />
@@ -104,11 +104,11 @@ export function ThemeToggleSimple() {
 
   return (
     <Button
-      variant= "ghost"
-      size= "sm"
+      variant= "ghost
+      size= "sm
       onClick={toggleTheme}
-      className= "h-9 w-9 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-      aria-label= "Toggle theme"
+      className= "h-9 w-9 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors
+      aria-label= "Toggle theme
     >
       {resolvedTheme === 'dark' ? (
         <Sun className= "h-4 w-4" />

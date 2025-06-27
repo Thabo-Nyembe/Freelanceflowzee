@@ -15,17 +15,17 @@ export function DashboardTestWrapper({ children }: DashboardTestWrapperProps) {
       <div role= "tablist" data-testid= "dashboard-tabs">
         <button 
           role= "tab" 
-          data-testid= "projects-tab"
-          data-tab= "projects"
-          aria-selected= "true"
+          data-testid= "projects-tab
+          data-tab= "projects
+          aria-selected= "true
         >
           Projects
         </button>
         <button 
           role= "tab" 
-          data-testid= "team-tab"
-          data-tab= "team"
-          aria-selected= "false"
+          data-testid= "team-tab
+          data-tab= "team
+          aria-selected= "false
         >
           Team
         </button>
@@ -39,11 +39,11 @@ export function DashboardTestWrapper({ children }: DashboardTestWrapperProps) {
       </div>
       
       <div data-testid= "team-hub" style={{ display: &apos;none&apos; }}>
-        <div data-testid= "team-member" data-member-id=&quot;1">"
+        <div data-testid= "team-member" data-member-id=&quot;1">
           <img src= "/avatars/alice.jpg" alt= "Alice Johnson" / alt=>
           <span>Alice Johnson</span>
         </div>
-        <div data-testid= "team-member" data-member-id=&quot;2">"
+        <div data-testid= "team-member" data-member-id=&quot;2">
           <img src= "/avatars/bob.jpg" alt= "Bob Smith" / alt=>
           <span>Bob Smith</span>
         </div>

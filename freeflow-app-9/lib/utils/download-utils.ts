@@ -4,7 +4,7 @@ export interface DownloadableFile {
   url?: string
   downloadUrl?: string
   signedUrl?: string
-  provider?: 'supabase' | 'wasabi'
+  provider?: 'supabase' | 'wasabi
   key?: string
   mimeType?: string
   size?: number
@@ -173,7 +173,7 @@ export async function downloadInvoice(invoiceId: string, invoiceData: Record<str
 
     if (response.ok) {
       const blob = await response.blob()
-      const filename = `invoice-${invoiceId}-${new Date().toISOString().split('T')[0]}.pdf`'
+      const filename = `invoice-${invoiceId}-${new Date().toISOString().split('T')[0]}.pdf
       triggerDownload(blob, filename)
     } else {
       throw new Error('Invoice PDF generation failed')
@@ -228,7 +228,7 @@ export async function downloadGalleryItem(
  */
 export async function copyDownloadLink(file: DownloadableFile): Promise<string> {
   try {
-    let link = '
+    let link = 
 
     if (file.downloadUrl) {
       link = file.downloadUrl
@@ -240,13 +240,13 @@ export async function copyDownloadLink(file: DownloadableFile): Promise<string> 
       const response = await fetch(`/api/storage/download?fileId=${file.id}`)
       if (response.ok) {
         const result = await response.json()
-        link = result.signedUrl || '
+        link = result.signedUrl || 
       }
     } else if (file.provider && file.key) {
       const response = await fetch(`/api/storage/download?provider=${file.provider}&key=${file.key}`)
       if (response.ok) {
         const result = await response.json()
-        link = result.signedUrl || '
+        link = result.signedUrl || 
       }
     }
 
@@ -315,7 +315,7 @@ export async function shareFile(file: DownloadableFile, method: &apos;link&apos;
  */
 function triggerDownload(blob: Blob, filename: string): void {
   const url = window.URL.createObjectURL(blob)
-  const a = document.createElement('a')'
+  const a = document.createElement('a')
   a.href = url
   a.download = filename
   document.body.appendChild(a)
@@ -388,29 +388,29 @@ export async function downloadWithPassword(fileId: string, password: string): Pr
  * Format file size for display
  */
 export function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes'
+  if (bytes === 0) return '0 Bytes
   const k = 1024
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]'
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
 /**
  * Get file type icon component name
  */
 export function getFileTypeIcon(mimeType: string | undefined): string {
-  if (!mimeType) return 'FileText'
+  if (!mimeType) return 'FileText
   
-  if (mimeType.startsWith('image/')) return 'Image'
-  if (mimeType.startsWith('video/')) return 'Video'
-  if (mimeType.startsWith('audio/')) return 'Music'
-  if (mimeType.includes('pdf')) return 'FileText'
-  if (mimeType.includes('zip') || mimeType.includes('archive')) return 'Archive'
-  if (mimeType.includes('doc') || mimeType.includes('word')) return 'FileText'
-  if (mimeType.includes('sheet') || mimeType.includes('excel')) return 'Grid'
-  if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return 'Presentation'
+  if (mimeType.startsWith('image/')) return 'Image
+  if (mimeType.startsWith('video/')) return 'Video
+  if (mimeType.startsWith('audio/')) return 'Music
+  if (mimeType.includes('pdf')) return 'FileText
+  if (mimeType.includes('zip') || mimeType.includes('archive')) return 'Archive
+  if (mimeType.includes('doc') || mimeType.includes('word')) return 'FileText
+  if (mimeType.includes('sheet') || mimeType.includes('excel')) return 'Grid
+  if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return 'Presentation
   
-  return 'FileText'
+  return 'FileText
 }
 
 /**
@@ -428,8 +428,8 @@ export function validateDownloadPermissions(file: DownloadableFile, userRole: st
 export async function handleUniversalDownload(
   file: DownloadableFile | string,
   options: {
-    type?: 'file' | 'invoice' | 'report' | 'gallery'
-    license?: 'digital' | 'print' | 'commercial'
+    type?: 'file' | 'invoice' | 'report' | 'gallery
+    license?: 'digital' | 'print' | 'commercial
     password?: string
     onSuccess?: () => void
     onError?: (error: Error) => void

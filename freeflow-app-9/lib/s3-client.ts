@@ -1,18 +1,18 @@
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner
 
 // S3 Client Configuration for Supabase Storage
 const s3Client = new S3Client({
   endpoint: process.env.S3_ENDPOINT || process.env.AWS_S3_ENDPOINT,
   region: process.env.S3_REGION || process.env.AWS_REGION || 'us-east-1',
   credentials: {
-    accessKeyId: process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || '','
-    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || '','
+    accessKeyId: process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || 
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || 
   },
   forcePathStyle: true, // Required for Supabase S3 compatibility
 })
 
-const BUCKET_NAME = process.env.S3_BUCKET_NAME || 'freeflowzee-storage'
+const BUCKET_NAME = process.env.S3_BUCKET_NAME || 'freeflowzee-storage
 
 export interface UploadResult {
   key: string
@@ -129,7 +129,7 @@ export async function deleteFile(key: string): Promise<boolean> {
  * List files in a folder
  */
 export async function listFiles(
-  prefix: string = '','
+  prefix: string = '',
   maxKeys: number = 100
 ): Promise<Array<{ key: string; size: number; lastModified: Date }>> {
   try {
@@ -142,7 +142,7 @@ export async function listFiles(
     const response = await s3Client.send(command)
     
     return (response.Contents || []).map(object => ({
-      key: object.Key || '','
+      key: object.Key || 
       size: object.Size || 0,
       lastModified: object.LastModified || new Date(),
     }))

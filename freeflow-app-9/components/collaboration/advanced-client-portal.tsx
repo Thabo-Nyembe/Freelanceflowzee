@@ -1,6 +1,6 @@
-'use client'
+'use client
 
-import React, { useReducer, useState, useCallback } from 'react'
+import React, { useReducer, useState, useCallback } from 'react
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
  project: Project }
@@ -103,7 +103,7 @@ const mockProject: Project = {
       url: '/files/brand-guidelines.pdf',
       accessLevel: 'premium',
       downloadCount: 5,
-      lastAccessed: '2024-01-14T15:45:00Z'
+      lastAccessed: '2024-01-14T15:45:00Z
     }
   ],
   milestones: [
@@ -140,7 +140,7 @@ export function AdvancedClientPortal({
   clientId,
   initialAccessLevel = 'guest',
   onUpgradeAccess,
-  className = '
+  className = 
 }: AdvancedClientPortalProps) {
   const [state, dispatch] = useReducer(clientPortalReducer, {
     selectedProject: mockProject,
@@ -150,7 +150,7 @@ export function AdvancedClientPortal({
     analytics: { views: 156, downloads: 23, shares: 8, engagement: 78, topFiles: [], viewerLocations: [] },
     isLoading: false,
     error: null,
-    activeTab: 'overview'
+    activeTab: 'overview
   })
 
   const requestDownload = useCallback((file: ProjectFile) => {
@@ -281,7 +281,7 @@ export function AdvancedClientPortal({
                     </Button>
                     <Button 
                       size= "sm" 
-                      className= "flex-1"
+                      className= "flex-1
                       onClick={() => requestDownload(file)}
                     >
                       <Download className= "w-3 h-3 mr-1" />
@@ -292,7 +292,7 @@ export function AdvancedClientPortal({
                   <Button 
                     size= "sm" 
                     variant= "outline" 
-                    className= "w-full"
+                    className= "w-full
                     onClick={() => onUpgradeAccess?.(file.accessLevel)}
                   >
                     <Lock className= "w-3 h-3 mr-1" />

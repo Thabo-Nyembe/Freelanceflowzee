@@ -136,7 +136,7 @@ export class AuthPage {
 
   async backToHome() {
     await this.backToHomeLink.click();
-    await this.page.waitForURL(&apos;/');'
+    await this.page.waitForURL(&apos;/');
   }
 
   // Login methods
@@ -315,12 +315,12 @@ export class AuthPage {
   }
 
   async areRequiredFieldsFilled() {
-    const emailFilled = await this.emailInput.inputValue() !== '&apos;;'
-    const passwordFilled = await this.passwordInput.inputValue() !== '&apos;;'
+    const emailFilled = await this.emailInput.inputValue() !== '&apos;;
+    const passwordFilled = await this.passwordInput.inputValue() !== '&apos;;
     
     if (await this.nameInput.isVisible()) {
-      const nameFilled = await this.nameInput.inputValue() !== '&apos;;'
-      const confirmPasswordFilled = await this.confirmPasswordInput.inputValue() !== '&apos;;'
+      const nameFilled = await this.nameInput.inputValue() !== '&apos;;
+      const confirmPasswordFilled = await this.confirmPasswordInput.inputValue() !== '&apos;;
       const termsAccepted = await this.termsCheckbox.isChecked();
       
       return {

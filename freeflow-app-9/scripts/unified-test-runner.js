@@ -14,6 +14,8 @@ class UnifiedTestRunner {
       payment: null
     };
     this.fixes = [];
+    this.testResults = [];
+    this.failedTests = [];
   }
 
   async runCommand(command, options = {}) {
@@ -32,7 +34,7 @@ class UnifiedTestRunner {
         if (i === retries - 1) {
           return {
             success: false,
-            stdout: '','
+            stdout: '',
             stderr: error.message,
             code: -1
           };
@@ -52,8 +54,8 @@ class UnifiedTestRunner {
         timeout 
       });
       
-      let stdout = '';'
-      let stderr = '';'
+      let stdout = '';
+      let stderr = '';
       
       if (process.stdout) {
         process.stdout.on('data', (data) => {
@@ -70,8 +72,8 @@ class UnifiedTestRunner {
       process.on('close', (code) => {
         resolve({
           success: code === 0,
-          stdout: stdout || '','
-          stderr: stderr || '','
+          stdout: stdout || '',
+          stderr: stderr || '',
           code: code || 0
         });
       });
@@ -79,8 +81,8 @@ class UnifiedTestRunner {
       process.on('error', (error) => {
         resolve({
           success: false,
-          stdout: stdout || '','
-          stderr: error.message || '','
+          stdout: stdout || '',
+          stderr: error.message || '',
           code: -1
         });
       });
@@ -115,7 +117,7 @@ class UnifiedTestRunner {
     this.results.build = {
       success: result.success,
       buildTime: `${buildTime}s`,
-      bundleSize: this.extractBundleSize(result.stdout || '')'
+      bundleSize: this.extractBundleSize(result.stdout || '')
     };
     
     if (result.success) {
@@ -129,7 +131,7 @@ class UnifiedTestRunner {
 
   extractBundleSize(buildOutput) {
     try {
-      const match = (buildOutput || '').match(/First Load JS shared by all\s+(\d+(?:\.\d+)?\s*\w+)/);'
+      const match = (buildOutput || '').match(/First Load JS shared by all\s+(\d+(?:\.\d+)?\s*\w+)/);
       return match ? match[1] : 'Unknown';
     } catch (error) {
       return 'Unknown';
@@ -173,7 +175,7 @@ class UnifiedTestRunner {
       { timeout: 180000 }
     );
     
-    const stats = this.parseTestResults(result.stdout || result.stderr || '');'
+    const stats = this.parseTestResults(result.stdout || result.stderr || '');
     
     this.results.dashboard = {
       success: result.success,
@@ -196,7 +198,7 @@ class UnifiedTestRunner {
       { timeout: 300000 }
     );
     
-    const stats = this.parseTestResults(result.stdout || result.stderr || '');'
+    const stats = this.parseTestResults(result.stdout || result.stderr || '');
     
     this.results.payment = {
       success: result.success,

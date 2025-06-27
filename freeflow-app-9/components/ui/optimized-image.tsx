@@ -1,8 +1,8 @@
-'use client'
+'use client
 
-import Image from 'next/image'
-import { useState } from 'react'
-import { cn } from '@/lib/utils'
+import Image from 'next/image
+import { useState } from 'react
+import { cn } from '@/lib/utils
 
 interface OptimizedImageProps {
   src: string
@@ -14,7 +14,7 @@ interface OptimizedImageProps {
   quality?: number
   sizes?: string
   fill?: boolean
-  placeholder?: 'blur' | 'empty'
+  placeholder?: 'blur' | 'empty
   blurDataURL?: string
   onLoad?: () => void
   onError?: () => void
@@ -63,7 +63,7 @@ export function OptimizedImage({
       canvas.height = h
       const ctx = canvas.getContext('2d')
       if (ctx) {
-        ctx.fillStyle = '#f3f4f6'
+        ctx.fillStyle = '#f3f4f6
         ctx.fillRect(0, 0, w, h)
       }
       return canvas.toDataURL()
@@ -86,7 +86,7 @@ export function OptimizedImage({
           className= "w-8 h-8" 
           fill= "none" 
           stroke= "currentColor" 
-          viewBox= "0 0 24 24"
+          viewBox= "0 0 24 24
         >
           <path 
             strokeLinecap= "round" 
@@ -157,7 +157,7 @@ export function OptimizedAvatar({
       height={size}
       quality={90}
       priority={false}
-      placeholder= "blur"
+      placeholder= "blur
       className={cn("rounded-full object-cover", className)}
       {...props}
     />
@@ -181,7 +181,7 @@ export function OptimizedHeroImage({
       alt={alt}
       priority={true}
       quality={90}
-      sizes= "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      sizes= "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw
       className={cn("object-cover", className)}
       {...props}
     />

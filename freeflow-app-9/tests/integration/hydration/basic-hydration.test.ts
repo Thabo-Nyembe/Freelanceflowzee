@@ -38,9 +38,9 @@ test.describe(&apos;Basic Hydration Tests&apos;, () => {
     // Compare snapshots (excluding dynamic content)
     const cleanSnapshot = (html: string) => {
       return html
-        .replace(/data-reactid=&quot;[^&quot;]*&quot;/g, '&apos;)'
-        .replace(/data-react-checksum=&quot;[^&quot;]*&quot;/g, '&apos;)'
-        .replace(/data-react-server-rendered=&quot;[^&quot;]*&quot;/g, '&apos;)'
+        .replace(/data-reactid=&quot;[^&quot;]*&quot;/g, '&apos;)
+        .replace(/data-react-checksum=&quot;[^&quot;]*&quot;/g, '&apos;)
+        .replace(/data-react-server-rendered=&quot;[^&quot;]*&quot;/g, '&apos;)
     }
 
     expect(cleanSnapshot(initialDOM)).toBe(cleanSnapshot(finalDOM))

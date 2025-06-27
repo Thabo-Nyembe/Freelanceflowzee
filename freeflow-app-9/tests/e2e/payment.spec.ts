@@ -110,7 +110,7 @@ async function setupPaymentAPIMocking(page: Page) {
           status: &apos;succeeded&apos;,
           paymentIntentId: &apos;pi_test_123456789&apos;,
           accessToken: &apos;access_token_&apos; + Date.now(),
-          unlockUrl: `/projects/${TEST_PROJECT.slug}/unlocked`
+          unlockUrl: `/projects/${TEST_PROJECT.slug}/unlocked
         })
       });
     }
@@ -135,7 +135,7 @@ async function setupPaymentAPIMocking(page: Page) {
             accessToken: &apos;access_token_&apos; + Date.now(),
             projectSlug: TEST_PROJECT.slug,
             expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-            unlockUrl: `/projects/${TEST_PROJECT.slug}/unlocked`
+            unlockUrl: `/projects/${TEST_PROJECT.slug}/unlocked
           })
         });
       } else {
@@ -377,7 +377,7 @@ test.describe(&apos;💳 Payment-to-Unlock Flow Testing&apos;, () => {
       // Fill email and verify it&apos;s accepted
       await emailInput.fill(TEST_USER.email);
       const updatedValidationMessage = await emailInput.evaluate((el: HTMLInputElement) => el.validationMessage);
-      expect(updatedValidationMessage).toBe('&apos;);'
+      expect(updatedValidationMessage).toBe('&apos;);
     });
   });
 
@@ -416,7 +416,7 @@ test.describe(&apos;💳 Payment-to-Unlock Flow Testing&apos;, () => {
 
     test(&apos;should maintain access across browser sessions after payment&apos;, async ({ page, context }) => {
       // Simulate payment completion and set access token in storage
-      await page.goto(&apos;/');'
+      await page.goto(&apos;/');
       await page.evaluate((projectId) => {
         localStorage.setItem(`project_access_${projectId}`, JSON.stringify({
           accessToken: &apos;access_token_123&apos;,
@@ -497,7 +497,7 @@ test.describe(&apos;💳 Payment-to-Unlock Flow Testing&apos;, () => {
         `/projects/${TEST_PROJECT.slug}/unlocked?token=hacked_token&expires=9999999999999`,
         `/projects/${TEST_PROJECT.slug}/unlocked?token=&expires=${Date.now() + 3600000}`,
         `/projects/${TEST_PROJECT.slug}/unlocked?expires=${Date.now() + 3600000}`,
-        `/projects/${TEST_PROJECT.slug}/unlocked?token=valid_token_123`
+        `/projects/${TEST_PROJECT.slug}/unlocked?token=valid_token_123
       ];
       
       for (const tamperedUrl of tamperingAttempts) {

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server
 
 interface UPFComment {
   id: string
@@ -6,7 +6,7 @@ interface UPFComment {
   userName: string
   userAvatar?: string
   content: string
-  type: 'image' | 'video' | 'code' | 'audio' | 'doc'
+  type: 'image' | 'video' | 'code' | 'audio' | 'doc
   position: {
     x?: number
     y?: number
@@ -20,8 +20,8 @@ interface UPFComment {
     }
     elementId?: string
   }
-  status: 'open' | 'resolved' | 'needs_revision' | 'approved'
-  priority: 'low' | 'medium' | 'high' | 'urgent'
+  status: 'open' | 'resolved' | 'needs_revision' | 'approved
+  priority: 'low' | 'medium' | 'high' | 'urgent
   createdAt: string
   updatedAt?: string
   resolvedAt?: string
@@ -30,7 +30,7 @@ interface UPFComment {
   mentions: string[]
   reactions: {
     userId: string
-    type: 'like' | 'love' | 'approve' | 'reject'
+    type: 'like' | 'love' | 'approve' | 'reject
     createdAt: string
   }[]
   metadata?: {
@@ -55,7 +55,7 @@ interface UPFComment {
 interface MediaFile {
   id: string
   name: string
-  type: 'image' | 'video' | 'code' | 'audio' | 'doc'
+  type: 'image' | 'video' | 'code' | 'audio' | 'doc
   url: string
   thumbnail?: string
   metadata: {
@@ -66,7 +66,7 @@ interface MediaFile {
     lines?: number
   }
   comments: UPFComment[]
-  status: 'draft' | 'review' | 'approved' | 'changes_required'
+  status: 'draft' | 'review' | 'approved' | 'changes_required
 }
 
 // Mock data store (in production, this would be a database)
@@ -106,7 +106,7 @@ let mockProjects: { [key: string]: MediaFile[] } = {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const action = searchParams.get('action')
-  const projectId = searchParams.get('projectId') || 'current-project'
+  const projectId = searchParams.get('projectId') || 'current-project
   const fileId = searchParams.get('fileId')
   const commentId = searchParams.get('commentId')
 
@@ -205,10 +205,10 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           success: true,
           message: 'Universal Pinpoint Feedback API',
-          supportedActions: ['get_files', 'get_comments', 'get_comment', 'get_analytics'
+          supportedActions: ['get_files', 'get_comments', 'get_comment', 'get_analytics
           ],
           endpoints: {
-            'GET': 'Retrieve files, comments, or analytics', 'POST': 'Create comments or reactions', 'PUT': 'Update comments or file status', 'DELETE': 'Delete comments'
+            'GET': 'Retrieve files, comments, or analytics', 'POST': 'Create comments or reactions', 'PUT': 'Update comments or file status', 'DELETE': 'Delete comments
           }
         })
     }
@@ -216,7 +216,7 @@ export async function GET(request: NextRequest) {
     console.error('UPF API error:', error)
     return NextResponse.json({
       success: false,
-      error: 'Internal server error'
+      error: 'Internal server error
     }, { status: 500 })
   }
 }
@@ -224,7 +224,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const action = searchParams.get('action')
-  const projectId = searchParams.get('projectId') || 'current-project'
+  const projectId = searchParams.get('projectId') || 'current-project
 
   try {
     const body = await request.json()
@@ -272,7 +272,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           comment: newComment,
-          message: 'Comment added successfully'
+          message: 'Comment added successfully
         })
 
       case 'add_reaction':
@@ -316,7 +316,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
           success: true,
-          message: 'Reaction added successfully'
+          message: 'Reaction added successfully
         })
 
       case 'add_reply':
@@ -367,7 +367,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
           success: true,
-          message: 'Reply added successfully'
+          message: 'Reply added successfully
         })
 
       default:
@@ -380,7 +380,7 @@ export async function POST(request: NextRequest) {
     console.error('UPF POST error:', error)
     return NextResponse.json({
       success: false,
-      error: 'Internal server error'
+      error: 'Internal server error
     }, { status: 500 })
   }
 }
@@ -388,7 +388,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const action = searchParams.get('action')
-  const projectId = searchParams.get('projectId') || 'current-project'
+  const projectId = searchParams.get('projectId') || 'current-project
 
   try {
     const body = await request.json()
@@ -433,7 +433,7 @@ export async function PUT(request: NextRequest) {
 
         return NextResponse.json({
           success: true,
-          message: 'Comment status updated successfully'
+          message: 'Comment status updated successfully
         })
 
       case 'update_file_status':
@@ -460,7 +460,7 @@ export async function PUT(request: NextRequest) {
 
         return NextResponse.json({
           success: true,
-          message: 'File status updated successfully'
+          message: 'File status updated successfully
         })
 
       default:
@@ -473,7 +473,7 @@ export async function PUT(request: NextRequest) {
     console.error('UPF PUT error:', error)
     return NextResponse.json({
       success: false,
-      error: 'Internal server error'
+      error: 'Internal server error
     }, { status: 500 })
   }
 }
@@ -481,7 +481,7 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const action = searchParams.get('action')
-  const projectId = searchParams.get('projectId') || 'current-project'
+  const projectId = searchParams.get('projectId') || 'current-project
   const commentId = searchParams.get('commentId')
 
   try {
@@ -516,7 +516,7 @@ export async function DELETE(request: NextRequest) {
 
         return NextResponse.json({
           success: true,
-          message: 'Comment deleted successfully'
+          message: 'Comment deleted successfully
         })
 
       default:
@@ -529,7 +529,7 @@ export async function DELETE(request: NextRequest) {
     console.error('UPF DELETE error:', error)
     return NextResponse.json({
       success: false,
-      error: 'Internal server error'
+      error: 'Internal server error
     }, { status: 500 })
   }
 } 

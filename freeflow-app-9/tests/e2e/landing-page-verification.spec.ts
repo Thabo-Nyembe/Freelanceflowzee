@@ -2,7 +2,7 @@ import { test, expect } from &apos;@playwright/test&apos;
 
 test.describe(&apos;Landing Page Features Verification&apos;, () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(&apos;/')'
+    await page.goto(&apos;/')
   })
 
   test(&apos;should display rocket icon in hero section&apos;, async ({ page }) => {
@@ -58,17 +58,17 @@ test.describe(&apos;Landing Page Features Verification&apos;, () => {
 
   test(&apos;should have properly styled buttons matching design pattern&apos;, async ({ page }) => {
     // Check Creator Login button
-    const creatorLoginButton = page.locator(&apos;a').filter({ hasText: &apos;Creator Login&apos; }).first()'
+    const creatorLoginButton = page.locator(&apos;a').filter({ hasText: &apos;Creator Login&apos; }).first()
     await expect(creatorLoginButton).toBeVisible()
     await expect(creatorLoginButton).toHaveAttribute(&apos;href&apos;, &apos;/login?redirect=/dashboard&apos;)
     
     // Check Watch Demo button
-    const watchDemoButton = page.locator(&apos;a').filter({ hasText: &apos;Watch Demo&apos; }).first()'
+    const watchDemoButton = page.locator(&apos;a').filter({ hasText: &apos;Watch Demo&apos; }).first()
     await expect(watchDemoButton).toBeVisible()
     await expect(watchDemoButton).toHaveAttribute(&apos;href&apos;, &apos;/demo&apos;)
     
     // Check View Projects button
-    const viewProjectsButton = page.locator(&apos;a').filter({ hasText: &apos;View Projects&apos; }).first()'
+    const viewProjectsButton = page.locator(&apos;a').filter({ hasText: &apos;View Projects&apos; }).first()
     await expect(viewProjectsButton).toBeVisible()
     await expect(viewProjectsButton).toHaveAttribute(&apos;href&apos;, &apos;/projects&apos;)
     
@@ -77,17 +77,17 @@ test.describe(&apos;Landing Page Features Verification&apos;, () => {
 
   test(&apos;should have working Strategic CTA section buttons&apos;, async ({ page }) => {
     // Check Start Free Trial button
-    const startTrialButton = page.locator(&apos;a').filter({ hasText: &apos;Start Free Trial&apos; })'
+    const startTrialButton = page.locator(&apos;a').filter({ hasText: &apos;Start Free Trial&apos; })
     await expect(startTrialButton).toBeVisible()
     await expect(startTrialButton).toHaveAttribute(&apos;href&apos;, &apos;/signup&apos;)
     
     // Check Watch Live Demo button
-    const liveDemoButton = page.locator(&apos;a').filter({ hasText: &apos;Watch Live Demo&apos; })'
+    const liveDemoButton = page.locator(&apos;a').filter({ hasText: &apos;Watch Live Demo&apos; })
     await expect(liveDemoButton).toBeVisible()
     await expect(liveDemoButton).toHaveAttribute(&apos;href&apos;, &apos;/demo&apos;)
     
     // Check Explore Resources button with BookOpen icon
-    const resourcesButton = page.locator(&apos;a').filter({ hasText: &apos;Explore Resources&apos; })'
+    const resourcesButton = page.locator(&apos;a').filter({ hasText: &apos;Explore Resources&apos; })
     await expect(resourcesButton).toBeVisible()
     await expect(resourcesButton).toHaveAttribute(&apos;href&apos;, &apos;/resources&apos;)
     
@@ -157,7 +157,7 @@ test.describe(&apos;Landing Page Features Verification&apos;, () => {
   test(&apos;should pass comprehensive functionality test&apos;, async ({ page }) => {
     // Test page load performance
     const startTime = Date.now()
-    await page.goto(&apos;/')'
+    await page.goto(&apos;/')
     const loadTime = Date.now() - startTime
     expect(loadTime).toBeLessThan(5000) // Should load in less than 5 seconds
     
@@ -186,15 +186,15 @@ test.describe(&apos;Landing Page Features Verification&apos;, () => {
 
   test(&apos;should have all buttons functional with correct routing&apos;, async ({ page }) => {
     // Test Creator Login button click
-    const creatorLogin = page.locator(&apos;a').filter({ hasText: &apos;Creator Login&apos; }).first()'
+    const creatorLogin = page.locator(&apos;a').filter({ hasText: &apos;Creator Login&apos; }).first()
     await expect(creatorLogin).toBeVisible()
     
     // Test Watch Demo button click
-    const watchDemo = page.locator(&apos;a').filter({ hasText: &apos;Watch Demo&apos; }).first()'
+    const watchDemo = page.locator(&apos;a').filter({ hasText: &apos;Watch Demo&apos; }).first()
     await expect(watchDemo).toBeVisible()
     
     // Test View Projects button click
-    const viewProjects = page.locator(&apos;a').filter({ hasText: &apos;View Projects&apos; }).first()'
+    const viewProjects = page.locator(&apos;a').filter({ hasText: &apos;View Projects&apos; }).first()
     await expect(viewProjects).toBeVisible()
     
     // Check all href attributes are correct
@@ -210,7 +210,7 @@ test.describe(&apos;Landing Page Complete Feature Integration&apos;, () => {
   test(&apos;MASTER TEST: All requested features working together&apos;, async ({ page }) => {
     console.log(&apos;🚀 Starting comprehensive feature verification...&apos;)
     
-    await page.goto(&apos;/')'
+    await page.goto(&apos;/')
     
     // 1. Rocket icon verification
     const rocketIcon = page.locator(&apos;svg[data-lucide=&quot;rocket&quot;]&apos;).first()
@@ -223,7 +223,7 @@ test.describe(&apos;Landing Page Complete Feature Integration&apos;, () => {
     console.log(&apos;✅ 2. How It Works interactive section&apos;)
     
     // 3. Button styling verification
-    const creatorButton = page.locator(&apos;a').filter({ hasText: &apos;Creator Login&apos; }).first()'
+    const creatorButton = page.locator(&apos;a').filter({ hasText: &apos;Creator Login&apos; }).first()
     await expect(creatorButton).toBeVisible()
     console.log(&apos;✅ 3. Updated button styling&apos;)
     
@@ -245,9 +245,9 @@ test.describe(&apos;Landing Page Complete Feature Integration&apos;, () => {
     
     // 7. Strategic CTA buttons verification
     const ctaButtons = [
-      page.locator(&apos;a').filter({ hasText: &apos;Start Free Trial&apos; }),'
-      page.locator(&apos;a').filter({ hasText: &apos;Watch Live Demo&apos; }),'
-      page.locator(&apos;a').filter({ hasText: &apos;Explore Resources&apos; })'
+      page.locator(&apos;a').filter({ hasText: &apos;Start Free Trial&apos; }),
+      page.locator(&apos;a').filter({ hasText: &apos;Watch Live Demo&apos; }),
+      page.locator(&apos;a').filter({ hasText: &apos;Explore Resources&apos; })
     ]
     
     for (const button of ctaButtons) {

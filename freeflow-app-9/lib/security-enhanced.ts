@@ -1,4 +1,4 @@
-'use client'
+'use client
 
 // Enhanced Security System for FreeflowZee
 class SecurityService {
@@ -44,14 +44,14 @@ class SecurityService {
     const rateLimitThreat = await this.checkRateLimit(request)
     if (rateLimitThreat.detected) {
       assessment.threats.push(rateLimitThreat)
-      assessment.threatLevel = 'high'
+      assessment.threatLevel = 'high
     }
 
     // SQL injection detection
     const sqlInjectionThreat = await this.detectSQLInjection(request)
     if (sqlInjectionThreat.detected) {
       assessment.threats.push(sqlInjectionThreat)
-      assessment.threatLevel = 'critical'
+      assessment.threatLevel = 'critical
     }
 
     // XSS detection
@@ -195,7 +195,7 @@ class SecurityService {
   async validateAccess(request: AccessRequest): Promise<AccessValidation> {
     const validation: AccessValidation = {
       granted: false,
-      reason: '','
+      reason: '',
       permissions: [],
       restrictions: [],
       sessionInfo: null
@@ -204,7 +204,7 @@ class SecurityService {
     // Validate session
     const sessionValidation = await this.validateSession(request.sessionToken)
     if (!sessionValidation.valid) {
-      validation.reason = 'Invalid or expired session'
+      validation.reason = 'Invalid or expired session
       return validation
     }
 
@@ -235,13 +235,13 @@ class SecurityService {
     // Check for suspicious access patterns
     const accessPattern = await this.analyzeAccessPattern(request)
     if (accessPattern.suspicious) {
-      validation.reason = 'Suspicious access pattern detected'
+      validation.reason = 'Suspicious access pattern detected
       await this.alertSystem.sendAccessAlert(request, accessPattern)
       return validation
     }
 
     validation.granted = true
-    validation.reason = 'Access granted'
+    validation.reason = 'Access granted
 
     // Log successful access
     await this.securityLogger.logAccess(request, validation)
@@ -382,32 +382,32 @@ class SecurityService {
   // Threat detection methods
   private async checkRateLimit(request: SecurityRequest): Promise<ThreatDetection> {
     // Implement rate limiting logic
-    return { detected: false, type: 'rate_limit', severity: 'high', description: , confidence: 0 }'
+    return { detected: false, type: 'rate_limit', severity: 'high', description: , confidence: 0 }
   }
 
   private async detectSQLInjection(request: SecurityRequest): Promise<ThreatDetection> {
     // SQL injection detection logic
-    return { detected: false, type: 'sql_injection', severity: 'critical', description: , confidence: 0 }'
+    return { detected: false, type: 'sql_injection', severity: 'critical', description: , confidence: 0 }
   }
 
   private async detectXSS(request: SecurityRequest): Promise<ThreatDetection> {
     // XSS detection logic
-    return { detected: false, type: 'xss', severity: 'high', description: , confidence: 0 }'
+    return { detected: false, type: 'xss', severity: 'high', description: , confidence: 0 }
   }
 
   private async detectCSRF(request: SecurityRequest): Promise<ThreatDetection> {
     // CSRF detection logic
-    return { detected: false, type: 'csrf', severity: 'medium', description: , confidence: 0 }'
+    return { detected: false, type: 'csrf', severity: 'medium', description: , confidence: 0 }
   }
 
   private async detectSuspiciousBehavior(request: SecurityRequest): Promise<ThreatDetection> {
     // Behavioral analysis logic
-    return { detected: false, type: 'suspicious_behavior', severity: 'medium', description: , confidence: 0 }'
+    return { detected: false, type: 'suspicious_behavior', severity: 'medium', description: , confidence: 0 }
   }
 
   private async detectBot(request: SecurityRequest): Promise<ThreatDetection> {
     // Bot detection logic
-    return { detected: false, type: 'bot', severity: 'low', description: , confidence: 0 }'
+    return { detected: false, type: 'bot', severity: 'low', description: , confidence: 0 }
   }
 
   private escalateThreatLevel(current: ThreatLevel, new_level: ThreatLevel): ThreatLevel {
@@ -455,11 +455,11 @@ class SecurityService {
   }
 
   private async maskPII(data: string): Promise<string> {
-    return data.replace(/.(?=.{4})/g, '*')'
+    return data.replace(/.(?=.{4})/g, '*')
   }
 
   private async tokenizeFinancialData(data: string): Promise<string> {
-    return `token_${Math.random().toString(36).substr(2, 9)}`
+    return `token_${Math.random().toString(36).substr(2, 9)}
   }
 
   private async hashPassword(password: string): Promise<string> {
@@ -541,11 +541,11 @@ class SecurityService {
 
   // Utility methods
   private generateScanId(): string {
-    return `scan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return `scan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}
   }
 
   private generateTestSuiteId(): string {
-    return `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}
   }
 }
 
@@ -618,7 +618,7 @@ interface SecurityRequest {
   userId?: string
 }
 
-type ThreatLevel = 'low' | 'medium' | 'high' | 'critical'
+type ThreatLevel = 'low' | 'medium' | 'high' | 'critical
 
 interface ThreatDetection {
   detected: boolean
@@ -639,7 +639,7 @@ interface ThreatAssessment {
 interface Vulnerability {
   id: string
   type: string
-  severity: 'info' | 'low' | 'medium' | 'high' | 'critical'
+  severity: 'info' | 'low' | 'medium' | 'high' | 'critical
   description: string
   location: string
   recommendation: string
@@ -668,7 +668,7 @@ interface ProtectedData {
 
 interface SensitiveField {
   name: string
-  type: 'pii' | 'financial' | 'password' | 'confidential'
+  type: 'pii' | 'financial' | 'password' | 'confidential
   confidence: number
 }
 
@@ -734,7 +734,7 @@ interface ComplianceStandardResult {
 
 interface SecurityTest {
   name: string
-  status: 'passed' | 'failed' | 'skipped'
+  status: 'passed' | 'failed' | 'skipped
   description: string
   details?: Record<string, unknown>
 }

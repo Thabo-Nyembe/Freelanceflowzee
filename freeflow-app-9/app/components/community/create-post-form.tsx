@@ -1,11 +1,11 @@
-"use client
+"use client"
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Image as ImageIcon, Link as LinkIcon, Video, Loader2 } from 'lucide-react'
+import { Image as ImageIcon, Link as LinkIcon, Video, Loader2 } from 'lucide-react
 
 interface CreatePostFormProps {
   onSubmit: (data: {
@@ -18,17 +18,17 @@ interface CreatePostFormProps {
 }
 
 export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
-  const [title, setTitle] = useState('')'
-  const [content, setContent] = useState('')'
+  const [title, setTitle] = useState('')
+  const [content, setContent] = useState('')
   const [category, setCategory] = useState('general')
   const [mediaUrls, setMediaUrls] = useState<string[]>([])
   const [mediaType, setMediaType] = useState<&apos;image&apos; | &apos;video&apos; | &apos;link&apos;>('image')
-  const [mediaUrl, setMediaUrl] = useState('')'
+  const [mediaUrl, setMediaUrl] = useState('')
 
   const handleAddMedia = () => {
     if (mediaUrl && !mediaUrls.includes(mediaUrl)) {
       setMediaUrls(prev => [...prev, mediaUrl])
-      setMediaUrl('')'
+      setMediaUrl('')
     }
   }
 
@@ -48,24 +48,24 @@ export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
     })
 
     // Reset form
-    setTitle('')'
-    setContent('')'
+    setTitle('')
+    setContent('')
     setCategory('general')
     setMediaUrls([])
-    setMediaUrl('')'
+    setMediaUrl('')
   }
 
   return (
     <form onSubmit={handleSubmit} className= "space-y-4">
       <Input
-        placeholder= "Post title"
+        placeholder= "Post title
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         required
       />
 
       <Textarea
-        placeholder= "Write your post content..."
+        placeholder= "Write your post content...
         value={content}
         onChange={(e) => setContent(e.target.value)}
         required
@@ -91,7 +91,7 @@ export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
             type= "button"
             variant={mediaType === 'image' ? 'default' : 'outline'}
             onClick={() => setMediaType('image')}
-            size= "sm"
+            size= "sm
           >
             <ImageIcon className= "mr-2 h-4 w-4" />
             Image
@@ -100,7 +100,7 @@ export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
             type= "button"
             variant={mediaType === 'video' ? 'default' : 'outline'}
             onClick={() => setMediaType('video')}
-            size= "sm"
+            size= "sm
           >
             <Video className= "mr-2 h-4 w-4" />
             Video
@@ -109,7 +109,7 @@ export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
             type= "button"
             variant={mediaType === 'link' ? 'default' : 'outline'}
             onClick={() => setMediaType('link')}
-            size= "sm"
+            size= "sm
           >
             <LinkIcon className= "mr-2 h-4 w-4" />
             Link
@@ -121,13 +121,13 @@ export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
             placeholder={`Add ${mediaType} URL`}
             value={mediaUrl}
             onChange={(e) => setMediaUrl(e.target.value)}
-            type= "url"
+            type= "url
           />
           <Button
             type= "button"
             onClick={handleAddMedia}
             disabled={!mediaUrl}
-            size= "sm"
+            size= "sm
           >
             Add
           </Button>
@@ -165,7 +165,7 @@ export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
             Creating Post...
           </>
         ) : (
-          'Create Post'
+          'Create Post
         )}
       </Button>
     </form>

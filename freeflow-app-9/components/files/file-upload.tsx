@@ -1,10 +1,10 @@
-'use client'
+'use client
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback } from 'react
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { Upload, CheckCircle, AlertCircle } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Upload, CheckCircle, AlertCircle } from 'lucide-react
+import { cn } from '@/lib/utils
 
 interface FileUploadProps {
   onUpload: (files: File[]) => Promise<void>
@@ -50,7 +50,7 @@ export function FileUpload({
       if (file.size > maxSize) {
         setErrors(prev => ({
           ...prev,
-          [file.name]: `File size exceeds ${maxSize / 1024 / 1024}MB limit`
+          [file.name]: `File size exceeds ${maxSize / 1024 / 1024}MB limit
         }))
         return false
       }
@@ -98,7 +98,7 @@ export function FileUpload({
       setUploadStatus('error')
       setErrors(prev => ({
         ...prev,
-        general: 'Upload failed. Please try again.'
+        general: 'Upload failed. Please try again.
       }))
     }
   }, [maxSize, onUpload])
@@ -116,12 +116,12 @@ export function FileUpload({
     <div className={cn('relative', className)} data-testid="file-upload">
       <input
         ref={fileInputRef}
-        type="file"
+        type="file
         multiple={multiple}
         accept={acceptedTypes.join(',')}
         onChange={handleFileSelect}
         className="hidden"
-        data-testid="file-input"
+        data-testid="file-input
       />
       
       <div
@@ -130,7 +130,7 @@ export function FileUpload({
           'hover:border-primary/50 hover:bg-primary/5',
           isDragging && 'border-primary bg-primary/10',
           uploadStatus === 'success' && 'border-green-500 bg-green-50',
-          uploadStatus === 'error' && 'border-red-500 bg-red-50'
+          uploadStatus === 'error' && 'border-red-500 bg-red-50
         )}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -179,9 +179,9 @@ export function FileUpload({
               </div>
               <Button
                 onClick={handleClick}
-                data-testid="upload-file-btn"
-                className="mt-4"
-              >
+                data-testid="upload-file-btn
+                className="mt-4
+              >"
                 <Upload className="w-4 h-4 mr-2" />
                 Choose Files
               </Button>

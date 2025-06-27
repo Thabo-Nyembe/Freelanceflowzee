@@ -169,7 +169,7 @@ router.get(&apos;/api/upf/comments/:fileId&apos;, async (context) => {
     const fileId = context.params.fileId
     const { data, error } = await supabase
       .from(&apos;upf_comments&apos;)
-      .select(&apos;*')'
+      .select(&apos;*')
       .eq(&apos;file_id&apos;, fileId)
       .order(&apos;created_at&apos;, { ascending: false })
 
@@ -210,7 +210,7 @@ router.get(&apos;/api/upf/analytics/:projectId&apos;, async (context) => {
     
     const { data: comments, error } = await supabase
       .from(&apos;upf_comments&apos;)
-      .select(&apos;*')'
+      .select(&apos;*')
       .eq(&apos;project_id&apos;, projectId)
 
     if (error) throw error
@@ -283,7 +283,7 @@ router.get(&apos;/api/collaboration/sessions/:projectId&apos;, async (context) =
     const projectId = context.params.projectId
     const { data, error } = await supabase
       .from(&apos;collaboration_sessions&apos;)
-      .select(&apos;*')'
+      .select(&apos;*')
       .eq(&apos;project_id&apos;, projectId)
       .eq(&apos;status&apos;, &apos;active&apos;)
 
@@ -368,7 +368,7 @@ const app = new Application()
 
 // CORS middleware
 app.use(async (context, next) => {
-  context.response.headers.set(&apos;Access-Control-Allow-Origin&apos;, &apos;*')'
+  context.response.headers.set(&apos;Access-Control-Allow-Origin&apos;, &apos;*')
   context.response.headers.set(&apos;Access-Control-Allow-Headers&apos;, &apos;authorization, x-client-info, apikey, content-type&apos;)
   context.response.headers.set(&apos;Access-Control-Allow-Methods&apos;, &apos;POST, GET, OPTIONS, PUT, DELETE&apos;)
   

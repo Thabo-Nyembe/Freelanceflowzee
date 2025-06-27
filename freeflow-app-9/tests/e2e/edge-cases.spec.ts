@@ -390,7 +390,7 @@ test.describe(&apos;File Upload Edge Cases&apos;, () => {
       
       // Assert - Should show storage warning
       await expect(page.locator(&apos;[data-testid=&quot;storage-warning&quot;]&apos;))
-        .toContainText(&apos;You\'re running low on storage&apos;);'
+        .toContainText(&apos;You\'re running low on storage&apos;);
       await expect(page.locator(&apos;[data-testid=&quot;upgrade-storage&quot;]&apos;)).toBeVisible();
       await expect(page.locator(&apos;[data-testid=&quot;manage-files&quot;]&apos;)).toBeVisible();
     });
@@ -498,7 +498,7 @@ test.describe(&apos;Browser Compatibility Edge Cases&apos;, () => {
       await context.setJavaScriptEnabled(false);
       
       // Act - Navigate to landing page
-      await page.goto(&apos;/');'
+      await page.goto(&apos;/');
       
       // Assert - Should show fallback content
       await expect(page.locator(&apos;[data-testid=&quot;no-js-message&quot;]&apos;)).toBeVisible();
@@ -515,7 +515,7 @@ test.describe(&apos;Browser Compatibility Edge Cases&apos;, () => {
         // Fill localStorage to capacity
         try {
           for (let i = 0; i < 10000; i++) {
-            localStorage.setItem(`key${i}`, &apos;x'.repeat(1000));'
+            localStorage.setItem(`key${i}`, &apos;x'.repeat(1000));
           }
         } catch (e) {
           // Storage full

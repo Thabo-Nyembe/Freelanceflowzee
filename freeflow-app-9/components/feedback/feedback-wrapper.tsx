@@ -1,9 +1,9 @@
-'use client'
+'use client
 
-import React, { useState } from 'react'
-import ImageViewer from './image-viewer'
-import VideoViewer from './video-viewer'
-import AudioViewer from './audio-viewer'
+import React, { useState } from 'react
+import ImageViewer from './image-viewer
+import VideoViewer from './video-viewer
+import AudioViewer from './audio-viewer
 
 export interface Comment {
   id: string
@@ -16,12 +16,12 @@ export interface Comment {
   author: string
   created_at: string
   updated_at?: string
-  priority?: 'low' | 'medium' | 'high' | 'critical'
+  priority?: 'low' | 'medium' | 'high' | 'critical
   tags?: string[]
 }
 
 interface FeedbackWrapperProps {
-  type: 'video' | 'audio' | 'image'
+  type: 'video' | 'audio' | 'image
   src: string
   title?: string
   alt?: string

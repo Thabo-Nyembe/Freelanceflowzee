@@ -1,10 +1,19 @@
 'use client'
 
- i < len; i += 4) {
+import { useState } from 'react'
+
+export default function PaymentClient() {
+  return (
+    <div className="container mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-4">Payment Client</h1>
+      <p>Payment processing interface will be implemented here.</p>
+    </div>
+  )
+}
       parts.push(match.substring(i, i + 4))
     }
     if (parts.length) {
-      return parts.join(' ')'
+      return parts.join(' ')
     } else {
       return v
     }
@@ -97,7 +106,7 @@
                       </ul>
                       
                       <Button
-                        className= "w-full min-h-[44px]"
+                        className= "w-full min-h-[44px]
                         variant={selectedPlan?.id === plan.id ? 'default' : 'outline'}
                         onClick={() => handlePlanSelect(plan)}
                         data-testid={`select-${plan.id}`}
@@ -149,12 +158,12 @@
                     <div className= "space-y-2">
                       <Label htmlFor= "email">Email Address</Label>
                       <Input
-                        id= "email"
-                        type= "email"
+                        id= "email
+                        type= "email
                         value={cardData.email}
                         onChange={(e) => setCardData({ ...cardData, email: e.target.value })}
                         required
-                        data-testid= "email-input"
+                        data-testid= "email-input
                         suppressHydrationWarning
                       />
                     </div>
@@ -162,12 +171,12 @@
                     <div className= "space-y-2">
                       <Label htmlFor= "name">Full Name</Label>
                       <Input
-                        id= "name"
-                        type= "text"
+                        id= "name
+                        type= "text
                         value={cardData.name}
                         onChange={(e) => setCardData({ ...cardData, name: e.target.value })}
                         required
-                        data-testid= "name-input"
+                        data-testid= "name-input
                         suppressHydrationWarning
                       />
                     </div>
@@ -176,28 +185,28 @@
                       <Label>Card Details</Label>
                       <div className= "space-y-2">
                         <Input
-                          placeholder= "Card Number"
+                          placeholder= "Card Number
                           value={cardData.number}
                           onChange={(e) => setCardData({ ...cardData, number: formatCardNumber(e.target.value) })}
                           maxLength={19}
-                          data-testid= "card-number"
+                          data-testid= "card-number
                           suppressHydrationWarning
                         />
                         <div className= "grid grid-cols-2 gap-2">
                           <Input
-                            placeholder= "MM/YY"
+                            placeholder= "MM/YY
                             value={cardData.expiry}
                             onChange={(e) => setCardData({ ...cardData, expiry: formatExpiry(e.target.value) })}
                             maxLength={5}
-                            data-testid= "card-expiry"
+                            data-testid= "card-expiry
                             suppressHydrationWarning
                           />
                           <Input
-                            placeholder= "CVC"
+                            placeholder= "CVC
                             value={cardData.cvc}
-                            onChange={(e) => setCardData({ ...cardData, cvc: e.target.value.replace(/\D/g, '') })}'
+                            onChange={(e) => setCardData({ ...cardData, cvc: e.target.value.replace(/\D/g, '') })}
                             maxLength={4}
-                            data-testid= "card-cvc"
+                            data-testid= "card-cvc
                             suppressHydrationWarning
                           />
                         </div>
@@ -211,7 +220,7 @@
                       type= "submit" 
                       className= "w-full min-h-[44px]" 
                       disabled={isLoading}
-                      data-testid= "submit-payment"
+                      data-testid= "submit-payment
                       suppressHydrationWarning
                     >
                       {isLoading ? (
@@ -250,10 +259,10 @@
                       <Input 
                         id= "client-email" 
                         type= "email" 
-                        placeholder= "your@email.com"
+                        placeholder= "your@email.com
                         value={loginData.email}
                         onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                        data-testid= "client-email-input"
+                        data-testid= "client-email-input
                         suppressHydrationWarning
                       />
                     </div>
@@ -263,10 +272,10 @@
                       <Input 
                         id= "access-code" 
                         type= "text" 
-                        placeholder= "Enter your access code"
+                        placeholder= "Enter your access code
                         value={loginData.accessCode}
                         onChange={(e) => setLoginData({ ...loginData, accessCode: e.target.value })}
-                        data-testid= "client-access-code"
+                        data-testid= "client-access-code
                         suppressHydrationWarning
                       />
                     </div>
@@ -275,7 +284,7 @@
                       type= "submit" 
                       className= "w-full min-h-[44px]" 
                       disabled={isLoading}
-                      data-testid= "client-login-submit"
+                      data-testid= "client-login-submit
                       suppressHydrationWarning
                     >
                       <Key className= "h-4 w-4 mr-2" />

@@ -1,6 +1,6 @@
-'use client'
+'use client
 
-import React, { useState, useRef, useReducer, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useReducer, useEffect, useCallback } from 'react
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -34,7 +34,7 @@ function upfReducer(state: UPFState, action: UPFAction): UPFState {
         ...state, 
         comments: newComments,
         filteredComments: filterComments(newComments, state.filterBy, state.searchQuery),
-        commentContent: '','
+        commentContent: '',
         selectedPosition: null,
         isAddingComment: false,
         voiceBlob: null
@@ -159,7 +159,7 @@ interface UniversalPinpointFeedbackProps {
     id: string
     name: string
     avatar?: string
-    role: 'client' | 'freelancer'
+    role: 'client' | 'freelancer
   }
   onCommentAdd?: (comment: UPFComment) => void
   onCommentUpdate?: (commentId: string, updates: Partial<UPFComment>) => void
@@ -172,7 +172,7 @@ export function UniversalPinpointFeedback({
   currentUser,
   onCommentAdd,
   onCommentUpdate,
-  className = '
+  className = 
 }: UniversalPinpointFeedbackProps) {
   // Initialize state with Context7 reducer pattern
   const [state, dispatch] = useReducer(upfReducer, {
@@ -183,17 +183,17 @@ export function UniversalPinpointFeedback({
     recordingDuration: 0,
     selectedPosition: null,
     isAddingComment: false,
-    commentContent: '','
+    commentContent: '',
     commentType: 'text',
     commentPriority: 'medium',
     voiceBlob: null,
     isPlayingAudio: {},
     viewMode: 'overlay',
     filterBy: 'all',
-    searchQuery: '','
+    searchQuery: '',
     showAISuggestions: true,
     isProcessingAI: false,
-    clientMode: currentUser.role === 'client'
+    clientMode: currentUser.role === 'client
   })
 
   // Refs for media elements
@@ -224,7 +224,7 @@ export function UniversalPinpointFeedback({
         aiSuggestion: {
           summary: 'Timing adjustment suggestion for smoother user experience',
           category: 'UX Enhancement',
-          severity: 'info'
+          severity: 'info
         }
       },
       {
@@ -243,7 +243,7 @@ export function UniversalPinpointFeedback({
         aiSuggestion: {
           summary: 'Responsive design issue requiring mobile optimization',
           category: 'Responsive Design',
-          severity: 'warning'
+          severity: 'warning
         }
       }
     ]
@@ -394,7 +394,7 @@ export function UniversalPinpointFeedback({
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}`'
+    return `${mins}:${secs.toString().padStart(2, '0')}
   }
 
   const getPriorityColor = (priority: UPFComment['priority']) => {
@@ -402,7 +402,7 @@ export function UniversalPinpointFeedback({
       low: 'bg-blue-100 text-blue-800',
       medium: 'bg-yellow-100 text-yellow-800',
       high: 'bg-orange-100 text-orange-800',
-      urgent: 'bg-red-100 text-red-800'
+      urgent: 'bg-red-100 text-red-800
     }
     return colors[priority]
   }
@@ -411,7 +411,7 @@ export function UniversalPinpointFeedback({
     const colors = {
       open: 'bg-gray-100 text-gray-800',
       in_progress: 'bg-blue-100 text-blue-800',
-      resolved: 'bg-green-100 text-green-800'
+      resolved: 'bg-green-100 text-green-800
     }
     return colors[status]
   }
@@ -432,8 +432,8 @@ export function UniversalPinpointFeedback({
           <Button
             onClick={() => dispatch({ type: 'TOGGLE_AI_SUGGESTIONS' })}
             variant={state.showAISuggestions ? "default" : "outline"}
-            size= "sm"
-            className= "bg-gradient-to-r from-purple-600 to-blue-600"
+            size= "sm
+            className= "bg-gradient-to-r from-purple-600 to-blue-600
           >
             <Sparkles className= "h-4 w-4 mr-2" />
             AI Insights
@@ -443,24 +443,24 @@ export function UniversalPinpointFeedback({
             <Button
               onClick={() => dispatch({ type: 'SET_VIEW_MODE', mode: 'overlay' })}
               variant={state.viewMode === 'overlay' ? "default" : "ghost"}
-              size= "sm"
-              className= "rounded-r-none"
+              size= "sm
+              className= "rounded-r-none
             >
               <Grid className= "h-4 w-4" />
             </Button>
             <Button
               onClick={() => dispatch({ type: 'SET_VIEW_MODE', mode: 'timeline' })}
               variant={state.viewMode === 'timeline' ? "default" : "ghost"}
-              size= "sm"
-              className= "rounded-none"
+              size= "sm
+              className= "rounded-none
             >
               <Clock className= "h-4 w-4" />
             </Button>
             <Button
               onClick={() => dispatch({ type: 'SET_VIEW_MODE', mode: 'grid' })}
               variant={state.viewMode === 'grid' ? "default" : "ghost"}
-              size= "sm"
-              className= "rounded-l-none"
+              size= "sm
+              className= "rounded-l-none
             >
               <List className= "h-4 w-4" />
             </Button>
@@ -486,7 +486,7 @@ export function UniversalPinpointFeedback({
                     key={file.id}
                     onClick={() => dispatch({ type: 'SET_ACTIVE_FILE', file })}
                     variant={state.activeFile?.id === file.id ? "default" : "outline"}
-                    className= "h-auto p-3 flex flex-col items-center gap-2"
+                    className= "h-auto p-3 flex flex-col items-center gap-2
                   >
                     {file.type === 'video' && <Video className= "h-6 w-6" />}
                     {file.type === 'image' && <ImageIcon className= "h-6 w-6" />}
@@ -509,7 +509,7 @@ export function UniversalPinpointFeedback({
                     <Button
                       onClick={() => dispatch({ type: 'TOGGLE_ADDING_COMMENT' })}
                       variant={state.isAddingComment ? "default" : "outline"}
-                      size= "sm"
+                      size= "sm
                       className={state.isAddingComment ? "bg-purple-600" : "border-purple-200 text-purple-600"}
                     >
                       <Pin className= "h-4 w-4 mr-2" />
@@ -527,7 +527,7 @@ export function UniversalPinpointFeedback({
                       <video
                         ref={videoRef}
                         src={state.activeFile.url}
-                        className= "w-full rounded-lg cursor-pointer"
+                        className= "w-full rounded-lg cursor-pointer
                         controls
                         onClick={handleVideoClick}
                       />
@@ -538,9 +538,9 @@ export function UniversalPinpointFeedback({
                         .map((comment) => (
                           <div
                             key={comment.id}
-                            className= "absolute bottom-16 bg-purple-500 text-white p-2 rounded-lg cursor-pointer hover:bg-purple-600 transition-colors transform -translate-x-1/2"
+                            className= "absolute bottom-16 bg-purple-500 text-white p-2 rounded-lg cursor-pointer hover:bg-purple-600 transition-colors transform -translate-x-1/2
                             style={{
-                              left: `${((comment.position?.timestamp || 0) / (state.activeFile?.metadata?.duration || 1)) * 100}%`
+                              left: `${((comment.position?.timestamp || 0) / (state.activeFile?.metadata?.duration || 1)) * 100}%
                             }}
                             title={comment.content}
                           >
@@ -597,13 +597,13 @@ export function UniversalPinpointFeedback({
                     </div>
 
                     <Textarea value={state.commentContent}> dispatch({ type: 'SET_COMMENT_CONTENT&apos;, content: e.target.value })}
-                      placeholder= "Share your feedback..."
-                      className= "bg-white"
+                      placeholder= "Share your feedback...
+                      className= "bg-white
                     />
 
                     <div >
                       <select value={state.commentPriority}> dispatch({ type: &apos;SET_COMMENT_PRIORITY&apos;, priority: e.target.value as UPFComment['priority'] })}
-                        className= "px-3 py-1 border border-purple-200 rounded-md text-sm"
+                        className= "px-3 py-1 border border-purple-200 rounded-md text-sm
                       >
                         <option >Low Priority</option>
                         <option >Medium Priority</option>
@@ -648,8 +648,8 @@ export function UniversalPinpointFeedback({
                             dispatch({ type: 'TOGGLE_ADDING_COMMENT' })
                             dispatch({ type: 'SET_SELECTED_POSITION', position: null })
                           }}
-                          variant= "ghost"
-                          size= "sm"
+                          variant= "ghost
+                          size= "sm
                         >
                           Cancel
                         </Button>
@@ -674,8 +674,8 @@ export function UniversalPinpointFeedback({
               <div >
                 <Search >
                 <Input value={state.searchQuery}> dispatch({ type: &apos;SET_SEARCH_QUERY&apos;, query: e.target.value })}
-                  placeholder= "Search comments..."
-                  className= "pl-10"
+                  placeholder= "Search comments...
+                  className= "pl-10
                 />
               </div>
               
@@ -683,8 +683,8 @@ export function UniversalPinpointFeedback({
                 {['all', 'open', 'resolved', 'priority'].map((filter) => (
                   <Button key={filter}> dispatch({ type: &apos;SET_FILTER&apos;, filter: filter as UPFState['filterBy'] })}
                     variant={state.filterBy === filter ? "default" : "outline"}
-                    size= "sm"
-                    className= "capitalize"
+                    size= "sm
+                    className= "capitalize
                   >
                     {filter}
                   </Button>
@@ -750,8 +750,8 @@ export function UniversalPinpointFeedback({
                         {comment.voiceNote && (
                           <div >
                             <Button > dispatch({ type: &apos;TOGGLE_AUDIO_PLAYBACK&apos;, commentId: comment.id })}
-                              size= "sm"
-                              variant= "ghost"
+                              size= "sm
+                              variant= "ghost
                             >
                               {state.isPlayingAudio[comment.id] ? (
                                 <Pause >
@@ -778,7 +778,7 @@ export function UniversalPinpointFeedback({
                               <Badge className={
                                   comment.aiSuggestion.severity === 'error' ? 'bg-red-100 text-red-700' :
                                   comment.aiSuggestion.severity === 'warning' ? 'bg-yellow-100 text-yellow-700' :
-                                  'bg-blue-100 text-blue-700'
+                                  'bg-blue-100 text-blue-700
                                 }>
                                 {comment.aiSuggestion.category}
                               </Badge>
@@ -802,9 +802,9 @@ export function UniversalPinpointFeedback({
                                         createdAt: new Date().toISOString()
                                       }
                                     })}
-                                    variant= "ghost"
-                                    size= "sm"
-                                    className= "h-6 px-2 text-xs"
+                                    variant= "ghost
+                                    size= "sm
+                                    className= "h-6 px-2 text-xs
                                   >
                                     {reactionType === 'thumbs_up' && <ThumbsUp >}
                                     {reactionType === 'heart' && <Heart >}
@@ -824,9 +824,9 @@ export function UniversalPinpointFeedback({
                                   createdAt: new Date().toISOString()
                                 }
                               })}
-                              variant= "ghost"
-                              size= "sm"
-                              className= "h-6 px-2 text-xs"
+                              variant= "ghost
+                              size= "sm
+                              className= "h-6 px-2 text-xs
                             >
                               <ThumbsUp >
                             </Button>
@@ -847,9 +847,9 @@ export function UniversalPinpointFeedback({
                                     updatedAt: new Date().toISOString()
                                   }
                                 })}
-                                size= "sm"
+                                size= "sm
                                 variant={comment.status === 'resolved' ? "default" : "outline"}
-                                className= "h-6 px-2 text-xs"
+                                className= "h-6 px-2 text-xs
                               >
                                 <CheckCircle >
                                 {comment.status === 'resolved' ? 'Resolved' : 'Mark Resolved'}

@@ -1,8 +1,8 @@
-'use client'
+'use client
 
-import React, { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { format, addDays, startOfDay } from 'date-fns'
+import React, { useState, useEffect } from 'react
+import { useForm } from 'react-hook-form
+import { format, addDays, startOfDay } from 'date-fns
 )
 
   // Generate simple time slots
@@ -13,7 +13,7 @@ import { format, addDays, startOfDay } from 'date-fns'
       // Generate slots from 9 AM to 6 PM, 30-minute intervals
       for (let hour = 9; hour < 18; hour++) {
         for (let minute = 0; minute < 60; minute += 30) {
-          const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
+          const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}
           const displayTime = new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
@@ -23,7 +23,7 @@ import { format, addDays, startOfDay } from 'date-fns'
           slots.push({
             id: `${hour}-${minute}`,
             startTime: timeString,
-            endTime: `${hour + Math.floor((minute + service.duration) / 60)}:${((minute + service.duration) % 60).toString().padStart(2, '0')}`,'
+            endTime: `${hour + Math.floor((minute + service.duration) / 60)}:${((minute + service.duration) % 60).toString().padStart(2, '0')}`,
             isAvailable: true,
             displayTime
           })
@@ -137,7 +137,7 @@ import { format, addDays, startOfDay } from 'date-fns'
           const stepLabels = {
             datetime: 'Date & Time',
             details: 'Your Details',
-            payment: 'Payment'
+            payment: 'Payment
           }
           
           const isCompleted = ['datetime', 'details', 'payment'].indexOf(step) > index
@@ -148,18 +148,18 @@ import { format, addDays, startOfDay } from 'date-fns'
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                 isCompleted ? 'bg-green-500 text-white' : 
                 isCurrent ? 'bg-blue-500 text-white' : 
-                'bg-gray-200 text-gray-600'
+                'bg-gray-200 text-gray-600
               }`}>
                 {isCompleted ? <Check className= "w-4 h-4" /> : index + 1}
               </div>
               <span className={`ml-2 text-sm font-medium ${
-                isCurrent ? 'text-blue-600' : 'text-gray-600'
+                isCurrent ? 'text-blue-600' : 'text-gray-600
               }`}>
                 {stepLabels[stepName as keyof typeof stepLabels]}
               </span>
               {index < 2 && (
                 <div className={`mx-4 h-px w-12 ${
-                  isCompleted ? 'bg-green-500' : 'bg-gray-200'
+                  isCompleted ? 'bg-green-500' : 'bg-gray-200
                 }`} />
               )}
             </div>
@@ -193,11 +193,11 @@ import { format, addDays, startOfDay } from 'date-fns'
               <div>
                 <Label htmlFor= "selectedDate">Date</Label>
                 <Input
-                  id= "selectedDate"
-                  type= "date"
+                  id= "selectedDate
+                  type= "date
                   min={format(new Date(), 'yyyy-MM-dd')}
                   {...register('selectedDate', { required: 'Please select a date' })}
-                  className= "mt-1"
+                  className= "mt-1
                 />
                 {errors.selectedDate && (
                   <p className= "text-sm text-red-600 mt-1">{errors.selectedDate.message}</p>
@@ -215,8 +215,8 @@ import { format, addDays, startOfDay } from 'date-fns'
                         onClick={() => setValue('selectedTime', slot.startTime)}
                         className={`p-2 text-sm border rounded-md transition-colors ${
                           watchedTime === slot.startTime
-                            ? 'bg-blue-500 text-white border-blue-500'
-                            : 'bg-white text-gray-700 border-gray-300 hover:border-blue-300'
+                            ? 'bg-blue-500 text-white border-blue-500
+                            : 'bg-white text-gray-700 border-gray-300 hover:border-blue-300
                         }`}
                       >
                         {slot.displayTime}
@@ -247,9 +247,9 @@ import { format, addDays, startOfDay } from 'date-fns'
                 <div>
                   <Label htmlFor= "clientName">Full Name *</Label>
                   <Input
-                    id= "clientName"
+                    id= "clientName
                     {...register('clientName', { required: 'Name is required' })}
-                    className= "mt-1"
+                    className= "mt-1
                   />
                   {errors.clientName && (
                     <p className= "text-sm text-red-600 mt-1">{errors.clientName.message}</p>
@@ -259,10 +259,10 @@ import { format, addDays, startOfDay } from 'date-fns'
                 <div>
                   <Label htmlFor= "clientPhone">Phone Number</Label>
                   <Input
-                    id= "clientPhone"
-                    type= "tel"
+                    id= "clientPhone
+                    type= "tel
                     {...register('clientPhone')}
-                    className= "mt-1"
+                    className= "mt-1
                   />
                 </div>
               </div>
@@ -270,16 +270,16 @@ import { format, addDays, startOfDay } from 'date-fns'
               <div>
                 <Label htmlFor= "clientEmail">Email Address *</Label>
                 <Input
-                  id= "clientEmail"
-                  type= "email"
+                  id= "clientEmail
+                  type= "email
                   {...register('clientEmail', { 
                     required: 'Email is required',
                     pattern: {
                       value: /^\S+@\S+$/i,
-                      message: 'Please enter a valid email address'
+                      message: 'Please enter a valid email address
                     }
                   })}
-                  className= "mt-1"
+                  className= "mt-1
                 />
                 {errors.clientEmail && (
                   <p className= "text-sm text-red-600 mt-1">{errors.clientEmail.message}</p>
@@ -289,16 +289,16 @@ import { format, addDays, startOfDay } from 'date-fns'
               <div>
                 <Label htmlFor= "notes">Additional Notes (Optional)</Label>
                 <Textarea
-                  id= "notes"
+                  id= "notes
                   {...register('notes')}
-                  placeholder= "Any specific requirements or questions..."
-                  className= "mt-1"
+                  placeholder= "Any specific requirements or questions...
+                  className= "mt-1
                 />
               </div>
 
               <div className= "flex items-center space-x-2">
                 <Checkbox
-                  id= "agreeToTerms"
+                  id= "agreeToTerms
                   {...register('agreeToTerms', { required: 'You must agree to the terms' })}
                 />
                 <Label htmlFor= "agreeToTerms" className= "text-sm">
@@ -356,9 +356,9 @@ import { format, addDays, startOfDay } from 'date-fns'
 
               <div className= "text-center">
                 <Button
-                  type= "submit"
-                  size= "lg"
-                  className= "w-full"
+                  type= "submit
+                  size= "lg
+                  className= "w-full
                   disabled={loading}
                 >
                   {loading ? 'Processing...' : `Pay ${service.formattedPrice} & Book Appointment`}
@@ -375,7 +375,7 @@ import { format, addDays, startOfDay } from 'date-fns'
         <div className= "flex justify-between">
           <Button
             type= "button"
-            variant= "outline"
+            variant= "outline
             onClick={prevStep}
             disabled={step === 'datetime'}
           >

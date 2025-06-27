@@ -10,8 +10,8 @@ const INVALID_CREDENTIALS = {
   invalidEmail: &apos;invalid.email.format&apos;,
   nonExistentEmail: &apos;nonexistent@example.com&apos;,
   wrongPassword: &apos;WrongPassword123!&apos;,
-  blankEmail: '&apos;,'
-  blankPassword: '&apos;'
+  blankEmail: '&apos;,
+  blankPassword: '&apos;
 };
 
 // Helper functions for login testing with Context7 best practices
@@ -32,7 +32,7 @@ const waitForLoginResponse = async (page: Page, timeout = 10000) => {
   try {
     // Wait for either error message or successful redirect with extended timeout
     await Promise.race([
-      page.waitForURL(&apos;/', { timeout }),'
+      page.waitForURL(&apos;/', { timeout }),
       page.waitForURL(/\?error=/, { timeout }),
       page.waitForSelector(&apos;[role=&quot;alert&quot;]:not([id*=&quot;route-announcer&quot;])&apos;, { timeout })
     ]);
@@ -51,9 +51,9 @@ const getErrorText = async (page: Page): Promise<string> => {
   // Get the first visible alert that&apos;s not the route announcer and has content
   const errorAlert = page.locator(&apos;[role=&quot;alert&quot;]:not([id*=&quot;route-announcer&quot;])&apos;).filter({ hasText: /.+/ }).first();
   if (await errorAlert.isVisible()) {
-    return await errorAlert.textContent() || '&apos;;'
+    return await errorAlert.textContent() || '&apos;;
   }
-  return '&apos;;'
+  return '&apos;;
 };
 
 const hasVisibleErrorAlert = async (page: Page): Promise<boolean> => {
@@ -176,7 +176,7 @@ test.describe(&apos;Robust Login Flow - Context7 Enhanced Testing&apos;, () => {
       
       // Check signup link
       await expect(page.locator(&apos;a[href=&quot;/signup&quot;]&apos;)).toContainText(&apos;Sign up here&apos;);
-      await expect(page.locator(&apos;text=Don\'t have an account?&apos;)).toBeVisible();'
+      await expect(page.locator(&apos;text=Don\'t have an account?&apos;)).toBeVisible();
     });
 
     test(&apos;should successfully login with valid credentials&apos;, async ({ page }) => {
@@ -293,7 +293,7 @@ test.describe(&apos;Robust Login Flow - Context7 Enhanced Testing&apos;, () => {
       // HTML5 validation should prevent submission
       const emailInput = page.locator(&apos;#email&apos;);
       const validationMessage = await emailInput.evaluate((el: HTMLInputElement) => el.validationMessage);
-      expect(validationMessage).not.toBe('&apos;);'
+      expect(validationMessage).not.toBe('&apos;);
       
       // Should remain on login page
       expect(page.url()).toContain(&apos;/login&apos;);
@@ -340,7 +340,7 @@ test.describe(&apos;Robust Login Flow - Context7 Enhanced Testing&apos;, () => {
       // HTML5 validation should prevent submission
       const passwordInput = page.locator(&apos;#password&apos;);
       const validationMessage = await passwordInput.evaluate((el: HTMLInputElement) => el.validationMessage);
-      expect(validationMessage).not.toBe('&apos;);'
+      expect(validationMessage).not.toBe('&apos;);
       
       // Should remain on login page
       expect(page.url()).toContain(&apos;/login&apos;);

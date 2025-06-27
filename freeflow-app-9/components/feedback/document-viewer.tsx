@@ -1,9 +1,9 @@
-"use client
+"use client"
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ZoomIn, ZoomOut, MessageSquare, FileText } from "lucide-react"
-import { CommentDialog } from "./comment-dialog"
+import { CommentDialog } from "./comment-dialog
 
 interface DocumentViewerProps {
   file: Record<string, unknown>
@@ -30,11 +30,11 @@ This document outlines the comprehensive brand identity redesign project for our
 5. Digital asset library
 
 ## Timeline
-The project will be completed over 6 weeks with regular check-ins and feedback sessions.`
+The project will be completed over 6 weeks with regular check-ins and feedback sessions.
 
 export function DocumentViewer({ file, comments, onAddComment }: DocumentViewerProps) {
   const [zoom, setZoom] = useState(1)
-  const [selectedText, setSelectedText] = useState("")"
+  const [selectedText, setSelectedText] = useState("")
   const [showCommentDialog, setShowCommentDialog] = useState(false)
 
   const handleTextSelection = () => {
@@ -57,7 +57,7 @@ export function DocumentViewer({ file, comments, onAddComment }: DocumentViewerP
 
     onAddComment([...comments, newComment])
     setShowCommentDialog(false)
-    setSelectedText("")"
+    setSelectedText("")
   }
 
   return (
@@ -88,26 +88,26 @@ export function DocumentViewer({ file, comments, onAddComment }: DocumentViewerP
           </div>
 
           <div
-            className= "prose max-w-none"
+            className= "prose max-w-none
             onMouseUp={handleTextSelection}
             dangerouslySetInnerHTML={{
               __html: sampleText
                 .split("\n")
                 .map((line) => {
                   if (line.startsWith("# ")) {
-                    return `<h1 class= "text-3xl font-bold mt-8 mb-4 text-gray-800">${line.substring(2)}</h1>`
+                    return `<h1 class= "text-3xl font-bold mt-8 mb-4 text-gray-800">${line.substring(2)}</h1>
                   } else if (line.startsWith("## ")) {
-                    return `<h2 class= "text-2xl font-semibold mt-6 mb-3 text-gray-700">${line.substring(3)}</h2>`
+                    return `<h2 class= "text-2xl font-semibold mt-6 mb-3 text-gray-700">${line.substring(3)}</h2>
                   } else if (line.startsWith("- ")) {
-                    return `<li class= "ml-4 mb-1">${line.substring(2)}</li>`
+                    return `<li class= "ml-4 mb-1">${line.substring(2)}</li>
                   } else if (line.match(/^\d+\./)) {
-                    return `<li class= "ml-4 mb-1">${line.substring(line.indexOf(".") + 1)}</li>`"
+                    return `<li class= "ml-4 mb-1">${line.substring(line.indexOf(".") + 1)}</li>
                   } else if (line.trim()) {
-                    return `<p class= "mb-4 text-gray-600">${line}</p>`
+                    return `<p class= "mb-4 text-gray-600">${line}</p>
                   }
                   return "<br>&quot;
                 })
-                .join(""),"
+                .join(""),
             }}
           />
         </div>
@@ -117,7 +117,7 @@ export function DocumentViewer({ file, comments, onAddComment }: DocumentViewerP
         open={showCommentDialog}
         onOpenChange={setShowCommentDialog}
         onSubmit={handleAddComment}
-        title= "Add Text Comment"
+        title= "Add Text Comment
         description={selectedText ? `Comment on: "${selectedText}"` : "Select text to comment on it."}
       />
     </div>

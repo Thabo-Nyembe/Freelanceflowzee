@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { headers } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server
+import { createClient } from '@/lib/supabase/server
+import { headers } from 'next/headers
 
 // Context7 enhanced upload endpoint with multi-cloud support
 export async function POST(request: NextRequest) {
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData()
     const file = formData.get('file') as File
     const projectId = formData.get('projectId') as string
-    const category = formData.get('category') as string || 'general'
+    const category = formData.get('category') as string || 'general
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     // File validation using Context7 patterns
     const maxSize = 100 * 1024 * 1024 // 100MB
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/avi', 'video/mov', 'video/wmv', 'audio/mp3', 'audio/wav', 'audio/ogg', 'application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/avi', 'video/mov', 'video/wmv', 'audio/mp3', 'audio/wav', 'audio/ogg', 'application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document
     ]
 
     if (file.size > maxSize) {
@@ -49,9 +49,9 @@ export async function POST(request: NextRequest) {
     // Generate unique filename
     const timestamp = Date.now()
     const randomString = Math.random().toString(36).substring(2, 15)
-    const fileExtension = file.name.split('.').pop()'
-    const uniqueFileName = `${timestamp}-${randomString}.${fileExtension}`
-    const storagePath = `uploads/${category}/${uniqueFileName}`
+    const fileExtension = file.name.split('.').pop()
+    const uniqueFileName = `${timestamp}-${randomString}.${fileExtension}
+    const storagePath = `uploads/${category}/${uniqueFileName}
 
     // Upload to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
         metadata: {
           uploadTimestamp: timestamp,
           originalExtension: fileExtension,
-          uploadSource: 'web-app'
+          uploadSource: 'web-app
         }
       })
       .select()
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
     console.error('Upload endpoint error:', error)
     return NextResponse.json({ 
       error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error
     }, { status: 500 })
   }
 }
@@ -175,7 +175,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('file_storage')
-      .select('*')'
+      .select('*')
       .order('created_at', { ascending: false })
       .limit(limit)
 
@@ -203,7 +203,7 @@ export async function GET(request: NextRequest) {
     console.error('File listing error:', error)
     return NextResponse.json({ 
       error: 'Failed to list files',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error
     }, { status: 500 })
   }
 }

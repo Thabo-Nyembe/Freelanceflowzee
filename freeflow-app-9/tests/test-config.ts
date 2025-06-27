@@ -38,6 +38,6 @@ export const INVALID_CREDENTIALS = {
   invalidEmail: &apos;invalid.email.format&apos;,
   nonExistentEmail: &apos;nonexistent@example.com&apos;,
   wrongPassword: &apos;WrongPassword123!&apos;,
-  blankEmail: '&apos;,'
-  blankPassword: '&apos;'
+  blankEmail: '&apos;,
+  blankPassword: '&apos;
 }; 

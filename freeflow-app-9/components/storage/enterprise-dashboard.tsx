@@ -1,4 +1,4 @@
-'use client'
+'use client
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -53,7 +53,7 @@ export function EnterpriseDashboard() {
           total: 75,
           used: 58.50,
           remaining: 16.50,
-          status: 'efficient'
+          status: 'efficient
         },
         services: {
           vercel: {
@@ -85,7 +85,7 @@ export function EnterpriseDashboard() {
           percentage: 62
         },
         compliance: ['SOC2', 'GDPR', 'HIPAA', 'ISO27001'],
-        recommendations: ['🎯 Excellent cost optimization - 62% below enterprise alternatives', '⚡ Performance is optimal with 1.2s load times', '💡 Consider lifecycle policies for 15% additional savings', '🚀 Ready to scale - 22% budget headroom available'
+        recommendations: ['🎯 Excellent cost optimization - 62% below enterprise alternatives', '⚡ Performance is optimal with 1.2s load times', '💡 Consider lifecycle policies for 15% additional savings', '🚀 Ready to scale - 22% budget headroom available
         ]
       });
       
@@ -128,7 +128,7 @@ export function EnterpriseDashboard() {
           annual: (prev.savings.monthly + 8.50) * 12,
           percentage: Math.min(75, prev.savings.percentage + 8)
         },
-        recommendations: ['🎉 Optimization complete! Additional $8.50/month saved', '📁 Moved 2.3GB from Supabase to Wasabi Pro', '✅ Storage now 95% optimized for enterprise efficiency', '💰 Total annual savings now $1,248 vs enterprise cloud'
+        recommendations: ['🎉 Optimization complete! Additional $8.50/month saved', '📁 Moved 2.3GB from Supabase to Wasabi Pro', '✅ Storage now 95% optimized for enterprise efficiency', '💰 Total annual savings now $1,248 vs enterprise cloud
         ]
       } : null);
       
@@ -185,7 +185,7 @@ export function EnterpriseDashboard() {
         <div className= "flex items-center gap-4">
           <Badge 
             variant={metrics.budget.status === 'optimal' || metrics.budget.status === 'efficient' ? 'default' : 'destructive'}
-            className= "text-sm"
+            className= "text-sm
           >
             {metrics.budget.status === 'optimal' ? '🎯 Optimal' :
              metrics.budget.status === 'efficient' ? '✅ Efficient' :
@@ -194,7 +194,7 @@ export function EnterpriseDashboard() {
           <Button 
             onClick={runEnterpriseOptimization} 
             disabled={optimizing}
-            className= "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            className= "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700
           >
             {optimizing ? 'Optimizing...' : 'Optimize Now'}
           </Button>
@@ -336,7 +336,7 @@ export function EnterpriseDashboard() {
                   {metrics.recommendations.map((recommendation, index) => (
                     <div 
                       key={index}
-                      className= "flex items-start gap-3 p-3 rounded-lg bg-muted/50"
+                      className= "flex items-start gap-3 p-3 rounded-lg bg-muted/50
                     >
                       <div className= "text-sm flex-1">
                         {recommendation}

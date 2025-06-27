@@ -97,12 +97,12 @@ export function EnhancedUploadButton({
     <div className={cn('relative', className)}>
       <input
         ref={fileInputRef}
-        type= "file"
+        type= "file
         multiple={multiple}
-        accept={acceptedTypes.join(',')}'
+        accept={acceptedTypes.join(',')}
         onChange={handleFileSelect}
-        className= "hidden"
-        data-testid= "file-input"
+        className= "hidden
+        data-testid= "file-input
       />
       
       <div
@@ -110,7 +110,7 @@ export function EnhancedUploadButton({
           'border-2 border-dashed rounded-lg p-6 transition-all duration-200', 'hover:border-primary/50 hover:bg-primary/5',
           isDragging && 'border-primary bg-primary/10',
           uploadStatus === 'success' && 'border-green-500 bg-green-50',
-          uploadStatus === 'error' && 'border-red-500 bg-red-50'
+          uploadStatus === 'error' && 'border-red-500 bg-red-50
         )}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -149,8 +149,8 @@ export function EnhancedUploadButton({
               </div>
               <Button
                 onClick={handleClick}
-                data-testid= "upload-file-btn"
-                className= "mt-4"
+                data-testid= "upload-file-btn
+                className= "mt-4
               >
                 <Upload className= "w-4 h-4 mr-2" />
                 Choose Files

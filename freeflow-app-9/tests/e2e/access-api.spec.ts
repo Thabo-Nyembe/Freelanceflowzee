@@ -140,8 +140,8 @@ test.describe(&apos;🔑 Access API Endpoint Testing&apos;, () => {
     test(&apos;should reject request with empty strings&apos;, async ({ request }) => {
       const response = await request.post(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
         data: {
-          password: '&apos;,'
-          accessCode: '&apos;'
+          password: '&apos;,
+          accessCode: '&apos;
         }
       });
 
@@ -211,7 +211,7 @@ test.describe(&apos;🔑 Access API Endpoint Testing&apos;, () => {
       // Check access status with the token in header
       const checkResponse = await request.get(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
         headers: {
-          &apos;Authorization&apos;: `Bearer ${accessToken}`
+          &apos;Authorization&apos;: `Bearer ${accessToken}
         }
       });
       

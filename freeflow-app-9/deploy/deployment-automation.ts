@@ -402,8 +402,8 @@ class DeploymentAutomation {
     return {
       environments: {
         development: { replicas: 1, resources: { cpu: &apos;0.5&apos;, memory: &apos;1Gi&apos; } },
-        staging: { replicas: 2, resources: { cpu: &apos;1', memory: &apos;2Gi&apos; } },'
-        production: { replicas: 5, resources: { cpu: &apos;2', memory: &apos;4Gi&apos; } }'
+        staging: { replicas: 2, resources: { cpu: &apos;1', memory: &apos;2Gi&apos; } },
+        production: { replicas: 5, resources: { cpu: &apos;2', memory: &apos;4Gi&apos; } }
       },
       autoRollback: true,
       healthCheckTimeout: 300000,
@@ -412,7 +412,7 @@ class DeploymentAutomation {
   }
 
   private generateDeploymentId(): string {
-    return `deploy_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return `deploy_${Date.now()}_${Math.random().toString(36).substr(2, 9)}
   }
 
   private async runPreDeploymentChecks(result: DeploymentResult): Promise<void> {

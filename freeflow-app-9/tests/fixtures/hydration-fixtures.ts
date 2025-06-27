@@ -53,7 +53,7 @@ export async function checkHydrationErrors(page: Page): Promise<string[]> {
         if (mutation.type === &apos;childList&apos; || mutation.type === &apos;characterData&apos;) {
           const target = mutation.target as HTMLElement
           if (target.getAttribute(&apos;data-hydration-error&apos;)) {
-            errors.push(target.getAttribute(&apos;data-hydration-error&apos;) || '&apos;)'
+            errors.push(target.getAttribute(&apos;data-hydration-error&apos;) || '&apos;)
           }
         }
       })
@@ -92,7 +92,7 @@ export async function checkComponentRendering(page: Page, expectedContent: strin
 // Mock project data for testing
 export const mockProjects: Project[] = [
   {
-    id: &apos;1','
+    id: &apos;1',
     title: &apos;Test Project 1&apos;,
     description: &apos;A test project for hydration testing&apos;,
     status: &apos;active&apos;,
@@ -105,11 +105,11 @@ export const mockProjects: Project[] = [
     end_date: &apos;2024-12-31&apos;,
     progress: 50,
     team_members: [
-      { id: &apos;1', name: &apos;John Doe&apos;, avatar: &apos;/avatars/john.jpg&apos; },'
-      { id: &apos;2', name: &apos;Jane Smith&apos;, avatar: &apos;/avatars/jane.jpg&apos; }'
+      { id: &apos;1', name: &apos;John Doe&apos;, avatar: &apos;/avatars/john.jpg&apos; },
+      { id: &apos;2', name: &apos;Jane Smith&apos;, avatar: &apos;/avatars/jane.jpg&apos; }
     ],
     attachments: [
-      { id: &apos;1', name: &apos;doc.pdf&apos;, url: &apos;/files/doc.pdf&apos; }'
+      { id: &apos;1', name: &apos;doc.pdf&apos;, url: &apos;/files/doc.pdf&apos; }
     ],
     comments_count: 5,
     created_at: &apos;2024-01-01T00:00:00Z&apos;,
@@ -127,7 +127,7 @@ export const mockUser = {
 // Mock state changes for testing hydration
 export const mockStateChanges = {
   projectUpdates: {
-    id: &apos;1','
+    id: &apos;1',
     progress: 75,
     status: &apos;completed&apos; as const
   },
@@ -166,7 +166,7 @@ export const mockHydrationCases = {
     server: mockProjects,
     client: [...mockProjects, {
       ...mockProjects[0],
-      id: &apos;2','
+      id: &apos;2',
       title: &apos;Client-only Project&apos;
     }]
   },
@@ -265,5 +265,5 @@ export const simulateHydrationMismatch = (serverData: unknown, clientData: unkno
 
 // Helper function to create test IDs
 export const createTestId = (component: string, element: string) => {
-  return `${component}-${element}-test-id`
+  return `${component}-${element}-test-id
 } 

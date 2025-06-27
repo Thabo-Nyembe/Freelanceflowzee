@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
-import { headers } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server
+import Stripe from 'stripe
+import { headers } from 'next/headers
 
 // Stripe MCP Best Practice: Initialize with proper error handling and environment validation
 let stripe: Stripe | null = null
@@ -135,7 +135,7 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
       amount: paymentIntent.amount,
       currency: paymentIntent.currency,
       customer_id: paymentIntent.customer as string,
-      description: metadata.description || '','
+      description: metadata.description || 
       timestamp: new Date().toISOString(),
     })
 

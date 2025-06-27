@@ -47,7 +47,7 @@ export async function GET() {
         overall: 'healthy',
         providers: {
           supabase: 'connected',
-          wasabi: 'connected'
+          wasabi: 'connected
         }
       }
     });
@@ -55,7 +55,7 @@ export async function GET() {
   } catch (error) {
     console.error('Analytics error:', error);
     return NextResponse.json({
-      error: error instanceof Error ? error.message : 'Failed to fetch analytics'
+      error: error instanceof Error ? error.message : 'Failed to fetch analytics
     }, { status: 500 });
   }
 }
@@ -66,19 +66,19 @@ export async function POST() {
     const optimization = {
       moved: 0,
       saved: 0,
-      message: 'Storage optimization functionality coming soon'
+      message: 'Storage optimization functionality coming soon
     };
     
     return NextResponse.json({
       success: true,
       optimization,
-      message: `Storage optimization complete! Moved ${optimization.moved} files, saving approximately $${(optimization.saved / 1e9 * 0.023).toFixed(2)}/month`
+      message: `Storage optimization complete! Moved ${optimization.moved} files, saving approximately $${(optimization.saved / 1e9 * 0.023).toFixed(2)}/month
     });
 
   } catch (error) {
     console.error('Optimization error:', error);
     return NextResponse.json({
-      error: error instanceof Error ? error.message : 'Optimization failed'
+      error: error instanceof Error ? error.message : 'Optimization failed
     }, { status: 500 });
   }
 } 

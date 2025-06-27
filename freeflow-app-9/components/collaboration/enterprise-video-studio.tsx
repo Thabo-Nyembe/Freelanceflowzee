@@ -1,7 +1,31 @@
-'use client'
+'use client
 
-import React, { useState, useReducer, useRef, useEffect } from 'react'
- y: number }
+import React, { useState, useReducer, useRef, useEffect } from 'react
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Slider } from '@/components/ui/slider'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { 
+  Play, 
+  Pause, 
+  Square, 
+  Volume2, 
+  Monitor, 
+  Camera, 
+  Settings,
+  Download,
+  Share2,
+  Users,
+  MessageSquare,
+  TrendingUp
+} from 'lucide-react
+
+interface VideoAnnotation {
+  id: string
+  timestamp: number
+  x: number
+  y: number
   startTime: number
   endTime: number
   style: unknown
@@ -88,7 +112,7 @@ const initialState: VideoStudioState = {
   comments: [],
   transcription: [],
   aiAnalysis: {
-    summary: '','
+    summary: '',
     keyTopics: [],
     sentiment: 'neutral',
     engagementScore: 0,
@@ -96,7 +120,7 @@ const initialState: VideoStudioState = {
     optimizationTips: [],
     accessibilityScore: 0,
     qualityScore: 0,
-    contentType: '','
+    contentType: '',
     difficulty: 'beginner',
     estimatedWatchTime: 0
   },
@@ -107,7 +131,7 @@ const initialState: VideoStudioState = {
     frameRate: 60,
     bitrate: 5000,
     audioQuality: 'high',
-    compression: 'balanced'
+    compression: 'balanced
   },
   annotations: [],
   chapters: [],
@@ -140,7 +164,7 @@ export function EnterpriseVideoStudio({
   currentUser,
   onRecordingComplete,
   onShare,
-  className = '
+  className = 
 }: EnterpriseVideoStudioProps) {
   const [state, dispatch] = useReducer(videoStudioReducer, initialState)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -155,9 +179,9 @@ export function EnterpriseVideoStudio({
       dispatch({
         type: 'UPDATE_LIVE_VIEWERS',
         viewers: [
-          { id: '1', name: 'Sarah Chen', avatar: '/avatars/sarah-chen.jpg', timestamp: Date.now(), isActive: true, cursor: { x: 120, y: 80 }, isWatching: true },'
-          { id: '2', name: 'Mike Johnson', avatar: '/avatars/mike.jpg', timestamp: Date.now(), isActive: true, cursor: { x: 200, y: 150 }, isWatching: true },'
-          { id: '3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', timestamp: Date.now(), isActive: false, cursor: { x: 0, y: 0 }, isWatching: true }'
+          { id: '1', name: 'Sarah Chen', avatar: '/avatars/sarah-chen.jpg', timestamp: Date.now(), isActive: true, cursor: { x: 120, y: 80 }, isWatching: true },
+          { id: '2', name: 'Mike Johnson', avatar: '/avatars/mike.jpg', timestamp: Date.now(), isActive: true, cursor: { x: 200, y: 150 }, isWatching: true },
+          { id: '3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', timestamp: Date.now(), isActive: false, cursor: { x: 0, y: 0 }, isWatching: true }
         ]
       })
 
@@ -291,7 +315,7 @@ export function EnterpriseVideoStudio({
       reactions: [],
       createdAt: new Date().toISOString(),
       isResolved: false,
-      aiSentiment: 'positive'
+      aiSentiment: 'positive
     }
     
     dispatch({ type: 'ADD_COMMENT', comment: newComment })
@@ -300,11 +324,11 @@ export function EnterpriseVideoStudio({
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}`'
+    return `${mins}:${secs.toString().padStart(2, '0')}
   }
 
   const formatFileSize = (bytes: number) => {
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB
   }
 
   return (
@@ -390,7 +414,7 @@ export function EnterpriseVideoStudio({
                   <div className= "relative bg-black rounded-lg aspect-video overflow-hidden">
                     <video
                       ref={videoRef}
-                      className= "w-full h-full object-cover"
+                      className= "w-full h-full object-cover
                       autoPlay
                       muted
                       playsInline
@@ -400,11 +424,11 @@ export function EnterpriseVideoStudio({
                     {state.liveViewers.map((viewer) => (
                       <div
                         key={viewer.id}
-                        className= "absolute pointer-events-none transition-all duration-200"
+                        className= "absolute pointer-events-none transition-all duration-200
                         style={{
                           left: `${viewer.cursor.x}px`,
                           top: `${viewer.cursor.y}px`,
-                          transform: 'translate(-50%, -50%)'
+                          transform: 'translate(-50%, -50%)
                         }}
                       >
                         <div className= "flex items-center gap-1">
@@ -421,18 +445,18 @@ export function EnterpriseVideoStudio({
                       <div className= "absolute bottom-4 left-1/2 transform -translate-x-1/2">
                         <div className= "flex items-center gap-3 bg-black/70 backdrop-blur-sm rounded-full px-4 py-2">
                           <Button
-                            size= "sm"
+                            size= "sm
                             variant={state.isPaused ? "default" : "outline"}
                             onClick={() => dispatch({ type: 'PAUSE_RECORDING' })}
-                            className= "rounded-full"
+                            className= "rounded-full
                           >
                             {state.isPaused ? <Play className= "h-4 w-4" /> : <Pause className= "h-4 w-4" />}
                           </Button>
                           <Button
-                            size= "sm"
-                            variant= "destructive"
+                            size= "sm
+                            variant= "destructive
                             onClick={stopRecording}
-                            className= "rounded-full"
+                            className= "rounded-full
                           >
                             <StopCircle className= "h-4 w-4" />
                           </Button>
@@ -475,7 +499,7 @@ export function EnterpriseVideoStudio({
 
                       <Button
                         variant={state.audioEnabled ? "default" : "outline"}
-                        size= "sm"
+                        size= "sm
                         onClick={() => dispatch({ type: 'TOGGLE_AUDIO' })}
                       >
                         <Mic className= "h-4 w-4" />
@@ -483,7 +507,7 @@ export function EnterpriseVideoStudio({
 
                       <Button
                         variant={state.videoEnabled ? "default" : "outline"}
-                        size= "sm"
+                        size= "sm
                         onClick={() => dispatch({ type: 'TOGGLE_VIDEO' })}
                       >
                         <Camera className= "h-4 w-4" />
@@ -494,7 +518,7 @@ export function EnterpriseVideoStudio({
                       {!state.isRecording ? (
                         <Button
                           onClick={startRecording}
-                          className= "bg-red-600 hover:bg-red-700 text-white"
+                          className= "bg-red-600 hover:bg-red-700 text-white
                         >
                           <Video className= "h-4 w-4 mr-2" />
                           Start Recording
@@ -502,7 +526,7 @@ export function EnterpriseVideoStudio({
                       ) : (
                         <Button
                           onClick={stopRecording}
-                          variant= "destructive"
+                          variant= "destructive
                         >
                           <StopCircle className= "h-4 w-4 mr-2" />
                           Stop Recording

@@ -1,8 +1,8 @@
-'use server'
+'use server
 
-import { createClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server
+import { cookies } from 'next/headers
+import { redirect } from 'next/navigation
 
 const attempts = new Map()
 const MAX_ATTEMPTS = 5
@@ -32,7 +32,7 @@ function isLockedOut(email: string): boolean {
 export async function login(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
-  const redirectTo = formData.get('redirectTo') as string || '/dashboard'
+  const redirectTo = formData.get('redirectTo') as string || '/dashboard
 
   if (isLockedOut(email)) {
     return { error: 'Too many login attempts. Please try again later.' }

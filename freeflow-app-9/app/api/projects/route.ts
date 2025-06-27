@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { NextRequest, NextResponse } from 'next/server
+import { createClient } from '@/lib/supabase/server
 
 export async function GET() {
   try {
@@ -25,7 +25,7 @@ export async function GET() {
     // Fetch projects for the user
     const { data: projects, error } = await supabase
       .from('projects')
-      .select('*')'
+      .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     if (!body.title || !body.description) {
       return NextResponse.json({ 
         error: 'Title and description are required',
-        details: 'Both title and description must be provided'
+        details: 'Both title and description must be provided
       }, { status: 400 })
     }
 

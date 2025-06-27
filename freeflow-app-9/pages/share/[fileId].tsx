@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import Head from 'next/head'
-import { GetServerSideProps } from 'next'
+import React, { useState, useEffect } from 'react
+import Head from 'next/head
+import { GetServerSideProps } from 'next
  progress += 10) {
       await new Promise(resolve => setTimeout(resolve, 300))
       setDownloadProgress(progress)
     }
 
     // Trigger actual download
-    const link = document.createElement('a')'
+    const link = document.createElement('a')
     link.href = file.downloadUrl
     link.download = file.fileName
     document.body.appendChild(link)
@@ -39,7 +39,7 @@ import { GetServerSideProps } from 'next'
       toast({
         title: "Copy Failed",
         description: "Could not copy link to clipboard.",
-        variant: "destructive"
+        variant: "destructive
       })
     }
   }
@@ -77,7 +77,7 @@ import { GetServerSideProps } from 'next'
               <p className= "text-muted-foreground mb-6">
                 {error || 'The file you\'re looking for doesn\'t exist or has expired.'}
               </p>
-              <Button onClick={() => window.location.href = &apos;/'}>'
+              <Button onClick={() => window.location.href = &apos;/'}>
                 Go to Homepage
               </Button>
             </CardContent>
@@ -115,11 +115,11 @@ import { GetServerSideProps } from 'next'
         
         {/* JSON-LD Structured Data */}
         <script
-          type= "application/ld+json"
+          type= "application/ld+json
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org", "@type": "MediaObject", "name": file.fileName, "description": file.seoDescription, "contentUrl": file.downloadUrl, "encodingFormat": file.fileType, "contentSize": file.fileSize, "uploadDate": file.uploadedAt, "publisher": {
-                "@type": "Organization", "name": "FreeflowZee", "url": "https://freeflowzee.com"
+                "@type": "Organization", "name": "FreeflowZee", "url": "https://freeflowzee.com
               }
             })
           }}
@@ -135,7 +135,7 @@ import { GetServerSideProps } from 'next'
                 <Zap className= "h-8 w-8 text-primary" />
                 <span className= "text-xl font-bold">FreeflowZee</span>
               </div>
-              <Button variant= "outline" onClick={() => window.location.href = &apos;/'}>'
+              <Button variant= "outline" onClick={() => window.location.href = &apos;/'}>
                 Create Your Own
               </Button>
             </div>
@@ -163,11 +163,11 @@ import { GetServerSideProps } from 'next'
                       <div>
                         <Label htmlFor= "password">Password</Label>
                         <Input
-                          id= "password"
-                          type= "password"
+                          id= "password
+                          type= "password
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          placeholder= "Enter password"
+                          placeholder= "Enter password
                           required
                         />
                       </div>
@@ -244,8 +244,8 @@ import { GetServerSideProps } from 'next'
                       ) : (
                         <Button 
                           onClick={handleDownload}
-                          size= "lg"
-                          className= "w-full gap-2 h-12 text-lg"
+                          size= "lg
+                          className= "w-full gap-2 h-12 text-lg
                         >
                           <Download className= "h-5 w-5" />
                           Download {file.fileName}
@@ -256,7 +256,7 @@ import { GetServerSideProps } from 'next'
                         <Button 
                           variant= "outline" 
                           onClick={copyShareLink}
-                          className= "flex-1 gap-2"
+                          className= "flex-1 gap-2
                         >
                           {copiedLink ? (
                             <Check className= "h-4 w-4" />
@@ -268,7 +268,7 @@ import { GetServerSideProps } from 'next'
                         <Button 
                           variant= "outline" 
                           onClick={shareNatively}
-                          className= "flex-1 gap-2"
+                          className= "flex-1 gap-2
                         >
                           <Share2 className= "h-4 w-4" />
                           Share
@@ -334,7 +334,7 @@ import { GetServerSideProps } from 'next'
                   Create your own shareable links in seconds - no registration required!
                 </p>
                 <div className= "flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button size= "lg" onClick={() => window.location.href = &apos;/'}>'
+                  <Button size= "lg" onClick={() => window.location.href = &apos;/'}>
                     <Zap className= "h-5 w-5 mr-2" />
                     Start Sharing for Free
                   </Button>
@@ -414,7 +414,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       isPublic: true,
       requiresPassword: false,
       customMessage: 'Thanks for checking out this file! Feel free to download and share.',
-      uploaderName: 'FreeflowZee Demo'
+      uploaderName: 'FreeflowZee Demo
     }
 
     return {
@@ -426,7 +426,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       props: {
         file: null,
-        error: 'File not found or has expired'
+        error: 'File not found or has expired
       }
     }
   }

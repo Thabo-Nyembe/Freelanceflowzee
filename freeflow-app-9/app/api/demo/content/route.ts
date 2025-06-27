@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
             files: files.slice(0, 3),
             transactions: transactions.slice(0, 3)
           },
-          availableTypes: ['users', 'projects', 'posts', 'files', 'transactions', 'analytics', 'images', 'dashboard', 'community', 'files-hub', 'escrow', 'trending-posts', 'top-creators', 'recent-files'
+          availableTypes: ['users', 'projects', 'posts', 'files', 'transactions', 'analytics', 'images', 'dashboard', 'community', 'files-hub', 'escrow', 'trending-posts', 'top-creators', 'recent-files
           ]
         };
     }
@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: false,
       error: 'Failed to load demo content',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error
     }, { status: 500 });
   }
 }
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
         await demoContent.initialize();
         return NextResponse.json({
           success: true,
-          message: 'Demo content cache refreshed'
+          message: 'Demo content cache refreshed
         });
       
       case 'stats':
@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
       default:
         return NextResponse.json({
           success: false,
-          error: 'Invalid action'
+          error: 'Invalid action
         }, { status: 400 });
     }
 
@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: false,
       error: 'Failed to process demo content request',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error
     }, { status: 500 });
   }
 } 

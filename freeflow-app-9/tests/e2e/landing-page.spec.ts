@@ -2,7 +2,7 @@ import { test, expect } from &apos;@playwright/test&apos;
 
 test.describe(&apos;Landing Page&apos;, () => {
   test(&apos;should load landing page successfully&apos;, async ({ page }) => {
-    await page.goto(&apos;/')'
+    await page.goto(&apos;/')
     
     // Check page title
     await expect(page).toHaveTitle(/FreeflowZee/)
@@ -20,7 +20,7 @@ test.describe(&apos;Landing Page&apos;, () => {
   })
 
   test(&apos;should navigate to demo page&apos;, async ({ page }) => {
-    await page.goto(&apos;/')'
+    await page.goto(&apos;/')
     
     // Click demo button
     await page.click(&apos;text=Watch Demo&apos;)
@@ -36,7 +36,7 @@ test.describe(&apos;Landing Page&apos;, () => {
   })
 
   test(&apos;should have working navigation&apos;, async ({ page }) => {
-    await page.goto(&apos;/')'
+    await page.goto(&apos;/')
     
     // Test features link
     await page.click(&apos;text=Features&apos;)
@@ -44,7 +44,7 @@ test.describe(&apos;Landing Page&apos;, () => {
     await expect(page).toHaveURL(/features/)
     
     // Go back to home
-    await page.goto(&apos;/')'
+    await page.goto(&apos;/')
     
     // Test pricing link
     await page.click(&apos;text=Pricing&apos;)

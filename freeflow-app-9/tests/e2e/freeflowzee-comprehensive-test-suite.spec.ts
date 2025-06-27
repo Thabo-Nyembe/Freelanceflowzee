@@ -34,7 +34,7 @@ const testRoutes = async (page: Page, routes: Array<{path: string, title: string
 test.describe(&apos;🏠 Landing Page & Navigation System&apos;, () => {
   
   test(&apos;should load landing page with all essential elements&apos;, async ({ page }) => {
-    await page.goto(&apos;/')'
+    await page.goto(&apos;/')
     
     // Verify page loads
     await expect(page).toHaveTitle(/FreeflowZee/)
@@ -52,7 +52,7 @@ test.describe(&apos;🏠 Landing Page & Navigation System&apos;, () => {
   })
   
   test(&apos;should have functional navigation menu&apos;, async ({ page }) => {
-    await page.goto(&apos;/')'
+    await page.goto(&apos;/')
     
     // Test navigation links
     const navLinks = [
@@ -72,7 +72,7 @@ test.describe(&apos;🏠 Landing Page & Navigation System&apos;, () => {
   })
   
   test(&apos;should have working CTAs with correct routing&apos;, async ({ page }) => {
-    await page.goto(&apos;/')'
+    await page.goto(&apos;/')
     
     // Test Creator Login button
     const creatorLogin = page.getByRole(&apos;link&apos;, { name: &apos;Creator Login&apos; })
@@ -192,7 +192,7 @@ test.describe(&apos;📄 Public Pages&apos;, () => {
   
   test(&apos;should load all public pages without errors&apos;, async ({ page }) => {
     const publicRoutes = [
-      { path: &apos;/', title: &apos;Create, Share & Get Paid&apos; },'
+      { path: &apos;/', title: &apos;Create, Share & Get Paid&apos; },
       { path: &apos;/features&apos;, title: &apos;Features&apos; },
       { path: &apos;/how-it-works&apos;, title: &apos;How it works&apos; },
       { path: &apos;/payment&apos;, title: &apos;Brand Identity&apos; },
@@ -254,7 +254,7 @@ test.describe(&apos;📱 Responsive Design&apos;, () => {
   
   test(&apos;should work on mobile viewport&apos;, async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 })
-    await page.goto(&apos;/')'
+    await page.goto(&apos;/')
     
     // Verify mobile layout
     await expect(page.locator(&apos;body&apos;)).toBeVisible()
@@ -270,7 +270,7 @@ test.describe(&apos;📱 Responsive Design&apos;, () => {
   
   test(&apos;should work on tablet viewport&apos;, async ({ page }) => {
     await page.setViewportSize({ width: 768, height: 1024 })
-    await page.goto(&apos;/')'
+    await page.goto(&apos;/')
     
     await expect(page.locator(&apos;body&apos;)).toBeVisible()
     
@@ -283,7 +283,7 @@ test.describe(&apos;⚡ Performance & Security&apos;, () => {
   test(&apos;should load pages within reasonable time&apos;, async ({ page }) => {
     const startTime = Date.now()
     
-    await page.goto(&apos;/')'
+    await page.goto(&apos;/')
     await page.waitForLoadState(&apos;domcontentloaded&apos;)
     
     const loadTime = Date.now() - startTime
@@ -303,7 +303,7 @@ test.describe(&apos;⚡ Performance & Security&apos;, () => {
   })
   
   test(&apos;should handle rapid navigation&apos;, async ({ page }) => {
-    const routes = [&apos;/', &apos;/features&apos;, &apos;/contact&apos;, &apos;/payment&apos;]'
+    const routes = [&apos;/', &apos;/features&apos;, &apos;/contact&apos;, &apos;/payment&apos;]
     
     // Rapidly navigate between pages
     for (let i = 0; i < 3; i++) {
@@ -323,7 +323,7 @@ test.describe(&apos;⚡ Performance & Security&apos;, () => {
 test.describe(&apos;🔗 External Links & Integration&apos;, () => {
   
   test(&apos;should have proper external link attributes&apos;, async ({ page }) => {
-    await page.goto(&apos;/')'
+    await page.goto(&apos;/')
     
     // Check social media links in footer
     const externalLinks = page.locator(&apos;a[href^=&quot;https://&quot;]&apos;)
@@ -359,7 +359,7 @@ test.describe(&apos;🔗 External Links & Integration&apos;, () => {
 test.describe(&apos;🧪 Edge Cases & Browser Compatibility&apos;, () => {
   
   test(&apos;should handle browser back/forward navigation&apos;, async ({ page }) => {
-    await page.goto(&apos;/')'
+    await page.goto(&apos;/')
     await page.goto(&apos;/features&apos;)
     await page.goto(&apos;/contact&apos;)
     
@@ -368,7 +368,7 @@ test.describe(&apos;🧪 Edge Cases & Browser Compatibility&apos;, () => {
     expect(page.url()).toContain(&apos;/features&apos;)
     
     await page.goBack()
-    expect(page.url()).toContain(&apos;/')'
+    expect(page.url()).toContain(&apos;/')
     
     // Go forward
     await page.goForward()
@@ -386,7 +386,7 @@ test.describe(&apos;🧪 Edge Cases & Browser Compatibility&apos;, () => {
       }
     })
     
-    await page.goto(&apos;/')'
+    await page.goto(&apos;/')
     
     // Should not have critical JavaScript errors
     const criticalErrors = errors.filter(error => 
@@ -405,7 +405,7 @@ test.describe(&apos;🧪 Edge Cases & Browser Compatibility&apos;, () => {
 test.afterEach(async ({ page }, testInfo) => {
   if (testInfo.status !== &apos;passed&apos;) {
     await page.screenshot({ 
-      path: `test-results/failed-${testInfo.title.replace(/\s+/g, &apos;-')}-${Date.now()}.png`,'
+      path: `test-results/failed-${testInfo.title.replace(/\s+/g, &apos;-')}-${Date.now()}.png`,
       fullPage: true 
     })
   }

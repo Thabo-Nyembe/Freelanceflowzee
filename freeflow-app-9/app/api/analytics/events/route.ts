@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { headers } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server
+import { createClient } from '@/lib/supabase/server
+import { headers } from 'next/headers
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
         { 
           success: false, 
           error: 'Configuration error',
-          message: 'Database not configured'
+          message: 'Database not configured
         },
         { status: 500 }
       )
@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
       session_id,
       timestamp: new Date().toISOString(),
       properties,
-      page_url: page_url || request.headers.get('referer') || ,'
-      user_agent: request.headers.get('user-agent') || ,'
+      page_url: page_url || request.headers.get('referer') || ,
+      user_agent: request.headers.get('user-agent') || ,
       ip_address: ipAddress,
       performance_metrics: Object.keys(performance_metrics).length > 0 ? performance_metrics : null
     }
@@ -94,12 +94,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       event_id: data[0]?.id,
-      message: 'Event tracked successfully'
+      message: 'Event tracked successfully
     })
     
   } catch (error) {
     // Properly type the error and provide structured error details
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred
     const errorDetails = error instanceof Error && error.cause ? error.cause : undefined
     
     console.error('Analytics API error:', {
@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
         { 
           success: false, 
           error: 'Configuration error',
-          message: 'Database not configured'
+          message: 'Database not configured
         },
         { status: 500 }
       )
@@ -150,7 +150,7 @@ export async function GET(request: NextRequest) {
       )
     }
     
-    const timeRange = searchParams.get('range') || 'day'
+    const timeRange = searchParams.get('range') || 'day
     const eventType = searchParams.get('type')
     const limit = parseInt(searchParams.get('limit') || '100')
     
@@ -178,7 +178,7 @@ export async function GET(request: NextRequest) {
     // Build query
     let query = supabase
       .from('analytics_events')
-      .select('*')'
+      .select('*')
       .eq('user_id', user.id)
       .gte('timestamp', startTime.toISOString())
       .lte('timestamp', now.toISOString())
@@ -199,12 +199,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       events,
-      message: 'Events retrieved successfully'
+      message: 'Events retrieved successfully
     })
     
   } catch (error) {
     // Properly type the error and provide structured error details
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred
     const errorDetails = error instanceof Error && error.cause ? error.cause : undefined
     
     console.error('Analytics API error:', {

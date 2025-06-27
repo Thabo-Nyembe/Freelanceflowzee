@@ -1,6 +1,6 @@
-'use client'
+'use client
 
-import { useState } from 'react'
+import { useState } from 'react
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
@@ -63,18 +63,18 @@ export default function APIKeySettings({ onApiKeyUpdate, onProviderChange }: API
             API Key
           </label>
           <Input
-            type="password"
-            id="apiKey"
+            type="password
+            id="apiKey
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            placeholder="Enter your API key"
-            data-testid="api-key-input"
+            placeholder="Enter your API key
+            data-testid="api-key-input
           />
         </div>
         <Button
           onClick={handleValidateKey}
           disabled={isLoading}
-          data-testid="validate-api-key-btn"
+          data-testid="validate-api-key-btn
         >
           {isLoading ? 'Validating...' : 'Validate Key'}
         </Button>

@@ -1,6 +1,6 @@
-'use client'
+'use client
 
-import React, { useReducer, useState, useCallback, useEffect, useRef } from 'react'
+import React, { useReducer, useState, useCallback, useEffect, useRef } from 'react
 import { Button } from '@/components/ui/button'
  payload: Category }
   | { type: 'SET_MODEL'; payload: AIModel }
@@ -212,7 +212,7 @@ const initialState: AssetGenerationState = {
   selectedCategory: Object.values(CREATIVE_FIELDS)[0].assetTypes[0],
   selectedModel: AI_MODELS[0],
   selectedProvider: 'platform',
-  prompt: '','
+  prompt: '',
   uploadedFiles: [],
   isUploading: false,
   showUploadModal: false,
@@ -236,7 +236,7 @@ const initialState: AssetGenerationState = {
     realTime: false
   },
   useCustomApi: false,
-  customApiKey: '','
+  customApiKey: '',
   userApiKeys: {}, // Initialize empty API keys storage
   selectedApiProvider: 'platform', // Default to platform APIs
   showApiKeyModal: false, // Initialize API key modal state
@@ -387,7 +387,7 @@ const assetGenerationReducer = (state: AssetGenerationState, action: AssetGenera
       return {
         ...state,
         userApiKeys: {},
-        selectedApiProvider: 'platform'
+        selectedApiProvider: 'platform
       }
     
     case 'TOGGLE_API_KEY_SETTINGS':
@@ -464,14 +464,14 @@ export default function AICreate() {
           fileType: file.type.startsWith('image/') ? 'image' : 
                    file.type.startsWith('video/') ? 'video' : 'other',
           quality: Math.floor(Math.random() * 30) + 70, // 70-100%
-          suggestions: ['Consider adjusting brightness for better results', 'Image quality is excellent for AI generation', 'This file is perfect for style transfer'
+          suggestions: ['Consider adjusting brightness for better results', 'Image quality is excellent for AI generation', 'This file is perfect for style transfer
           ],
           compatibleAssetTypes: file.type.startsWith('image/') 
             ? ['luts', 'presets', 'overlays', 'templates']
             : ['transitions', 'effects', 'audio'],
           extractedMetadata: {
             resolution: file.type.startsWith('image/') ? '1920x1080' : 'N/A',
-            duration: file.type.startsWith('video/') ? '00:05:23' : 'N/A'
+            duration: file.type.startsWith('video/') ? '00:05:23' : 'N/A
           }
         }
 
@@ -519,7 +519,7 @@ export default function AICreate() {
       toast.success(`Downloading ${asset.name}...`)
       
       // In a real implementation, this would trigger the actual download
-      const link = document.createElement('a')'
+      const link = document.createElement('a')
       link.href = asset.downloadUrl
       link.download = asset.name + asset.format
       document.body.appendChild(link)
@@ -566,7 +566,7 @@ export default function AICreate() {
       // Context7 Pattern: Conditional API routing based on model selection
       const apiEndpoint = state.useCustomApi && state.customApiKey 
         ? '/api/ai/create/custom' 
-        : '/api/ai/create'
+        : '/api/ai/create
 
       const response = await fetch(apiEndpoint, {
         method: 'POST',
@@ -631,7 +631,7 @@ export default function AICreate() {
       const mockAssets = generateMockAssets(
         state.selectedCategory.id, 
         state.selectedCategory.id, 
-        assetType?.name || '','
+        assetType?.name || 
         state.uploadedFiles
       )
       
@@ -650,7 +650,7 @@ export default function AICreate() {
   const generateMockAssets = (field: string, type: string, typeName: string, uploadedFiles?: UploadedFile[]): GeneratedAsset[] => {
     // Enhanced asset generation with uploaded file context
     const hasUploadedFiles = uploadedFiles && uploadedFiles.length > 0
-    const basePrefix = hasUploadedFiles ? 'AI-Enhanced' : 'AI-Generated'
+    const basePrefix = hasUploadedFiles ? 'AI-Enhanced' : 'AI-Generated
     
     const qualityScores = [85, 92, 88, 95, 91] // Realistic quality scores
     const fileSizes = ['2.4 MB', '3.7 MB', '1.9 MB', '4.2 MB', '2.8 MB']
@@ -669,8 +669,8 @@ export default function AICreate() {
             ? ['ai-enhanced', 'custom', 'high-quality', 'professional'] 
             : ['ai-generated', 'modern', 'creative'],
           description: hasUploadedFiles 
-            ? `AI-enhanced ${typeName.toLowerCase()} based on your uploaded content`
-            : `AI-generated ${typeName.toLowerCase()} with professional quality`
+            ? `AI-enhanced ${typeName.toLowerCase()} based on your uploaded content
+            : `AI-generated ${typeName.toLowerCase()} with professional quality
         },
         createdAt: new Date(),
         size: fileSizes[0],
@@ -693,7 +693,7 @@ export default function AICreate() {
         metadata: {
           dimensions: '1920x1080',
           tags: ['ai-generated', 'artistic', 'unique', 'premium'],
-          description: `Creative variation of ${typeName.toLowerCase()} with artistic flair`
+          description: `Creative variation of ${typeName.toLowerCase()} with artistic flair
         },
         createdAt: new Date(),
         size: fileSizes[1],
@@ -714,7 +714,7 @@ export default function AICreate() {
         metadata: {
           dimensions: '1920x1080',
           tags: ['minimalist', 'clean', 'elegant', 'professional'],
-          description: `Clean and minimalist ${typeName.toLowerCase()} design`
+          description: `Clean and minimalist ${typeName.toLowerCase()} design
         },
         createdAt: new Date(),
         size: fileSizes[2],
@@ -738,7 +738,7 @@ export default function AICreate() {
         metadata: {
           dimensions: '2560x1440',
           tags: ['custom', 'enhanced', 'high-res', 'premium'],
-          description: `High-resolution custom ${typeName.toLowerCase()} created from your files`
+          description: `High-resolution custom ${typeName.toLowerCase()} created from your files
         },
         createdAt: new Date(),
         size: fileSizes[3],
@@ -771,10 +771,10 @@ export default function AICreate() {
       components: '.tsx',
       animations: '.css',
       themes: '.json',
-      snippets: '.js'
+      snippets: '.js
     }
     
-    return formatMap[type] || '.zip'
+    return formatMap[type] || '.zip
   }
 
   const selectedField = CREATIVE_FIELDS[state.selectedCategory.id as keyof typeof CREATIVE_FIELDS]
@@ -821,7 +821,7 @@ export default function AICreate() {
                       className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
                         state.selectedCategory.id === key 
                           ? 'ring-2 ring-purple-500 bg-purple-50' 
-                          : 'hover:shadow-lg'
+                          : 'hover:shadow-lg
                       }`}
                       onClick={() => dispatch({ type: 'SET_CATEGORY', payload: field.assetTypes[0] })}
                     >
@@ -857,7 +857,7 @@ export default function AICreate() {
                       className={`cursor-pointer transition-all duration-200 ${
                         state.selectedCategory.id === assetType.id 
                           ? 'ring-2 ring-purple-500 bg-purple-50' 
-                          : 'hover:shadow-md'
+                          : 'hover:shadow-md
                       }`}
                       onClick={() => dispatch({ type: 'SET_CATEGORY', payload: assetType })}
                     >
@@ -924,10 +924,10 @@ export default function AICreate() {
                 <div className= "space-y-2">
                   <label className= "text-sm font-medium">Custom Prompt (Optional)</label>
                   <Textarea
-                    placeholder= "Describe specific requirements or style preferences..."
+                    placeholder= "Describe specific requirements or style preferences...
                     value={state.prompt}
                     onChange={(e) => dispatch({ type: 'SET_PROMPT', payload: e.target.value })}
-                    className= "min-h-[100px]"
+                    className= "min-h-[100px]
                   />
                 </div>
 
@@ -950,7 +950,7 @@ export default function AICreate() {
                           className={`cursor-pointer transition-all duration-200 ${
                             state.selectedModel.id === model.id 
                               ? 'ring-2 ring-purple-500 bg-purple-50' 
-                              : 'hover:shadow-md'
+                              : 'hover:shadow-md
                           }`}
                           onClick={() => dispatch({ type: 'SET_MODEL', payload: model })}
                         >
@@ -963,7 +963,7 @@ export default function AICreate() {
                               <div className= "flex gap-1">
                                 <Badge 
                                   variant={model.tier === 'enterprise' ? 'default' : model.tier === 'pro' ? 'secondary' : 'outline'}
-                                  className= "text-xs"
+                                  className= "text-xs
                                 >
                                   {model.tier}
                                 </Badge>
@@ -1019,7 +1019,7 @@ export default function AICreate() {
                             <div className= "space-y-2">
                               <label className= "text-sm font-medium">API Key</label>
                               <Input
-                                type= "password"
+                                type= "password
                                 placeholder={`Enter your ${state.selectedModel.provider} API key`}
                                 value={state.customApiKey}
                                 onChange={(e) => dispatch({ type: 'SET_API_KEY', payload: e.target.value })}
@@ -1062,7 +1062,7 @@ export default function AICreate() {
                                 max={50}
                                 min={5}
                                 step={5}
-                                className= "w-full"
+                                className= "w-full
                               />
                               <div className= "flex justify-between text-xs text-gray-500">
                                 <span>5 assets</span>
@@ -1083,8 +1083,8 @@ export default function AICreate() {
                 <Button
                   onClick={generateAssets}
                   disabled={state.isGenerating || !state.selectedCategory}
-                  className= "w-full h-12 text-lg font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-                  data-testid= "generate-assets-btn"
+                  className= "w-full h-12 text-lg font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600
+                  data-testid= "generate-assets-btn
                 >
                   {state.isGenerating ? (
                     <div className= "flex items-center gap-2">
@@ -1094,7 +1094,7 @@ export default function AICreate() {
                   ) : (
                     <div className= "flex items-center gap-2">
                       <Wand2 className= "w-5 h-5" />
-                      Generate {state.advancedSettings.batch ? `${state.advancedSettings.iterationCount} ` : ''}Assets'
+                      Generate {state.advancedSettings.batch ? `${state.advancedSettings.iterationCount} ` : ''}Assets
                     </div>
                   )}
                 </Button>
@@ -1153,21 +1153,21 @@ export default function AICreate() {
                         </div>
                         <div className= "flex gap-2">
                           <Button
-                            variant= "outline"
-                            size= "sm"
-                            className= "flex-1"
+                            variant= "outline
+                            size= "sm
+                            className= "flex-1
                             onClick={() => console.log('Preview asset:', asset.id)}
-                            data-testid= "preview-asset-btn"
+                            data-testid= "preview-asset-btn
                           >
                             <Eye className= "w-4 h-4 mr-1" />
                             Preview
                           </Button>
                           <Button
-                            variant= "default"
-                            size= "sm"
-                            className= "flex-1"
+                            variant= "default
+                            size= "sm
+                            className= "flex-1
                             onClick={() => handleDownloadAsset(asset)}
-                            data-testid= "download-asset-btn"
+                            data-testid= "download-asset-btn
                           >
                             <Download className= "w-4 h-4 mr-1" />
                             Download
@@ -1196,7 +1196,7 @@ export default function AICreate() {
             <CardContent className= "space-y-6">
               {/* File Upload Area */}
               <div
-                className= "border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-400 transition-colors cursor-pointer"
+                className= "border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-400 transition-colors cursor-pointer
                 onDragOver={handleDragOver}
                 onDragEnter={handleDragEnter}
                 onDrop={handleDrop}
@@ -1236,10 +1236,10 @@ export default function AICreate() {
 
               <input
                 ref={fileInputRef}
-                type= "file"
+                type= "file
                 multiple
-                accept= "image/*,video/*,audio/*"
-                className= "hidden"
+                accept= "image/*,video/*,audio/*
+                className= "hidden
                 onChange={(e) => {
                   if (e.target.files) {
                     handleFileUpload(e.target.files)
@@ -1280,9 +1280,9 @@ export default function AICreate() {
                               </div>
                             </div>
                             <Button
-                              variant= "ghost"
-                              size= "sm"
-                              className= "w-6 h-6 p-0 text-red-500"
+                              variant= "ghost
+                              size= "sm
+                              className= "w-6 h-6 p-0 text-red-500
                               onClick={() => dispatch({ type: 'REMOVE_UPLOADED_FILE', payload: file.id })}
                             >
                               <X className= "w-4 h-4" />
@@ -1334,14 +1334,14 @@ export default function AICreate() {
                               </div>
 
                               <Button
-                                variant= "default"
-                                size= "sm"
-                                className= "w-full"
+                                variant= "default
+                                size= "sm
+                                className= "w-full
                                 onClick={() => {
                                   // Auto-populate generation settings based on uploaded file
                                   if (file.analysisResult) {
                                     const field = file.type.startsWith('image/') ? 'photography' : 
-                                                file.type.startsWith('video/') ? 'videography' : 'music'
+                                                file.type.startsWith('video/') ? 'videography' : 'music
                                     // dispatch({ type: 'SET_ASSET_TYPE', payload: 'image' as AssetType })
                                     
                                     const assetType = file.analysisResult.compatibleAssetTypes[0]
@@ -1405,8 +1405,8 @@ export default function AICreate() {
                 <div className= "flex items-center justify-between">
                   <div className= "flex gap-2">
                     <Input
-                      placeholder= "Search assets..."
-                      className= "w-64"
+                      placeholder= "Search assets...
+                      className= "w-64
                     />
                     <Select defaultValue= "all">
                       <SelectTrigger className= "w-32">
@@ -1428,7 +1428,7 @@ export default function AICreate() {
                         const uploadTab = document.querySelector('[value= "upload"]') as HTMLElement
                         uploadTab?.click()
                       }}
-                      data-testid= "upload-asset-btn"
+                      data-testid= "upload-asset-btn
                     >
                       <Upload className= "w-4 h-4 mr-1" />
                       Upload
@@ -1552,8 +1552,8 @@ export default function AICreate() {
                 <div className= "flex gap-2">
                   <Button
                     onClick={() => dispatch({ type: 'TOGGLE_API_KEY_SETTINGS', payload: true })}
-                    className= "flex-1"
-                    variant= "outline"
+                    className= "flex-1
+                    variant= "outline
                   >
                     <Settings className= "h-4 w-4 mr-2" />
                     Manage All API Keys
@@ -1564,8 +1564,8 @@ export default function AICreate() {
                       dispatch({ type: 'UPDATE_COST_SAVINGS', payload: { monthly: savings } })
                       toast.success(`Updated cost savings: $${savings.toFixed(2)}/month`)
                     }}
-                    variant= "outline"
-                    size= "sm"
+                    variant= "outline
+                    size= "sm
                   >
                     <RefreshCw className= "h-4 w-4" />
                   </Button>
@@ -1600,19 +1600,19 @@ export default function AICreate() {
                     </Label>
                     <div className= "relative">
                       <Input
-                        type= "password"
+                        type= "password
                         placeholder={`Enter your ${state.selectedApiProvider} API key`}
-                        value={state.userApiKeys[state.selectedApiProvider] || ''}'
+                        value={state.userApiKeys[state.selectedApiProvider] || ''}
                         onChange={(e) => dispatch({ 
                           type: 'SET_USER_API_KEY', 
                           payload: { provider: state.selectedApiProvider, apiKey: e.target.value }
                         })}
-                        className= "pr-10"
+                        className= "pr-10
                       />
                       <Button
-                        variant= "ghost"
-                        size= "sm"
-                        className= "absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                        variant= "ghost
+                        size= "sm
+                        className= "absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0
                         onClick={() => dispatch({ type: 'TOGGLE_API_KEY_MODAL', payload: true })}
                       >
                         <HelpCircle className= "h-4 w-4" />
@@ -1731,10 +1731,10 @@ export default function AICreate() {
                 {/* Clear API Keys Button */}
                 {Object.keys(state.userApiKeys).length > 0 && (
                   <Button
-                    variant= "outline"
-                    size= "sm"
+                    variant= "outline
+                    size= "sm
                     onClick={() => dispatch({ type: 'CLEAR_API_KEYS' })}
-                    className= "w-full"
+                    className= "w-full
                   >
                     <Trash2 className= "h-4 w-4 mr-2" />
                     Clear All API Keys
@@ -1751,8 +1751,8 @@ export default function AICreate() {
                     <div className= "flex justify-between items-center mb-4">
                       <h3 className= "text-lg font-semibold">How to Get API Keys</h3>
                       <Button
-                        variant= "ghost"
-                        size= "sm"
+                        variant= "ghost
+                        size= "sm
                         onClick={() => dispatch({ type: 'TOGGLE_API_KEY_MODAL', payload: false })}
                       >
                         <X className= "h-4 w-4" />
@@ -1826,8 +1826,8 @@ export default function AICreate() {
                 <div className= "flex justify-between items-center mb-4">
                   <h3 className= "text-xl font-semibold">Comprehensive API Key Management</h3>
                   <Button
-                    variant= "ghost"
-                    size= "sm"
+                    variant= "ghost
+                    size= "sm
                     onClick={() => dispatch({ type: 'TOGGLE_API_KEY_SETTINGS', payload: false })}
                   >
                     <X className= "h-4 w-4" />
@@ -1867,8 +1867,8 @@ export default function AICreate() {
               <div className= "flex items-center justify-between">
                 <CardTitle>{state.generatedAssets[0].name}</CardTitle>
                 <Button
-                  variant= "ghost"
-                  size= "sm"
+                  variant= "ghost
+                  size= "sm
                   onClick={() => dispatch({ type: 'SET_GENERATED_ASSETS', payload: [] })}
                 >
                   ✕

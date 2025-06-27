@@ -1,13 +1,13 @@
-'use client'
+'use client
 
-import Link from 'next/link'
-import { useState } from 'react'
+import Link from 'next/link
+import { useState } from 'react
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Rocket, Github, Twitter, Linkedin, Mail, Send, MapPin, Phone, Clock, CheckCircle } from 'lucide-react'
+import { Rocket, Github, Twitter, Linkedin, Mail, Send, MapPin, Phone, Clock, CheckCircle } from 'lucide-react
 
 export function SiteFooter() {
-  const [email, setEmail] = useState('')'
+  const [email, setEmail] = useState('')
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -21,7 +21,7 @@ export function SiteFooter() {
       // Simulate API call for newsletter subscription
       await new Promise(resolve => setTimeout(resolve, 1000))
       setIsSubscribed(true)
-      setEmail('')'
+      setEmail('')
       
       // Reset after 3 seconds
       setTimeout(() => setIsSubscribed(false), 3000)
@@ -55,17 +55,17 @@ export function SiteFooter() {
             <form onSubmit={handleSubscribe} className= "max-w-md mx-auto">
               <div className= "flex flex-col sm:flex-row gap-3">
                 <Input
-                  type= "email"
-                  placeholder= "Enter your email address"
+                  type= "email
+                  placeholder= "Enter your email address
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className= "flex-1 bg-white/20 border-white/30 text-white placeholder:text-white/70 focus:border-white/50"
+                  className= "flex-1 bg-white/20 border-white/30 text-white placeholder:text-white/70 focus:border-white/50
                   required
                 />
                 <Button 
                   type= "submit" 
                   disabled={isLoading}
-                  className= "bg-white theme-text-primary hover:bg-gray-100 px-6 py-2 whitespace-nowrap"
+                  className= "bg-white theme-text-primary hover:bg-gray-100 px-6 py-2 whitespace-nowrap
                 >
                   {isLoading ? 'Subscribing...' : (
                     <>

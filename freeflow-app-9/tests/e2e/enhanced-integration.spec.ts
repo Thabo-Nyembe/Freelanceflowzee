@@ -82,7 +82,7 @@ test.describe(&apos;Enhanced Features Integration&apos;, () => {
       const navLink = page.locator(`[data-testid=&quot;${item.testId}&quot;]`);
       if (await navLink.count() > 0) {
         await navLink.click();
-        await expect(page).toHaveURL(new RegExp(item.href.replace(&apos;/', &apos;\\/&apos;)));'
+        await expect(page).toHaveURL(new RegExp(item.href.replace(&apos;/', &apos;\\/&apos;)));
         await page.goBack();
       }
     }

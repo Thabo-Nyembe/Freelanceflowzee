@@ -43,7 +43,7 @@ const getErrorText = async (page: Page) => {
   if (await errorAlert.isVisible()) {
     return await errorAlert.textContent();
   }
-  return '&apos;;'
+  return '&apos;;
 };
 
 test.describe(&apos;Fixed Comprehensive Signup Flow Tests&apos;, () => {

@@ -1,6 +1,6 @@
-'use client'
+'use client
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react
  percentage: number }>
   popularItems: Array<{ id: string; name: string; views: number }>
 }
@@ -14,7 +14,7 @@ interface AdvancedGallerySharingSystemProps {
     id: string
     name: string
     avatar?: string
-    role: 'owner' | 'collaborator' | 'viewer'
+    role: 'owner' | 'collaborator' | 'viewer
   }
   isOwnerView?: boolean
 }
@@ -29,8 +29,8 @@ export function AdvancedGallerySharingSystem({
 }: AdvancedGallerySharingSystemProps) {
   const [settings, setSettings] = useState<GallerySettings>(initialSettings)
   const [selectedItems, setSelectedItems] = useState<string[]>([])
-  const [searchQuery, setSearchQuery] = useState('')'
-  const [filterTag, setFilterTag] = useState<string>('&apos;)'
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterTag, setFilterTag] = useState<string>('&apos;)
   const [sortBy, setSortBy] = useState<&apos;date&apos; | &apos;name&apos; | &apos;views&apos; | &apos;likes&apos;>('date')
   const [viewMode, setViewMode] = useState<&apos;grid&apos; | &apos;list&apos;>('grid')
   const [lightboxItem, setLightboxItem] = useState<GalleryItem | null>(null)
@@ -38,10 +38,10 @@ export function AdvancedGallerySharingSystem({
   const [settingsDialog, setSettingsDialog] = useState(false)
   const [analyticsDialog, setAnalyticsDialog] = useState(false)
   const [qrCodeDialog, setQrCodeDialog] = useState(false)
-  const [customMessage, setCustomMessage] = useState('')'
-  const [embedCode, setEmbedCode] = useState('')'
+  const [customMessage, setCustomMessage] = useState('')
+  const [embedCode, setEmbedCode] = useState('')
 
-  const galleryUrl = `${typeof window !== 'undefined' ? window.location.origin : }/gallery/${galleryId}`'
+  const galleryUrl = `${typeof window !== 'undefined' ? window.location.origin : }/gallery/${galleryId}
   const publicShareUrl = settings.customDomain ? `https://${settings.customDomain}` : galleryUrl
 
   useEffect(() => {
@@ -53,9 +53,9 @@ export function AdvancedGallerySharingSystem({
   src= "${publicShareUrl}?embed=true" 
   width= "100%" 
   height= "600" 
-  frameborder="0" "
+  frameborder="0" 
   allowfullscreen>
-</iframe>`
+</iframe>
     setEmbedCode(code)
   }
 
@@ -175,10 +175,10 @@ export function AdvancedGallerySharingSystem({
   }
 
   const formatFileSize = (bytes: number): string => {
-    const sizes = ['B', 'KB', 'MB', 'GB']'
-    if (bytes === 0) return '0 B'
+    const sizes = ['B', 'KB', 'MB', 'GB']
+    if (bytes === 0) return '0 B
     const i = Math.floor(Math.log(bytes) / Math.log(1024))
-    return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`
+    return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}
   }
 
   const formatDuration = (seconds: number): string => {
@@ -187,9 +187,9 @@ export function AdvancedGallerySharingSystem({
     const secs = Math.floor(seconds % 60)
     
     if (hrs > 0) {
-      return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+      return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}
     }
-    return `${mins}:${secs.toString().padStart(2, '0')}`'
+    return `${mins}:${secs.toString().padStart(2, '0')}
   }
 
   return (
@@ -215,18 +215,18 @@ export function AdvancedGallerySharingSystem({
           {isOwnerView && (
             <>
               <Button
-                variant= "outline"
+                variant= "outline
                 onClick={() => setAnalyticsDialog(true)}
-                className= "space-x-2"
+                className= "space-x-2
               >
                 <BarChart3 className= "h-4 w-4" />
                 <span>Analytics</span>
               </Button>
               
               <Button
-                variant= "outline"
+                variant= "outline
                 onClick={() => setSettingsDialog(true)}
-                className= "space-x-2"
+                className= "space-x-2
               >
                 <Settings className= "h-4 w-4" />
                 <span>Settings</span>
@@ -236,7 +236,7 @@ export function AdvancedGallerySharingSystem({
 
           <Button
             onClick={() => setShareDialog(true)}
-            className= "space-x-2"
+            className= "space-x-2
           >
             <Share2 className= "h-4 w-4" />
             <span>Share Gallery</span>
@@ -272,10 +272,10 @@ export function AdvancedGallerySharingSystem({
           <div className= "relative">
             <Search className= "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder= "Search items..."
+              placeholder= "Search items...
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className= "pl-10 w-64"
+              className= "pl-10 w-64
             />
           </div>
 
@@ -284,7 +284,7 @@ export function AdvancedGallerySharingSystem({
               <SelectValue placeholder= "Filter by tag" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="&quot;>All tags</SelectItem>"
+              <SelectItem value="&quot;>All tags</SelectItem>
               {allTags.map(tag => (
                 <SelectItem key={tag} value={tag}>{tag}</SelectItem>
               ))}
@@ -307,14 +307,14 @@ export function AdvancedGallerySharingSystem({
         <div className= "flex items-center space-x-2">
           <Button
             variant={viewMode === 'grid' ? 'default' : 'outline'}
-            size= "sm"
+            size= "sm
             onClick={() => setViewMode('grid')}
           >
             <Grid className= "h-4 w-4" />
           </Button>
           <Button
             variant={viewMode === 'list' ? 'default' : 'outline'}
-            size= "sm"
+            size= "sm
             onClick={() => setViewMode('list')}
           >
             <List className= "h-4 w-4" />
@@ -520,34 +520,34 @@ export function AdvancedGallerySharingSystem({
             <div >
               <label >Custom Message (Optional)</label>
               <Textarea value={customMessage}> setCustomMessage(e.target.value)}
-                className= "mt-1"
+                className= "mt-1
               />
             </div>
 
             <div >
               <Button > handleShare('facebook')}
-                className= "space-x-2"
+                className= "space-x-2
               >
                 <Facebook >
                 <span >Facebook</span>
               </Button>
               
               <Button > handleShare('twitter')}
-                className= "space-x-2"
+                className= "space-x-2
               >
                 <Twitter >
                 <span >Twitter</span>
               </Button>
               
               <Button > handleShare('linkedin')}
-                className= "space-x-2"
+                className= "space-x-2
               >
                 <Linkedin >
                 <span >LinkedIn</span>
               </Button>
               
               <Button > handleShare('email')}
-                className= "space-x-2"
+                className= "space-x-2
               >
                 <Mail >
                 <span >Email</span>
@@ -556,14 +556,14 @@ export function AdvancedGallerySharingSystem({
 
             <div >
               <Button > setQrCodeDialog(true)}
-                className= "flex-1 space-x-2"
+                className= "flex-1 space-x-2
               >
                 <QrCode >
                 <span >QR Code</span>
               </Button>
               
               <Button > navigator.clipboard.writeText(embedCode)}
-                className= "flex-1 space-x-2"
+                className= "flex-1 space-x-2
               >
                 <Code >
                 <span >Embed</span>
@@ -585,7 +585,7 @@ export function AdvancedGallerySharingSystem({
               )}
               
               <Button > setLightboxItem(null)}
-                className= "absolute top-2 right-2 bg-purple-600/90 text-white hover:bg-purple-700/90 backdrop-blur-sm"
+                className= "absolute top-2 right-2 bg-purple-600/90 text-white hover:bg-purple-700/90 backdrop-blur-sm
               >
                 <X >
               </Button>

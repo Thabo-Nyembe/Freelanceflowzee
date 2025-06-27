@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getChartData, getTopPages, getUserActivity, getPerformanceMetrics } from '@/lib/analytics'
 
 export async function GET(request: NextRequest) {
   try {
@@ -68,9 +69,9 @@ export async function GET(request: NextRequest) {
     })
     
   } catch (error) {
-    console.error('Analytics dashboard API error:', error)
+    console.error('Analytics dashboard error:', error)
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: 'Failed to fetch analytics data' },
       { status: 500 }
     )
   }
@@ -83,7 +84,7 @@ async function getChartData(supabase: unknown, userId: string, timeRange: string
     // Get daily event counts
     const { data: dailyEvents } = await supabase
       .from('hourly_events')
-      .select('*')'
+      .select('*')
       .gte('hour', startDate)
       .lte('hour', endDate)
       .order('hour')
@@ -91,9 +92,9 @@ async function getChartData(supabase: unknown, userId: string, timeRange: string
     // Get daily revenue
     const { data: dailyRevenue } = await supabase
       .from('revenue_summary')
-      .select('*')'
-      .gte('date', startDate.split('T')[0])'
-      .lte('date', endDate.split('T')[0])'
+      .select('*')
+      .gte('date', startDate.split('T')[0])
+      .lte('date', endDate.split('T')[0])
       .order('date')
     
     // Process data for charts
@@ -131,7 +132,7 @@ async function getTopPages(supabase: unknown, userId: string, timeRange: string)
     // Count page visits
     const pageMap = new Map()
     data.forEach((event: unknown) => {
-      const path = event.properties?.path || new URL(event.page_url || '').pathname || '/'
+      const path = event.properties?.path || new URL(event.page_url || '').pathname || '/
       pageMap.set(path, (pageMap.get(path) || 0) + 1)
     })
     
@@ -151,7 +152,7 @@ async function getUserActivity(supabase: unknown, userId: string, timeRange: str
   try {
     const { data } = await supabase
       .from('user_activity_summary')
-      .select('*')'
+      .select('*')
       .eq('user_id', userId)
     
     return data?.[0] || {
@@ -177,9 +178,9 @@ async function getPerformanceMetrics(supabase: unknown, userId: string, timeRang
   try {
     const { data } = await supabase
       .from('performance_summary')
-      .select('*')'
-      .gte('date', startDate.split('T')[0])'
-      .lte('date', endDate.split('T')[0])'
+      .select('*')
+      .gte('date', startDate.split('T')[0])
+      .lte('date', endDate.split('T')[0])
       .order('date', { ascending: false })
       .limit(1)
     
@@ -235,7 +236,7 @@ function processEventsByDay(events: unknown[]) {
   const eventMap = new Map()
   
   events.forEach((event: unknown) => {
-    const date = event.hour.split('T')[0]'
+    const date = event.hour.split('T')[0]
     const current = eventMap.get(date) || 0
     eventMap.set(date, current + event.event_count)
   })
@@ -314,40 +315,40 @@ export async function POST(request: NextRequest) {
     
     // Define allowed custom queries for security
     const allowedQueries = {
-      'user_funnel': `
+      'user_funnel': 
         SELECT 
           event_name,
           COUNT(*) as count,
           COUNT(DISTINCT session_id) as unique_sessions
         FROM analytics_events 
         WHERE user_id = $1 
-          AND event_type = 'user_action'
+          AND event_type = 'user_action
           AND timestamp >= $2
         GROUP BY event_name
         ORDER BY count DESC
-      `, 'page_performance': `
+      `, 'page_performance': 
         SELECT 
           properties->>'path' as page,
           AVG((performance_metrics->>'page_load_time')::numeric) as avg_load_time,
           COUNT(*) as measurements
         FROM analytics_events
         WHERE user_id = $1
-          AND event_type = 'performance'
+          AND event_type = 'performance
           AND timestamp >= $2
-        GROUP BY properties->>'path'
+        GROUP BY properties->>'path
         ORDER BY avg_load_time DESC
-      `, 'error_analysis': `
+      `, 'error_analysis': 
         SELECT 
           properties->>'error_message' as error,
           COUNT(*) as occurrences,
           MAX(timestamp) as last_occurrence
         FROM analytics_events
         WHERE user_id = $1
-          AND event_type = 'error'
+          AND event_type = 'error
           AND timestamp >= $2
-        GROUP BY properties->>'error_message'
+        GROUP BY properties->>'error_message
         ORDER BY occurrences DESC
-      `
+      
     }
     
     if (!allowedQueries[query as keyof typeof allowedQueries]) {

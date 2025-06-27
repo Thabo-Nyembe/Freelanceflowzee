@@ -1,4 +1,4 @@
-import Stripe from 'stripe'
+import Stripe from 'stripe
 
 // Initialize Stripe with enhanced configuration
 export const stripe = new Stripe(
@@ -349,5 +349,5 @@ export const StripeUtils = {
 
   isTestKey: (key: string) => key.startsWith('sk_test_'),
 
-  getPublishableKey: () => process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '','
+  getPublishableKey: () => process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 
 } 

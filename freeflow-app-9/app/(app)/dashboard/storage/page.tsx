@@ -2,7 +2,7 @@
 import React from 'react'
 import { EnhancedFileStorage } from '@/components/storage/enhanced-file-storage'
 import { StorageDashboard } from '@/components/storage/storage-dashboard'
-import { Metadata } from 'next'
+import { Metadata } from 'next
 
 export const metadata: Metadata = {
   title: 'Multi-Cloud Storage | FreeflowZee',

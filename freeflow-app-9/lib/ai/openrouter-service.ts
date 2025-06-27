@@ -1,5 +1,5 @@
 interface OpenRouterMessage {
-  role: 'system' | 'user' | 'assistant'
+  role: 'system' | 'user' | 'assistant
   content: string
 }
 
@@ -29,9 +29,9 @@ class OpenRouterService {
   private defaultModel: string
 
   constructor() {
-    this.apiKey = process.env.OPENROUTER_API_KEY || '
-    this.baseUrl = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1'
-    this.defaultModel = process.env.OPENROUTER_MODEL || 'openrouter/auto'
+    this.apiKey = process.env.OPENROUTER_API_KEY || 
+    this.baseUrl = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1
+    this.defaultModel = process.env.OPENROUTER_MODEL || 'openrouter/auto
   }
 
   async generateResponse(
@@ -50,7 +50,7 @@ class OpenRouterService {
           content: `You are an expert AI assistant for FreeflowZee, a freelance management platform. 
           Help users with business optimization, project management, client relationships, and productivity.
           Provide actionable, specific advice with clear next steps.
-          ${context ? `Context: ${JSON.stringify(context)}` : ''}`'
+          ${context ? `Context: ${JSON.stringify(context)}` : ''}
         },
         {
           role: 'user',
@@ -61,7 +61,7 @@ class OpenRouterService {
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`, 'Content-Type': 'application/json', 'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000', 'X-Title': 'FreeflowZee AI Assistant'
+          'Authorization': `Bearer ${this.apiKey}`, 'Content-Type': 'application/json', 'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000', 'X-Title': 'FreeflowZee AI Assistant
         },
         body: JSON.stringify({
           model: model || this.defaultModel,
@@ -100,7 +100,7 @@ class OpenRouterService {
     - Client Count: ${businessData.clientCount || 'N/A'}
     - Monthly Hours: ${businessData.monthlyHours || 'N/A'}
     
-    Provide 3-5 specific recommendations for growth and optimization.`
+    Provide 3-5 specific recommendations for growth and optimization.
 
     return this.generateResponse(prompt, businessData)
   }
@@ -114,7 +114,7 @@ class OpenRouterService {
     Deadline: ${projectData.deadline || 'N/A'}
     Progress: ${projectData.progress || 0}%
     
-    Suggest ways to improve efficiency, meet deadlines, and maximize value.`
+    Suggest ways to improve efficiency, meet deadlines, and maximize value.
 
     return this.generateResponse(prompt, projectData)
   }
@@ -127,7 +127,7 @@ class OpenRouterService {
       email: `Write a professional client email for: ${context.purpose || 'general communication'}`,
       proposal: `Create a project proposal for: ${context.projectTitle || 'new project'}`,
       update: `Write a project update email for: ${context.projectTitle || 'current project'}`,
-      invoice: `Generate professional invoice communication for: ${context.projectTitle || 'completed work'}`
+      invoice: `Generate professional invoice communication for: ${context.projectTitle || 'completed work'}
     }
 
     return this.generateResponse(prompts[type], context)
@@ -140,7 +140,7 @@ class OpenRouterService {
     Target Audience: ${context.audience || 'small businesses'}
     Tone: ${context.tone || 'professional but friendly'}
     
-    Make it engaging and conversion-focused.`
+    Make it engaging and conversion-focused.
 
     return this.generateResponse(prompt, context)
   }
@@ -148,7 +148,7 @@ class OpenRouterService {
   // Test connection method
   async testConnection(): Promise<boolean> {
     try {
-      const response = await this.generateResponse('Hello, please respond with "Connection successful"')
+      const response = await this.generateResponse('Hello, please respond with "Connection successful")
       return response.toLowerCase().includes('connection successful')
     } catch (error) {
       console.error('OpenRouter connection test failed:', error)
@@ -161,7 +161,7 @@ class OpenRouterService {
     try {
       const response = await fetch(`${this.baseUrl}/models`, {
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`, 'Content-Type': 'application/json'
+          'Authorization': `Bearer ${this.apiKey}`, 'Content-Type': 'application/json
         }
       })
 

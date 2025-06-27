@@ -1,4 +1,4 @@
-import Stripe from 'stripe'
+import Stripe from 'stripe
 
 // Enhanced Stripe service with Apple Pay, Google Pay, and advanced features
 class StripeEnhancedService {
@@ -13,7 +13,7 @@ class StripeEnhancedService {
         typescript: true,
       }
     )
-    this.publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '
+    this.publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 
   }
 
   // Enhanced Payment Intent with Apple Pay/Google Pay support
@@ -23,7 +23,7 @@ class StripeEnhancedService {
     metadata?: Record<string, string>
     paymentMethods?: string[]
     returnUrl?: string
-    setupFutureUsage?: 'on_session' | 'off_session'
+    setupFutureUsage?: 'on_session' | 'off_session
   }) {
     try {
       const { amount, currency, metadata, paymentMethods, returnUrl, setupFutureUsage } = params
@@ -31,18 +31,18 @@ class StripeEnhancedService {
       const paymentIntent = await this.stripe.paymentIntents.create({
         amount,
         currency,
-        payment_method_types: paymentMethods || ['card', 'apple_pay', 'google_pay', 'link', 'cashapp'
+        payment_method_types: paymentMethods || ['card', 'apple_pay', 'google_pay', 'link', 'cashapp
         ],
         metadata: {
           ...metadata,
           created_at: new Date().toISOString(),
-          service: 'freeflowzee-enhanced'
+          service: 'freeflowzee-enhanced
         },
         setup_future_usage: setupFutureUsage,
         return_url: returnUrl,
         automatic_payment_methods: {
           enabled: true,
-          allow_redirects: 'always'
+          allow_redirects: 'always
         }
       })
 
@@ -71,7 +71,7 @@ class StripeEnhancedService {
       console.error('Apple Pay domain verification failed:', error)
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Domain verification failed'
+        error: error instanceof Error ? error.message : 'Domain verification failed
       }
     }
   }
@@ -114,7 +114,7 @@ class StripeEnhancedService {
       console.error('Enhanced customer creation failed:', error)
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Customer creation failed'
+        error: error instanceof Error ? error.message : 'Customer creation failed
       }
     }
   }
@@ -135,12 +135,12 @@ class StripeEnhancedService {
         items: [{ price: priceId }],
         payment_behavior: 'default_incomplete',
         payment_settings: {
-          save_default_payment_method: 'on_subscription'
+          save_default_payment_method: 'on_subscription
         },
         expand: ['latest_invoice.payment_intent'],
         metadata: {
           ...metadata,
-          created_via: 'freeflowzee-enhanced'
+          created_via: 'freeflowzee-enhanced
         }
       }
 
@@ -165,7 +165,7 @@ class StripeEnhancedService {
       console.error('Subscription creation failed:', error)
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Subscription creation failed'
+        error: error instanceof Error ? error.message : 'Subscription creation failed
       }
     }
   }
@@ -221,7 +221,7 @@ class StripeEnhancedService {
       console.error('Invoice creation failed:', error)
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Invoice creation failed'
+        error: error instanceof Error ? error.message : 'Invoice creation failed
       }
     }
   }
@@ -258,7 +258,7 @@ class StripeEnhancedService {
       console.error('Payment method save failed:', error)
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Payment method save failed'
+        error: error instanceof Error ? error.message : 'Payment method save failed
       }
     }
   }
@@ -296,7 +296,7 @@ class StripeEnhancedService {
       console.error('Webhook processing failed:', error)
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Webhook processing failed'
+        error: error instanceof Error ? error.message : 'Webhook processing failed
       }
     }
   }
@@ -338,7 +338,7 @@ class StripeEnhancedService {
       console.error('Payment analytics failed:', error)
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Analytics retrieval failed'
+        error: error instanceof Error ? error.message : 'Analytics retrieval failed
       }
     }
   }
@@ -380,7 +380,7 @@ class StripeEnhancedService {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Connection test failed'
+        error: error instanceof Error ? error.message : 'Connection test failed
       }
     }
   }

@@ -1,7 +1,7 @@
-'use client'
+'use client
 
-import React, { useState, useEffect, useReducer } from 'react'
-import Link from 'next/link'
+import React, { useState, useEffect, useReducer } from 'react
+import Link from 'next/link
  id: string }
   | { type: 'MARK_ALL_READ' }
   | { type: 'DELETE'; id: string }
@@ -86,9 +86,9 @@ export function DashboardNav({ className, onLogout, user, setOpen }: DashboardNa
         
         <button
           onClick={toggleMobileMenu}
-          className= "mobile-menu-button"
-          aria-label= "Toggle mobile menu"
-          data-testid= "mobile-menu"
+          className= "mobile-menu-button
+          aria-label= "Toggle mobile menu
+          data-testid= "mobile-menu
         >
           <Menu className= "h-6 w-6" />
         </button>
@@ -103,8 +103,8 @@ export function DashboardNav({ className, onLogout, user, setOpen }: DashboardNa
               <span className= "font-semibold">Menu</span>
               <button
                 onClick={toggleMobileMenu}
-                className= "button-touch"
-                aria-label= "Close menu"
+                className= "button-touch
+                aria-label= "Close menu
               >
                 <X className= "h-5 w-5" />
               </button>
@@ -118,8 +118,8 @@ export function DashboardNav({ className, onLogout, user, setOpen }: DashboardNa
                   className={cn(
                     "flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors button-touch",
                     pathname === item.href
-                      ? "bg-indigo-50 text-indigo-700 border-r-2 border-indigo-700"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      ? "bg-indigo-50 text-indigo-700 border-r-2 border-indigo-700
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900
                   )}
                 >
                   <item.icon className= "h-5 w-5" />
@@ -138,7 +138,7 @@ export function DashboardNav({ className, onLogout, user, setOpen }: DashboardNa
                     onLogout?.();
                     toggleMobileMenu();
                   }}
-                  className= "flex items-center gap-3 px-3 py-3 w-full text-left rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 button-touch"
+                  className= "flex items-center gap-3 px-3 py-3 w-full text-left rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 button-touch
                 >
                   <LogOut className= "h-5 w-5" />
                   Sign Out
@@ -152,7 +152,7 @@ export function DashboardNav({ className, onLogout, user, setOpen }: DashboardNa
       {/* Desktop Sidebar */}
       <div className={cn(
         "fixed left-0 top-0 z-40 h-screen w-64 transform bg-white border-r border-gray-200 transition-transform duration-200 ease-in-out desktop-only",
-        collapsed ? "-translate-x-48" : "translate-x-0"
+        collapsed ? "-translate-x-48" : "translate-x-0
       )}>
         <div className= "flex h-full flex-col">
           {/* Header */}
@@ -164,11 +164,11 @@ export function DashboardNav({ className, onLogout, user, setOpen }: DashboardNa
               {!collapsed && <span className= "font-semibold text-gray-900">FreeflowZee</span>}
             </Link>
             <Button
-              variant= "ghost"
-              size= "sm"
+              variant= "ghost
+              size= "sm
               onClick={() => setCollapsed(!collapsed)}
-              className= "button-touch"
-              data-testid= "sidebar-toggle"
+              className= "button-touch
+              data-testid= "sidebar-toggle
             >
               {collapsed ? <ChevronRight className= "h-4 w-4" /> : <ChevronLeft className= "h-4 w-4" />}
             </Button>
@@ -183,10 +183,10 @@ export function DashboardNav({ className, onLogout, user, setOpen }: DashboardNa
                 className={cn(
                   "flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors button-touch",
                   pathname === item.href
-                    ? "bg-indigo-50 text-indigo-700 border-r-2 border-indigo-700"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    ? "bg-indigo-50 text-indigo-700 border-r-2 border-indigo-700
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900
                 )}
-                data-testid={`nav-${item.href.split('/').pop()}`}'
+                data-testid={`nav-${item.href.split('/').pop()}`}
               >
                 <item.icon className= "h-5 w-5 flex-shrink-0" />
                 {!collapsed && <span>{item.name}</span>}
@@ -211,10 +211,10 @@ export function DashboardNav({ className, onLogout, user, setOpen }: DashboardNa
                 </div>
               </div>
               <Button
-                variant= "ghost"
+                variant= "ghost
                 onClick={() => onLogout?.()}
-                className= "w-full mt-2 justify-start text-red-600 hover:text-red-700 hover:bg-red-50 button-touch"
-                data-testid= "logout-button"
+                className= "w-full mt-2 justify-start text-red-600 hover:text-red-700 hover:bg-red-50 button-touch
+                data-testid= "logout-button
               >
                 <LogOut className= "h-4 w-4 mr-2" />
                 Sign Out
@@ -233,12 +233,12 @@ export function DashboardNav({ className, onLogout, user, setOpen }: DashboardNa
               href={item.href}
               className={cn(
                 "mobile-nav-item",
-                pathname === item.href ? "active" : "
+                pathname === item.href ? "active" : 
               )}
-              data-testid={`mobile-nav-${item.href.split('/').pop()}`}'
+              data-testid={`mobile-nav-${item.href.split('/').pop()}`}
             >
               <item.icon className= "h-5 w-5" />
-              <span className= "text-xs font-medium">{item.name.split(&apos; ')[0]}</span>'
+              <span className= "text-xs font-medium">{item.name.split(&apos; ')[0]}</span>
             </Link>
           ))}
         </div>

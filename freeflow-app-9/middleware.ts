@@ -1,7 +1,7 @@
 // Force deployment update - Production Ready V2.1
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-import { updateSession } from '@/utils/supabase/middleware'
+import { NextResponse } from 'next/server
+import type { NextRequest } from 'next/server
+import { updateSession } from '@/utils/supabase/middleware
 
 // Define public routes that don't require authentication
 const publicRoutes = [
@@ -9,7 +9,7 @@ const publicRoutes = [
   '/landing', '/login', '/signup', '/features', '/how-it-works', '/docs', '/tutorials', 
   '/community', '/api-docs', '/demo', '/support', '/contact', '/payment', '/blog', 
   '/newsletter', '/privacy', '/terms', '/pricing', '/careers', '/cookies', 
-  '/book-appointment', '/community-showcase', '/enhanced-collaboration-demo', '/media-preview-demo'
+  '/book-appointment', '/community-showcase', '/enhanced-collaboration-demo', '/media-preview-demo
 ]
 
 // Define protected routes that require authentication
@@ -20,7 +20,7 @@ const protectedRoutes = [
   '/dashboard/files',
   '/dashboard/projects',
   '/dashboard/settings',
-  '/dashboard/billing'
+  '/dashboard/billing
 ]
 
 // Rate limiting for auth endpoints
@@ -64,7 +64,7 @@ export async function middleware(request: NextRequest) {
   const isTestEnv = 
     request.headers.get('x-test-mode') === 'true' ||
     request.headers.get('user-agent')?.includes('Playwright') ||
-    process.env.NODE_ENV === 'test'
+    process.env.NODE_ENV === 'test
 
   // Check for local development environment
   const isLocalDev = process.env.NODE_ENV === 'development' &&
@@ -102,9 +102,9 @@ export async function middleware(request: NextRequest) {
 
   // Get client IP for rate limiting
   const ip = request.headers.get('x-forwarded-for') || 
-    request.headers.get('x-forwarded-for')?.split(',')[0] || '
+    request.headers.get('x-forwarded-for')?.split(',')[0] || 
     request.headers.get('x-real-ip') || 
-    '127.0.0.1'
+    '127.0.0.1
 
   // Apply rate limiting to auth endpoints
   if (request.nextUrl.pathname.startsWith('/login') || 
