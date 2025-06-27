@@ -384,17 +384,20 @@ export function TeamHub({ projects, userId }: TeamHubProps) {
           </Dialog>
         </div>
       </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="members">Members</TabsTrigger>
-            <TabsTrigger value="activity">Activity</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-          </TabsList>
+      <CardContent className="flex-1 overflow-hidden">
+        <div className="tab-content-container">
+          <Tabs defaultValue="overview" className="h-full flex flex-col">
+            <TabsList className="tabs-list-fixed">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="members">Members</TabsTrigger>
+              <TabsTrigger value="activity">Activity</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
 
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
+            <div className="tabs-content-area">
+              {/* Overview Tab */}
+              <TabsContent value="overview" className="h-full m-0">
+                <div className="tab-panel p-6 space-y-6">
             {/* Team Statistics */}
             <div className="grid gap-4 md:grid-cols-4">
               <Card>

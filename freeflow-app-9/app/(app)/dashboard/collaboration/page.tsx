@@ -73,7 +73,7 @@ export default function CollaborationPage() {
       {/* Collaboration Tabs */}
       <div className="tab-content-container">
         <Tabs defaultValue="chat" className="h-full flex flex-col">
-          <TabsList className="bg-white/60 backdrop-blur-sm border-slate-200/50 flex-shrink-0">
+          <TabsList className="tabs-list-fixed">
             <TabsTrigger value="chat" className="flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />
               <span className="hidden sm:inline">Enhanced Chat</span>
@@ -92,18 +92,18 @@ export default function CollaborationPage() {
             </TabsTrigger>
           </TabsList>
 
-          <div className="flex-1 overflow-hidden">
-            <TabsContent value="chat" className="h-full">
-              <Card className="glass-card">
-                <CardContent className="tab-panel">
+          <div className="tabs-content-area">
+            <TabsContent value="chat" className="h-full m-0">
+              <div className="glass-card">
+                <div className="tab-panel p-6">
                   <RealTimeCollaborationSystem />
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </TabsContent>
 
-            <TabsContent value="feedback" className="h-full">
-              <Card className="glass-card">
-                <CardContent className="tab-panel">
+            <TabsContent value="feedback" className="h-full m-0">
+              <div className="glass-card">
+                <div className="tab-panel p-6">
                   <UniversalPinpointFeedbackSystem 
                     projectId="current-project"
                     files={sampleFiles}
@@ -114,33 +114,33 @@ export default function CollaborationPage() {
                       role: 'freelancer'
                     }}
                   />
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </TabsContent>
 
-            <TabsContent value="media" className="h-full">
-              <Card className="glass-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+            <TabsContent value="media" className="h-full m-0">
+              <div className="glass-card">
+                <div className="p-6 flex-shrink-0 border-b border-white/20">
+                  <h3 className="flex items-center gap-2 text-lg font-semibold">
                     <ImageIcon className="w-5 h-5 text-purple-600" />
                     Universal Media Previews
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="tab-panel">
+                  </h3>
+                </div>
+                <div className="tab-panel p-6">
                   <UniversalMediaPreviewsEnhanced />
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </TabsContent>
 
-            <TabsContent value="gallery" className="h-full">
-              <Card className="glass-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+            <TabsContent value="gallery" className="h-full m-0">
+              <div className="glass-card">
+                <div className="p-6 flex-shrink-0 border-b border-white/20">
+                  <h3 className="flex items-center gap-2 text-lg font-semibold">
                     <FolderOpen className="w-5 h-5 text-orange-600" />
                     Project Gallery
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="tab-panel">
+                  </h3>
+                </div>
+                <div className="tab-panel p-6">
                   <div className="text-center py-12">
                     <FolderOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Project Gallery</h3>
@@ -148,8 +148,8 @@ export default function CollaborationPage() {
                       Browse and manage all project files and assets in one place.
                     </p>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </TabsContent>
           </div>
         </Tabs>

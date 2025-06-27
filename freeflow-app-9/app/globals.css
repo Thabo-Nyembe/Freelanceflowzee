@@ -188,20 +188,27 @@
 
   /* Content Container for Tabs */
   .dashboard-tab-content {
-    @apply h-full overflow-auto flex-1;
-    height: calc(100vh - 12rem); /* Account for header + tabs */
-    min-height: 0; /* Allow content to shrink */
+    @apply overflow-auto;
+    height: calc(100vh - 16rem); /* Account for header + tabs + padding */
+    min-height: 400px; /* Minimum usable height */
   }
 
   /* Collaboration Container */
   .collaboration-container {
-    @apply h-full flex flex-col gap-6;
-    height: calc(100vh - 8rem); /* Account for header */
+    @apply flex flex-col gap-4;
+    height: calc(100vh - 5rem); /* Account for header */
+    max-height: calc(100vh - 5rem);
+    min-height: 600px; /* Minimum usable height */
   }
 
   /* Collaboration Content */
   .collaboration-content {
     @apply flex-1 flex flex-col min-h-0; /* min-h-0 allows flex child to shrink */
+  }
+
+  /* Collaboration Tabs Container */
+  .collaboration-tabs-container {
+    @apply flex-shrink-0 space-y-4 p-4;
   }
 
   /* Skip to content accessibility */
@@ -472,30 +479,48 @@
 
   /* Glass Card Styles */
   .glass-card {
-    @apply bg-white/60 backdrop-blur-xl border border-white/20 shadow-lg;
-    @apply flex flex-col; /* Add flex column layout */
-    @apply h-full; /* Take full height */
+    @apply bg-white/60 backdrop-blur-xl border border-white/20 shadow-lg rounded-2xl;
+    @apply flex flex-col h-full; /* Full height flex container */
+    @apply transition-all duration-300 hover:bg-white/70 hover:shadow-xl;
   }
 
   .dark .glass-card {
-    @apply bg-gray-900/60 border-gray-800/20;
+    @apply bg-gray-900/60 border-gray-800/20 hover:bg-gray-900/70;
   }
 
   /* Tab Content Container */
   .tab-content-container {
     @apply flex-1 overflow-hidden flex flex-col;
     min-height: 0; /* Allow content to shrink */
+    height: calc(100vh - 12rem); /* Account for header and navigation */
   }
 
   /* Tab Panel */
   .tab-panel {
-    @apply flex-1 overflow-auto p-6;
-    min-height: 0; /* Allow content to shrink */
+    @apply overflow-auto p-0;
+    height: calc(100vh - 18rem); /* Account for headers, tabs, and padding */
+    min-height: 350px; /* Minimum usable height */
   }
 
   /* Tabs Header */
   .collaboration-tabs-container {
-    @apply flex-shrink-0 pb-6;
+    @apply flex-shrink-0 pb-4;
+  }
+
+  /* Tabs List styling to prevent shrinking */
+  .tabs-list-fixed {
+    @apply flex-shrink-0 mb-4;
+  }
+
+  /* Enhanced card content spacing */
+  .glass-card .card-content {
+    @apply flex-1 overflow-hidden;
+  }
+
+  /* Tab content wrapper for proper scroll behavior */
+  .tabs-content-area {
+    @apply flex-1 overflow-hidden;
+    min-height: 0;
   }
 }
 

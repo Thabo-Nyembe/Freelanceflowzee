@@ -611,23 +611,26 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
         </CardContent>
       </Card>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3 bg-white/50 backdrop-blur-sm">
-          <TabsTrigger value="files" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
-            <FileText className="w-4 h-4 mr-2" />
-            Files
-          </TabsTrigger>
-          <TabsTrigger value="shared" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
-            <Share className="w-4 h-4 mr-2" />
-            Shared
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
-            <TrendingUp className="w-4 h-4 mr-2" />
-            Analytics
-          </TabsTrigger>
-        </TabsList>
+      <div className="tab-content-container">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+          <TabsList className="tabs-list-fixed">
+            <TabsTrigger value="files" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Files
+            </TabsTrigger>
+            <TabsTrigger value="shared" className="flex items-center gap-2">
+              <Share className="w-4 h-4" />
+              Shared
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />
+              Analytics
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="files" className="mt-6">
+          <div className="tabs-content-area">
+            <TabsContent value="files" className="h-full m-0">
+              <div className="tab-panel p-6">
           {/* Folders */}
           {filteredFolders.length > 0 && (
             <div className="mb-6">
@@ -725,35 +728,38 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
                 </Card>
               ))}
             </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="shared" className="h-full m-0">
+              <div className="tab-panel p-6">
+                <div className="text-center py-12">
+                  <Share className="w-12 h-12 text-blue-500 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">Shared Files</h3>
+                  <p className="text-gray-600 mb-4">Files shared with team members and clients</p>
+                  <Button onClick={() => alert('Shared files feature coming soon!')}>
+                    View Shared Files
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="analytics" className="h-full m-0">
+              <div className="tab-panel p-6">
+                <div className="text-center py-12">
+                  <TrendingUp className="w-12 h-12 text-green-500 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">File Analytics</h3>
+                  <p className="text-gray-600 mb-4">Track file usage, downloads, and collaboration metrics</p>
+                  <Button onClick={() => alert('Analytics dashboard coming soon!')}>
+                    View Analytics
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
           </div>
-        </TabsContent>
-
-        <TabsContent value="shared" className="mt-6">
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-            <CardContent className="p-8 text-center">
-              <Share className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Shared Files</h3>
-              <p className="text-gray-600 mb-4">Files shared with team members and clients</p>
-              <Button onClick={() => alert('Shared files feature coming soon!')}>
-                View Shared Files
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="analytics" className="mt-6">
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-            <CardContent className="p-8 text-center">
-              <TrendingUp className="w-12 h-12 text-green-500 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">File Analytics</h3>
-              <p className="text-gray-600 mb-4">Track file usage, downloads, and collaboration metrics</p>
-              <Button onClick={() => alert('Analytics dashboard coming soon!')}>
-                View Analytics
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        </Tabs>
+      </div>
 
       {/* File Upload Dialog */}
       <FileUploadDialog
