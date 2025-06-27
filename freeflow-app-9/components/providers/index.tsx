@@ -39,7 +39,7 @@ export function Providers({ children }: ProvidersProps) {
   return (
     <SupabaseContext.Provider value={supabase}>
       <QueryClientProvider client={queryClient}>
-        <NextThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <NextThemeProvider attribute= "class" defaultTheme= "system" enableSystem>
           <ThemeProvider>
             {children}
             <Toaster />

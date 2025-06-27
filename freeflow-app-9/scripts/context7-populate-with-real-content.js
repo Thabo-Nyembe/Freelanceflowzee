@@ -26,8 +26,7 @@ const axios = require('axios').default;
 const apiClient = axios.create({
   timeout: 10000,
   headers: {
-    'User-Agent': 'FreeflowZee-Content-Populator/1.0',
-    'Accept': 'application/json'
+    'User-Agent': 'FreeflowZee-Content-Populator/1.0', 'Accept': 'application/json'
   }
 });
 
@@ -87,10 +86,7 @@ async function generateRealUsers(count = 20) {
  * Uses Picsum Photos for high-quality placeholder images
  */
 async function generateProjectImages(count = 30) {
-  const categories = [
-    'business', 'technology', 'design', 'architecture', 'nature',
-    'food', 'fashion', 'art', 'interior', 'landscape'
-  ];
+  const categories = ['business', 'technology', 'design', 'architecture', 'nature', 'food', 'fashion', 'art', 'interior', 'landscape'];
   
   const images = [];
   
@@ -119,24 +115,14 @@ async function generateProjectImages(count = 30) {
  * Uses Lorem Picsum for varied text content
  */
 async function generateLoremContent() {
-  const sentences = [
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    "Ut enim ad minim veniam, quis nostrud exercitation ullamco.",
-    "Duis aute irure dolor in reprehenderit in voluptate velit esse.",
-    "Excepteur sint occaecat cupidatat non proident, sunt in culpa.",
-    "Nulla pariatur excepteur sint occaecat cupidatat non proident.",
-    "At vero eos et accusamus et iusto odio dignissimos ducimus.",
-    "Et harum quidem rerum facilis est et expedita distinctio.",
-    "Temporibus autem quibusdam et aut officiis debitis aut rerum.",
-    "Neque porro quisquam est qui dolorem ipsum quia dolor sit."
-  ];
+  const sentences = ["Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.", "Ut enim ad minim veniam, quis nostrud exercitation ullamco.", "Duis aute irure dolor in reprehenderit in voluptate velit esse.", "Excepteur sint occaecat cupidatat non proident, sunt in culpa.", "Nulla pariatur excepteur sint occaecat cupidatat non proident.", "At vero eos et accusamus et iusto odio dignissimos ducimus.", "Et harum quidem rerum facilis est et expedita distinctio.", "Temporibus autem quibusdam et aut officiis debitis aut rerum.",
+    "Neque porro quisquam est qui dolorem ipsum quia dolor sit."];
   
   return {
-    short: sentences.slice(0, 2).join(' '),
-    medium: sentences.slice(0, 4).join(' '),
-    long: sentences.join(' '),
-    paragraph: sentences.slice(0, 6).join(' ') + ' ' + sentences.slice(3, 8).join(' ')
+    short: sentences.slice(0, 2).join(' '),'
+    medium: sentences.slice(0, 4).join(' '),'
+    long: sentences.join(' '),'
+    paragraph: sentences.slice(0, 6).join(' ') + ' ' + sentences.slice(3, 8).join(' ')'
   };
 }
 
@@ -145,17 +131,10 @@ async function generateLoremContent() {
  * Creates diverse project types with real-world scenarios
  */
 async function generateRealProjects(users, images, count = 25) {
-  const projectTypes = [
-    'Website Design', 'Mobile App', 'Logo Design', 'Brand Identity',
-    'E-commerce Store', 'Marketing Campaign', 'Social Media Design',
-    'Video Production', 'Content Writing', 'SEO Optimization',
-    'UI/UX Design', 'Web Development', 'Graphic Design', 'Photography'
+  const projectTypes = ['Website Design', 'Mobile App', 'Logo Design', 'Brand Identity', 'E-commerce Store', 'Marketing Campaign', 'Social Media Design', 'Video Production', 'Content Writing', 'SEO Optimization', 'UI/UX Design', 'Web Development', 'Graphic Design', 'Photography'
   ];
   
-  const industries = [
-    'Technology', 'Healthcare', 'Finance', 'Education', 'Retail',
-    'Food & Beverage', 'Real Estate', 'Entertainment', 'Fitness',
-    'Travel', 'Automotive', 'Fashion', 'Non-Profit', 'Gaming'
+  const industries = ['Technology', 'Healthcare', 'Finance', 'Education', 'Retail', 'Food & Beverage', 'Real Estate', 'Entertainment', 'Fitness', 'Travel', 'Automotive', 'Fashion', 'Non-Profit', 'Gaming'
   ];
   
   const lorem = await generateLoremContent();
@@ -333,7 +312,7 @@ function generateAnalyticsData() {
     const date = new Date();
     date.setDate(date.getDate() - i);
     return {
-      date: date.toISOString().split('T')[0],
+      date: date.toISOString().split('T')[0],'
       views: Math.floor(Math.random() * 1000) + 100,
       downloads: Math.floor(Math.random() * 200) + 10,
       uploads: Math.floor(Math.random() * 50) + 5,
@@ -369,27 +348,19 @@ function generateAnalyticsData() {
 
 // Helper Functions
 function getRandomProfession() {
-  const professions = [
-    'Web Designer', 'Graphic Designer', 'Developer', 'Writer', 'Photographer',
-    'Video Editor', 'Marketing Specialist', 'UI/UX Designer', 'Illustrator',
-    'Brand Strategist', 'Social Media Manager', 'Content Creator'
+  const professions = ['Web Designer', 'Graphic Designer', 'Developer', 'Writer', 'Photographer', 'Video Editor', 'Marketing Specialist', 'UI/UX Designer', 'Illustrator', 'Brand Strategist', 'Social Media Manager', 'Content Creator'
   ];
   return professions[Math.floor(Math.random() * professions.length)];
 }
 
 function getRandomSkills() {
-  const skills = [
-    'Adobe Photoshop', 'Figma', 'React', 'Node.js', 'WordPress', 'SEO',
-    'Adobe Illustrator', 'JavaScript', 'Python', 'CSS', 'HTML', 'Vue.js',
-    'After Effects', 'Premiere Pro', 'Sketch', 'InDesign', 'Canva'
+  const skills = ['Adobe Photoshop', 'Figma', 'React', 'Node.js', 'WordPress', 'SEO', 'Adobe Illustrator', 'JavaScript', 'Python', 'CSS', 'HTML', 'Vue.js', 'After Effects', 'Premiere Pro', 'Sketch', 'InDesign', 'Canva'
   ];
   return skills.sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 5) + 3);
 }
 
 function getRandomTags() {
-  const tags = [
-    'design', 'development', 'marketing', 'branding', 'ui-ux', 'mobile',
-    'web', 'creative', 'business', 'startup', 'ecommerce', 'portfolio'
+  const tags = ['design', 'development', 'marketing', 'branding', 'ui-ux', 'mobile', 'web', 'creative', 'business', 'startup', 'ecommerce', 'portfolio'
   ];
   return tags.sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 4) + 2);
 }
@@ -422,7 +393,7 @@ function formatFileSize(bytes) {
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];'
 }
 
 function generateProjectFiles() {
@@ -461,10 +432,7 @@ function generateAttachments() {
 }
 
 function generateMockUsers(count) {
-  const mockNames = [
-    'Alex Johnson', 'Sarah Chen', 'Mike Rodriguez', 'Emma Thompson', 'David Kim',
-    'Lisa Anderson', 'John Smith', 'Anna Williams', 'Carlos Garcia', 'Maya Patel'
-  ];
+  const mockNames = ['Alex Johnson', 'Sarah Chen', 'Mike Rodriguez', 'Emma Thompson', 'David Kim', 'Lisa Anderson', 'John Smith', 'Anna Williams', 'Carlos Garcia', 'Maya Patel'];
   
   return Array.from({ length: count }, (_, i) => ({
     id: `user_${i + 1}`,
@@ -474,7 +442,7 @@ function generateMockUsers(count) {
     location: 'Remote',
     phone: `+1-555-${String(Math.floor(Math.random() * 9000) + 1000)}`,
     profession: getRandomProfession(),
-    bio: generateBio(mockNames[i % mockNames.length]?.split(' ')[0] || 'User'),
+    bio: generateBio(mockNames[i % mockNames.length]?.split(' ')[0] || 'User'),'
     joinDate: getRandomDate(),
     skills: getRandomSkills(),
     rating: Math.round((Math.random() * 2 + 3) * 10) / 10,
@@ -521,13 +489,7 @@ async function populateAppWithRealContent() {
     
     // Save all generated content
     const contentFiles = {
-      'enhanced-users.json': users,
-      'enhanced-projects.json': projects,
-      'enhanced-posts.json': posts,
-      'enhanced-images.json': images,
-      'enhanced-files.json': fileSystem,
-      'enhanced-transactions.json': transactions,
-      'enhanced-analytics.json': analytics
+      'enhanced-users.json': users, 'enhanced-projects.json': projects, 'enhanced-posts.json': posts, 'enhanced-images.json': images, 'enhanced-files.json': fileSystem, 'enhanced-transactions.json': transactions, 'enhanced-analytics.json': analytics
     };
     
     for (const [filename, data] of Object.entries(contentFiles)) {
@@ -546,22 +508,10 @@ async function populateAppWithRealContent() {
       totalFiles: fileSystem.files.length,
       totalTransactions: transactions.length,
       totalFileSize: fileSystem.totalSizeFormatted,
-      apiSources: [
-        'randomuser.me - User profiles',
-        'picsum.photos - Professional images',
-        'Generated - Lorem ipsum content',
-        'Mock data - File system and analytics'
+      apiSources: ['randomuser.me - User profiles', 'picsum.photos - Professional images', 'Generated - Lorem ipsum content', 'Mock data - File system and analytics'
       ],
-      features: [
-        '✅ Real user profiles with photos',
-        '✅ Professional project images',
-        '✅ Realistic project scenarios',
-        '✅ Engaging community posts',
-        '✅ Comprehensive file system',
-        '✅ Financial transactions',
-        '✅ Analytics dashboard data',
-        '✅ Context7 + Axios integration'
-      ]
+      features: ['✅ Real user profiles with photos', '✅ Professional project images', '✅ Realistic project scenarios', '✅ Engaging community posts', '✅ Comprehensive file system', '✅ Financial transactions', '✅ Analytics dashboard data',
+        '✅ Context7 + Axios integration']
     };
     
     await fs.writeFile(

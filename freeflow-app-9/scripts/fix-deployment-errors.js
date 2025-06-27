@@ -42,7 +42,7 @@ const execCommand = (command, options = {}) => {
 
 async function fixDeploymentErrors() {
   log('\n🔧 Comprehensive Deployment Error Fix', colors.cyan);
-  log('=' .repeat(50), colors.cyan);
+  log('=' .repeat(50), colors.cyan);'
 
   const fixes = [];
 
@@ -53,10 +53,10 @@ async function fixDeploymentErrors() {
     let envContent = fs.readFileSync(envPath, 'utf-8');
     
     // Ensure OpenRouter variables are properly set
-    if (!envContent.includes('OPENROUTER_BASE_URL=')) {
+    if (!envContent.includes('OPENROUTER_BASE_URL= ')) {
       envContent += '\nOPENROUTER_BASE_URL=https://openrouter.ai/api/v1\n';
     }
-    if (!envContent.includes('OPENROUTER_MODEL=')) {
+    if (!envContent.includes('OPENROUTER_MODEL= ')) {
       envContent += 'OPENROUTER_MODEL=openrouter/auto\n';
     }
     
@@ -158,14 +158,14 @@ class OpenRouterService {
   private defaultModel: string
 
   constructor() {
-    this.apiKey = process.env.OPENROUTER_API_KEY || ''
+    this.apiKey = process.env.OPENROUTER_API_KEY || '
     this.baseUrl = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1'
     this.defaultModel = process.env.OPENROUTER_MODEL || 'openrouter/auto'
   }
 
   async generateResponse(
     prompt: string,
-    context: any = {},
+    context: unknown = {},
     model?: string
   ): Promise<string> {
     if (!this.apiKey) {
@@ -187,10 +187,7 @@ class OpenRouterService {
       const response = await fetch(\`\${this.baseUrl}/chat/completions\`, {
         method: 'POST',
         headers: {
-          'Authorization': \`Bearer \${this.apiKey}\`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://freeflowzee.com',
-          'X-Title': 'FreeflowZee'
+          'Authorization': \`Bearer \${this.apiKey}\`, 'Content-Type': 'application/json', 'HTTP-Referer': 'https://freeflowzee.com', 'X-Title': 'FreeflowZee'
         },
         body: JSON.stringify({
           model: model || this.defaultModel,
@@ -213,13 +210,13 @@ class OpenRouterService {
     }
   }
 
-  async generateBusinessInsights(context: any): Promise<string> {
+  async generateBusinessInsights(context: unknown): Promise<string> {
     return this.generateResponse(
       \`Generate business insights based on this context: \${JSON.stringify(context)}\`
     )
   }
 
-  async generateProjectSuggestions(context: any): Promise<string> {
+  async generateProjectSuggestions(context: unknown): Promise<string> {
     return this.generateResponse(
       \`Suggest project improvements based on: \${JSON.stringify(context)}\`
     )
@@ -292,12 +289,12 @@ export default openRouterService`;
 
   // Summary Report
   log('\n📊 Fix Summary Report', colors.cyan);
-  log('=' .repeat(50), colors.cyan);
+  log('=' .repeat(50), colors.cyan);'
   fixes.forEach(fix => {
-    log(`  ${fix}`, fix.includes('✅') ? colors.green : colors.red);
+    log(`  ${fix}`, fix.includes('✅') ? colors.green : colors.red);'
   });
 
-  const successCount = fixes.filter(f => f.includes('✅')).length;
+  const successCount = fixes.filter(f => f.includes('✅')).length;'
   const totalCount = fixes.length;
   
   log(`\n🎯 Overall Success Rate: ${successCount}/${totalCount} (${Math.round(successCount/totalCount*100)}%)`, 

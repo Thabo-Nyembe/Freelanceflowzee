@@ -4,14 +4,14 @@ import { ProjectCreationForm } from "@/components/forms/project-creation-form"
 interface CreateProjectDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit: (projectData: any) => void
+  onSubmit: (projectData: Record<string, unknown>) => void
   loading?: boolean
 }
 
 export function CreateProjectDialog({ open, onOpenChange, onSubmit, loading = false }: CreateProjectDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className= "sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Create New Project</DialogTitle>
         </DialogHeader>

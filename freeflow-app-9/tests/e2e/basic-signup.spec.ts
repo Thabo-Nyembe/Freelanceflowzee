@@ -1,82 +1,82 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from &apos;@playwright/test&apos;;
 
-test.describe('Basic Signup Flow Tests', () => {
-  test('should load the signup page correctly', async ({ page }) => {
+test.describe(&apos;Basic Signup Flow Tests&apos;, () => {
+  test(&apos;should load the signup page correctly&apos;, async ({ page }) => {
     // Navigate to signup page
-    await page.goto('/signup');
+    await page.goto(&apos;/signup&apos;);
     
     // Wait for the page to load
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState(&apos;networkidle&apos;);
     
     // Check if the page loaded correctly
     await expect(page).toHaveTitle(/FreeflowZee|Signup|Join/);
     
     // Check if the main form elements are present
-    await expect(page.locator('form')).toBeVisible();
-    await expect(page.locator('#fullName')).toBeVisible();
-    await expect(page.locator('#email')).toBeVisible();
-    await expect(page.locator('#password')).toBeVisible();
-    await expect(page.locator('#confirmPassword')).toBeVisible();
-    await expect(page.locator('button[type="submit"]')).toBeVisible();
+    await expect(page.locator(&apos;form&apos;)).toBeVisible();
+    await expect(page.locator(&apos;#fullName&apos;)).toBeVisible();
+    await expect(page.locator(&apos;#email&apos;)).toBeVisible();
+    await expect(page.locator(&apos;#password&apos;)).toBeVisible();
+    await expect(page.locator(&apos;#confirmPassword&apos;)).toBeVisible();
+    await expect(page.locator(&apos;button[type=&quot;submit&quot;]&apos;)).toBeVisible();
     
-    console.log('✅ Signup page loaded successfully with all form elements');
+    console.log(&apos;✅ Signup page loaded successfully with all form elements&apos;);
   });
 
-  test('should show validation for empty form submission', async ({ page }) => {
-    await page.goto('/signup');
-    await page.waitForLoadState('networkidle');
+  test(&apos;should show validation for empty form submission&apos;, async ({ page }) => {
+    await page.goto(&apos;/signup&apos;);
+    await page.waitForLoadState(&apos;networkidle&apos;);
     
     // Try to submit empty form
-    await page.click('button[type="submit"]');
+    await page.click(&apos;button[type=&quot;submit&quot;]&apos;);
     
     // Check if HTML5 validation prevents submission
-    const fullNameInput = page.locator('#fullName');
+    const fullNameInput = page.locator(&apos;#fullName&apos;);
     const isValid = await fullNameInput.evaluate((el: HTMLInputElement) => el.checkValidity());
     
     expect(isValid).toBe(false);
-    console.log('✅ Empty form validation working correctly');
+    console.log(&apos;✅ Empty form validation working correctly&apos;);
   });
 
-  test('should toggle password visibility', async ({ page }) => {
-    await page.goto('/signup');
-    await page.waitForLoadState('networkidle');
+  test(&apos;should toggle password visibility&apos;, async ({ page }) => {
+    await page.goto(&apos;/signup&apos;);
+    await page.waitForLoadState(&apos;networkidle&apos;);
     
     // Fill password field
-    await page.fill('#password', 'testpassword');
+    await page.fill(&apos;#password&apos;, &apos;testpassword&apos;);
     
     // Check initial type is password
-    await expect(page.locator('#password')).toHaveAttribute('type', 'password');
+    await expect(page.locator(&apos;#password&apos;)).toHaveAttribute(&apos;type&apos;, &apos;password&apos;);
     
     // Find and click the eye toggle button (next sibling of password input)
-    const toggleButton = page.locator('#password').locator('..').locator('button').last();
+    const toggleButton = page.locator(&apos;#password&apos;).locator(&apos;..&apos;).locator(&apos;button&apos;).last();
     await toggleButton.click();
     
     // Check type changed to text
-    await expect(page.locator('#password')).toHaveAttribute('type', 'text');
+    await expect(page.locator(&apos;#password&apos;)).toHaveAttribute(&apos;type&apos;, &apos;text&apos;);
     
-    console.log('✅ Password visibility toggle working correctly');
+    console.log(&apos;✅ Password visibility toggle working correctly&apos;);
   });
 
-  test('should validate short password', async ({ page }) => {
-    await page.goto('/signup');
-    await page.waitForLoadState('networkidle');
+  test(&apos;should validate short password&apos;, async ({ page }) => {
+    await page.goto(&apos;/signup&apos;);
+    await page.waitForLoadState(&apos;networkidle&apos;);
     
     // Fill form with short password
-    await page.fill('#fullName', 'Test User');
-    await page.fill('#email', 'test@example.com');
-    await page.fill('#password', '123');
-    await page.fill('#confirmPassword', '123');
+    await page.fill(&apos;#fullName&apos;, &apos;Test User&apos;);
+    await page.fill(&apos;#email&apos;, &apos;test@example.com&apos;);
+    await page.fill(&apos;#password&apos;, &apos;123&apos;);
+    await page.fill(&apos;#confirmPassword&apos;, &apos;123&apos;);
     
     // Submit form
-    await page.click('button[type="submit"]');
+    await page.click(&apos;button[type=&quot;submit&quot;]&apos;);
     
     // Wait for any client-side validation
     await page.waitForTimeout(1000);
     
     // Check for error message about password length
-    const errorMessage = page.locator('text=Password must be at least 6 characters long');
+    const errorMessage = page.locator(&apos;text=Password must be at least 6 characters long&apos;);
     await expect(errorMessage).toBeVisible({ timeout: 5000 });
     
-    console.log('✅ Short password validation working correctly');
+    console.log(&apos;✅ Short password validation working correctly&apos;);
   });
 }); 

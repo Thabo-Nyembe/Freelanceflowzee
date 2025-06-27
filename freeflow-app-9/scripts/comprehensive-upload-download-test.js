@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 console.log('🚀 FreeflowZee Comprehensive Upload/Download Test Suite');
-console.log('======================================================');
+console.log('====================================================== ');
 console.log('Using Context7 + Playwright MCP Best Practices');
 
 // Test configuration based on Context7 documentation
@@ -23,11 +23,11 @@ const testSuites = [
     name: 'Files Hub Upload/Download',
     path: '/dashboard/files-hub',
     selectors: {
-      uploadBtn: '[data-testid="upload-file-btn"]',
-      downloadBtn: '[data-testid="download-file-btn"]',
-      fileInput: 'input[type="file"]',
-      fileList: '[data-testid="file-list"]',
-      progressBar: '[data-testid="upload-progress"]'
+      uploadBtn: '[data-testid= "upload-file-btn"]',
+      downloadBtn: '[data-testid= "download-file-btn"]',
+      fileInput: 'input[type= "file"]',
+      fileList: '[data-testid= "file-list"]',
+      progressBar: '[data-testid= "upload-progress"]'
     },
     testFiles: [
       { name: 'test-document.pdf', size: '2MB', type: 'application/pdf' },
@@ -39,10 +39,10 @@ const testSuites = [
     name: 'AI Create Asset Upload',
     path: '/dashboard/ai-create',
     selectors: {
-      uploadBtn: '[data-testid="upload-asset-btn"]',
-      downloadBtn: '[data-testid="download-asset-btn"]',
-      assetPreview: '[data-testid="asset-preview"]',
-      generatedContent: '[data-testid="generated-content"]'
+      uploadBtn: '[data-testid= "upload-asset-btn"]',
+      downloadBtn: '[data-testid= "download-asset-btn"]',
+      assetPreview: '[data-testid= "asset-preview"]',
+      generatedContent: '[data-testid= "generated-content"]'
     },
     testFiles: [
       { name: 'design-brief.txt', size: '50KB', type: 'text/plain' },
@@ -53,10 +53,10 @@ const testSuites = [
     name: 'Video Studio Media Upload',
     path: '/dashboard/video-studio',
     selectors: {
-      uploadBtn: '[data-testid="upload-btn"]',
-      mediaPreview: '[data-testid="media-preview"]',
-      timelineTrack: '[data-testid="timeline-track"]',
-      exportBtn: '[data-testid="export-btn"]'
+      uploadBtn: '[data-testid= "upload-btn"]',
+      mediaPreview: '[data-testid= "media-preview"]',
+      timelineTrack: '[data-testid= "timeline-track"]',
+      exportBtn: '[data-testid= "export-btn"]'
     },
     testFiles: [
       { name: 'video-clip.mp4', size: '25MB', type: 'video/mp4' },
@@ -67,10 +67,10 @@ const testSuites = [
     name: 'Escrow Document Download',
     path: '/dashboard/escrow',
     selectors: {
-      downloadBtn: '[data-testid="download-receipt-btn"]',
-      contractLink: '[data-testid="contract-download"]',
-      invoiceLink: '[data-testid="invoice-download"]',
-      reportBtn: '[data-testid="escrow-report-btn"]'
+      downloadBtn: '[data-testid= "download-receipt-btn"]',
+      contractLink: '[data-testid= "contract-download"]',
+      invoiceLink: '[data-testid= "invoice-download"]',
+      reportBtn: '[data-testid= "escrow-report-btn"]'
     },
     testFiles: [
       { name: 'contract.pdf', type: 'application/pdf' },
@@ -83,10 +83,10 @@ const testSuites = [
     path: '/dashboard/projects-hub',
     tab: 'collaboration',
     selectors: {
-      feedbackBtn: '[data-testid="add-feedback-btn"]',
-      uploadMediaBtn: '[data-testid="upload-media-btn"]',
-      voiceRecordBtn: '[data-testid="voice-record-btn"]',
-      downloadComment: '[data-testid="download-comment"]'
+      feedbackBtn: '[data-testid= "add-feedback-btn"]',
+      uploadMediaBtn: '[data-testid= "upload-media-btn"]',
+      voiceRecordBtn: '[data-testid= "voice-record-btn"]',
+      downloadComment: '[data-testid= "download-comment"]'
     },
     testFiles: [
       { name: 'feedback-image.jpg', size: '800KB', type: 'image/jpeg' },
@@ -164,16 +164,16 @@ async function runUploadDownloadTests() {
   }
 
   // Generate final report
-  console.log('\n' + '='.repeat(60));
+  console.log('\n' + '='.repeat(60));'
   console.log('📊 COMPREHENSIVE UPLOAD/DOWNLOAD TEST RESULTS');
-  console.log('='.repeat(60));
+  console.log('='.repeat(60));'
   console.log(`📈 Total Tests: ${results.total}`);
   console.log(`✅ Passed: ${results.passed} (${((results.passed / results.total) * 100).toFixed(1)}%)`);
   console.log(`❌ Failed: ${results.failed} (${((results.failed / results.total) * 100).toFixed(1)}%)`);
   console.log(`🎯 Success Rate: ${((results.passed / results.total) * 100).toFixed(1)}%`);
 
   // Detailed breakdown
-  console.log('\n📋 DETAILED BREAKDOWN:');
+  console.log('\n📋 DETAILED BREAKDOWN: ');
   testSuites.forEach(suite => {
     const suiteResults = results.details.filter(d => d.suite === suite.name);
     const uploadResult = suiteResults.find(r => r.type === 'upload');
@@ -191,7 +191,7 @@ async function runUploadDownloadTests() {
   // Context7 recommendations
   if (results.failed > 0) {
     console.log('\n🔧 CONTEXT7 RECOMMENDATIONS FOR FIXES:');
-    console.log('=====================================');
+    console.log('===================================== ');
     console.log('1. 🎯 Interactive Button Implementation');
     console.log('   - Ensure all buttons have proper onClick handlers');
     console.log('   - Add loading states and progress indicators');
@@ -230,11 +230,7 @@ async function runUploadDownloadTests() {
       testFiles: suite.testFiles
     })),
     results: results.details,
-    context7Recommendations: results.failed > 0 ? [
-      'Interactive Button Implementation',
-      'File Upload/Download Logic',
-      'UI/UX Component Enhancement',
-      'Navigation & Routing'
+    context7Recommendations: results.failed > 0 ? ['Interactive Button Implementation', 'File Upload/Download Logic', 'UI/UX Component Enhancement', 'Navigation & Routing'
     ] : ['All systems operational']
   }, null, 2));
 

@@ -34,7 +34,7 @@ async function applyDatabaseUpdate() {
       // If the RPC doesn't exist, try direct query
       const { error: directError } = await supabase
         .from('__temp__')
-        .select('*')
+        .select('*')'
         .limit(0);
       
       if (directError) {
@@ -42,7 +42,7 @@ async function applyDatabaseUpdate() {
         
         // Split SQL into individual statements and execute them
         const statements = sqlContent
-          .split(';')
+          .split(';')'
           .map(stmt => stmt.trim())
           .filter(stmt => stmt.length > 0 && !stmt.startsWith('--'));
         
@@ -63,7 +63,7 @@ async function applyDatabaseUpdate() {
     }
     
     console.log('\n✅ Database update completed successfully!');
-    console.log('\n🎉 New Features Available:');
+    console.log('\n🎉 New Features Available: ');
     console.log('   ✅ Community Posts & Social Wall');
     console.log('   ✅ Post Interactions (likes, shares, bookmarks)');
     console.log('   ✅ Threaded Comments System');

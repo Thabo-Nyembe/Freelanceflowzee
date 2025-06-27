@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
                   userId: 'freelancer_1',
                   userName: 'Alex Designer',
                   userAvatar: '/avatars/alex.jpg',
-                  content: 'Thanks for the feedback! I\'ll increase the font size and test on mobile.',
+                  content: 'Thanks for the feedback! I\'ll increase the font size and test on mobile.','
                   type: 'text',
                   fileType: 'figma',
                   status: 'in_review',
@@ -84,27 +84,15 @@ export async function GET(request: NextRequest) {
           summary: {
             totalComments: 2,
             themes: {
-              'design': 2,
-              'mobile_responsiveness': 1,
-              'typography': 1,
-              'color_corrections': 1
+              'design': 2, 'mobile_responsiveness': 1, 'typography': 1, 'color_corrections': 1
             },
             urgentIssues: 1,
             overallSentiment: 'positive',
             estimatedWorkRequired: '2-3 hours',
-            keyActionItems: [
-              'Increase footer font size for mobile',
-              'Test mobile responsiveness across devices',
-              'Consider hero section approved for production',
-              'Implement accessibility improvements for text contrast'
+            keyActionItems: ['Increase footer font size for mobile', 'Test mobile responsiveness across devices', 'Consider hero section approved for production', 'Implement accessibility improvements for text contrast'
             ],
             categoryBreakdown: {
-              'color_corrections': { count: 1, avgPriority: 'medium' },
-              'typo_fixes': { count: 0, avgPriority: 'low' },
-              'layout_changes': { count: 1, avgPriority: 'high' },
-              'functionality': { count: 0, avgPriority: 'low' },
-              'content': { count: 0, avgPriority: 'low' },
-              'design': { count: 2, avgPriority: 'medium' }
+              'color_corrections': { count: 1, avgPriority: 'medium' }, 'typo_fixes': { count: 0, avgPriority: 'low' }, 'layout_changes': { count: 1, avgPriority: 'high' }, 'functionality': { count: 0, avgPriority: 'low' }, 'content': { count: 0, avgPriority: 'low' }, 'design': { count: 2, avgPriority: 'medium' }
             },
             timelineInsights: {
               peakFeedbackHours: ['11:00', '11:30'],
@@ -160,11 +148,7 @@ export async function GET(request: NextRequest) {
           approvalStatus: {
             overall: 'pending',
             elements: {
-              'hero_section': 'approved',
-              'pricing_section': 'pending',
-              'footer': 'rejected',
-              'navigation': 'approved',
-              'cta_buttons': 'pending'
+              'hero_section': 'approved', 'pricing_section': 'pending', 'footer': 'rejected', 'navigation': 'approved', 'cta_buttons': 'pending'
             },
             approvedBy: [],
             rejectedBy: ['client_1'],
@@ -189,12 +173,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           success: true,
           message: 'Client feedback API endpoint working',
-          supportedActions: [
-            'get_comments',
-            'get_ai_summary', 
-            'get_file_versions',
-            'get_approval_status',
-            'get_notification_summary'
+          supportedActions: ['get_comments', 'get_ai_summary', 'get_file_versions', 'get_approval_status', 'get_notification_summary'
           ]
         })
     }
@@ -322,19 +301,11 @@ export async function POST(request: NextRequest) {
           summary: {
             themes: ['design improvements', 'mobile responsiveness', 'user experience'],
             sentiment: 'positive',
-            urgentItems: data.comments?.filter((c: any) => c.priority === 'urgent').length || 0,
+            urgentItems: data.comments?.filter((c: unknown) => c.priority === 'urgent').length || 0,
             estimatedWork: '3-5 hours',
-            keyInsights: [
-              'Most feedback focuses on visual design elements',
-              'Mobile responsiveness is a recurring concern',
-              'Overall client satisfaction is high',
-              'Quick fixes can resolve 60% of issues'
+            keyInsights: ['Most feedback focuses on visual design elements', 'Mobile responsiveness is a recurring concern', 'Overall client satisfaction is high', 'Quick fixes can resolve 60% of issues'
             ],
-            actionItems: [
-              'Address footer typography issues',
-              'Test mobile responsiveness',
-              'Implement color scheme feedback',
-              'Schedule client review call'
+            actionItems: ['Address footer typography issues', 'Test mobile responsiveness', 'Implement color scheme feedback', 'Schedule client review call'
             ]
           },
           message: 'AI summary generated successfully'
@@ -344,14 +315,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: false,
           error: 'Unknown action',
-          supportedActions: [
-            'add_comment',
-            'add_voice_comment',
-            'add_screen_recording',
-            'update_comment_status',
-            'approve_file',
-            'request_changes',
-            'generate_ai_summary'
+          supportedActions: ['add_comment', 'add_voice_comment', 'add_screen_recording', 'update_comment_status', 'approve_file', 'request_changes', 'generate_ai_summary'
           ]
         }, { status: 400 })
     }

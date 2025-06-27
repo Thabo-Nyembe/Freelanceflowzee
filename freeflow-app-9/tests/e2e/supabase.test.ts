@@ -1,27 +1,27 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from &apos;@playwright/test&apos;;
 
-test.describe('Supabase Integration Tests', () => {
+test.describe(&apos;Supabase Integration Tests&apos;, () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3001');
-    await page.waitForLoadState('networkidle');
+    await page.goto(&apos;http://localhost:3001&apos;);
+    await page.waitForLoadState(&apos;networkidle&apos;);
   });
 
-  test('should load without Supabase connection errors', async ({ page }) => {
+  test(&apos;should load without Supabase connection errors&apos;, async ({ page }) => {
     // Check for Supabase-related console errors
     const errors: string[] = [];
-    page.on('console', msg => {
-      if (msg.type() === 'error' && msg.text().toLowerCase().includes('supabase')) {
+    page.on(&apos;console&apos;, msg => {
+      if (msg.type() === &apos;error&apos; && msg.text().toLowerCase().includes(&apos;supabase&apos;)) {
         errors.push(`Supabase Error: ${msg.text()}`);
       }
     });
 
     // Check for failed Supabase requests
     const failedRequests: string[] = [];
-    page.on('requestfailed', request => {
+    page.on(&apos;requestfailed&apos;, request => {
       const url = request.url();
-      if (url.includes('supabase')) {
+      if (url.includes(&apos;supabase&apos;)) {
         const failure = request.failure();
-        failedRequests.push(`Failed Supabase Request: ${url} - ${failure?.errorText || 'Unknown error'}`);
+        failedRequests.push(`Failed Supabase Request: ${url} - ${failure?.errorText || &apos;Unknown error&apos;}`);
       }
     });
 
@@ -30,10 +30,10 @@ test.describe('Supabase Integration Tests', () => {
 
     // Log any errors found
     if (errors.length > 0) {
-      console.log('Supabase Console Errors:', errors);
+      console.log(&apos;Supabase Console Errors:&apos;, errors);
     }
     if (failedRequests.length > 0) {
-      console.log('Failed Supabase Requests:', failedRequests);
+      console.log(&apos;Failed Supabase Requests:&apos;, failedRequests);
     }
 
     // Assert no errors were found
@@ -41,20 +41,20 @@ test.describe('Supabase Integration Tests', () => {
     expect(failedRequests.length).toBe(0);
   });
 
-  test('should handle auth state', async ({ page }) => {
+  test(&apos;should handle auth state&apos;, async ({ page }) => {
     // Check if auth state is properly initialized
     const hasAuthError = await page.evaluate(() => {
       const html = document.documentElement.innerHTML;
-      return html.includes('authentication error') || html.includes('auth error');
+      return html.includes(&apos;authentication error&apos;) || html.includes(&apos;auth error&apos;);
     });
     expect(hasAuthError).toBe(false);
   });
 
-  test('should handle database queries', async ({ page }) => {
+  test(&apos;should handle database queries&apos;, async ({ page }) => {
     // Monitor for database query errors
     const queryErrors: string[] = [];
-    page.on('console', msg => {
-      if (msg.type() === 'error' && msg.text().toLowerCase().includes('query')) {
+    page.on(&apos;console&apos;, msg => {
+      if (msg.type() === &apos;error&apos; && msg.text().toLowerCase().includes(&apos;query&apos;)) {
         queryErrors.push(`Query Error: ${msg.text()}`);
       }
     });
@@ -66,11 +66,11 @@ test.describe('Supabase Integration Tests', () => {
     expect(queryErrors.length).toBe(0);
   });
 
-  test('should handle storage operations', async ({ page }) => {
+  test(&apos;should handle storage operations&apos;, async ({ page }) => {
     // Monitor for storage-related errors
     const storageErrors: string[] = [];
-    page.on('console', msg => {
-      if (msg.type() === 'error' && msg.text().toLowerCase().includes('storage')) {
+    page.on(&apos;console&apos;, msg => {
+      if (msg.type() === &apos;error&apos; && msg.text().toLowerCase().includes(&apos;storage&apos;)) {
         storageErrors.push(`Storage Error: ${msg.text()}`);
       }
     });

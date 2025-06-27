@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     
     // Add pagination
     const limit = parseInt(searchParams.get('limit') || '10');
-    const offset = parseInt(searchParams.get('offset') || '0');
+    const offset = parseInt(searchParams.get('offset') || '0');'
     const paginatedData = Array.isArray(data) ? data.slice(offset, offset + limit) : data;
     
     // Add filtering by tags if provided
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     let filteredData = paginatedData;
     
     if (tags && Array.isArray(paginatedData)) {
-      const tagArray = tags.split(',');
+      const tagArray = tags.split(',');'
       filteredData = paginatedData.filter(item => 
         item.tags && tagArray.some(tag => item.tags.includes(tag.trim()))
       );

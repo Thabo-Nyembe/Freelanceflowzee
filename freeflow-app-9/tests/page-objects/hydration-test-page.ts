@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test'
+import { Page, expect } from &apos;@playwright/test&apos;
 
 export class HydrationTestPage {
   readonly page: Page
@@ -14,15 +14,15 @@ export class HydrationTestPage {
 
   async waitForHydration() {
     await this.page.waitForFunction(() => {
-      return document.documentElement.hasAttribute('data-hydrated')
+      return document.documentElement.hasAttribute(&apos;data-hydrated&apos;)
     }, { timeout: 5000 })
   }
 
   async getHydrationErrors(): Promise<string[]> {
     return await this.page.evaluate(() => {
       const errors: string[] = []
-      document.querySelectorAll('[data-hydration-error]').forEach(el => {
-        const error = el.getAttribute('data-hydration-error')
+      document.querySelectorAll(&apos;[data-hydration-error]&apos;).forEach(el => {
+        const error = el.getAttribute(&apos;data-hydration-error&apos;)
         if (error) errors.push(error)
       })
       return errors
@@ -30,15 +30,15 @@ export class HydrationTestPage {
   }
 
   async checkComponentRendering(selector: string) {
-    await this.page.waitForSelector(selector, { state: 'attached' })
+    await this.page.waitForSelector(selector, { state: &apos;attached&apos; })
     const isVisible = await this.page.isVisible(selector)
     expect(isVisible).toBe(true, `Component ${selector} should be visible`)
   }
 
   async checkHydrationWarnings() {
     const warnings: string[] = []
-    this.page.on('console', msg => {
-      if (msg.type() === 'warning' && msg.text().includes('Hydration')) {
+    this.page.on(&apos;console&apos;, msg => {
+      if (msg.type() === &apos;warning&apos; && msg.text().includes(&apos;Hydration&apos;)) {
         warnings.push(msg.text())
       }
     })
@@ -56,11 +56,11 @@ export class HydrationTestPage {
       const checkNode = (node: Node): boolean => {
         if (node.nodeType === Node.ELEMENT_NODE) {
           const element = node as Element
-          const serverHTML = element.getAttribute('data-server-html')
+          const serverHTML = element.getAttribute(&apos;data-server-html&apos;)
           const clientHTML = element.innerHTML.trim()
           
           if (serverHTML && serverHTML !== clientHTML) {
-            console.warn('Hydration mismatch detected:', {
+            console.warn(&apos;Hydration mismatch detected:&apos;, {
               element,
               serverHTML,
               clientHTML
@@ -82,12 +82,12 @@ export class HydrationTestPage {
 
   async checkStateConsistency() {
     return await this.page.evaluate(() => {
-      const stateElements = document.querySelectorAll('[data-state]')
-      const inconsistencies: any[] = []
+      const stateElements = document.querySelectorAll(&apos;[data-state]&apos;)
+      const inconsistencies: unknown[] = []
       
       stateElements.forEach(element => {
-        const serverState = element.getAttribute('data-server-state')
-        const clientState = element.getAttribute('data-state')
+        const serverState = element.getAttribute(&apos;data-server-state&apos;)
+        const clientState = element.getAttribute(&apos;data-state&apos;)
         
         if (serverState && clientState && serverState !== clientState) {
           inconsistencies.push({
@@ -104,12 +104,12 @@ export class HydrationTestPage {
 
   async checkEventHandlers() {
     return await this.page.evaluate(() => {
-      const interactiveElements = document.querySelectorAll('button, a, input, select')
+      const interactiveElements = document.querySelectorAll(&apos;button, a, input, select&apos;)
       const missingHandlers: string[] = []
       
       interactiveElements.forEach(element => {
-        if (element.hasAttribute('data-action') && !element.onclick) {
-          missingHandlers.push(`${element.tagName} with data-action=${element.getAttribute('data-action')}`)
+        if (element.hasAttribute(&apos;data-action&apos;) && !element.onclick) {
+          missingHandlers.push(`${element.tagName} with data-action=${element.getAttribute(&apos;data-action&apos;)}`)
         }
       })
       
@@ -121,6 +121,6 @@ export class HydrationTestPage {
     await this.page.reload()
     await this.waitForHydration()
     const errors = await this.getHydrationErrors()
-    expect(errors).toHaveLength(0, 'Should have no hydration errors after refresh')
+    expect(errors).toHaveLength(0, &apos;Should have no hydration errors after refresh&apos;)
   }
 } 

@@ -1,0 +1,110 @@
+{
+  "timestamp": "2025-06-27T12:32:13.823Z",
+  "summary": {
+    "total": 18,
+    "passed": 12,
+    "failed": 6,
+    "successRate": "66.7%",
+    "grade": "C"
+  },
+  "details": [
+    {
+      "test": "Landing Page Load",
+      "status": "ERROR",
+      "error": "page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('h1') to be visible\u001b[22m\n"
+    },
+    {
+      "test": "Navigation Links",
+      "status": "FAILED",
+      "error": "Test returned false"
+    },
+    {
+      "test": "CTA Buttons",
+      "status": "PASSED",
+      "error": null
+    },
+    {
+      "test": "Dashboard Route Protection",
+      "status": "PASSED",
+      "error": null
+    },
+    {
+      "test": "AI Create API Key Interface",
+      "status": "ERROR",
+      "error": "page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"ai-create\"]') to be visible\u001b[22m\n"
+    },
+    {
+      "test": "User API Key Storage",
+      "status": "PASSED",
+      "error": null
+    },
+    {
+      "test": "File Upload Interface",
+      "status": "FAILED",
+      "error": "Test returned false"
+    },
+    {
+      "test": "Download Button Functionality",
+      "status": "FAILED",
+      "error": "Test returned false"
+    },
+    {
+      "test": "Payment Page Access",
+      "status": "ERROR",
+      "error": "page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('form') to be visible\u001b[22m\n"
+    },
+    {
+      "test": "Stripe Integration",
+      "status": "PASSED",
+      "error": null
+    },
+    {
+      "test": "Responsive Design - Desktop",
+      "status": "PASSED",
+      "error": null
+    },
+    {
+      "test": "Responsive Design - Tablet",
+      "status": "PASSED",
+      "error": null
+    },
+    {
+      "test": "Responsive Design - Mobile",
+      "status": "PASSED",
+      "error": null
+    },
+    {
+      "test": "Page Load Performance",
+      "status": "PASSED",
+      "error": null
+    },
+    {
+      "test": "Core Web Vitals",
+      "status": "PASSED",
+      "error": null
+    },
+    {
+      "test": "Network Error Handling",
+      "status": "PASSED",
+      "error": null
+    },
+    {
+      "test": "JavaScript Disabled Fallback",
+      "status": "PASSED",
+      "error": null
+    },
+    {
+      "test": "Large File Upload Handling",
+      "status": "PASSED",
+      "error": null
+    }
+  ],
+  "testUrls": {
+    "landing": "http://localhost:3001",
+    "dashboard": "http://localhost:3001/dashboard",
+    "features": "http://localhost:3001/demo-features",
+    "payment": "http://localhost:3001/payment",
+    "apiDocs": "http://localhost:3001/api-docs",
+    "community": "http://localhost:3001/community"
+  }
+}

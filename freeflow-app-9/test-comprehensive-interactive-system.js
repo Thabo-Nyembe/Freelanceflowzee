@@ -14,63 +14,22 @@ const log = {
 const TEST_CONFIG = {
   baseUrl: 'http://localhost:3000',
   timeout: 30000,
-  pages: [
-    '/dashboard',
-    '/dashboard/projects-hub', 
-    '/dashboard/ai-create',
-    '/dashboard/video-studio',
-    '/dashboard/files-hub',
-    '/dashboard/community-hub',
-    '/dashboard/escrow',
-    '/dashboard/invoices',
-    '/dashboard/calendar',
-    '/dashboard/analytics',
-    '/dashboard/team',
-    '/dashboard/storage',
-    '/dashboard/my-day'
+  pages: ['/dashboard', '/dashboard/projects-hub', '/dashboard/ai-create', '/dashboard/video-studio', '/dashboard/files-hub', '/dashboard/community-hub', '/dashboard/escrow', '/dashboard/invoices', '/dashboard/calendar', '/dashboard/analytics', '/dashboard/team', '/dashboard/storage', '/dashboard/my-day'
   ]
 };
 
 // Expected interactive buttons by page
 const EXPECTED_BUTTONS = {
-  '/dashboard': [
-    'create-project-btn',
-    'create-invoice-btn', 
-    'upload-files-btn',
-    'schedule-meeting-btn',
-    'header-new-project-btn'
-  ],
-  '/dashboard/projects-hub': [
-    'create-project-btn',
-    'import-project-btn',
-    'quick-start-btn',
-    'view-all-projects-btn',
-    'export-projects-btn'
-  ],
-  '/dashboard/ai-create': [
-    'ai-generate-content-btn',
-    'ai-analyze-btn', 
-    'ai-optimize-btn',
-    'save-content-btn'
-  ],
-  '/dashboard/video-studio': [
-    'create-video-btn',
-    'upload-video-btn',
-    'edit-video-btn',
-    'export-video-btn'
-  ],
-  '/dashboard/files-hub': [
-    'upload-file-btn',
-    'create-folder-btn',
-    'share-file-btn',
-    'download-file-btn'
+  '/dashboard': ['create-project-btn', 'create-invoice-btn', 'upload-files-btn', 'schedule-meeting-btn', 'header-new-project-btn'
+  ], '/dashboard/projects-hub': ['create-project-btn', 'import-project-btn', 'quick-start-btn', 'view-all-projects-btn', 'export-projects-btn'
+  ], '/dashboard/ai-create': ['ai-generate-content-btn', 'ai-analyze-btn', 'ai-optimize-btn', 'save-content-btn'
+  ], '/dashboard/video-studio': ['create-video-btn', 'upload-video-btn', 'edit-video-btn', 'export-video-btn'
+  ], '/dashboard/files-hub': ['upload-file-btn', 'create-folder-btn', 'share-file-btn', 'download-file-btn'
   ]
 };
 
 // Missing pages that need to be created
-const MISSING_PAGES = [
-  'ai-assistant',
-  'community-hub'
+const MISSING_PAGES = ['ai-assistant', 'community-hub'
 ];
 
 class InteractiveSystemTester {
@@ -103,7 +62,6 @@ class InteractiveSystemTester {
     const pageContent = `"use client";
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -119,12 +77,12 @@ import {
 } from 'lucide-react';
 
 export default function AIAssistantPage() {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState('');'
   const [conversation, setConversation] = useState([
     {
       id: 1,
       type: 'assistant',
-      content: 'Hello! I\'m your AI assistant. How can I help you today?',
+      content: 'Hello! I\'m your AI assistant. How can I help you today?','
       timestamp: new Date()
     }
   ]);
@@ -153,7 +111,7 @@ export default function AIAssistantPage() {
       setConversation(prev => [...prev, aiResponse]);
     }, 1000);
     
-    setMessage('');
+    setMessage('');'
     alert('AI Assistant message sent successfully!');
   };
 
@@ -189,17 +147,17 @@ export default function AIAssistantPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className= "space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className= "flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">AI Assistant</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className= "text-3xl font-bold text-gray-900">AI Assistant</h1>
+          <p className= "text-gray-600 mt-2">
             Your intelligent assistant for project management and creativity
           </p>
         </div>
-        <Button data-testid="new-conversation-btn">
-          <MessageSquare className="w-4 h-4 mr-2" />
+        <Button data-testid= "new-conversation-btn">
+          <MessageSquare className= "w-4 h-4 mr-2" />
           New Conversation
         </Button>
       </div>
@@ -210,7 +168,7 @@ export default function AIAssistantPage() {
           <CardTitle>Quick AI Actions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {quickActions.map((action, index) => {
               const Icon = action.icon;
               return (
@@ -218,15 +176,15 @@ export default function AIAssistantPage() {
                   key={index}
                   onClick={action.action}
                   data-testid={action.testId}
-                  className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left group"
+                  className= "p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left group"
                 >
-                  <div className="p-2 rounded-lg bg-violet-50 w-fit">
-                    <Icon className="w-5 h-5 text-violet-600" />
+                  <div className= "p-2 rounded-lg bg-violet-50 w-fit">
+                    <Icon className= "w-5 h-5 text-violet-600" />
                   </div>
-                  <h4 className="font-medium text-gray-900 mt-3 group-hover:text-violet-600 transition-colors">
+                  <h4 className= "font-medium text-gray-900 mt-3 group-hover:text-violet-600 transition-colors">
                     {action.title}
                   </h4>
-                  <p className="text-sm text-gray-500 mt-1">{action.description}</p>
+                  <p className= "text-sm text-gray-500 mt-1">{action.description}</p>
                 </button>
               );
             })}
@@ -235,14 +193,14 @@ export default function AIAssistantPage() {
       </Card>
 
       {/* Chat Interface */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <Card className="h-[600px] flex flex-col">
+      <div className= "grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className= "lg:col-span-2">
+          <Card className= "h-[600px] flex flex-col">
             <CardHeader>
               <CardTitle>Chat with AI</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col">
-              <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+            <CardContent className= "flex-1 flex flex-col">
+              <div className= "flex-1 overflow-y-auto space-y-4 mb-4">
                 {conversation.map((msg) => (
                   <div
                     key={msg.id}
@@ -256,7 +214,7 @@ export default function AIAssistantPage() {
                       }\`}
                     >
                       <p>{msg.content}</p>
-                      <p className="text-xs opacity-70 mt-1">
+                      <p className= "text-xs opacity-70 mt-1">
                         {msg.timestamp.toLocaleTimeString()}
                       </p>
                     </div>
@@ -264,19 +222,19 @@ export default function AIAssistantPage() {
                 ))}
               </div>
               
-              <div className="flex gap-2">
+              <div className= "flex gap-2">
                 <Input
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Type your message..."
+                  placeholder= "Type your message..."
                   onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  className="flex-1"
+                  className= "flex-1"
                 />
                 <Button 
                   onClick={handleSendMessage}
-                  data-testid="send-message-btn"
+                  data-testid= "send-message-btn"
                 >
-                  <Send className="w-4 h-4" />
+                  <Send className= "w-4 h-4" />
                 </Button>
               </div>
             </CardContent>
@@ -288,22 +246,22 @@ export default function AIAssistantPage() {
             <CardHeader>
               <CardTitle>AI Capabilities</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <h4 className="font-medium text-blue-900">Content Creation</h4>
-                <p className="text-sm text-blue-700">Generate high-quality content for your projects</p>
+            <CardContent className= "space-y-4">
+              <div className= "p-3 bg-blue-50 rounded-lg">
+                <h4 className= "font-medium text-blue-900">Content Creation</h4>
+                <p className= "text-sm text-blue-700">Generate high-quality content for your projects</p>
               </div>
-              <div className="p-3 bg-green-50 rounded-lg">
-                <h4 className="font-medium text-green-900">Data Analysis</h4>
-                <p className="text-sm text-green-700">Analyze and interpret your project data</p>
+              <div className= "p-3 bg-green-50 rounded-lg">
+                <h4 className= "font-medium text-green-900">Data Analysis</h4>
+                <p className= "text-sm text-green-700">Analyze and interpret your project data</p>
               </div>
-              <div className="p-3 bg-purple-50 rounded-lg">
-                <h4 className="font-medium text-purple-900">Workflow Optimization</h4>
-                <p className="text-sm text-purple-700">Optimize your processes for better efficiency</p>
+              <div className= "p-3 bg-purple-50 rounded-lg">
+                <h4 className= "font-medium text-purple-900">Workflow Optimization</h4>
+                <p className= "text-sm text-purple-700">Optimize your processes for better efficiency</p>
               </div>
-              <div className="p-3 bg-amber-50 rounded-lg">
-                <h4 className="font-medium text-amber-900">Creative Assistance</h4>
-                <p className="text-sm text-amber-700">Get creative ideas and suggestions</p>
+              <div className= "p-3 bg-amber-50 rounded-lg">
+                <h4 className= "font-medium text-amber-900">Creative Assistance</h4>
+                <p className= "text-sm text-amber-700">Get creative ideas and suggestions</p>
               </div>
             </CardContent>
           </Card>
@@ -327,23 +285,9 @@ export default function AIAssistantPage() {
     const pageContent = `"use client";
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Users, 
-  MessageSquare, 
-  Share2, 
-  Heart,
-  Eye,
-  Plus,
-  Search,
-  Filter,
-  Bookmark,
-  Globe
-} from 'lucide-react';
 
 export default function CommunityHubPage() {
   const [posts, setPosts] = useState([
@@ -352,7 +296,7 @@ export default function CommunityHubPage() {
       author: 'John Doe',
       avatar: '/avatars/john.jpg',
       title: 'Amazing Design Trends for 2024',
-      content: 'Here are the top design trends I\'ve been following this year...',
+      content: 'Here are the top design trends I\'ve been following this year...','
       likes: 24,
       comments: 8,
       views: 156,
@@ -373,7 +317,7 @@ export default function CommunityHubPage() {
     }
   ]);
 
-  const [newPost, setNewPost] = useState({ title: '', content: '' });
+  const [newPost, setNewPost] = useState({ title: '', content:  });
 
   const handleCreatePost = () => {
     if (!newPost.title.trim() || !newPost.content.trim()) return;
@@ -392,7 +336,7 @@ export default function CommunityHubPage() {
     };
     
     setPosts([post, ...posts]);
-    setNewPost({ title: '', content: '' });
+    setNewPost({ title: '', content:  });
     alert('Post created successfully!');
   };
 
@@ -417,35 +361,35 @@ export default function CommunityHubPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className= "space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className= "flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Community Hub</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className= "text-3xl font-bold text-gray-900">Community Hub</h1>
+          <p className= "text-gray-600 mt-2">
             Connect, share, and learn with fellow creators
           </p>
         </div>
-        <Button data-testid="join-discussion-btn">
-          <Plus className="w-4 h-4 mr-2" />
+        <Button data-testid= "join-discussion-btn">
+          <Plus className= "w-4 h-4 mr-2" />
           Join Discussion
         </Button>
       </div>
 
       {/* Community Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className= "grid grid-cols-1 md:grid-cols-4 gap-4">
         {communityStats.map((stat, index) => {
           const Icon = stat.icon;
           return (
             <Card key={index}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+              <CardContent className= "p-4">
+                <div className= "flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                    <p className="text-sm text-gray-500">{stat.label}</p>
+                    <p className= "text-2xl font-bold text-gray-900">{stat.value}</p>
+                    <p className= "text-sm text-gray-500">{stat.label}</p>
                   </div>
-                  <div className="p-2 bg-violet-50 rounded-lg">
-                    <Icon className="w-5 h-5 text-violet-600" />
+                  <div className= "p-2 bg-violet-50 rounded-lg">
+                    <Icon className= "w-5 h-5 text-violet-600" />
                   </div>
                 </div>
               </CardContent>
@@ -459,30 +403,30 @@ export default function CommunityHubPage() {
         <CardHeader>
           <CardTitle>Share with Community</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className= "space-y-4">
           <Input
-            placeholder="Post title..."
+            placeholder= "Post title..."
             value={newPost.title}
             onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
           />
           <Textarea
-            placeholder="What would you like to share?"
+            placeholder= "What would you like to share?"
             value={newPost.content}
             onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
             rows={3}
           />
-          <div className="flex gap-2">
+          <div className= "flex gap-2">
             <Button 
               onClick={handleCreatePost}
-              data-testid="create-post-btn"
-              className="flex-1"
+              data-testid= "create-post-btn"
+              className= "flex-1"
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className= "w-4 h-4 mr-2" />
               Create Post
             </Button>
             <Button 
-              variant="outline"
-              data-testid="upload-media-btn"
+              variant= "outline"
+              data-testid= "upload-media-btn"
             >
               Upload Media
             </Button>
@@ -491,79 +435,79 @@ export default function CommunityHubPage() {
       </Card>
 
       {/* Search and Filter */}
-      <div className="flex gap-4">
-        <div className="flex-1">
+      <div className= "flex gap-4">
+        <div className= "flex-1">
           <Input
-            placeholder="Search community posts..."
-            className="w-full"
+            placeholder= "Search community posts..."
+            className= "w-full"
           />
         </div>
-        <Button variant="outline" data-testid="filter-posts-btn">
-          <Filter className="w-4 h-4 mr-2" />
+        <Button variant= "outline" data-testid= "filter-posts-btn">
+          <Filter className= "w-4 h-4 mr-2" />
           Filter
         </Button>
-        <Button variant="outline" data-testid="bookmark-posts-btn">
-          <Bookmark className="w-4 h-4 mr-2" />
+        <Button variant= "outline" data-testid= "bookmark-posts-btn">
+          <Bookmark className= "w-4 h-4 mr-2" />
           Bookmarks
         </Button>
       </div>
 
       {/* Posts Feed */}
-      <div className="space-y-6">
+      <div className= "space-y-6">
         {posts.map((post) => (
           <Card key={post.id}>
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                    <Users className="w-5 h-5 text-gray-600" />
+            <CardContent className= "p-6">
+              <div className= "flex items-start justify-between mb-4">
+                <div className= "flex items-center gap-3">
+                  <div className= "w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                    <Users className= "w-5 h-5 text-gray-600" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">{post.author}</h4>
-                    <p className="text-sm text-gray-500">{post.timestamp}</p>
+                    <h4 className= "font-medium text-gray-900">{post.author}</h4>
+                    <p className= "text-sm text-gray-500">{post.timestamp}</p>
                   </div>
                 </div>
                 <Button 
-                  variant="ghost" 
-                  size="sm"
+                  variant= "ghost" 
+                  size= "sm"
                   onClick={() => handleSharePost(post.id)}
                   data-testid={\`share-post-\${post.id}-btn\`}
                 >
-                  <Share2 className="w-4 h-4" />
+                  <Share2 className= "w-4 h-4" />
                 </Button>
               </div>
               
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{post.title}</h3>
-              <p className="text-gray-600 mb-4">{post.content}</p>
+              <h3 className= "text-lg font-semibold text-gray-900 mb-2">{post.title}</h3>
+              <p className= "text-gray-600 mb-4">{post.content}</p>
               
-              <div className="flex flex-wrap gap-2 mb-4">
+              <div className= "flex flex-wrap gap-2 mb-4">
                 {post.tags.map((tag, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
+                  <Badge key={index} variant= "secondary" className= "text-xs">
                     #{tag}
                   </Badge>
                 ))}
               </div>
               
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
+              <div className= "flex items-center justify-between">
+                <div className= "flex items-center gap-4">
                   <button 
                     onClick={() => handleLikePost(post.id)}
                     data-testid={\`like-post-\${post.id}-btn\`}
-                    className="flex items-center gap-1 text-gray-500 hover:text-red-500 transition-colors"
+                    className= "flex items-center gap-1 text-gray-500 hover:text-red-500 transition-colors"
                   >
-                    <Heart className="w-4 h-4" />
-                    <span className="text-sm">{post.likes}</span>
+                    <Heart className= "w-4 h-4" />
+                    <span className= "text-sm">{post.likes}</span>
                   </button>
                   <button 
                     data-testid={\`comment-post-\${post.id}-btn\`}
-                    className="flex items-center gap-1 text-gray-500 hover:text-blue-500 transition-colors"
+                    className= "flex items-center gap-1 text-gray-500 hover:text-blue-500 transition-colors"
                   >
-                    <MessageSquare className="w-4 h-4" />
-                    <span className="text-sm">{post.comments}</span>
+                    <MessageSquare className= "w-4 h-4" />
+                    <span className= "text-sm">{post.comments}</span>
                   </button>
-                  <div className="flex items-center gap-1 text-gray-400">
-                    <Eye className="w-4 h-4" />
-                    <span className="text-sm">{post.views}</span>
+                  <div className= "flex items-center gap-1 text-gray-400">
+                    <Eye className= "w-4 h-4" />
+                    <span className= "text-sm">{post.views}</span>
                   </div>
                 </div>
               </div>
@@ -607,16 +551,11 @@ export default function CommunityHubPage() {
       let content = await fs.readFile(projectsHubPath, 'utf8');
       
       // Ensure all required buttons exist with proper test IDs
-      const requiredButtons = [
-        'create-project-btn',
-        'import-project-btn', 
-        'quick-start-btn',
-        'view-all-projects-btn',
-        'export-projects-btn'
+      const requiredButtons = ['create-project-btn', 'import-project-btn', 'quick-start-btn', 'view-all-projects-btn', 'export-projects-btn'
       ];
       
       // Add missing button functionality if needed
-      if (!content.includes('data-testid="create-project-btn"')) {
+      if (!content.includes('data-testid= "create-project-btn"')) {
         log.warn('Adding missing create project button to projects hub');
         // Would add the button here
       }
@@ -633,11 +572,7 @@ export default function CommunityHubPage() {
       let content = await fs.readFile(aiCreatePath, 'utf8');
       
       // Ensure AI Create has all interactive buttons
-      const requiredButtons = [
-        'ai-generate-content-btn',
-        'ai-analyze-btn',
-        'ai-optimize-btn', 
-        'save-content-btn'
+      const requiredButtons = ['ai-generate-content-btn', 'ai-analyze-btn', 'ai-optimize-btn', 'save-content-btn'
       ];
       
       log.info('AI Create buttons verified');
@@ -652,11 +587,7 @@ export default function CommunityHubPage() {
       let content = await fs.readFile(videoStudioPath, 'utf8');
       
       // Ensure Video Studio has all interactive buttons
-      const requiredButtons = [
-        'create-video-btn',
-        'upload-video-btn',
-        'edit-video-btn',
-        'export-video-btn'
+      const requiredButtons = ['create-video-btn', 'upload-video-btn', 'edit-video-btn', 'export-video-btn'
       ];
       
       log.info('Video Studio buttons verified');

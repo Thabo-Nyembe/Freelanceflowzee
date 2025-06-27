@@ -26,21 +26,9 @@ export const SEO_CONFIG = {
     }
   },
   features: {
-    primary: [
-      'Project Management',
-      'Client Collaboration', 
-      'Payment Processing',
-      'Time Tracking',
-      'File Sharing',
-      'Team Management'
+    primary: ['Project Management', 'Client Collaboration', 'Payment Processing', 'Time Tracking', 'File Sharing', 'Team Management'
     ],
-    benefits: [
-      'Increase productivity by 40%',
-      'Reduce project turnaround time',
-      'Streamline client communication',
-      'Automate invoicing and payments',
-      'Secure file collaboration',
-      'Real-time project tracking'
+    benefits: ['Increase productivity by 40%', 'Reduce project turnaround time', 'Streamline client communication', 'Automate invoicing and payments', 'Secure file collaboration', 'Real-time project tracking'
     ]
   },
   keywords: {
@@ -78,7 +66,7 @@ export const SEO_TEMPLATES = {
   },
   contact: {
     title: `Contact Us - ${SEO_CONFIG.site.name}`,
-    description: 'Get in touch with our team. We\'re here to help you succeed with your freelance business. Multiple ways to reach us.',
+    description: 'Get in touch with our team. We\'re here to help you succeed with your freelance business. Multiple ways to reach us.','
     keywords: 'contact freeflowzee, customer support, sales inquiry',
     schema: 'ContactPage'
   },
@@ -137,7 +125,7 @@ export function generateBlogPostSEO(post: BlogPostSEO): Metadata {
     twitter: {
       card: 'summary_large_image',
       site: SEO_CONFIG.site.creator,
-      creator: `@${post.author.toLowerCase().replace(' ', '')}`,
+      creator: `@${post.author.toLowerCase().replace(' ', )}`,
       title,
       description,
       images: [`${SEO_CONFIG.site.url}/images/blog/${slugify(post.title)}-twitter.jpg`]
@@ -212,17 +200,14 @@ export function generatePageSEO(
       follow: true,
       googleBot: {
         index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1
+        follow: true, 'max-video-preview': -1, 'max-image-preview': 'large', 'max-snippet': -1
       }
     },
     openGraph: {
       title: template.title,
       description: template.description,
       type: SEO_CONFIG.site.type as any,
-      url: `${SEO_CONFIG.site.url}/${page === 'homepage' ? '' : page}`,
+      url: `${SEO_CONFIG.site.url}/${page === 'homepage' ?  : page}`,'
       siteName: SEO_CONFIG.site.name,
       locale: SEO_CONFIG.site.locale,
       images: [
@@ -243,9 +228,9 @@ export function generatePageSEO(
       images: [SEO_CONFIG.site.image]
     },
     alternates: {
-      canonical: `${SEO_CONFIG.site.url}/${page === 'homepage' ? '' : page}`,
+      canonical: `${SEO_CONFIG.site.url}/${page === 'homepage' ?  : page}`,'
       languages: SEO_CONFIG.site.alternateLocales.reduce((acc, locale) => {
-        acc[locale] = `${SEO_CONFIG.site.url}/${locale}/${page === 'homepage' ? '' : page}`
+        acc[locale] = `${SEO_CONFIG.site.url}/${locale}/${page === 'homepage' ?  : page}`'
         return acc
       }, {} as Record<string, string>)
     },
@@ -266,30 +251,14 @@ export function generatePageSEO(
 // Context7 Pattern: Structured Data Generator
 export function generateStructuredData(
   type: 'Organization' | 'Product' | 'Article' | 'Blog' | 'ContactPage' | 'Offer' | 'SoftwareApplication',
-  data?: any
+  data?: Record<string, unknown>
 ) {
   const baseOrganization = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": SEO_CONFIG.site.name,
-    "description": SEO_CONFIG.site.description,
-    "url": SEO_CONFIG.site.url,
-    "logo": `${SEO_CONFIG.site.url}/images/logo.png`,
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "telephone": SEO_CONFIG.contact.phone,
-      "contactType": "customer service",
-      "email": SEO_CONFIG.contact.email
-    },
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "123 Creative Street",
-      "addressLocality": "San Francisco",
-      "addressRegion": "CA",
-      "postalCode": "94103",
-      "addressCountry": "US"
-    },
-    "sameAs": Object.values(SEO_CONFIG.contact.social)
+    "@context": "https://schema.org", "@type": "Organization", "name": SEO_CONFIG.site.name, "description": SEO_CONFIG.site.description, "url": SEO_CONFIG.site.url, "logo": `${SEO_CONFIG.site.url}/images/logo.png`, "contactPoint": {
+      "@type": "ContactPoint", "telephone": SEO_CONFIG.contact.phone, "contactType": "customer service", "email": SEO_CONFIG.contact.email
+    }, "address": {
+      "@type": "PostalAddress", "streetAddress": "123 Creative Street", "addressLocality": "San Francisco", "addressRegion": "CA", "postalCode": "94103", "addressCountry": "US"
+    }, "sameAs": Object.values(SEO_CONFIG.contact.social)
   }
 
   switch (type) {
@@ -298,89 +267,41 @@ export function generateStructuredData(
 
     case 'Product':
       return {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": SEO_CONFIG.site.name,
-        "description": SEO_CONFIG.site.description,
-        "url": SEO_CONFIG.site.url,
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web Browser",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "USD",
-          "availability": "https://schema.org/InStock"
-        },
-        "provider": baseOrganization,
-        "screenshot": `${SEO_CONFIG.site.url}/images/app-screenshot.jpg`,
-        "featureList": SEO_CONFIG.features.primary
+        "@context": "https://schema.org", "@type": "SoftwareApplication", "name": SEO_CONFIG.site.name, "description": SEO_CONFIG.site.description, "url": SEO_CONFIG.site.url, "applicationCategory": "BusinessApplication", "operatingSystem": "Web Browser", "offers": {
+          "@type": "Offer", "price": "0","
+          "priceCurrency": "USD", "availability": "https://schema.org/InStock"
+        }, "provider": baseOrganization, "screenshot": `${SEO_CONFIG.site.url}/images/app-screenshot.jpg`, "featureList": SEO_CONFIG.features.primary
       }
 
     case 'Article':
       return {
-        "@context": "https://schema.org",
-        "@type": "Article",
-        "headline": data?.title,
-        "description": data?.description,
-        "author": {
-          "@type": "Person",
-          "name": data?.author
-        },
-        "publisher": baseOrganization,
-        "datePublished": data?.publishedAt,
-        "dateModified": data?.modifiedAt || data?.publishedAt,
-        "image": data?.image,
-        "url": data?.url
+        "@context": "https://schema.org", "@type": "Article", "headline": data?.title, "description": data?.description, "author": {
+          "@type": "Person", "name": data?.author
+        }, "publisher": baseOrganization, "datePublished": data?.publishedAt, "dateModified": data?.modifiedAt || data?.publishedAt, "image": data?.image, "url": data?.url
       }
 
     case 'Blog':
       return {
-        "@context": "https://schema.org",
-        "@type": "Blog",
-        "name": `${SEO_CONFIG.site.name} Blog`,
-        "description": "Expert insights on freelance management and business growth",
-        "url": `${SEO_CONFIG.site.url}/blog`,
-        "publisher": baseOrganization
+        "@context": "https://schema.org", "@type": "Blog", "name": `${SEO_CONFIG.site.name} Blog`, "description": "Expert insights on freelance management and business growth", "url": `${SEO_CONFIG.site.url}/blog`, "publisher": baseOrganization
       }
 
     case 'ContactPage':
       return {
-        "@context": "https://schema.org",
-        "@type": "ContactPage",
-        "name": `Contact ${SEO_CONFIG.site.name}`,
-        "description": "Get in touch with our team",
-        "url": `${SEO_CONFIG.site.url}/contact`,
-        "mainEntity": baseOrganization
+        "@context": "https://schema.org", "@type": "ContactPage", "name": `Contact ${SEO_CONFIG.site.name}`, "description": "Get in touch with our team", "url": `${SEO_CONFIG.site.url}/contact`, "mainEntity": baseOrganization
       }
 
     case 'Offer':
       return {
-        "@context": "https://schema.org",
-        "@type": "Offer",
-        "name": data?.product || SEO_CONFIG.site.name,
-        "description": data?.description,
-        "price": data?.price || "0",
-        "priceCurrency": data?.currency || "USD",
-        "availability": "https://schema.org/InStock",
-        "seller": baseOrganization,
-        "url": data?.url || `${SEO_CONFIG.site.url}/pricing`
+        "@context": "https://schema.org", "@type": "Offer", "name": data?.product || SEO_CONFIG.site.name, "description": data?.description, "price": data?.price || "0","
+        "priceCurrency": data?.currency || "USD", "availability": "https://schema.org/InStock", "seller": baseOrganization, "url": data?.url || `${SEO_CONFIG.site.url}/pricing`
       }
 
     case 'SoftwareApplication':
       return {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": SEO_CONFIG.site.name,
-        "description": SEO_CONFIG.site.description,
-        "url": SEO_CONFIG.site.url,
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web Browser",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
+        "@context": "https://schema.org", "@type": "SoftwareApplication", "name": SEO_CONFIG.site.name, "description": SEO_CONFIG.site.description, "url": SEO_CONFIG.site.url, "applicationCategory": "BusinessApplication", "operatingSystem": "Web Browser", "offers": {
+          "@type": "Offer", "price": "0","
           "priceCurrency": "USD"
-        },
-        "provider": baseOrganization
+        }, "provider": baseOrganization
       }
 
     default:
@@ -398,7 +319,7 @@ export function analyzeSEO(content: string, metadata: Metadata) {
   }
 
   // Title analysis
-  const titleLength = (typeof metadata.title === 'string' ? metadata.title : metadata.title?.toString() || '').length
+  const titleLength = (typeof metadata.title === 'string' ? metadata.title : metadata.title?.toString() || ).length'
   if (titleLength < 30) {
     analysis.issues.push('Title is too short (< 30 characters)')
   } else if (titleLength > 60) {
@@ -420,7 +341,7 @@ export function analyzeSEO(content: string, metadata: Metadata) {
   }
 
   // Content analysis
-  const wordCount = content.split(' ').length
+  const wordCount = content.split(' ').length'
   if (wordCount < 300) {
     analysis.issues.push('Content is too short (< 300 words)')
   } else {
@@ -477,24 +398,24 @@ export function analyzeSEO(content: string, metadata: Metadata) {
 export function slugify(text: string): string {
   return text
     .toLowerCase()
-    .replace(/[^\w ]+/g, '')
-    .replace(/ +/g, '-')
+    .replace(/[^\w ]+/g, '')'
+    .replace(/ +/g, '-')'
 }
 
 export function generateSitemap(pages: string[]): string {
   const urls = pages.map(page => {
-    const url = page === '/' ? SEO_CONFIG.site.url : `${SEO_CONFIG.site.url}${page}`
+    const url = page === '/' ? SEO_CONFIG.site.url : `${SEO_CONFIG.site.url}${page}`'
     return `
   <url>
     <loc>${url}</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>${page === '/' ? '1.0' : '0.8'}</priority>
+    <priority>${page === '/' ? &apos;1.0&apos; : &apos;0.8&apos;}</priority>'
   </url>`
-  }).join('')
+  }).join('')'
 
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  return `<?xml version= "1.0" encoding= "UTF-8"?>
+<urlset xmlns= "http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls}
 </urlset>`
 }

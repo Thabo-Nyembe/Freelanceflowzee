@@ -1,4 +1,4 @@
-"use client"
+"use client
 
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
@@ -15,8 +15,8 @@ interface CreatePostDialogProps {
 }
 
 export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDialogProps) {
-  const [title, setTitle] = useState('')
-  const [content, setContent] = useState('')
+  const [title, setTitle] = useState('')'
+  const [content, setContent] = useState('')'
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -34,8 +34,8 @@ export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDia
 
     try {
       await onSubmit(formData)
-      setTitle('')
-      setContent('')
+      setTitle('')'
+      setContent('')'
       setSelectedFiles([])
       onOpenChange(false)
     } catch (error) {
@@ -56,58 +56,49 @@ export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDia
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className= "sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Create Post</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
+        <form onSubmit={handleSubmit} className= "space-y-4">
+          <div className= "space-y-2">
+            <Label htmlFor= "title">Title</Label>
             <Input
-              id="title"
+              id= "title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Give your post a title..."
+              placeholder= "Give your post a title..."
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="content">Content</Label>
+          <div className= "space-y-2">
+            <Label htmlFor= "content">Content</Label>
             <Textarea
-              id="content"
+              id= "content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="What's on your mind?"
+              placeholder= "What's on your mind?"
               rows={4}
             />
           </div>
           
           {selectedFiles.length > 0 && (
-            <div className="space-y-2">
+            <div className= "space-y-2">
               <Label>Selected Files</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className= "grid grid-cols-2 gap-2">
                 {selectedFiles.map((file, index) => (
-                  <div key={index} className="relative group">
+                  <div key={index} className= "relative group">
                     {file.type.startsWith('image/') ? (
-                      <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={`Selected file ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
+                      <div className= "aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                        <img src={URL.createObjectURL(file)} alt={`Selected file ${index + 1}>
                       </div>
                     ) : (
-                      <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
-                        <Video className="w-8 h-8 text-gray-400" />
+                      <div >
+                        <Video >
                       </div>
                     )}
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => removeFile(index)}
+                    <Button > removeFile(index)}
                     >
-                      <X className="w-4 h-4" />
+                      <X >
                     </Button>
                   </div>
                 ))}
@@ -115,49 +106,23 @@ export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDia
             </div>
           )}
 
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="flex items-center gap-2"
-              onClick={() => document.getElementById('image-upload')?.click()}
+          <div >
+            <Button > document.getElementById('image-upload')?.click()}
             >
-              <Image className="w-4 h-4" />
+              <Image >
               Add Image
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="flex items-center gap-2"
-              onClick={() => document.getElementById('video-upload')?.click()}
+            <Button > document.getElementById('video-upload')?.click()}
             >
-              <Video className="w-4 h-4" />
+              <Video >
               Add Video
             </Button>
-            <input
-              id="image-upload"
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={handleFileSelect}
-            />
-            <input
-              id="video-upload"
-              type="file"
-              accept="video/*"
-              multiple
-              className="hidden"
-              onChange={handleFileSelect}
-            />
+            <input onChange={handleFileSelect}>
+            <input onChange={handleFileSelect}>
           </div>
 
-          <DialogFooter>
-            <Button
-              type="submit"
-              disabled={isSubmitting || !content.trim()}
-              className="w-full"
-            >
+          <DialogFooter >
+            <Button disabled={isSubmitting || !content.trim()}>
               {isSubmitting ? 'Creating...' : 'Create Post'}
             </Button>
           </DialogFooter>

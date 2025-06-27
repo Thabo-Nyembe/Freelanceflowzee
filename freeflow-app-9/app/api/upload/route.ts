@@ -32,15 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file type
-    const allowedTypes = [
-      'image/jpeg',
-      'image/jpg', 
-      'image/png',
-      'image/gif',
-      'image/webp',
-      'application/pdf',
-      'text/plain',
-      'application/json'
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'application/pdf', 'text/plain', 'application/json'
     ]
     
     if (!allowedTypes.includes(file.type)) {
@@ -55,7 +47,7 @@ export async function POST(request: NextRequest) {
     
     // Generate unique filename
     const timestamp = Date.now()
-    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')'
     const filename = `${timestamp}-${sanitizedName}`
     
     // Determine folder based on file type
@@ -72,9 +64,7 @@ export async function POST(request: NextRequest) {
       filename,
       contentType: file.type,
       metadata: {
-        'original-name': file.name,
-        'upload-timestamp': timestamp.toString(),
-        'content-length': file.size.toString()
+        'original-name': file.name, 'upload-timestamp': timestamp.toString(), 'content-length': file.size.toString()
       }
     })
 
@@ -139,7 +129,7 @@ export async function PUT(request: NextRequest) {
 
     // Generate unique key
     const timestamp = Date.now()
-    const sanitizedName = filename.replace(/[^a-zA-Z0-9.-]/g, '_')
+    const sanitizedName = filename.replace(/[^a-zA-Z0-9.-]/g, '_')'
     const key = `${folder}/${timestamp}-${sanitizedName}`
     
     // Generate presigned URL (valid for 1 hour)

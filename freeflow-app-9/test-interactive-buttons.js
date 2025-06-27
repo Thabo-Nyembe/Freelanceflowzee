@@ -13,25 +13,15 @@ class InteractiveSystemTester {
     const pageContent = `"use client";
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { 
-  Brain, 
-  MessageSquare, 
-  Lightbulb, 
-  Zap,
-  Send,
-  FileText,
-  Plus
-} from 'lucide-react';
 
 export default function AIAssistantPage() {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState('');'
 
   const handleSendMessage = () => {
     if (!message.trim()) return;
-    setMessage('');
+    setMessage('');'
     alert('AI Assistant message sent successfully!');
   };
 
@@ -60,16 +50,16 @@ export default function AIAssistantPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className= "space-y-6">
+      <div className= "flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">AI Assistant</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className= "text-3xl font-bold text-gray-900">AI Assistant</h1>
+          <p className= "text-gray-600 mt-2">
             Your intelligent assistant for project management and creativity
           </p>
         </div>
-        <Button data-testid="new-conversation-btn">
-          <MessageSquare className="w-4 h-4 mr-2" />
+        <Button data-testid= "new-conversation-btn">
+          <MessageSquare className= "w-4 h-4 mr-2" />
           New Conversation
         </Button>
       </div>
@@ -79,7 +69,7 @@ export default function AIAssistantPage() {
           <CardTitle>Quick AI Actions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className= "grid grid-cols-1 md:grid-cols-3 gap-4">
             {quickActions.map((action, index) => {
               const Icon = action.icon;
               return (
@@ -87,15 +77,15 @@ export default function AIAssistantPage() {
                   key={index}
                   onClick={action.action}
                   data-testid={action.testId}
-                  className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left group"
+                  className= "p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left group"
                 >
-                  <div className="p-2 rounded-lg bg-violet-50 w-fit">
-                    <Icon className="w-5 h-5 text-violet-600" />
+                  <div className= "p-2 rounded-lg bg-violet-50 w-fit">
+                    <Icon className= "w-5 h-5 text-violet-600" />
                   </div>
-                  <h4 className="font-medium text-gray-900 mt-3 group-hover:text-violet-600 transition-colors">
+                  <h4 className= "font-medium text-gray-900 mt-3 group-hover:text-violet-600 transition-colors">
                     {action.title}
                   </h4>
-                  <p className="text-sm text-gray-500 mt-1">{action.description}</p>
+                  <p className= "text-sm text-gray-500 mt-1">{action.description}</p>
                 </button>
               );
             })}
@@ -103,28 +93,28 @@ export default function AIAssistantPage() {
         </CardContent>
       </Card>
 
-      <Card className="h-[400px] flex flex-col">
+      <Card className= "h-[400px] flex flex-col">
         <CardHeader>
           <CardTitle>Chat with AI</CardTitle>
         </CardHeader>
-        <CardContent className="flex-1 flex flex-col">
-          <div className="flex-1 mb-4 p-4 bg-gray-50 rounded-lg">
-            <p className="text-gray-600">AI Assistant: Hello! How can I help you today?</p>
+        <CardContent className= "flex-1 flex flex-col">
+          <div className= "flex-1 mb-4 p-4 bg-gray-50 rounded-lg">
+            <p className= "text-gray-600">AI Assistant: Hello! How can I help you today?</p>
           </div>
           
-          <div className="flex gap-2">
+          <div className= "flex gap-2">
             <Input
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Type your message..."
+              placeholder= "Type your message..."
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-              className="flex-1"
+              className= "flex-1"
             />
             <Button 
               onClick={handleSendMessage}
-              data-testid="send-message-btn"
+              data-testid= "send-message-btn"
             >
-              <Send className="w-4 h-4" />
+              <Send className= "w-4 h-4" />
             </Button>
           </div>
         </CardContent>
@@ -147,19 +137,8 @@ export default function AIAssistantPage() {
     const pageContent = `"use client";
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Users, 
-  MessageSquare, 
-  Share2, 
-  Heart,
-  Plus,
-  Filter,
-  Bookmark
-} from 'lucide-react';
 
 export default function CommunityHubPage() {
   const [posts, setPosts] = useState([
@@ -196,33 +175,33 @@ export default function CommunityHubPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className= "space-y-6">
+      <div className= "flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Community Hub</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className= "text-3xl font-bold text-gray-900">Community Hub</h1>
+          <p className= "text-gray-600 mt-2">
             Connect, share, and learn with fellow creators
           </p>
         </div>
-        <Button data-testid="join-discussion-btn">
-          <Plus className="w-4 h-4 mr-2" />
+        <Button data-testid= "join-discussion-btn">
+          <Plus className= "w-4 h-4 mr-2" />
           Join Discussion
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className= "grid grid-cols-1 md:grid-cols-4 gap-4">
         {communityStats.map((stat, index) => {
           const Icon = stat.icon;
           return (
             <Card key={index}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+              <CardContent className= "p-4">
+                <div className= "flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                    <p className="text-sm text-gray-500">{stat.label}</p>
+                    <p className= "text-2xl font-bold text-gray-900">{stat.value}</p>
+                    <p className= "text-sm text-gray-500">{stat.label}</p>
                   </div>
-                  <div className="p-2 bg-violet-50 rounded-lg">
-                    <Icon className="w-5 h-5 text-violet-600" />
+                  <div className= "p-2 bg-violet-50 rounded-lg">
+                    <Icon className= "w-5 h-5 text-violet-600" />
                   </div>
                 </div>
               </CardContent>
@@ -235,20 +214,20 @@ export default function CommunityHubPage() {
         <CardHeader>
           <CardTitle>Share with Community</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <Input placeholder="Post title..." />
-          <div className="flex gap-2">
+        <CardContent className= "space-y-4">
+          <Input placeholder= "Post title..." />
+          <div className= "flex gap-2">
             <Button 
               onClick={handleCreatePost}
-              data-testid="create-post-btn"
-              className="flex-1"
+              data-testid= "create-post-btn"
+              className= "flex-1"
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className= "w-4 h-4 mr-2" />
               Create Post
             </Button>
             <Button 
-              variant="outline"
-              data-testid="upload-media-btn"
+              variant= "outline"
+              data-testid= "upload-media-btn"
             >
               Upload Media
             </Button>
@@ -256,67 +235,67 @@ export default function CommunityHubPage() {
         </CardContent>
       </Card>
 
-      <div className="flex gap-4">
-        <Input placeholder="Search community posts..." className="flex-1" />
-        <Button variant="outline" data-testid="filter-posts-btn">
-          <Filter className="w-4 h-4 mr-2" />
+      <div className= "flex gap-4">
+        <Input placeholder= "Search community posts..." className= "flex-1" />
+        <Button variant= "outline" data-testid= "filter-posts-btn">
+          <Filter className= "w-4 h-4 mr-2" />
           Filter
         </Button>
-        <Button variant="outline" data-testid="bookmark-posts-btn">
-          <Bookmark className="w-4 h-4 mr-2" />
+        <Button variant= "outline" data-testid= "bookmark-posts-btn">
+          <Bookmark className= "w-4 h-4 mr-2" />
           Bookmarks
         </Button>
       </div>
 
-      <div className="space-y-6">
+      <div className= "space-y-6">
         {posts.map((post) => (
           <Card key={post.id}>
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                    <Users className="w-5 h-5 text-gray-600" />
+            <CardContent className= "p-6">
+              <div className= "flex items-start justify-between mb-4">
+                <div className= "flex items-center gap-3">
+                  <div className= "w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                    <Users className= "w-5 h-5 text-gray-600" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">{post.author}</h4>
-                    <p className="text-sm text-gray-500">{post.timestamp}</p>
+                    <h4 className= "font-medium text-gray-900">{post.author}</h4>
+                    <p className= "text-sm text-gray-500">{post.timestamp}</p>
                   </div>
                 </div>
                 <Button 
-                  variant="ghost" 
-                  size="sm"
+                  variant= "ghost" 
+                  size= "sm"
                   data-testid={\`share-post-\${post.id}-btn\`}
                 >
-                  <Share2 className="w-4 h-4" />
+                  <Share2 className= "w-4 h-4" />
                 </Button>
               </div>
               
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{post.title}</h3>
-              <p className="text-gray-600 mb-4">{post.content}</p>
+              <h3 className= "text-lg font-semibold text-gray-900 mb-2">{post.title}</h3>
+              <p className= "text-gray-600 mb-4">{post.content}</p>
               
-              <div className="flex flex-wrap gap-2 mb-4">
+              <div className= "flex flex-wrap gap-2 mb-4">
                 {post.tags.map((tag, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
+                  <Badge key={index} variant= "secondary" className= "text-xs">
                     #{tag}
                   </Badge>
                 ))}
               </div>
               
-              <div className="flex items-center gap-4">
+              <div className= "flex items-center gap-4">
                 <button 
                   onClick={() => handleLikePost(post.id)}
                   data-testid={\`like-post-\${post.id}-btn\`}
-                  className="flex items-center gap-1 text-gray-500 hover:text-red-500 transition-colors"
+                  className= "flex items-center gap-1 text-gray-500 hover:text-red-500 transition-colors"
                 >
-                  <Heart className="w-4 h-4" />
-                  <span className="text-sm">{post.likes}</span>
+                  <Heart className= "w-4 h-4" />
+                  <span className= "text-sm">{post.likes}</span>
                 </button>
                 <button 
                   data-testid={\`comment-post-\${post.id}-btn\`}
-                  className="flex items-center gap-1 text-gray-500 hover:text-blue-500 transition-colors"
+                  className= "flex items-center gap-1 text-gray-500 hover:text-blue-500 transition-colors"
                 >
-                  <MessageSquare className="w-4 h-4" />
-                  <span className="text-sm">{post.comments}</span>
+                  <MessageSquare className= "w-4 h-4" />
+                  <span className= "text-sm">{post.comments}</span>
                 </button>
               </div>
             </CardContent>

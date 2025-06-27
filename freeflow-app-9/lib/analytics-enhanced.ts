@@ -10,7 +10,7 @@ class AnalyticsService {
   private aiInsights: AIInsight[] = []
 
   constructor() {
-    this.apiKey = process.env.NEXT_PUBLIC_ANALYTICS_KEY || ''
+    this.apiKey = process.env.NEXT_PUBLIC_ANALYTICS_KEY || '
     this.sessionId = this.generateSessionId()
     this.initializeWebVitals()
     this.initializePerformanceObserver()
@@ -347,11 +347,11 @@ class AnalyticsService {
   }
 
   // Placeholder methods for AI functionality
-  private generateAIContext(event: string, properties: any): any {
+  private generateAIContext(event: string, properties: Record<string, unknown>): Record<string, unknown> {
     return { event, properties, timestamp: Date.now() }
   }
 
-  private predictLifetimeValue(properties: any): number {
+  private predictLifetimeValue(properties: Record<string, unknown>): number {
     // AI-powered LTV prediction
     return Math.random() * 1000 // Placeholder
   }
@@ -371,7 +371,7 @@ class AnalyticsService {
     return ['Check network connectivity', 'Refresh the page'] // Placeholder
   }
 
-  private async processWithAI(data: any): Promise<any> {
+  private async processWithAI(data: Record<string, unknown>): Promise<any> {
     // AI processing pipeline
     return {
       predictions: [],
@@ -389,18 +389,18 @@ class AnalyticsService {
   private getCurrentFunnelStage() { return 'unknown' }
   private getAttributionData() { return {} }
   private categorizeErrorSeverity(error: Error) { return 'medium' }
-  private calculateErrorImpact(error: Error, context: any) { return 'low' }
+  private calculateErrorImpact(error: Error, context: Record<string, unknown>) { return &apos;low&apos; }
   private getUserJourneyContext() { return [] }
-  private triggerErrorAlert(errorData: any) {}
+  private triggerErrorAlert(errorData: Record<string, unknown>) {}
   private getPerformanceBenchmark(metric: string) { return 0 }
   private calculatePercentile(metric: string, value: number) { return 50 }
   private calculateTrend(metric: string, value: number) { return 'stable' }
   private assessPerformanceImpact(metric: string, value: number) { return 'low' }
   private suggestOptimizations(metric: string, value: number) { return [] }
   private isCriticalPerformanceIssue(metric: string, value: number) { return false }
-  private triggerPerformanceAlert(data: any) {}
+  private triggerPerformanceAlert(data: Record<string, unknown>) {}
   private getRecentEvents(count: number) { return [] }
-  private detectBehaviorPatterns(events: any[]) { return {} }
+  private detectBehaviorPatterns(events: Record<string, unknown>[]) { return {} }
   private getSessionDuration() { return 0 }
   private getPageViewCount() { return 0 }
   private getInteractionCount() { return 0 }
@@ -412,26 +412,26 @@ class AnalyticsService {
   private optimizeAllocation(variants: string[]) { return {} }
   private calculateOptimalDuration(testName: string) { return 14 }
   private selectOptimalMetrics(testName: string) { return [] }
-  private assignVariant(testName: string, config: any) { return config.variants[0] }
+  private assignVariant(testName: string, config: Record<string, unknown>) { return config.variants[0] }
   private aggregateAnalyticsData() { return {} }
-  private calculateUserMetrics(data: any) { return {} }
-  private calculateRevenueMetrics(data: any) { return {} }
-  private calculateErrorMetrics(data: any) { return {} }
-  private identifyTrends(data: any) { return [] }
-  private detectAnomalies(data: any) { return [] }
-  private generateAlerts(data: any, insights: any) { return [] }
-  private identifyOpportunities(data: any, insights: any) { return [] }
+  private calculateUserMetrics(data: Record<string, unknown>) { return {} }
+  private calculateRevenueMetrics(data: Record<string, unknown>) { return {} }
+  private calculateErrorMetrics(data: Record<string, unknown>) { return {} }
+  private identifyTrends(data: Record<string, unknown>) { return [] }
+  private detectAnomalies(data: Record<string, unknown>) { return [] }
+  private generateAlerts(data: Record<string, unknown>, insights: Record<string, unknown>) { return [] }
+  private identifyOpportunities(data: Record<string, unknown>, insights: Record<string, unknown>) { return [] }
   private buildCohorts(type: string) { return {} }
-  private calculateRetentionRates(cohorts: any) { return {} }
-  private calculateCohortRevenue(cohorts: any) { return {} }
-  private calculateCohortEngagement(cohorts: any) { return {} }
-  private calculateLifetimeValue(cohorts: any) { return {} }
-  private calculateChurnRates(cohorts: any) { return {} }
-  private predictCohortBehavior(cohorts: any) { return {} }
-  private processPerformanceEntry(entry: any) {}
+  private calculateRetentionRates(cohorts: Record<string, unknown>) { return {} }
+  private calculateCohortRevenue(cohorts: Record<string, unknown>) { return {} }
+  private calculateCohortEngagement(cohorts: Record<string, unknown>) { return {} }
+  private calculateLifetimeValue(cohorts: Record<string, unknown>) { return {} }
+  private calculateChurnRates(cohorts: Record<string, unknown>) { return {} }
+  private predictCohortBehavior(cohorts: Record<string, unknown>) { return {} }
+  private processPerformanceEntry(entry: Record<string, unknown>) {}
   private generateEventInsight(event: AnalyticsEvent) { return null }
   private updatePersonalization(event: AnalyticsEvent) {}
-  private updateAIModels(data: any) {}
+  private updateAIModels(data: Record<string, unknown>) {}
 }
 
 // Types and interfaces
@@ -439,13 +439,13 @@ interface AnalyticsEvent {
   id: string
   event: string
   properties: Record<string, any>
-  aiContext: any
+  aiContext: Record<string, unknown>
 }
 
 interface AIInsight {
   type: string
   confidence: number
-  data: any
+  data: Record<string, unknown>
   timestamp: number
 }
 
@@ -453,12 +453,12 @@ interface UserBehaviorInsights {
   sessionDuration: number
   pageViews: number
   interactions: number
-  conversionFunnel: any
-  behaviorPatterns: any
+  conversionFunnel: Record<string, unknown>
+  behaviorPatterns: Record<string, unknown>
   engagementScore: number
   churnRisk: number
   nextBestAction: string
-  personalization: any
+  personalization: Record<string, unknown>
 }
 
 interface ABTestConfig {
@@ -471,22 +471,22 @@ interface ABTestConfig {
 }
 
 interface AnalyticsInsights {
-  summary: any
-  trends: any[]
-  anomalies: any[]
-  predictions: any[]
-  recommendations: any[]
-  alerts: any[]
-  opportunities: any[]
+  summary: Record<string, unknown>
+  trends: Record<string, unknown>[]
+  anomalies: Record<string, unknown>[]
+  predictions: Record<string, unknown>[]
+  recommendations: Record<string, unknown>[]
+  alerts: Record<string, unknown>[]
+  opportunities: Record<string, unknown>[]
 }
 
 interface CohortAnalysis {
-  retention: any
-  revenue: any
-  engagement: any
-  ltv: any
-  churn: any
-  predictions: any
+  retention: Record<string, unknown>
+  revenue: Record<string, unknown>
+  engagement: Record<string, unknown>
+  ltv: Record<string, unknown>
+  churn: Record<string, unknown>
+  predictions: Record<string, unknown>
 }
 
 // Export singleton instance

@@ -188,7 +188,7 @@ class MultiCloudStorage {
     const fileSize = file.length;
     const useWasabi = this.shouldUseWasabi(fileSize, mimeType, options.metadata);
     const timestamp = Date.now();
-    const safeFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const safeFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');'
     const fileKey = options.folder ? `${options.folder}/${timestamp}-${safeFileName}` : `uploads/${timestamp}-${safeFileName}`;
     
     try {
@@ -371,7 +371,7 @@ class MultiCloudStorage {
     // Get file metadata from database
     const { data, error } = await this.supabaseClient
       .from('file_storage')
-      .select('*')
+      .select('*')'
       .eq('id', fileId)
       .single();
 
@@ -489,7 +489,7 @@ class MultiCloudStorage {
   async listFiles(options: ListOptions = {}): Promise<FileMetadata[]> {
     let query = this.supabaseClient
       .from('file_storage')
-      .select('*')
+      .select('*')'
       .order('created_at', { ascending: false });
 
     if (options.provider) {
@@ -551,7 +551,7 @@ class MultiCloudStorage {
     // Get file metadata
     const { data, error } = await this.supabaseClient
       .from('file_storage')
-      .select('*')
+      .select('*')'
       .eq('id', fileId)
       .single();
 
@@ -596,7 +596,7 @@ class MultiCloudStorage {
   async getStorageAnalytics(): Promise<any> {
     const { data, error } = await this.supabaseClient
       .from('storage_analytics')
-      .select('*')
+      .select('*')'
       .order('date', { ascending: false })
       .limit(30);
 
@@ -627,7 +627,7 @@ class MultiCloudStorage {
     // Get the stored metadata
     const { data, error } = await this.supabaseClient
       .from('file_storage')
-      .select('*')
+      .select('*')'
       .eq('id', result.file_id)
       .single();
 

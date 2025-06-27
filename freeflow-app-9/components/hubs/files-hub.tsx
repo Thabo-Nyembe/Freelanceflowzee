@@ -1,101 +1,7 @@
-"use client"
+"use client
 
 import React, { useState, useReducer, useCallback, useRef } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { EnhancedUploadProgress } from '@/components/upload/enhanced-upload-progress'
-import { EnhancedDownloadManager } from '@/components/download/enhanced-download-manager'
-import { 
-  FileText,
-  Upload,
-  Download,
-  Folder,
-  Search,
-  Filter,
-  Grid,
-  List,
-  MoreHorizontal,
-  Star,
-  Share,
-  Trash2,
-  Eye,
-  Edit,
-  Image,
-  Video,
-  Music,
-  Archive,
-  Cloud,
-  HardDrive,
-  RefreshCw,
-  Plus,
-  FolderPlus,
-  Users,
-  Lock,
-  Clock,
-  TrendingUp,
-  Zap,
-  Settings,
-  File
-} from 'lucide-react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { FileUploadDialog } from '@/components/files/file-upload-dialog'
-import { createBrowserClient } from '@supabase/ssr'
-
-interface FilesHubProps {
-  projects: any[]
-  userId: string
-}
-
-// Utility functions
-const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 Bytes'
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
-
-const getFileIcon = (mimeType: string) => {
-  if (mimeType?.includes('image')) return Image
-  if (mimeType?.includes('video')) return Video
-  if (mimeType?.includes('audio')) return Music
-  if (mimeType?.includes('pdf')) return FileText
-  return FileText
-}
-
-const getFileColor = (mimeType: string): string => {
-  if (mimeType?.includes('image')) return 'text-purple-500'
-  if (mimeType?.includes('video')) return 'text-blue-500'
-  if (mimeType?.includes('audio')) return 'text-green-500'
-  if (mimeType?.includes('pdf')) return 'text-red-500'
-  return 'text-gray-500'
-}
-
-// Context7 useReducer pattern for file state management
-interface FileState {
-  files: any[]
-  folders: any[]
-  selectedItems: string[]
-  viewMode: 'grid' | 'list'
-  searchQuery: string
-  currentFolder: string | null
-  uploadProgress: number
-  isUploading: boolean
-  storageStats: {
-    used: number
-    total: number
-    files: number
-    folders: number
-  }
-}
-
-type FileAction = 
-  | { type: 'SET_VIEW_MODE'; payload: 'grid' | 'list' }
-  | { type: 'SET_SEARCH_QUERY'; payload: string }
+ payload: string }
   | { type: 'SELECT_ITEM'; payload: string }
   | { type: 'DESELECT_ITEM'; payload: string }
   | { type: 'CLEAR_SELECTION' }
@@ -103,18 +9,18 @@ type FileAction =
   | { type: 'START_UPLOAD' }
   | { type: 'UPDATE_UPLOAD_PROGRESS'; payload: number }
   | { type: 'COMPLETE_UPLOAD' }
-  | { type: 'ADD_FILE'; payload: any }
+  | { type: &apos;ADD_FILE&apos;; payload: Record<string, unknown> }
   | { type: 'DELETE_FILES'; payload: string[] }
-  | { type: 'UPLOAD_SUCCESS'; payload: { files: any[] } }
+  | { type: &apos;UPLOAD_SUCCESS&apos;; payload: { files: Record<string, unknown>[] } }
   | { type: 'UPLOAD_ERROR'; payload: { error: string } }
   | { type: 'DOWNLOAD_START'; payload: { fileId: string } }
   | { type: 'DOWNLOAD_SUCCESS'; payload: { fileId: string } }
   | { type: 'DOWNLOAD_ERROR'; payload: { fileId: string; error: string } }
 
-const initialState: FileState = {
+const initialState:State = {
   files: [
     {
-      id: '1',
+      id: '1','
       name: 'Brand_Guidelines_V2.pdf',
       type: 'pdf',
       size: '2.4 MB',
@@ -122,11 +28,11 @@ const initialState: FileState = {
       author: 'Sarah Chen',
       shared: true,
       starred: true,
-      icon: FileText,
+      icon:Text,
       color: 'text-red-500'
     },
     {
-      id: '2',
+      id: '2','
       name: 'Logo_Concepts.psd',
       type: 'image',
       size: '45.2 MB',
@@ -138,7 +44,7 @@ const initialState: FileState = {
       color: 'text-purple-500'
     },
     {
-      id: '3',
+      id: '3','
       name: 'Presentation_Video.mp4',
       type: 'video',
       size: '127.8 MB',
@@ -150,7 +56,7 @@ const initialState: FileState = {
       color: 'text-blue-500'
     },
     {
-      id: '4',
+      id: '4','
       name: 'Project_Archive.zip',
       type: 'archive',
       size: '89.1 MB',
@@ -162,7 +68,7 @@ const initialState: FileState = {
       color: 'text-orange-500'
     },
     {
-      id: '5',
+      id: '5','
       name: 'Audio_Branding.wav',
       type: 'audio',
       size: '15.6 MB',
@@ -210,7 +116,7 @@ const initialState: FileState = {
   ],
   selectedItems: [],
   viewMode: 'grid',
-  searchQuery: '',
+  searchQuery: '','
   currentFolder: null,
   uploadProgress: 0,
   isUploading: false,
@@ -222,7 +128,7 @@ const initialState: FileState = {
   }
 }
 
-function fileReducer(state: FileState, action: FileAction): FileState {
+function fileReducer(state:State, action:Action):State {
   switch (action.type) {
     case 'SET_VIEW_MODE':
       return { ...state, viewMode: action.payload }
@@ -280,13 +186,13 @@ function fileReducer(state: FileState, action: FileAction): FileState {
   }
 }
 
-export function FilesHub({ projects, userId }: FilesHubProps) {
+export functionsHub({ projects, userId }:sHubProps) {
   const [state, dispatch] = useReducer(fileReducer, initialState)
   const [activeTab, setActiveTab] = useState('files')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
   const [isNewFolderDialogOpen, setIsNewFolderDialogOpen] = useState(false)
-  const [newFolderName, setNewFolderName] = useState('')
+  const [newFolderName, setNewFolderName] = useState('')'
   const [loading, setLoading] = useState(false)
 
   const supabase = createBrowserClient(
@@ -299,7 +205,7 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
     fileInputRef.current?.click()
   }, [])
 
-  const handleFileChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (!files || files.length === 0) return
 
@@ -336,11 +242,11 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
         }
       })
       
-      const uploadedFiles = await Promise.all(uploadPromises)
+      const uploadeds = await Promise.all(uploadPromises)
       
       dispatch({ 
         type: 'UPLOAD_SUCCESS',
-        payload: { files: uploadedFiles }
+        payload: { files: uploadeds }
       })
     } catch (error) {
       console.error('Upload error:', error)
@@ -351,7 +257,7 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
     }
     
     // Reset file input
-    event.target.value = ''
+    event.target.value = '
   }, [])
 
   const handleCreateFolder = async () => {
@@ -376,7 +282,7 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
 
       dispatch({ type: 'ADD_FILE', payload: data })
       setIsNewFolderDialogOpen(false)
-      setNewFolderName('')
+      setNewFolderName('')'
     } catch (error) {
       console.error('Error creating folder:', error)
       alert('Failed to create folder. Please try again.')
@@ -385,7 +291,7 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
     }
   }
 
-  const handleDownloadFile = useCallback(async (file: any) => {
+  const handleDownload = useCallback(async (file: Record<string, unknown>) => {
     try {
       dispatch({ type: 'DOWNLOAD_START', payload: { fileId: file.id } })
       
@@ -399,7 +305,7 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
       
       // Create download link
       const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
+      const a = document.createElement('a')'
       a.href = url
       a.download = file.name
       document.body.appendChild(a)
@@ -423,7 +329,7 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
     }
   }, [])
 
-  const handleShareFile = useCallback((file: any) => {
+  const handleShare = useCallback((file: Record<string, unknown>) => {
     console.log(`Sharing ${file.name}...`)
     alert(`Share link copied for ${file.name}!`)
   }, [])
@@ -433,7 +339,7 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
       const confirmed = confirm(`Delete ${state.selectedItems.length} item(s)?`)
       if (confirmed) {
         dispatch({ type: 'DELETE_FILES', payload: state.selectedItems })
-        alert('Files deleted successfully!')
+        alert('s deleted successfully!')
       }
     }
   }, [state.selectedItems])
@@ -446,7 +352,7 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
     }
   }, [state.selectedItems])
 
-  const filteredFiles = state.files.filter(file =>
+  const filtereds = state.files.filter(file =>
     file.name.toLowerCase().includes(state.searchQuery.toLowerCase())
   )
 
@@ -454,101 +360,101 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
     folder.name.toLowerCase().includes(state.searchQuery.toLowerCase())
   )
 
-  const handleUploadComplete = (uploadedFiles: any[]) => {
+  const handleUploadComplete = (uploadeds: Record<string, unknown>[]) => {
     dispatch({ 
       type: 'UPLOAD_SUCCESS',
-      payload: { files: uploadedFiles }
+      payload: { files: uploadeds }
     })
     setIsUploadDialogOpen(false)
   }
 
   return (
-    <div className="w-full space-y-6">
+    <div className= "w-full space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className= "flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Enterprise Files Hub
+          <h1 className= "text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Enterprises Hub
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className= "text-gray-600 mt-1">
             Professional file management with cloud storage optimization
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className= "flex items-center gap-3">
           <Button 
-            variant="outline" 
-            size="sm"
+            variant= "outline" 
+            size= "sm"
             onClick={() => setIsNewFolderDialogOpen(true)}
-            data-testid="new-folder-btn"
+            data-testid= "new-folder-btn"
           >
-            <FolderPlus className="w-4 h-4 mr-2" />
+            <Folder className= "w-4 h-4 mr-2" />
             New Folder
           </Button>
           <Button 
             onClick={() => setIsUploadDialogOpen(true)}
             disabled={state.isUploading}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            data-testid="upload-file-btn"
+            className= "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            data-testid= "upload-file-btn"
           >
-            <Upload className="w-4 h-4 mr-2" />
-            {state.isUploading ? `Uploading ${state.uploadProgress}%` : 'Upload Files'}
+            <Upload className= "w-4 h-4 mr-2" />
+            {state.isUploading ? `Uploading ${state.uploadProgress}%` : 'Uploads'}
           </Button>
           <input
             ref={fileInputRef}
-            type="file"
-            onChange={handleFileChange}
-            className="hidden"
-            accept="image/*,video/*,audio/*,.pdf,.zip,.txt,.json,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+            type= "file"
+            onChange={handleChange}
+            className= "hidden"
+            accept= "image/*,video/*,audio/*,.pdf,.zip,.txt,.json,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
             multiple={true}
           />
         </div>
       </div>
 
       {/* Storage Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <Cloud className="w-8 h-8" />
+      <div className= "grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className= "bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0">
+          <CardContent className= "p-4">
+            <div className= "flex items-center gap-3">
+              <Cloud className= "w-8 h-8" />
               <div>
-                <div className="text-2xl font-bold">{state.storageStats.used} MB</div>
-                <div className="text-sm opacity-90">Storage Used</div>
+                <div className= "text-2xl font-bold">{state.storageStats.used} MB</div>
+                <div className= "text-sm opacity-90">Storage Used</div>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <FileText className="w-8 h-8" />
+        <Card className= "bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0">
+          <CardContent className= "p-4">
+            <div className= "flex items-center gap-3">
+              <Text className= "w-8 h-8" />
               <div>
-                <div className="text-2xl font-bold">{state.storageStats.files}</div>
-                <div className="text-sm opacity-90">Total Files</div>
+                <div className= "text-2xl font-bold">{state.storageStats.files}</div>
+                <div className= "text-sm opacity-90">Totals</div>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <Folder className="w-8 h-8" />
+        <Card className= "bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
+          <CardContent className= "p-4">
+            <div className= "flex items-center gap-3">
+              <Folder className= "w-8 h-8" />
               <div>
-                <div className="text-2xl font-bold">{state.storageStats.folders}</div>
-                <div className="text-sm opacity-90">Folders</div>
+                <div className= "text-2xl font-bold">{state.storageStats.folders}</div>
+                <div className= "text-sm opacity-90">Folders</div>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <TrendingUp className="w-8 h-8" />
+        <Card className= "bg-gradient-to-r from-orange-500 to-red-500 text-white border-0">
+          <CardContent className= "p-4">
+            <div className= "flex items-center gap-3">
+              <TrendingUp className= "w-8 h-8" />
               <div>
-                <div className="text-2xl font-bold">{Math.round((state.storageStats.used / state.storageStats.total) * 100)}%</div>
-                <div className="text-sm opacity-90">Usage</div>
+                <div className= "text-2xl font-bold">{Math.round((state.storageStats.used / state.storageStats.total) * 100)}%</div>
+                <div className= "text-sm opacity-90">Usage</div>
               </div>
             </div>
           </CardContent>
@@ -556,54 +462,54 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
       </div>
 
       {/* Toolbar */}
-      <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4 flex-1">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+      <Card className= "bg-white/70 backdrop-blur-sm border-0 shadow-lg">
+        <CardContent className= "p-4">
+          <div className= "flex items-center justify-between gap-4">
+            <div className= "flex items-center gap-4 flex-1">
+              <div className= "relative flex-1 max-w-md">
+                <Search className= "absolute left-3 top-3 w-4 h-4 text-gray-400" />
                 <Input
-                  placeholder="Search files and folders..."
+                  placeholder= "Search files and folders..."
                   value={state.searchQuery}
                   onChange={(e) => dispatch({ type: 'SET_SEARCH_QUERY', payload: e.target.value })}
-                  className="pl-10 bg-white/80"
+                  className= "pl-10 bg-white/80"
                 />
               </div>
-              <Button variant="outline" size="sm">
-                <Filter className="w-4 h-4 mr-2" />
+              <Button variant= "outline" size= "sm">
+                <Filter className= "w-4 h-4 mr-2" />
                 Filter
               </Button>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className= "flex items-center gap-2">
               {state.selectedItems.length > 0 && (
                 <>
-                  <Button variant="outline" size="sm" onClick={() => dispatch({ type: 'CLEAR_SELECTION' })}>
+                  <Button variant= "outline" size= "sm" onClick={() => dispatch({ type: &apos;CLEAR_SELECTION&apos; })}>
                     Clear ({state.selectedItems.length})
                   </Button>
-                  <Button variant="outline" size="sm" onClick={handleDeleteSelected} data-testid="delete-file-btn">
-                    <Trash2 className="w-4 h-4 mr-2" />
+                  <Button variant= "outline" size= "sm" onClick={handleDeleteSelected} data-testid= "delete-file-btn">
+                    <Trash2 className= "w-4 h-4 mr-2" />
                     Delete
                   </Button>
                 </>
               )}
               
-              <div className="flex border rounded-lg overflow-hidden">
+              <div className= "flex border rounded-lg overflow-hidden">
                 <Button
                   variant={state.viewMode === 'grid' ? 'default' : 'ghost'}
-                  size="sm"
-                  className="rounded-none"
+                  size= "sm"
+                  className= "rounded-none"
                   onClick={() => dispatch({ type: 'SET_VIEW_MODE', payload: 'grid' })}
                 >
-                  <Grid className="w-4 h-4" />
+                  <Grid className= "w-4 h-4" />
                 </Button>
                 <Button
                   variant={state.viewMode === 'list' ? 'default' : 'ghost'}
-                  size="sm"
-                  className="rounded-none"
+                  size= "sm"
+                  className= "rounded-none"
                   onClick={() => dispatch({ type: 'SET_VIEW_MODE', payload: 'list' })}
                 >
-                  <List className="w-4 h-4" />
+                  <List className= "w-4 h-4" />
                 </Button>
               </div>
             </div>
@@ -611,51 +517,50 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
         </CardContent>
       </Card>
 
-      <div className="tab-content-container">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-          <TabsList className="tabs-list-fixed">
-            <TabsTrigger value="files" className="flex items-center gap-2">
-              <FileText className="w-4 h-4" />
-              Files
+      <div className= "tab-content-container">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className= "h-full flex flex-col">
+          <TabsList className= "tabs-list-fixed">
+            <TabsTrigger value= "files" className= "flex items-center gap-2">
+              <Text className= "w-4 h-4" />s
             </TabsTrigger>
-            <TabsTrigger value="shared" className="flex items-center gap-2">
-              <Share className="w-4 h-4" />
+            <TabsTrigger value= "shared" className= "flex items-center gap-2">
+              <Share className= "w-4 h-4" />
               Shared
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" />
+            <TabsTrigger value= "analytics" className= "flex items-center gap-2">
+              <TrendingUp className= "w-4 h-4" />
               Analytics
             </TabsTrigger>
           </TabsList>
 
-          <div className="tabs-content-area">
-            <TabsContent value="files" className="h-full m-0">
-              <div className="tab-panel p-6">
+          <div className= "tabs-content-area">
+            <TabsContent value= "files" className= "h-full m-0">
+              <div className= "tab-panel p-6">
           {/* Folders */}
           {filteredFolders.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                <Folder className="w-5 h-5" />
+            <div className= "mb-6">
+              <h3 className= "text-lg font-semibold mb-3 flex items-center gap-2">
+                <Folder className= "w-5 h-5" />
                 Folders
               </h3>
-              <div className={`grid gap-4 ${state.viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1'}`}>
+              <div className={`grid gap-4 ${state.viewMode === 'grid' ? &apos;grid-cols-1 md:grid-cols-2 lg:grid-cols-4&apos; : &apos;grid-cols-1&apos;}`}>
                 {filteredFolders.map(folder => (
                   <Card 
                     key={folder.id}
-                    className={`cursor-pointer transition-all hover:shadow-lg ${state.selectedItems.includes(folder.id) ? 'ring-2 ring-blue-500' : ''}`}
+                    className={`cursor-pointer transition-all hover:shadow-lg ${state.selectedItems.includes(folder.id) ? 'ring-2 ring-blue-500' : }`}'
                     onClick={() => handleItemSelect(folder.id)}
                   >
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
+                    <CardContent className= "p-4">
+                      <div className= "flex items-center gap-3">
                         <Folder className={`w-8 h-8 ${folder.color}`} />
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium truncate">{folder.name}</div>
-                          <div className="text-sm text-gray-500">{folder.filesCount} files</div>
+                        <div className= "flex-1 min-w-0">
+                          <div className= "font-medium truncate">{folder.name}</div>
+                          <div className= "text-sm text-gray-500">{folder.filesCount} files</div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          {folder.shared && <Users className="w-4 h-4 text-blue-500" />}
-                          <Button variant="ghost" size="sm" className="p-1">
-                            <MoreHorizontal className="w-4 h-4" />
+                        <div className= "flex items-center gap-1">
+                          {folder.shared && <Users className= "w-4 h-4 text-blue-500" />}
+                          <Button variant= "ghost" size= "sm" className= "p-1">
+                            <MoreHorizontal className= "w-4 h-4" />
                           </Button>
                         </div>
                       </div>
@@ -666,60 +571,59 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
             </div>
           )}
 
-          {/* Files */}
+          {/*s */}
           <div>
-            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              Files
+            <h3 className= "text-lg font-semibold mb-3 flex items-center gap-2">
+              <Text className= "w-5 h-5" />s
             </h3>
-            <div className={`grid gap-4 ${state.viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
-              {filteredFiles.map(file => (
+            <div className={`grid gap-4 ${state.viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4&apos; : &apos;grid-cols-1&apos;}`}>
+              {filtereds.map(file => (
                 <Card 
                   key={file.id}
-                  className={`cursor-pointer transition-all hover:shadow-lg ${state.selectedItems.includes(file.id) ? 'ring-2 ring-blue-500' : ''}`}
+                  className={`cursor-pointer transition-all hover:shadow-lg ${state.selectedItems.includes(file.id) ? 'ring-2 ring-blue-500' : }`}'
                   onClick={() => handleItemSelect(file.id)}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
+                  <CardContent className= "p-4">
+                    <div className= "flex items-start gap-3">
                       <file.icon className={`w-8 h-8 ${file.color} flex-shrink-0`} />
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium truncate flex items-center gap-2">
+                      <div className= "flex-1 min-w-0">
+                        <div className= "font-medium truncate flex items-center gap-2">
                           {file.name}
-                          {file.starred && <Star className="w-4 h-4 text-yellow-500 fill-current" />}
+                          {file.starred && <Star className= "w-4 h-4 text-yellow-500 fill-current" />}
                         </div>
-                        <div className="text-sm text-gray-500">{file.size}</div>
-                        <div className="text-xs text-gray-400">Modified {file.modified}</div>
-                        <div className="text-xs text-gray-400">by {file.author}</div>
+                        <div className= "text-sm text-gray-500">{file.size}</div>
+                        <div className= "text-xs text-gray-400">Modified {file.modified}</div>
+                        <div className= "text-xs text-gray-400">by {file.author}</div>
                       </div>
-                      <div className="flex flex-col gap-1">
-                        {file.shared && <Badge variant="secondary" className="text-xs">Shared</Badge>}
-                        <div className="flex items-center gap-1">
+                      <div className= "flex flex-col gap-1">
+                        {file.shared && <Badge variant= "secondary" className= "text-xs">Shared</Badge>}
+                        <div className= "flex items-center gap-1">
                           <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="p-1"
+                            variant= "ghost" 
+                            size= "sm" 
+                            className= "p-1"
                             onClick={(e) => {
                               e.stopPropagation()
-                              handleDownloadFile(file)
+                              handleDownload(file)
                             }}
-                            data-testid="download-file-btn"
+                            data-testid= "download-file-btn"
                           >
-                            <Download className="w-4 h-4" />
+                            <Download className= "w-4 h-4" />
                           </Button>
                           <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="p-1"
+                            variant= "ghost" 
+                            size= "sm" 
+                            className= "p-1"
                             onClick={(e) => {
                               e.stopPropagation()
-                              handleShareFile(file)
+                              handleShare(file)
                             }}
-                            data-testid="share-file-btn"
+                            data-testid= "share-file-btn"
                           >
-                            <Share className="w-4 h-4" />
+                            <Share className= "w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" className="p-1">
-                            <MoreHorizontal className="w-4 h-4" />
+                          <Button variant= "ghost" size= "sm" className= "p-1">
+                            <MoreHorizontal className= "w-4 h-4" />
                           </Button>
                         </div>
                       </div>
@@ -732,25 +636,25 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
               </div>
             </TabsContent>
 
-            <TabsContent value="shared" className="h-full m-0">
-              <div className="tab-panel p-6">
-                <div className="text-center py-12">
-                  <Share className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Shared Files</h3>
-                  <p className="text-gray-600 mb-4">Files shared with team members and clients</p>
+            <TabsContent value= "shared" className= "h-full m-0">
+              <div className= "tab-panel p-6">
+                <div className= "text-center py-12">
+                  <Share className= "w-12 h-12 text-blue-500 mx-auto mb-4" />
+                  <h3 className= "text-xl font-semibold mb-2">Shareds</h3>
+                  <p className= "text-gray-600 mb-4">s shared with team members and clients</p>
                   <Button onClick={() => alert('Shared files feature coming soon!')}>
-                    View Shared Files
+                    View Shareds
                   </Button>
                 </div>
               </div>
             </TabsContent>
 
-            <TabsContent value="analytics" className="h-full m-0">
-              <div className="tab-panel p-6">
-                <div className="text-center py-12">
-                  <TrendingUp className="w-12 h-12 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">File Analytics</h3>
-                  <p className="text-gray-600 mb-4">Track file usage, downloads, and collaboration metrics</p>
+            <TabsContent value= "analytics" className= "h-full m-0">
+              <div className= "tab-panel p-6">
+                <div className= "text-center py-12">
+                  <TrendingUp className= "w-12 h-12 text-green-500 mx-auto mb-4" />
+                  <h3 className= "text-xl font-semibold mb-2"> Analytics</h3>
+                  <p className= "text-gray-600 mb-4">Track file usage, downloads, and collaboration metrics</p>
                   <Button onClick={() => alert('Analytics dashboard coming soon!')}>
                     View Analytics
                   </Button>
@@ -761,8 +665,8 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
         </Tabs>
       </div>
 
-      {/* File Upload Dialog */}
-      <FileUploadDialog
+      {/* Upload Dialog */}
+      <UploadDialog
         isOpen={isUploadDialogOpen}
         onClose={() => setIsUploadDialogOpen(false)}
         onUploadComplete={handleUploadComplete}
@@ -770,22 +674,22 @@ export function FilesHub({ projects, userId }: FilesHubProps) {
 
       {/* New Folder Dialog */}
       <Dialog open={isNewFolderDialogOpen} onOpenChange={setIsNewFolderDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className= "sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Create New Folder</DialogTitle>
             <DialogDescription>
               Enter a name for your new folder
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className= "space-y-4">
             <Input
               value={newFolderName}
               onChange={(e) => setNewFolderName(e.target.value)}
-              placeholder="Folder name"
+              placeholder= "Folder name"
             />
-            <div className="flex justify-end gap-4">
+            <div className= "flex justify-end gap-4">
               <Button
-                variant="outline"
+                variant= "outline"
                 onClick={() => setIsNewFolderDialogOpen(false)}
               >
                 Cancel

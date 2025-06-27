@@ -44,11 +44,7 @@ export async function POST(request: NextRequest) {
             description: 'AI-powered dashboard with personalized project insights and recommendations',
             aiScore: 95,
             conversionBoost: '+28%',
-            implementation: [
-              'Implement real-time analytics',
-              'Add AI-powered insights',
-              'Create customizable widgets',
-              'Add drag-and-drop interface'
+            implementation: ['Implement real-time analytics', 'Add AI-powered insights', 'Create customizable widgets', 'Add drag-and-drop interface'
             ]
           },
           {
@@ -56,11 +52,7 @@ export async function POST(request: NextRequest) {
             description: 'Client-facing portal with AI-enhanced communication and feedback tools',
             aiScore: 92,
             conversionBoost: '+31%',
-            implementation: [
-              'Build secure client login',
-              'Add real-time messaging',
-              'Implement file sharing',
-              'Create feedback system'
+            implementation: ['Build secure client login', 'Add real-time messaging', 'Implement file sharing', 'Create feedback system'
             ]
           },
           {
@@ -68,11 +60,7 @@ export async function POST(request: NextRequest) {
             description: 'Automatic time tracking with AI suggestions and productivity insights',
             aiScore: 89,
             conversionBoost: '+18%',
-            implementation: [
-              'Add automatic detection',
-              'Create productivity metrics',
-              'Build reporting dashboard',
-              'Implement billing integration'
+            implementation: ['Add automatic detection', 'Create productivity metrics', 'Build reporting dashboard', 'Implement billing integration'
             ]
           }
         ]
@@ -90,11 +78,7 @@ export async function GET() {
       'POST /api/ai/component-recommendations': 'Get AI-powered component recommendations for your project'
     },
     version: '1.0.0',
-    capabilities: [
-      'React/Next.js component suggestions',
-      'Conversion optimization analysis',
-      'AI scoring and impact assessment',
-      'Implementation guidance'
+    capabilities: ['React/Next.js component suggestions', 'Conversion optimization analysis', 'AI scoring and impact assessment', 'Implementation guidance'
     ]
   });
 } 

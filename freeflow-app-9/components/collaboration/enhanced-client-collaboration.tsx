@@ -4,125 +4,7 @@ import React, { useState, useRef, useReducer, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  MessageCircle, Pin, Play, Pause, Mic, MicOff, Video, Camera, 
-  Send, X, CheckCircle, AlertCircle, Clock, User, Sparkles, 
-  Volume2, Download, Eye, Filter, Search, MoreHorizontal, Heart, 
-  ThumbsUp, MessageSquare, Zap, Target, Grid, List, Settings,
-  FileText, Code, Image as ImageIcon, MapPin, ArrowRight,
-  GitCompare, Bell, BellOff, ChevronDown, RotateCcw, Archive
-} from 'lucide-react'
-
-// Enhanced types for client collaboration
-interface ClientComment {
-  id: string
-  userId: string
-  userName: string
-  userAvatar?: string
-  content: string
-  type: 'text' | 'voice' | 'screen' | 'inline'
-  fileType: 'image' | 'video' | 'pdf' | 'code' | 'figma' | 'psd'
-  position?: {
-    x?: number
-    y?: number
-    timestamp?: number
-    line?: number
-    page?: number
-    elementId?: string
-    textSelection?: { start: number; end: number; text: string }
-  }
-  status: 'pending' | 'in_review' | 'resolved' | 'approved' | 'changes_required'
-  priority: 'low' | 'medium' | 'high' | 'urgent'
-  category?: 'color_corrections' | 'typo_fixes' | 'layout_changes' | 'functionality' | 'content' | 'design'
-  createdAt: string
-  updatedAt?: string
-  replies: ClientComment[]
-  reactions: ClientReaction[]
-  mentions: string[]
-  voiceNote?: {
-    url: string
-    duration: number
-    waveform: number[]
-    transcript?: string
-  }
-  screenRecording?: {
-    url: string
-    duration: number
-    thumbnail: string
-  }
-  aiSummary?: {
-    theme: string
-    actionItems: string[]
-    priority: 'low' | 'medium' | 'high'
-    estimatedEffort: string
-  }
-  isResolved: boolean
-  resolvedBy?: string
-  resolvedAt?: string
-}
-
-interface ClientReaction {
-  userId: string
-  type: 'like' | 'love' | 'thumbs_up' | 'approved' | 'needs_changes'
-  createdAt: string
-}
-
-interface FileVersion {
-  id: string
-  version: string
-  name: string
-  url: string
-  uploadedAt: string
-  uploadedBy: string
-  changelog?: string
-  status: 'draft' | 'review' | 'approved' | 'archived'
-}
-
-interface ProjectFile {
-  id: string
-  name: string
-  type: 'image' | 'video' | 'pdf' | 'code' | 'figma' | 'psd'
-  currentVersion: FileVersion
-  versions: FileVersion[]
-  url: string
-  thumbnail?: string
-  status: 'needs_review' | 'approved' | 'changes_required' | 'in_progress'
-  approvalStatus: {
-    overall: 'pending' | 'partial' | 'approved' | 'rejected'
-    elements: { [key: string]: 'approved' | 'rejected' | 'pending' }
-  }
-  comments: ClientComment[]
-  aiSummary?: {
-    totalComments: number
-    themes: { [category: string]: number }
-    urgentIssues: number
-    overallSentiment: 'positive' | 'neutral' | 'negative'
-    estimatedWorkRequired: string
-    keyActionItems: string[]
-  }
-}
-
-// Enhanced state management
-interface ClientCollabState {
-  activeFile: ProjectFile | null
-  files: ProjectFile[]
-  comments: ClientComment[]
-  isRecording: boolean
-  recordingType: 'voice' | 'screen' | null
-  recordingDuration: number
-  selectedPosition: ClientComment['position'] | null
-  commentContent: string
-  voiceBlob: Blob | null
-  screenBlob: Blob | null
-  viewMode: 'inline' | 'threaded' | 'timeline' | 'comparison'
-  filterBy: 'all' | 'open' | 'resolved' | 'approved' | 'priority'
-  showAISummary: boolean
-  comparisonMode: boolean
-  compareVersions: { old: FileVersion | null; new: FileVersion | null }
+ new: FileVersion | null }
   notificationSettings: {
     mentions: boolean
     approvals: boolean
@@ -134,7 +16,7 @@ interface ClientCollabState {
 type ClientCollabAction =
   | { type: 'SET_ACTIVE_FILE'; file: ProjectFile | null }
   | { type: 'ADD_COMMENT'; comment: ClientComment }
-  | { type: 'UPDATE_COMMENT'; id: string; updates: Partial<ClientComment> }
+  | { type: &apos;UPDATE_COMMENT&apos;; id: string; updates: Partial<ClientComment> }
   | { type: 'RESOLVE_COMMENT'; id: string; resolvedBy: string }
   | { type: 'START_RECORDING'; recordingType: 'voice' | 'screen' }
   | { type: 'STOP_RECORDING'; blob: Blob; duration: number }
@@ -158,7 +40,7 @@ function clientCollabReducer(state: ClientCollabState, action: ClientCollabActio
       return { 
         ...state, 
         comments: newComments,
-        commentContent: '',
+        commentContent: '','
         selectedPosition: null,
         voiceBlob: null,
         screenBlob: null
@@ -244,9 +126,7 @@ const sampleFiles: ProjectFile[] = [
     approvalStatus: {
       overall: 'pending',
       elements: {
-        'hero_section': 'approved',
-        'pricing_section': 'pending',
-        'footer': 'rejected'
+        'hero_section': 'approved', 'pricing_section': 'pending', 'footer': 'rejected'
       }
     },
     comments: [
@@ -289,7 +169,7 @@ const sampleFiles: ProjectFile[] = [
             userId: 'freelancer_1',
             userName: 'Alex Designer',
             userAvatar: '/avatars/alex.jpg',
-            content: 'Thanks for the feedback! I\'ll increase the font size and test on mobile.',
+            content: 'Thanks for the feedback! I\'ll increase the font size and test on mobile.','
             type: 'text',
             fileType: 'figma',
             status: 'in_review',
@@ -315,17 +195,12 @@ const sampleFiles: ProjectFile[] = [
     aiSummary: {
       totalComments: 2,
       themes: {
-        'design': 2,
-        'mobile_responsiveness': 1,
-        'typography': 1
+        'design': 2, 'mobile_responsiveness': 1, 'typography': 1
       },
       urgentIssues: 1,
       overallSentiment: 'positive',
       estimatedWorkRequired: '2-3 hours',
-      keyActionItems: [
-        'Increase footer font size for mobile',
-        'Test mobile responsiveness',
-        'Consider hero section approved'
+      keyActionItems: ['Increase footer font size for mobile', 'Test mobile responsiveness', 'Consider hero section approved'
       ]
     }
   }
@@ -351,7 +226,7 @@ export function EnhancedClientCollaboration({
   onCommentAdd,
   onCommentUpdate,
   onFileApproval,
-  className = ''
+  className = '
 }: EnhancedClientCollaborationProps) {
   const [state, dispatch] = useReducer(clientCollabReducer, {
     activeFile: sampleFiles[0],
@@ -361,7 +236,7 @@ export function EnhancedClientCollaboration({
     recordingType: null,
     recordingDuration: 0,
     selectedPosition: null,
-    commentContent: '',
+    commentContent: '','
     voiceBlob: null,
     screenBlob: null,
     viewMode: 'inline',
@@ -444,53 +319,53 @@ export function EnhancedClientCollaboration({
 
   const getFileStatusIcon = (status: ProjectFile['status']) => {
     switch (status) {
-      case 'approved': return <CheckCircle className="w-5 h-5 text-green-600" />
-      case 'changes_required': return <AlertCircle className="w-5 h-5 text-red-600" />
-      case 'needs_review': return <Clock className="w-5 h-5 text-yellow-600" />
-      default: return <Clock className="w-5 h-5 text-gray-600" />
+      case &apos;approved&apos;: return <CheckCircle className= "w-5 h-5 text-green-600" />
+      case &apos;changes_required&apos;: return <AlertCircle className= "w-5 h-5 text-red-600" />
+      case &apos;needs_review&apos;: return <Clock className= "w-5 h-5 text-yellow-600" />
+      default: return <Clock className= "w-5 h-5 text-gray-600" />
     }
   }
 
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Enhanced Header with AI Summary */}
-      <div className="flex justify-between items-start">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-slate-800">Client Collaboration</h2>
-          <p className="text-slate-600">Advanced feedback system with AI-powered insights</p>
+      <div className= "flex justify-between items-start">
+        <div className= "space-y-2">
+          <h2 className= "text-2xl font-bold text-slate-800">Client Collaboration</h2>
+          <p className= "text-slate-600">Advanced feedback system with AI-powered insights</p>
           
           {state.activeFile?.aiSummary && state.showAISummary && (
-            <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200/50">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="w-4 h-4 text-purple-600" />
-                  <span className="text-sm font-medium text-purple-800">AI Summary</span>
+            <Card className= "bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200/50">
+              <CardContent className= "p-4">
+                <div className= "flex items-center gap-2 mb-2">
+                  <Sparkles className= "w-4 h-4 text-purple-600" />
+                  <span className= "text-sm font-medium text-purple-800">AI Summary</span>
                 </div>
-                <div className="grid grid-cols-4 gap-3 text-sm">
-                  <div className="text-center">
-                    <div className="font-semibold text-slate-800">{state.activeFile.aiSummary.totalComments}</div>
-                    <div className="text-slate-600">Comments</div>
+                <div className= "grid grid-cols-4 gap-3 text-sm">
+                  <div className= "text-center">
+                    <div className= "font-semibold text-slate-800">{state.activeFile.aiSummary.totalComments}</div>
+                    <div className= "text-slate-600">Comments</div>
                   </div>
-                  <div className="text-center">
-                    <div className="font-semibold text-red-600">{state.activeFile.aiSummary.urgentIssues}</div>
-                    <div className="text-slate-600">Urgent</div>
+                  <div className= "text-center">
+                    <div className= "font-semibold text-red-600">{state.activeFile.aiSummary.urgentIssues}</div>
+                    <div className= "text-slate-600">Urgent</div>
                   </div>
-                  <div className="text-center">
-                    <div className="font-semibold text-blue-600">{state.activeFile.aiSummary.estimatedWorkRequired}</div>
-                    <div className="text-slate-600">Est. Work</div>
+                  <div className= "text-center">
+                    <div className= "font-semibold text-blue-600">{state.activeFile.aiSummary.estimatedWorkRequired}</div>
+                    <div className= "text-slate-600">Est. Work</div>
                   </div>
-                  <div className="text-center">
-                    <div className="font-semibold text-green-600 capitalize">{state.activeFile.aiSummary.overallSentiment}</div>
-                    <div className="text-slate-600">Sentiment</div>
+                  <div className= "text-center">
+                    <div className= "font-semibold text-green-600 capitalize">{state.activeFile.aiSummary.overallSentiment}</div>
+                    <div className= "text-slate-600">Sentiment</div>
                   </div>
                 </div>
                 
-                <div className="mt-3 p-2 bg-white/60 rounded">
-                  <p className="text-sm font-medium text-slate-700 mb-1">Key Action Items:</p>
-                  <ul className="text-xs text-slate-600 space-y-1">
+                <div className= "mt-3 p-2 bg-white/60 rounded">
+                  <p className= "text-sm font-medium text-slate-700 mb-1">Key Action Items:</p>
+                  <ul className= "text-xs text-slate-600 space-y-1">
                     {state.activeFile.aiSummary.keyActionItems.map((item, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                      <li key={index} className= "flex items-start gap-2">
+                        <div className= "w-1.5 h-1.5 bg-purple-400 rounded-full mt-1.5 flex-shrink-0"></div>
                         <span>{item}</span>
                       </li>
                     ))}
@@ -501,66 +376,66 @@ export function EnhancedClientCollaboration({
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className= "flex items-center gap-2">
           <Button
-            variant="outline"
-            size="sm"
+            variant= "outline"
+            size= "sm"
             onClick={() => dispatch({ type: 'TOGGLE_COMPARISON_MODE' })}
-            className={state.comparisonMode ? 'bg-blue-100 text-blue-700' : ''}
+            className={state.comparisonMode ? 'bg-blue-100 text-blue-700' : }'
           >
-            <GitCompare className="w-4 h-4 mr-2" />
+            <GitCompare className= "w-4 h-4 mr-2" />
             Compare Versions
           </Button>
           <Button
-            variant="outline"
-            size="sm"
+            variant= "outline"
+            size= "sm"
             onClick={() => dispatch({ type: 'TOGGLE_AI_SUMMARY' })}
-            className={state.showAISummary ? 'bg-purple-100 text-purple-700' : ''}
+            className={state.showAISummary ? 'bg-purple-100 text-purple-700' : }'
           >
-            <Sparkles className="w-4 h-4 mr-2" />
+            <Sparkles className= "w-4 h-4 mr-2" />
             AI Insights
           </Button>
         </div>
       </div>
 
       {/* File Selection and Status */}
-      <Card className="bg-white/70 backdrop-blur-sm border-slate-200/50">
+      <Card className= "bg-white/70 backdrop-blur-sm border-slate-200/50">
         <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle className="flex items-center gap-3">
+          <div className= "flex justify-between items-center">
+            <CardTitle className= "flex items-center gap-3">
               {getFileStatusIcon(state.activeFile?.status || 'needs_review')}
               <span>{state.activeFile?.name}</span>
-              <Badge className={getStatusColor(state.activeFile?.status === 'approved' ? 'approved' : 'pending')}>
+              <Badge className={getStatusColor(state.activeFile?.status === 'approved' ? &apos;approved&apos; : &apos;pending&apos;)}>
                 {state.activeFile?.status?.replace('_', ' ') || 'Unknown Status'}
               </Badge>
             </CardTitle>
             
-            <div className="flex items-center gap-2">
+            <div className= "flex items-center gap-2">
               {currentUser.role === 'client' && (
                 <>
                   <Button
-                    size="sm"
-                    className="bg-green-600 hover:bg-green-700 text-white"
+                    size= "sm"
+                    className= "bg-green-600 hover:bg-green-700 text-white"
                     onClick={() => {
                       if (state.activeFile) {
                         onFileApproval?.(state.activeFile.id, 'approved')
                       }
                     }}
                   >
-                    <CheckCircle className="w-4 h-4 mr-2" />
+                    <CheckCircle className= "w-4 h-4 mr-2" />
                     Approve File
                   </Button>
                   <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-red-300 text-red-600 hover:bg-red-50"
+                    size= "sm"
+                    variant= "outline"
+                    className= "border-red-300 text-red-600 hover:bg-red-50"
                     onClick={() => {
                       if (state.activeFile) {
                         onFileApproval?.(state.activeFile.id, 'changes_required')
                       }
                     }}
                   >
-                    <AlertCircle className="w-4 h-4 mr-2" />
+                    <AlertCircle className= "w-4 h-4 mr-2" />
                     Request Changes
                   </Button>
                 </>
@@ -571,44 +446,44 @@ export function EnhancedClientCollaboration({
       </Card>
 
       {/* Main Content Area */}
-      <div className="grid grid-cols-12 gap-6">
+      <div className= "grid grid-cols-12 gap-6">
         {/* File Preview */}
-        <div className="col-span-8">
-          <Card className="bg-white/70 backdrop-blur-sm border-slate-200/50">
-            <CardContent className="p-6">
+        <div className= "col-span-8">
+          <Card className= "bg-white/70 backdrop-blur-sm border-slate-200/50">
+            <CardContent className= "p-6">
               {/* Mock Figma File Preview */}
-              <div className="relative bg-gradient-to-br from-slate-100 to-slate-200 aspect-video rounded-lg overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100"></div>
+              <div className= "relative bg-gradient-to-br from-slate-100 to-slate-200 aspect-video rounded-lg overflow-hidden group">
+                <div className= "absolute inset-0 bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100"></div>
                 
                 {/* Mock Design Elements */}
-                <div className="absolute inset-4 bg-white/90 rounded-lg p-6">
+                <div className= "absolute inset-4 bg-white/90 rounded-lg p-6">
                   {/* Header */}
-                  <div className="flex items-center justify-between mb-6" id="hero_section">
-                    <div className="h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded w-32"></div>
-                    <div className="flex gap-2">
-                      <div className="w-8 h-8 bg-slate-200 rounded"></div>
-                      <div className="w-8 h-8 bg-slate-200 rounded"></div>
+                  <div className= "flex items-center justify-between mb-6" id= "hero_section">
+                    <div className= "h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded w-32"></div>
+                    <div className= "flex gap-2">
+                      <div className= "w-8 h-8 bg-slate-200 rounded"></div>
+                      <div className= "w-8 h-8 bg-slate-200 rounded"></div>
                     </div>
                   </div>
                   
                   {/* Hero Content */}
-                  <div className="text-center mb-8">
-                    <div className="h-6 bg-slate-300 rounded w-3/4 mx-auto mb-3"></div>
-                    <div className="h-4 bg-slate-200 rounded w-1/2 mx-auto mb-4"></div>
-                    <div className="w-32 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded mx-auto"></div>
+                  <div className= "text-center mb-8">
+                    <div className= "h-6 bg-slate-300 rounded w-3/4 mx-auto mb-3"></div>
+                    <div className= "h-4 bg-slate-200 rounded w-1/2 mx-auto mb-4"></div>
+                    <div className= "w-32 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded mx-auto"></div>
                   </div>
                   
                   {/* Cards */}
-                  <div className="grid grid-cols-3 gap-4 mb-6">
-                    <div className="h-20 bg-gradient-to-br from-rose-100 to-orange-100 rounded"></div>
-                    <div className="h-20 bg-gradient-to-br from-blue-100 to-cyan-100 rounded"></div>
-                    <div className="h-20 bg-gradient-to-br from-green-100 to-emerald-100 rounded"></div>
+                  <div className= "grid grid-cols-3 gap-4 mb-6">
+                    <div className= "h-20 bg-gradient-to-br from-rose-100 to-orange-100 rounded"></div>
+                    <div className= "h-20 bg-gradient-to-br from-blue-100 to-cyan-100 rounded"></div>
+                    <div className= "h-20 bg-gradient-to-br from-green-100 to-emerald-100 rounded"></div>
                   </div>
                   
                   {/* Footer */}
-                  <div className="text-center" id="footer">
-                    <div className="h-3 bg-slate-300 rounded w-1/4 mx-auto mb-2"></div>
-                    <div className="h-3 bg-slate-200 rounded w-1/6 mx-auto"></div>
+                  <div className= "text-center" id= "footer">
+                    <div className= "h-3 bg-slate-300 rounded w-1/4 mx-auto mb-2"></div>
+                    <div className= "h-3 bg-slate-200 rounded w-1/6 mx-auto"></div>
                   </div>
                 </div>
 
@@ -617,7 +492,7 @@ export function EnhancedClientCollaboration({
                   comment.position && (
                     <div 
                       key={comment.id}
-                      className="absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2"
+                      className= "absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2"
                       style={{ left: `${comment.position.x}%`, top: `${comment.position.y}%` }}
                     >
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-semibold shadow-lg hover:scale-110 transition-transform ${
@@ -626,7 +501,7 @@ export function EnhancedClientCollaboration({
                         comment.status === 'resolved' ? 'bg-blue-500' :
                         'bg-yellow-500'
                       }`}>
-                        <Pin className="w-3 h-3" />
+                        <Pin className= "w-3 h-3" />
                       </div>
                     </div>
                   )
@@ -634,57 +509,57 @@ export function EnhancedClientCollaboration({
               </div>
 
               {/* Recording Controls */}
-              <div className="mt-4 flex items-center gap-2">
+              <div className= "mt-4 flex items-center gap-2">
                 <Button
-                  size="sm"
-                  variant="outline"
+                  size= "sm"
+                  variant= "outline"
                   onClick={startVoiceRecording}
                   disabled={state.isRecording}
-                  className="flex items-center gap-2"
+                  className= "flex items-center gap-2"
                 >
                   {state.isRecording && state.recordingType === 'voice' ? (
                     <>
-                      <MicOff className="w-4 h-4 text-red-500" />
+                      <MicOff className= "w-4 h-4 text-red-500" />
                       Recording... {state.recordingDuration}s
                     </>
                   ) : (
                     <>
-                      <Mic className="w-4 h-4" />
+                      <Mic className= "w-4 h-4" />
                       Voice Comment
                     </>
                   )}
                 </Button>
                 
                 <Button
-                  size="sm"
-                  variant="outline"
+                  size= "sm"
+                  variant= "outline"
                   onClick={startScreenRecording}
                   disabled={state.isRecording}
-                  className="flex items-center gap-2"
+                  className= "flex items-center gap-2"
                 >
                   {state.isRecording && state.recordingType === 'screen' ? (
                     <>
-                      <Camera className="w-4 h-4 text-red-500" />
+                      <Camera className= "w-4 h-4 text-red-500" />
                       Recording... {state.recordingDuration}s
                     </>
                   ) : (
                     <>
-                      <Camera className="w-4 h-4" />
+                      <Camera className= "w-4 h-4" />
                       Screen Record
                     </>
                   )}
                 </Button>
 
                 <Input
-                  placeholder="Add a text comment..."
+                  placeholder= "Add a text comment..."
                   value={state.commentContent}
                   onChange={(e) => dispatch({ type: 'SET_COMMENT_CONTENT', content: e.target.value })}
-                  className="flex-1"
+                  className= "flex-1"
                 />
 
                 {(state.voiceBlob || state.screenBlob || state.commentContent) && (
-                  <Button size="sm" onClick={submitComment} className="bg-green-600 hover:bg-green-700 text-white">
-                    <Send className="w-4 h-4 mr-2" />
+                  <Button size= "sm" onClick={submitComment} className= "bg-green-600 hover:bg-green-700 text-white">
+                    <Send className= "w-4 h-4 mr-2" />
                     Submit Feedback
                   </Button>
                 )}
@@ -694,76 +569,76 @@ export function EnhancedClientCollaboration({
         </div>
 
         {/* Comments Sidebar */}
-        <div className="col-span-4">
-          <Card className="bg-white/70 backdrop-blur-sm border-slate-200/50">
+        <div className= "col-span-4">
+          <Card className= "bg-white/70 backdrop-blur-sm border-slate-200/50">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                <MessageSquare className="w-5 h-5" />
+              <CardTitle className= "text-lg font-semibold flex items-center gap-2">
+                <MessageSquare className= "w-5 h-5" />
                 Feedback ({state.comments.length})
               </CardTitle>
             </CardHeader>
             
-            <CardContent className="space-y-4 max-h-96 overflow-y-auto">
+            <CardContent className= "space-y-4 max-h-96 overflow-y-auto">
               {state.comments.map((comment) => (
-                <div key={comment.id} className="border border-slate-200 rounded-lg p-3 space-y-3">
-                  <div className="flex items-start gap-3">
-                    <Avatar className="w-8 h-8">
+                <div key={comment.id} className= "border border-slate-200 rounded-lg p-3 space-y-3">
+                  <div className= "flex items-start gap-3">
+                    <Avatar className= "w-8 h-8">
                       <AvatarImage src={comment.userAvatar} />
                       <AvatarFallback>{comment.userName[0]}</AvatarFallback>
                     </Avatar>
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{comment.userName}</span>
-                        <Badge className={getStatusColor(comment.status)} variant="outline">
+                    <div className= "flex-1 space-y-2">
+                      <div className= "flex items-center justify-between">
+                        <span className= "text-sm font-medium">{comment.userName}</span>
+                        <Badge className={getStatusColor(comment.status)} variant= "outline">
                           {comment.status.replace('_', ' ')}
                         </Badge>
                       </div>
                       
-                      <p className="text-sm text-slate-700">{comment.content}</p>
+                      <p className= "text-sm text-slate-700">{comment.content}</p>
                       
                       {comment.voiceNote && (
-                        <div className="flex items-center gap-2 p-2 bg-blue-50 rounded">
-                          <Button size="sm" variant="ghost">
-                            <Play className="w-3 h-3" />
+                        <div className= "flex items-center gap-2 p-2 bg-blue-50 rounded">
+                          <Button size= "sm" variant= "ghost">
+                            <Play className= "w-3 h-3" />
                           </Button>
-                          <div className="flex-1 h-6 bg-blue-100 rounded flex items-center px-2">
-                            <div className="flex gap-1">
+                          <div className= "flex-1 h-6 bg-blue-100 rounded flex items-center px-2">
+                            <div className= "flex gap-1">
                               {comment.voiceNote.waveform.slice(0, 10).map((height, i) => (
                                 <div
                                   key={i}
-                                  className="w-1 bg-blue-500 rounded"
+                                  className= "w-1 bg-blue-500 rounded"
                                   style={{ height: `${height/3}px` }}
                                 />
                               ))}
                             </div>
                           </div>
-                          <span className="text-xs text-blue-600">{comment.voiceNote.duration}s</span>
+                          <span className= "text-xs text-blue-600">{comment.voiceNote.duration}s</span>
                         </div>
                       )}
                       
-                      <div className="flex items-center justify-between text-xs text-slate-500">
+                      <div className= "flex items-center justify-between text-xs text-slate-500">
                         <span>{new Date(comment.createdAt).toLocaleTimeString()}</span>
-                        <div className="flex items-center gap-2">
+                        <div className= "flex items-center gap-2">
                           <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-6 px-2"
+                            size= "sm"
+                            variant= "ghost"
+                            className= "h-6 px-2"
                           >
-                            <ThumbsUp className="w-3 h-3" />
+                            <ThumbsUp className= "w-3 h-3" />
                           </Button>
                           
                           {currentUser.role === 'freelancer' && !comment.isResolved && (
                             <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-6 px-2"
+                              size= "sm"
+                              variant= "ghost"
+                              className= "h-6 px-2"
                               onClick={() => dispatch({
                                 type: 'RESOLVE_COMMENT',
                                 id: comment.id,
                                 resolvedBy: currentUser.id
                               })}
                             >
-                              <CheckCircle className="w-3 h-3" />
+                              <CheckCircle className= "w-3 h-3" />
                             </Button>
                           )}
                         </div>
@@ -771,11 +646,11 @@ export function EnhancedClientCollaboration({
                       
                       {/* Threaded replies */}
                       {comment.replies.length > 0 && (
-                        <div className="ml-4 border-l-2 border-slate-200 pl-3 space-y-2">
+                        <div className= "ml-4 border-l-2 border-slate-200 pl-3 space-y-2">
                           {comment.replies.map((reply) => (
-                            <div key={reply.id} className="text-sm">
-                              <span className="font-medium">{reply.userName}:</span>
-                              <span className="ml-2 text-slate-600">{reply.content}</span>
+                            <div key={reply.id} className= "text-sm">
+                              <span className= "font-medium">{reply.userName}:</span>
+                              <span className= "ml-2 text-slate-600">{reply.content}</span>
                             </div>
                           ))}
                         </div>
@@ -786,10 +661,10 @@ export function EnhancedClientCollaboration({
               ))}
               
               {state.comments.length === 0 && (
-                <div className="text-center py-8 text-slate-500">
-                  <MessageCircle className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+                <div className= "text-center py-8 text-slate-500">
+                  <MessageCircle className= "w-12 h-12 mx-auto mb-3 text-slate-300" />
                   <p>No feedback yet</p>
-                  <p className="text-sm">Click on the design to add comments</p>
+                  <p className= "text-sm">Click on the design to add comments</p>
                 </div>
               )}
             </CardContent>

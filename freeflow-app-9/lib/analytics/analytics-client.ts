@@ -53,7 +53,7 @@ class IntegratedAnalyticsClient {
     }
   }
 
-  private observePerformanceMetric(entryType: string, callback: (entries: any[]) => void) {
+  private observePerformanceMetric(entryType: string, callback: (entries: Record<string, unknown>[]) => void) {
     try {
       const observer = new PerformanceObserver((list) => {
         callback(list.getEntries())
@@ -163,15 +163,7 @@ class IntegratedAnalyticsClient {
 
   // Helper methods
   private isImportantEvent(eventName: string): boolean {
-    const importantEvents = [
-      'page_view',
-      'conversion',
-      'signup',
-      'login',
-      'purchase',
-      'subscription',
-      'error',
-      'performance'
+    const importantEvents = ['page_view', 'conversion', 'signup', 'login', 'purchase', 'subscription', 'error', 'performance'
     ]
     return importantEvents.includes(eventName)
   }

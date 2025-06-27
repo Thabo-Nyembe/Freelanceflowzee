@@ -1,51 +1,51 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from &apos;@playwright/test&apos;
 
-test.describe('Dashboard Navigation', () => {
+test.describe(&apos;Dashboard Navigation&apos;, () => {
   test.beforeEach(async ({ page }) => {
     // Set test mode headers
     await page.setExtraHTTPHeaders({
-      'x-test-mode': 'true',
-      'x-bypass-auth': 'true'
+      &apos;x-test-mode&apos;: &apos;true&apos;,
+      &apos;x-bypass-auth&apos;: &apos;true&apos;
     })
   })
 
-  test('should access dashboard with test mode', async ({ page }) => {
-    await page.goto('/dashboard')
+  test(&apos;should access dashboard with test mode&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard&apos;)
     
     // Should be able to access dashboard in test mode
     await expect(page).toHaveURL(/dashboard/)
     
     // Check for dashboard content
-    await expect(page.locator('text=Dashboard')).toBeVisible()
+    await expect(page.locator(&apos;text=Dashboard&apos;)).toBeVisible()
   })
 
-  test('should navigate to AI Asset Generator', async ({ page }) => {
-    await page.goto('/dashboard')
+  test(&apos;should navigate to AI Asset Generator&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard&apos;)
     
     // Look for AI Asset Generator link
-    const assetGeneratorLink = page.locator('text=AI Asset Generator')
+    const assetGeneratorLink = page.locator(&apos;text=AI Asset Generator&apos;)
     
     if (await assetGeneratorLink.isVisible()) {
       await assetGeneratorLink.click()
       await expect(page).toHaveURL(/ai-asset-generator/)
       
       // Check page loaded
-      await expect(page.locator('text=AI Asset Generator')).toBeVisible()
+      await expect(page.locator(&apos;text=AI Asset Generator&apos;)).toBeVisible()
     } else {
       // Navigate directly if link not visible
-      await page.goto('/dashboard/ai-asset-generator')
-      await expect(page.locator('text=AI Asset Generator')).toBeVisible()
+      await page.goto(&apos;/dashboard/ai-asset-generator&apos;)
+      await expect(page.locator(&apos;text=AI Asset Generator&apos;)).toBeVisible()
     }
   })
 
-  test('should navigate to other dashboard sections', async ({ page }) => {
-    await page.goto('/dashboard')
+  test(&apos;should navigate to other dashboard sections&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard&apos;)
     
     // Test navigation to different sections
     const sections = [
-      { name: 'Projects', url: '/dashboard/projects-hub' },
-      { name: 'Collaboration', url: '/dashboard/collaboration' },
-      { name: 'My Day', url: '/dashboard/my-day' }
+      { name: &apos;Projects&apos;, url: &apos;/dashboard/projects-hub&apos; },
+      { name: &apos;Collaboration&apos;, url: &apos;/dashboard/collaboration&apos; },
+      { name: &apos;My Day&apos;, url: &apos;/dashboard/my-day&apos; }
     ]
 
     for (const section of sections) {
@@ -53,7 +53,7 @@ test.describe('Dashboard Navigation', () => {
       await page.waitForTimeout(1000)
       
       // Check URL changed
-      await expect(page).toHaveURL(new RegExp(section.url.replace('/dashboard/', '')))
+      await expect(page).toHaveURL(new RegExp(section.url.replace(&apos;/dashboard/&apos;, '&apos;)))'
     }
   })
 }) 

@@ -37,19 +37,19 @@ export default async function FeedbackPage({ searchParams }: FeedbackPageProps) 
   const { type = 'video', file } = await searchParams
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="p-6 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-gray-800">
+    <div className= "min-h-screen bg-gray-50 py-8">
+      <div className= "max-w-4xl mx-auto px-4">
+        <div className= "bg-white rounded-lg shadow-lg overflow-hidden">
+          <div className= "p-6 border-b border-gray-200">
+            <h1 className= "text-2xl font-bold text-gray-800">
               Media Feedback System
             </h1>
-            <p className="text-gray-600 mt-2">
+            <p className= "text-gray-600 mt-2">
               Review and provide feedback on {type} content
             </p>
           </div>
           
-          <div className="p-6">
+          <div className= "p-6">
             <FeedbackWrapper
               type={type}
               src={file || `/demo/sample-${type === 'image' ? 'image.jpg' : type === 'video' ? 'video.mp4' : 'audio.mp3'}`}

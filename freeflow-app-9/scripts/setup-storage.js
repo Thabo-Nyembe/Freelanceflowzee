@@ -29,7 +29,7 @@ function log(message, color = 'reset') {
 async function setupStorage() {
   log('🔧 FreeflowZee Storage Setup', 'blue')
   log('===============================', 'blue')
-  log('', 'reset')
+  log('', 'reset')'
 
   // Validate environment variables
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -37,7 +37,7 @@ async function setupStorage() {
 
   if (!supabaseUrl || !serviceRoleKey) {
     log('❌ Missing required environment variables', 'red')
-    log('Please ensure .env.local contains:', 'yellow')
+    log('Please ensure .env.local contains: ', 'yellow')
     log('- NEXT_PUBLIC_SUPABASE_URL', 'yellow')
     log('- SUPABASE_SERVICE_ROLE_KEY', 'yellow')
     process.exit(1)
@@ -53,7 +53,7 @@ async function setupStorage() {
 
   log('✅ Connected to Supabase', 'green')
   log(`📍 Project: ${supabaseUrl}`, 'cyan')
-  log('', 'reset')
+  log('', 'reset')'
 
   // Define buckets to create
   const buckets = [
@@ -79,14 +79,7 @@ async function setupStorage() {
       id: 'ai-generations',
       public: false,
       fileSizeLimit: '100MiB',
-      allowedMimeTypes: [
-        'image/*',
-        'video/*', 
-        'audio/*',
-        'text/*',
-        'application/json',
-        'application/javascript',
-        'application/typescript'
+      allowedMimeTypes: ['image/*', 'video/*', 'audio/*', 'text/*', 'application/json', 'application/javascript', 'application/typescript'
       ]
     },
     {
@@ -122,9 +115,9 @@ async function setupStorage() {
     }
   }
 
-  log('', 'reset')
+  log('', 'reset')'
   log('🎉 Storage setup complete!', 'green')
-  log('You can now use the following buckets:', 'blue')
+  log('You can now use the following buckets: ', 'blue')
   buckets.forEach(bucket => {
     log(`- ${bucket.id} (${bucket.fileSizeLimit})`, 'cyan')
   })

@@ -3,15 +3,15 @@
 // Cross-browser compatibility: Chrome, Firefox, Safari, Mobile
 // Comprehensive coverage: Media comments, markers, validation, CRUD operations
 
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, Page } from &apos;@playwright/test&apos;;
 
 // Configuration for Context7 enhanced testing
 test.use({
-  baseURL: 'http://localhost:3000',
+  baseURL: &apos;http://localhost:3000&apos;,
   viewport: { width: 1280, height: 720 },
   extraHTTPHeaders: {
-    'x-test-mode': 'true',
-    'user-agent': 'Playwright/Test Runner'
+    &apos;x-test-mode&apos;: &apos;true&apos;,
+    &apos;user-agent&apos;: &apos;Playwright/Test Runner&apos;
   },
   actionTimeout: 10000,
   navigationTimeout: 30000,
@@ -19,40 +19,40 @@ test.use({
 
 // Test data constants for feedback scenarios
 const VALID_FEEDBACK_DATA = {
-  comment: 'This section needs revision according to brand guidelines',
-  priority: 'high',
-  tags: ['Design', 'Urgent'],
+  comment: &apos;This section needs revision according to brand guidelines&apos;,
+  priority: &apos;high&apos;,
+  tags: [&apos;Design&apos;, &apos;Urgent&apos;],
   markerPosition: { x: 50, y: 30 },
   videoTimestamp: 45, // seconds
   audioTimestamp: 120 // seconds
 };
 
 const INVALID_FEEDBACK_DATA = {
-  emptyComment: '',
-  whitespaceOnlyComment: '   \n\t   ',
-  tooLongComment: 'a'.repeat(2001), // Assuming 2000 char limit
+  emptyComment: '&apos;,'
+  whitespaceOnlyComment: &apos;   \n\t   &apos;,
+  tooLongComment: &apos;a'.repeat(2001), // Assuming 2000 char limit'
   invalidPosition: { x: -10, y: 150 } // Out of bounds
 };
 
 const MEDIA_FILES = {
   image: {
-    id: 'media-img-1',
-    name: 'Brand Logo.png',
-    type: 'image',
-    url: '/demo/test-image.jpg'
+    id: &apos;media-img-1&apos;,
+    name: &apos;Brand Logo.png&apos;,
+    type: &apos;image&apos;,
+    url: &apos;/demo/test-image.jpg&apos;
   },
   video: {
-    id: 'media-vid-1', 
-    name: 'Product Demo.mp4',
-    type: 'video',
-    url: '/demo/test-video.mp4',
+    id: &apos;media-vid-1&apos;, 
+    name: &apos;Product Demo.mp4&apos;,
+    type: &apos;video&apos;,
+    url: &apos;/demo/test-video.mp4&apos;,
     duration: 135
   },
   audio: {
-    id: 'media-aud-1',
-    name: 'Podcast.mp3', 
-    type: 'audio',
-    url: '/demo/test-audio.mp3',
+    id: &apos;media-aud-1&apos;,
+    name: &apos;Podcast.mp3&apos;, 
+    type: &apos;audio&apos;,
+    url: &apos;/demo/test-audio.mp3&apos;,
     duration: 930
   }
 };
@@ -60,21 +60,21 @@ const MEDIA_FILES = {
 // Context7 Enhanced API Mocking Setup for Feedback
 async function setupFeedbackAPIMocking(page: Page) {
   // Mock feedback endpoints
-  await page.route('**/api/feedback/**', async (route) => {
+  await page.route(&apos;**/api/feedback/**&apos;, async (route) => {
     const method = route.request().method();
     const url = route.request().url();
     
-    if (method === 'POST' && url.includes('/comments')) {
+    if (method === &apos;POST&apos; && url.includes(&apos;/comments&apos;)) {
       const postData = route.request().postDataJSON();
       
       // Validate required fields
-      if (!postData?.content || postData.content.trim() === '') {
+      if (!postData?.content || postData.content.trim() === '&apos;) {'
         await route.fulfill({
           status: 400,
-          contentType: 'application/json',
+          contentType: &apos;application/json&apos;,
           body: JSON.stringify({
-            error: 'Comment content is required',
-            field: 'content'
+            error: &apos;Comment content is required&apos;,
+            field: &apos;content&apos;
           })
         });
         return;
@@ -83,60 +83,60 @@ async function setupFeedbackAPIMocking(page: Page) {
       // Simulate successful comment creation
       await route.fulfill({
         status: 201,
-        contentType: 'application/json', 
+        contentType: &apos;application/json&apos;, 
         body: JSON.stringify({
-          id: 'comment_' + Date.now(),
+          id: &apos;comment_&apos; + Date.now(),
           content: postData.content,
           position: postData.position,
           timestamp: postData.timestamp,
-          priority: postData.priority || 'medium',
+          priority: postData.priority || &apos;medium&apos;,
           tags: postData.tags || [],
-          author: 'Test User',
+          author: &apos;Test User&apos;,
           created_at: new Date().toISOString(),
-          status: 'pending'
+          status: &apos;pending&apos;
         })
       });
-    } else if (method === 'PUT' && url.includes('/comments/')) {
+    } else if (method === &apos;PUT&apos; && url.includes(&apos;/comments/&apos;)) {
       // Mock comment editing
       const postData = route.request().postDataJSON();
       await route.fulfill({
         status: 200,
-        contentType: 'application/json',
+        contentType: &apos;application/json&apos;,
         body: JSON.stringify({
-          id: url.split('/').pop(),
+          id: url.split(&apos;/').pop(),'
           content: postData.content,
           updated_at: new Date().toISOString()
         })
       });
-    } else if (method === 'DELETE' && url.includes('/comments/')) {
+    } else if (method === &apos;DELETE&apos; && url.includes(&apos;/comments/&apos;)) {
       // Mock comment deletion
       await route.fulfill({
         status: 204,
-        contentType: 'application/json'
+        contentType: &apos;application/json&apos;
       });
     } else {
       // Mock GET requests
       await route.fulfill({
         status: 200,
-        contentType: 'application/json',
+        contentType: &apos;application/json&apos;,
         body: JSON.stringify([])
       });
     }
   });
 
-  console.log('✅ Feedback API mocking configured successfully');
+  console.log(&apos;✅ Feedback API mocking configured successfully&apos;);
 }
 
 // Helper function to create self-contained HTML page
-async function createFeedbackTestPage(page: Page, mediaType: 'image' | 'video' | 'audio') {
+async function createFeedbackTestPage(page: Page, mediaType: &apos;image&apos; | &apos;video&apos; | &apos;audio&apos;) {
   const mediaFile = MEDIA_FILES[mediaType];
   
   const mockHtml = `
   <!DOCTYPE html>
-  <html lang="en">
+  <html lang=&quot;en&quot;>
   <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta charset=&quot;UTF-8&quot;>
+      <meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
       <title>Feedback System - ${mediaFile.name}</title>
       <style>
           body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
@@ -175,80 +175,80 @@ async function createFeedbackTestPage(page: Page, mediaType: 'image' | 'video' |
       </style>
   </head>
   <body>
-      <div class="feedback-container">
+      <div class=&quot;feedback-container&quot;>
           <h1>Feedback on ${mediaFile.name}</h1>
           
-          <div class="media-viewer" id="mediaViewer" data-testid="media-viewer">
-              ${mediaType === 'image' ? 
-                `<img src="${mediaFile.url}" alt="${mediaFile.name}" class="media-content" data-testid="media-image" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-                 <div class="media-placeholder" style="display:none;" data-testid="media-placeholder">
+          <div class=&quot;media-viewer&quot; id=&quot;mediaViewer&quot; data-testid=&quot;media-viewer&quot;>
+              ${mediaType === &apos;image&apos; ? 
+                `<img src=&quot;${mediaFile.url}&quot; alt=&quot;${mediaFile.name}&quot; class=&quot;media-content&quot; data-testid=&quot;media-image&quot; onerror=&quot;this.style.display=&apos;none&apos;;this.nextElementSibling.style.display=&apos;flex&apos;;&quot; alt="">
+                 <div class=&quot;media-placeholder&quot; style=&quot;display:none;&quot; data-testid=&quot;media-placeholder&quot;>
                      <div>🖼️ Image: ${mediaFile.name}</div>
                  </div>` :
-                mediaType === 'video' ?
-                `<div class="media-placeholder" data-testid="media-placeholder">
-                     <div>🎥 Video: ${mediaFile.name}<br>Duration: ${Math.floor(mediaFile.duration / 60)}:${(mediaFile.duration % 60).toString().padStart(2, '0')}</div>
+                mediaType === &apos;video&apos; ?
+                `<div class=&quot;media-placeholder&quot; data-testid=&quot;media-placeholder&quot;>
+                     <div>🎥 Video: ${mediaFile.name}<br>Duration: ${Math.floor(mediaFile.duration / 60)}:${(mediaFile.duration % 60).toString().padStart(2, &apos;0')}</div>'
                  </div>` :
-                `<div class="media-placeholder" data-testid="media-placeholder">
-                     <div>🎵 Audio: ${mediaFile.name}<br>Duration: ${Math.floor(mediaFile.duration / 60)}:${(mediaFile.duration % 60).toString().padStart(2, '0')}</div>
+                `<div class=&quot;media-placeholder&quot; data-testid=&quot;media-placeholder&quot;>
+                     <div>🎵 Audio: ${mediaFile.name}<br>Duration: ${Math.floor(mediaFile.duration / 60)}:${(mediaFile.duration % 60).toString().padStart(2, &apos;0')}</div>'
                  </div>`
               }
               
               <!-- Feedback markers will be added here dynamically -->
           </div>
           
-          ${mediaType !== 'image' ? `
-          <div class="timeline" id="timeline" data-testid="timeline">
-              <div class="timeline-progress" style="width: 0%;" data-testid="timeline-progress"></div>
+          ${mediaType !== &apos;image&apos; ? `
+          <div class=&quot;timeline&quot; id=&quot;timeline&quot; data-testid=&quot;timeline&quot;>
+              <div class=&quot;timeline-progress&quot; style=&quot;width: 0%;&quot; data-testid=&quot;timeline-progress&quot;></div>
               <!-- Timeline markers will be added here -->
           </div>
-          ` : ''}
+          ` : '&apos;}'
           
-          <button class="button button-primary" onclick="showCommentDialog()" data-testid="add-comment-btn">
+          <button class=&quot;button button-primary&quot; onclick=&quot;showCommentDialog()&quot; data-testid=&quot;add-comment-btn&quot;>
               Add Comment
           </button>
           
-          <div class="comments-list" id="commentsList" data-testid="comments-list">
+          <div class=&quot;comments-list&quot; id=&quot;commentsList&quot; data-testid=&quot;comments-list&quot;>
               <!-- Comments will be listed here -->
           </div>
       </div>
       
       <!-- Comment Dialog -->
-      <div class="overlay hidden" id="overlay" onclick="hideCommentDialog()"></div>
-      <div class="comment-dialog hidden" id="commentDialog" data-testid="comment-dialog">
+      <div class=&quot;overlay hidden&quot; id=&quot;overlay&quot; onclick=&quot;hideCommentDialog()&quot;></div>
+      <div class=&quot;comment-dialog hidden&quot; id=&quot;commentDialog&quot; data-testid=&quot;comment-dialog&quot;>
           <h3>Add Feedback Comment</h3>
-          <form id="commentForm" onsubmit="submitComment(event)">
-              <div class="form-group">
-                  <label class="form-label" for="commentContent">Comment *</label>
-                  <textarea id="commentContent" name="content" class="form-textarea" 
-                           placeholder="Share your feedback..." required data-testid="comment-content"></textarea>
-                  <div class="error-message hidden" id="contentError" data-testid="content-error"></div>
+          <form id=&quot;commentForm&quot; onsubmit=&quot;submitComment(event)&quot;>
+              <div class=&quot;form-group&quot;>
+                  <label class=&quot;form-label&quot; for=&quot;commentContent&quot;>Comment *</label>
+                  <textarea id=&quot;commentContent&quot; name=&quot;content&quot; class=&quot;form-textarea&quot; 
+                           placeholder=&quot;Share your feedback...&quot; required data-testid=&quot;comment-content&quot;></textarea>
+                  <div class=&quot;error-message hidden&quot; id=&quot;contentError&quot; data-testid=&quot;content-error&quot;></div>
               </div>
               
-              <div class="form-group">
-                  <label class="form-label" for="commentPriority">Priority</label>
-                  <select id="commentPriority" name="priority" class="form-select" data-testid="comment-priority">
-                      <option value="low">Low</option>
-                      <option value="medium" selected>Medium</option>
-                      <option value="high">High</option>
-                      <option value="critical">Critical</option>
+              <div class=&quot;form-group&quot;>
+                  <label class=&quot;form-label&quot; for=&quot;commentPriority&quot;>Priority</label>
+                  <select id=&quot;commentPriority&quot; name=&quot;priority&quot; class=&quot;form-select&quot; data-testid=&quot;comment-priority&quot;>
+                      <option value=&quot;low&quot;>Low</option>
+                      <option value=&quot;medium&quot; selected>Medium</option>
+                      <option value=&quot;high&quot;>High</option>
+                      <option value=&quot;critical&quot;>Critical</option>
                   </select>
               </div>
               
-              <div class="form-group">
-                  <label class="form-label">Tags</label>
-                  <div class="tag-container" data-testid="tag-container">
-                      <span class="tag" onclick="toggleTag('Design')" data-testid="tag-design">Design</span>
-                      <span class="tag" onclick="toggleTag('Content')" data-testid="tag-content">Content</span>
-                      <span class="tag" onclick="toggleTag('Technical')" data-testid="tag-technical">Technical</span>
-                      <span class="tag" onclick="toggleTag('Urgent')" data-testid="tag-urgent">Urgent</span>
+              <div class=&quot;form-group&quot;>
+                  <label class=&quot;form-label&quot;>Tags</label>
+                  <div class=&quot;tag-container&quot; data-testid=&quot;tag-container&quot;>
+                      <span class=&quot;tag&quot; onclick=&quot;toggleTag(&apos;Design&apos;)&quot; data-testid=&quot;tag-design&quot;>Design</span>
+                      <span class=&quot;tag&quot; onclick=&quot;toggleTag(&apos;Content&apos;)&quot; data-testid=&quot;tag-content&quot;>Content</span>
+                      <span class=&quot;tag&quot; onclick=&quot;toggleTag(&apos;Technical&apos;)&quot; data-testid=&quot;tag-technical&quot;>Technical</span>
+                      <span class=&quot;tag&quot; onclick=&quot;toggleTag(&apos;Urgent&apos;)&quot; data-testid=&quot;tag-urgent&quot;>Urgent</span>
                   </div>
               </div>
               
-              <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                  <button type="button" class="button button-secondary" onclick="hideCommentDialog()" data-testid="cancel-btn">
+              <div style=&quot;display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;&quot;>
+                  <button type=&quot;button&quot; class=&quot;button button-secondary&quot; onclick=&quot;hideCommentDialog()&quot; data-testid=&quot;cancel-btn&quot;>
                       Cancel
                   </button>
-                  <button type="submit" class="button button-primary" id="submitBtn" data-testid="submit-btn">
+                  <button type=&quot;submit&quot; class=&quot;button button-primary&quot; id=&quot;submitBtn&quot; data-testid=&quot;submit-btn&quot;>
                       Add Comment
                   </button>
               </div>
@@ -256,19 +256,19 @@ async function createFeedbackTestPage(page: Page, mediaType: 'image' | 'video' |
       </div>
       
       <!-- Edit Dialog -->
-      <div class="comment-dialog hidden" id="editDialog" data-testid="edit-dialog">
+      <div class=&quot;comment-dialog hidden&quot; id=&quot;editDialog&quot; data-testid=&quot;edit-dialog&quot;>
           <h3>Edit Comment</h3>
-          <form id="editForm" onsubmit="submitEdit(event)">
-              <div class="form-group">
-                  <label class="form-label" for="editContent">Comment *</label>
-                  <textarea id="editContent" name="content" class="form-textarea" required data-testid="edit-content"></textarea>
+          <form id=&quot;editForm&quot; onsubmit=&quot;submitEdit(event)&quot;>
+              <div class=&quot;form-group&quot;>
+                  <label class=&quot;form-label&quot; for=&quot;editContent&quot;>Comment *</label>
+                  <textarea id=&quot;editContent&quot; name=&quot;content&quot; class=&quot;form-textarea&quot; required data-testid=&quot;edit-content&quot;></textarea>
               </div>
               
-              <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                  <button type="button" class="button button-secondary" onclick="hideEditDialog()" data-testid="edit-cancel-btn">
+              <div style=&quot;display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;&quot;>
+                  <button type=&quot;button&quot; class=&quot;button button-secondary&quot; onclick=&quot;hideEditDialog()&quot; data-testid=&quot;edit-cancel-btn&quot;>
                       Cancel
                   </button>
-                  <button type="submit" class="button button-primary" data-testid="edit-submit-btn">
+                  <button type=&quot;submit&quot; class=&quot;button button-primary&quot; data-testid=&quot;edit-submit-btn&quot;>
                       Update Comment
                   </button>
               </div>
@@ -282,8 +282,8 @@ async function createFeedbackTestPage(page: Page, mediaType: 'image' | 'video' |
           let editingCommentId = null;
           
           // Media click handler for positioning markers
-          document.getElementById('mediaViewer').addEventListener('click', function(e) {
-              if (e.target.closest('.feedback-marker')) return;
+          document.getElementById(&apos;mediaViewer&apos;).addEventListener(&apos;click&apos;, function(e) {
+              if (e.target.closest(&apos;.feedback-marker&apos;)) return;
               
               const rect = this.getBoundingClientRect();
               const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -293,9 +293,9 @@ async function createFeedbackTestPage(page: Page, mediaType: 'image' | 'video' |
               showCommentDialog();
           });
           
-          ${mediaType !== 'image' ? `
+          ${mediaType !== &apos;image&apos; ? `
           // Timeline click handler for time-based comments
-          document.getElementById('timeline').addEventListener('click', function(e) {
+          document.getElementById(&apos;timeline&apos;).addEventListener(&apos;click&apos;, function(e) {
               const rect = this.getBoundingClientRect();
               const position = (e.clientX - rect.left) / rect.width;
               const timestamp = position * ${mediaFile.duration || 100};
@@ -303,18 +303,18 @@ async function createFeedbackTestPage(page: Page, mediaType: 'image' | 'video' |
               currentPosition = { timestamp };
               showCommentDialog();
           });
-          ` : ''}
+          ` : '&apos;}'
           
           function showCommentDialog() {
-              document.getElementById('overlay').classList.remove('hidden');
-              document.getElementById('commentDialog').classList.remove('hidden');
-              document.getElementById('commentContent').focus();
+              document.getElementById(&apos;overlay&apos;).classList.remove(&apos;hidden&apos;);
+              document.getElementById(&apos;commentDialog&apos;).classList.remove(&apos;hidden&apos;);
+              document.getElementById(&apos;commentContent&apos;).focus();
           }
           
           function hideCommentDialog() {
-              document.getElementById('overlay').classList.add('hidden');
-              document.getElementById('commentDialog').classList.add('hidden');
-              document.getElementById('commentForm').reset();
+              document.getElementById(&apos;overlay&apos;).classList.add(&apos;hidden&apos;);
+              document.getElementById(&apos;commentDialog&apos;).classList.add(&apos;hidden&apos;);
+              document.getElementById(&apos;commentForm&apos;).reset();
               selectedTags = [];
               updateTagDisplay();
               currentPosition = null;
@@ -326,14 +326,14 @@ async function createFeedbackTestPage(page: Page, mediaType: 'image' | 'video' |
               if (!comment) return;
               
               editingCommentId = commentId;
-              document.getElementById('editContent').value = comment.content;
-              document.getElementById('overlay').classList.remove('hidden');
-              document.getElementById('editDialog').classList.remove('hidden');
+              document.getElementById(&apos;editContent&apos;).value = comment.content;
+              document.getElementById(&apos;overlay&apos;).classList.remove(&apos;hidden&apos;);
+              document.getElementById(&apos;editDialog&apos;).classList.remove(&apos;hidden&apos;);
           }
           
           function hideEditDialog() {
-              document.getElementById('overlay').classList.add('hidden');
-              document.getElementById('editDialog').classList.add('hidden');
+              document.getElementById(&apos;overlay&apos;).classList.add(&apos;hidden&apos;);
+              document.getElementById(&apos;editDialog&apos;).classList.add(&apos;hidden&apos;);
               editingCommentId = null;
           }
           
@@ -347,12 +347,12 @@ async function createFeedbackTestPage(page: Page, mediaType: 'image' | 'video' |
           }
           
           function updateTagDisplay() {
-              document.querySelectorAll('.tag').forEach(tag => {
+              document.querySelectorAll(&apos;.tag&apos;).forEach(tag => {
                   const tagText = tag.textContent;
                   if (selectedTags.includes(tagText)) {
-                      tag.classList.add('selected');
+                      tag.classList.add(&apos;selected&apos;);
                   } else {
-                      tag.classList.remove('selected');
+                      tag.classList.remove(&apos;selected&apos;);
                   }
               });
           }
@@ -361,28 +361,28 @@ async function createFeedbackTestPage(page: Page, mediaType: 'image' | 'video' |
               e.preventDefault();
               clearErrors();
               
-              const content = document.getElementById('commentContent').value.trim();
-              const priority = document.getElementById('commentPriority').value;
+              const content = document.getElementById(&apos;commentContent&apos;).value.trim();
+              const priority = document.getElementById(&apos;commentPriority&apos;).value;
               
               // Validation
               if (!content) {
-                  showError('contentError', 'Comment content is required');
+                  showError(&apos;contentError&apos;, &apos;Comment content is required&apos;);
                   return;
               }
               
               if (content.length > 2000) {
-                  showError('contentError', 'Comment must be less than 2000 characters');
+                  showError(&apos;contentError&apos;, &apos;Comment must be less than 2000 characters&apos;);
                   return;
               }
               
               // Create comment
               const comment = {
-                  id: 'comment_' + Date.now(),
+                  id: &apos;comment_&apos; + Date.now(),
                   content,
                   priority,
                   tags: [...selectedTags],
                   position: currentPosition,
-                  author: 'Test User',
+                  author: &apos;Test User&apos;,
                   created_at: new Date().toISOString()
               };
               
@@ -395,7 +395,7 @@ async function createFeedbackTestPage(page: Page, mediaType: 'image' | 'video' |
           function submitEdit(e) {
               e.preventDefault();
               
-              const content = document.getElementById('editContent').value.trim();
+              const content = document.getElementById(&apos;editContent&apos;).value.trim();
               
               if (!content) return;
               
@@ -410,7 +410,7 @@ async function createFeedbackTestPage(page: Page, mediaType: 'image' | 'video' |
           }
           
           function deleteComment(commentId) {
-              if (confirm('Are you sure you want to delete this comment?')) {
+              if (confirm(&apos;Are you sure you want to delete this comment?&apos;)) {
                   comments = comments.filter(c => c.id !== commentId);
                   renderComments();
                   renderMarkers();
@@ -418,55 +418,55 @@ async function createFeedbackTestPage(page: Page, mediaType: 'image' | 'video' |
           }
           
           function renderComments() {
-              const container = document.getElementById('commentsList');
+              const container = document.getElementById(&apos;commentsList&apos;);
               container.innerHTML = comments.map(comment => \`
-                  <div class="comment-item" data-testid="comment-\${comment.id}">
-                      <div class="comment-header">
+                  <div class=&quot;comment-item&quot; data-testid=&quot;comment-\${comment.id}&quot;>
+                      <div class=&quot;comment-header&quot;>
                           <strong>\${comment.author}</strong>
-                          <span style="color: #6b7280; font-size: 12px;">
+                          <span style=&quot;color: #6b7280; font-size: 12px;&quot;>
                               \${new Date(comment.created_at).toLocaleString()}
-                              \${comment.updated_at ? ' (edited)' : ''}
+                              \${comment.updated_at ? &apos; (edited)&apos; : '&apos;}'
                           </span>
                       </div>
-                      <div class="comment-content">\${comment.content}</div>
-                      <div class="comment-actions">
-                          <button class="button button-secondary" onclick="showEditDialog('\${comment.id}')" 
-                                  data-testid="edit-comment-\${comment.id}">Edit</button>
-                          <button class="button button-secondary" onclick="deleteComment('\${comment.id}')" 
-                                  data-testid="delete-comment-\${comment.id}">Delete</button>
+                      <div class=&quot;comment-content&quot;>\${comment.content}</div>
+                      <div class=&quot;comment-actions&quot;>
+                          <button class=&quot;button button-secondary&quot; onclick=&quot;showEditDialog(&apos;\${comment.id}&apos;)&quot; 
+                                  data-testid=&quot;edit-comment-\${comment.id}&quot;>Edit</button>
+                          <button class=&quot;button button-secondary&quot; onclick=&quot;deleteComment(&apos;\${comment.id}&apos;)&quot; 
+                                  data-testid=&quot;delete-comment-\${comment.id}&quot;>Delete</button>
                       </div>
                   </div>
-              \`).join('');
+              \`).join('&apos;);'
           }
           
           function renderMarkers() {
-              const viewer = document.getElementById('mediaViewer');
+              const viewer = document.getElementById(&apos;mediaViewer&apos;);
               
               // Remove existing markers
-              viewer.querySelectorAll('.feedback-marker').forEach(marker => marker.remove());
+              viewer.querySelectorAll(&apos;.feedback-marker&apos;).forEach(marker => marker.remove());
               
               // Add new markers
               comments.forEach((comment, index) => {
                   if (comment.position) {
                       if (comment.position.x !== undefined && comment.position.y !== undefined) {
                           // Position-based marker (image/video)
-                          const marker = document.createElement('div');
-                          marker.className = 'feedback-marker';
-                          marker.style.left = comment.position.x + '%';
-                          marker.style.top = comment.position.y + '%';
+                          const marker = document.createElement(&apos;div&apos;);
+                          marker.className = &apos;feedback-marker&apos;;
+                          marker.style.left = comment.position.x + &apos;%';'
+                          marker.style.top = comment.position.y + &apos;%';'
                           marker.textContent = index + 1;
                           marker.title = comment.content;
-                          marker.setAttribute('data-testid', \`marker-\${comment.id}\`);
+                          marker.setAttribute(&apos;data-testid&apos;, \`marker-\${comment.id}\`);
                           viewer.appendChild(marker);
                       } else if (comment.position.timestamp !== undefined) {
                           // Time-based marker (video/audio timeline)
-                          const timeline = document.getElementById('timeline');
+                          const timeline = document.getElementById(&apos;timeline&apos;);
                           if (timeline) {
-                              const marker = document.createElement('div');
-                              marker.className = 'timeline-marker';
-                              marker.style.left = (comment.position.timestamp / ${mediaFile.duration || 100}) * 100 + '%';
-                              marker.title = \`\${Math.floor(comment.position.timestamp / 60)}:\${Math.floor(comment.position.timestamp % 60).toString().padStart(2, '0')} - \${comment.content}\`;
-                              marker.setAttribute('data-testid', \`timeline-marker-\${comment.id}\`);
+                              const marker = document.createElement(&apos;div&apos;);
+                              marker.className = &apos;timeline-marker&apos;;
+                              marker.style.left = (comment.position.timestamp / ${mediaFile.duration || 100}) * 100 + &apos;%';'
+                              marker.title = \`\${Math.floor(comment.position.timestamp / 60)}:\${Math.floor(comment.position.timestamp % 60).toString().padStart(2, &apos;0')} - \${comment.content}\`;'
+                              marker.setAttribute(&apos;data-testid&apos;, \`timeline-marker-\${comment.id}\`);
                               timeline.appendChild(marker);
                           }
                       }
@@ -477,13 +477,13 @@ async function createFeedbackTestPage(page: Page, mediaType: 'image' | 'video' |
           function showError(elementId, message) {
               const errorElement = document.getElementById(elementId);
               errorElement.textContent = message;
-              errorElement.classList.remove('hidden');
+              errorElement.classList.remove(&apos;hidden&apos;);
           }
           
           function clearErrors() {
-              document.querySelectorAll('.error-message').forEach(el => {
-                  el.classList.add('hidden');
-                  el.textContent = '';
+              document.querySelectorAll(&apos;.error-message&apos;).forEach(el => {
+                  el.classList.add(&apos;hidden&apos;);
+                  el.textContent = '&apos;;'
               });
           }
           
@@ -497,292 +497,292 @@ async function createFeedbackTestPage(page: Page, mediaType: 'image' | 'video' |
   await page.setContent(mockHtml);
 }
 
-test.describe('Media Feedback System Testing', () => {
+test.describe(&apos;Media Feedback System Testing&apos;, () => {
   test.beforeEach(async ({ page }) => {
     // Setup API mocking before each test
     await setupFeedbackAPIMocking(page);
   });
 
-  test.describe('🖼️ Image Feedback', () => {
-    test('should display image feedback interface with all required elements', async ({ page, browserName }) => {
+  test.describe(&apos;🖼️ Image Feedback&apos;, () => {
+    test(&apos;should display image feedback interface with all required elements&apos;, async ({ page, browserName }) => {
       // Navigate to image feedback page
-      await page.goto('/feedback?type=image&file=sample.jpg');
-      await page.waitForLoadState('networkidle');
+      await page.goto(&apos;/feedback?type=image&file=sample.jpg&apos;);
+      await page.waitForLoadState(&apos;networkidle&apos;);
       
       // Verify image viewer and comment controls
-      await expect(page.locator('[data-testid="image-viewer"]')).toBeVisible();
-      await expect(page.locator('[data-testid="comment-dialog"]')).toBeVisible();
-      await expect(page.locator('[data-testid="comment-content"]')).toBeVisible();
+      await expect(page.locator(&apos;[data-testid=&quot;image-viewer&quot;]&apos;)).toBeVisible();
+      await expect(page.locator(&apos;[data-testid=&quot;comment-dialog&quot;]&apos;)).toBeVisible();
+      await expect(page.locator(&apos;[data-testid=&quot;comment-content&quot;]&apos;)).toBeVisible();
       
       console.log(`✅ Image feedback interface verified (${browserName})`);
     });
 
-    test('should successfully add a comment with marker on image', async ({ page, browserName }) => {
+    test(&apos;should successfully add a comment with marker on image&apos;, async ({ page, browserName }) => {
       // Navigate to image feedback page
-      await page.goto('/feedback?type=image&file=sample.jpg');
-      await page.waitForLoadState('networkidle');
+      await page.goto(&apos;/feedback?type=image&file=sample.jpg&apos;);
+      await page.waitForLoadState(&apos;networkidle&apos;);
       
       // Click on image to add comment marker
-      await page.locator('[data-testid="image-viewer"]').click({ position: { x: 100, y: 100 } });
+      await page.locator(&apos;[data-testid=&quot;image-viewer&quot;]&apos;).click({ position: { x: 100, y: 100 } });
       
       // Fill comment form
-      await page.locator('[data-testid="comment-content"]').fill('Test comment on image');
-      await page.locator('button[type="submit"]').click();
+      await page.locator(&apos;[data-testid=&quot;comment-content&quot;]&apos;).fill(&apos;Test comment on image&apos;);
+      await page.locator(&apos;button[type=&quot;submit&quot;]&apos;).click();
       
       // Wait for form submission
       await page.waitForTimeout(1000);
       
       // Verify comment was added (use .first() to handle multiple matches)
-      await expect(page.locator('[data-testid="comment-list"] .comment-item').first()).toBeVisible();
-      await expect(page.locator('[data-testid^="marker-"]').first()).toBeVisible();
+      await expect(page.locator(&apos;[data-testid=&quot;comment-list&quot;] .comment-item&apos;).first()).toBeVisible();
+      await expect(page.locator(&apos;[data-testid^=&quot;marker-&quot;]&apos;).first()).toBeVisible();
       
       console.log(`✅ Image comment with marker added successfully (${browserName})`);
     });
 
-    test('should show validation error for empty comment', async ({ page, browserName }) => {
-      await page.goto('/feedback?type=image&file=sample.jpg');
-      await page.waitForLoadState('networkidle');
+    test(&apos;should show validation error for empty comment&apos;, async ({ page, browserName }) => {
+      await page.goto(&apos;/feedback?type=image&file=sample.jpg&apos;);
+      await page.waitForLoadState(&apos;networkidle&apos;);
       
       // Try to submit empty comment
-      await page.locator('button[type="submit"]').click();
+      await page.locator(&apos;button[type=&quot;submit&quot;]&apos;).click();
       
       // Check for validation error
-      const errorMessage = page.locator('[data-testid="error-message"], .error-message, [role="alert"]').first();
+      const errorMessage = page.locator(&apos;[data-testid=&quot;error-message&quot;], .error-message, [role=&quot;alert&quot;]&apos;).first();
       await expect(errorMessage).toBeVisible();
       
       console.log(`✅ Empty comment validation working (${browserName})`);
     });
 
-    test('should edit existing comment successfully', async ({ page, browserName }) => {
-      await page.goto('/feedback?type=image&file=sample.jpg');
-      await page.waitForLoadState('networkidle');
+    test(&apos;should edit existing comment successfully&apos;, async ({ page, browserName }) => {
+      await page.goto(&apos;/feedback?type=image&file=sample.jpg&apos;);
+      await page.waitForLoadState(&apos;networkidle&apos;);
       
       // Add initial comment
-      await page.locator('[data-testid="image-viewer"]').click({ position: { x: 150, y: 150 } });
-      await page.locator('[data-testid="comment-content"]').fill('Original comment');
-      await page.locator('button[type="submit"]').click();
+      await page.locator(&apos;[data-testid=&quot;image-viewer&quot;]&apos;).click({ position: { x: 150, y: 150 } });
+      await page.locator(&apos;[data-testid=&quot;comment-content&quot;]&apos;).fill(&apos;Original comment&apos;);
+      await page.locator(&apos;button[type=&quot;submit&quot;]&apos;).click();
       
       // Wait for comment to appear
-      await expect(page.locator('[data-testid="comment-list"] .comment-item').first()).toBeVisible();
+      await expect(page.locator(&apos;[data-testid=&quot;comment-list&quot;] .comment-item&apos;).first()).toBeVisible();
       
       // Click edit button
-      await page.locator('[data-testid^="edit-comment-"]').first().click();
+      await page.locator(&apos;[data-testid^=&quot;edit-comment-&quot;]&apos;).first().click();
       
       // Update comment
-      await page.locator('[data-testid="comment-content"]').fill('Updated comment');
-      await page.locator('button[type="submit"]').click();
+      await page.locator(&apos;[data-testid=&quot;comment-content&quot;]&apos;).fill(&apos;Updated comment&apos;);
+      await page.locator(&apos;button[type=&quot;submit&quot;]&apos;).click();
       
       // Verify updated comment
-      await expect(page.locator('text=Updated comment').first()).toBeVisible();
+      await expect(page.locator(&apos;text=Updated comment&apos;).first()).toBeVisible();
       
       console.log(`✅ Comment editing successful (${browserName})`);
     });
 
-    test('should delete comment and marker successfully', async ({ page, browserName }) => {
-      await page.goto('/feedback?type=image&file=sample.jpg');
-      await page.waitForLoadState('networkidle');
+    test(&apos;should delete comment and marker successfully&apos;, async ({ page, browserName }) => {
+      await page.goto(&apos;/feedback?type=image&file=sample.jpg&apos;);
+      await page.waitForLoadState(&apos;networkidle&apos;);
       
       // Add comment first
-      await page.locator('[data-testid="image-viewer"]').click({ position: { x: 200, y: 200 } });
-      await page.locator('[data-testid="comment-content"]').fill('Comment to delete');
-      await page.locator('button[type="submit"]').click();
+      await page.locator(&apos;[data-testid=&quot;image-viewer&quot;]&apos;).click({ position: { x: 200, y: 200 } });
+      await page.locator(&apos;[data-testid=&quot;comment-content&quot;]&apos;).fill(&apos;Comment to delete&apos;);
+      await page.locator(&apos;button[type=&quot;submit&quot;]&apos;).click();
       
       // Verify comment and marker exist
-      await expect(page.locator('[data-testid="comment-list"] .comment-item').first()).toBeVisible();
-      await expect(page.locator('[data-testid^="marker-"]').first()).toBeVisible();
+      await expect(page.locator(&apos;[data-testid=&quot;comment-list&quot;] .comment-item&apos;).first()).toBeVisible();
+      await expect(page.locator(&apos;[data-testid^=&quot;marker-&quot;]&apos;).first()).toBeVisible();
       
       // Delete comment (handle confirmation dialog)
-      await page.locator('[data-testid^="delete-comment-"]').first().click();
+      await page.locator(&apos;[data-testid^=&quot;delete-comment-&quot;]&apos;).first().click();
       
       // Handle potential confirmation dialog
-      const confirmDialog = page.locator('button:has-text("Delete"), button:has-text("Confirm")');
+      const confirmDialog = page.locator(&apos;button:has-text(&quot;Delete&quot;), button:has-text(&quot;Confirm&quot;)&apos;);
       if (await confirmDialog.isVisible()) {
         await confirmDialog.click();
       }
       
       // Verify comment and marker removed
-      await expect(page.locator('[data-testid="comment-list"] .comment-item')).toHaveCount(0);
-      await expect(page.locator('[data-testid^="marker-"]')).toHaveCount(0);
+      await expect(page.locator(&apos;[data-testid=&quot;comment-list&quot;] .comment-item&apos;)).toHaveCount(0);
+      await expect(page.locator(&apos;[data-testid^=&quot;marker-&quot;]&apos;)).toHaveCount(0);
       
       console.log(`✅ Comment deletion successful (${browserName})`);
     });
   });
 
-  test.describe('🎥 Video Feedback', () => {
-    test('should display video feedback interface with timeline', async ({ page, browserName }) => {
-      await page.goto('/feedback?type=video&file=sample.mp4');
-      await page.waitForLoadState('networkidle');
+  test.describe(&apos;🎥 Video Feedback&apos;, () => {
+    test(&apos;should display video feedback interface with timeline&apos;, async ({ page, browserName }) => {
+      await page.goto(&apos;/feedback?type=video&file=sample.mp4&apos;);
+      await page.waitForLoadState(&apos;networkidle&apos;);
       
       // Verify video interface elements
-      await expect(page.locator('[data-testid="video-viewer"]')).toBeVisible();
-      await expect(page.locator('[data-testid="timeline"]')).toBeVisible();
-      await expect(page.locator('[data-testid="comment-dialog"]')).toBeVisible();
+      await expect(page.locator(&apos;[data-testid=&quot;video-viewer&quot;]&apos;)).toBeVisible();
+      await expect(page.locator(&apos;[data-testid=&quot;timeline&quot;]&apos;)).toBeVisible();
+      await expect(page.locator(&apos;[data-testid=&quot;comment-dialog&quot;]&apos;)).toBeVisible();
       
       console.log(`✅ Video feedback interface verified (${browserName})`);
     });
 
-    test('should add time-based comment on timeline click', async ({ page, browserName }) => {
-      await page.goto('/feedback?type=video&file=sample.mp4');
-      await page.waitForLoadState('networkidle');
+    test(&apos;should add time-based comment on timeline click&apos;, async ({ page, browserName }) => {
+      await page.goto(&apos;/feedback?type=video&file=sample.mp4&apos;);
+      await page.waitForLoadState(&apos;networkidle&apos;);
       
       // Click on timeline to set time position
-      await page.locator('[data-testid="timeline"]').click({ position: { x: 100, y: 10 } });
+      await page.locator(&apos;[data-testid=&quot;timeline&quot;]&apos;).click({ position: { x: 100, y: 10 } });
       
       // Add comment
-      await page.locator('[data-testid="comment-content"]').fill('Time-based comment');
-      await page.locator('button[type="submit"]').click();
+      await page.locator(&apos;[data-testid=&quot;comment-content&quot;]&apos;).fill(&apos;Time-based comment&apos;);
+      await page.locator(&apos;button[type=&quot;submit&quot;]&apos;).click();
       
       // Verify timeline marker was added
-      await expect(page.locator('[data-testid^="timeline-marker-"]').first()).toBeVisible();
-      await expect(page.locator('[data-testid="comment-list"] .comment-item').first()).toBeVisible();
+      await expect(page.locator(&apos;[data-testid^=&quot;timeline-marker-&quot;]&apos;).first()).toBeVisible();
+      await expect(page.locator(&apos;[data-testid=&quot;comment-list&quot;] .comment-item&apos;).first()).toBeVisible();
       
       console.log(`✅ Time-based video comment added successfully (${browserName})`);
     });
 
-    test('should add position-based comment on video area click', async ({ page, browserName }) => {
-      await page.goto('/feedback?type=video&file=sample.mp4');
-      await page.waitForLoadState('networkidle');
+    test(&apos;should add position-based comment on video area click&apos;, async ({ page, browserName }) => {
+      await page.goto(&apos;/feedback?type=video&file=sample.mp4&apos;);
+      await page.waitForLoadState(&apos;networkidle&apos;);
       
       // Click on video area to add position marker
-      await page.locator('[data-testid="video-viewer"] video, [data-testid="video-viewer"] .video-container').first().click({ position: { x: 200, y: 150 } });
+      await page.locator(&apos;[data-testid=&quot;video-viewer&quot;] video, [data-testid=&quot;video-viewer&quot;] .video-container&apos;).first().click({ position: { x: 200, y: 150 } });
       
       // Add comment
-      await page.locator('[data-testid="comment-content"]').fill('Position-based comment');
-      await page.locator('button[type="submit"]').click();
+      await page.locator(&apos;[data-testid=&quot;comment-content&quot;]&apos;).fill(&apos;Position-based comment&apos;);
+      await page.locator(&apos;button[type=&quot;submit&quot;]&apos;).click();
       
       // Verify position marker was added
-      await expect(page.locator('[data-testid^="marker-"]').first()).toBeVisible();
-      await expect(page.locator('[data-testid="comment-list"] .comment-item').first()).toBeVisible();
+      await expect(page.locator(&apos;[data-testid^=&quot;marker-&quot;]&apos;).first()).toBeVisible();
+      await expect(page.locator(&apos;[data-testid=&quot;comment-list&quot;] .comment-item&apos;).first()).toBeVisible();
       
       console.log(`✅ Position-based video comment added successfully (${browserName})`);
     });
   });
 
-  test.describe('🎵 Audio Feedback', () => {
-    test('should display audio feedback interface with timeline', async ({ page, browserName }) => {
-      await page.goto('/feedback?type=audio&file=sample.mp3');
-      await page.waitForLoadState('networkidle');
+  test.describe(&apos;🎵 Audio Feedback&apos;, () => {
+    test(&apos;should display audio feedback interface with timeline&apos;, async ({ page, browserName }) => {
+      await page.goto(&apos;/feedback?type=audio&file=sample.mp3&apos;);
+      await page.waitForLoadState(&apos;networkidle&apos;);
       
       // Verify audio interface elements
-      await expect(page.locator('[data-testid="audio-viewer"]')).toBeVisible();
-      await expect(page.locator('[data-testid="timeline"]')).toBeVisible();
+      await expect(page.locator(&apos;[data-testid=&quot;audio-viewer&quot;]&apos;)).toBeVisible();
+      await expect(page.locator(&apos;[data-testid=&quot;timeline&quot;]&apos;)).toBeVisible();
       
       console.log(`✅ Audio feedback interface verified (${browserName})`);
     });
 
-    test('should add timestamp-based comment on audio timeline', async ({ page, browserName }) => {
-      await page.goto('/feedback?type=audio&file=sample.mp3');
-      await page.waitForLoadState('networkidle');
+    test(&apos;should add timestamp-based comment on audio timeline&apos;, async ({ page, browserName }) => {
+      await page.goto(&apos;/feedback?type=audio&file=sample.mp3&apos;);
+      await page.waitForLoadState(&apos;networkidle&apos;);
       
       // Click on audio timeline
-      await page.locator('[data-testid="timeline"]').click({ position: { x: 150, y: 10 } });
+      await page.locator(&apos;[data-testid=&quot;timeline&quot;]&apos;).click({ position: { x: 150, y: 10 } });
       
       // Add timestamp comment
-      await page.locator('[data-testid="comment-content"]').fill('Audio timestamp comment');
-      await page.locator('button[type="submit"]').click();
+      await page.locator(&apos;[data-testid=&quot;comment-content&quot;]&apos;).fill(&apos;Audio timestamp comment&apos;);
+      await page.locator(&apos;button[type=&quot;submit&quot;]&apos;).click();
       
       // Verify timeline marker and comment
-      await expect(page.locator('[data-testid^="timeline-marker-"]').first()).toBeVisible();
-      await expect(page.locator('[data-testid="comment-list"] .comment-item').first()).toBeVisible();
+      await expect(page.locator(&apos;[data-testid^=&quot;timeline-marker-&quot;]&apos;).first()).toBeVisible();
+      await expect(page.locator(&apos;[data-testid=&quot;comment-list&quot;] .comment-item&apos;).first()).toBeVisible();
       
       console.log(`✅ Audio timestamp comment added successfully (${browserName})`);
     });
   });
 
-  test.describe('📝 Comment Validation & Edge Cases', () => {
+  test.describe(&apos;📝 Comment Validation & Edge Cases&apos;, () => {
     test.beforeEach(async ({ page }) => {
-      await createFeedbackTestPage(page, 'image');
+      await createFeedbackTestPage(page, &apos;image&apos;);
     });
 
-    test('should reject whitespace-only comments', async ({ page, browserName }) => {
-      await page.locator('[data-testid="media-viewer"]').click({ position: { x: 100, y: 100 } });
+    test(&apos;should reject whitespace-only comments&apos;, async ({ page, browserName }) => {
+      await page.locator(&apos;[data-testid=&quot;media-viewer&quot;]&apos;).click({ position: { x: 100, y: 100 } });
       
       // Try whitespace-only comment
-      await page.locator('[data-testid="comment-content"]').fill('   \n\t   ');
-      await page.locator('[data-testid="submit-btn"]').click();
+      await page.locator(&apos;[data-testid=&quot;comment-content&quot;]&apos;).fill(&apos;   \n\t   &apos;);
+      await page.locator(&apos;[data-testid=&quot;submit-btn&quot;]&apos;).click();
       
       // Verify validation error
-      await expect(page.locator('[data-testid="content-error"]')).toBeVisible();
+      await expect(page.locator(&apos;[data-testid=&quot;content-error&quot;]&apos;)).toBeVisible();
       
       console.log(`✅ Whitespace-only comment validation working (${browserName})`);
     });
 
-    test('should handle comment character limit validation', async ({ page, browserName }) => {
-      await page.locator('[data-testid="media-viewer"]').click({ position: { x: 100, y: 100 } });
+    test(&apos;should handle comment character limit validation&apos;, async ({ page, browserName }) => {
+      await page.locator(&apos;[data-testid=&quot;media-viewer&quot;]&apos;).click({ position: { x: 100, y: 100 } });
       
       // Try overly long comment
-      const longComment = 'a'.repeat(2001);
-      await page.locator('[data-testid="comment-content"]').fill(longComment);
-      await page.locator('[data-testid="submit-btn"]').click();
+      const longComment = &apos;a'.repeat(2001);'
+      await page.locator(&apos;[data-testid=&quot;comment-content&quot;]&apos;).fill(longComment);
+      await page.locator(&apos;[data-testid=&quot;submit-btn&quot;]&apos;).click();
       
       // Verify validation error
-      await expect(page.locator('[data-testid="content-error"]')).toBeVisible();
-      await expect(page.locator('[data-testid="content-error"]')).toContainText('2000 characters');
+      await expect(page.locator(&apos;[data-testid=&quot;content-error&quot;]&apos;)).toBeVisible();
+      await expect(page.locator(&apos;[data-testid=&quot;content-error&quot;]&apos;)).toContainText(&apos;2000 characters&apos;);
       
       console.log(`✅ Character limit validation working (${browserName})`);
     });
 
-    test('should handle canceling comment creation', async ({ page, browserName }) => {
-      await page.locator('[data-testid="media-viewer"]').click({ position: { x: 100, y: 100 } });
+    test(&apos;should handle canceling comment creation&apos;, async ({ page, browserName }) => {
+      await page.locator(&apos;[data-testid=&quot;media-viewer&quot;]&apos;).click({ position: { x: 100, y: 100 } });
       
       // Fill form partially
-      await page.locator('[data-testid="comment-content"]').fill('Partial comment');
-      await page.locator('[data-testid="tag-design"]').click();
+      await page.locator(&apos;[data-testid=&quot;comment-content&quot;]&apos;).fill(&apos;Partial comment&apos;);
+      await page.locator(&apos;[data-testid=&quot;tag-design&quot;]&apos;).click();
       
       // Cancel
-      await page.locator('[data-testid="cancel-btn"]').click();
+      await page.locator(&apos;[data-testid=&quot;cancel-btn&quot;]&apos;).click();
       
       // Verify dialog closes and no comment is added
-      await expect(page.locator('[data-testid="comment-dialog"]')).not.toBeVisible();
-      await expect(page.locator('[data-testid^="comment-"]')).toHaveCount(0);
+      await expect(page.locator(&apos;[data-testid=&quot;comment-dialog&quot;]&apos;)).not.toBeVisible();
+      await expect(page.locator(&apos;[data-testid^=&quot;comment-&quot;]&apos;)).toHaveCount(0);
       
       console.log(`✅ Comment cancellation working (${browserName})`);
     });
 
-    test('should handle canceling comment edit', async ({ page, browserName }) => {
+    test(&apos;should handle canceling comment edit&apos;, async ({ page, browserName }) => {
       // First add a comment
-      await page.locator('[data-testid="media-viewer"]').click({ position: { x: 200, y: 150 } });
-      await page.locator('[data-testid="comment-content"]').fill('Original comment');
-      await page.locator('[data-testid="submit-btn"]').click();
+      await page.locator(&apos;[data-testid=&quot;media-viewer&quot;]&apos;).click({ position: { x: 200, y: 150 } });
+      await page.locator(&apos;[data-testid=&quot;comment-content&quot;]&apos;).fill(&apos;Original comment&apos;);
+      await page.locator(&apos;[data-testid=&quot;submit-btn&quot;]&apos;).click();
       
       // Start editing
-      await page.locator('[data-testid^="edit-comment-"]').click();
-      await page.locator('[data-testid="edit-content"]').fill('Changed but cancelled');
+      await page.locator(&apos;[data-testid^=&quot;edit-comment-&quot;]&apos;).click();
+      await page.locator(&apos;[data-testid=&quot;edit-content&quot;]&apos;).fill(&apos;Changed but cancelled&apos;);
       
       // Cancel edit
-      await page.locator('[data-testid="edit-cancel-btn"]').click();
+      await page.locator(&apos;[data-testid=&quot;edit-cancel-btn&quot;]&apos;).click();
       
       // Verify original comment unchanged
-      await expect(page.locator('[data-testid="edit-dialog"]')).not.toBeVisible();
-      await expect(page.locator('[data-testid^="comment-"]')).toContainText('Original comment');
-      await expect(page.locator('[data-testid^="comment-"]')).not.toContainText('Changed but cancelled');
+      await expect(page.locator(&apos;[data-testid=&quot;edit-dialog&quot;]&apos;)).not.toBeVisible();
+      await expect(page.locator(&apos;[data-testid^=&quot;comment-&quot;]&apos;)).toContainText(&apos;Original comment&apos;);
+      await expect(page.locator(&apos;[data-testid^=&quot;comment-&quot;]&apos;)).not.toContainText(&apos;Changed but cancelled&apos;);
       
       console.log(`✅ Edit cancellation working (${browserName})`);
     });
 
-    test('should handle multiple comments with different priorities and tags', async ({ page, browserName }) => {
+    test(&apos;should handle multiple comments with different priorities and tags&apos;, async ({ page, browserName }) => {
       // Add first comment
-      await page.locator('[data-testid="media-viewer"]').click({ position: { x: 100, y: 100 } });
-      await page.locator('[data-testid="comment-content"]').fill('High priority design issue');
-      await page.locator('[data-testid="comment-priority"]').selectOption('high');
-      await page.locator('[data-testid="tag-design"]').click();
-      await page.locator('[data-testid="tag-urgent"]').click();
-      await page.locator('[data-testid="submit-btn"]').click();
+      await page.locator(&apos;[data-testid=&quot;media-viewer&quot;]&apos;).click({ position: { x: 100, y: 100 } });
+      await page.locator(&apos;[data-testid=&quot;comment-content&quot;]&apos;).fill(&apos;High priority design issue&apos;);
+      await page.locator(&apos;[data-testid=&quot;comment-priority&quot;]&apos;).selectOption(&apos;high&apos;);
+      await page.locator(&apos;[data-testid=&quot;tag-design&quot;]&apos;).click();
+      await page.locator(&apos;[data-testid=&quot;tag-urgent&quot;]&apos;).click();
+      await page.locator(&apos;[data-testid=&quot;submit-btn&quot;]&apos;).click();
       
       // Add second comment
-      await page.locator('[data-testid="media-viewer"]').click({ position: { x: 300, y: 200 } });
-      await page.locator('[data-testid="comment-content"]').fill('Technical improvement suggestion');
-      await page.locator('[data-testid="comment-priority"]').selectOption('low');
-      await page.locator('[data-testid="tag-technical"]').click();
-      await page.locator('[data-testid="submit-btn"]').click();
+      await page.locator(&apos;[data-testid=&quot;media-viewer&quot;]&apos;).click({ position: { x: 300, y: 200 } });
+      await page.locator(&apos;[data-testid=&quot;comment-content&quot;]&apos;).fill(&apos;Technical improvement suggestion&apos;);
+      await page.locator(&apos;[data-testid=&quot;comment-priority&quot;]&apos;).selectOption(&apos;low&apos;);
+      await page.locator(&apos;[data-testid=&quot;tag-technical&quot;]&apos;).click();
+      await page.locator(&apos;[data-testid=&quot;submit-btn&quot;]&apos;).click();
       
       // Verify both comments exist
-      await expect(page.locator('[data-testid^="comment-"]')).toHaveCount(2);
-      await expect(page.locator('[data-testid^="marker-"]')).toHaveCount(2);
+      await expect(page.locator(&apos;[data-testid^=&quot;comment-&quot;]&apos;)).toHaveCount(2);
+      await expect(page.locator(&apos;[data-testid^=&quot;marker-&quot;]&apos;)).toHaveCount(2);
       
       // Verify content
-      await expect(page.locator('[data-testid^="comment-"]').first()).toContainText('High priority design issue');
-      await expect(page.locator('[data-testid^="comment-"]').last()).toContainText('Technical improvement suggestion');
+      await expect(page.locator(&apos;[data-testid^=&quot;comment-&quot;]&apos;).first()).toContainText(&apos;High priority design issue&apos;);
+      await expect(page.locator(&apos;[data-testid^=&quot;comment-&quot;]&apos;).last()).toContainText(&apos;Technical improvement suggestion&apos;);
       
       console.log(`✅ Multiple comments with different properties working (${browserName})`);
     });

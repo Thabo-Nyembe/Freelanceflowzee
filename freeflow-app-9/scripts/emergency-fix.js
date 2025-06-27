@@ -18,8 +18,8 @@ class EmergencyFixer {
       exec(command, { maxBuffer: 1024 * 1024 * 10 }, (error, stdout, stderr) => {
         resolve({
           success: !error,
-          stdout: stdout || '',
-          stderr: stderr || '',
+          stdout: stdout || '','
+          stderr: stderr || '','
           error: error
         });
       });
@@ -73,8 +73,7 @@ class EmergencyFixer {
     if (fs.existsSync(filePath)) {
       let content = fs.readFileSync(filePath, 'utf8');
       
-      // Remove problematic OptimizedAvatar import
-      content = content.replace(
+      // Remove problematic OptimizedAvatar import content = content.replace(
         "import { OptimizedAvatar } from '@/components/ui/optimized-image'",
         "// import { OptimizedAvatar } from '@/components/ui/optimized-image' // Temporarily disabled for SSR"
       );
@@ -111,7 +110,7 @@ class EmergencyFixer {
       
       return { passed, failed, total: passed + failed };
     } catch (error) {
-      console.warn('⚠️ Error parsing test results:', error.message);
+      console.warn('⚠️ Error parsing test results: ', error.message);
       return { passed: 0, failed: 0, total: 0 };
     }
   }`;
@@ -129,13 +128,8 @@ class EmergencyFixer {
   async cleanCaches() {
     await this.log('🧹 Cleaning all caches...');
     
-    const commands = [
-      'rm -rf .next',
-      'rm -rf node_modules/.cache',
-      'rm -rf test-results',
-      'rm -rf playwright-report',
-      'rm -rf tsconfig.tsbuildinfo'
-    ];
+    const commands = ['rm -rf .next', 'rm -rf node_modules/.cache', 'rm -rf test-results', 'rm -rf playwright-report',
+      'rm -rf tsconfig.tsbuildinfo'];
     
     for (const cmd of commands) {
       await this.executeCommand(cmd);

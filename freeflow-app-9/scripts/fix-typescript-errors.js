@@ -4,19 +4,16 @@ const fs = require('fs');
 
 console.log('🔧 Fixing TypeScript Errors...');
 
-// Fix 1: Gallery advanced sharing system - Add Code import
-const galleryFile = 'components/gallery/advanced-sharing-system.tsx';
+// Fix 1: Gallery advanced sharing system - Add Code import const galleryFile = 'components/gallery/advanced-sharing-system.tsx';
 if (fs.existsSync(galleryFile)) {
   let content = fs.readFileSync(galleryFile, 'utf8');
-  if (content.includes('<Code className="h-4 w-4" />') && !content.includes('import { Code }')) {
+  if (content.includes('<Code className= "h-4 w-4" />&apos;) && !content.includes('import { Code }')) {
     // Add Code to the lucide-react imports
     content = content.replace(
-      /from "lucide-react"/,
-      ', Code } from "lucide-react"'
+      /from "lucide-react"/, ', Code } from "lucide-react"'
     );
     content = content.replace(
-      /import \{([^}]+)\} from "lucide-react"/,
-      'import {$1, Code} from "lucide-react"'
+      /import \{([^}]+)\} from "lucide-react"/, 'import {$1, Code} from "lucide-react"'
     );
     fs.writeFileSync(galleryFile, content);
     console.log('✅ Fixed Code import in gallery system');
@@ -51,8 +48,7 @@ if (fs.existsSync(notificationsFile)) {
   
   // Fix circular type reference
   content = content.replace(
-    /notifications: typeof notifications/,
-    'notifications: NotificationItem[]'
+    /notifications: typeof notifications/, 'notifications: NotificationItem[]'
   );
   
   fs.writeFileSync(notificationsFile, content);
@@ -81,8 +77,7 @@ if (fs.existsSync(storageFile)) {
   
   // Fix potential_savings to potentialSavings
   content = content.replace(
-    /analytics\.potential_savings/g,
-    'analytics.potentialSavings'
+    /analytics\.potential_savings/g, 'analytics.potentialSavings'
   );
   
   fs.writeFileSync(storageFile, content);
@@ -96,15 +91,13 @@ if (fs.existsSync(playwrightFile)) {
   
   // Move timeout to the correct location
   content = content.replace(
-    /use: \{[^}]*timeout: 60000,/,
-    'use: {'
+    /use: \{[^}]*timeout: 60000,/, 'use: {'
   );
   
   // Add timeout at project level
   if (!content.includes('timeout: 60000')) {
     content = content.replace(
-      /export default defineConfig\(\{/,
-      'export default defineConfig({\n  timeout: 60000,'
+      /export default defineConfig\(\{/, 'export default defineConfig({\n  timeout: 60000,'
     );
   }
   

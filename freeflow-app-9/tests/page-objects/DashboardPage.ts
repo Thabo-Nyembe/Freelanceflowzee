@@ -1,5 +1,5 @@
-import { Page } from '@playwright/test';
-import { BasePage } from './BasePage';
+import { Page } from &apos;@playwright/test&apos;;
+import { BasePage } from &apos;./BasePage&apos;;
 
 export class DashboardPage extends BasePage {
   constructor(page: Page) {
@@ -7,52 +7,52 @@ export class DashboardPage extends BasePage {
   }
 
   async navigateToDashboard() {
-    await this.page.goto('/dashboard');
+    await this.page.goto(&apos;/dashboard&apos;);
     await this.waitForPageLoad();
   }
 
   async openProjectsHub() {
-    await this.click('[data-testid="projects-hub-button"]');
+    await this.click(&apos;[data-testid=&quot;projects-hub-button&quot;]&apos;);
     await this.waitForPageLoad();
   }
 
   async openCommunityHub() {
-    await this.click('[data-testid="community-hub-button"]');
+    await this.click(&apos;[data-testid=&quot;community-hub-button&quot;]&apos;);
     await this.waitForPageLoad();
   }
 
   async openVideoStudio() {
-    await this.click('[data-testid="video-studio-button"]');
+    await this.click(&apos;[data-testid=&quot;video-studio-button&quot;]&apos;);
     await this.waitForPageLoad();
   }
 
   async openMyDay() {
-    await this.click('[data-testid="my-day-button"]');
+    await this.click(&apos;[data-testid=&quot;my-day-button&quot;]&apos;);
     await this.waitForPageLoad();
   }
 
   async openAIAssistant() {
-    await this.click('[data-testid="ai-assistant-button"]');
+    await this.click(&apos;[data-testid=&quot;ai-assistant-button&quot;]&apos;);
     await this.waitForPageLoad();
   }
 
   async isProjectsHubVisible(): Promise<boolean> {
-    return await this.isVisible('[data-testid="projects-hub"]');
+    return await this.isVisible(&apos;[data-testid=&quot;projects-hub&quot;]&apos;);
   }
 
   async isCommunityHubVisible(): Promise<boolean> {
-    return await this.isVisible('[data-testid="community-hub"]');
+    return await this.isVisible(&apos;[data-testid=&quot;community-hub&quot;]&apos;);
   }
 
   async isVideoStudioVisible(): Promise<boolean> {
-    return await this.isVisible('[data-testid="video-studio"]');
+    return await this.isVisible(&apos;[data-testid=&quot;video-studio&quot;]&apos;);
   }
 
   async isMyDayVisible(): Promise<boolean> {
-    return await this.isVisible('[data-testid="my-day"]');
+    return await this.isVisible(&apos;[data-testid=&quot;my-day&quot;]&apos;);
   }
 
   async isAIAssistantVisible(): Promise<boolean> {
-    return await this.isVisible('[data-testid="ai-assistant"]');
+    return await this.isVisible(&apos;[data-testid=&quot;ai-assistant&quot;]&apos;);
   }
 } 

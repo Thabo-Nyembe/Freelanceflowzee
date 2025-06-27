@@ -1,8 +1,8 @@
-import { defineConfig, devices } from '@playwright/test'
-import path from 'path'
+import { defineConfig, devices } from &apos;@playwright/test&apos;
+import path from &apos;path&apos;
 
 export default defineConfig({
-  testDir: './integration/hydration',
+  testDir: &apos;./integration/hydration&apos;,
   timeout: 30000,
   expect: {
     timeout: 5000
@@ -11,39 +11,39 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI ? 'dot' : 'html',
+  reporter: process.env.CI ? &apos;dot&apos; : &apos;html&apos;,
   use: {
-    baseURL: 'http://localhost:3002',
-    trace: 'on-first-retry',
-    video: 'on-first-retry',
+    baseURL: &apos;http://localhost:3002&apos;,
+    trace: &apos;on-first-retry&apos;,
+    video: &apos;on-first-retry&apos;,
   },
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: &apos;chromium&apos;,
+      use: { ...devices[&apos;Desktop Chrome&apos;] },
     },
     {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      name: &apos;firefox&apos;,
+      use: { ...devices[&apos;Desktop Firefox&apos;] },
     },
     {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      name: &apos;webkit&apos;,
+      use: { ...devices[&apos;Desktop Safari&apos;] },
     },
     {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
+      name: &apos;Mobile Chrome&apos;,
+      use: { ...devices[&apos;Pixel 5&apos;] },
     },
     {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
+      name: &apos;Mobile Safari&apos;,
+      use: { ...devices[&apos;iPhone 12&apos;] },
     },
   ],
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3002',
+    command: &apos;npm run dev&apos;,
+    url: &apos;http://localhost:3002&apos;,
     reuseExistingServer: !process.env.CI,
-    stdout: 'pipe',
-    stderr: 'pipe',
+    stdout: &apos;pipe&apos;,
+    stderr: &apos;pipe&apos;,
   },
 }) 

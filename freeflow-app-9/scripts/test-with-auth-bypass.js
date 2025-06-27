@@ -19,38 +19,26 @@ const PAGES_TO_TEST = [
   {
     url: '/dashboard',
     name: 'Dashboard',
-    expectedButtons: [
-      'create-project-btn',
-      'create-invoice-btn', 
-      'upload-files-btn',
-      'schedule-meeting-btn'
+    expectedButtons: ['create-project-btn', 'create-invoice-btn', 'upload-files-btn', 'schedule-meeting-btn'
     ]
   },
   {
     url: '/dashboard/projects-hub',
     name: 'Projects Hub',
-    expectedButtons: [
-      'create-project-btn',
-      'import-project-btn',
-      'quick-start-btn',
-      'view-all-btn',
-      'export-data-btn'
+    expectedButtons: ['create-project-btn', 'import-project-btn', 'quick-start-btn', 'view-all-btn', 'export-data-btn'
     ]
   },
   {
     url: '/dashboard/ai-create',
     name: 'AI Create',
-    expectedButtons: [
-      'generate-btn'
+    expectedButtons: ['generate-btn'
     ]
   },
   {
     url: '/dashboard/files-hub',
     name: 'Files Hub', 
-    expectedButtons: [
-      'upload-file-btn',
-      'new-folder-btn'
-    ]
+    expectedButtons: ['upload-file-btn',
+      'new-folder-btn']
   }
 ];
 
@@ -73,9 +61,7 @@ class AuthBypassTester {
     
     // Set headers to bypass authentication
     await this.page.setExtraHTTPHeaders({
-      'x-test-mode': 'true',
-      'x-dev-bypass': 'true',
-      'user-agent': 'Playwright/Test-Runner-Auth-Bypass'
+      'x-test-mode': 'true', 'x-dev-bypass': 'true', 'user-agent': 'Playwright/Test-Runner-Auth-Bypass'
     });
     
     // Add initialization script for local storage
@@ -124,7 +110,7 @@ class AuthBypassTester {
       let foundButtons = 0;
       for (const buttonTestId of pageConfig.expectedButtons) {
         try {
-          const button = this.page.locator(`[data-testid="${buttonTestId}"]`);
+          const button = this.page.locator(`[data-testid= "${buttonTestId}"]`);
           const exists = await button.count() > 0;
           
           if (exists) {
@@ -168,7 +154,7 @@ class AuthBypassTester {
       
       // Take screenshot
       await this.page.screenshot({ 
-        path: `debug-screenshots/${pageConfig.name.replace(/\s+/g, '-').toLowerCase()}-bypass.png`,
+        path: `debug-screenshots/${pageConfig.name.replace(/\s+/g, '-').toLowerCase()}-bypass.png`,'
         fullPage: true 
       });
       
@@ -201,9 +187,9 @@ class AuthBypassTester {
   }
 
   generateReport() {
-    console.log('\n' + '='.repeat(60));
+    console.log('\n' + '='.repeat(60));'
     console.log('📊 AUTH BYPASS TEST RESULTS');
-    console.log('='.repeat(60));
+    console.log('='.repeat(60));'
     
     let totalPages = this.results.length;
     let loadedPages = this.results.filter(r => r.loaded).length;
@@ -220,7 +206,7 @@ class AuthBypassTester {
       }
     }
     
-    console.log('\n📈 Summary:');
+    console.log('\n📈 Summary: ');
     console.log(`   Pages Loaded: ${loadedPages}/${totalPages}`);
     console.log(`   Buttons Found: ${foundButtons}/${totalButtons}`);
     console.log(`   Overall Success: ${totalButtons > 0 ? Math.round((foundButtons / totalButtons) * 100) : 0}%`);

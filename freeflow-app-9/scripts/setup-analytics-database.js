@@ -42,7 +42,7 @@ async function setupAnalyticsDatabase() {
     
     // Split SQL content into individual statements
     const statements = sqlContent
-      .split(';')
+      .split(';')'
       .map(stmt => stmt.trim())
       .filter(stmt => stmt.length > 0 && !stmt.startsWith('--'))
 
@@ -53,7 +53,7 @@ async function setupAnalyticsDatabase() {
     let errors = []
 
     for (let i = 0; i < statements.length; i++) {
-      const statement = statements[i] + ';'
+      const statement = statements[i] + ';''
       
       try {
         const { error } = await supabase.rpc('exec_sql', { 
@@ -91,11 +91,8 @@ async function setupAnalyticsDatabase() {
     console.log('\n🔍 Verifying analytics tables...')
     
     // Verify tables were created
-    const tables = [
-      'analytics_events',
-      'business_metrics', 
-      'user_sessions'
-    ]
+    const tables = ['analytics_events', 'business_metrics', 
+      'user_sessions']
 
     const verificationResults = []
     
@@ -103,7 +100,7 @@ async function setupAnalyticsDatabase() {
       try {
         const { count, error } = await supabase
           .from(table)
-          .select('*', { count: 'exact', head: true })
+          .select('*', { count: 'exact', head: true })'
         
         if (error) {
           verificationResults.push(`❌ ${table}: ${error.message}`)
@@ -115,8 +112,8 @@ async function setupAnalyticsDatabase() {
       }
     }
 
-    console.log('\n📊 Analytics Tables Status:')
-    console.log('=============================')
+    console.log('\n📊 Analytics Tables Status: ')
+    console.log('============================= ')
     verificationResults.forEach(result => console.log(result))
 
     // Test analytics API
@@ -154,7 +151,7 @@ async function setupAnalyticsDatabase() {
     }
 
     console.log('\n🎉 Analytics Database Setup Complete!')
-    console.log('=====================================')
+    console.log('===================================== ')
     console.log(`✅ Successful operations: ${successCount}`)
     
     if (errors.length > 0) {
@@ -192,7 +189,7 @@ async function setupAnalyticsDatabase() {
 // Alternative manual setup instructions
 function showManualInstructions() {
   console.log('\n📖 Manual Setup Instructions:')
-  console.log('==============================')
+  console.log('============================== ')
   console.log('1. Open Supabase Dashboard: https://app.supabase.com')
   console.log('2. Go to SQL Editor')
   console.log('3. Copy and paste the contents of: scripts/setup-analytics-database.sql')

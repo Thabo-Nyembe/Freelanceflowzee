@@ -1,57 +1,57 @@
 #!/usr/bin/env node
 
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require(&apos;@playwright/test&apos;);
 
-test.describe('FreeflowZee Quick Component Tests', () => {
-  test('Landing page loads with key elements', async ({ page }) => {
-    await page.goto('http://localhost:3000');
+test.describe(&apos;FreeflowZee Quick Component Tests&apos;, () => {
+  test(&apos;Landing page loads with key elements&apos;, async ({ page }) => {
+    await page.goto(&apos;http://localhost:3000&apos;);
     
     // Check for key content
     await expect(page).toHaveTitle(/FreeflowZee/);
     
     // Look for main heading or brand content
-    const hasContent = await page.locator('body').textContent();
-    expect(hasContent).toContain('FreeflowZee');
+    const hasContent = await page.locator(&apos;body&apos;).textContent();
+    expect(hasContent).toContain(&apos;FreeflowZee&apos;);
     
-    console.log('✅ Landing page loaded successfully');
+    console.log(&apos;✅ Landing page loaded successfully&apos;);
   });
 
-  test('Navigation elements are present', async ({ page }) => {
-    await page.goto('http://localhost:3000');
+  test(&apos;Navigation elements are present&apos;, async ({ page }) => {
+    await page.goto(&apos;http://localhost:3000&apos;);
     
     // Check for navigation elements
-    const hasNavigation = await page.locator('nav, header').count() > 0;
+    const hasNavigation = await page.locator(&apos;nav, header&apos;).count() > 0;
     expect(hasNavigation).toBeTruthy();
     
-    console.log('✅ Navigation elements found');
+    console.log(&apos;✅ Navigation elements found&apos;);
   });
 
-  test('Features page is accessible', async ({ page }) => {
-    await page.goto('http://localhost:3000/features');
+  test(&apos;Features page is accessible&apos;, async ({ page }) => {
+    await page.goto(&apos;http://localhost:3000/features&apos;);
     
     // Should load successfully
     await expect(page).toHaveURL(/features/);
     
-    console.log('✅ Features page accessible');
+    console.log(&apos;✅ Features page accessible&apos;);
   });
 
-  test('Dashboard requires authentication', async ({ page }) => {
-    await page.goto('http://localhost:3000/dashboard');
+  test(&apos;Dashboard requires authentication&apos;, async ({ page }) => {
+    await page.goto(&apos;http://localhost:3000/dashboard&apos;);
     
     // Should redirect to login or show authentication requirement
     const url = page.url();
-    const hasRedirect = url.includes('login') || url.includes('auth');
+    const hasRedirect = url.includes(&apos;login&apos;) || url.includes(&apos;auth&apos;);
     
     console.log(`✅ Dashboard properly protected (redirected: ${hasRedirect})`);
   });
 
-  test('Demo page functionality', async ({ page }) => {
-    await page.goto('http://localhost:3000/demo');
+  test(&apos;Demo page functionality&apos;, async ({ page }) => {
+    await page.goto(&apos;http://localhost:3000/demo&apos;);
     
     // Check demo page loads
     await expect(page).toHaveURL(/demo/);
     
-    console.log('✅ Demo page accessible');
+    console.log(&apos;✅ Demo page accessible&apos;);
   });
 });
 

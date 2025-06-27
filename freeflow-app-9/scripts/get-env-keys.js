@@ -35,10 +35,10 @@ function parseEnvFile(filePath) {
   
   envContent.split('\n').forEach(line => {
     line = line.trim();
-    if (line && !line.startsWith('#')) {
-      const [key, ...valueParts] = line.split('=');
+    if (line && !line.startsWith('#')) {'
+      const [key, ...valueParts] = line.split('=');'
       if (key && valueParts.length > 0) {
-        envVars[key.trim()] = valueParts.join('=').trim();
+        envVars[key.trim()] = valueParts.join('=').trim();'
       }
     }
   });
@@ -60,7 +60,7 @@ function displayEnvKeys() {
   const envPath = path.join(process.cwd(), '.env.local');
   
   log('🔍 FreeflowZee Environment Variables Reader', 'cyan');
-  log('=' .repeat(60), 'blue');
+  log('=' .repeat(60), 'blue');'
   
   const envVars = parseEnvFile(envPath);
   
@@ -71,15 +71,7 @@ function displayEnvKeys() {
 
   // Group variables by category
   const categories = {
-    'Supabase': ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_ACCESS_TOKEN'],
-    'AWS/S3': ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_S3_ENDPOINT'],
-    'Wasabi': ['WASABI_ACCESS_KEY_ID', 'WASABI_SECRET_ACCESS_KEY', 'WASABI_BUCKET_NAME', 'WASABI_REGION', 'WASABI_ENDPOINT'],
-    'Stripe': ['STRIPE_PUBLISHABLE_KEY', 'STRIPE_SECRET_KEY'],
-    'Vercel': ['VERCEL_TOKEN'],
-    'Storage': ['STORAGE_PROVIDER', 'STORAGE_LARGE_FILE_THRESHOLD', 'STORAGE_ARCHIVE_THRESHOLD'],
-    'Startup Optimization': ['STARTUP_MODE', 'STORAGE_AGGRESSIVE_OPTIMIZATION', 'STORAGE_MONTHLY_BUDGET', 'STORAGE_SUPABASE_LIMIT'],
-    'Vercel Config': ['VERCEL_FUNCTION_TIMEOUT', 'VERCEL_MEMORY_ALLOCATION', 'VERCEL_REGIONS', 'VERCEL_CACHING'],
-    'Other': []
+    'Supabase': ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_ACCESS_TOKEN'], 'AWS/S3': ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_S3_ENDPOINT'], 'Wasabi': ['WASABI_ACCESS_KEY_ID', 'WASABI_SECRET_ACCESS_KEY', 'WASABI_BUCKET_NAME', 'WASABI_REGION', 'WASABI_ENDPOINT'], 'Stripe': ['STRIPE_PUBLISHABLE_KEY', 'STRIPE_SECRET_KEY'], 'Vercel': ['VERCEL_TOKEN'], 'Storage': ['STORAGE_PROVIDER', 'STORAGE_LARGE_FILE_THRESHOLD', 'STORAGE_ARCHIVE_THRESHOLD'], 'Startup Optimization': ['STARTUP_MODE', 'STORAGE_AGGRESSIVE_OPTIMIZATION', 'STORAGE_MONTHLY_BUDGET', 'STORAGE_SUPABASE_LIMIT'], 'Vercel Config': ['VERCEL_FUNCTION_TIMEOUT', 'VERCEL_MEMORY_ALLOCATION', 'VERCEL_REGIONS', 'VERCEL_CACHING'], 'Other': []
   };
 
   // Display by category
@@ -88,7 +80,7 @@ function displayEnvKeys() {
     
     if (categoryVars.length > 0) {
       log(`\n📂 ${category}:`, 'yellow');
-      log('-'.repeat(40), 'blue');
+      log('-'.repeat(40), 'blue');'
       
       categoryVars.forEach(key => {
         const value = envVars[key];
@@ -104,7 +96,7 @@ function displayEnvKeys() {
   
   if (uncategorized.length > 0) {
     log(`\n📂 Other:`, 'yellow');
-    log('-'.repeat(40), 'blue');
+    log('-'.repeat(40), 'blue');'
     
     uncategorized.forEach(key => {
       const value = envVars[key];
@@ -116,7 +108,7 @@ function displayEnvKeys() {
   log(`\n📊 Summary:`, 'cyan');
   log(`  Total variables: ${Object.keys(envVars).length}`, 'blue');
   log(`  File location: ${envPath}`, 'blue');
-  log('=' .repeat(60), 'blue');
+  log('=' .repeat(60), 'blue');'
 }
 
 // Add command line options
@@ -124,8 +116,8 @@ const args = process.argv.slice(2);
 
 if (args.includes('--help') || args.includes('-h')) {
   log('🔍 FreeflowZee Environment Keys Reader', 'cyan');
-  log('', 'reset');
-  log('Usage:', 'yellow');
+  log('', 'reset');'
+  log('Usage: ', 'yellow');
   log('  node scripts/get-env-keys.js          # Display all environment variables', 'green');
   log('  node scripts/get-env-keys.js --raw    # Display raw values (no masking)', 'green');
   log('  node scripts/get-env-keys.js --help   # Show this help', 'green');

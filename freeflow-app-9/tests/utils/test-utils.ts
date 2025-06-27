@@ -1,6 +1,6 @@
-import { render } from '@testing-library/react'
-import { Providers } from '@/components/providers'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { render } from &apos;@testing-library/react&apos;
+import { Providers } from &apos;@/components/providers&apos;
+import { QueryClient, QueryClientProvider } from &apos;@tanstack/react-query&apos;
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,34 +22,34 @@ export function renderWithProviders(ui: React.ReactElement) {
 
 export function createMockProject(overrides = {}) {
   return {
-    id: 'test-project-id',
-    title: 'Test Project',
-    description: 'A test project description',
-    status: 'active',
-    priority: 'medium',
+    id: &apos;test-project-id&apos;,
+    title: &apos;Test Project&apos;,
+    description: &apos;A test project description&apos;,
+    status: &apos;active&apos;,
+    priority: &apos;medium&apos;,
     budget: 1000,
     spent: 500,
-    client_name: 'Test Client',
-    client_email: 'client@test.com',
-    start_date: '2024-01-01',
-    end_date: '2024-12-31',
+    client_name: &apos;Test Client&apos;,
+    client_email: &apos;client@test.com&apos;,
+    start_date: &apos;2024-01-01&apos;,
+    end_date: &apos;2024-12-31&apos;,
     progress: 50,
     team_members: [],
     attachments: [],
     comments_count: 0,
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z',
+    created_at: &apos;2024-01-01T00:00:00Z&apos;,
+    updated_at: &apos;2024-01-01T00:00:00Z&apos;,
     ...overrides
   }
 }
 
 export function createMockUser(overrides = {}) {
   return {
-    id: 'test-user-id',
-    email: 'test@example.com',
-    name: 'Test User',
+    id: &apos;test-user-id&apos;,
+    email: &apos;test@example.com&apos;,
+    name: &apos;Test User&apos;,
     avatar_url: null,
-    created_at: '2024-01-01T00:00:00Z',
+    created_at: &apos;2024-01-01T00:00:00Z&apos;,
     ...overrides
   }
 }

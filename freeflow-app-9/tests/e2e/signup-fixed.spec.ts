@@ -1,36 +1,36 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, Page } from &apos;@playwright/test&apos;;
 
 // Test data constants
 const VALID_USER = {
-  fullName: 'John Doe',
-  email: 'john.doe@example.com',
-  password: 'SecurePassword123!'
+  fullName: &apos;John Doe&apos;,
+  email: &apos;john.doe@example.com&apos;,
+  password: &apos;SecurePassword123!&apos;
 };
 
 // Helper functions
 const fillSignupForm = async (page: Page, data: { fullName?: string; email?: string; password?: string; confirmPassword?: string }) => {
   if (data.fullName !== undefined) {
-    await page.fill('#fullName', data.fullName);
+    await page.fill(&apos;#fullName&apos;, data.fullName);
   }
   if (data.email !== undefined) {
-    await page.fill('#email', data.email);
+    await page.fill(&apos;#email&apos;, data.email);
   }
   if (data.password !== undefined) {
-    await page.fill('#password', data.password);
+    await page.fill(&apos;#password&apos;, data.password);
   }
   if (data.confirmPassword !== undefined) {
-    await page.fill('#confirmPassword', data.confirmPassword);
+    await page.fill(&apos;#confirmPassword&apos;, data.confirmPassword);
   }
 };
 
 const submitForm = async (page: Page) => {
-  await page.click('button[type="submit"]');
+  await page.click(&apos;button[type=&quot;submit&quot;]&apos;);
 };
 
 const waitForErrorOrSuccess = async (page: Page, timeout = 5000) => {
   try {
     // Wait for visible alert that has actual content (not empty)
-    await page.waitForSelector('[role="alert"]:not([id*="route-announcer"]):not(:empty)', { timeout });
+    await page.waitForSelector(&apos;[role=&quot;alert&quot;]:not([id*=&quot;route-announcer&quot;]):not(:empty)&apos;, { timeout });
     return true;
   } catch {
     return false;
@@ -38,51 +38,51 @@ const waitForErrorOrSuccess = async (page: Page, timeout = 5000) => {
 };
 
 const getErrorText = async (page: Page) => {
-  // Get the first visible alert that's not the route announcer and has content
-  const errorAlert = page.locator('[role="alert"]:not([id*="route-announcer"])').filter({ hasText: /.+/ }).first();
+  // Get the first visible alert that&apos;s not the route announcer and has content
+  const errorAlert = page.locator(&apos;[role=&quot;alert&quot;]:not([id*=&quot;route-announcer&quot;])&apos;).filter({ hasText: /.+/ }).first();
   if (await errorAlert.isVisible()) {
     return await errorAlert.textContent();
   }
-  return '';
+  return '&apos;;'
 };
 
-test.describe('Fixed Comprehensive Signup Flow Tests', () => {
+test.describe(&apos;Fixed Comprehensive Signup Flow Tests&apos;, () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to signup page
-    await page.goto('/signup');
+    await page.goto(&apos;/signup&apos;);
     
     // Wait for the page to be fully loaded
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState(&apos;networkidle&apos;);
     
     // Ensure main elements are visible
-    await expect(page.locator('form')).toBeVisible();
+    await expect(page.locator(&apos;form&apos;)).toBeVisible();
   });
 
-  test.describe('🎯 Valid User Registration', () => {
-    test('should successfully display signup form with all elements', async ({ page }) => {
+  test.describe(&apos;🎯 Valid User Registration&apos;, () => {
+    test(&apos;should successfully display signup form with all elements&apos;, async ({ page }) => {
       // Check page title and heading
-      await expect(page.locator('text=Join FreeflowZee')).toBeVisible();
+      await expect(page.locator(&apos;text=Join FreeflowZee&apos;)).toBeVisible();
       
       // Check all form fields are present
-      await expect(page.locator('#fullName')).toBeVisible();
-      await expect(page.locator('#email')).toBeVisible();
-      await expect(page.locator('#password')).toBeVisible();
-      await expect(page.locator('#confirmPassword')).toBeVisible();
+      await expect(page.locator(&apos;#fullName&apos;)).toBeVisible();
+      await expect(page.locator(&apos;#email&apos;)).toBeVisible();
+      await expect(page.locator(&apos;#password&apos;)).toBeVisible();
+      await expect(page.locator(&apos;#confirmPassword&apos;)).toBeVisible();
       
       // Check labels with more specific selectors
-      await expect(page.locator('label[for="fullName"]')).toContainText('Full Name');
-      await expect(page.locator('label[for="email"]')).toContainText('Email');
-      await expect(page.locator('label[for="password"]')).toContainText('Password');
-      await expect(page.locator('label[for="confirmPassword"]')).toContainText('Confirm Password');
+      await expect(page.locator(&apos;label[for=&quot;fullName&quot;]&apos;)).toContainText(&apos;Full Name&apos;);
+      await expect(page.locator(&apos;label[for=&quot;email&quot;]&apos;)).toContainText(&apos;Email&apos;);
+      await expect(page.locator(&apos;label[for=&quot;password&quot;]&apos;)).toContainText(&apos;Password&apos;);
+      await expect(page.locator(&apos;label[for=&quot;confirmPassword&quot;]&apos;)).toContainText(&apos;Confirm Password&apos;);
       
       // Check submit button
-      await expect(page.locator('button[type="submit"]')).toContainText('Create Account');
+      await expect(page.locator(&apos;button[type=&quot;submit&quot;]&apos;)).toContainText(&apos;Create Account&apos;);
       
       // Check login link
-      await expect(page.locator('a[href="/login"]')).toContainText('Sign in here');
+      await expect(page.locator(&apos;a[href=&quot;/login&quot;]&apos;)).toContainText(&apos;Sign in here&apos;);
     });
 
-    test('should handle valid form submission', async ({ page }) => {
+    test(&apos;should handle valid form submission&apos;, async ({ page }) => {
       // Fill form with valid data
       await fillSignupForm(page, {
         fullName: VALID_USER.fullName,
@@ -95,33 +95,33 @@ test.describe('Fixed Comprehensive Signup Flow Tests', () => {
       await submitForm(page);
 
       // Wait for response
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState(&apos;networkidle&apos;);
       
       // Check for any response - either success, error, or redirect
       const hasAlert = await waitForErrorOrSuccess(page);
       
       if (hasAlert) {
         const alertText = await getErrorText(page);
-        console.log('Alert message:', alertText);
+        console.log(&apos;Alert message:&apos;, alertText);
         
         // Just check that we got some response
-        expect(alertText || 'response received').toBeTruthy();
+        expect(alertText || &apos;response received&apos;).toBeTruthy();
       } else {
         // Check if redirected (success case)
         const currentUrl = page.url();
-        console.log('Current URL:', currentUrl);
+        console.log(&apos;Current URL:&apos;, currentUrl);
         
-        // Either we got an alert or we're on a different page (success)
+        // Either we got an alert or we&apos;re on a different page (success)
         expect(currentUrl).toBeTruthy();
       }
     });
   });
 
-  test.describe('📧 Email Validation', () => {
-    test('should validate email format - missing @', async ({ page }) => {
+  test.describe(&apos;📧 Email Validation&apos;, () => {
+    test(&apos;should validate email format - missing @&apos;, async ({ page }) => {
       await fillSignupForm(page, {
         fullName: VALID_USER.fullName,
-        email: 'invalidemail.com',
+        email: &apos;invalidemail.com&apos;,
         password: VALID_USER.password,
         confirmPassword: VALID_USER.password
       });
@@ -129,49 +129,49 @@ test.describe('Fixed Comprehensive Signup Flow Tests', () => {
       await submitForm(page);
       
       // Check HTML5 validation
-      const emailInput = page.locator('#email');
+      const emailInput = page.locator(&apos;#email&apos;);
       const isValid = await emailInput.evaluate((el: HTMLInputElement) => el.checkValidity());
       expect(isValid).toBe(false);
     });
 
-    test('should validate email format - missing domain', async ({ page }) => {
+    test(&apos;should validate email format - missing domain&apos;, async ({ page }) => {
       await fillSignupForm(page, {
         fullName: VALID_USER.fullName,
-        email: 'user@',
+        email: &apos;user@&apos;,
         password: VALID_USER.password,
         confirmPassword: VALID_USER.password
       });
 
       await submitForm(page);
       
-      const emailInput = page.locator('#email');
+      const emailInput = page.locator(&apos;#email&apos;);
       const isValid = await emailInput.evaluate((el: HTMLInputElement) => el.checkValidity());
       expect(isValid).toBe(false);
     });
 
-    test('should validate email format - double dots', async ({ page }) => {
+    test(&apos;should validate email format - double dots&apos;, async ({ page }) => {
       await fillSignupForm(page, {
         fullName: VALID_USER.fullName,
-        email: 'user@domain..com',
+        email: &apos;user@domain..com&apos;,
         password: VALID_USER.password,
         confirmPassword: VALID_USER.password
       });
 
       await submitForm(page);
       
-      const emailInput = page.locator('#email');
+      const emailInput = page.locator(&apos;#email&apos;);
       const isValid = await emailInput.evaluate((el: HTMLInputElement) => el.checkValidity());
       expect(isValid).toBe(false);
     });
   });
 
-  test.describe('🔒 Password Validation', () => {
-    test('should show error for password too short', async ({ page }) => {
+  test.describe(&apos;🔒 Password Validation&apos;, () => {
+    test(&apos;should show error for password too short&apos;, async ({ page }) => {
       await fillSignupForm(page, {
         fullName: VALID_USER.fullName,
         email: VALID_USER.email,
-        password: '123',
-        confirmPassword: '123'
+        password: &apos;123&apos;,
+        confirmPassword: &apos;123&apos;
       });
 
       await submitForm(page);
@@ -184,25 +184,25 @@ test.describe('Fixed Comprehensive Signup Flow Tests', () => {
       
       if (hasError) {
         const errorText = await getErrorText(page);
-        console.log('Password error text:', errorText);
-        expect(errorText?.toLowerCase()).toContain('password');
+        console.log(&apos;Password error text:&apos;, errorText);
+        expect(errorText?.toLowerCase()).toContain(&apos;password&apos;);
         expect(errorText?.toLowerCase()).toMatch(/(6|characters|short)/);
       } else {
         // If no custom error, check if browser validation works
-        const passwordInput = page.locator('#password');
+        const passwordInput = page.locator(&apos;#password&apos;);
         const isValid = await passwordInput.evaluate((el: HTMLInputElement) => el.checkValidity());
-        console.log('Password field validity:', isValid);
+        console.log(&apos;Password field validity:&apos;, isValid);
         // Test passes if either custom validation or browser validation works
         expect(true).toBe(true);
       }
     });
 
-    test('should show error for mismatched passwords', async ({ page }) => {
+    test(&apos;should show error for mismatched passwords&apos;, async ({ page }) => {
       await fillSignupForm(page, {
         fullName: VALID_USER.fullName,
         email: VALID_USER.email,
         password: VALID_USER.password,
-        confirmPassword: 'DifferentPassword123!'
+        confirmPassword: &apos;DifferentPassword123!&apos;
       });
 
       await submitForm(page);
@@ -214,55 +214,55 @@ test.describe('Fixed Comprehensive Signup Flow Tests', () => {
       
       if (hasError) {
         const errorText = await getErrorText(page);
-        console.log('Password mismatch error text:', errorText);
+        console.log(&apos;Password mismatch error text:&apos;, errorText);
         expect(errorText?.toLowerCase()).toMatch(/(password|match)/);
       } else {
         // Check if form submission was prevented
         const currentUrl = page.url();
-        expect(currentUrl).toContain('/signup'); // Should still be on signup page
+        expect(currentUrl).toContain(&apos;/signup&apos;); // Should still be on signup page
       }
     });
 
-    test('should toggle password visibility correctly', async ({ page }) => {
+    test(&apos;should toggle password visibility correctly&apos;, async ({ page }) => {
       // Fill password field
-      await page.fill('#password', 'testpassword');
+      await page.fill(&apos;#password&apos;, &apos;testpassword&apos;);
       
-      // Password field should be type="password" initially
-      await expect(page.locator('#password')).toHaveAttribute('type', 'password');
+      // Password field should be type=&quot;password&quot; initially
+      await expect(page.locator(&apos;#password&apos;)).toHaveAttribute(&apos;type&apos;, &apos;password&apos;);
       
       // Find the toggle button more reliably
-      const passwordContainer = page.locator('#password').locator('..');
-      const toggleButtons = passwordContainer.locator('button');
+      const passwordContainer = page.locator(&apos;#password&apos;).locator(&apos;..&apos;);
+      const toggleButtons = passwordContainer.locator(&apos;button&apos;);
       
       const toggleButtonCount = await toggleButtons.count();
-      console.log('Found toggle buttons:', toggleButtonCount);
+      console.log(&apos;Found toggle buttons:&apos;, toggleButtonCount);
       
       if (toggleButtonCount > 0) {
         await toggleButtons.first().click();
         
         // Check if type changed
-        const newType = await page.locator('#password').getAttribute('type');
-        console.log('Password field type after toggle:', newType);
+        const newType = await page.locator(&apos;#password&apos;).getAttribute(&apos;type&apos;);
+        console.log(&apos;Password field type after toggle:&apos;, newType);
         
-        // Should be either 'text' or still 'password' if toggle didn't work
-        expect(['text', 'password']).toContain(newType);
+        // Should be either &apos;text&apos; or still &apos;password&apos; if toggle didn&apos;t work
+        expect([&apos;text&apos;, &apos;password&apos;]).toContain(newType);
       } else {
-        console.log('No toggle button found - test passes as password field works');
+        console.log(&apos;No toggle button found - test passes as password field works&apos;);
         expect(true).toBe(true);
       }
     });
   });
 
-  test.describe('📝 Empty Form Validation', () => {
-    test('should prevent submission of empty form', async ({ page }) => {
+  test.describe(&apos;📝 Empty Form Validation&apos;, () => {
+    test(&apos;should prevent submission of empty form&apos;, async ({ page }) => {
       // Submit completely empty form
       await submitForm(page);
       
       // Check HTML5 validation for required fields
-      const fullNameInput = page.locator('#fullName');
-      const emailInput = page.locator('#email');
-      const passwordInput = page.locator('#password');
-      const confirmPasswordInput = page.locator('#confirmPassword');
+      const fullNameInput = page.locator(&apos;#fullName&apos;);
+      const emailInput = page.locator(&apos;#email&apos;);
+      const passwordInput = page.locator(&apos;#password&apos;);
+      const confirmPasswordInput = page.locator(&apos;#confirmPassword&apos;);
       
       // All required fields should be invalid when empty
       const fullNameValid = await fullNameInput.evaluate((el: HTMLInputElement) => el.checkValidity());
@@ -276,7 +276,7 @@ test.describe('Fixed Comprehensive Signup Flow Tests', () => {
       expect(confirmPasswordValid).toBe(false);
     });
 
-    test('should show validation for missing individual fields', async ({ page }) => {
+    test(&apos;should show validation for missing individual fields&apos;, async ({ page }) => {
       // Test missing full name
       await fillSignupForm(page, {
         email: VALID_USER.email,
@@ -286,72 +286,72 @@ test.describe('Fixed Comprehensive Signup Flow Tests', () => {
 
       await submitForm(page);
       
-      const fullNameValid = await page.locator('#fullName').evaluate((el: HTMLInputElement) => el.checkValidity());
+      const fullNameValid = await page.locator(&apos;#fullName&apos;).evaluate((el: HTMLInputElement) => el.checkValidity());
       expect(fullNameValid).toBe(false);
     });
   });
 
-  test.describe('🎨 UI/UX Elements', () => {
-    test('should display proper accessibility attributes', async ({ page }) => {
+  test.describe(&apos;🎨 UI/UX Elements&apos;, () => {
+    test(&apos;should display proper accessibility attributes&apos;, async ({ page }) => {
       // Check form structure
-      await expect(page.locator('form')).toBeVisible();
+      await expect(page.locator(&apos;form&apos;)).toBeVisible();
       
       // Check required attributes
-      await expect(page.locator('#fullName')).toHaveAttribute('required');
-      await expect(page.locator('#email')).toHaveAttribute('required');
-      await expect(page.locator('#email')).toHaveAttribute('type', 'email');
-      await expect(page.locator('#password')).toHaveAttribute('required');
-      await expect(page.locator('#confirmPassword')).toHaveAttribute('required');
+      await expect(page.locator(&apos;#fullName&apos;)).toHaveAttribute(&apos;required&apos;);
+      await expect(page.locator(&apos;#email&apos;)).toHaveAttribute(&apos;required&apos;);
+      await expect(page.locator(&apos;#email&apos;)).toHaveAttribute(&apos;type&apos;, &apos;email&apos;);
+      await expect(page.locator(&apos;#password&apos;)).toHaveAttribute(&apos;required&apos;);
+      await expect(page.locator(&apos;#confirmPassword&apos;)).toHaveAttribute(&apos;required&apos;);
     });
 
-    test('should navigate to login page', async ({ page }) => {
+    test(&apos;should navigate to login page&apos;, async ({ page }) => {
       // Click login link
-      await page.click('a[href="/login"]');
+      await page.click(&apos;a[href=&quot;/login&quot;]&apos;);
       
       // Should navigate to login page
       await expect(page).toHaveURL(/.*login/);
     });
 
-    test('should display proper placeholders and labels', async ({ page }) => {
+    test(&apos;should display proper placeholders and labels&apos;, async ({ page }) => {
       // Check placeholders
-      await expect(page.locator('#fullName')).toHaveAttribute('placeholder', /name/i);
-      await expect(page.locator('#email')).toHaveAttribute('placeholder', /email/i);
-      await expect(page.locator('#password')).toHaveAttribute('placeholder', /password/i);
-      await expect(page.locator('#confirmPassword')).toHaveAttribute('placeholder', /password/i);
+      await expect(page.locator(&apos;#fullName&apos;)).toHaveAttribute(&apos;placeholder&apos;, /name/i);
+      await expect(page.locator(&apos;#email&apos;)).toHaveAttribute(&apos;placeholder&apos;, /email/i);
+      await expect(page.locator(&apos;#password&apos;)).toHaveAttribute(&apos;placeholder&apos;, /password/i);
+      await expect(page.locator(&apos;#confirmPassword&apos;)).toHaveAttribute(&apos;placeholder&apos;, /password/i);
     });
   });
 
-  test.describe('📱 Mobile Responsiveness', () => {
-    test('should work correctly on mobile viewport', async ({ page }) => {
+  test.describe(&apos;📱 Mobile Responsiveness&apos;, () => {
+    test(&apos;should work correctly on mobile viewport&apos;, async ({ page }) => {
       // Set mobile viewport
       await page.setViewportSize({ width: 375, height: 667 });
       
       // Form should still be visible and usable
-      await expect(page.locator('form')).toBeVisible();
-      await expect(page.locator('#fullName')).toBeVisible();
-      await expect(page.locator('#email')).toBeVisible();
-      await expect(page.locator('#password')).toBeVisible();
-      await expect(page.locator('#confirmPassword')).toBeVisible();
-      await expect(page.locator('button[type="submit"]')).toBeVisible();
+      await expect(page.locator(&apos;form&apos;)).toBeVisible();
+      await expect(page.locator(&apos;#fullName&apos;)).toBeVisible();
+      await expect(page.locator(&apos;#email&apos;)).toBeVisible();
+      await expect(page.locator(&apos;#password&apos;)).toBeVisible();
+      await expect(page.locator(&apos;#confirmPassword&apos;)).toBeVisible();
+      await expect(page.locator(&apos;button[type=&quot;submit&quot;]&apos;)).toBeVisible();
       
       // Test form functionality on mobile
       await fillSignupForm(page, {
-        fullName: 'Mobile User',
-        email: 'mobile@example.com',
+        fullName: &apos;Mobile User&apos;,
+        email: &apos;mobile@example.com&apos;,
         password: VALID_USER.password,
         confirmPassword: VALID_USER.password
       });
 
       await submitForm(page);
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState(&apos;networkidle&apos;);
     });
   });
 
-  test.describe('🛡️ Error Handling', () => {
-    test('should handle server errors gracefully', async ({ page }) => {
+  test.describe(&apos;🛡️ Error Handling&apos;, () => {
+    test(&apos;should handle server errors gracefully&apos;, async ({ page }) => {
       // Intercept auth requests and simulate server error
-      await page.route('**/auth/**', route => {
-        route.abort('failed');
+      await page.route(&apos;**/auth/**&apos;, route => {
+        route.abort(&apos;failed&apos;);
       });
 
       await fillSignupForm(page, {
@@ -371,23 +371,23 @@ test.describe('Fixed Comprehensive Signup Flow Tests', () => {
       
       if (hasError) {
         const errorText = await getErrorText(page);
-        console.log('Error handling test - Alert text:', errorText);
-        expect(errorText || 'error handled').toBeTruthy();
+        console.log(&apos;Error handling test - Alert text:&apos;, errorText);
+        expect(errorText || &apos;error handled&apos;).toBeTruthy();
       } else {
         // Check if form is still functional (graceful degradation)
-        const formVisible = await page.locator('form').isVisible();
-        console.log('Form still visible after error:', formVisible);
+        const formVisible = await page.locator(&apos;form&apos;).isVisible();
+        console.log(&apos;Form still visible after error:&apos;, formVisible);
         expect(formVisible).toBe(true);
       }
     });
 
-    test('should clear errors when correcting form', async ({ page }) => {
+    test(&apos;should clear errors when correcting form&apos;, async ({ page }) => {
       // First submit with short password
       await fillSignupForm(page, {
         fullName: VALID_USER.fullName,
         email: VALID_USER.email,
-        password: '123',
-        confirmPassword: '123'
+        password: &apos;123&apos;,
+        confirmPassword: &apos;123&apos;
       });
 
       await submitForm(page);
@@ -398,20 +398,20 @@ test.describe('Fixed Comprehensive Signup Flow Tests', () => {
       
       if (hasError) {
         const initialErrorText = await getErrorText(page);
-        console.log('Initial error:', initialErrorText);
+        console.log(&apos;Initial error:&apos;, initialErrorText);
         
         // Now correct the password
-        await page.fill('#password', VALID_USER.password);
-        await page.fill('#confirmPassword', VALID_USER.password);
+        await page.fill(&apos;#password&apos;, VALID_USER.password);
+        await page.fill(&apos;#confirmPassword&apos;, VALID_USER.password);
         
         await submitForm(page);
         await page.waitForTimeout(1000);
         
         // Error should be cleared or changed
-        console.log('Error clearing test completed');
+        console.log(&apos;Error clearing test completed&apos;);
         expect(true).toBe(true); // Test completed successfully
       } else {
-        console.log('No initial error found - test passes');
+        console.log(&apos;No initial error found - test passes&apos;);
         expect(true).toBe(true);
       }
     });

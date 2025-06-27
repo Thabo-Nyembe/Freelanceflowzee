@@ -1,20 +1,20 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from &apos;@playwright/test&apos;;
 
-test('basic application test', async ({ page }) => {
+test(&apos;basic application test&apos;, async ({ page }) => {
   // Navigate to the homepage
-  await page.goto('http://localhost:3001');
+  await page.goto(&apos;http://localhost:3001&apos;);
   
   // Check if the page loads successfully
   await expect(page).toHaveTitle(/FreeflowZee/);
   
   // Check if main navigation elements are present
-  await expect(page.locator('nav')).toBeVisible();
+  await expect(page.locator(&apos;nav&apos;)).toBeVisible();
   
   // Check if the Projects Hub component is present
-  await expect(page.locator('[data-testid="projects-hub"]')).toBeVisible();
+  await expect(page.locator(&apos;[data-testid=&quot;projects-hub&quot;]&apos;)).toBeVisible();
   
   // Check if the glass morphism styles are applied
-  const projectsHub = await page.locator('[data-testid="projects-hub"]');
+  const projectsHub = await page.locator(&apos;[data-testid=&quot;projects-hub&quot;]&apos;);
   const styles = await projectsHub.evaluate((element) => {
     const computedStyle = window.getComputedStyle(element);
     return {
@@ -25,5 +25,5 @@ test('basic application test', async ({ page }) => {
   });
   
   // Verify glass morphism styles
-  expect(styles.backdropFilter).toContain('blur');
+  expect(styles.backdropFilter).toContain(&apos;blur&apos;);
 }); 

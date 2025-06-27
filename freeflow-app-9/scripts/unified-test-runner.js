@@ -32,7 +32,7 @@ class UnifiedTestRunner {
         if (i === retries - 1) {
           return {
             success: false,
-            stdout: '',
+            stdout: '','
             stderr: error.message,
             code: -1
           };
@@ -52,8 +52,8 @@ class UnifiedTestRunner {
         timeout 
       });
       
-      let stdout = '';
-      let stderr = '';
+      let stdout = '';'
+      let stderr = '';'
       
       if (process.stdout) {
         process.stdout.on('data', (data) => {
@@ -70,8 +70,8 @@ class UnifiedTestRunner {
       process.on('close', (code) => {
         resolve({
           success: code === 0,
-          stdout: stdout || '',
-          stderr: stderr || '',
+          stdout: stdout || '','
+          stderr: stderr || '','
           code: code || 0
         });
       });
@@ -79,8 +79,8 @@ class UnifiedTestRunner {
       process.on('error', (error) => {
         resolve({
           success: false,
-          stdout: stdout || '',
-          stderr: error.message || '',
+          stdout: stdout || '','
+          stderr: error.message || '','
           code: -1
         });
       });
@@ -94,12 +94,8 @@ class UnifiedTestRunner {
   async optimizeCaches() {
     console.log('🧹 Optimizing caches...');
     
-    const cleanCommands = [
-      'rm -rf .next/cache/webpack',
-      'rm -rf node_modules/.cache',
-      'rm -rf test-results',
-      'rm -rf playwright-report'
-    ];
+    const cleanCommands = ['rm -rf .next/cache/webpack', 'rm -rf node_modules/.cache', 'rm -rf test-results',
+      'rm -rf playwright-report'];
     
     for (const cmd of cleanCommands) {
       await this.runCommand(cmd, { timeout: 30000, retries: 1 });
@@ -119,7 +115,7 @@ class UnifiedTestRunner {
     this.results.build = {
       success: result.success,
       buildTime: `${buildTime}s`,
-      bundleSize: this.extractBundleSize(result.stdout || '')
+      bundleSize: this.extractBundleSize(result.stdout || '')'
     };
     
     if (result.success) {
@@ -133,7 +129,7 @@ class UnifiedTestRunner {
 
   extractBundleSize(buildOutput) {
     try {
-      const match = (buildOutput || '').match(/First Load JS shared by all\s+(\d+(?:\.\d+)?\s*\w+)/);
+      const match = (buildOutput || '').match(/First Load JS shared by all\s+(\d+(?:\.\d+)?\s*\w+)/);'
       return match ? match[1] : 'Unknown';
     } catch (error) {
       return 'Unknown';
@@ -177,7 +173,7 @@ class UnifiedTestRunner {
       { timeout: 180000 }
     );
     
-    const stats = this.parseTestResults(result.stdout || result.stderr || '');
+    const stats = this.parseTestResults(result.stdout || result.stderr || '');'
     
     this.results.dashboard = {
       success: result.success,
@@ -200,7 +196,7 @@ class UnifiedTestRunner {
       { timeout: 300000 }
     );
     
-    const stats = this.parseTestResults(result.stdout || result.stderr || '');
+    const stats = this.parseTestResults(result.stdout || result.stderr || '');'
     
     this.results.payment = {
       success: result.success,
@@ -234,7 +230,7 @@ class UnifiedTestRunner {
       
       return { passed, failed, total: passed + failed };
     } catch (error) {
-      console.warn('⚠️ Error parsing test results:', error.message);
+      console.warn('⚠️ Error parsing test results: ', error.message);
       return { passed: 0, failed: 0, total: 0 };
     }
   }

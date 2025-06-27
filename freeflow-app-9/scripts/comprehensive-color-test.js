@@ -10,7 +10,7 @@ console.log('==================================================');
 function testServerConnection(port = 3000) {
   return new Promise((resolve) => {
     const req = http.get(`http://localhost:${port}`, (res) => {
-      let data = '';
+      let data = '';'
       res.on('data', chunk => {
         data += chunk;
       });
@@ -83,9 +83,9 @@ function checkCSSOverrides() {
   const cssContent = fs.readFileSync(cssFile, 'utf8');
   
   // Check for our specific override rules
-  const hasBlackBgOverride = cssContent.includes('*[class*="bg-black"]');
-  const hasGrayBgOverride = cssContent.includes('*[class*="bg-gray-900"]');
-  const hasGradientOverride = cssContent.includes('*[class*="from-gray-900"]');
+  const hasBlackBgOverride = cssContent.includes('*[class*= "bg-black"]');
+  const hasGrayBgOverride = cssContent.includes('*[class*= "bg-gray-900"]');
+  const hasGradientOverride = cssContent.includes('*[class*= "from-gray-900"]');
   const hasTextVisibilityRules = cssContent.includes('color: var(--purple-700) !important');
   
   return {
@@ -103,7 +103,7 @@ function checkCSSOverrides() {
 // Main test function
 async function runColorVisibilityTest() {
   console.log('\n🔍 Phase 1: Server Connection Test');
-  console.log('==================================');
+  console.log('================================== ');
   
   const serverTest = await testServerConnection(3000);
   
@@ -117,7 +117,7 @@ async function runColorVisibilityTest() {
   console.log(`📊 Response status: ${serverTest.status}`);
   
   console.log('\n🎨 Phase 2: CSS Override Verification');
-  console.log('====================================');
+  console.log('==================================== ');
   
   const cssCheck = checkCSSOverrides();
   
@@ -147,7 +147,7 @@ async function runColorVisibilityTest() {
   }
   
   console.log('\n🔍 Phase 3: HTML Color Analysis');
-  console.log('===============================');
+  console.log('=============================== ');
   
   const issues = analyzeColorIssues(serverTest.data);
   
@@ -165,7 +165,7 @@ async function runColorVisibilityTest() {
   }
   
   console.log('\n🎯 Phase 4: Recommendations');
-  console.log('===========================');
+  console.log('=========================== ');
   
   // High-severity issues
   const highSeverityIssues = issues.filter(i => i.severity === 'high');

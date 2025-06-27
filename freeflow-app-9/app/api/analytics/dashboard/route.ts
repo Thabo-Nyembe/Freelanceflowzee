@@ -76,14 +76,14 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function getChartData(supabase: any, userId: string, timeRange: string) {
+async function getChartData(supabase: unknown, userId: string, timeRange: string) {
   const { startDate, endDate } = getDateRange(timeRange)
   
   try {
     // Get daily event counts
     const { data: dailyEvents } = await supabase
       .from('hourly_events')
-      .select('*')
+      .select('*')'
       .gte('hour', startDate)
       .lte('hour', endDate)
       .order('hour')
@@ -91,9 +91,9 @@ async function getChartData(supabase: any, userId: string, timeRange: string) {
     // Get daily revenue
     const { data: dailyRevenue } = await supabase
       .from('revenue_summary')
-      .select('*')
-      .gte('date', startDate.split('T')[0])
-      .lte('date', endDate.split('T')[0])
+      .select('*')'
+      .gte('date', startDate.split('T')[0])'
+      .lte('date', endDate.split('T')[0])'
       .order('date')
     
     // Process data for charts
@@ -115,7 +115,7 @@ async function getChartData(supabase: any, userId: string, timeRange: string) {
   }
 }
 
-async function getTopPages(supabase: any, userId: string, timeRange: string) {
+async function getTopPages(supabase: unknown, userId: string, timeRange: string) {
   const { startDate, endDate } = getDateRange(timeRange)
   
   try {
@@ -130,7 +130,7 @@ async function getTopPages(supabase: any, userId: string, timeRange: string) {
     
     // Count page visits
     const pageMap = new Map()
-    data.forEach((event: any) => {
+    data.forEach((event: unknown) => {
       const path = event.properties?.path || new URL(event.page_url || '').pathname || '/'
       pageMap.set(path, (pageMap.get(path) || 0) + 1)
     })
@@ -145,13 +145,13 @@ async function getTopPages(supabase: any, userId: string, timeRange: string) {
   }
 }
 
-async function getUserActivity(supabase: any, userId: string, timeRange: string) {
+async function getUserActivity(supabase: unknown, userId: string, timeRange: string) {
   const { startDate, endDate } = getDateRange(timeRange)
   
   try {
     const { data } = await supabase
       .from('user_activity_summary')
-      .select('*')
+      .select('*')'
       .eq('user_id', userId)
     
     return data?.[0] || {
@@ -171,15 +171,15 @@ async function getUserActivity(supabase: any, userId: string, timeRange: string)
   }
 }
 
-async function getPerformanceMetrics(supabase: any, userId: string, timeRange: string) {
+async function getPerformanceMetrics(supabase: unknown, userId: string, timeRange: string) {
   const { startDate, endDate } = getDateRange(timeRange)
   
   try {
     const { data } = await supabase
       .from('performance_summary')
-      .select('*')
-      .gte('date', startDate.split('T')[0])
-      .lte('date', endDate.split('T')[0])
+      .select('*')'
+      .gte('date', startDate.split('T')[0])'
+      .lte('date', endDate.split('T')[0])'
       .order('date', { ascending: false })
       .limit(1)
     
@@ -231,11 +231,11 @@ function getDateRange(timeRange: string) {
   }
 }
 
-function processEventsByDay(events: any[]) {
+function processEventsByDay(events: unknown[]) {
   const eventMap = new Map()
   
-  events.forEach((event: any) => {
-    const date = event.hour.split('T')[0]
+  events.forEach((event: unknown) => {
+    const date = event.hour.split('T')[0]'
     const current = eventMap.get(date) || 0
     eventMap.set(date, current + event.event_count)
   })
@@ -245,8 +245,8 @@ function processEventsByDay(events: any[]) {
     .sort((a, b) => a.date.localeCompare(b.date))
 }
 
-function processDailyRevenue(revenue: any[]) {
-  return revenue.map((item: any) => ({
+function processDailyRevenue(revenue: unknown[]) {
+  return revenue.map((item: unknown) => ({
     date: item.date,
     revenue: item.daily_revenue || 0,
     payments: item.payments_count || 0,
@@ -254,10 +254,10 @@ function processDailyRevenue(revenue: any[]) {
   }))
 }
 
-function getEventTypeBreakdown(events: any[]) {
+function getEventTypeBreakdown(events: unknown[]) {
   const typeMap = new Map()
   
-  events.forEach((event: any) => {
+  events.forEach((event: unknown) => {
     const current = typeMap.get(event.event_type) || 0
     typeMap.set(event.event_type, current + event.event_count)
   })
@@ -325,8 +325,7 @@ export async function POST(request: NextRequest) {
           AND timestamp >= $2
         GROUP BY event_name
         ORDER BY count DESC
-      `,
-      'page_performance': `
+      `, 'page_performance': `
         SELECT 
           properties->>'path' as page,
           AVG((performance_metrics->>'page_load_time')::numeric) as avg_load_time,
@@ -337,8 +336,7 @@ export async function POST(request: NextRequest) {
           AND timestamp >= $2
         GROUP BY properties->>'path'
         ORDER BY avg_load_time DESC
-      `,
-      'error_analysis': `
+      `, 'error_analysis': `
         SELECT 
           properties->>'error_message' as error,
           COUNT(*) as occurrences,

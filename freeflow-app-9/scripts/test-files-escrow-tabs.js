@@ -24,46 +24,46 @@ const FILES_ESCROW_ELEMENTS = {
     name: 'Files Hub',
     url: '/dashboard/files-hub',
     tabs: [
-      { id: 'files', name: 'Files', selector: '[role="tab"][data-value="files"]' },
-      { id: 'recent', name: 'Recent', selector: '[role="tab"][data-value="recent"]' },
-      { id: 'shared', name: 'Shared', selector: '[role="tab"][data-value="shared"]' },
-      { id: 'storage', name: 'Storage', selector: '[role="tab"][data-value="storage"]' },
-      { id: 'analytics', name: 'Analytics', selector: '[role="tab"][data-value="analytics"]' }
+      { id: 'files', name: 'Files', selector: '[role= "tab"][data-value= "files"]' },
+      { id: 'recent', name: 'Recent', selector: '[role= "tab"][data-value= "recent"]' },
+      { id: 'shared', name: 'Shared', selector: '[role= "tab"][data-value= "shared"]' },
+      { id: 'storage', name: 'Storage', selector: '[role= "tab"][data-value= "storage"]' },
+      { id: 'analytics', name: 'Analytics', selector: '[role= "tab"][data-value= "analytics"]' }
     ],
     buttons: [
-      { id: 'upload-file', name: 'Upload File', selector: '[data-testid="upload-btn"]' },
-      { id: 'create-folder', name: 'Create Folder', selector: '[data-testid="folder-btn"]' },
-      { id: 'share-file', name: 'Share File', selector: '[data-testid="share-btn"]' },
-      { id: 'download-file', name: 'Download File', selector: '[data-testid="download-btn"]' }
+      { id: 'upload-file', name: 'Upload File', selector: '[data-testid= "upload-btn"]' },
+      { id: 'create-folder', name: 'Create Folder', selector: '[data-testid= "folder-btn"]' },
+      { id: 'share-file', name: 'Share File', selector: '[data-testid= "share-btn"]' },
+      { id: 'download-file', name: 'Download File', selector: '[data-testid= "download-btn"]' }
     ]
   },
   escrowSystem: {
     name: 'Escrow System',
     url: '/dashboard/escrow',
     tabs: [
-      { id: 'overview', name: 'Overview', selector: '[role="tab"][data-value="overview"]' },
-      { id: 'deposits', name: 'Deposits', selector: '[role="tab"][data-value="deposits"]' },
-      { id: 'milestones', name: 'Milestones', selector: '[role="tab"][data-value="milestones"]' },
-      { id: 'transactions', name: 'Transactions', selector: '[role="tab"][data-value="transactions"]' }
+      { id: 'overview', name: 'Overview', selector: '[role= "tab"][data-value= "overview"]' },
+      { id: 'deposits', name: 'Deposits', selector: '[role= "tab"][data-value= "deposits"]' },
+      { id: 'milestones', name: 'Milestones', selector: '[role= "tab"][data-value= "milestones"]' },
+      { id: 'transactions', name: 'Transactions', selector: '[role= "tab"][data-value= "transactions"]' }
     ],
     buttons: [
-      { id: 'create-deposit', name: 'Create Deposit', selector: '[data-testid="create-deposit-btn"]' },
-      { id: 'release-funds', name: 'Release Funds', selector: '[data-testid="release-funds-btn"]' },
-      { id: 'add-milestone', name: 'Add Milestone', selector: '[data-testid="add-milestone-btn"]' },
-      { id: 'dispute-resolution', name: 'Dispute Resolution', selector: '[data-testid="dispute-btn"]' }
+      { id: 'create-deposit', name: 'Create Deposit', selector: '[data-testid= "create-deposit-btn"]' },
+      { id: 'release-funds', name: 'Release Funds', selector: '[data-testid= "release-funds-btn"]' },
+      { id: 'add-milestone', name: 'Add Milestone', selector: '[data-testid= "add-milestone-btn"]' },
+      { id: 'dispute-resolution', name: 'Dispute Resolution', selector: '[data-testid= "dispute-btn"]' }
     ]
   },
   fileFeatures: [
-    { id: 'file-preview', name: 'File Preview', selector: '.file-preview, [data-testid="file-preview"]' },
-    { id: 'version-control', name: 'Version Control', selector: '.version-control, [data-testid="version-control"]' },
-    { id: 'file-comments', name: 'File Comments', selector: '.file-comments, [data-testid="file-comments"]' },
-    { id: 'access-control', name: 'Access Control', selector: '.access-control, [data-testid="access-control"]' }
+    { id: 'file-preview', name: 'File Preview', selector: '.file-preview, [data-testid= "file-preview"]' },
+    { id: 'version-control', name: 'Version Control', selector: '.version-control, [data-testid= "version-control"]' },
+    { id: 'file-comments', name: 'File Comments', selector: '.file-comments, [data-testid= "file-comments"]' },
+    { id: 'access-control', name: 'Access Control', selector: '.access-control, [data-testid= "access-control"]' }
   ],
   escrowFeatures: [
-    { id: 'payment-protection', name: 'Payment Protection', selector: '.payment-protection, [data-testid="payment-protection"]' },
-    { id: 'milestone-tracking', name: 'Milestone Tracking', selector: '.milestone-tracking, [data-testid="milestone-tracking"]' },
-    { id: 'auto-release', name: 'Auto Release', selector: '.auto-release, [data-testid="auto-release"]' },
-    { id: 'dispute-system', name: 'Dispute System', selector: '.dispute-system, [data-testid="dispute-system"]' }
+    { id: 'payment-protection', name: 'Payment Protection', selector: '.payment-protection, [data-testid= "payment-protection"]' },
+    { id: 'milestone-tracking', name: 'Milestone Tracking', selector: '.milestone-tracking, [data-testid= "milestone-tracking"]' },
+    { id: 'auto-release', name: 'Auto Release', selector: '.auto-release, [data-testid= "auto-release"]' },
+    { id: 'dispute-system', name: 'Dispute System', selector: '.dispute-system, [data-testid= "dispute-system"]' }
   ]
 };
 
@@ -146,9 +146,9 @@ class FilesEscrowTester {
     try {
       const tabSelectors = [
         tab.selector,
-        `[role="tab"]:has-text("${tab.name}")`,
+        `[role= "tab"]:has-text("${tab.name}")`,
         `button:has-text("${tab.name}")`,
-        `[data-value="${tab.id}"]`,
+        `[data-value= "${tab.id}"]`,
         `#${tab.id}-tab`
       ];
 
@@ -176,7 +176,7 @@ class FilesEscrowTester {
 
       const isActive = await tabElement.getAttribute('aria-selected') === 'true' ||
                       await tabElement.getAttribute('data-state') === 'active' ||
-                      (await tabElement.getAttribute('class') || '').includes('active');
+                      (await tabElement.getAttribute('class') || ).includes('active');'
 
       const screenshotPath = `${system}-${tab.id}-tab.png`;
       await this.page.screenshot({ path: screenshotPath });
@@ -207,8 +207,8 @@ class FilesEscrowTester {
       const buttonSelectors = [
         button.selector,
         `button:has-text("${button.name}")`,
-        `[aria-label="${button.name}"]`,
-        `[title="${button.name}"]`,
+        `[aria-label= "${button.name}"]`,
+        `[title= "${button.name}"]`,
         `#${button.id}`
       ];
 
@@ -333,12 +333,12 @@ class FilesEscrowTester {
     const passRate = Math.round((this.results.passed / this.results.total) * 100);
     
     console.log('\n📊 FILES HUB & ESCROW SYSTEM TEST REPORT');
-    console.log('=' .repeat(60));
+    console.log('=' .repeat(60));'
     console.log(`✅ Passed: ${this.results.passed}/${this.results.total} (${passRate}%)`);
     console.log(`❌ Failed: ${this.results.failed}/${this.results.total}`);
     console.log(`📸 Screenshots: ${this.results.screenshots.length}`);
     
-    console.log('\n📋 Detailed Results:');
+    console.log('\n📋 Detailed Results: ');
     this.results.details.forEach(result => {
       const icon = result.status === 'passed' ? '✅' : result.status === 'warning' ? '⚠️' : '❌';
       console.log(`${icon} ${result.name}: ${result.status}`);
@@ -376,8 +376,7 @@ class FilesEscrowTester {
       
       const report = this.generateReport();
       
-      await fs.writeFile(
-        'files-escrow-test-report.json',
+      await fs.writeFile('files-escrow-test-report.json',
         JSON.stringify(report, null, 2)
       );
       

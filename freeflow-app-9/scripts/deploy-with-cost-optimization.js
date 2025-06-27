@@ -191,10 +191,7 @@ function setupSupabaseCostOptimization() {
   console.log('✅ Enable compression for storage');
   
   const supabaseSettings = {
-    'Storage quota': '1GB (minimal, use Wasabi for more)',
-    'Auth sessions': '1 hour timeout',
-    'Connections': '20 max (startup optimized)',
-    'Retention': '30 days (shorter to save space)'
+    'Storage quota': '1GB (minimal, use Wasabi for more)', 'Auth sessions': '1 hour timeout', 'Connections': '20 max (startup optimized)', 'Retention': '30 days (shorter to save space)'
   };
   
   Object.entries(supabaseSettings).forEach(([setting, value]) => {

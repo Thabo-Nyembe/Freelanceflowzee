@@ -6,7 +6,7 @@ const path = require('path');
 
 async function setupAnalytics() {
     console.log('🚀 Quick Analytics Setup for 100% Completion');
-    console.log('==========================================');
+    console.log('========================================== ');
 
     try {
         // Read environment variables
@@ -30,7 +30,7 @@ async function setupAnalytics() {
 
         // Split into manageable chunks (Supabase has query limits)
         const statements = sqlContent
-            .split(';')
+            .split(';')'
             .map(s => s.trim())
             .filter(s => s.length > 0 && !s.startsWith('--'));
 
@@ -39,7 +39,7 @@ async function setupAnalytics() {
         let successCount = 0;
         for (const statement of statements) {
             try {
-                const { error } = await supabase.rpc('exec_sql', { sql: statement + ';' });
+                const { error } = await supabase.rpc('exec_sql', { sql: statement + ';' });'
                 if (!error) {
                     successCount++;
                 }

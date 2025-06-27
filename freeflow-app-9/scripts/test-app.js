@@ -37,12 +37,12 @@ function checkFile(filePath, description) {
 
 function runHealthCheck() {
   log('\n🎯 FreeflowZee Application Health Check', 'cyan');
-  log('=' .repeat(50), 'cyan');
+  log('=' .repeat(50), 'cyan');'
 
   let allPassed = true;
 
   // Check core files
-  log('\n📁 Core Application Files:', 'blue');
+  log('\n📁 Core Application Files: ', 'blue');
   allPassed &= checkFile('app/page.tsx', 'Main application page');
   allPassed &= checkFile('package.json', 'Package configuration');
   allPassed &= checkFile('next.config.mjs', 'Next.js configuration');
@@ -84,11 +84,7 @@ function runHealthCheck() {
   log('\n📦 Dependencies Check:', 'blue');
   try {
     const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-    const requiredDeps = [
-      'next', 'react', 'react-dom', '@supabase/ssr', 
-      'tailwindcss', 'recharts', '@radix-ui/react-tabs',
-      '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'
-    ];
+    const requiredDeps = ['next', 'react', 'react-dom', '@supabase/ssr', 'tailwindcss', 'recharts', '@radix-ui/react-tabs', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'];
     
     const allDeps = { ...packageJson.dependencies, ...packageJson.devDependencies };
     
@@ -118,24 +114,24 @@ function runHealthCheck() {
   }
 
   // Final result
-  log('\n' + '=' .repeat(50), 'cyan');
+  log('\n' + '=' .repeat(50), 'cyan');'
   if (allPassed) {
     log('🎉 All checks passed! FreeflowZee is ready to go!', 'green');
-    log('\n🚀 To start the application:', 'blue');
+    log('\n🚀 To start the application: ', 'blue');
     log('   pnpm context7:dev  # Start with Context7 integration', 'cyan');
     log('   pnpm dev          # Start standard development server', 'cyan');
   } else {
     log('⚠️  Some checks failed. Please review the issues above.', 'yellow');
   }
-  log('=' .repeat(50), 'cyan');
+  log('=' .repeat(50), 'cyan');'
 
   return allPassed;
 }
 
 // Feature test descriptions
 function showFeatureOverview() {
-  log('\n🌟 FreeflowZee Features Overview:', 'cyan');
-  log('=' .repeat(50), 'cyan');
+  log('\n🌟 FreeflowZee Features Overview: ', 'cyan');
+  log('=' .repeat(50), 'cyan');'
   
   const features = [
     { name: 'Dashboard Hub', desc: 'Real-time analytics, charts, and activity feeds' },

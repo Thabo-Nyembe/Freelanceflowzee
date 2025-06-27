@@ -23,7 +23,7 @@ interface DownloadTokenRequest {
 }
 
 // Generate secure download token
-function generateDownloadToken(data: any): string {
+function generateDownloadToken(data: unknown): string {
   return jwt.sign(
     {
       ...data,
@@ -83,9 +83,8 @@ export async function POST(request: NextRequest) {
 
 async function handleUnlockRequest(
   unlockData: UnlockRequest,
-  supabase: any,
-  user: any
-) {
+  supabase: unknown,
+  user: unknown) {
   try {
     // Fetch project details
     const { data: project, error: projectError } = await supabase
@@ -103,7 +102,7 @@ async function handleUnlockRequest(
 
     // Validate unlock method
     const unlockMethod = project.unlock_methods?.find(
-      (method: any) => method.type === unlockData.method && method.is_enabled
+      (method: unknown) => method.type === unlockData.method && method.is_enabled
     )
 
     if (!unlockMethod) {
@@ -114,7 +113,7 @@ async function handleUnlockRequest(
     }
 
     let unlockSuccess = false
-    let unlockMessage = ''
+    let unlockMessage = '
     let unlockedItems: string[] = []
 
     switch (unlockData.method) {
@@ -133,12 +132,12 @@ async function handleUnlockRequest(
 
       case 'milestone':
         const completedMilestones = project.milestones?.filter(
-          (m: any) => m.status === 'completed'
+          (m: unknown) => m.status === 'completed'
         ) || []
         
         const requiredMilestones = unlockMethod.conditions?.required_milestones || []
         const hasRequiredMilestones = requiredMilestones.every((id: string) =>
-          completedMilestones.some((m: any) => m.id === id)
+          completedMilestones.some((m: unknown) => m.id === id)
         )
 
         if (hasRequiredMilestones) {
@@ -147,7 +146,7 @@ async function handleUnlockRequest(
           unlockedItems = await unlockDeliverablesByMilestone(
             supabase, 
             unlockData.projectId, 
-            completedMilestones.map((m: any) => m.id)
+            completedMilestones.map((m: unknown) => m.id)
           )
         } else {
           return NextResponse.json(
@@ -222,9 +221,8 @@ async function handleUnlockRequest(
 
 async function handleGenerateToken(
   tokenData: DownloadTokenRequest,
-  supabase: any,
-  user: any
-) {
+  supabase: unknown,
+  user: unknown) {
   try {
     // Validate access to deliverable
     const { data: deliverable, error: deliverableError } = await supabase
@@ -255,7 +253,7 @@ async function handleGenerateToken(
       deliverableId: tokenData.deliverableId,
       clientEmail: tokenData.clientEmail,
       accessLevel: tokenData.accessLevel,
-      fileHash: generateFileHash(deliverable.file_url || ''),
+      fileHash: generateFileHash(deliverable.file_url || ''),'
       downloadLimit: deliverable.download_limit || 10,
       validUntil: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
     }
@@ -292,10 +290,9 @@ async function handleGenerateToken(
 }
 
 async function handleValidateAccess(
-  validationData: any,
-  supabase: any,
-  user: any
-) {
+  validationData: unknown,
+  supabase: unknown,
+  user: unknown) {
   try {
     const { projectId, clientEmail, deliverableId } = validationData
 
@@ -355,7 +352,7 @@ async function handleValidateAccess(
 }
 
 // Helper functions
-async function unlockAllDeliverables(supabase: any, projectId: string): Promise<string[]> {
+async function unlockAllDeliverables(supabase: unknown, projectId: string): Promise<string[]> {
   const { data: deliverables, error } = await supabase
     .from('deliverables')
     .select('id, name')
@@ -364,18 +361,18 @@ async function unlockAllDeliverables(supabase: any, projectId: string): Promise<
 
   if (error || !deliverables) return []
 
-  const deliverableIds = deliverables.map((d: any) => d.id)
+  const deliverableIds = deliverables.map((d: unknown) => d.id)
   
   await supabase
     .from('deliverables')
     .update({ status: 'unlocked', unlocked_at: new Date().toISOString() })
     .in('id', deliverableIds)
 
-  return deliverables.map((d: any) => d.name)
+  return deliverables.map((d: unknown) => d.name)
 }
 
 async function unlockDeliverablesByMilestone(
-  supabase: any, 
+  supabase: unknown, 
   projectId: string, 
   milestoneIds: string[]
 ): Promise<string[]> {
@@ -388,18 +385,18 @@ async function unlockDeliverablesByMilestone(
 
   if (error || !deliverables) return []
 
-  const deliverableIds = deliverables.map((d: any) => d.id)
+  const deliverableIds = deliverables.map((d: unknown) => d.id)
   
   await supabase
     .from('deliverables')
     .update({ status: 'unlocked', unlocked_at: new Date().toISOString() })
     .in('id', deliverableIds)
 
-  return deliverables.map((d: any) => d.name)
+  return deliverables.map((d: unknown) => d.name)
 }
 
 async function generateDownloadTokens(
-  supabase: any,
+  supabase: unknown,
   projectId: string,
   unlockedItems: string[]
 ): Promise<Record<string, string>> {
@@ -418,7 +415,7 @@ async function generateDownloadTokens(
         projectId,
         deliverableId: deliverable.id,
         accessLevel: 'full',
-        fileHash: generateFileHash(deliverable.file_url || '')
+        fileHash: generateFileHash(deliverable.file_url || '')'
       })
       
       tokens[itemName] = token
@@ -428,7 +425,7 @@ async function generateDownloadTokens(
   return tokens
 }
 
-async function sendUnlockNotifications(supabase: any, data: any) {
+async function sendUnlockNotifications(supabase: unknown, data: unknown) {
   try {
     // Get project and client details
     const { data: project } = await supabase
@@ -519,7 +516,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function getUnlockStatus(supabase: any, projectId: string, user: any) {
+async function getUnlockStatus(supabase: unknown, projectId: string, user: unknown) {
   const { data: project, error } = await supabase
     .from('projects')
     .select(`
@@ -539,7 +536,7 @@ async function getUnlockStatus(supabase: any, projectId: string, user: any) {
   }
 
   const unlockedDeliverables = project.deliverables?.filter(
-    (d: any) => d.status === 'unlocked'
+    (d: unknown) => d.status === 'unlocked'
   ).length || 0
   
   const totalDeliverables = project.deliverables?.length || 0
@@ -554,8 +551,8 @@ async function getUnlockStatus(supabase: any, projectId: string, user: any) {
     unlockProgress,
     unlockedDeliverables,
     totalDeliverables,
-    availableUnlockMethods: project.unlock_methods?.filter((m: any) => m.is_enabled) || [],
-    milestoneStatus: project.milestones?.map((m: any) => ({
+    availableUnlockMethods: project.unlock_methods?.filter((m: unknown) => m.is_enabled) || [],
+    milestoneStatus: project.milestones?.map((m: unknown) => ({
       id: m.id,
       name: m.name,
       status: m.status,
@@ -564,10 +561,10 @@ async function getUnlockStatus(supabase: any, projectId: string, user: any) {
   })
 }
 
-async function getAvailableUnlockMethods(supabase: any, projectId: string, user: any) {
+async function getAvailableUnlockMethods(supabase: unknown, projectId: string, user: unknown) {
   const { data: methods, error } = await supabase
     .from('unlock_methods')
-    .select('*')
+    .select('*')'
     .eq('project_id', projectId)
     .eq('is_enabled', true)
 
@@ -584,10 +581,10 @@ async function getAvailableUnlockMethods(supabase: any, projectId: string, user:
   })
 }
 
-async function getUnlockHistory(supabase: any, projectId: string, user: any) {
+async function getUnlockHistory(supabase: unknown, projectId: string, user: unknown) {
   const { data: history, error } = await supabase
     .from('project_activity')
-    .select('*')
+    .select('*')'
     .eq('project_id', projectId)
     .eq('action', 'unlock')
     .order('created_at', { ascending: false })

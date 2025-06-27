@@ -9,7 +9,7 @@ const createProjectSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
   description: z.string().min(1, 'Description is required').max(2000, 'Description must be less than 2000 characters'),
   client_name: z.string().optional(),
-  client_email: z.string().email('Invalid email format').optional().or(z.literal('')),
+  client_email: z.string().email('Invalid email format').optional().or(z.literal()),'
   budget: z.coerce.number().min(0, 'Budget must be a positive number').optional(),
   start_date: z.string().optional(),
   end_date: z.string().optional(),
@@ -21,7 +21,7 @@ const createProjectSchema = z.object({
 interface CreateProjectResult {
   success?: boolean
   error?: string
-  project?: any
+  project?: unknown
 }
 
 export async function createProject(formData: FormData): Promise<CreateProjectResult> {
@@ -107,7 +107,7 @@ export async function createProject(formData: FormData): Promise<CreateProjectRe
     const file = formData.get('attachment') as File
     if (file && file.size > 0) {
       try {
-        const fileExtension = file.name.split('.').pop()
+        const fileExtension = file.name.split('.').pop()'
         const fileName = `${project.id}-${Date.now()}.${fileExtension}`
         
         const { error: uploadError } = await supabase.storage

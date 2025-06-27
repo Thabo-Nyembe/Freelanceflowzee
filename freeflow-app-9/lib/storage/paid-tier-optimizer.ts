@@ -95,8 +95,7 @@ export const PAID_TIER_CONFIG = {
       backupToWasabi: true,           // ALL backups go to Wasabi
       
       // Keep only essential files on Supabase
-      supabaseOnlyFor: [
-        'thumbnails',               // Small thumbnails for speed
+      supabaseOnlyFor: ['thumbnails',               // Small thumbnails for speed
         'profiles',                 // User profile images
         'realtime',                 // Real-time chat files
         'temp',                     // Temporary processing files
@@ -356,12 +355,7 @@ export class PaidTierOptimizer {
     const budgetStatus = await this.monitorPaidTierBudget();
     const utilizationImproved = budgetStatus.status === 'optimal' || budgetStatus.status === 'efficient';
     
-    const nextSteps = [
-      '📊 Monitor usage in Vercel Pro dashboard',
-      '🗄️ Check Supabase Pro metrics for efficiency',
-      '💾 Review Wasabi dashboard for cost tracking',
-      '🔄 Schedule weekly optimization reviews',
-      '📈 Plan for scaling when usage grows'
+    const nextSteps = ['📊 Monitor usage in Vercel Pro dashboard', '🗄️ Check Supabase Pro metrics for efficiency', '💾 Review Wasabi dashboard for cost tracking', '🔄 Schedule weekly optimization reviews', '📈 Plan for scaling when usage grows'
     ];
     
     return {

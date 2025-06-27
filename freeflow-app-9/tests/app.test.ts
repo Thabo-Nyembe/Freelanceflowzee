@@ -1,13 +1,13 @@
-import { test } from './fixtures/test-fixtures';
-import { expect } from '@playwright/test';
+import { test } from &apos;./fixtures/test-fixtures&apos;;
+import { expect } from &apos;@playwright/test&apos;;
 
-test.describe('Application Tests', () => {
-  test('homepage loads successfully', async ({ page }) => {
-    await page.goto('http://localhost:3001');
+test.describe(&apos;Application Tests&apos;, () => {
+  test(&apos;homepage loads successfully&apos;, async ({ page }) => {
+    await page.goto(&apos;http://localhost:3001&apos;);
     await expect(page).toHaveTitle(/Freeflow/);
   });
 
-  test('dashboard loads successfully', async ({ dashboardPage }) => {
+  test(&apos;dashboard loads successfully&apos;, async ({ dashboardPage }) => {
     await dashboardPage.goto();
     const elements = await dashboardPage.verifyDashboardLoaded();
     
@@ -16,7 +16,7 @@ test.describe('Application Tests', () => {
     await expect(elements.mainContent).toBeVisible();
   });
 
-  test('landing page sections render correctly', async ({ landingPage }) => {
+  test(&apos;landing page sections render correctly&apos;, async ({ landingPage }) => {
     await landingPage.goto();
     
     const heroElements = await landingPage.verifyHeroSection();
@@ -33,7 +33,7 @@ test.describe('Application Tests', () => {
     expect(pricingElements.plans.length).toBeGreaterThan(0);
   });
 
-  test('payment form works correctly', async ({ paymentPage }) => {
+  test(&apos;payment form works correctly&apos;, async ({ paymentPage }) => {
     await paymentPage.goto();
     
     const formElements = await paymentPage.verifyPaymentForm();
@@ -43,7 +43,7 @@ test.describe('Application Tests', () => {
     await expect(formElements.submitButton).toBeVisible();
 
     // Test card validation
-    const errorMessage = await paymentPage.testCardValidation('4242');
+    const errorMessage = await paymentPage.testCardValidation(&apos;4242&apos;);
     expect(errorMessage).toBeTruthy();
 
     // Test successful payment
@@ -51,19 +51,19 @@ test.describe('Application Tests', () => {
     expect(successMessage).toBeTruthy();
   });
 
-  test('projects hub renders correctly', async ({ page }) => {
-    await page.goto('http://localhost:3001/projects');
+  test(&apos;projects hub renders correctly&apos;, async ({ page }) => {
+    await page.goto(&apos;http://localhost:3001/projects&apos;);
     
     // Check if the projects hub title is visible
-    await expect(page.locator('text=Projects Hub')).toBeVisible();
+    await expect(page.locator(&apos;text=Projects Hub&apos;)).toBeVisible();
     
     // Check if the create project button exists
-    await expect(page.locator('[data-testid="create-project-btn"]')).toBeVisible();
+    await expect(page.locator(&apos;[data-testid=&quot;create-project-btn&quot;]&apos;)).toBeVisible();
     
     // Check if the import project button exists
-    await expect(page.locator('[data-testid="import-project-btn"]')).toBeVisible();
+    await expect(page.locator(&apos;[data-testid=&quot;import-project-btn&quot;]&apos;)).toBeVisible();
     
     // Check if the quick start button exists
-    await expect(page.locator('[data-testid="quick-start-btn"]')).toBeVisible();
+    await expect(page.locator(&apos;[data-testid=&quot;quick-start-btn&quot;]&apos;)).toBeVisible();
   });
 }); 

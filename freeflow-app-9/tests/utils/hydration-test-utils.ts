@@ -1,10 +1,10 @@
-import { Page } from '@playwright/test'
+import { Page } from &apos;@playwright/test&apos;
 
 export async function checkHydrationErrors(page: Page) {
   const errors: string[] = []
   
-  page.on('console', msg => {
-    if (msg.type() === 'error' && msg.text().includes('Hydration')) {
+  page.on(&apos;console&apos;, msg => {
+    if (msg.type() === &apos;error&apos; && msg.text().includes(&apos;Hydration&apos;)) {
       errors.push(msg.text())
     }
   })
@@ -27,8 +27,8 @@ export async function waitForHydration(page: Page) {
 
 export async function simulateUserInteraction(page: Page) {
   // Click various interactive elements
-  await page.click('button')
-  await page.keyboard.press('Tab')
+  await page.click(&apos;button&apos;)
+  await page.keyboard.press(&apos;Tab&apos;)
   await page.mouse.move(100, 100)
 }
 
@@ -47,7 +47,7 @@ export async function checkDOMConsistency(page: Page) {
 
       // Check for invalid ARIA attributes
       const ariaAttrs = Array.from(node.attributes)
-        .filter(attr => attr.name.startsWith('aria-'))
+        .filter(attr => attr.name.startsWith(&apos;aria-&apos;))
       
       ariaAttrs.forEach(attr => {
         if (!attr.value) {
@@ -74,9 +74,9 @@ export async function checkStateConsistency(page: Page) {
     // Check React component state
     const reactInstances = (window as any)._reactRootContainer?._internalRoot?.current
     if (reactInstances) {
-      const checkComponent = (fiber: any) => {
+      const checkComponent = (fiber: unknown) => {
         if (fiber.memoizedState !== null && fiber.memoizedState !== fiber.updateQueue?.baseState) {
-          stateIssues.push(`State inconsistency in component: ${fiber.type?.name || 'Unknown'}`)
+          stateIssues.push(`State inconsistency in component: ${fiber.type?.name || &apos;Unknown&apos;}`)
         }
         
         // Check children
@@ -97,9 +97,9 @@ export async function checkEventHandlers(page: Page) {
     
     const checkElement = (element: Element) => {
       // Check for event handlers that might have been lost during hydration
-      const eventProps = ['onclick', 'onchange', 'onsubmit', 'onkeydown', 'onkeyup']
+      const eventProps = [&apos;onclick&apos;, &apos;onchange&apos;, &apos;onsubmit&apos;, &apos;onkeydown&apos;, &apos;onkeyup&apos;]
       eventProps.forEach(prop => {
-        if ((element as any)[prop] && typeof (element as any)[prop] !== 'function') {
+        if ((element as any)[prop] && typeof (element as any)[prop] !== &apos;function&apos;) {
           issues.push(`Invalid event handler for ${prop} on ${element.tagName}`)
         }
       })

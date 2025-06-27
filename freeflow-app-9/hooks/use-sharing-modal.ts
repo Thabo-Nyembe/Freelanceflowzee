@@ -1,13 +1,13 @@
-'use client';
+'use client&apos;;'
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from &apos;react&apos;;
 
 interface ShareContent {
   title: string;
   description?: string;
   url: string;
   imageUrl?: string;
-  type: 'post' | 'portfolio' | 'gallery' | 'asset';
+  type: &apos;post&apos; | &apos;portfolio&apos; | &apos;gallery&apos; | &apos;asset&apos;;
 }
 
 export function useSharingModal() {
@@ -31,7 +31,7 @@ export function useSharingModal() {
       description,
       url: `/community/post/${postId}`,
       imageUrl,
-      type: 'post'
+      type: &apos;post&apos;
     });
   }, [openSharingModal]);
 
@@ -41,7 +41,7 @@ export function useSharingModal() {
       description,
       url: `/portfolio/${portfolioId}`,
       imageUrl,
-      type: 'portfolio'
+      type: &apos;portfolio&apos;
     });
   }, [openSharingModal]);
 
@@ -51,7 +51,7 @@ export function useSharingModal() {
       description,
       url: `/gallery/${galleryId}`,
       imageUrl,
-      type: 'gallery'
+      type: &apos;gallery&apos;
     });
   }, [openSharingModal]);
 
@@ -61,7 +61,7 @@ export function useSharingModal() {
       description,
       url: `/asset/${assetId}`,
       imageUrl,
-      type: 'asset'
+      type: &apos;asset&apos;
     });
   }, [openSharingModal]);
 

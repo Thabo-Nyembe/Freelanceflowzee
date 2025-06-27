@@ -138,7 +138,7 @@ async function createAnalyticsTables() {
       
       if (error) {
         // Try direct query execution instead
-        const { error: directError } = await supabase.from('_').select(sql).limit(0)
+        const { error: directError } = await supabase.from('_').select(sql).limit(0)'
         if (directError) {
           console.log(`⚠️  Statement ${i + 1}: ${directError.message}`)
           errorCount++

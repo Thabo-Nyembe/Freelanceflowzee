@@ -92,7 +92,7 @@ class ButtonDemonstrator {
   async demonstratePage(pageConfig) {
     console.log(`\n📄 Demonstrating: ${pageConfig.name}`);
     console.log(`🔗 URL: ${pageConfig.page}`);
-    console.log('─'.repeat(50));
+    console.log('─'.repeat(50));'
     
     try {
       // Navigate to page
@@ -162,9 +162,9 @@ class ButtonDemonstrator {
   }
 
   generateSummaryReport() {
-    console.log('\n' + '='.repeat(70));
+    console.log('\n' + '='.repeat(70));'
     console.log('🎉 BUTTON FUNCTIONALITY DEMONSTRATION COMPLETE');
-    console.log('='.repeat(70));
+    console.log('='.repeat(70));'
     
     console.log(`\n📊 Results Summary:`);
     console.log(`   🔘 Total Buttons Tested: ${this.results.totalButtons}`);
@@ -178,7 +178,7 @@ class ButtonDemonstrator {
       });
     }
     
-    console.log('\n🏆 CONCLUSION:');
+    console.log('\n🏆 CONCLUSION: ');
     if (this.results.workingButtons >= this.results.totalButtons * 0.8) {
       console.log('   ✅ EXCELLENT: Most buttons are working correctly!');
       console.log('   🚀 Application is ready for production use');

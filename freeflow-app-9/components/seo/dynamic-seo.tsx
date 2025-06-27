@@ -1,18 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
-import Head from 'next/head'
-
-interface SEOProps {
-  title?: string
-  description?: string
-  keywords?: string[]
-  canonical?: string
-  ogImage?: string
-  ogType?: 'website' | 'article' | 'product' | 'profile'
-  structuredData?: object
-  noIndex?: boolean
-  alternateUrls?: Array<{ href: string; hrefLang: string }>
+ hrefLang: string }>
 }
 
 export function DynamicSEO({
@@ -36,13 +24,13 @@ export function DynamicSEO({
     document.title = fullTitle
 
     // Update meta description
-    const metaDescription = document.querySelector('meta[name="description"]')
+    const metaDescription = document.querySelector('meta[name= "description"]')
     if (metaDescription) {
       metaDescription.setAttribute('content', description)
     }
 
     // Update canonical URL
-    const canonicalLink = document.querySelector('link[rel="canonical"]')
+    const canonicalLink = document.querySelector('link[rel= "canonical"]')
     if (canonicalLink) {
       canonicalLink.setAttribute('href', fullCanonical)
     }
@@ -68,59 +56,59 @@ export function DynamicSEO({
     <Head>
       {/* Primary Meta Tags */}
       <title>{fullTitle}</title>
-      <meta name="title" content={fullTitle} />
-      <meta name="description" content={description} />
-      <meta name="keywords" content={keywords.join(', ')} />
+      <meta name= "title" content={fullTitle} />
+      <meta name= "description" content={description} />
+      <meta name= "keywords" content={keywords.join(', ')} />
       
       {/* Canonical URL */}
-      <link rel="canonical" href={fullCanonical} />
+      <link rel= "canonical" href={fullCanonical} />
       
       {/* Open Graph / Facebook */}
-      <meta property="og:type" content={ogType} />
-      <meta property="og:url" content={fullCanonical} />
-      <meta property="og:title" content={fullTitle} />
-      <meta property="og:description" content={description} />
-      <meta property="og:image" content={fullOgImage} />
-      <meta property="og:image:width" content="1200" />
-      <meta property="og:image:height" content="630" />
-      <meta property="og:image:alt" content={title} />
-      <meta property="og:site_name" content="FreeflowZee" />
-      <meta property="og:locale" content="en_US" />
+      <meta property= "og:type" content={ogType} />
+      <meta property= "og:url" content={fullCanonical} />
+      <meta property= "og:title" content={fullTitle} />
+      <meta property= "og:description" content={description} />
+      <meta property= "og:image" content={fullOgImage} />
+      <meta property= "og:image:width" content= "1200" />
+      <meta property= "og:image:height" content= "630" />
+      <meta property= "og:image:alt" content={title} />
+      <meta property= "og:site_name" content= "FreeflowZee" />
+      <meta property= "og:locale" content= "en_US" />
       
       {/* Twitter */}
-      <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:url" content={fullCanonical} />
-      <meta property="twitter:title" content={fullTitle} />
-      <meta property="twitter:description" content={description} />
-      <meta property="twitter:image" content={fullOgImage} />
-      <meta property="twitter:creator" content="@freeflowzee" />
-      <meta property="twitter:site" content="@freeflowzee" />
+      <meta property= "twitter:card" content= "summary_large_image" />
+      <meta property= "twitter:url" content={fullCanonical} />
+      <meta property= "twitter:title" content={fullTitle} />
+      <meta property= "twitter:description" content={description} />
+      <meta property= "twitter:image" content={fullOgImage} />
+      <meta property= "twitter:creator" content= "@freeflowzee" />
+      <meta property= "twitter:site" content= "@freeflowzee" />
       
       {/* Additional Meta Tags */}
-      <meta name="author" content="FreeflowZee Team" />
-      <meta name="publisher" content="FreeflowZee" />
-      <meta name="robots" content={noIndex ? 'noindex, nofollow' : 'index, follow'} />
-      <meta name="googlebot" content={noIndex ? 'noindex, nofollow' : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'} />
+      <meta name= "author" content= "FreeflowZee Team" />
+      <meta name= "publisher" content= "FreeflowZee" />
+      <meta name= "robots" content={noIndex ? 'noindex, nofollow&apos; : &apos;index, follow&apos;} />
+      <meta name= "googlebot" content={noIndex ? &apos;noindex, nofollow&apos; : &apos;index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1&apos;} />
       
       {/* Alternate URLs for i18n */}
       {alternateUrls.map((alternate, index) => (
         <link
           key={index}
-          rel="alternate"
+          rel= "alternate"
           hrefLang={alternate.hrefLang}
           href={alternate.href}
         />
       ))}
       
       {/* Preconnect for performance */}
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link rel="preconnect" href="https://images.unsplash.com" />
+      <link rel= "preconnect" href= "https://fonts.googleapis.com" />
+      <link rel= "preconnect" href= "https://fonts.gstatic.com" crossOrigin= "anonymous" />
+      <link rel= "preconnect" href= "https://images.unsplash.com" />
       
       {/* DNS Prefetch */}
-      <link rel="dns-prefetch" href="//fonts.googleapis.com" />
-      <link rel="dns-prefetch" href="//fonts.gstatic.com" />
-      <link rel="dns-prefetch" href="//images.unsplash.com" />
+      <link rel= "dns-prefetch" href= "//fonts.googleapis.com" />
+      <link rel= "dns-prefetch" href= "//fonts.gstatic.com" />
+      <link rel= "dns-prefetch" href= "//images.unsplash.com" />
     </Head>
   )
 }
@@ -138,28 +126,14 @@ export function generateArticleStructuredData(article: {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freeflow-app-9-6egesbwif-thabo-5265s-projects.vercel.app'
   
   return {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": article.title,
-    "description": article.description,
-    "image": article.image || `${baseUrl}/images/homepage-mockup.jpg`,
-    "author": {
-      "@type": "Person",
-      "name": article.author
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "FreeflowZee",
-      "logo": {
-        "@type": "ImageObject",
-        "url": `${baseUrl}/images/logo-preview.jpg`
+    "@context": "https://schema.org", "@type": "Article", "headline": article.title, "description": article.description, "image": article.image || `${baseUrl}/images/homepage-mockup.jpg`, "author": {
+      "@type": "Person", "name": article.author
+    }, "publisher": {
+      "@type": "Organization", "name": "FreeflowZee", "logo": {
+        "@type": "ImageObject", "url": `${baseUrl}/images/logo-preview.jpg`
       }
-    },
-    "datePublished": article.datePublished,
-    "dateModified": article.dateModified || article.datePublished,
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": article.url
+    }, "datePublished": article.datePublished, "dateModified": article.dateModified || article.datePublished, "mainEntityOfPage": {
+      "@type": "WebPage", "@id": article.url
     }
   }
 }
@@ -178,25 +152,13 @@ export function generateProductStructuredData(product: {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freeflow-app-9-6egesbwif-thabo-5265s-projects.vercel.app'
   
   return {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "name": product.name,
-    "description": product.description,
-    "image": product.image || `${baseUrl}/images/homepage-mockup.jpg`,
-    "brand": {
-      "@type": "Brand",
-      "name": "FreeflowZee"
-    },
-    "offers": {
-      "@type": "Offer",
-      "price": product.price || "0",
-      "priceCurrency": product.currency || "USD",
-      "availability": `https://schema.org/${product.availability || 'InStock'}`
-    },
-    "aggregateRating": product.rating ? {
-      "@type": "AggregateRating",
-      "ratingValue": product.rating,
-      "reviewCount": product.reviewCount || 1
+    "@context": "https://schema.org", "@type": "Product", "name": product.name, "description": product.description, "image": product.image || `${baseUrl}/images/homepage-mockup.jpg`, "brand": {
+      "@type": "Brand", "name": "FreeflowZee"
+    }, "offers": {
+      "@type": "Offer", "price": product.price || "0","
+      "priceCurrency": product.currency || "USD", "availability": `https://schema.org/${product.availability || 'InStock'}`
+    }, "aggregateRating": product.rating ? {
+      "@type": "AggregateRating", "ratingValue": product.rating, "reviewCount": product.reviewCount || 1
     } : undefined
   }
 } 

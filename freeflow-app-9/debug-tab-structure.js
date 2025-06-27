@@ -6,9 +6,7 @@ const { chromium } = require('playwright');
   const browser = await chromium.launch({ headless: false });
   const page = await browser.newPage();
   
-  const testPages = [
-    'analytics', 'projects-hub', 'ai-create', 'files-hub', 'my-day', 
-    'video-studio', 'escrow', 'ai-assistant', 'community-hub'
+  const testPages = ['analytics', 'projects-hub', 'ai-create', 'files-hub', 'my-day', 'video-studio', 'escrow', 'ai-assistant', 'community-hub'
   ];
   
   for (const pageName of testPages) {
@@ -19,13 +17,7 @@ const { chromium } = require('playwright');
       await page.waitForTimeout(4000); // Give it more time to load
       
       // Check for various tab selectors
-      const tabSelectors = [
-        '[role="tablist"]',
-        '.tab-list',
-        '.tabs-list',
-        '.tablist',
-        '[data-tabs]',
-        'div[role="tablist"]'
+      const tabSelectors = ['[role= "tablist"]', '.tab-list', '.tabs-list', '.tablist', '[data-tabs]', 'div[role= "tablist"]'
       ];
       
       let tabsFound = false;
@@ -38,7 +30,7 @@ const { chromium } = require('playwright');
           console.log(`  ✅ Found tablist with selector: ${selector}`);
           
           // Get all tabs within this tablist
-          const tabs = await page.$$(`${selector} [role="tab"]`);
+          const tabs = await page.$$(`${selector} [role= "tab"]`);
           const buttons = await page.$$(`${selector} button`);
           const elements = tabs.length > 0 ? tabs : buttons;
           
@@ -71,7 +63,7 @@ const { chromium } = require('playwright');
       }
       
       // Check if there are any tab content areas
-      const tabPanels = await page.$$('[role="tabpanel"], .tab-content, .tabs-content');
+      const tabPanels = await page.$$('[role= "tabpanel"], .tab-content, .tabs-content');
       if (tabPanels.length > 0) {
         console.log(`  📄 Found ${tabPanels.length} tab content areas`);
       }

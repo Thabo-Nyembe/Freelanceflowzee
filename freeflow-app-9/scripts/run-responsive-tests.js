@@ -40,7 +40,7 @@ class ResponsiveTestRunner {
     
     console.log('🚀 Starting Comprehensive Responsive UI/UX Testing');
     console.log('📱 Testing across:', Object.keys(VIEWPORT_CATEGORIES).join(', '));
-    console.log('🔍 Viewport configurations:', Object.values(VIEWPORT_CATEGORIES).flat().length);
+    console.log('🔍 Viewport configurations: ', Object.values(VIEWPORT_CATEGORIES).flat().length);
   }
 
   async runTestSuite(suiteName, projects = null) {
@@ -50,10 +50,8 @@ class ResponsiveTestRunner {
     const testFile = TEST_SUITES[suiteName] || suiteName;
     
     return new Promise((resolve) => {
-      const testProcess = spawn('npx', [
-        'playwright', 'test',
-        testFile,
-        '--reporter=json',
+      const testProcess = spawn('npx', ['playwright', 'test',
+        testFile, '--reporter=json',
         `--output-dir=${this.outputDir}/${suiteName}`,
         ...projectArgs
       ], {
@@ -97,7 +95,7 @@ class ResponsiveTestRunner {
     console.log(`${status} ${suiteName} suite completed (exit code: ${code})`);
     
     if (stderr) {
-      console.log('⚠️  Warnings/Errors:');
+      console.log('⚠️  Warnings/Errors: ');
       console.log(stderr.substring(0, 500));
     }
   }
@@ -251,8 +249,7 @@ ${Object.entries(viewports).map(([viewport, data]) => {
 - **Success Rate**: ${rate}%
 
 ${data.issues.length > 0 ? 
-  `**Issues:**\n${data.issues.map(issue => `- ${issue.test}: ${issue.error}`).join('\n')}\n` : 
-  '**No issues detected** ✅\n'
+  `**Issues:**\n${data.issues.map(issue => `- ${issue.test}: ${issue.error}`).join('\n')}\n` : '**No issues detected** ✅\n'
 }`;
 }).join('\n')}
 
@@ -264,10 +261,9 @@ ${rec.description}
 
 **Action**: ${rec.action}
 
-${rec.viewports ? `**Affected Viewports**: ${rec.viewports.join(', ')}` : ''}
-${rec.affectedViewports ? `**Affected Viewports**: ${rec.affectedViewports.join(', ')}` : ''}
-`).join('\n') : 
-  '**No specific recommendations** - All tests passing! 🎉'
+${rec.viewports ? `**Affected Viewports**: ${rec.viewports.join(', ')}` : }'
+${rec.affectedViewports ? `**Affected Viewports**: ${rec.affectedViewports.join(', ')}` : }'
+`).join('\n') : '**No specific recommendations** - All tests passing! 🎉'
 }
 
 ## 🖼️ Screenshots

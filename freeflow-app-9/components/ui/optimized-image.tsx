@@ -83,16 +83,16 @@ export function OptimizedImage({
         style={{ width, height }}
       >
         <svg 
-          className="w-8 h-8" 
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
+          className= "w-8 h-8" 
+          fill= "none" 
+          stroke= "currentColor" 
+          viewBox= "0 0 24 24"
         >
           <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
+            strokeLinecap= "round" 
+            strokeLinejoin= "round" 
             strokeWidth={2} 
-            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" 
+            d= "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" 
           />
         </svg>
       </div>
@@ -148,7 +148,7 @@ export function OptimizedAvatar({
   alt: string
   size?: number
   className?: string
-} & Omit<OptimizedImageProps, 'width' | 'height'>) {
+} & Omit<OptimizedImageProps, 'width' | &apos;height&apos;>) {
   return (
     <OptimizedImage
       src={src}
@@ -157,7 +157,7 @@ export function OptimizedAvatar({
       height={size}
       quality={90}
       priority={false}
-      placeholder="blur"
+      placeholder= "blur"
       className={cn("rounded-full object-cover", className)}
       {...props}
     />
@@ -174,14 +174,14 @@ export function OptimizedHeroImage({
   src: string
   alt: string
   className?: string
-} & Omit<OptimizedImageProps, 'priority' | 'sizes'>) {
+} & Omit<OptimizedImageProps, 'priority' | &apos;sizes&apos;>) {
   return (
     <OptimizedImage
       src={src}
       alt={alt}
       priority={true}
       quality={90}
-      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      sizes= "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
       className={cn("object-cover", className)}
       {...props}
     />

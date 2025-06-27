@@ -1,15 +1,15 @@
-import { Page, expect } from '@playwright/test';
+import { Page, expect } from &apos;@playwright/test&apos;;
 
 export class TestHelpers {
   constructor(protected readonly page: Page) {}
 
   async goto() {
-    await this.page.goto('/');
+    await this.page.goto(&apos;/');'
     await this.waitForLoadState();
   }
 
   async waitForLoadState() {
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState(&apos;networkidle&apos;);
   }
 
   async measureLoadTime(): Promise<number> {
@@ -24,13 +24,13 @@ export class TestHelpers {
 
   // Wait for app to be ready
   async waitForAppReady() {
-    await this.page.waitForLoadState('networkidle');
-    await this.page.waitForSelector('[data-testid]', { timeout: 10000 });
+    await this.page.waitForLoadState(&apos;networkidle&apos;);
+    await this.page.waitForSelector(&apos;[data-testid]&apos;, { timeout: 10000 });
   }
 
   // Authentication helper
-  async authenticateUser(email = 'test@freeflowzee.com', password = 'testpassword') {
-    await this.page.goto('/login');
+  async authenticateUser(email = &apos;test@freeflowzee.com&apos;, password = &apos;testpassword&apos;) {
+    await this.page.goto(&apos;/login&apos;);
     await this.fillLoginForm(email, password);
     await this.submitLoginForm();
     await this.waitForLoginResponse();
@@ -38,47 +38,47 @@ export class TestHelpers {
 
   // Dashboard navigation helper
   async navigateToDashboard() {
-    await this.page.goto('/dashboard');
+    await this.page.goto(&apos;/dashboard&apos;);
     await this.waitForAppReady();
-    await expect(this.page.locator('[data-testid="dashboard-container"]')).toBeVisible();
+    await expect(this.page.locator(&apos;[data-testid=&quot;dashboard-container&quot;]&apos;)).toBeVisible();
   }
 
   async fillLoginForm(email: string, password: string) {
     // Wait for form to be ready
-    await this.page.waitForSelector('[data-testid="login-form"]', { timeout: 10000 });
+    await this.page.waitForSelector(&apos;[data-testid=&quot;login-form&quot;]&apos;, { timeout: 10000 });
     
     // Fill email
-    await this.page.fill('[data-testid="email-input"]', email);
+    await this.page.fill(&apos;[data-testid=&quot;email-input&quot;]&apos;, email);
     
     // Fill password
-    await this.page.fill('[data-testid="password-input"]', password);
+    await this.page.fill(&apos;[data-testid=&quot;password-input&quot;]&apos;, password);
   }
 
   async submitLoginForm() {
-    await this.page.click('[data-testid="submit-button"]');
+    await this.page.click(&apos;[data-testid=&quot;submit-button&quot;]&apos;);
   }
 
   async waitForLoginResponse() {
     try {
       // Wait for either successful navigation or error message
       await Promise.race([
-        this.page.waitForURL('/dashboard', { timeout: 10000 }),
-        this.page.waitForSelector('[data-testid="error-message"]', { state: 'visible', timeout: 5000 })
+        this.page.waitForURL(&apos;/dashboard&apos;, { timeout: 10000 }),
+        this.page.waitForSelector(&apos;[data-testid=&quot;error-message&quot;]&apos;, { state: &apos;visible&apos;, timeout: 5000 })
       ]);
     } catch (error) {
       // Take screenshot on failure
-      await this.takeTimestampedScreenshot('login-failure');
+      await this.takeTimestampedScreenshot(&apos;login-failure&apos;);
       throw error;
     }
   }
 
   async checkForErrorMessage() {
-    const errorMessage = this.page.locator('[data-testid="error-message"]');
+    const errorMessage = this.page.locator(&apos;[data-testid=&quot;error-message&quot;]&apos;);
     return await errorMessage.isVisible();
   }
 
   async getErrorMessage() {
-    const errorMessage = this.page.locator('[data-testid="error-message"]');
+    const errorMessage = this.page.locator(&apos;[data-testid=&quot;error-message&quot;]&apos;);
     if (await errorMessage.isVisible()) {
       return await errorMessage.textContent();
     }
@@ -87,7 +87,7 @@ export class TestHelpers {
 
   // Take screenshot with timestamp
   async takeTimestampedScreenshot(name: string) {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, &apos;-');'
     await this.page.screenshot({ 
       path: `test-results/screenshots/${name}-${timestamp}.png`,
       fullPage: true 
@@ -97,8 +97,8 @@ export class TestHelpers {
   // Check for console errors
   async checkConsoleErrors() {
     const errors: string[] = [];
-    this.page.on('console', (msg) => {
-      if (msg.type() === 'error') {
+    this.page.on(&apos;console&apos;, (msg) => {
+      if (msg.type() === &apos;error&apos;) {
         errors.push(msg.text());
       }
     });
@@ -123,7 +123,7 @@ export class TestHelpers {
 
   // Wait for network idle with timeout
   async waitForNetworkIdle(timeout = 15000) {
-    await this.page.waitForLoadState('networkidle', { timeout });
+    await this.page.waitForLoadState(&apos;networkidle&apos;, { timeout });
   }
 
   // Clear browser storage
@@ -135,11 +135,11 @@ export class TestHelpers {
   }
 
   // Mock API response
-  async mockApiResponse(url: string, response: any) {
+  async mockApiResponse(url: string, response: unknown) {
     await this.page.route(url, async (route) => {
       await route.fulfill({
         status: 200,
-        contentType: 'application/json',
+        contentType: &apos;application/json&apos;,
         body: JSON.stringify(response)
       });
     });
@@ -147,9 +147,9 @@ export class TestHelpers {
 
   // Check for accessibility issues
   async checkAccessibility() {
-    const headings = await this.page.locator('h1, h2, h3').count();
-    const buttons = await this.page.locator('button').count();
-    const images = await this.page.locator('img[alt]').count();
+    const headings = await this.page.locator(&apos;h1, h2, h3&apos;).count();
+    const buttons = await this.page.locator(&apos;button&apos;).count();
+    const images = await this.page.locator(&apos;img[alt]&apos;).count();
     
     console.log(`
       Accessibility check results:
@@ -165,8 +165,8 @@ export class TestHelpers {
   async getFormValidationErrors() {
     return await this.page.evaluate(() => {
       const errors: string[] = [];
-      document.querySelectorAll('[data-testid*="error"]').forEach((el) => {
-        errors.push(el.textContent || '');
+      document.querySelectorAll(&apos;[data-testid*=&quot;error&quot;]&apos;).forEach((el) => {
+        errors.push(el.textContent || '&apos;);'
       });
       return errors;
     });
@@ -175,8 +175,8 @@ export class TestHelpers {
   // Wait for page load with timeout
   async waitForPageLoad(timeout = 30000) {
     await Promise.all([
-      this.page.waitForLoadState('domcontentloaded', { timeout }),
-      this.page.waitForLoadState('networkidle', { timeout })
+      this.page.waitForLoadState(&apos;domcontentloaded&apos;, { timeout }),
+      this.page.waitForLoadState(&apos;networkidle&apos;, { timeout })
     ]);
   }
 
@@ -194,7 +194,7 @@ export class TestHelpers {
   async verifyNo404Errors() {
     const failed404s: string[] = [];
     
-    this.page.on('response', (response) => {
+    this.page.on(&apos;response&apos;, (response) => {
       if (response.status() === 404) {
         failed404s.push(response.url());
       }
@@ -203,8 +203,8 @@ export class TestHelpers {
     await this.page.waitForTimeout(2000); // Wait for resources to load
     
     if (failed404s.length > 0) {
-      console.error('404 errors found:', failed404s);
-      await this.takeTimestampedScreenshot('404-errors-found');
+      console.error(&apos;404 errors found:&apos;, failed404s);
+      await this.takeTimestampedScreenshot(&apos;404-errors-found&apos;);
     }
     
     return failed404s;
@@ -213,9 +213,9 @@ export class TestHelpers {
   // Mobile responsive testing helper
   async testMobileResponsiveness() {
     const viewports = [
-      { width: 375, height: 667, name: 'iPhone' },
-      { width: 768, height: 1024, name: 'iPad' },
-      { width: 1920, height: 1080, name: 'Desktop' }
+      { width: 375, height: 667, name: &apos;iPhone&apos; },
+      { width: 768, height: 1024, name: &apos;iPad&apos; },
+      { width: 1920, height: 1080, name: &apos;Desktop&apos; }
     ];
 
     for (const viewport of viewports) {

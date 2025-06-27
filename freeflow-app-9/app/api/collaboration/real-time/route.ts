@@ -22,7 +22,7 @@ interface NotificationRequest {
   type: string
   title: string
   message: string
-  data?: any
+  data?: unknown
   priority?: 'low' | 'medium' | 'high' | 'urgent'
 }
 
@@ -79,9 +79,8 @@ export async function POST(request: NextRequest) {
 
 async function handleAddComment(
   commentData: CommentRequest,
-  supabase: any,
-  user: any
-) {
+  supabase: unknown,
+  user: unknown) {
   try {
     // Validate file exists
     const { data: file, error: fileError } = await supabase
@@ -167,9 +166,8 @@ async function handleAddComment(
 
 async function handleAddApproval(
   approvalData: ApprovalRequest,
-  supabase: any,
-  user: any
-) {
+  supabase: unknown,
+  user: unknown) {
   try {
     // Validate file exists
     const { data: file, error: fileError } = await supabase
@@ -254,9 +252,8 @@ async function handleAddApproval(
 
 async function handleSendNotification(
   notificationData: NotificationRequest,
-  supabase: any,
-  user: any
-) {
+  supabase: unknown,
+  user: unknown) {
   try {
     const { data: notification, error } = await supabase
       .from('notifications')
@@ -299,10 +296,9 @@ async function handleSendNotification(
 }
 
 async function handleUpdateFileStatus(
-  statusData: any,
-  supabase: any,
-  user: any
-) {
+  statusData: unknown,
+  supabase: unknown,
+  user: unknown) {
   try {
     const { fileId, status, metadata } = statusData
 
@@ -339,7 +335,7 @@ async function handleUpdateFileStatus(
 }
 
 // Helper functions
-async function createFileActivityNotification(supabase: any, data: any) {
+async function createFileActivityNotification(supabase: unknown, data: unknown) {
   try {
     // Get project collaborators
     const { data: project } = await supabase
@@ -376,7 +372,7 @@ async function createFileActivityNotification(supabase: any, data: any) {
   }
 }
 
-async function createApprovalNotification(supabase: any, data: any) {
+async function createApprovalNotification(supabase: unknown, data: unknown) {
   try {
     // Get project owner and file uploader
     const { data: file } = await supabase
@@ -411,13 +407,13 @@ async function createApprovalNotification(supabase: any, data: any) {
   }
 }
 
-async function checkWorkflowProgression(supabase: any, projectId: string, approvalStatus: string) {
+async function checkWorkflowProgression(supabase: unknown, projectId: string, approvalStatus: string) {
   try {
     if (approvalStatus === 'approved') {
       // Check if this approval completes a workflow step
       const { data: workflow } = await supabase
         .from('workflow_steps')
-        .select('*')
+        .select('*')'
         .eq('project_id', projectId)
         .eq('is_completed', false)
         .order('order')
@@ -453,7 +449,7 @@ async function checkWorkflowProgression(supabase: any, projectId: string, approv
   }
 }
 
-async function triggerRealTimeNotification(notification: any) {
+async function triggerRealTimeNotification(notification: unknown) {
   // In a real application, this would trigger WebSocket or server-sent events
   // For now, we'll just log it
   console.log('Real-time notification triggered:', {
@@ -518,7 +514,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function getComments(supabase: any, fileId: string | null, user: any) {
+async function getComments(supabase: unknown, fileId: string | null, user: unknown) {
   if (!fileId) {
     return NextResponse.json(
       { error: 'File ID required' },
@@ -551,7 +547,7 @@ async function getComments(supabase: any, fileId: string | null, user: any) {
   })
 }
 
-async function getApprovals(supabase: any, fileId: string | null, user: any) {
+async function getApprovals(supabase: unknown, fileId: string | null, user: unknown) {
   if (!fileId) {
     return NextResponse.json(
       { error: 'File ID required' },
@@ -581,10 +577,10 @@ async function getApprovals(supabase: any, fileId: string | null, user: any) {
   })
 }
 
-async function getNotifications(supabase: any, userId: string, user: any) {
+async function getNotifications(supabase: unknown, userId: string, user: unknown) {
   const { data: notifications, error } = await supabase
     .from('notifications')
-    .select('*')
+    .select('*')'
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(50)
@@ -596,7 +592,7 @@ async function getNotifications(supabase: any, userId: string, user: any) {
     )
   }
 
-  const unreadCount = notifications?.filter((n: any) => !n.is_read).length || 0
+  const unreadCount = notifications?.filter((n: unknown) => !n.is_read).length || 0
 
   return NextResponse.json({
     notifications: notifications || [],
@@ -605,7 +601,7 @@ async function getNotifications(supabase: any, userId: string, user: any) {
   })
 }
 
-async function getProjectActivity(supabase: any, projectId: string | null, user: any) {
+async function getProjectActivity(supabase: unknown, projectId: string | null, user: unknown) {
   if (!projectId) {
     return NextResponse.json(
       { error: 'Project ID required' },

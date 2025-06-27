@@ -1,4 +1,4 @@
-"use client"
+"use client
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
@@ -46,7 +46,7 @@ export function ThemeProvider({
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(defaultTheme)
-  const [systemTheme, setSystemTheme] = useState<'dark' | 'light'>(defaultSystemTheme)
+  const [systemTheme, setSystemTheme] = useState<&apos;dark&apos; | &apos;light&apos;>(defaultSystemTheme)
   const [mounted, setMounted] = useState(false)
 
   // Get resolved theme (actual theme being applied)
@@ -99,7 +99,7 @@ export function ThemeProvider({
     }
 
     // Update meta theme-color for mobile browsers
-    const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+    const metaThemeColor = document.querySelector('meta[name= "theme-color"]')
     if (metaThemeColor) {
       metaThemeColor.setAttribute('content', resolvedTheme === 'dark' ? '#1a1a1a' : '#ffffff')
     } else {
@@ -131,7 +131,7 @@ export function ThemeProvider({
   // Prevent hydration mismatch by not rendering until mounted
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className= "min-h-screen bg-gray-50">
         {children}
       </div>
     )

@@ -11,7 +11,7 @@ const fs = require('fs');
 const path = require('path');
 
 console.log('🎯 BIT 3: Dashboard Demo Integration');
-console.log('====================================');
+console.log('==================================== ');
 
 class DashboardDemoIntegrator {
   constructor() {
@@ -160,7 +160,7 @@ import { DemoFeatureShowcase } from '@/components/dashboard/demo-feature-showcas
   const { dashboardMetrics, isLoading } = useDashboardMetrics();
   
   if (isLoading) {
-    return <div className="flex items-center justify-center h-screen">Loading demo content...</div>;
+    return <div className= "flex items-center justify-center h-screen">Loading demo content...</div>;
   }
 `;
 
@@ -171,10 +171,10 @@ import { DemoFeatureShowcase } from '@/components/dashboard/demo-feature-showcas
   
   return (
     <DemoContentProvider>
-      <div className="dashboard-demo-enhanced">
+      <div className= "dashboard-demo-enhanced">
         <DemoEnhancedOverview />
         <DemoFeatureShowcase />
-        <div className="original-dashboard">`
+        <div className= "original-dashboard">`
     );
 
     // Close the wrapper at the end
@@ -192,16 +192,14 @@ import { DemoFeatureShowcase } from '@/components/dashboard/demo-feature-showcas
     return `'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDashboardMetrics, useCommunityMetrics } from './demo-content-provider';
-import { TrendingUp, Users, DollarSign, FileText, Clock, Star } from 'lucide-react';
 
 export function DemoEnhancedOverview() {
   const { dashboardMetrics, isLoading } = useDashboardMetrics();
   const { communityMetrics } = useCommunityMetrics();
 
   if (isLoading) {
-    return <div className="animate-pulse">Loading overview...</div>;
+    return <div className= "animate-pulse">Loading overview...</div>;
   }
 
   const metrics = [
@@ -236,51 +234,51 @@ export function DemoEnhancedOverview() {
   ];
 
   return (
-    <div className="demo-overview-section mb-8">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">Dashboard Overview</h2>
-        <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+    <div className= "demo-overview-section mb-8">
+      <div className= "flex items-center justify-between mb-6">
+        <h2 className= "text-2xl font-bold">Dashboard Overview</h2>
+        <div className= "bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
           🎭 Demo Mode
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {metrics.map((metric, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{metric.title}</CardTitle>
+          <Card key={index} className= "hover:shadow-lg transition-shadow">
+            <CardHeader className= "flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className= "text-sm font-medium">{metric.title}</CardTitle>
               <metric.icon className={\`h-4 w-4 \${metric.color}\`} />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{metric.value}</div>
-              <p className="text-xs text-muted-foreground">
-                <span className="text-green-600">{metric.change}</span> from last month
+              <div className= "text-2xl font-bold">{metric.value}</div>
+              <p className= "text-xs text-muted-foreground">
+                <span className= "text-green-600">{metric.change}</span> from last month
               </p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className= "grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
+            <CardTitle className= "flex items-center gap-2">
+              <Clock className= "h-5 w-5" />
               Recent Activity
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className= "space-y-4">
               {dashboardMetrics?.recentActivity?.slice(0, 5).map((activity, index) => (
-                <div key={index} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{activity.title}</p>
-                    <p className="text-xs text-gray-500">{activity.time}</p>
+                <div key={index} className= "flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+                  <div className= "w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <div className= "flex-1">
+                    <p className= "text-sm font-medium">{activity.title}</p>
+                    <p className= "text-xs text-gray-500">{activity.time}</p>
                   </div>
                 </div>
               )) || (
-                <div className="text-sm text-gray-500">Loading activities...</div>
+                <div className= "text-sm text-gray-500">Loading activities...</div>
               )}
             </div>
           </CardContent>
@@ -288,26 +286,26 @@ export function DemoEnhancedOverview() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Star className="h-5 w-5" />
+            <CardTitle className= "flex items-center gap-2">
+              <Star className= "h-5 w-5" />
               Top Projects
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className= "space-y-4">
               {dashboardMetrics?.topProjects?.slice(0, 4).map((project, index) => (
-                <div key={index} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                <div key={index} className= "flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
                   <div>
-                    <p className="text-sm font-medium">{project.title}</p>
-                    <p className="text-xs text-gray-500">{project.client}</p>
+                    <p className= "text-sm font-medium">{project.title}</p>
+                    <p className= "text-xs text-gray-500">{project.client}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold text-green-600">{project.value}</p>
-                    <p className="text-xs text-gray-500">{project.status}</p>
+                  <div className= "text-right">
+                    <p className= "text-sm font-bold text-green-600">{project.value}</p>
+                    <p className= "text-xs text-gray-500">{project.status}</p>
                   </div>
                 </div>
               )) || (
-                <div className="text-sm text-gray-500">Loading projects...</div>
+                <div className= "text-sm text-gray-500">Loading projects...</div>
               )}
             </div>
           </CardContent>
@@ -323,7 +321,6 @@ export function DemoEnhancedOverview() {
     return `'use client';
 
 import React from 'react';
-import { Bell, User, Settings, Search, Menu } from 'lucide-react';
 import { useDemoContent } from './demo-content-provider';
 
 export function DemoEnhancedNav() {
@@ -336,48 +333,44 @@ export function DemoEnhancedNav() {
   };
 
   return (
-    <nav className="demo-enhanced-nav bg-white border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button className="lg:hidden">
-            <Menu className="h-6 w-6" />
+    <nav className= "demo-enhanced-nav bg-white border-b border-gray-200 px-6 py-4">
+      <div className= "flex items-center justify-between">
+        <div className= "flex items-center gap-4">
+          <button className= "lg:hidden">
+            <Menu className= "h-6 w-6" />
           </button>
-          <h1 className="text-xl font-bold">FreeflowZee Dashboard</h1>
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+          <h1 className= "text-xl font-bold">FreeflowZee Dashboard</h1>
+          <div className= "bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium">
             🎭 Demo Mode
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <div className= "flex items-center gap-4">
+          <div className= "relative">
+            <Search className= "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
-              type="text"
-              placeholder="Search features..."
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              type= "text"
+              placeholder= "Search features..."
+              className= "pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
-          <div className="relative">
-            <Bell className="h-6 w-6 text-gray-600 cursor-pointer hover:text-gray-800" />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+          <div className= "relative">
+            <Bell className= "h-6 w-6 text-gray-600 cursor-pointer hover:text-gray-800" />
+            <span className= "absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
               3
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <img
-              src={currentUser.picture?.thumbnail || '/images/demo-avatar.jpg'}
-              alt={currentUser.name}
-              className="h-8 w-8 rounded-full object-cover"
-            />
-            <div className="hidden md:block">
-              <p className="text-sm font-medium">{currentUser.name}</p>
-              <p className="text-xs text-gray-500">Demo Account</p>
+          <div className= "flex items-center gap-3">
+            <img src={currentUser.picture?.thumbnail || &apos;/images/demo-avatar.jpg&apos;} alt={currentUser.name}>
+            <div >
+              <p >{currentUser.name}</p>
+              <p >Demo Account</p>
             </div>
           </div>
 
-          <Settings className="h-6 w-6 text-gray-600 cursor-pointer hover:text-gray-800" />
+          <Settings >
         </div>
       </div>
     </nav>
@@ -390,20 +383,7 @@ export function DemoEnhancedNav() {
     return `'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Zap, 
-  Users, 
-  FileText, 
-  DollarSign, 
-  Calendar, 
-  BarChart3,
-  ArrowRight,
-  Play,
-  Eye
-} from 'lucide-react';
 
 export function DemoFeatureShowcase() {
   const [activeDemo, setActiveDemo] = useState(null);
@@ -466,62 +446,56 @@ export function DemoFeatureShowcase() {
   ];
 
   return (
-    <div className="demo-feature-showcase mb-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold">Feature Showcase</h2>
-          <p className="text-gray-600">Experience FreeflowZee's powerful features with live demo data</p>
+    <div >
+      <div >
+        <div >
+          <h2 >Feature Showcase</h2>
+          <p >Experience FreeflowZee's powerful features with live demo data</p>
         </div>
-        <Badge variant="secondary" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+        <Badge >
           🎭 Interactive Demos Available
         </Badge>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div >
         {features.map((feature) => (
-          <Card 
-            key={feature.id} 
-            className="hover:shadow-xl transition-all duration-300 cursor-pointer group"
-            onClick={() => setActiveDemo(feature.id)}
+          <Card key={feature.id}> setActiveDemo(feature.id)}
           >
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className={\`p-3 rounded-lg \${feature.color}\`}>
-                  <feature.icon className="h-6 w-6 text-white" />
+            <CardHeader >
+              <div >
+                <div className={\`p-3 rounded-lg \${feature.color}>
+                  <feature >
                 </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Eye className="h-4 w-4" />
+                <div >
+                  <Button >
+                    <Eye >
                   </Button>
-                  <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Play className="h-4 w-4" />
+                  <Button >
+                    <Play >
                   </Button>
                 </div>
               </div>
-              <CardTitle className="text-lg">{feature.title}</CardTitle>
-              <p className="text-sm text-gray-600">{feature.description}</p>
+              <CardTitle >{feature.title}</CardTitle>
+              <p >{feature.description}</p>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="grid grid-cols-3 gap-2 text-center">
+            <CardContent >
+              <div >
+                <div >
                   {Object.entries(feature.metrics).map(([key, value]) => (
-                    <div key={key} className="p-2 bg-gray-50 rounded-lg">
-                      <div className="text-sm font-bold">{value}</div>
-                      <div className="text-xs text-gray-500 capitalize">{key.replace('_', ' ')}</div>
+                    <div key={key}>
+                      <div >{value}</div>
+                      <div >{key.replace('_', &apos; ')}</div>
                     </div>
                   ))}
                 </div>
                 
-                <Button 
-                  className="w-full group-hover:bg-primary group-hover:text-white transition-colors"
-                  variant="outline"
-                  onClick={(e) => {
+                <Button > {
                     e.stopPropagation();
                     window.open(feature.demoUrl, '_blank');
                   }}
                 >
                   Try Demo
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight >
                 </Button>
               </div>
             </CardContent>
@@ -530,20 +504,17 @@ export function DemoFeatureShowcase() {
       </div>
 
       {activeDemo && (
-        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-blue-900">
+        <div >
+          <div >
+            <div >
+              <h3 >
                 Demo Mode: {features.find(f => f.id === activeDemo)?.title}
               </h3>
-              <p className="text-blue-700 text-sm">
+              <p >
                 Click "Try Demo" to experience this feature with realistic data
               </p>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setActiveDemo(null)}
+            <Button > setActiveDemo(null)}
             >
               Close
             </Button>
@@ -567,7 +538,7 @@ export function DemoFeatureShowcase() {
     console.log(`🎯 Success Rate: ${successRate}%`);
     
     // Show what was created/enhanced
-    console.log('\n✨ NEW COMPONENTS CREATED:');
+    console.log('\n✨ NEW COMPONENTS CREATED: ');
     Object.entries(this.results.integrations).forEach(([key, result]) => {
       if (result.status === 'created' || result.status === 'enhanced') {
         console.log(`   ✅ ${key}: ${result.status}`);

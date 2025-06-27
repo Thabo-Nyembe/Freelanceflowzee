@@ -13,59 +13,53 @@ const integrationMap = {
     file: 'components/hubs/files-hub.tsx',
     replacements: [
       {
-        search: '<Button.*?data-testid="upload-file-btn".*?>.*?</Button>',
-        replace: '<EnhancedUploadButton data-testid="upload-file-btn" onUpload={handleFileUpload} multiple={true} acceptedTypes={["image/*", "video/*", "application/pdf", "text/*"]} />'
+        search: &apos;<Button.*?data-testid= "upload-file-btn".*?>.*?</Button>&apos;,
+        replace: &apos;<EnhancedUploadButton data-testid= "upload-file-btn" onUpload={handleFileUpload} multiple={true} acceptedTypes={["image/*&quot;, "video/*", "application/pdf", &quot;text/*"]} />&apos;
       },
       {
-        search: '<Button.*?data-testid="download-file-btn".*?>.*?</Button>',
-        replace: '<SmartDownloadButton data-testid="download-file-btn" fileUrl={file.url} fileName={file.name} fileSize={file.size} onDownload={() => handleDownload(file)} />'
+        search: &apos;<Button.*?data-testid= "download-file-btn".*?>.*?</Button>&apos;,
+        replace: &apos;<SmartDownloadButton data-testid= "download-file-btn" fileUrl={file.url} fileName={file.name} fileSize={file.size} onDownload={() => handleDownload(file)} />&apos;
       }
     ],
-    imports: [
-      'import { EnhancedUploadButton } from "@/components/enhanced/enhanced-upload-button";',
-      'import { SmartDownloadButton } from "@/components/enhanced/smart-download-button";'
+    imports: ['import { EnhancedUploadButton } from "@/components/enhanced/enhanced-upload-button";', 'import { SmartDownloadButton } from "@/components/enhanced/smart-download-button";'
     ]
   },
   aiCreate: {
     file: 'components/collaboration/ai-create.tsx',
     replacements: [
       {
-        search: '<Button.*?data-testid="upload-asset-btn".*?>.*?</Button>',
-        replace: '<EnhancedUploadButton data-testid="upload-asset-btn" onUpload={handleAssetUpload} acceptedTypes={["image/*", "text/*"]} maxSize={5*1024*1024} />'
+        search: &apos;<Button.*?data-testid= "upload-asset-btn".*?>.*?</Button>&apos;,
+        replace: &apos;<EnhancedUploadButton data-testid= "upload-asset-btn" onUpload={handleAssetUpload} acceptedTypes={["image/*&quot;, "text/*"]} maxSize={5*1024*1024} />&apos;
       },
       {
-        search: '<Button.*?data-testid="download-asset-btn".*?>.*?</Button>',
-        replace: '<SmartDownloadButton data-testid="download-asset-btn" fileName={`generated-${asset.type}.${asset.format}`} onDownload={() => handleAssetDownload(asset)} />'
+        search: &apos;<Button.*?data-testid= "download-asset-btn".*?>.*?</Button>&apos;,
+        replace: &apos;<SmartDownloadButton data-testid= "download-asset-btn" fileName={`generated-${asset.type}.${asset.format}`} onDownload={() => handleAssetDownload(asset)} />'
       }
     ],
-    imports: [
-      'import { EnhancedUploadButton } from "@/components/enhanced/enhanced-upload-button";',
-      'import { SmartDownloadButton } from "@/components/enhanced/smart-download-button";'
+    imports: ['import { EnhancedUploadButton } from "@/components/enhanced/enhanced-upload-button";', 'import { SmartDownloadButton } from "@/components/enhanced/smart-download-button";'
     ]
   },
   videoStudio: {
     file: 'app/(app)/dashboard/video-studio/page.tsx',
     replacements: [
       {
-        search: '<Button.*?data-testid="upload-btn".*?>.*?</Button>',
-        replace: '<EnhancedUploadButton data-testid="upload-btn" onUpload={handleVideoUpload} acceptedTypes={["video/*", "audio/*"]} maxSize={100*1024*1024} />'
+        search: &apos;<Button.*?data-testid= "upload-btn".*?>.*?</Button>&apos;,
+        replace: &apos;<EnhancedUploadButton data-testid= "upload-btn" onUpload={handleVideoUpload} acceptedTypes={["video/*", "audio/*"]} maxSize={100*1024*1024} />&apos;
       }
     ],
-    imports: [
-      'import { EnhancedUploadButton } from "@/components/enhanced/enhanced-upload-button";'
+    imports: ['import { EnhancedUploadButton } from "@/components/enhanced/enhanced-upload-button";'
     ]
   },
   escrowPage: {
     file: 'app/(app)/dashboard/escrow/page.tsx',
     replacements: [
       {
-        search: '<Button.*?data-testid="download-receipt-btn".*?>.*?</Button>',
-        replace: '<SmartDownloadButton data-testid="download-receipt-btn" fileName={`receipt-${escrow.id}.pdf`} onDownload={() => handleReceiptDownload(escrow)} />'
+        search: &apos;<Button.*?data-testid= "download-receipt-btn".*?>.*?</Button>&apos;,
+        replace: &apos;<SmartDownloadButton data-testid= "download-receipt-btn" fileName={`receipt-${escrow.id}.pdf`} onDownload={() => handleReceiptDownload(escrow)} />'
       }
     ],
     imports: [
-      'import { SmartDownloadButton } from "@/components/enhanced/smart-download-button";'
-    ]
+      'import { SmartDownloadButton } from "@/components/enhanced/smart-download-button";']
   }
 };
 
@@ -88,7 +82,7 @@ const navigationItems = [
 ];
 
 // Interactive navigation with proper routing
-const NavigationLink = ({ item, isActive }: { item: any, isActive: boolean }) => (
+const NavigationLink = ({ item, isActive }: { item: unknown, isActive: boolean }) => (
   <Link
     href={item.href}
     data-testid={item.testId}
@@ -97,7 +91,7 @@ const NavigationLink = ({ item, isActive }: { item: any, isActive: boolean }) =>
       isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
     )}
   >
-    <item.icon className="h-4 w-4" />
+    <item.icon className= "h-4 w-4" />
     {item.label}
   </Link>
 );`
@@ -114,11 +108,11 @@ useEffect(() => {
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.metaKey || e.ctrlKey) {
       switch (e.key) {
-        case 'k':
+        case 'k':'
           e.preventDefault();
           setSearchOpen(true);
           break;
-        case '/':
+        case '/':'
           e.preventDefault();
           setQuickActions(true);
           break;
@@ -153,7 +147,7 @@ const handleFileUpload = async (files: File[]) => {
       const file = files[i];
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('projectId', currentProject?.id || '');
+      formData.append('projectId', currentProject?.id || );'
       
       // Upload with progress tracking
       const response = await fetch('/api/storage/upload', {
@@ -190,7 +184,7 @@ const handleFileUpload = async (files: File[]) => {
 };
 
 // Enhanced download handler
-const handleDownload = async (file: any) => {
+const handleDownload = async (file: unknown) => {
   try {
     const response = await fetch(\`/api/storage/download/\${file.id}\`, {
       headers: {
@@ -202,7 +196,7 @@ const handleDownload = async (file: any) => {
     
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement('a');'
     link.href = url;
     link.download = file.name;
     document.body.appendChild(link);
@@ -260,14 +254,14 @@ const handleAssetUpload = async (files: File[]) => {
 };
 
 // AI Create asset download handler  
-const handleAssetDownload = async (asset: any) => {
+const handleAssetDownload = async (asset: unknown) => {
   try {
     const response = await fetch(\`/api/ai/create/download/\${asset.id}\`);
     if (!response.ok) throw new Error('Download failed');
     
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement('a');'
     link.href = url;
     link.download = \`generated-\${asset.type}.\${asset.format}\`;
     document.body.appendChild(link);
@@ -430,18 +424,18 @@ test.describe('Enhanced Features Integration', () => {
     await page.goto('/dashboard/files-hub');
     
     // Test enhanced upload button
-    const uploadBtn = page.locator('[data-testid="upload-file-btn"]');
+    const uploadBtn = page.locator('[data-testid= "upload-file-btn"]');
     await expect(uploadBtn).toBeVisible();
     await uploadBtn.click();
     
     // Test file input appears
-    await expect(page.locator('[data-testid="file-input"]')).toBeAttached();
+    await expect(page.locator('[data-testid= "file-input"]')).toBeAttached();
     
     // Test download functionality
-    const downloadBtn = page.locator('[data-testid="download-file-btn"]').first();
+    const downloadBtn = page.locator('[data-testid= "download-file-btn"]').first();
     if (await downloadBtn.count() > 0) {
       await downloadBtn.click();
-      await expect(page.locator('[role="progressbar"]')).toBeVisible();
+      await expect(page.locator('[role= "progressbar"]')).toBeVisible();
     }
   });
 
@@ -449,11 +443,11 @@ test.describe('Enhanced Features Integration', () => {
     await page.goto('/dashboard/ai-create');
     
     // Test asset upload
-    const uploadAssetBtn = page.locator('[data-testid="upload-asset-btn"]');
+    const uploadAssetBtn = page.locator('[data-testid= "upload-asset-btn"]');
     await expect(uploadAssetBtn).toBeVisible();
     
     // Test download functionality
-    const downloadAssetBtn = page.locator('[data-testid="download-asset-btn"]');
+    const downloadAssetBtn = page.locator('[data-testid= "download-asset-btn"]');
     if (await downloadAssetBtn.count() > 0) {
       await expect(downloadAssetBtn).toBeVisible();
     }
@@ -463,19 +457,19 @@ test.describe('Enhanced Features Integration', () => {
     await page.goto('/dashboard/video-studio');
     
     // Test video upload
-    const uploadBtn = page.locator('[data-testid="upload-btn"]');
+    const uploadBtn = page.locator('[data-testid= "upload-btn"]');
     await expect(uploadBtn).toBeVisible();
     
     // Test upload functionality
     await uploadBtn.click();
-    await expect(page.locator('[data-testid="file-input"]')).toBeAttached();
+    await expect(page.locator('[data-testid= "file-input"]')).toBeAttached();
   });
 
   test('Escrow - Document Download Integration', async ({ page }) => {
     await page.goto('/dashboard/escrow');
     
     // Test receipt download
-    const downloadReceiptBtn = page.locator('[data-testid="download-receipt-btn"]');
+    const downloadReceiptBtn = page.locator('[data-testid= "download-receipt-btn"]');
     if (await downloadReceiptBtn.count() > 0) {
       await expect(downloadReceiptBtn).toBeVisible();
       await downloadReceiptBtn.click();
@@ -498,7 +492,7 @@ test.describe('Enhanced Features Integration', () => {
       const navLink = page.locator(\`[data-testid="\${item.testId}"]\`);
       if (await navLink.count() > 0) {
         await navLink.click();
-        await expect(page).toHaveURL(new RegExp(item.href.replace('/', '\\\\/')));
+        await expect(page).toHaveURL(new RegExp(item.href.replace('/', '\\\\/')));'
         await page.goBack();
       }
     }
@@ -506,13 +500,8 @@ test.describe('Enhanced Features Integration', () => {
 
   test('Interactive Elements - All Buttons Functional', async ({ page }) => {
     // Test all interactive buttons across the application
-    const pages = [
-      '/dashboard/files-hub',
-      '/dashboard/ai-create', 
-      '/dashboard/video-studio',
-      '/dashboard/escrow',
-      '/dashboard/projects-hub'
-    ];
+    const pages = ['/dashboard/files-hub', '/dashboard/ai-create', '/dashboard/video-studio', '/dashboard/escrow',
+      '/dashboard/projects-hub'];
 
     for (const pagePath of pages) {
       await page.goto(pagePath);
@@ -558,9 +547,9 @@ async function runIntegration() {
     const testResults = await createIntegrationTestSuite();
 
     // Generate comprehensive report
-    console.log('\n' + '='.repeat(70));
+    console.log('\n' + '='.repeat(70));'
     console.log('📊 ENHANCED FEATURES INTEGRATION RESULTS');
-    console.log('='.repeat(70));
+    console.log('='.repeat(70));'
     console.log(`🎨 Components Updated: ${integrationResults.componentsUpdated}`);
     console.log(`📝 Function Handlers Added: ${integrationResults.handlersAdded}`);
     console.log(`🗺️  Navigation Enhanced: ${integrationResults.navigationEnhanced}`);
@@ -577,8 +566,8 @@ async function runIntegration() {
     console.log(`🎯 Integration Success Rate: ${successRate.toFixed(1)}%`);
 
     // Context7 implementation status
-    console.log('\n🔧 CONTEXT7 IMPLEMENTATION STATUS:');
-    console.log('===================================');
+    console.log('\n🔧 CONTEXT7 IMPLEMENTATION STATUS: ');
+    console.log('=================================== ');
     console.log('✅ Enhanced Upload/Download Components: INTEGRATED');
     console.log('✅ Interactive Button Functionality: IMPLEMENTED');
     console.log('✅ Navigation & Routing: ENHANCED');
@@ -587,7 +576,7 @@ async function runIntegration() {
 
     // Next steps
     console.log('\n📋 NEXT STEPS FOR PRODUCTION:');
-    console.log('=============================');
+    console.log('============================= ');
     console.log('1. 🧪 Run integration test suite');
     console.log('2. 🔗 Connect API endpoints for upload/download');
     console.log('3. 🎨 Apply final UI/UX polish');
@@ -616,14 +605,8 @@ async function runIntegration() {
         testingInfrastructure: 'Created',
         apiEndpoints: endpointResults.missing === 0 ? 'Complete' : 'Partial'
       },
-      context7Features: [
-        'Drag & Drop Upload with Progress Tracking',
-        'Smart Download with File Preview',
-        'Real-time Status Updates',
-        'Interactive Navigation with Keyboard Shortcuts',
-        'Comprehensive Testing with Playwright',
-        'Enhanced User Experience Components'
-      ]
+      context7Features: ['Drag & Drop Upload with Progress Tracking', 'Smart Download with File Preview', 'Real-time Status Updates', 'Interactive Navigation with Keyboard Shortcuts', 'Comprehensive Testing with Playwright',
+        'Enhanced User Experience Components']
     }, null, 2));
 
     console.log(`\n📄 Comprehensive report saved: ${reportPath}`);

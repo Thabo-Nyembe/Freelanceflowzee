@@ -23,22 +23,22 @@ const PROJECTS_HUB_ELEMENTS = {
   name: 'Projects Hub',
   url: '/dashboard/projects-hub',
   tabs: [
-    { id: 'overview', name: 'Overview', selector: '[role="tab"][value="overview"]' },
-    { id: 'active', name: 'Active', selector: '[role="tab"][value="active"]' },
-    { id: 'completed', name: 'Completed', selector: '[role="tab"][value="completed"]' },
-    { id: 'analytics', name: 'Analytics', selector: '[role="tab"][value="analytics"]' }
+    { id: 'overview', name: 'Overview', selector: '[role= "tab"][value= "overview"]' },
+    { id: 'active', name: 'Active', selector: '[role= "tab"][value= "active"]' },
+    { id: 'completed', name: 'Completed', selector: '[role= "tab"][value= "completed"]' },
+    { id: 'analytics', name: 'Analytics', selector: '[role= "tab"][value= "analytics"]' }
   ],
   buttons: [
-    { id: 'new-project', name: 'New Project', selector: '[data-testid="create-project-btn"]' },
-    { id: 'view-details', name: 'View Details', selector: '[aria-label="View Details"]' },
-    { id: 'edit-project', name: 'Edit Project', selector: '[aria-label="Edit Project"]' },
-    { id: 'add-feedback', name: 'Add Feedback', selector: '[aria-label="Add Feedback"]' },
-    { id: 'delete-project', name: 'Delete Project', selector: '[aria-label="Delete Project"]' }
+    { id: 'new-project', name: 'New Project', selector: '[data-testid= "create-project-btn"]' },
+    { id: 'view-details', name: 'View Details', selector: '[aria-label= "View Details"]' },
+    { id: 'edit-project', name: 'Edit Project', selector: '[aria-label= "Edit Project"]' },
+    { id: 'add-feedback', name: 'Add Feedback', selector: '[aria-label= "Add Feedback"]' },
+    { id: 'delete-project', name: 'Delete Project', selector: '[aria-label= "Delete Project"]' }
   ],
   filters: [
-    { id: 'status-filter', name: 'Status Filter', selector: 'select[value*="status"]' },
-    { id: 'priority-filter', name: 'Priority Filter', selector: 'select[value*="priority"]' },
-    { id: 'search-projects', name: 'Search Projects', selector: 'input[placeholder*="Search projects"]' }
+    { id: 'status-filter', name: 'Status Filter', selector: 'select[value*= "status"]' },
+    { id: 'priority-filter', name: 'Priority Filter', selector: 'select[value*= "priority"]' },
+    { id: 'search-projects', name: 'Search Projects', selector: 'input[placeholder*= "Search projects"]' }
   ],
   viewModes: [
     { id: 'grid-view', name: 'Grid View', selector: 'button:has-text("Grid")' },
@@ -90,9 +90,9 @@ class ProjectsHubTester {
       // Look for tab by multiple possible selectors
       const tabSelectors = [
         tab.selector,
-        `[role="tab"]:has-text("${tab.name}")`,
+        `[role= "tab"]:has-text("${tab.name}")`,
         `button:has-text("${tab.name}")`,
-        `[data-value="${tab.id}"]`,
+        `[data-value= "${tab.id}"]`,
         `#${tab.id}-tab`
       ];
 
@@ -122,7 +122,7 @@ class ProjectsHubTester {
       // Check if tab is now active
       const isActive = await tabElement.getAttribute('aria-selected') === 'true' ||
                       await tabElement.getAttribute('data-state') === 'active' ||
-                      (await tabElement.getAttribute('class') || '').includes('active');
+                      (await tabElement.getAttribute('class') || ).includes('active');'
 
       // Take screenshot
       const screenshotPath = `projects-hub-${tab.id}-tab.png`;
@@ -167,8 +167,8 @@ class ProjectsHubTester {
       const buttonSelectors = [
         button.selector,
         `button:has-text("${button.name}")`,
-        `[aria-label="${button.name}"]`,
-        `[title="${button.name}"]`,
+        `[aria-label= "${button.name}"]`,
+        `[title= "${button.name}"]`,
         `#${button.id}`
       ];
 
@@ -332,12 +332,12 @@ class ProjectsHubTester {
     const passRate = Math.round((this.results.passed / this.results.total) * 100);
     
     console.log('\n📊 PROJECTS HUB TEST REPORT');
-    console.log('=' .repeat(50));
+    console.log('=' .repeat(50));'
     console.log(`✅ Passed: ${this.results.passed}/${this.results.total} (${passRate}%)`);
     console.log(`❌ Failed: ${this.results.failed}/${this.results.total}`);
     console.log(`📸 Screenshots: ${this.results.screenshots.length}`);
     
-    console.log('\n📋 Detailed Results:');
+    console.log('\n📋 Detailed Results: ');
     this.results.details.forEach(result => {
       const icon = result.status === 'passed' ? '✅' : result.status === 'warning' ? '⚠️' : '❌';
       console.log(`${icon} ${result.name}: ${result.status}`);
@@ -376,8 +376,7 @@ class ProjectsHubTester {
       const report = this.generateReport();
       
       // Save report
-      await fs.writeFile(
-        'projects-hub-test-report.json',
+      await fs.writeFile('projects-hub-test-report.json',
         JSON.stringify(report, null, 2)
       );
       

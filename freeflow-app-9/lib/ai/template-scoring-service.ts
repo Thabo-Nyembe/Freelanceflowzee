@@ -9,7 +9,7 @@ export interface TemplateAnalysis {
 }
 
 export class TemplateAnalysisService {
-  calculateTemplateScore(template: any): TemplateAnalysis {
+  calculateTemplateScore(template: Record<string, unknown>): TemplateAnalysis {
     // Base scores
     const technicalScore = this.calculateTechnicalScore(template)
     const creativityScore = this.calculateCreativityScore(template)
@@ -33,7 +33,7 @@ export class TemplateAnalysisService {
     }
   }
 
-  private calculateTechnicalScore(template: any): number {
+  private calculateTechnicalScore(template: Record<string, unknown>): number {
     let score = 0.7 // Base score
 
     // Check for technical quality indicators
@@ -46,7 +46,7 @@ export class TemplateAnalysisService {
     return Math.min(1, score)
   }
 
-  private calculateCreativityScore(template: any): number {
+  private calculateCreativityScore(template: Record<string, unknown>): number {
     let score = 0.6 // Base score
 
     // Check for creative elements
@@ -58,7 +58,7 @@ export class TemplateAnalysisService {
     return Math.min(1, score)
   }
 
-  private calculateMarketScore(template: any): number {
+  private calculateMarketScore(template: Record<string, unknown>): number {
     let score = 0.5 // Base score
 
     // Check for market appeal indicators
@@ -71,7 +71,7 @@ export class TemplateAnalysisService {
   }
 
   private generateSuggestions(
-    template: any,
+    template: Record<string, unknown>,
     scores: { technicalScore: number; creativityScore: number; marketScore: number }
   ): string[] {
     const suggestions: string[] = []

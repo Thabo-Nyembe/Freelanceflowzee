@@ -1,4 +1,4 @@
-import type { Page, Locator } from '@playwright/test';
+import type { Page, Locator } from &apos;@playwright/test&apos;;
 
 export class FeedbackPage {
   readonly page: Page;
@@ -8,14 +8,14 @@ export class FeedbackPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.feedbackForm = page.locator('[data-testid="feedback-form"]');
-    this.messageInput = page.getByLabel('Feedback');
-    this.submitButton = page.getByRole('button', { name: 'Submit' });
+    this.feedbackForm = page.locator(&apos;[data-testid=&quot;feedback-form&quot;]&apos;);
+    this.messageInput = page.getByLabel(&apos;Feedback&apos;);
+    this.submitButton = page.getByRole(&apos;button&apos;, { name: &apos;Submit&apos; });
   }
 
   async goto() {
-    await this.page.goto('/feedback');
-    await this.page.waitForLoadState('networkidle');
+    await this.page.goto(&apos;/feedback&apos;);
+    await this.page.waitForLoadState(&apos;networkidle&apos;);
   }
 
   async submitFeedback(message: string) {

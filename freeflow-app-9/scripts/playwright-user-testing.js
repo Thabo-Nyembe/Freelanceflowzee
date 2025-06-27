@@ -111,11 +111,11 @@ class PlaywrightUserTester {
       await this.page.waitForLoadState('networkidle');
       
       // Fill login form
-      await this.page.fill('input[type="email"]', TEST_USER.email);
-      await this.page.fill('input[type="password"]', TEST_USER.password);
+      await this.page.fill('input[type= "email"]', TEST_USER.email);
+      await this.page.fill('input[type= "password"]', TEST_USER.password);
       
       // Submit form
-      await this.page.click('button[type="submit"]');
+      await this.page.click('button[type= "submit"]');
       
       // Wait for dashboard to load
       await this.page.waitForURL('**/dashboard', { timeout: 10000 });
@@ -162,7 +162,7 @@ class PlaywrightUserTester {
       
       // Take screenshot
       await this.page.screenshot({ 
-        path: `${pageConfig.page.toLowerCase().replace(/\s+/g, '-')}-test.png` 
+        path: `${pageConfig.page.toLowerCase().replace(/\s+/g, '-')}-test.png` '
       });
       
     } catch (error) {
@@ -181,7 +181,7 @@ class PlaywrightUserTester {
       this.results.summary.totalButtons++;
       
       // Check if button exists
-      const button = await this.page.locator(`[data-testid="${buttonConfig.testId}"]`);
+      const button = await this.page.locator(`[data-testid= "${buttonConfig.testId}"]`);
       const exists = await button.count() > 0;
       
       if (!exists) {
@@ -270,7 +270,7 @@ class PlaywrightUserTester {
 
   generateReport() {
     console.log('\n📊 Playwright User Testing Results');
-    console.log('=====================================');
+    console.log('===================================== ');
     
     const pageSuccessRate = this.results.summary.totalPages > 0 ? 
       Math.round((this.results.summary.successfulPages / this.results.summary.totalPages) * 100) : 0;
@@ -332,7 +332,7 @@ class PlaywrightUserTester {
       console.log('===========================================');
       console.log(`👤 Test User: ${TEST_USER.email}`);
       console.log(`🌐 Base URL: ${BASE_URL}`);
-      console.log('');
+      console.log('');'
       
       await this.init();
       await this.login();

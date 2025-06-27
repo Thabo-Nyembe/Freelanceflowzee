@@ -15,7 +15,7 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
 }
 
 console.log('🔍 FreeflowZee Database Setup & Verification')
-console.log('📍 Supabase URL:', SUPABASE_URL)
+console.log('📍 Supabase URL: ', SUPABASE_URL)
 console.log('🔑 Using Service Role Key for admin operations')
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
@@ -48,20 +48,8 @@ async function checkDatabaseConnection() {
 
 async function checkExistingTables() {
   console.log('\n🔍 Checking existing tables...')
-  const requiredTables = [
-    'projects',
-    'feedback_comments', 
-    'project_attachments',
-    'project_members',
-    'user_profiles',
-    'invoices',
-    'time_entries',
-    'upf_comments',
-    'upf_reactions',
-    'upf_attachments',
-    'upf_voice_notes',
-    'upf_analytics'
-  ]
+  const requiredTables = ['projects', 'feedback_comments', 'project_attachments', 'project_members', 'user_profiles', 'invoices', 'time_entries', 'upf_comments', 'upf_reactions', 'upf_attachments', 'upf_voice_notes',
+    'upf_analytics']
 
   const existingTables = []
   
@@ -69,7 +57,7 @@ async function checkExistingTables() {
     try {
       const { data, error } = await supabase
         .from(table)
-        .select('*')
+        .select('*')'
         .limit(1)
       
       if (!error) {
@@ -113,7 +101,7 @@ async function setupMainSchema() {
   
   const mainSchemaPath = path.join(__dirname, 'supabase-schema.sql')
   if (!fs.existsSync(mainSchemaPath)) {
-    console.error('❌ Main schema file not found:', mainSchemaPath)
+    console.error('❌ Main schema file not found: ', mainSchemaPath)
     return false
   }
 
@@ -121,25 +109,23 @@ async function setupMainSchema() {
   
   // Split SQL into smaller chunks to avoid issues
   const sqlStatements = mainSchema
-    .split(';')
+    .split(';')'
     .filter(stmt => stmt.trim().length > 0)
-    .map(stmt => stmt.trim() + ';')
+    .map(stmt => stmt.trim() + ';')'
 
   let successCount = 0
   let failureCount = 0
 
   for (let i = 0; i < sqlStatements.length; i++) {
     const statement = sqlStatements[i]
-    if (statement.trim() === ';') continue
+    if (statement.trim() === ';') continue'
     
     try {
       // Use direct SQL execution for schema setup
       const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/exec_sql`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-          'apikey': SUPABASE_SERVICE_KEY,
+          'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`, 'apikey': SUPABASE_SERVICE_KEY,
         },
         body: JSON.stringify({ sql_query: statement })
       })
@@ -221,7 +207,7 @@ async function verifySetup() {
     // Test user profiles table
     const { data: profileData, error: profileError } = await supabase
       .from('user_profiles')
-      .select('*')
+      .select('*')'
       .limit(1)
     
     if (!profileError) {
@@ -231,7 +217,7 @@ async function verifySetup() {
     // Test UPF comments table
     const { data: upfData, error: upfError } = await supabase
       .from('upf_comments')
-      .select('*')
+      .select('*')'
       .limit(1)
     
     if (!upfError) {
@@ -241,7 +227,7 @@ async function verifySetup() {
     // Test projects table
     const { data: projectData, error: projectError } = await supabase
       .from('projects')
-      .select('*')
+      .select('*')'
       .limit(1)
     
     if (!projectError) {
@@ -291,7 +277,7 @@ async function main() {
     console.log('Some tables may need manual creation in Supabase SQL Editor')
   }
   
-  console.log('\n📱 Next steps:')
+  console.log('\n📱 Next steps: ')
   console.log('1. Test user registration at http://localhost:3000/signup')
   console.log('2. Verify dashboard access after login')
   console.log('3. Test collaboration features')

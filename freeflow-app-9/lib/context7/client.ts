@@ -44,24 +44,7 @@ class Context7Client {
       // This would call the actual Context7 MCP resolve-library-id tool
       // For now, we'll implement a basic mapping
       const libraryMappings: Record<string, string> = {
-        'next.js': '/vercel/next.js',
-        'react': '/facebook/react',
-        'typescript': '/microsoft/typescript',
-        'tailwindcss': '/tailwindlabs/tailwindcss',
-        'supabase': '/supabase/supabase',
-        '@radix-ui/react-accordion': '/radix-ui/primitives',
-        '@radix-ui/react-dialog': '/radix-ui/primitives',
-        '@radix-ui/react-dropdown-menu': '/radix-ui/primitives',
-        '@radix-ui/react-tabs': '/radix-ui/primitives',
-        '@radix-ui/react-toast': '/radix-ui/primitives',
-        'lucide-react': '/lucide-icons/lucide',
-        'react-hook-form': '/react-hook-form/react-hook-form',
-        'zod': '/colinhacks/zod',
-        'class-variance-authority': '/joe-bell/cva',
-        'clsx': '/lukeed/clsx',
-        'tailwind-merge': '/dcastil/tailwind-merge',
-        'date-fns': '/date-fns/date-fns',
-        'recharts': '/recharts/recharts'
+        'next.js': '/vercel/next.js', 'react': '/facebook/react', 'typescript': '/microsoft/typescript', 'tailwindcss': '/tailwindlabs/tailwindcss', 'supabase': '/supabase/supabase', '@radix-ui/react-accordion': '/radix-ui/primitives', '@radix-ui/react-dialog': '/radix-ui/primitives', '@radix-ui/react-dropdown-menu': '/radix-ui/primitives', '@radix-ui/react-tabs': '/radix-ui/primitives', '@radix-ui/react-toast': '/radix-ui/primitives', 'lucide-react': '/lucide-icons/lucide', 'react-hook-form': '/react-hook-form/react-hook-form', 'zod': '/colinhacks/zod', 'class-variance-authority': '/joe-bell/cva', 'clsx': '/lukeed/clsx', 'tailwind-merge': '/dcastil/tailwind-merge', 'date-fns': '/date-fns/date-fns', 'recharts': '/recharts/recharts'
       };
 
       return libraryMappings[libraryName] || libraryName;
@@ -141,9 +124,8 @@ Next.js is a React framework for building full-stack web applications.
 - Implement loading states with \`loading.tsx\`
 - Handle errors with \`error.tsx\`
 
-${topic ? `\n## ${topic} Documentation:\n[Specific documentation for ${topic} would be fetched here]` : ''}
-      `,
-      '/supabase/supabase': `
+${topic ? `\n## ${topic} Documentation:\n[Specific documentation for ${topic} would be fetched here]` : ''}'
+      `, '/supabase/supabase': `
 # Supabase Documentation
 
 Supabase is an open-source Firebase alternative providing authentication, database, and real-time features.
@@ -161,9 +143,8 @@ Supabase is an open-source Firebase alternative providing authentication, databa
 - Implement RLS policies for security
 - Use TypeScript for better type safety
 
-${topic ? `\n## ${topic} Documentation:\n[Specific documentation for ${topic} would be fetched here]` : ''}
-      `,
-      '/radix-ui/primitives': `
+${topic ? `\n## ${topic} Documentation:\n[Specific documentation for ${topic} would be fetched here]` : ''}'
+      `, '/radix-ui/primitives': `
 # Radix UI Documentation
 
 Radix UI provides low-level UI primitives for building design systems and accessible user interfaces.
@@ -181,7 +162,7 @@ Radix UI provides low-level UI primitives for building design systems and access
 - Use compound components pattern
 - Implement controlled and uncontrolled components
 
-${topic ? `\n## ${topic} Documentation:\n[Specific documentation for ${topic} would be fetched here]` : ''}
+${topic ? `\n## ${topic} Documentation:\n[Specific documentation for ${topic} would be fetched here]` : ''}'
       `
     };
 
@@ -230,8 +211,7 @@ export default async function Page() {
           language: 'typescript',
           tags: ['server-component', 'data-fetching', 'async']
         }
-      ],
-      '/supabase/supabase': [
+      ], '/supabase/supabase': [
         {
           title: 'Supabase Client Setup',
           description: 'Initialize Supabase client for Next.js',
@@ -297,13 +277,7 @@ const { error } = await supabase.auth.signOut()`,
    */
   async getQuickHelp(task: string): Promise<CodeSnippet[]> {
     const helpMap: Record<string, { library: string; topic: string }> = {
-      'authentication': { library: 'supabase', topic: 'auth' },
-      'routing': { library: 'next.js', topic: 'app-router' },
-      'forms': { library: 'react-hook-form', topic: 'validation' },
-      'styling': { library: 'tailwindcss', topic: 'components' },
-      'state': { library: 'react', topic: 'hooks' },
-      'database': { library: 'supabase', topic: 'database' },
-      'api': { library: 'next.js', topic: 'api-routes' }
+      'authentication': { library: 'supabase', topic: 'auth' }, 'routing': { library: 'next.js', topic: 'app-router' }, 'forms': { library: 'react-hook-form', topic: 'validation' }, 'styling': { library: 'tailwindcss', topic: 'components' }, 'state': { library: 'react', topic: 'hooks' }, 'database': { library: 'supabase', topic: 'database' }, 'api': { library: 'next.js', topic: 'api-routes' }
     };
 
     const help = helpMap[task.toLowerCase()];
@@ -333,25 +307,7 @@ const { error } = await supabase.auth.signOut()`,
 
 // Export singleton instance
 export const context7Client = new Context7Client({
-  libraries: [
-    'next.js',
-    'react',
-    'typescript',
-    'tailwindcss',
-    'supabase',
-    '@radix-ui/react-accordion',
-    '@radix-ui/react-dialog',
-    '@radix-ui/react-dropdown-menu',
-    '@radix-ui/react-tabs',
-    '@radix-ui/react-toast',
-    'lucide-react',
-    'react-hook-form',
-    'zod',
-    'class-variance-authority',
-    'clsx',
-    'tailwind-merge',
-    'date-fns',
-    'recharts'
+  libraries: ['next.js', 'react', 'typescript', 'tailwindcss', 'supabase', '@radix-ui/react-accordion', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs', '@radix-ui/react-toast', 'lucide-react', 'react-hook-form', 'zod', 'class-variance-authority', 'clsx', 'tailwind-merge', 'date-fns', 'recharts'
   ],
   defaultTokens: 10000,
   autoUpdate: true

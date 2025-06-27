@@ -23,33 +23,33 @@ const TEST_SUITES = {
     name: 'Critical Fixes Validation',
     tests: [
       { name: 'Font Loading (Inter var)', url: '/fonts/inter-var.woff2', type: 'resource' },
-      { name: 'Homepage Module Resolution', url: '/', type: 'page' },
-      { name: 'ExternalLink Icon Usage', url: '/', type: 'component' },
+      { name: 'Homepage Module Resolution', url: '/', type: 'page' },'
+      { name: 'ExternalLink Icon Usage', url: '/', type: 'component' },'
       { name: 'Dashboard Authentication', url: '/dashboard', type: 'auth' }
     ]
   },
   context7_patterns: {
     name: 'Context7 Integration',
     tests: [
-      { name: 'SEO Metadata Generation', url: '/', type: 'seo' },
-      { name: 'Structured Data Schema', url: '/', type: 'schema' },
-      { name: 'Performance Optimization', url: '/', type: 'performance' },
-      { name: 'Responsive Design', url: '/', type: 'responsive' }
+      { name: 'SEO Metadata Generation', url: '/', type: 'seo' },'
+      { name: 'Structured Data Schema', url: '/', type: 'schema' },'
+      { name: 'Performance Optimization', url: '/', type: 'performance' },'
+      { name: 'Responsive Design', url: '/', type: 'responsive' }'
     ]
   },
   ui_components: {
     name: 'UI/UX Components',
     tests: [
-      { name: 'Home Page Client Components', url: '/', type: 'component' },
-      { name: 'Navigation Elements', url: '/', type: 'navigation' },
-      { name: 'Interactive Buttons', url: '/', type: 'interaction' },
-      { name: 'Theme System', url: '/', type: 'styling' }
+      { name: 'Home Page Client Components', url: '/', type: 'component' },'
+      { name: 'Navigation Elements', url: '/', type: 'navigation' },'
+      { name: 'Interactive Buttons', url: '/', type: 'interaction' },'
+      { name: 'Theme System', url: '/', type: 'styling' }'
     ]
   },
   feature_integration: {
     name: 'Feature Integration',
     tests: [
-      { name: 'Demo Modal Functionality', url: '/', type: 'modal' },
+      { name: 'Demo Modal Functionality', url: '/', type: 'modal' },'
       { name: 'Contact Forms', url: '/contact', type: 'form' },
       { name: 'Payment Integration', url: '/payment', type: 'payment' },
       { name: 'Project Management', url: '/projects', type: 'projects' }
@@ -326,8 +326,8 @@ async function testSEOMetadata(url) {
     const html = await response.text();
     
     const seoChecks = [
-      { name: 'Title tag', test: html.includes('<title>') },
-      { name: 'Meta description', test: html.includes('meta name="description"') },
+      { name: &apos;Title tag&apos;, test: html.includes('<title>') },
+      { name: 'Meta description', test: html.includes('meta name= "description"') },
       { name: 'Open Graph', test: html.includes('og:title') },
       { name: 'Twitter Cards', test: html.includes('twitter:card') }
     ];
@@ -353,7 +353,7 @@ async function testStructuredData(url) {
     const html = await response.text();
     
     const hasStructuredData = html.includes('application/ld+json');
-    const hasWebApplicationSchema = html.includes('"@type":"WebApplication"');
+    const hasWebApplicationSchema = html.includes('"@type":"WebApplication"');"
     
     return {
       success: hasStructuredData && hasWebApplicationSchema,
@@ -375,7 +375,7 @@ async function testPerformance(url) {
     const endTime = Date.now();
     
     const loadTime = endTime - startTime;
-    const contentLength = parseInt(response.headers.get('content-length') || '0');
+    const contentLength = parseInt(response.headers.get('content-length') || '0');'
     
     // Performance thresholds
     const isGoodLoadTime = loadTime < 2000; // Under 2 seconds
@@ -478,7 +478,7 @@ async function testStyling(url) {
     const html = await response.text();
     
     const styleChecks = [
-      { name: 'CSS classes', test: html.includes('class=') },
+      { name: 'CSS classes', test: html.includes('class= ') },
       { name: 'Theme colors', test: html.includes('purple') || html.includes('indigo') },
       { name: 'Gradient backgrounds', test: html.includes('gradient') }
     ];
@@ -566,10 +566,10 @@ function generateHTMLReport(testResults) {
   
   return `
 <!DOCTYPE html>
-<html lang="en">
+<html lang= "en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset= "UTF-8">
+    <meta name= "viewport" content= "width=device-width, initial-scale=1.0">
     <title>FreeflowZee - Comprehensive Test Report</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
@@ -587,48 +587,48 @@ function generateHTMLReport(testResults) {
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
+    <div class= "container">
+        <div class= "header">
             <h1>🎭 FreeflowZee Comprehensive Test Report</h1>
             <p>Context7 + Playwright Integration</p>
             <p><strong>Generated:</strong> ${testResults.endTime.toLocaleString()}</p>
         </div>
         
-        <div class="stats">
-            <div class="stat-card">
+        <div class= "stats">
+            <div class= "stat-card">
                 <h3>Total Tests</h3>
-                <div style="font-size: 2em; font-weight: bold;">${testResults.overall.total}</div>
+                <div style= "font-size: 2em; font-weight: bold;">${testResults.overall.total}</div>
             </div>
-            <div class="stat-card">
+            <div class= "stat-card">
                 <h3>Success Rate</h3>
-                <div style="font-size: 2em; font-weight: bold;">${successRate}%</div>
+                <div style= "font-size: 2em; font-weight: bold;">${successRate}%</div>
             </div>
-            <div class="stat-card">
+            <div class= "stat-card">
                 <h3>Duration</h3>
-                <div style="font-size: 2em; font-weight: bold;">${duration}s</div>
+                <div style= "font-size: 2em; font-weight: bold;">${duration}s</div>
             </div>
-            <div class="stat-card">
+            <div class= "stat-card">
                 <h3>Status</h3>
-                <div style="font-size: 2em; font-weight: bold;" class="${testResults.overall.failed === 0 ? 'success' : 'failure'}">
+                <div style= "font-size: 2em; font-weight: bold;" class= "${testResults.overall.failed === 0 ? 'success&apos; : &apos;failure&apos;}">
                     ${testResults.overall.failed === 0 ? '✅ PASS' : '❌ FAIL'}
                 </div>
             </div>
         </div>
         
         ${Object.entries(testResults.suites).map(([key, suite]) => `
-            <div class="suite">
-                <div class="suite-header">
+            <div class= "suite">
+                <div class= "suite-header">
                     <h2>${TEST_SUITES[key].name}</h2>
-                    <p>Passed: <span class="success">${suite.passed}</span> | Failed: <span class="failure">${suite.failed}</span> | Total: ${suite.total}</p>
+                    <p>Passed: <span class= "success">${suite.passed}</span> | Failed: <span class= "failure">${suite.failed}</span> | Total: ${suite.total}</p>
                 </div>
                 ${suite.details.map(test => `
-                    <div class="test-item ${test.success ? 'passed' : 'failed'}">
-                        <strong>${test.success ? '✅' : '❌'} ${test.name}</strong>
-                        ${test.error ? `<div style="margin-top: 8px; color: #dc2626;">${test.error}</div>` : ''}
+                    <div class= "test-item ${test.success ? 'passed&apos; : &apos;failed&apos;}">
+                        <strong>${test.success ? '✅' : &apos;❌'} ${test.name}</strong>
+                        ${test.error ? `<div style= "margin-top: 8px; color: #dc2626;">${test.error}</div>` : ''}'
                     </div>
-                `).join('')}
+                `).join('')}'
             </div>
-        `).join('')}
+        `).join('')}'
     </div>
 </body>
 </html>`;

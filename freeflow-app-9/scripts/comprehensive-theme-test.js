@@ -103,19 +103,19 @@ function runCommand(command, description) {
       env: { ...process.env, NODE_ENV: 'test' }
     });
     
-    let stdout = '';
-    let stderr = '';
+    let stdout = '';'
+    let stderr = '';'
     
     child.stdout?.on('data', (data) => {
       stdout += data;
-      if (data.includes('PASS') || data.includes('✓')) {
+      if (data.includes('PASS') || data.includes('✓')) {'
         log(data.trim(), 'success');
       }
     });
     
     child.stderr?.on('data', (data) => {
       stderr += data;
-      if (data.includes('FAIL') || data.includes('✗')) {
+      if (data.includes('FAIL') || data.includes('✗')) {'
         log(data.trim(), 'error');
       }
     });
@@ -137,8 +137,7 @@ async function checkServerHealth() {
   
   try {
     await runCommand(
-      `curl -f -s -I ${TEST_CONFIG.baseUrl}`,
-      'Server health check'
+      `curl -f -s -I ${TEST_CONFIG.baseUrl}`, 'Server health check'
     );
     log('✅ Server is healthy and responding', 'success');
     return true;
@@ -156,27 +155,27 @@ async function runThemeTests() {
     
     test.describe('Theme System Tests', () => {
       test.beforeEach(async ({ page }) => {
-        await page.goto('/');
+        await page.goto('/');'
         await page.waitForLoadState('networkidle');
       });
       
       test('Theme toggle functionality', async ({ page }) => {
         // Test theme toggle visibility
-        const themeToggle = page.locator('[data-testid="theme-toggle"]').or(
+        const themeToggle = page.locator('[data-testid= "theme-toggle"]').or(
           page.locator('button').filter({ hasText: /theme|dark|light/i })
         );
         await expect(themeToggle).toBeVisible();
         
         // Test clicking theme toggle opens dropdown
         await themeToggle.click();
-        const dropdown = page.locator('[role="menu"]').or(
+        const dropdown = page.locator('[role= "menu"]').or(
           page.locator('.dropdown-menu')
         );
         await expect(dropdown).toBeVisible();
         
         // Test light mode selection
         const lightOption = page.locator('text=Light').or(
-          page.locator('[data-theme="light"]')
+          page.locator('[data-theme= "light"]')
         );
         if (await lightOption.isVisible()) {
           await lightOption.click();
@@ -186,7 +185,7 @@ async function runThemeTests() {
         // Test dark mode selection
         await themeToggle.click();
         const darkOption = page.locator('text=Dark').or(
-          page.locator('[data-theme="dark"]')
+          page.locator('[data-theme= "dark"]')
         );
         if (await darkOption.isVisible()) {
           await darkOption.click();
@@ -196,14 +195,14 @@ async function runThemeTests() {
       
       test('Theme persistence', async ({ page, context }) => {
         // Set dark theme
-        const themeToggle = page.locator('[data-testid="theme-toggle"]').or(
+        const themeToggle = page.locator('[data-testid= "theme-toggle"]').or(
           page.locator('button').filter({ hasText: /theme|dark|light/i })
         );
         
         if (await themeToggle.isVisible()) {
           await themeToggle.click();
           const darkOption = page.locator('text=Dark').or(
-            page.locator('[data-theme="dark"]')
+            page.locator('[data-theme= "dark"]')
           );
           if (await darkOption.isVisible()) {
             await darkOption.click();
@@ -212,7 +211,7 @@ async function runThemeTests() {
         
         // Create new page in same context
         const newPage = await context.newPage();
-        await newPage.goto('/');
+        await newPage.goto('/');'
         await newPage.waitForLoadState('networkidle');
         
         // Verify theme persisted
@@ -221,7 +220,7 @@ async function runThemeTests() {
       
       test('Visual consistency across themes', async ({ page }) => {
         // Test light theme
-        await page.goto('/');
+        await page.goto('/');'
         await page.waitForLoadState('networkidle');
         
         const lightScreenshot = await page.screenshot({ 
@@ -230,14 +229,14 @@ async function runThemeTests() {
         });
         
         // Switch to dark theme
-        const themeToggle = page.locator('[data-testid="theme-toggle"]').or(
+        const themeToggle = page.locator('[data-testid= "theme-toggle"]').or(
           page.locator('button').filter({ hasText: /theme|dark|light/i })
         );
         
         if (await themeToggle.isVisible()) {
           await themeToggle.click();
           const darkOption = page.locator('text=Dark').or(
-            page.locator('[data-theme="dark"]')
+            page.locator('[data-theme= "dark"]')
           );
           if (await darkOption.isVisible()) {
             await darkOption.click();
@@ -263,8 +262,7 @@ async function runThemeTests() {
   
   try {
     await runCommand(
-      'npx playwright test tests/e2e/theme-system.spec.ts --reporter=list',
-      'Theme system tests'
+      'npx playwright test tests/e2e/theme-system.spec.ts --reporter=list', 'Theme system tests'
     );
     log('✅ Theme tests completed successfully', 'success');
   } catch (error) {
@@ -280,7 +278,7 @@ async function runFeatureTests() {
     
     test.describe('Feature Tests', () => {
       test('Landing page loads and displays correctly', async ({ page }) => {
-        await page.goto('/');
+        await page.goto('/');'
         await page.waitForLoadState('networkidle');
         
         // Test main heading
@@ -288,7 +286,7 @@ async function runFeatureTests() {
         await expect(heading).toBeVisible();
         
         // Test navigation
-        const nav = page.locator('nav').or(page.locator('[role="navigation"]'));
+        const nav = page.locator('nav').or(page.locator('[role= "navigation"]'));
         await expect(nav).toBeVisible();
         
         // Test CTA buttons
@@ -303,7 +301,7 @@ async function runFeatureTests() {
       });
       
       test('Navigation works correctly', async ({ page }) => {
-        await page.goto('/');
+        await page.goto('/');'
         await page.waitForLoadState('networkidle');
         
         // Test navigation links
@@ -314,8 +312,8 @@ async function runFeatureTests() {
         ];
         
         for (const link of links) {
-          const navLink = page.locator(\`a[href="\${link.path}"]\`).or(
-            page.locator('a').filter({ hasText: link.text })
+          const navLink = page.locator(\`a[href= "\${link.path}"]\`).or(
+            page.locator('a').filter({ hasText: link.text })'
           );
           
           if (await navLink.isVisible()) {
@@ -334,7 +332,7 @@ async function runFeatureTests() {
         await page.waitForLoadState('networkidle');
         
         const loginForm = page.locator('form').or(
-          page.locator('[data-testid="login-form"]')
+          page.locator('[data-testid= "login-form"]')
         );
         await expect(loginForm).toBeVisible();
         
@@ -343,7 +341,7 @@ async function runFeatureTests() {
         await page.waitForLoadState('networkidle');
         
         const signupForm = page.locator('form').or(
-          page.locator('[data-testid="signup-form"]')
+          page.locator('[data-testid= "signup-form"]')
         );
         await expect(signupForm).toBeVisible();
       });
@@ -354,7 +352,7 @@ async function runFeatureTests() {
         
         // Should redirect to login or show login form
         const currentUrl = page.url();
-        const hasLoginElements = await page.locator('form, [data-testid="login-form"]').isVisible();
+        const hasLoginElements = await page.locator('form, [data-testid= "login-form"]').isVisible();
         
         expect(currentUrl.includes('/login') || hasLoginElements).toBeTruthy();
       });
@@ -367,14 +365,14 @@ async function runFeatureTests() {
         await expect(page).toHaveURL(/payment/);
         
         // Test payment form or elements
-        const paymentElements = page.locator('form, [data-testid="payment-form"], .payment');
+        const paymentElements = page.locator('form, [data-testid= "payment-form"], .payment');
         await expect(paymentElements.first()).toBeVisible();
       });
       
       test('Responsive design works', async ({ page }) => {
         // Test desktop
         await page.setViewportSize({ width: 1920, height: 1080 });
-        await page.goto('/');
+        await page.goto('/');'
         await page.waitForLoadState('networkidle');
         
         const desktopNav = page.locator('nav');
@@ -391,7 +389,7 @@ async function runFeatureTests() {
         await page.waitForLoadState('networkidle');
         
         // Mobile menu should be visible or page should adapt
-        const mobileElements = page.locator('button[aria-label*="menu"], .mobile-menu, [data-testid="mobile-menu"]');
+        const mobileElements = page.locator('button[aria-label*= "menu"], .mobile-menu, [data-testid= "mobile-menu"]');
         const isResponsive = await mobileElements.count() > 0 || await desktopNav.isVisible();
         expect(isResponsive).toBeTruthy();
       });
@@ -404,8 +402,7 @@ async function runFeatureTests() {
   
   try {
     await runCommand(
-      'npx playwright test tests/e2e/features.spec.ts --reporter=list',
-      'Feature functionality tests'
+      'npx playwright test tests/e2e/features.spec.ts --reporter=list', 'Feature functionality tests'
     );
     log('✅ Feature tests completed successfully', 'success');
   } catch (error) {
@@ -418,8 +415,7 @@ async function runPerformanceTests() {
   
   try {
     await runCommand(
-      `npx playwright test --grep "performance" --reporter=list`,
-      'Performance tests'
+      `npx playwright test --grep "performance" --reporter=list`, 'Performance tests'
     );
     log('✅ Performance tests completed', 'success');
   } catch (error) {
@@ -459,8 +455,7 @@ async function generateTestReport() {
   // Generate HTML report if Playwright HTML reporter is available
   try {
     await runCommand(
-      'npx playwright show-report --host 0.0.0.0 --port 9323',
-      'Generate HTML test report'
+      'npx playwright show-report --host 0.0.0.0 --port 9323', 'Generate HTML test report'
     );
   } catch (error) {
     log('ℹ️ HTML report generation skipped', 'info');
@@ -483,8 +478,7 @@ async function main() {
     // 2. Install Playwright if needed
     try {
       await runCommand(
-        'npx playwright install --with-deps chromium firefox webkit',
-        'Install Playwright browsers'
+        'npx playwright install --with-deps chromium firefox webkit', 'Install Playwright browsers'
       );
     } catch (error) {
       log('⚠️ Playwright installation had issues, continuing...', 'warning');

@@ -13,7 +13,7 @@ class StripeEnhancedService {
         typescript: true,
       }
     )
-    this.publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''
+    this.publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '
   }
 
   // Enhanced Payment Intent with Apple Pay/Google Pay support
@@ -31,12 +31,7 @@ class StripeEnhancedService {
       const paymentIntent = await this.stripe.paymentIntents.create({
         amount,
         currency,
-        payment_method_types: paymentMethods || [
-          'card',
-          'apple_pay', 
-          'google_pay',
-          'link',
-          'cashapp'
+        payment_method_types: paymentMethods || ['card', 'apple_pay', 'google_pay', 'link', 'cashapp'
         ],
         metadata: {
           ...metadata,

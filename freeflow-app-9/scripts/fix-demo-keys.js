@@ -38,8 +38,7 @@ fs.readFile(filePath, 'utf8', (err, data) => {
   // Add key to demoTypes.map
   modifiedData = modifiedData.replace(
     /({\s*demoTypes\.map\(\(demo\)\s*=>\s*\(\s*)(<Card)/,
-    '$1<Card key={demo.id}'
-  );
+    '$1<Card key={demo.id}');
 
   fs.writeFile(filePath, modifiedData, 'utf8', (err) => {
     if (err) {

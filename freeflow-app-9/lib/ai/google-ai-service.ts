@@ -131,8 +131,7 @@ export class GoogleAIService {
         - Flexible layouts
         
         Provide a score (0-100), insights, and responsive design recommendations.
-      `,
-      'brand-consistency': `
+      `, 'brand-consistency': `
         Analyze this design for brand consistency:
         ${request.designDescription}
         
@@ -153,10 +152,7 @@ export class GoogleAIService {
       
       Format response as JSON:
       {
-        "score": number,
-        "insights": ["insight1", "insight2", ...],
-        "recommendations": ["rec1", "rec2", ...],
-        "confidence": number
+        "score": number, "insights": ["insight1", "insight2", ...], "recommendations": ["rec1", "rec2", ...], "confidence": number
       }
     `;
 
@@ -228,7 +224,7 @@ export class GoogleAIService {
   /**
    * Generate design insights and recommendations
    */
-  async generateDesignInsights(projectType: string, currentMetrics?: any): Promise<{
+  async generateDesignInsights(projectType: string, currentMetrics?: Record<string, unknown>): Promise<{
     insights: Array<{
       title: string;
       description: string;

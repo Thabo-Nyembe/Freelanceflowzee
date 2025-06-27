@@ -1,15 +1,15 @@
-'use client';
+'use client'
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface DemoContent {
-  users: any[];
-  projects: any[];
-  posts: any[];
-  files: any[];
-  transactions: any[];
-  analytics: any;
-  images: any[];
+  users: unknown[];
+  projects: unknown[];
+  posts: unknown[];
+  files: unknown[];
+  transactions: unknown[];
+  analytics: unknown;
+  images: unknown[];
 }
 
 interface DemoContentContextType {

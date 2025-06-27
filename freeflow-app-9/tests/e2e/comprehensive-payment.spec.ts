@@ -1,8 +1,8 @@
-import { test, expect } from '../fixtures/app-fixtures';
+import { test, expect } from &apos;../fixtures/app-fixtures&apos;;
 
-test.describe('💳 Comprehensive Payment System Tests', () => {
-  test.describe('💰 Payment Form Validation', () => {
-    test('should display payment form elements', async ({ paymentPage }) => {
+test.describe(&apos;💳 Comprehensive Payment System Tests&apos;, () => {
+  test.describe(&apos;💰 Payment Form Validation&apos;, () => {
+    test(&apos;should display payment form elements&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       const formElements = await paymentPage.verifyPaymentForm();
@@ -15,22 +15,22 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
       expect(formElements.payButton).toBe(true);
     });
 
-    test('should validate card number format', async ({ paymentPage }) => {
+    test(&apos;should validate card number format&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
-      const invalidCardValidation = await paymentPage.testCardValidation('1234');
-      const validCardValidation = await paymentPage.testCardValidation('4242424242424242');
+      const invalidCardValidation = await paymentPage.testCardValidation(&apos;1234&apos;);
+      const validCardValidation = await paymentPage.testCardValidation(&apos;4242424242424242&apos;);
       
       if (invalidCardValidation) {
-        expect(invalidCardValidation).toContain('invalid');
+        expect(invalidCardValidation).toContain(&apos;invalid&apos;);
       }
       
       if (validCardValidation) {
-        expect(validCardValidation).not.toContain('invalid');
+        expect(validCardValidation).not.toContain(&apos;invalid&apos;);
       }
     });
 
-    test('should check required fields completion', async ({ paymentPage }) => {
+    test(&apos;should check required fields completion&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       // Initially empty
@@ -38,16 +38,16 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
       expect(fieldStatus.allFilled).toBe(false);
       
       // Fill all required fields
-      await paymentPage.cardNumberInput.fill('4242424242424242');
-      await paymentPage.expiryDateInput.fill('12/28');
-      await paymentPage.cvcInput.fill('123');
-      await paymentPage.cardholderNameInput.fill('Test User');
+      await paymentPage.cardNumberInput.fill(&apos;4242424242424242&apos;);
+      await paymentPage.expiryDateInput.fill(&apos;12/28&apos;);
+      await paymentPage.cvcInput.fill(&apos;123&apos;);
+      await paymentPage.cardholderNameInput.fill(&apos;Test User&apos;);
       
       fieldStatus = await paymentPage.areRequiredFieldsFilled();
       expect(fieldStatus.allFilled).toBe(true);
     });
 
-    test('should enable pay button when form is complete', async ({ paymentPage }) => {
+    test(&apos;should enable pay button when form is complete&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       // Initially disabled
@@ -55,18 +55,18 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
       expect(initiallyEnabled).toBe(false);
       
       // Fill required fields
-      await paymentPage.cardNumberInput.fill('4242424242424242');
-      await paymentPage.expiryDateInput.fill('12/28');
-      await paymentPage.cvcInput.fill('123');
-      await paymentPage.cardholderNameInput.fill('Test User');
+      await paymentPage.cardNumberInput.fill(&apos;4242424242424242&apos;);
+      await paymentPage.expiryDateInput.fill(&apos;12/28&apos;);
+      await paymentPage.cvcInput.fill(&apos;123&apos;);
+      await paymentPage.cardholderNameInput.fill(&apos;Test User&apos;);
       
       const finallyEnabled = await paymentPage.isPayButtonEnabled();
       expect(finallyEnabled).toBe(true);
     });
   });
 
-  test.describe('💳 Payment Methods', () => {
-    test('should display all payment method options', async ({ paymentPage }) => {
+  test.describe(&apos;💳 Payment Methods&apos;, () => {
+    test(&apos;should display all payment method options&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       const paymentMethods = await paymentPage.verifyPaymentMethods();
@@ -78,39 +78,39 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
       expect(paymentMethods.bankTransfer).toBe(true);
     });
 
-    test('should process credit card payment successfully', async ({ paymentPage }) => {
+    test(&apos;should process credit card payment successfully&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       const successMessage = await paymentPage.testValidCard();
       
-      expect(successMessage).toContain('success');
+      expect(successMessage).toContain(&apos;success&apos;);
     });
 
-    test('should handle declined card', async ({ paymentPage }) => {
+    test(&apos;should handle declined card&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       const errorMessage = await paymentPage.testInvalidCard();
       
-      expect(errorMessage).toContain('declined');
+      expect(errorMessage).toContain(&apos;declined&apos;);
     });
 
-    test('should handle expired card', async ({ paymentPage }) => {
+    test(&apos;should handle expired card&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       const errorMessage = await paymentPage.testExpiredCard();
       
-      expect(errorMessage).toContain('expired');
+      expect(errorMessage).toContain(&apos;expired&apos;);
     });
 
-    test('should handle insufficient funds', async ({ paymentPage }) => {
+    test(&apos;should handle insufficient funds&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       const errorMessage = await paymentPage.testInsufficientFunds();
       
-      expect(errorMessage).toContain('insufficient');
+      expect(errorMessage).toContain(&apos;insufficient&apos;);
     });
 
-    test('should handle PayPal payment', async ({ paymentPage }) => {
+    test(&apos;should handle PayPal payment&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       await paymentPage.payWithPayPal();
       
@@ -118,21 +118,21 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
       await paymentPage.page.waitForTimeout(2000);
     });
 
-    test('should handle Apple Pay payment', async ({ paymentPage }) => {
+    test(&apos;should handle Apple Pay payment&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       await paymentPage.payWithApplePay();
       
       await paymentPage.page.waitForTimeout(2000);
     });
 
-    test('should handle Google Pay payment', async ({ paymentPage }) => {
+    test(&apos;should handle Google Pay payment&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       await paymentPage.payWithGooglePay();
       
       await paymentPage.page.waitForTimeout(2000);
     });
 
-    test('should handle bank transfer', async ({ paymentPage }) => {
+    test(&apos;should handle bank transfer&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       await paymentPage.payWithBankTransfer();
       
@@ -140,8 +140,8 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
     });
   });
 
-  test.describe('🧾 Order Summary', () => {
-    test('should display order summary', async ({ paymentPage }) => {
+  test.describe(&apos;🧾 Order Summary&apos;, () => {
+    test(&apos;should display order summary&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       const orderSummary = await paymentPage.getOrderSummary();
@@ -151,7 +151,7 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
       expect(orderSummary.total).toBeTruthy();
     });
 
-    test('should display items list', async ({ paymentPage }) => {
+    test(&apos;should display items list&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       const items = await paymentPage.getItemsList();
@@ -165,12 +165,12 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
       }
     });
 
-    test('should apply coupon codes', async ({ paymentPage }) => {
+    test(&apos;should apply coupon codes&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       const originalSummary = await paymentPage.getOrderSummary();
       
-      await paymentPage.applyCoupon('TESTCOUPON');
+      await paymentPage.applyCoupon(&apos;TESTCOUPON&apos;);
       
       const updatedSummary = await paymentPage.getOrderSummary();
       
@@ -179,8 +179,8 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
     });
   });
 
-  test.describe('🔒 Security Features', () => {
-    test('should display security badges', async ({ paymentPage }) => {
+  test.describe(&apos;🔒 Security Features&apos;, () => {
+    test(&apos;should display security badges&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       const securityFeatures = await paymentPage.verifySecurityFeatures();
@@ -190,7 +190,7 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
       expect(securityFeatures.cardSecurity).toBe(true);
     });
 
-    test('should implement payment security measures', async ({ paymentPage }) => {
+    test(&apos;should implement payment security measures&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       const security = await paymentPage.testPaymentSecurity();
@@ -201,24 +201,24 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
     });
   });
 
-  test.describe('⚡ Payment Processing', () => {
-    test('should show processing state during payment', async ({ paymentPage }) => {
+  test.describe(&apos;⚡ Payment Processing&apos;, () => {
+    test(&apos;should show processing state during payment&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       await paymentPage.payWithCreditCard({
-        number: '4242424242424242',
-        expiry: '12/28',
-        cvc: '123',
-        name: 'Test User'
+        number: &apos;4242424242424242&apos;,
+        expiry: &apos;12/28&apos;,
+        cvc: &apos;123&apos;,
+        name: &apos;Test User&apos;
       });
       
       await paymentPage.waitForPaymentProcessing();
       
       const status = await paymentPage.getPaymentStatus();
-      expect(['success', 'processing', 'error']).toContain(status.status);
+      expect([&apos;success&apos;, &apos;processing&apos;, &apos;error&apos;]).toContain(status.status);
     });
 
-    test('should handle payment success', async ({ paymentPage }) => {
+    test(&apos;should handle payment success&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       const successMessage = await paymentPage.testValidCard();
@@ -226,10 +226,10 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
       expect(successMessage).toBeTruthy();
       
       const finalStatus = await paymentPage.getPaymentStatus();
-      expect(finalStatus.status).toBe('success');
+      expect(finalStatus.status).toBe(&apos;success&apos;);
     });
 
-    test('should handle payment errors gracefully', async ({ paymentPage }) => {
+    test(&apos;should handle payment errors gracefully&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       const errorMessage = await paymentPage.testInvalidCard();
@@ -237,12 +237,12 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
       expect(errorMessage).toBeTruthy();
       
       const finalStatus = await paymentPage.getPaymentStatus();
-      expect(finalStatus.status).toBe('error');
+      expect(finalStatus.status).toBe(&apos;error&apos;);
     });
   });
 
-  test.describe('📱 Mobile Responsiveness', () => {
-    test('should display properly on mobile', async ({ paymentPage, mobileViewport }) => {
+  test.describe(&apos;📱 Mobile Responsiveness&apos;, () => {
+    test(&apos;should display properly on mobile&apos;, async ({ paymentPage, mobileViewport }) => {
       await paymentPage.page.setViewportSize(mobileViewport);
       await paymentPage.goto();
       
@@ -255,8 +255,8 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
     });
   });
 
-  test.describe('♿ Accessibility', () => {
-    test('should have proper form accessibility', async ({ paymentPage }) => {
+  test.describe(&apos;♿ Accessibility&apos;, () => {
+    test(&apos;should have proper form accessibility&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       const accessibility = await paymentPage.checkAccessibility();
@@ -266,23 +266,23 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
     });
   });
 
-  test.describe('⚡ Performance', () => {
-    test('should load payment form quickly', async ({ paymentPage }) => {
+  test.describe(&apos;⚡ Performance&apos;, () => {
+    test(&apos;should load payment form quickly&apos;, async ({ paymentPage }) => {
       const loadTime = await paymentPage.measurePaymentLoadTime();
       
       expect(loadTime).toBeLessThan(3000); // 3 seconds
     });
   });
 
-  test.describe('🔄 Navigation & Cancellation', () => {
-    test('should allow payment cancellation', async ({ paymentPage }) => {
+  test.describe(&apos;🔄 Navigation & Cancellation&apos;, () => {
+    test(&apos;should allow payment cancellation&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       await paymentPage.cancelPayment();
       
-      expect(paymentPage.page.url()).toContain('/dashboard');
+      expect(paymentPage.page.url()).toContain(&apos;/dashboard&apos;);
     });
 
-    test('should allow going back', async ({ paymentPage }) => {
+    test(&apos;should allow going back&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       await paymentPage.goBack();
       
@@ -291,17 +291,17 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
     });
   });
 
-  test.describe('🎯 Edge Cases', () => {
-    test('should handle multiple rapid payment attempts', async ({ paymentPage }) => {
+  test.describe(&apos;🎯 Edge Cases&apos;, () => {
+    test(&apos;should handle multiple rapid payment attempts&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       // Attempt multiple payments rapidly
       for (let i = 0; i < 3; i++) {
         await paymentPage.payWithCreditCard({
-          number: '4242424242424242',
-          expiry: '12/28',
-          cvc: '123',
-          name: 'Test User'
+          number: &apos;4242424242424242&apos;,
+          expiry: &apos;12/28&apos;,
+          cvc: &apos;123&apos;,
+          name: &apos;Test User&apos;
         });
         
         await paymentPage.page.waitForTimeout(500);
@@ -312,45 +312,45 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
       expect(status.status).toBeTruthy();
     });
 
-    test('should handle international cards', async ({ paymentPage }) => {
+    test(&apos;should handle international cards&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       await paymentPage.payWithCreditCard({
-        number: '4000000760000002', // International card
-        expiry: '12/28',
-        cvc: '123',
-        name: 'International User',
-        country: 'GB',
-        postalCode: 'SW1A 1AA'
+        number: &apos;4000000760000002&apos;, // International card
+        expiry: &apos;12/28&apos;,
+        cvc: &apos;123&apos;,
+        name: &apos;International User&apos;,
+        country: &apos;GB&apos;,
+        postalCode: &apos;SW1A 1AA&apos;
       });
       
       await paymentPage.waitForPaymentProcessing();
       const status = await paymentPage.getPaymentStatus();
-      expect(['success', 'error']).toContain(status.status);
+      expect([&apos;success&apos;, &apos;error&apos;]).toContain(status.status);
     });
 
-    test('should handle special characters in cardholder name', async ({ paymentPage }) => {
+    test(&apos;should handle special characters in cardholder name&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       await paymentPage.payWithCreditCard({
-        number: '4242424242424242',
-        expiry: '12/28',
-        cvc: '123',
-        name: 'José María González-Smith'
+        number: &apos;4242424242424242&apos;,
+        expiry: &apos;12/28&apos;,
+        cvc: &apos;123&apos;,
+        name: &apos;José María González-Smith&apos;
       });
       
       const fieldStatus = await paymentPage.areRequiredFieldsFilled();
       expect(fieldStatus.name).toBe(true);
     });
 
-    test('should handle form submission during processing', async ({ paymentPage }) => {
+    test(&apos;should handle form submission during processing&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       await paymentPage.payWithCreditCard({
-        number: '4242424242424242',
-        expiry: '12/28',
-        cvc: '123',
-        name: 'Test User'
+        number: &apos;4242424242424242&apos;,
+        expiry: &apos;12/28&apos;,
+        cvc: &apos;123&apos;,
+        name: &apos;Test User&apos;
       });
       
       // Try to submit again during processing
@@ -362,8 +362,8 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
     });
   });
 
-  test.describe('💱 Currency & Localization', () => {
-    test('should display correct currency format', async ({ paymentPage }) => {
+  test.describe(&apos;💱 Currency & Localization&apos;, () => {
+    test(&apos;should display correct currency format&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       const orderSummary = await paymentPage.getOrderSummary();
@@ -372,10 +372,10 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
       expect(orderSummary.total).toMatch(/[$€£¥]/);
     });
 
-    test('should handle different billing countries', async ({ paymentPage }) => {
+    test(&apos;should handle different billing countries&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
-      const countries = ['US', 'CA', 'GB', 'AU', 'DE'];
+      const countries = [&apos;US&apos;, &apos;CA&apos;, &apos;GB&apos;, &apos;AU&apos;, &apos;DE&apos;];
       
       for (const country of countries) {
         await paymentPage.countrySelect.selectOption(country);
@@ -388,15 +388,15 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
     });
   });
 
-  test.describe('🧪 Payment Testing Scenarios', () => {
-    test('should test various Stripe test cards', async ({ paymentPage }) => {
+  test.describe(&apos;🧪 Payment Testing Scenarios&apos;, () => {
+    test(&apos;should test various Stripe test cards&apos;, async ({ paymentPage }) => {
       await paymentPage.goto();
       
       const testCards = [
-        { number: '4242424242424242', expected: 'success' }, // Visa success
-        { number: '4000000000000002', expected: 'error' },   // Declined
-        { number: '4000000000009995', expected: 'error' },   // Insufficient funds
-        { number: '4000000000000069', expected: 'error' },   // Expired
+        { number: &apos;4242424242424242&apos;, expected: &apos;success&apos; }, // Visa success
+        { number: &apos;4000000000000002&apos;, expected: &apos;error&apos; },   // Declined
+        { number: &apos;4000000000009995&apos;, expected: &apos;error&apos; },   // Insufficient funds
+        { number: &apos;4000000000000069&apos;, expected: &apos;error&apos; },   // Expired
       ];
       
       for (const card of testCards) {
@@ -404,12 +404,12 @@ test.describe('💳 Comprehensive Payment System Tests', () => {
         
         await paymentPage.payWithCreditCard({
           number: card.number,
-          expiry: '12/28',
-          cvc: '123',
-          name: 'Test User'
+          expiry: &apos;12/28&apos;,
+          cvc: &apos;123&apos;,
+          name: &apos;Test User&apos;
         });
         
-        if (card.expected === 'success') {
+        if (card.expected === &apos;success&apos;) {
           await paymentPage.waitForPaymentProcessing();
           const successMessage = await paymentPage.waitForPaymentSuccess();
           expect(successMessage).toBeTruthy();

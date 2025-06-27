@@ -47,10 +47,10 @@ const testResults = {
   details: []
 };
 
-function logTest(name, status, details = '') {
+function logTest(name, status, details = '') {'
   testResults.total++;
   const emoji = status ? '✅' : '❌';
-  const message = `${emoji} ${name}${details ? ` - ${details}` : ''}`;
+  const message = `${emoji} ${name}${details ? ` - ${details}` : ''}`;'
   console.log(message);
   
   testResults.details.push({ name, status, details });
@@ -103,34 +103,34 @@ async function testPaymentAPI() {
 
 async function testPaymentUIComponents(page) {
   console.log('\n🎨 TESTING PAYMENT UI COMPONENTS');
-  console.log('=================================');
+  console.log('================================= ');
 
   try {
     // Test payment page rendering
     await page.goto(`${TEST_CONFIG.baseUrl}/payment`, { waitUntil: 'networkidle' });
     
     // Check for payment container
-    const paymentContainer = await page.locator('[data-testid="payment-container"]').count();
+    const paymentContainer = await page.locator('[data-testid= "payment-container"]').count();
     logTest('Payment Page Rendering', paymentContainer > 0, 'Payment container loaded');
 
     // Test pricing cards
-    const pricingCards = await page.locator('[data-testid*="pricing-card"]').count();
+    const pricingCards = await page.locator('[data-testid*= "pricing-card"]').count();
     logTest('Pricing Cards Display', pricingCards >= 3, `Found ${pricingCards} pricing options`);
 
     // Test payment tabs
-    const paymentTabs = await page.locator('[data-testid="payment-tabs"]').count();
+    const paymentTabs = await page.locator('[data-testid= "payment-tabs"]').count();
     logTest('Payment Tabs Present', paymentTabs > 0, 'Tab navigation available');
 
     // Test plan selection
-    const freeCard = await page.locator('[data-testid="select-free"]').count();
-    const proCard = await page.locator('[data-testid="select-pro"]').count();
-    const enterpriseCard = await page.locator('[data-testid="select-enterprise"]').count();
+    const freeCard = await page.locator('[data-testid= "select-free"]').count();
+    const proCard = await page.locator('[data-testid= "select-pro"]').count();
+    const enterpriseCard = await page.locator('[data-testid= "select-enterprise"]').count();
     
     logTest('Plan Selection Buttons', (freeCard + proCard + enterpriseCard) >= 3, `Free: ${freeCard}, Pro: ${proCard}, Enterprise: ${enterpriseCard}`);
 
     // Test client access system
-    await page.click('[data-testid="client-access-tab"]').catch(() => {});
-    const clientForm = await page.locator('[data-testid="client-login"]').count();
+    await page.click('[data-testid= "client-access-tab"]').catch(() => {});
+    const clientForm = await page.locator('[data-testid= "client-login"]').count();
     logTest('Client Access System', clientForm > 0, 'Client login form available');
 
   } catch (error) {
@@ -140,7 +140,7 @@ async function testPaymentUIComponents(page) {
 
 async function testSEOOptimization(page) {
   console.log('\n🔍 TESTING SEO OPTIMIZATION');
-  console.log('============================');
+  console.log('============================ ');
 
   try {
     // Test payment page SEO
@@ -149,31 +149,31 @@ async function testSEOOptimization(page) {
     const title = await page.title();
     logTest('Payment Page Title', title.includes('Payment') || title.includes('FreeflowZee'), `Title: ${title}`);
 
-    const metaDescription = await page.locator('meta[name="description"]').getAttribute('content');
+    const metaDescription = await page.locator('meta[name= "description"]').getAttribute('content');
     logTest('Meta Description', metaDescription?.length > 50, `Length: ${metaDescription?.length || 0} chars`);
 
     // Test canonical URL
-    const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
+    const canonical = await page.locator('link[rel= "canonical"]').getAttribute('href');
     logTest('Canonical URL', canonical !== null, `Canonical: ${canonical || 'Missing'}`);
 
     // Test Open Graph tags
-    const ogTitle = await page.locator('meta[property="og:title"]').getAttribute('content');
-    const ogDescription = await page.locator('meta[property="og:description"]').getAttribute('content');
-    const ogImage = await page.locator('meta[property="og:image"]').getAttribute('content');
+    const ogTitle = await page.locator('meta[property= "og:title"]').getAttribute('content');
+    const ogDescription = await page.locator('meta[property= "og:description"]').getAttribute('content');
+    const ogImage = await page.locator('meta[property= "og:image"]').getAttribute('content');
     
     logTest('Open Graph Title', ogTitle !== null, `OG Title: ${ogTitle ? 'Present' : 'Missing'}`);
     logTest('Open Graph Description', ogDescription !== null, `OG Description: ${ogDescription ? 'Present' : 'Missing'}`);
     logTest('Open Graph Image', ogImage !== null, `OG Image: ${ogImage ? 'Present' : 'Missing'}`);
 
     // Test Twitter Card tags
-    const twitterCard = await page.locator('meta[name="twitter:card"]').getAttribute('content');
-    const twitterTitle = await page.locator('meta[name="twitter:title"]').getAttribute('content');
+    const twitterCard = await page.locator('meta[name= "twitter:card"]').getAttribute('content');
+    const twitterTitle = await page.locator('meta[name= "twitter:title"]').getAttribute('content');
     
     logTest('Twitter Card', twitterCard !== null, `Twitter Card: ${twitterCard || 'Missing'}`);
     logTest('Twitter Title', twitterTitle !== null, `Twitter Title: ${twitterTitle ? 'Present' : 'Missing'}`);
 
     // Test structured data
-    const structuredData = await page.locator('script[type="application/ld+json"]').count();
+    const structuredData = await page.locator('script[type= "application/ld+json"]').count();
     logTest('Structured Data', structuredData > 0, `${structuredData} structured data blocks found`);
 
     // Test pricing page SEO
@@ -189,59 +189,59 @@ async function testSEOOptimization(page) {
 
 async function testPaymentFlow(page) {
   console.log('\n💳 TESTING PAYMENT FLOW');
-  console.log('========================');
+  console.log('======================== ');
 
   try {
     await page.goto(`${TEST_CONFIG.baseUrl}/payment`);
-    await page.waitForSelector('[data-testid="payment-container"]', { timeout: 5000 });
+    await page.waitForSelector('[data-testid= "payment-container"]', { timeout: 5000 });
     
     // Test free tier selection (should redirect to dashboard)
-    const freeTier = await page.locator('[data-testid="select-free"]').first();
+    const freeTier = await page.locator('[data-testid= "select-free"]').first();
     if (await freeTier.count() > 0) {
       await freeTier.click();
       await page.waitForTimeout(1000);
       
       // Check if redirected or success message shown
       const currentUrl = page.url();
-      const successMessage = await page.locator('[data-testid="payment-success"]').count();
+      const successMessage = await page.locator('[data-testid= "payment-success"]').count();
       
       if (currentUrl.includes('dashboard') || successMessage > 0) {
         logTest('Free Tier Selection', true, 'Free tier activates correctly');
         // Navigate back to payment page
         await page.goto(`${TEST_CONFIG.baseUrl}/payment`);
-        await page.waitForSelector('[data-testid="payment-container"]', { timeout: 3000 });
+        await page.waitForSelector('[data-testid= "payment-container"]', { timeout: 3000 });
       } else {
         logTest('Free Tier Selection', true, 'Free tier clickable');
       }
     }
 
     // Test pro tier payment flow
-    const proTier = await page.locator('[data-testid="select-pro"]').first();
+    const proTier = await page.locator('[data-testid= "select-pro"]').first();
     if (await proTier.count() > 0) {
       await proTier.click();
       await page.waitForTimeout(1000);
       logTest('Pro Tier Selection', true, 'Pro tier selected');
       
       // Check if payment tab is active
-      const paymentTab = await page.locator('[data-testid="payment-tab"][data-state="active"]').count();
+      const paymentTab = await page.locator('[data-testid= "payment-tab"][data-state= "active"]').count();
       
       if (paymentTab > 0) {
         // Wait for payment form
         try {
-          await page.waitForSelector('[data-testid="payment-form"]', { timeout: 3000 });
-          const paymentForm = await page.locator('[data-testid="payment-form"]').count();
+          await page.waitForSelector('[data-testid= "payment-form"]', { timeout: 3000 });
+          const paymentForm = await page.locator('[data-testid= "payment-form"]').count();
           logTest('Payment Flow Testing', paymentForm > 0, 'Payment form displayed correctly');
           
           // Test form fields
-          const emailInput = await page.locator('[data-testid="email-input"]').count();
-          const nameInput = await page.locator('[data-testid="name-input"]').count();
-          const cardElement = await page.locator('[data-testid="card-element"]').count();
+          const emailInput = await page.locator('[data-testid= "email-input"]').count();
+          const nameInput = await page.locator('[data-testid= "name-input"]').count();
+          const cardElement = await page.locator('[data-testid= "card-element"]').count();
           
           logTest('Payment Form Fields', emailInput > 0 && nameInput > 0 && cardElement > 0, 
             `Email: ${emailInput}, Name: ${nameInput}, Card: ${cardElement}`);
             
           // Test payment method options
-          const submitButton = await page.locator('[data-testid="submit-payment"]').count();
+          const submitButton = await page.locator('[data-testid= "submit-payment"]').count();
           logTest('Submit Payment Button', submitButton > 0, 'Payment submission available');
           
         } catch (error) {
@@ -259,7 +259,7 @@ async function testPaymentFlow(page) {
 
 async function testEscrowIntegration(page) {
   console.log('\n🏦 TESTING ESCROW INTEGRATION');
-  console.log('==============================');
+  console.log('============================== ');
 
   try {
     // Check escrow mentions in payment page
@@ -281,7 +281,7 @@ async function testEscrowIntegration(page) {
 
 async function testStripeIntegration() {
   console.log('\n🔒 TESTING STRIPE INTEGRATION');
-  console.log('==============================');
+  console.log('============================== ');
 
   try {
     // Test Stripe configuration
@@ -302,7 +302,7 @@ async function testStripeIntegration() {
 
 async function testResponsivePaymentDesign(page) {
   console.log('\n📱 TESTING RESPONSIVE PAYMENT DESIGN');
-  console.log('=====================================');
+  console.log('===================================== ');
 
   const viewports = [
     { name: 'Mobile', width: 375, height: 667 },
@@ -316,10 +316,10 @@ async function testResponsivePaymentDesign(page) {
       await page.goto(`${TEST_CONFIG.baseUrl}/payment`);
       
       // Wait for payment container
-      await page.waitForSelector('[data-testid="payment-container"]', { timeout: 5000 });
+      await page.waitForSelector('[data-testid= "payment-container"]', { timeout: 5000 });
       
       // Check if payment form is visible and properly sized
-      const paymentContainer = await page.locator('[data-testid="payment-container"]').boundingBox();
+      const paymentContainer = await page.locator('[data-testid= "payment-container"]').boundingBox();
       const isProperlyScaled = paymentContainer && paymentContainer.width <= viewport.width;
       
       logTest(`${viewport.name} Payment Layout`, isProperlyScaled, `Container width: ${paymentContainer?.width || 'Unknown'}`);
@@ -344,10 +344,10 @@ async function testResponsivePaymentDesign(page) {
 }
 
 async function main() {
-  console.log('🎉 ========================================');
+  console.log('🎉 ======================================== ');
   console.log('   FREEFLOWZEE PAYMENT SYSTEMS TEST SUITE');
   console.log('   Complete Payment & SEO Validation');
-  console.log('========================================');
+  console.log('======================================== ');
 
   const browser = await chromium.launch({ 
     headless: false,
@@ -374,9 +374,9 @@ async function main() {
   }
 
   // Generate final report
-  console.log('\n📊 ========================================');
+  console.log('\n📊 ======================================== ');
   console.log('   FINAL PAYMENT SYSTEMS TEST RESULTS');
-  console.log('========================================');
+  console.log('======================================== ');
   console.log(`✅ Tests Passed: ${testResults.passed}/${testResults.total} (${Math.round(testResults.passed/testResults.total*100)}%)`);
   console.log(`❌ Tests Failed: ${testResults.failed}/${testResults.total}`);
   

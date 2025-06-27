@@ -77,8 +77,7 @@ Disallow: /`
 
   return new NextResponse(robots, {
     headers: {
-      'Content-Type': 'text/plain',
-      'Cache-Control': 'public, max-age=86400, s-maxage=86400', // 24 hours
+      'Content-Type': 'text/plain', 'Cache-Control': 'public, max-age=86400, s-maxage=86400', // 24 hours
     },
   })
 } 

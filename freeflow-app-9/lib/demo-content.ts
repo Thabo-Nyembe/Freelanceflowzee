@@ -50,10 +50,10 @@ export interface DemoProject {
   dueDate: string;
   images: string[];
   thumbnail: string;
-  files: any[];
-  milestones: any[];
-  comments: any[];
-  attachments: any[];
+  files: Record<string, unknown>[];
+  milestones: Record<string, unknown>[];
+  comments: Record<string, unknown>[];
+  attachments: Record<string, unknown>[];
 }
 
 export interface DemoPost {
@@ -95,8 +95,8 @@ export interface DemoTransaction {
   id: string;
   projectId: string;
   projectTitle: string;
-  client: any;
-  freelancer: any;
+  client: Record<string, unknown>;
+  freelancer: Record<string, unknown>;
   amount: number;
   currency: string;
   status: string;
@@ -187,14 +187,7 @@ class DemoContentManager {
     console.log('🎭 Initializing Demo Content Manager...');
 
     // Pre-load all content files
-    const contentFiles = [
-      'enhanced-users.json',
-      'enhanced-projects.json', 
-      'enhanced-posts.json',
-      'enhanced-files.json',
-      'enhanced-transactions.json',
-      'enhanced-analytics.json',
-      'enhanced-images.json'
+    const contentFiles = ['enhanced-users.json', 'enhanced-projects.json', 'enhanced-posts.json', 'enhanced-files.json', 'enhanced-transactions.json', 'enhanced-analytics.json', 'enhanced-images.json'
     ];
 
     for (const file of contentFiles) {
@@ -280,7 +273,7 @@ class DemoContentManager {
   }
 
   // Images for Media Gallery, Project Showcases
-  async getDemoImages(limit?: number): Promise<any[]> {
+  async getDemoImages(limit?: number): Promise<unknown[]> {
     const images = await this.loadContentFile('enhanced-images.json') || [];
     return limit ? images.slice(0, limit) : images;
   }

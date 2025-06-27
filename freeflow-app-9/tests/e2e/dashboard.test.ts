@@ -1,117 +1,117 @@
-import { test, expect } from '@playwright/test';
-import { TestHelpers } from '../utils/test-helpers';
+import { test, expect } from &apos;@playwright/test&apos;;
+import { TestHelpers } from &apos;../utils/test-helpers&apos;;
 
-test.describe('Dashboard Tests', () => {
+test.describe(&apos;Dashboard Tests&apos;, () => {
   let helpers: TestHelpers;
 
   test.beforeEach(async ({ page }) => {
     helpers = new TestHelpers(page);
     // Authenticate before each test
-    await helpers.authenticateUser('test@freeflowzee.com', 'testpassword');
+    await helpers.authenticateUser(&apos;test@freeflowzee.com&apos;, &apos;testpassword&apos;);
   });
 
-  test('should load dashboard page successfully', async ({ page }) => {
-    await page.goto('/dashboard');
+  test(&apos;should load dashboard page successfully&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard&apos;);
     await expect(page).toHaveURL(/.*dashboard/);
-    await expect(page.locator('h1')).toContainText(/Dashboard|Welcome/);
+    await expect(page.locator(&apos;h1&apos;)).toContainText(/Dashboard|Welcome/);
   });
 
-  test('should display user profile information', async ({ page }) => {
-    await page.goto('/dashboard');
-    await expect(page.locator('[data-testid="user-profile"]')).toBeVisible();
-    await expect(page.locator('[data-testid="user-email"]')).toContainText('test@freeflowzee.com');
+  test(&apos;should display user profile information&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard&apos;);
+    await expect(page.locator(&apos;[data-testid=&quot;user-profile&quot;]&apos;)).toBeVisible();
+    await expect(page.locator(&apos;[data-testid=&quot;user-email&quot;]&apos;)).toContainText(&apos;test@freeflowzee.com&apos;);
   });
 
-  test('should navigate to different dashboard sections', async ({ page }) => {
-    await page.goto('/dashboard');
+  test(&apos;should navigate to different dashboard sections&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard&apos;);
     
     // Test Projects Hub navigation
-    await page.click('[data-testid="projects-hub-link"]');
+    await page.click(&apos;[data-testid=&quot;projects-hub-link&quot;]&apos;);
     await expect(page).toHaveURL(/.*projects-hub/);
     
     // Test Files & Escrow navigation
-    await page.click('[data-testid="files-escrow-link"]');
+    await page.click(&apos;[data-testid=&quot;files-escrow-link&quot;]&apos;);
     await expect(page).toHaveURL(/.*files-escrow/);
     
     // Test Video Studio navigation
-    await page.click('[data-testid="video-studio-link"]');
+    await page.click(&apos;[data-testid=&quot;video-studio-link&quot;]&apos;);
     await expect(page).toHaveURL(/.*video-studio/);
   });
 
-  test('should handle notifications', async ({ page }) => {
-    await page.goto('/dashboard');
+  test(&apos;should handle notifications&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard&apos;);
     
     // Open notifications panel
-    await page.click('[data-testid="notifications-button"]');
-    await expect(page.locator('[data-testid="notifications-panel"]')).toBeVisible();
+    await page.click(&apos;[data-testid=&quot;notifications-button&quot;]&apos;);
+    await expect(page.locator(&apos;[data-testid=&quot;notifications-panel&quot;]&apos;)).toBeVisible();
     
     // Close notifications panel
-    await page.click('[data-testid="close-notifications"]');
-    await expect(page.locator('[data-testid="notifications-panel"]')).not.toBeVisible();
+    await page.click(&apos;[data-testid=&quot;close-notifications&quot;]&apos;);
+    await expect(page.locator(&apos;[data-testid=&quot;notifications-panel&quot;]&apos;)).not.toBeVisible();
   });
 
-  test('should handle user settings', async ({ page }) => {
-    await page.goto('/dashboard');
+  test(&apos;should handle user settings&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard&apos;);
     
     // Open settings panel
-    await page.click('[data-testid="settings-button"]');
-    await expect(page.locator('[data-testid="settings-panel"]')).toBeVisible();
+    await page.click(&apos;[data-testid=&quot;settings-button&quot;]&apos;);
+    await expect(page.locator(&apos;[data-testid=&quot;settings-panel&quot;]&apos;)).toBeVisible();
     
     // Test theme toggle
-    await page.click('[data-testid="theme-toggle"]');
+    await page.click(&apos;[data-testid=&quot;theme-toggle&quot;]&apos;);
     const isDarkMode = await page.evaluate(() => {
-      return document.documentElement.classList.contains('dark');
+      return document.documentElement.classList.contains(&apos;dark&apos;);
     });
     expect(isDarkMode).toBeTruthy();
   });
 
-  test('should handle search functionality', async ({ page }) => {
-    await page.goto('/dashboard');
+  test(&apos;should handle search functionality&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard&apos;);
     
     // Open search
-    await page.click('[data-testid="search-button"]');
-    await expect(page.locator('[data-testid="search-modal"]')).toBeVisible();
+    await page.click(&apos;[data-testid=&quot;search-button&quot;]&apos;);
+    await expect(page.locator(&apos;[data-testid=&quot;search-modal&quot;]&apos;)).toBeVisible();
     
     // Test search input
-    await page.fill('[data-testid="search-input"]', 'test project');
-    await page.waitForSelector('[data-testid="search-results"]');
+    await page.fill(&apos;[data-testid=&quot;search-input&quot;]&apos;, &apos;test project&apos;);
+    await page.waitForSelector(&apos;[data-testid=&quot;search-results&quot;]&apos;);
     
     // Verify search results
-    const resultsCount = await page.locator('[data-testid="search-result-item"]').count();
+    const resultsCount = await page.locator(&apos;[data-testid=&quot;search-result-item&quot;]&apos;).count();
     expect(resultsCount).toBeGreaterThan(0);
   });
 
-  test('should handle file uploads', async ({ page }) => {
-    await page.goto('/dashboard');
+  test(&apos;should handle file uploads&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard&apos;);
     
     // Navigate to files section
-    await page.click('[data-testid="files-escrow-link"]');
+    await page.click(&apos;[data-testid=&quot;files-escrow-link&quot;]&apos;);
     
     // Test file upload
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.locator(&apos;input[type=&quot;file&quot;]&apos;);
     await fileInput.setInputFiles({
-      name: 'test.txt',
-      mimeType: 'text/plain',
-      buffer: Buffer.from('Test file content')
+      name: &apos;test.txt&apos;,
+      mimeType: &apos;text/plain&apos;,
+      buffer: Buffer.from(&apos;Test file content&apos;)
     });
     
     // Verify upload success
-    await expect(page.locator('[data-testid="upload-success"]')).toBeVisible();
+    await expect(page.locator(&apos;[data-testid=&quot;upload-success&quot;]&apos;)).toBeVisible();
   });
 
-  test('should handle project creation', async ({ page }) => {
-    await page.goto('/dashboard');
+  test(&apos;should handle project creation&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard&apos;);
     
     // Navigate to projects hub
-    await page.click('[data-testid="projects-hub-link"]');
+    await page.click(&apos;[data-testid=&quot;projects-hub-link&quot;]&apos;);
     
     // Create new project
-    await page.click('[data-testid="create-project-button"]');
-    await page.fill('[data-testid="project-name-input"]', 'Test Project');
-    await page.fill('[data-testid="project-description-input"]', 'Test Description');
-    await page.click('[data-testid="submit-project"]');
+    await page.click(&apos;[data-testid=&quot;create-project-button&quot;]&apos;);
+    await page.fill(&apos;[data-testid=&quot;project-name-input&quot;]&apos;, &apos;Test Project&apos;);
+    await page.fill(&apos;[data-testid=&quot;project-description-input&quot;]&apos;, &apos;Test Description&apos;);
+    await page.click(&apos;[data-testid=&quot;submit-project&quot;]&apos;);
     
     // Verify project creation
-    await expect(page.locator('text=Test Project')).toBeVisible();
+    await expect(page.locator(&apos;text=Test Project&apos;)).toBeVisible();
   });
 }); 

@@ -1,14 +1,14 @@
-import { Page, expect } from '@playwright/test';
+import { Page, expect } from &apos;@playwright/test&apos;;
 
 export class PageHelpers {
   constructor(private page: Page) {}
 
   async waitForPageReady() {
-    await this.page.waitForLoadState('networkidle');
-    await this.page.waitForLoadState('domcontentloaded');
+    await this.page.waitForLoadState(&apos;networkidle&apos;);
+    await this.page.waitForLoadState(&apos;domcontentloaded&apos;);
   }
 
-  async setViewportSize(size: 'mobile' | 'tablet' | 'desktop') {
+  async setViewportSize(size: &apos;mobile&apos; | &apos;tablet&apos; | &apos;desktop&apos;) {
     const viewports = {
       mobile: { width: 375, height: 812 },
       tablet: { width: 768, height: 1024 },
@@ -18,11 +18,11 @@ export class PageHelpers {
     await this.page.waitForTimeout(1000); // Wait for responsive changes
   }
 
-  async toggleTheme(theme: 'light' | 'dark' | 'system') {
-    const themeToggle = this.page.locator('button[aria-label="Toggle theme"]');
+  async toggleTheme(theme: &apos;light&apos; | &apos;dark&apos; | &apos;system&apos;) {
+    const themeToggle = this.page.locator(&apos;button[aria-label=&quot;Toggle theme&quot;]&apos;);
     await themeToggle.click();
     
-    const themeOption = this.page.locator('div[role="menuitem"]', { hasText: theme.charAt(0).toUpperCase() + theme.slice(1) });
+    const themeOption = this.page.locator(&apos;div[role=&quot;menuitem&quot;]&apos;, { hasText: theme.charAt(0).toUpperCase() + theme.slice(1) });
     await themeOption.click();
   }
 
@@ -32,9 +32,9 @@ export class PageHelpers {
   }
 
   async openMobileMenu() {
-    const mobileMenuButton = this.page.locator('button', { has: this.page.locator('svg[data-testid="menu-icon"]') });
+    const mobileMenuButton = this.page.locator(&apos;button&apos;, { has: this.page.locator(&apos;svg[data-testid=&quot;menu-icon&quot;]&apos;) });
     await mobileMenuButton.click();
-    const mobileNav = this.page.locator('div[role="navigation"]');
+    const mobileNav = this.page.locator(&apos;div[role=&quot;navigation&quot;]&apos;);
     await expect(mobileNav).toBeVisible();
   }
 

@@ -1,29 +1,29 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, Page } from &apos;@playwright/test&apos;;
 
 interface ViewportInfo {
   width: number;
   height: number;
-  category: 'desktop' | 'tablet' | 'mobile';
+  category: &apos;desktop&apos; | &apos;tablet&apos; | &apos;mobile&apos;;
   name: string;
 }
 
 // Helper function to categorize viewport
 function getViewportCategory(page: Page): ViewportInfo {
   const viewport = page.viewportSize();
-  if (!viewport) throw new Error('No viewport size available');
+  if (!viewport) throw new Error(&apos;No viewport size available&apos;);
   
-  let category: 'desktop' | 'tablet' | 'mobile';
-  let name = '';
+  let category: &apos;desktop&apos; | &apos;tablet&apos; | &apos;mobile&apos;;
+  let name = '&apos;;'
   
   if (viewport.width >= 1024) {
-    category = 'desktop';
-    name = viewport.width >= 1920 ? 'large-desktop' : 'standard-desktop';
+    category = &apos;desktop&apos;;
+    name = viewport.width >= 1920 ? &apos;large-desktop&apos; : &apos;standard-desktop&apos;;
   } else if (viewport.width >= 768) {
-    category = 'tablet';
-    name = 'tablet';
+    category = &apos;tablet&apos;;
+    name = &apos;tablet&apos;;
   } else {
-    category = 'mobile';
-    name = viewport.width <= 375 ? 'small-mobile' : 'mobile';
+    category = &apos;mobile&apos;;
+    name = viewport.width <= 375 ? &apos;small-mobile&apos; : &apos;mobile&apos;;
   }
   
   return { ...viewport, category, name };
@@ -31,22 +31,22 @@ function getViewportCategory(page: Page): ViewportInfo {
 
 // Helper function to wait for page load and hydration
 async function waitForPageReady(page: Page) {
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState(&apos;networkidle&apos;);
   await page.waitForFunction(() => {
-    return typeof window !== 'undefined' && document.readyState === 'complete';
+    return typeof window !== &apos;undefined&apos; && document.readyState === &apos;complete&apos;;
   });
   // Wait for React hydration
   await page.waitForTimeout(1000);
 }
 
-test.describe('Responsive UI/UX Testing Suite', () => {
+test.describe(&apos;Responsive UI/UX Testing Suite&apos;, () => {
   
-  test.describe('Landing Page Responsive Design', () => {
+  test.describe(&apos;Landing Page Responsive Design&apos;, () => {
     
-    test('should display properly on all viewport sizes', async ({ page }) => {
+    test(&apos;should display properly on all viewport sizes&apos;, async ({ page }) => {
       const viewport = getViewportCategory(page);
       
-      await page.goto('/');
+      await page.goto(&apos;/');'
       await waitForPageReady(page);
       
       // Take screenshot for visual regression testing
@@ -56,27 +56,27 @@ test.describe('Responsive UI/UX Testing Suite', () => {
       });
       
       // Test hero section visibility and layout
-      const heroSection = page.locator('[data-testid="hero-section"], .hero, [class*="hero"]').first();
+      const heroSection = page.locator(&apos;[data-testid=&quot;hero-section&quot;], .hero, [class*=&quot;hero&quot;]&apos;).first();
       await expect(heroSection).toBeVisible();
       
       // Test navigation accessibility
-      if (viewport.category === 'mobile') {
+      if (viewport.category === &apos;mobile&apos;) {
         // Mobile navigation should have hamburger menu
-        const mobileMenu = page.locator('[data-testid="mobile-menu"], [aria-label*="menu"], [class*="mobile"]').first();
+        const mobileMenu = page.locator(&apos;[data-testid=&quot;mobile-menu&quot;], [aria-label*=&quot;menu&quot;], [class*=&quot;mobile&quot;]&apos;).first();
         await expect(mobileMenu).toBeVisible();
       } else {
         // Desktop navigation should show full menu
-        const desktopNav = page.locator('[data-testid="desktop-nav"], nav').first();
+        const desktopNav = page.locator(&apos;[data-testid=&quot;desktop-nav&quot;], nav&apos;).first();
         await expect(desktopNav).toBeVisible();
       }
       
       // Test call-to-action buttons
-      const ctaButtons = page.locator('button:has-text("Creator Login"), button:has-text("Watch Demo"), button:has-text("View Projects")');
+      const ctaButtons = page.locator(&apos;button:has-text(&quot;Creator Login&quot;), button:has-text(&quot;Watch Demo&quot;), button:has-text(&quot;View Projects&quot;)&apos;);
       const ctaCount = await ctaButtons.count();
       expect(ctaCount).toBeGreaterThan(0);
       
       // Verify buttons are properly sized for touch on mobile
-      if (viewport.category === 'mobile') {
+      if (viewport.category === &apos;mobile&apos;) {
         for (let i = 0; i < ctaCount; i++) {
           const button = ctaButtons.nth(i);
           const boundingBox = await button.boundingBox();
@@ -89,20 +89,20 @@ test.describe('Responsive UI/UX Testing Suite', () => {
       console.log(`✓ Landing page tested successfully on ${viewport.category} (${viewport.width}x${viewport.height})`);
     });
     
-    test('should handle navigation interactions properly', async ({ page }) => {
+    test(&apos;should handle navigation interactions properly&apos;, async ({ page }) => {
       const viewport = getViewportCategory(page);
       
-      await page.goto('/');
+      await page.goto(&apos;/');'
       await waitForPageReady(page);
       
-      if (viewport.category === 'mobile') {
+      if (viewport.category === &apos;mobile&apos;) {
         // Test mobile menu functionality
-        const mobileMenuButton = page.locator('[data-testid="mobile-menu"]').first();
+        const mobileMenuButton = page.locator(&apos;[data-testid=&quot;mobile-menu&quot;]&apos;).first();
         if (await mobileMenuButton.isVisible()) {
           await mobileMenuButton.click({ force: true }); // Force click to bypass portal issues
           await page.waitForTimeout(500); // Animation time
           
-          const menuPanel = page.locator('[data-testid="mobile-menu-content"]').first();
+          const menuPanel = page.locator(&apos;[data-testid=&quot;mobile-menu-content&quot;]&apos;).first();
           await expect(menuPanel).toBeVisible();
           
           // Close menu after testing
@@ -111,7 +111,7 @@ test.describe('Responsive UI/UX Testing Suite', () => {
       }
       
       // Test login button navigation
-      const loginButton = page.locator('button:has-text("Creator Login"), a:has-text("Login")').first();
+      const loginButton = page.locator(&apos;button:has-text(&quot;Creator Login&quot;), a:has-text(&quot;Login&quot;)&apos;).first();
       if (await loginButton.isVisible()) {
         await loginButton.click();
         await waitForPageReady(page);
@@ -122,15 +122,15 @@ test.describe('Responsive UI/UX Testing Suite', () => {
     });
   });
   
-  test.describe('Dashboard Responsive Layout', () => {
+  test.describe(&apos;Dashboard Responsive Layout&apos;, () => {
     
     test.beforeEach(async ({ page }) => {
       // Navigate to dashboard (authentication bypassed in test mode)
-      await page.goto('/dashboard');
+      await page.goto(&apos;/dashboard&apos;);
       await waitForPageReady(page);
     });
     
-    test('should display dashboard layout correctly', async ({ page }) => {
+    test(&apos;should display dashboard layout correctly&apos;, async ({ page }) => {
       const viewport = getViewportCategory(page);
       
       // Take screenshot for visual regression
@@ -139,9 +139,9 @@ test.describe('Responsive UI/UX Testing Suite', () => {
         fullPage: true 
       });
       
-      if (viewport.category === 'desktop') {
+      if (viewport.category === &apos;desktop&apos;) {
         // Desktop should show sidebar navigation
-        const sidebar = page.locator('[data-testid="dashboard-sidebar"], [class*="sidebar"], aside').first();
+        const sidebar = page.locator(&apos;[data-testid=&quot;dashboard-sidebar&quot;], [class*=&quot;sidebar&quot;], aside&apos;).first();
         await expect(sidebar).toBeVisible();
         
         // Check sidebar width
@@ -152,8 +152,8 @@ test.describe('Responsive UI/UX Testing Suite', () => {
         }
       } else {
         // Mobile/tablet should show bottom navigation or top bar
-        const mobileNav = page.locator('[data-testid="mobile-nav"], [class*="bottom-nav"], [class*="mobile-nav"]').first();
-        const topBar = page.locator('[data-testid="top-bar"], [class*="top-bar"]').first();
+        const mobileNav = page.locator(&apos;[data-testid=&quot;mobile-nav&quot;], [class*=&quot;bottom-nav&quot;], [class*=&quot;mobile-nav&quot;]&apos;).first();
+        const topBar = page.locator(&apos;[data-testid=&quot;top-bar&quot;], [class*=&quot;top-bar&quot;]&apos;).first();
         
         const mobileNavVisible = await mobileNav.isVisible();
         const topBarVisible = await topBar.isVisible();
@@ -162,11 +162,11 @@ test.describe('Responsive UI/UX Testing Suite', () => {
       }
       
       // Test main content area
-      const mainContent = page.locator('[data-testid="main-content"], main, [class*="main"]').first();
+      const mainContent = page.locator(&apos;[data-testid=&quot;main-content&quot;], main, [class*=&quot;main&quot;]&apos;).first();
       await expect(mainContent).toBeVisible();
       
       // Test responsive cards/stats
-      const statsCards = page.locator('[data-testid="stats-card"], [class*="stats"], [class*="metric"]');
+      const statsCards = page.locator(&apos;[data-testid=&quot;stats-card&quot;], [class*=&quot;stats&quot;], [class*=&quot;metric&quot;]&apos;);
       const cardCount = await statsCards.count();
       
       if (cardCount > 0) {
@@ -175,7 +175,7 @@ test.describe('Responsive UI/UX Testing Suite', () => {
           const card = statsCards.nth(i);
           const cardBox = await card.boundingBox();
           if (cardBox) {
-            if (viewport.category === 'mobile') {
+            if (viewport.category === &apos;mobile&apos;) {
               // Mobile cards should stack or use smaller grid
               expect(cardBox.width).toBeGreaterThanOrEqual(viewport.width * 0.8);
             } else {
@@ -189,19 +189,19 @@ test.describe('Responsive UI/UX Testing Suite', () => {
       console.log(`✓ Dashboard layout tested on ${viewport.category} (${viewport.width}x${viewport.height})`);
     });
     
-    test('should handle dashboard navigation properly', async ({ page }) => {
+    test(&apos;should handle dashboard navigation properly&apos;, async ({ page }) => {
       const viewport = getViewportCategory(page);
       
       // Test navigation to different dashboard sections
       const navItems = [
-        'Projects Hub',
-        'Community',
-        'Collaboration',
-        'My Day'
+        &apos;Projects Hub&apos;,
+        &apos;Community&apos;,
+        &apos;Collaboration&apos;,
+        &apos;My Day&apos;
       ];
       
       for (const navItem of navItems) {
-        const navLink = page.locator(`[data-testid="nav-${navItem.toLowerCase().replace(' ', '-')}"], a:has-text("${navItem}"), button:has-text("${navItem}")`).first();
+        const navLink = page.locator(`[data-testid=&quot;nav-${navItem.toLowerCase().replace(&apos; ', &apos;-')}&quot;], a:has-text(&quot;${navItem}&quot;), button:has-text(&quot;${navItem}&quot;)`).first();
         
         if (await navLink.isVisible()) {
           await navLink.click();
@@ -209,11 +209,11 @@ test.describe('Responsive UI/UX Testing Suite', () => {
           
           // Verify navigation worked
           const currentUrl = page.url();
-          expect(currentUrl).toMatch(new RegExp(navItem.toLowerCase().replace(' ', '-')));
+          expect(currentUrl).toMatch(new RegExp(navItem.toLowerCase().replace(&apos; ', &apos;-')));
           
           // Take screenshot of each section
           await page.screenshot({ 
-            path: `test-results/screenshots/dashboard-${navItem.toLowerCase().replace(' ', '-')}-${viewport.name}.png`,
+            path: `test-results/screenshots/dashboard-${navItem.toLowerCase().replace(&apos; ', &apos;-')}-${viewport.name}.png`,
             fullPage: true 
           });
           
@@ -225,12 +225,12 @@ test.describe('Responsive UI/UX Testing Suite', () => {
     });
   });
   
-  test.describe('Component Responsive Behavior', () => {
+  test.describe(&apos;Component Responsive Behavior&apos;, () => {
     
-    test('should render forms responsively', async ({ page }) => {
+    test(&apos;should render forms responsively&apos;, async ({ page }) => {
       const viewport = getViewportCategory(page);
       
-      await page.goto('/login');
+      await page.goto(&apos;/login&apos;);
       await waitForPageReady(page);
       
       // Take screenshot
@@ -239,12 +239,12 @@ test.describe('Responsive UI/UX Testing Suite', () => {
       });
       
       // Test form layout
-      const loginForm = page.locator('form').first();
+      const loginForm = page.locator(&apos;form&apos;).first();
       await expect(loginForm).toBeVisible();
       
       const formBox = await loginForm.boundingBox();
       if (formBox) {
-        if (viewport.category === 'mobile') {
+        if (viewport.category === &apos;mobile&apos;) {
           // Mobile forms should use most of screen width
           expect(formBox.width).toBeGreaterThanOrEqual(viewport.width * 0.8);
         } else {
@@ -254,7 +254,7 @@ test.describe('Responsive UI/UX Testing Suite', () => {
       }
       
       // Test input field sizing
-      const inputs = page.locator('input[type="email"], input[type="password"]');
+      const inputs = page.locator(&apos;input[type=&quot;email&quot;], input[type=&quot;password&quot;]&apos;);
       const inputCount = await inputs.count();
       
       for (let i = 0; i < inputCount; i++) {
@@ -262,7 +262,7 @@ test.describe('Responsive UI/UX Testing Suite', () => {
         const inputBox = await input.boundingBox();
         if (inputBox) {
           expect(inputBox.height).toBeGreaterThanOrEqual(40); // Minimum input height
-          if (viewport.category === 'mobile') {
+          if (viewport.category === &apos;mobile&apos;) {
             expect(inputBox.height).toBeGreaterThanOrEqual(44); // Touch-friendly height
           }
         }
@@ -271,14 +271,14 @@ test.describe('Responsive UI/UX Testing Suite', () => {
       console.log(`✓ Form responsiveness tested on ${viewport.category}`);
     });
     
-    test('should handle modal dialogs responsively', async ({ page }) => {
+    test(&apos;should handle modal dialogs responsively&apos;, async ({ page }) => {
       const viewport = getViewportCategory(page);
       
-      await page.goto('/dashboard/projects-hub');
+      await page.goto(&apos;/dashboard/projects-hub&apos;);
       await waitForPageReady(page);
       
       // Look for modal triggers
-      const modalTriggers = page.locator('button:has-text("New"), button:has-text("Add"), button:has-text("Create")');
+      const modalTriggers = page.locator(&apos;button:has-text(&quot;New&quot;), button:has-text(&quot;Add&quot;), button:has-text(&quot;Create&quot;)&apos;);
       const triggerCount = await modalTriggers.count();
       
       if (triggerCount > 0) {
@@ -286,11 +286,11 @@ test.describe('Responsive UI/UX Testing Suite', () => {
         await page.waitForTimeout(500);
         
         // Check if modal appeared
-        const modal = page.locator('[role="dialog"], [class*="modal"], [class*="dialog"]').first();
+        const modal = page.locator(&apos;[role=&quot;dialog&quot;], [class*=&quot;modal&quot;], [class*=&quot;dialog&quot;]&apos;).first();
         if (await modal.isVisible()) {
           const modalBox = await modal.boundingBox();
           if (modalBox) {
-            if (viewport.category === 'mobile') {
+            if (viewport.category === &apos;mobile&apos;) {
               // Mobile modals should be full-screen or nearly full-screen
               expect(modalBox.width).toBeGreaterThanOrEqual(viewport.width * 0.9);
             } else {
@@ -309,22 +309,22 @@ test.describe('Responsive UI/UX Testing Suite', () => {
     });
   });
   
-  test.describe('Touch and Interaction Testing', () => {
+  test.describe(&apos;Touch and Interaction Testing&apos;, () => {
     
-    test('should handle touch interactions on mobile devices', async ({ page }) => {
+    test(&apos;should handle touch interactions on mobile devices&apos;, async ({ page }) => {
       const viewport = getViewportCategory(page);
       
       // Only run touch tests on mobile/tablet
-      if (viewport.category === 'desktop') {
-        test.skip('Touch testing only applicable to mobile/tablet devices');
+      if (viewport.category === &apos;desktop&apos;) {
+        test.skip(&apos;Touch testing only applicable to mobile/tablet devices&apos;);
         return;
       }
       
-      await page.goto('/dashboard/collaboration');
+      await page.goto(&apos;/dashboard/collaboration&apos;);
       await waitForPageReady(page);
       
       // Test touch targets
-      const touchTargets = page.locator('button, a, [role="button"]');
+      const touchTargets = page.locator(&apos;button, a, [role=&quot;button&quot;]&apos;);
       const targetCount = await touchTargets.count();
       
       for (let i = 0; i < Math.min(targetCount, 10); i++) {
@@ -339,7 +339,7 @@ test.describe('Responsive UI/UX Testing Suite', () => {
       }
       
       // Test swipe gestures if applicable
-      const swipeableElements = page.locator('[class*="swipe"], [class*="carousel"], [class*="slider"]');
+      const swipeableElements = page.locator(&apos;[class*=&quot;swipe&quot;], [class*=&quot;carousel&quot;], [class*=&quot;slider&quot;]&apos;);
       const swipeCount = await swipeableElements.count();
       
       if (swipeCount > 0) {
@@ -358,21 +358,21 @@ test.describe('Responsive UI/UX Testing Suite', () => {
     });
   });
   
-  test.describe('Performance and Accessibility', () => {
+  test.describe(&apos;Performance and Accessibility&apos;, () => {
     
-    test('should meet accessibility standards', async ({ page }) => {
+    test(&apos;should meet accessibility standards&apos;, async ({ page }) => {
       const viewport = getViewportCategory(page);
       
-      await page.goto('/dashboard');
+      await page.goto(&apos;/dashboard&apos;);
       await waitForPageReady(page);
       
       // Test keyboard navigation - target specific focusable elements
-      const focusableElements = page.locator('button, a, input, [tabindex]:not([tabindex="-1"])').first();
+      const focusableElements = page.locator(&apos;button, a, input, [tabindex]:not([tabindex=&quot;-1&quot;])&apos;).first();
       await focusableElements.focus();
       await expect(focusableElements).toBeVisible();
       
       // Test contrast and readability
-      const textElements = page.locator('h1, h2, h3, p, span, div').filter({ hasText: /\S/ });
+      const textElements = page.locator(&apos;h1, h2, h3, p, span, div&apos;).filter({ hasText: /\S/ });
       const textCount = await textElements.count();
       
       for (let i = 0; i < Math.min(textCount, 5); i++) {
@@ -395,11 +395,11 @@ test.describe('Responsive UI/UX Testing Suite', () => {
       console.log(`✓ Accessibility tested on ${viewport.category}`);
     });
     
-    test('should have reasonable load times', async ({ page }) => {
+    test(&apos;should have reasonable load times&apos;, async ({ page }) => {
       const viewport = getViewportCategory(page);
       
       const startTime = Date.now();
-      await page.goto('/dashboard/projects-hub');
+      await page.goto(&apos;/dashboard/projects-hub&apos;);
       await waitForPageReady(page);
       const loadTime = Date.now() - startTime;
       
@@ -412,12 +412,12 @@ test.describe('Responsive UI/UX Testing Suite', () => {
           let cls = 0;
           new PerformanceObserver((list) => {
             for (const entry of list.getEntries()) {
-              if (entry.entryType === 'layout-shift' && !entry.hadRecentInput) {
+              if (entry.entryType === &apos;layout-shift&apos; && !entry.hadRecentInput) {
                 cls += entry.value;
               }
             }
             resolve(cls);
-          }).observe({ entryTypes: ['layout-shift'] });
+          }).observe({ entryTypes: [&apos;layout-shift&apos;] });
           
           setTimeout(() => resolve(cls), 3000);
         });
@@ -429,16 +429,16 @@ test.describe('Responsive UI/UX Testing Suite', () => {
     });
   });
   
-  test.describe('Cross-viewport Consistency', () => {
+  test.describe(&apos;Cross-viewport Consistency&apos;, () => {
     
-    test('should maintain consistent branding and styling', async ({ page }) => {
+    test(&apos;should maintain consistent branding and styling&apos;, async ({ page }) => {
       const viewport = getViewportCategory(page);
       
-      await page.goto('/');
+      await page.goto(&apos;/');'
       await waitForPageReady(page);
       
       // Test logo visibility and sizing
-      const logo = page.locator('[data-testid="logo"], [alt*="logo"], [class*="logo"]').first();
+      const logo = page.locator(&apos;[data-testid=&quot;logo&quot;], [alt*=&quot;logo&quot;], [class*=&quot;logo&quot;]&apos;).first();
       if (await logo.isVisible()) {
         const logoBox = await logo.boundingBox();
         if (logoBox) {
@@ -448,7 +448,7 @@ test.describe('Responsive UI/UX Testing Suite', () => {
       }
       
       // Test color scheme consistency
-      const primaryElements = page.locator('button[class*="primary"], .btn-primary, [class*="primary-button"]');
+      const primaryElements = page.locator(&apos;button[class*=&quot;primary&quot;], .btn-primary, [class*=&quot;primary-button&quot;]&apos;);
       const primaryCount = await primaryElements.count();
       
       if (primaryCount > 0) {

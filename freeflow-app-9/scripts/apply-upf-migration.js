@@ -25,13 +25,13 @@ async function applyUPFMigration() {
   try {
     // Split the migration into individual statements
     const statements = migrationSQL
-      .split(';')
+      .split(';')'
       .map(s => s.trim())
       .filter(s => s.length > 0);
     
     for (const statement of statements) {
       if (statement.trim()) {
-        console.log('Executing:', statement.substring(0, 50) + '...');
+        console.log('Executing: ', statement.substring(0, 50) + '...');
         const { error } = await supabase.rpc('exec_sql', { sql: statement });
         
         if (error) {
@@ -39,11 +39,11 @@ async function applyUPFMigration() {
           // Try direct query for DDL statements
           const { error: directError } = await supabase
             .from('information_schema.tables')
-            .select('*')
+            .select('*')'
             .limit(1);
           
           if (directError) {
-            console.error('Direct query also failed:', directError);
+            console.error('Direct query also failed: ', directError);
           } else {
             console.log('Statement executed successfully via direct method');
           }
@@ -162,11 +162,11 @@ async function applyUPFMigrationDirect() {
     // Test the setup
     const { data, error } = await supabase
       .from('upf_comments')
-      .select('*')
+      .select('*')'
       .limit(1);
     
     if (error) {
-      console.error('❌ Error testing table access:', error);
+      console.error('❌ Error testing table access: ', error);
     } else {
       console.log('✅ Table access test successful');
     }

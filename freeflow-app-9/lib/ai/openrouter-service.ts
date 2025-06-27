@@ -29,14 +29,14 @@ class OpenRouterService {
   private defaultModel: string
 
   constructor() {
-    this.apiKey = process.env.OPENROUTER_API_KEY || ''
+    this.apiKey = process.env.OPENROUTER_API_KEY || '
     this.baseUrl = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1'
     this.defaultModel = process.env.OPENROUTER_MODEL || 'openrouter/auto'
   }
 
   async generateResponse(
     prompt: string, 
-    context?: any,
+    context?: Record<string, unknown>,
     model?: string
   ): Promise<string> {
     if (!this.apiKey) {
@@ -50,7 +50,7 @@ class OpenRouterService {
           content: `You are an expert AI assistant for FreeflowZee, a freelance management platform. 
           Help users with business optimization, project management, client relationships, and productivity.
           Provide actionable, specific advice with clear next steps.
-          ${context ? `Context: ${JSON.stringify(context)}` : ''}`
+          ${context ? `Context: ${JSON.stringify(context)}` : ''}`'
         },
         {
           role: 'user',
@@ -61,10 +61,7 @@ class OpenRouterService {
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-          'X-Title': 'FreeflowZee AI Assistant'
+          'Authorization': `Bearer ${this.apiKey}`, 'Content-Type': 'application/json', 'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000', 'X-Title': 'FreeflowZee AI Assistant'
         },
         body: JSON.stringify({
           model: model || this.defaultModel,
@@ -94,7 +91,7 @@ class OpenRouterService {
     }
   }
 
-  async generateBusinessInsights(businessData: any): Promise<string> {
+  async generateBusinessInsights(businessData: Record<string, unknown>): Promise<string> {
     const prompt = `Analyze this freelance business data and provide actionable insights:
     
     Business Data:
@@ -108,7 +105,7 @@ class OpenRouterService {
     return this.generateResponse(prompt, businessData)
   }
 
-  async generateProjectSuggestions(projectData: any): Promise<string> {
+  async generateProjectSuggestions(projectData: Record<string, unknown>): Promise<string> {
     const prompt = `Given this project information, suggest optimizations:
     
     Project: ${projectData.title || 'Untitled'}
@@ -124,7 +121,7 @@ class OpenRouterService {
 
   async generateClientCommunication(
     type: 'email' | 'proposal' | 'update' | 'invoice',
-    context: any
+    context: Record<string, unknown>
   ): Promise<string> {
     const prompts = {
       email: `Write a professional client email for: ${context.purpose || 'general communication'}`,
@@ -136,7 +133,7 @@ class OpenRouterService {
     return this.generateResponse(prompts[type], context)
   }
 
-  async generateMarketingContent(contentType: string, context: any): Promise<string> {
+  async generateMarketingContent(contentType: string, context: Record<string, unknown>): Promise<string> {
     const prompt = `Create ${contentType} content for a freelancer with these details:
     
     Services: ${context.services || 'general freelance services'}
@@ -160,12 +157,11 @@ class OpenRouterService {
   }
 
   // Get available models
-  async getAvailableModels(): Promise<any[]> {
+  async getAvailableModels(): Promise<unknown[]> {
     try {
       const response = await fetch(`${this.baseUrl}/models`, {
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${this.apiKey}`, 'Content-Type': 'application/json'
         }
       })
 
@@ -187,7 +183,7 @@ export const openRouterService = new OpenRouterService()
 
 // React hook for using OpenRouter in components
 export function useOpenRouter() {
-  const generateResponse = async (prompt: string, context?: any) => {
+  const generateResponse = async (prompt: string, context?: Record<string, unknown>) => {
     try {
       return await openRouterService.generateResponse(prompt, context)
     } catch (error) {
@@ -196,7 +192,7 @@ export function useOpenRouter() {
     }
   }
 
-  const generateBusinessInsights = async (businessData: any) => {
+  const generateBusinessInsights = async (businessData: Record<string, unknown>) => {
     try {
       return await openRouterService.generateBusinessInsights(businessData)
     } catch (error) {

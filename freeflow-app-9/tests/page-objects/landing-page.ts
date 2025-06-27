@@ -1,4 +1,4 @@
-import type { Page, Locator } from '@playwright/test';
+import type { Page, Locator } from &apos;@playwright/test&apos;;
 
 export class LandingPage {
   readonly page: Page;
@@ -55,72 +55,72 @@ export class LandingPage {
     this.page = page;
     
     // Navigation elements
-    this.logo = page.getByTestId('nav-logo');
-    this.loginLink = page.getByTestId('nav-login');
-    this.signupLink = page.getByTestId('nav-signup');
-    this.navigationMenu = page.getByTestId('navigation');
+    this.logo = page.getByTestId(&apos;nav-logo&apos;);
+    this.loginLink = page.getByTestId(&apos;nav-login&apos;);
+    this.signupLink = page.getByTestId(&apos;nav-signup&apos;);
+    this.navigationMenu = page.getByTestId(&apos;navigation&apos;);
 
     // Hero section elements
-    this.heroHeading = page.getByTestId('hero-title');
-    this.heroSubtitle = page.getByTestId('hero-subtitle');
-    this.ctaButtons = page.getByTestId('hero-cta-buttons');
-    this.startCreatingButton = page.getByTestId('hero-cta-primary');
-    this.watchDemoButton = page.getByTestId('hero-cta-demo');
+    this.heroHeading = page.getByTestId(&apos;hero-title&apos;);
+    this.heroSubtitle = page.getByTestId(&apos;hero-subtitle&apos;);
+    this.ctaButtons = page.getByTestId(&apos;hero-cta-buttons&apos;);
+    this.startCreatingButton = page.getByTestId(&apos;hero-cta-primary&apos;);
+    this.watchDemoButton = page.getByTestId(&apos;hero-cta-demo&apos;);
 
     // Features section
-    this.featuresSection = page.getByTestId('features-section');
-    this.featureCards = page.locator('[data-testid^="feature-card-"]');
-    this.fileManagementFeature = page.getByTestId('feature-card-0');
-    this.paymentProcessingFeature = page.getByTestId('feature-card-2');
-    this.collaborationFeature = page.getByTestId('feature-card-1');
+    this.featuresSection = page.getByTestId(&apos;features-section&apos;);
+    this.featureCards = page.locator(&apos;[data-testid^=&quot;feature-card-&quot;]&apos;);
+    this.fileManagementFeature = page.getByTestId(&apos;feature-card-0&apos;);
+    this.paymentProcessingFeature = page.getByTestId(&apos;feature-card-2&apos;);
+    this.collaborationFeature = page.getByTestId(&apos;feature-card-1&apos;);
 
     // How it works section
-    this.howItWorksSection = page.getByTestId('how-it-works-section');
-    this.workflowSteps = page.locator('[data-testid^="workflow-step-"]');
-    this.learnMoreButtons = page.locator('[data-testid^="step-cta-"]');
+    this.howItWorksSection = page.getByTestId(&apos;how-it-works-section&apos;);
+    this.workflowSteps = page.locator(&apos;[data-testid^=&quot;workflow-step-&quot;]&apos;);
+    this.learnMoreButtons = page.locator(&apos;[data-testid^=&quot;step-cta-&quot;]&apos;);
 
     // Social proof section
-    this.socialProofSection = page.getByTestId('social-proof-section');
-    this.statistics = page.locator('[data-testid^="statistic-"]');
-    this.testimonials = page.locator('[data-testid^="testimonial-"]');
-    this.customerLogos = page.locator('.flex.items-center.justify-center.gap-8');
+    this.socialProofSection = page.getByTestId(&apos;social-proof-section&apos;);
+    this.statistics = page.locator(&apos;[data-testid^=&quot;statistic-&quot;]&apos;);
+    this.testimonials = page.locator(&apos;[data-testid^=&quot;testimonial-&quot;]&apos;);
+    this.customerLogos = page.locator(&apos;.flex.items-center.justify-center.gap-8&apos;);
 
     // Pricing section
-    this.pricingSection = page.getByTestId('pricing-section');
-    this.pricingCards = page.locator('[data-testid^="pricing-card-"]');
-    this.freePricingCard = page.getByTestId('pricing-card-starter');
-    this.proPricingCard = page.getByTestId('pricing-card-professional');
-    this.agencyPricingCard = page.getByTestId('pricing-card-agency');
-    this.pricingButtons = page.locator('[data-testid^="pricing-cta-"]');
+    this.pricingSection = page.getByTestId(&apos;pricing-section&apos;);
+    this.pricingCards = page.locator(&apos;[data-testid^=&quot;pricing-card-&quot;]&apos;);
+    this.freePricingCard = page.getByTestId(&apos;pricing-card-starter&apos;);
+    this.proPricingCard = page.getByTestId(&apos;pricing-card-professional&apos;);
+    this.agencyPricingCard = page.getByTestId(&apos;pricing-card-agency&apos;);
+    this.pricingButtons = page.locator(&apos;[data-testid^=&quot;pricing-cta-&quot;]&apos;);
 
     // Final CTA section
-    this.finalCtaSection = page.getByTestId('cta-section');
-    this.finalCtaButton = page.getByTestId('cta-primary');
-    this.contactSalesButton = page.getByTestId('cta-sales');
+    this.finalCtaSection = page.getByTestId(&apos;cta-section&apos;);
+    this.finalCtaButton = page.getByTestId(&apos;cta-primary&apos;);
+    this.contactSalesButton = page.getByTestId(&apos;cta-sales&apos;);
 
     // Footer elements
-    this.footer = page.locator('footer');
-    this.footerLinks = page.locator('footer a');
+    this.footer = page.locator(&apos;footer&apos;);
+    this.footerLinks = page.locator(&apos;footer a&apos;);
   }
 
   async goto() {
-    await this.page.goto('/');
-    await this.page.waitForLoadState('networkidle');
+    await this.page.goto(&apos;/');'
+    await this.page.waitForLoadState(&apos;networkidle&apos;);
   }
 
   async navigateToLogin() {
     await this.loginLink.click();
-    await this.page.waitForURL('**/login');
+    await this.page.waitForURL(&apos;**/login&apos;);
   }
 
   async navigateToSignup() {
     await this.signupLink.click();
-    await this.page.waitForURL('**/signup');
+    await this.page.waitForURL(&apos;**/signup&apos;);
   }
 
   async clickStartCreating() {
     await this.startCreatingButton.click();
-    await this.page.waitForURL('**/signup');
+    await this.page.waitForURL(&apos;**/signup&apos;);
   }
 
   async clickWatchDemo() {
@@ -132,45 +132,45 @@ export class LandingPage {
   }
 
   async scrollToFeatures() {
-    await this.scrollToSection('features');
+    await this.scrollToSection(&apos;features&apos;);
   }
 
   async scrollToHowItWorks() {
-    await this.scrollToSection('how-it-works');
+    await this.scrollToSection(&apos;how-it-works&apos;);
   }
 
   async scrollToPricing() {
-    await this.scrollToSection('pricing');
+    await this.scrollToSection(&apos;pricing&apos;);
   }
 
   async selectFreePlan() {
-    await this.freePricingCard.getByRole('button').click();
-    await this.page.waitForURL('**/signup');
+    await this.freePricingCard.getByRole(&apos;button&apos;).click();
+    await this.page.waitForURL(&apos;**/signup&apos;);
   }
 
   async selectProPlan() {
-    await this.proPricingCard.getByRole('button').click();
-    await this.page.waitForURL('**/signup');
+    await this.proPricingCard.getByRole(&apos;button&apos;).click();
+    await this.page.waitForURL(&apos;**/signup&apos;);
   }
 
   async contactSales() {
-    await this.agencyPricingCard.getByRole('button').click();
-    await this.page.waitForURL('**/contact');
+    await this.agencyPricingCard.getByRole(&apos;button&apos;).click();
+    await this.page.waitForURL(&apos;**/contact&apos;);
   }
 
   async clickFinalCta() {
     await this.finalCtaButton.click();
-    await this.page.waitForURL('**/signup');
+    await this.page.waitForURL(&apos;**/signup&apos;);
   }
 
   async contactSalesFromFinalCta() {
     await this.contactSalesButton.click();
-    await this.page.waitForURL('**/contact');
+    await this.page.waitForURL(&apos;**/contact&apos;);
   }
 
   // Assertion helpers
   async verifyHeroSection() {
-    await this.page.waitForSelector('h1');
+    await this.page.waitForSelector(&apos;h1&apos;);
     return {
       heading: await this.heroHeading.isVisible(),
       subtitle: await this.heroSubtitle.isVisible(),
@@ -216,7 +216,7 @@ export class LandingPage {
   }
 
   async getStatistics() {
-    await this.scrollToSection('testimonials');
+    await this.scrollToSection(&apos;testimonials&apos;);
     const stats = await this.statistics.all();
     const statData = [];
     
@@ -229,7 +229,7 @@ export class LandingPage {
   }
 
   async getTestimonials() {
-    await this.scrollToSection('testimonials');
+    await this.scrollToSection(&apos;testimonials&apos;);
     const testimonials = await this.testimonials.all();
     const testimonialData = [];
     
@@ -244,27 +244,27 @@ export class LandingPage {
   // Accessibility helpers
   async checkAccessibility() {
     // Check for proper heading hierarchy
-    const h1Count = await this.page.locator('h1').count();
-    const h2Count = await this.page.locator('h2').count();
-    const h3Count = await this.page.locator('h3').count();
+    const h1Count = await this.page.locator(&apos;h1&apos;).count();
+    const h2Count = await this.page.locator(&apos;h2&apos;).count();
+    const h3Count = await this.page.locator(&apos;h3&apos;).count();
     
     // Check for alt text on images
-    const images = await this.page.locator('img').all();
+    const images = await this.page.locator(&apos;img&apos;).all();
     const imagesWithoutAlt = [];
     
     for (const img of images) {
-      const alt = await img.getAttribute('alt');
+      const alt = await img.getAttribute(&apos;alt&apos;);
       if (!alt) {
-        imagesWithoutAlt.push(await img.getAttribute('src'));
+        imagesWithoutAlt.push(await img.getAttribute(&apos;src&apos;));
       }
     }
     
     // Check for aria-labels on buttons
-    const buttons = await this.page.locator('button').all();
+    const buttons = await this.page.locator(&apos;button&apos;).all();
     const buttonsWithoutLabels = [];
     
     for (const button of buttons) {
-      const ariaLabel = await button.getAttribute('aria-label');
+      const ariaLabel = await button.getAttribute(&apos;aria-label&apos;);
       const text = await button.textContent();
       
       if (!ariaLabel && !text?.trim()) {

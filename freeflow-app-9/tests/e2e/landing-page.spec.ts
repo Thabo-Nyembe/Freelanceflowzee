@@ -1,54 +1,54 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from &apos;@playwright/test&apos;
 
-test.describe('Landing Page', () => {
-  test('should load landing page successfully', async ({ page }) => {
-    await page.goto('/')
+test.describe(&apos;Landing Page&apos;, () => {
+  test(&apos;should load landing page successfully&apos;, async ({ page }) => {
+    await page.goto(&apos;/')'
     
     // Check page title
     await expect(page).toHaveTitle(/FreeflowZee/)
     
     // Check main heading
-    await expect(page.locator('h1')).toContainText(/Create, Share & Get Paid/)
+    await expect(page.locator(&apos;h1&apos;)).toContainText(/Create, Share & Get Paid/)
     
     // Check navigation
-    await expect(page.locator('nav')).toBeVisible()
+    await expect(page.locator(&apos;nav&apos;)).toBeVisible()
     
     // Check CTA buttons
-    await expect(page.locator('text=Creator Login')).toBeVisible()
-    await expect(page.locator('text=Watch Demo')).toBeVisible()
-    await expect(page.locator('text=View Projects')).toBeVisible()
+    await expect(page.locator(&apos;text=Creator Login&apos;)).toBeVisible()
+    await expect(page.locator(&apos;text=Watch Demo&apos;)).toBeVisible()
+    await expect(page.locator(&apos;text=View Projects&apos;)).toBeVisible()
   })
 
-  test('should navigate to demo page', async ({ page }) => {
-    await page.goto('/')
+  test(&apos;should navigate to demo page&apos;, async ({ page }) => {
+    await page.goto(&apos;/')'
     
     // Click demo button
-    await page.click('text=Watch Demo')
+    await page.click(&apos;text=Watch Demo&apos;)
     
     // Should open demo modal or navigate to demo
     await page.waitForTimeout(1000)
     
     // Check for demo content
-    const hasModal = await page.locator('[role="dialog"]').isVisible()
-    const hasDemo = await page.locator('text=Demo').isVisible()
+    const hasModal = await page.locator(&apos;[role=&quot;dialog&quot;]&apos;).isVisible()
+    const hasDemo = await page.locator(&apos;text=Demo&apos;).isVisible()
     
     expect(hasModal || hasDemo).toBeTruthy()
   })
 
-  test('should have working navigation', async ({ page }) => {
-    await page.goto('/')
+  test(&apos;should have working navigation&apos;, async ({ page }) => {
+    await page.goto(&apos;/')'
     
     // Test features link
-    await page.click('text=Features')
-    await page.waitForURL('**/features')
+    await page.click(&apos;text=Features&apos;)
+    await page.waitForURL(&apos;**/features&apos;)
     await expect(page).toHaveURL(/features/)
     
     // Go back to home
-    await page.goto('/')
+    await page.goto(&apos;/')'
     
     // Test pricing link
-    await page.click('text=Pricing')
-    await page.waitForURL('**/pricing')
+    await page.click(&apos;text=Pricing&apos;)
+    await page.waitForURL(&apos;**/pricing&apos;)
     await expect(page).toHaveURL(/pricing/)
   })
 }) 

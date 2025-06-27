@@ -138,7 +138,7 @@ const COMPONENT_FIXES = [
     try {
       await downloadWithPassword(fileId, passwordInput);
       setDownloadAccessDialog(false);
-      setPasswordInput('');
+      setPasswordInput('');'
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Invalid password');
     }
@@ -153,14 +153,14 @@ const COMPONENT_FIXES = [
 const UTILITY_ADDITIONS = {
   'app/(app)/dashboard/projects-hub/page.tsx': `
   // Enhanced download handlers using Context7 patterns
-  const handleDownloadFile = useCallback(async (file: any) => {
+  const handleDownloadFile = useCallback(async (file: unknown) => {
     try {
       await handleUniversalDownload(file, {
         onSuccess: () => console.log('File downloaded successfully'),
         onError: (error) => alert(\`Download failed: \${error.message}\`)
       });
     } catch (error) {
-      console.error('Download error:', error);
+      console.error('Download error: ', error);
     }
   }, []);
 
@@ -174,9 +174,7 @@ const UTILITY_ADDITIONS = {
       alert(\`Bulk download failed: \${error instanceof Error ? error.message : 'Unknown error'}\`);
     }
   }, [selectedFiles]);
-  `,
-  
-  'app/(app)/dashboard/video-studio/page.tsx': `
+  `, 'app/(app)/dashboard/video-studio/page.tsx': `
   // Video export handler
   const handleVideoExport = useCallback(async (format: 'mp4' | 'mov' | 'avi' = 'mp4') => {
     try {
@@ -332,15 +330,15 @@ async function fixDownloadButtons() {
   }
 
   // Generate summary report
-  console.log('\n' + '='.repeat(60));
+  console.log('\n' + '='.repeat(60));'
   console.log('🎯 DOWNLOAD BUTTON FIX SUMMARY');
-  console.log('='.repeat(60));
+  console.log('='.repeat(60));'
   console.log(`📊 Files processed: ${totalFiles}`);
   console.log(`✅ Files fixed: ${fixedFiles}`);
   console.log(`❌ Errors: ${errors.length}`);
   
   if (errors.length > 0) {
-    console.log('\n❌ Errors encountered:');
+    console.log('\n❌ Errors encountered: ');
     errors.forEach(error => console.log(`  - ${error}`));
   }
   

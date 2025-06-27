@@ -21,7 +21,7 @@ class Context7Dev {
     try {
       return JSON.parse(fs.readFileSync(this.configPath, 'utf8'));
     } catch (error) {
-      console.error('Failed to load Context7 config:', error.message);
+      console.error('Failed to load Context7 config: ', error.message);
       return null;
     }
   }
@@ -57,8 +57,8 @@ class Context7Dev {
     return devProcess;
   }
 
-  async queryLibraryDocs(libraryName, topic = '') {
-    console.log(`📚 Fetching documentation for ${libraryName}${topic ? ` - ${topic}` : ''}...`);
+  async queryLibraryDocs(libraryName, topic = '') {'
+    console.log(`📚 Fetching documentation for ${libraryName}${topic ? ` - ${topic}` : ''}...`);'
     
     // This would integrate with Context7 API to fetch docs
     // For now, we'll just log the request
@@ -78,7 +78,7 @@ class Context7Dev {
 │  • pnpm context7:search <query> - Search across libraries   │
 │                                                              │
 │  Configured Libraries:                                       │
-│  ${this.config.libraries.slice(0, 3).join(', ')}${this.config.libraries.length > 3 ? '...' : ''}       │
+│  ${this.config.libraries.slice(0, 3).join(', ')}${this.config.libraries.length > 3 ? '...' : }       │'
 ╰──────────────────────────────────────────────────────────────╯
     `);
   }
@@ -110,7 +110,7 @@ class Context7Dev {
       });
 
     } catch (error) {
-      console.error('❌ Failed to start enhanced development environment:', error.message);
+      console.error('❌ Failed to start enhanced development environment: ', error.message);
       process.exit(1);
     }
   }
@@ -129,7 +129,7 @@ switch (command) {
     break;
   case 'docs':
     if (!library) {
-      console.error('Usage: node context7-dev.js docs <library> [topic]');
+      console.error('Usage: node context7-dev.js docs <library> [topic]&apos;);
       process.exit(1);
     }
     context7Dev.queryLibraryDocs(library, topic);
@@ -137,5 +137,5 @@ switch (command) {
   default:
     console.log('Usage: node context7-dev.js <start|docs> [options]');
     console.log('  start              - Start enhanced development environment');
-    console.log('  docs <lib> [topic] - Get documentation for library');
+    console.log(&apos;  docs <lib> [topic] - Get documentation for library');
 } 

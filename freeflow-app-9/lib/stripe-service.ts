@@ -83,7 +83,7 @@ export class StripeService {
       currency: data.currency,
       customer: data.customerId,
       metadata: {
-        projectId: data.projectId || '',
+        projectId: data.projectId || '','
         environment: process.env.NODE_ENV || 'development',
         ...data.metadata
       },

@@ -23,11 +23,10 @@ class SimpleMCPTest {
       const req = http.get(`${this.baseUrl}${path}`, {
         timeout: 15000,
         headers: {
-          'x-test-mode': 'true',
-          'x-context7-enabled': 'true'
+          'x-test-mode': 'true', 'x-context7-enabled': 'true'
         }
       }, (res) => {
-        let data = '';
+        let data = '';'
         res.on('data', chunk => data += chunk);
         res.on('end', () => resolve({ statusCode: res.statusCode, body: data }));
       });
@@ -125,10 +124,10 @@ class SimpleMCPTest {
       // Test cases
       const tests = [
         {
-          path: '/',
+          path: '/','
           checks: {
-            title: '<title>',
-            description: 'name="description"',
+            title: '<title>&apos;,
+            description: 'name= "description"',
             seo: 'freeflowzee',
             interactive: 'button',
             navigation: 'header'

@@ -17,86 +17,50 @@ class TestIDVerifier {
       {
         name: 'Projects Hub',
         path: 'app/(app)/dashboard/projects-hub/page.tsx',
-        expectedTestIds: [
-          'create-project-btn',
-          'import-project-btn', 
-          'quick-start-btn',
-          'view-all-btn',
-          'export-data-btn'
+        expectedTestIds: ['create-project-btn', 'import-project-btn', 'quick-start-btn', 'view-all-btn', 'export-data-btn'
         ]
       },
       {
         name: 'Video Studio',
         path: 'app/(app)/dashboard/video-studio/page.tsx',
-        expectedTestIds: [
-          'record-btn',
-          'edit-btn',
-          'upload-btn',
-          'share-btn',
-          'export-btn'
+        expectedTestIds: ['record-btn', 'edit-btn', 'upload-btn', 'share-btn', 'export-btn'
         ]
       },
       {
         name: 'Community Hub',
         path: 'components/community/enhanced-community-hub.tsx',
-        expectedTestIds: [
-          'like-btn',
-          'share-btn',
-          'comment-btn',
-          'follow-creator-btn'
+        expectedTestIds: ['like-btn', 'share-btn', 'comment-btn', 'follow-creator-btn'
         ]
       },
       {
         name: 'AI Assistant',
         path: 'app/(app)/dashboard/ai-assistant/page.tsx',
-        expectedTestIds: [
-          'send-message-btn',
-          'take-action-btn',
-          'quick-action-btn',
-          'clear-chat-btn'
+        expectedTestIds: ['send-message-btn', 'take-action-btn', 'quick-action-btn', 'clear-chat-btn'
         ]
       },
       {
         name: 'My Day Today',
         path: 'app/(app)/dashboard/my-day/page.tsx',
-        expectedTestIds: [
-          'add-task-btn',
-          'view-calendar-btn',
-          'generate-schedule-btn',
-          'start-timer-btn'
+        expectedTestIds: ['add-task-btn', 'view-calendar-btn', 'generate-schedule-btn', 'start-timer-btn'
         ]
       },
       {
         name: 'Files Hub',
         path: 'components/hubs/files-hub.tsx',
-        expectedTestIds: [
-          'upload-file-btn',
-          'new-folder-btn',
-          'share-file-btn',
-          'download-file-btn',
-          'delete-file-btn'
+        expectedTestIds: ['upload-file-btn', 'new-folder-btn', 'share-file-btn', 'download-file-btn', 'delete-file-btn'
         ]
       },
       {
         name: 'Escrow System',
         path: 'app/(app)/dashboard/escrow/page.tsx',
-        expectedTestIds: [
-          'request-deposit-btn',
-          'release-funds-btn',
-          'download-receipt-btn',
-          'view-details-btn'
+        expectedTestIds: ['request-deposit-btn', 'release-funds-btn', 'download-receipt-btn', 'view-details-btn'
         ]
       },
       {
         name: 'AI Create',
         path: 'components/collaboration/ai-create.tsx',
-        expectedTestIds: [
-          'generate-assets-btn',
-          'preview-asset-btn',
-          'download-asset-btn',
-          'upload-asset-btn',
-          'export-all-btn'
-        ]
+        expectedTestIds: ['generate-assets-btn', 'preview-asset-btn', 'download-asset-btn', 'upload-asset-btn',
+          'export-all-btn']
       }
     ];
   }
@@ -116,7 +80,7 @@ class TestIDVerifier {
       };
 
       component.expectedTestIds.forEach(testId => {
-        if (content.includes(`data-testid="${testId}"`)) {
+        if (content.includes(`data-testid= "${testId}"`)) {
           console.log(`   ✅ ${testId}`);
           results.found.push(testId);
         } else {
@@ -166,8 +130,8 @@ class TestIDVerifier {
     console.log('=======================');
     
     results.forEach(result => {
-      const status = result.percentage === 100 ? '✅' : 
-                    result.percentage >= 80 ? '⚠️' : '❌';
+      const status = result.percentage === 100 ? '✅' : '
+                    result.percentage >= 80 ? '⚠️' : '❌';'
       console.log(`${status} ${result.component.padEnd(20)} | ${result.found.length}/${result.total} (${result.percentage}%)`);
     });
 

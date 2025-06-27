@@ -10,10 +10,7 @@ const openai = new OpenAI({
 
 const analyzePrompt = `Analyze the design patterns and provide insights in the following JSON format:
 {
-  "category": "string",
-  "score": number between 0 and 1,
-  "insights": ["string"],
-  "recommendations": ["string"]
+  "category": "string", "score": number between 0 and 1, "insights": ["string"], "recommendations": ["string"]
 }
 
 Focus on these categories:

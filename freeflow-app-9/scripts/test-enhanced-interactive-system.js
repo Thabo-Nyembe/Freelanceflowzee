@@ -28,47 +28,19 @@ const TEST_CONFIG = {
 const TEST_SCENARIOS = [
   {
     name: 'Dashboard Navigation',
-    routes: [
-      '/dashboard',
-      '/dashboard/projects-hub',
-      '/dashboard/my-day',
-      '/dashboard/collaboration',
-      '/dashboard/escrow',
-      '/dashboard/files-hub',
-      '/dashboard/storage',
-      '/dashboard/community',
-      '/dashboard/ai-design',
-      '/dashboard/ai-create',
-      '/dashboard/client-zone',
-      '/dashboard/analytics'
-    ]
+    routes: ['/dashboard', '/dashboard/projects-hub', '/dashboard/my-day', '/dashboard/collaboration', '/dashboard/escrow', '/dashboard/files-hub', '/dashboard/storage', '/dashboard/community', '/dashboard/ai-design', '/dashboard/ai-create', '/dashboard/client-zone',
+      '/dashboard/analytics']
   },
   {
     name: 'Marketing Pages',
     routes: [
-      '/',
-      '/features',
-      '/how-it-works',
-      '/payment',
-      '/demo',
-      '/contact'
+      '/','
+      '/features', '/how-it-works', '/payment', '/demo', '/contact'
     ]
   },
   {
     name: 'Interactive Elements',
-    selectors: [
-      '[data-testid="nav-dashboard"]',
-      '[data-testid="nav-projects-hub"]',
-      '[data-testid="nav-my-day"]',
-      '[data-testid="nav-collaboration"]',
-      '[data-testid="nav-escrow"]',
-      '[data-testid="nav-files-hub"]',
-      '[data-testid="nav-storage"]',
-      '[data-testid="nav-community"]',
-      '[data-testid="nav-ai-design"]',
-      '[data-testid="nav-ai-create"]',
-      '[data-testid="nav-client-zone"]',
-      '[data-testid="nav-analytics"]'
+    selectors: ['[data-testid= "nav-dashboard"]', '[data-testid= "nav-projects-hub"]', '[data-testid= "nav-my-day"]', '[data-testid= "nav-collaboration"]', '[data-testid= "nav-escrow"]', '[data-testid= "nav-files-hub"]', '[data-testid= "nav-storage"]', '[data-testid= "nav-community"]', '[data-testid= "nav-ai-design"]', '[data-testid= "nav-ai-create"]', '[data-testid= "nav-client-zone"]', '[data-testid= "nav-analytics"]'
     ]
   }
 ]
@@ -110,8 +82,7 @@ class EnhancedInteractiveTestRunner {
       userAgent: TEST_CONFIG.userAgent,
       // Enable test mode headers
       extraHTTPHeaders: {
-        'x-test-mode': 'true',
-        'x-test-runner': 'enhanced-interactive-system'
+        'x-test-mode': 'true', 'x-test-runner': 'enhanced-interactive-system'
       }
     })
 
@@ -130,11 +101,11 @@ class EnhancedInteractiveTestRunner {
     this.results.endTime = Date.now()
   }
 
-  async testRoute(route, description = '') {
+  async testRoute(route, description = '') {'
     this.results.total++
     
     try {
-      console.log(`🧪 Testing route: ${route} ${description ? `(${description})` : ''}`)
+      console.log(`🧪 Testing route: ${route} ${description ? `(${description})` : ''}`)'
       
       const response = await this.page.goto(`${TEST_CONFIG.baseURL}${route}`, {
         waitUntil: 'networkidle',
@@ -176,11 +147,11 @@ class EnhancedInteractiveTestRunner {
     }
   }
 
-  async testInteractiveElement(selector, description = '') {
+  async testInteractiveElement(selector, description = '') {'
     this.results.total++
     
     try {
-      console.log(`🧪 Testing interactive element: ${selector} ${description ? `(${description})` : ''}`)
+      console.log(`🧪 Testing interactive element: ${selector} ${description ? `(${description})` : ''}`)'
       
       // Wait for element to be present
       const element = await this.page.waitForSelector(selector, { timeout: 10000 })
@@ -230,12 +201,7 @@ class EnhancedInteractiveTestRunner {
     // Go to dashboard to test buttons
     await this.testRoute('/dashboard', 'Dashboard with Enhanced Buttons')
     
-    const buttonSelectors = [
-      '[data-testid*="quick-action"]',
-      '[data-testid*="nav-"]',
-      '[data-testid*="button"]',
-      'button[data-testid]',
-      'a[data-testid]'
+    const buttonSelectors = ['[data-testid*= "quick-action"]', '[data-testid*= "nav-"]', '[data-testid*= "button"]', 'button[data-testid]', 'a[data-testid]'
     ]
 
     for (const selector of buttonSelectors) {
@@ -253,11 +219,7 @@ class EnhancedInteractiveTestRunner {
     // Test sidebar navigation
     await this.testRoute('/dashboard', 'Dashboard Sidebar Navigation')
     
-    const navigationSelectors = [
-      '[data-testid="sidebar-navigation"]',
-      '[data-testid="header-navigation"]',
-      '[data-testid="mobile-navigation"]',
-      '[data-testid*="nav-"]'
+    const navigationSelectors = ['[data-testid= "sidebar-navigation"]', '[data-testid= "header-navigation"]', '[data-testid= "mobile-navigation"]', '[data-testid*= "nav-"]'
     ]
 
     for (const selector of navigationSelectors) {
@@ -274,11 +236,8 @@ class EnhancedInteractiveTestRunner {
     
     await this.testRoute('/dashboard', 'Dashboard with Enhanced Cards')
     
-    const cardSelectors = [
-      '[data-testid*="card"]',
-      '[data-testid*="stat-"]',
-      '[data-testid*="action-"]'
-    ]
+    const cardSelectors = ['[data-testid*= "card"]', '[data-testid*= "stat-"]',
+      '[data-testid*= "action-"]']
 
     for (const selector of cardSelectors) {
       const cards = await this.page.locator(selector).all()
@@ -369,7 +328,7 @@ class EnhancedInteractiveTestRunner {
 
   async runAllTests() {
     console.log('🎯 Starting Enhanced Interactive System Test Suite')
-    console.log('=' .repeat(60))
+    console.log('=' .repeat(60))'
     
     await this.setup()
 
@@ -401,7 +360,7 @@ class EnhancedInteractiveTestRunner {
       await this.testInteractiveSystemIntegration()
 
     } catch (error) {
-      console.error('💥 Critical test error:', error.message)
+      console.error('💥 Critical test error: ', error.message)
       this.results.errors.push({
         type: 'critical',
         error: error.message,
@@ -418,9 +377,9 @@ class EnhancedInteractiveTestRunner {
     const duration = this.results.endTime - this.results.startTime
     const successRate = this.results.total > 0 ? (this.results.passed / this.results.total * 100).toFixed(1) : 0
 
-    console.log('\n' + '=' .repeat(60))
+    console.log('\n' + '=' .repeat(60))'
     console.log('🎯 ENHANCED INTERACTIVE SYSTEM TEST RESULTS')
-    console.log('=' .repeat(60))
+    console.log('=' .repeat(60))'
     console.log(`📊 Total Tests: ${this.results.total}`)
     console.log(`✅ Passed: ${this.results.passed}`)
     console.log(`❌ Failed: ${this.results.failed}`)
@@ -428,7 +387,7 @@ class EnhancedInteractiveTestRunner {
     console.log(`⏱️  Duration: ${(duration / 1000).toFixed(2)}s`)
     
     if (this.results.errors.length > 0) {
-      console.log('\n🚨 ERRORS:')
+      console.log('\n🚨 ERRORS: ')
       this.results.errors.forEach((error, index) => {
         console.log(`${index + 1}. [${error.type.toUpperCase()}] ${error.error}`)
         if (error.route) console.log(`   Route: ${error.route}`)
@@ -437,16 +396,16 @@ class EnhancedInteractiveTestRunner {
       })
     }
 
-    console.log('\n' + '=' .repeat(60))
+    console.log('\n' + '=' .repeat(60))'
     
     const gradeMap = [
       { min: 95, grade: 'A++', emoji: '🏆' },
       { min: 90, grade: 'A+', emoji: '🥇' },
       { min: 85, grade: 'A', emoji: '⭐' },
-      { min: 80, grade: 'B+', emoji: '✅' },
-      { min: 75, grade: 'B', emoji: '👍' },
+      { min: 80, grade: 'B+', emoji: '✅' },'
+      { min: 75, grade: 'B', emoji: '👍' },'
       { min: 70, grade: 'C+', emoji: '⚠️' },
-      { min: 60, grade: 'C', emoji: '🔧' },
+      { min: 60, grade: 'C', emoji: '🔧' },'
       { min: 0, grade: 'F', emoji: '❌' }
     ]
 
@@ -464,7 +423,7 @@ class EnhancedInteractiveTestRunner {
       console.log('🔧 NEEDS WORK! Significant improvements required for interactive functionality.')
     }
 
-    console.log('=' .repeat(60))
+    console.log('=' .repeat(60))'
   }
 }
 

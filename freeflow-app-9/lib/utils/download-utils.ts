@@ -104,7 +104,7 @@ export async function downloadFiles(files: DownloadableFile[], onProgress?: (com
 /**
  * Enhanced document generation with support for different types
  */
-export async function downloadDocument(type: string, data: any, filename: string): Promise<void> {
+export async function downloadDocument(type: string, data: Record<string, unknown>, filename: string): Promise<void> {
   try {
     const response = await fetch(`/api/documents/generate`, {
       method: 'POST',
@@ -158,7 +158,7 @@ export async function downloadReport(
 /**
  * Enhanced invoice PDF download with receipt generation
  */
-export async function downloadInvoice(invoiceId: string, invoiceData: any): Promise<void> {
+export async function downloadInvoice(invoiceId: string, invoiceData: Record<string, unknown>): Promise<void> {
   try {
     const response = await fetch('/api/invoices/generate-pdf', {
       method: 'POST',
@@ -173,7 +173,7 @@ export async function downloadInvoice(invoiceId: string, invoiceData: any): Prom
 
     if (response.ok) {
       const blob = await response.blob()
-      const filename = `invoice-${invoiceId}-${new Date().toISOString().split('T')[0]}.pdf`
+      const filename = `invoice-${invoiceId}-${new Date().toISOString().split('T')[0]}.pdf`'
       triggerDownload(blob, filename)
     } else {
       throw new Error('Invoice PDF generation failed')
@@ -228,7 +228,7 @@ export async function downloadGalleryItem(
  */
 export async function copyDownloadLink(file: DownloadableFile): Promise<string> {
   try {
-    let link = ''
+    let link = '
 
     if (file.downloadUrl) {
       link = file.downloadUrl
@@ -240,13 +240,13 @@ export async function copyDownloadLink(file: DownloadableFile): Promise<string> 
       const response = await fetch(`/api/storage/download?fileId=${file.id}`)
       if (response.ok) {
         const result = await response.json()
-        link = result.signedUrl || ''
+        link = result.signedUrl || '
       }
     } else if (file.provider && file.key) {
       const response = await fetch(`/api/storage/download?provider=${file.provider}&key=${file.key}`)
       if (response.ok) {
         const result = await response.json()
-        link = result.signedUrl || ''
+        link = result.signedUrl || '
       }
     }
 
@@ -275,7 +275,7 @@ export async function copyDownloadLink(file: DownloadableFile): Promise<string> 
 /**
  * Enhanced file sharing with multiple options
  */
-export async function shareFile(file: DownloadableFile, method: 'link' | 'email' | 'social' = 'link'): Promise<void> {
+export async function shareFile(file: DownloadableFile, method: &apos;link&apos; | &apos;email&apos; | &apos;social&apos; = 'link'): Promise<void> {
   try {
     const link = await copyDownloadLink(file)
     
@@ -315,7 +315,7 @@ export async function shareFile(file: DownloadableFile, method: 'link' | 'email'
  */
 function triggerDownload(blob: Blob, filename: string): void {
   const url = window.URL.createObjectURL(blob)
-  const a = document.createElement('a')
+  const a = document.createElement('a')'
   a.href = url
   a.download = filename
   document.body.appendChild(a)
@@ -392,7 +392,7 @@ export function formatFileSize(bytes: number): string {
   const k = 1024
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]'
 }
 
 /**

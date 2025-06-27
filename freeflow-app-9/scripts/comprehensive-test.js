@@ -76,7 +76,7 @@ class ComprehensiveTestRunner {
       this.fixes.push('✅ Cleared corrupted webpack cache');
       return true;
     } catch (error) {
-      console.error('❌ Failed to clear cache:', error.message);
+      console.error('❌ Failed to clear cache: ', error.message);
       return false;
     }
   }
@@ -195,7 +195,7 @@ class ComprehensiveTestRunner {
     
     if (fs.existsSync(paymentPagePath)) {
       const content = fs.readFileSync(paymentPagePath, 'utf8');
-      if (!content.includes('export const dynamic = \'force-dynamic\'')) {
+      if (!content.includes('export const dynamic = \'force-dynamic\)) {
         console.log('🔧 Adding dynamic export to payment page...');
         const fixedContent = `export const dynamic = 'force-dynamic'\n\n${content}`;
         fs.writeFileSync(paymentPagePath, fixedContent);
@@ -453,7 +453,7 @@ Build logs and test results are available in:
     const report = this.generateReport();
     
     console.log('\n🏁 Testing Complete!');
-    console.log('=' * 50);
+    console.log('=' * 50);'
     console.log(report);
     
     return this.results;

@@ -21,7 +21,7 @@ const log = (message, color = colors.reset) => {
 
 async function testOpenRouterDirect() {
   log('\n🤖 Direct OpenRouter API Test', colors.cyan);
-  log('=' .repeat(40), colors.cyan);
+  log('=' .repeat(40), colors.cyan);'
 
   const apiKey = process.env.OPENROUTER_API_KEY;
   
@@ -44,10 +44,7 @@ async function testOpenRouterDirect() {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'http://localhost:3000',
-        'X-Title': 'FreeflowZee AI Assistant Test'
+        'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'HTTP-Referer': 'http://localhost:3000', 'X-Title': 'FreeflowZee AI Assistant Test'
       },
       body: JSON.stringify({
         model: 'openrouter/auto',
@@ -84,8 +81,7 @@ async function testOpenRouterDirect() {
       log('\n🎯 Testing Available Models...', colors.yellow);
       const modelsResponse = await fetch('https://openrouter.ai/api/v1/models', {
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json'
         }
       });
 
@@ -103,7 +99,7 @@ async function testOpenRouterDirect() {
       }
 
       log('\n🎉 OpenRouter Integration Test PASSED!', colors.cyan);
-      log('=' .repeat(40), colors.cyan);
+      log('=' .repeat(40), colors.cyan);'
       log('✨ Your FreeflowZee app now has AI capabilities!', colors.green);
       log('🚀 Ready for deployment with OpenRouter AI!', colors.green);
       
@@ -127,13 +123,10 @@ async function testOpenRouterDirect() {
 // Test environment setup
 function testEnvironmentSetup() {
   log('\n🔧 Environment Setup Check', colors.cyan);
-  log('-'.repeat(30), colors.cyan);
+  log('-'.repeat(30), colors.cyan);'
   
-  const requiredEnvVars = [
-    'OPENROUTER_API_KEY',
-    'NEXT_PUBLIC_SUPABASE_URL',
-    'NEXT_PUBLIC_SUPABASE_ANON_KEY'
-  ];
+  const requiredEnvVars = ['OPENROUTER_API_KEY', 'NEXT_PUBLIC_SUPABASE_URL',
+    'NEXT_PUBLIC_SUPABASE_ANON_KEY'];
 
   let allGood = true;
   
@@ -152,7 +145,7 @@ function testEnvironmentSetup() {
 // Run tests
 async function runTests() {
   log('🤖 FreeflowZee OpenRouter Integration Test', colors.cyan);
-  log('='.repeat(50), colors.cyan);
+  log('='.repeat(50), colors.cyan);'
   
   const envOk = testEnvironmentSetup();
   
@@ -164,7 +157,7 @@ async function runTests() {
   const success = await testOpenRouterDirect();
   
   if (success) {
-    log('\n🎯 NEXT STEPS:', colors.cyan);
+    log('\n🎯 NEXT STEPS: ', colors.cyan);
     log('1. Your OpenRouter API is working perfectly!', colors.green);
     log('2. You can now deploy to production', colors.green);
     log('3. AI features will be available in your app', colors.green);

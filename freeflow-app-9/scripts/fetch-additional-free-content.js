@@ -91,16 +91,10 @@ async function fetchPlaceholderImages() {
 async function fetchCompanyData() {
   console.log('🏢 Generating company data...');
   
-  const companyNames = [
-    'TechFlow Solutions', 'Creative Digital Agency', 'Modern Web Studio',
-    'Innovation Labs', 'Design Collective', 'Digital Pioneers',
-    'NextGen Development', 'Creative Minds Studio', 'Tech Innovators',
-    'Digital Craft Agency', 'Future Web Solutions', 'Creative Tech Hub'
+  const companyNames = ['TechFlow Solutions', 'Creative Digital Agency', 'Modern Web Studio', 'Innovation Labs', 'Design Collective', 'Digital Pioneers', 'NextGen Development', 'Creative Minds Studio', 'Tech Innovators', 'Digital Craft Agency', 'Future Web Solutions', 'Creative Tech Hub'
   ];
   
-  const industries = [
-    'Technology', 'Design', 'Marketing', 'E-commerce', 'Healthcare',
-    'Finance', 'Education', 'Entertainment', 'Real Estate', 'Automotive'
+  const industries = ['Technology', 'Design', 'Marketing', 'E-commerce', 'Healthcare', 'Finance', 'Education', 'Entertainment', 'Real Estate', 'Automotive'
   ];
   
   const companies = companyNames.map((name, i) => ({
@@ -109,11 +103,11 @@ async function fetchCompanyData() {
     industry: industries[Math.floor(Math.random() * industries.length)],
     size: ['Startup', 'Small', 'Medium', 'Large'][Math.floor(Math.random() * 4)],
     location: ['San Francisco', 'New York', 'London', 'Berlin', 'Toronto'][Math.floor(Math.random() * 5)],
-    website: `https://${name.toLowerCase().replace(/\s+/g, '')}.com`,
+    website: `https://${name.toLowerCase().replace(/\s+/g, '')}.com`,'
     description: `Leading ${industries[Math.floor(Math.random() * industries.length)].toLowerCase()} company focused on innovation and growth.`,
     employees: Math.floor(Math.random() * 500) + 10,
     founded: 2015 + Math.floor(Math.random() * 8),
-    logo: `https://api.dicebear.com/7.x/shapes/svg?seed=${name.replace(/\s+/g, '')}`
+    logo: `https://api.dicebear.com/7.x/shapes/svg?seed=${name.replace(/\s+/g, '')}`'
   }));
   
   return companies;
@@ -183,10 +177,7 @@ async function fetchSkillData() {
   console.log('🎯 Generating skill data...');
   
   const skillCategories = {
-    'Design': ['Photoshop', 'Illustrator', 'Figma', 'Sketch', 'InDesign', 'After Effects'],
-    'Development': ['JavaScript', 'React', 'Node.js', 'Python', 'PHP', 'Vue.js'],
-    'Marketing': ['SEO', 'Google Ads', 'Social Media', 'Content Marketing', 'Email Marketing'],
-    'Business': ['Project Management', 'Strategy', 'Analytics', 'Consulting', 'Sales']
+    'Design': ['Photoshop', 'Illustrator', 'Figma', 'Sketch', 'InDesign', 'After Effects'], 'Development': ['JavaScript', 'React', 'Node.js', 'Python', 'PHP', 'Vue.js'], 'Marketing': ['SEO', 'Google Ads', 'Social Media', 'Content Marketing', 'Email Marketing'], 'Business': ['Project Management', 'Strategy', 'Analytics', 'Consulting', 'Sales']
   };
   
   const skills = [];
@@ -229,11 +220,7 @@ async function generateMarketData() {
       { industry: 'Finance', growth: '+18%', projects: 320 }
     ],
     averageRates: {
-      'Web Development': '$65/hr',
-      'Graphic Design': '$45/hr',
-      'Content Writing': '$35/hr',
-      'Digital Marketing': '$55/hr',
-      'Video Editing': '$50/hr'
+      'Web Development': '$65/hr', 'Graphic Design': '$45/hr', 'Content Writing': '$35/hr', 'Digital Marketing': '$55/hr', 'Video Editing': '$50/hr'
     },
     projectTypes: [
       { type: 'Website Development', percentage: 35, avgBudget: '$3,500' },
@@ -268,13 +255,7 @@ async function fetchAdditionalFreeContent() {
     
     // Save all content
     const contentFiles = {
-      'lorem-posts.json': loremContent.posts,
-      'lorem-comments.json': loremContent.comments,
-      'placeholder-images.json': placeholderImages,
-      'companies.json': companies,
-      'quotes.json': quotes,
-      'skills.json': skills,
-      'market-data.json': marketData
+      'lorem-posts.json': loremContent.posts, 'lorem-comments.json': loremContent.comments, 'placeholder-images.json': placeholderImages, 'companies.json': companies, 'quotes.json': quotes, 'skills.json': skills, 'market-data.json': marketData
     };
     
     for (const [filename, data] of Object.entries(contentFiles)) {
@@ -295,12 +276,8 @@ async function fetchAdditionalFreeContent() {
       totalQuotes: quotes.length,
       totalSkills: skills.length,
       marketDataSections: Object.keys(marketData).length,
-      sources: [
-        'jsonplaceholder.typicode.com - Lorem posts and comments',
-        'picsum.photos - Placeholder images',
-        'Generated - Company, skill, and market data',
-        'Curated - Inspirational quotes'
-      ]
+      sources: ['jsonplaceholder.typicode.com - Lorem posts and comments', 'picsum.photos - Placeholder images', 'Generated - Company, skill, and market data',
+        'Curated - Inspirational quotes']
     };
     
     await fs.writeFile(

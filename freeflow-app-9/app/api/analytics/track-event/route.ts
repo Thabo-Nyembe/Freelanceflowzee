@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     const headersList = await headers()
     const forwarded = headersList.get('x-forwarded-for')
     const realIp = headersList.get('x-real-ip')
-    const clientIp = forwarded ? forwarded.split(',')[0] : (realIp || null)
+    const clientIp = forwarded ? forwarded.split(',')[0] : (realIp || null)'
 
     // Initialize Supabase client
     const supabase = await createClient()
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
         revenue_potential: calculateRevenuePotential(event, data),
         conversion_value: calculateConversionValue(event, data),
         traffic_source: getTrafficSource(referrer),
-        device_type: getDeviceType(userAgent || ''),
+        device_type: getDeviceType(userAgent || ''),'
         utm_data: extractUTMParams(referrer)
       }
     }
@@ -97,16 +97,9 @@ function generateSessionId(userAgent: string | undefined, ip: string | undefined
 }
 
 // Calculate revenue potential based on event type
-function calculateRevenuePotential(event: string, data: any): number {
+function calculateRevenuePotential(event: string, data: unknown): number {
   const eventValues = {
-    'download_started': 2.50,
-    'download_completed': 5.00,
-    'link_copied': 1.00,
-    'social_share': 3.00,
-    'payment_initiated': 25.00,
-    'premium_upgrade': 50.00,
-    'file_view': 0.50,
-    'external_link_click': 1.50
+    'download_started': 2.50, 'download_completed': 5.00, 'link_copied': 1.00, 'social_share': 3.00, 'payment_initiated': 25.00, 'premium_upgrade': 50.00, 'file_view': 0.50, 'external_link_click': 1.50
   }
 
   const baseValue = eventValues[event] || 0
@@ -117,7 +110,7 @@ function calculateRevenuePotential(event: string, data: any): number {
 }
 
 // Calculate conversion value
-function calculateConversionValue(event: string, data: any): number {
+function calculateConversionValue(event: string, data: unknown): number {
   if (event === 'payment_initiated' || event === 'premium_upgrade') {
     return data.amount || data.revenue || 0
   }
@@ -170,16 +163,12 @@ function extractUTMParams(referrer: string) {
 
 // Check if event generates revenue
 function isRevenueEvent(event: string): boolean {
-  return [
-    'payment_initiated',
-    'premium_upgrade',
-    'subscription_started',
-    'download_completed'
+  return ['payment_initiated', 'premium_upgrade', 'subscription_started', 'download_completed'
   ].includes(event)
 }
 
 // Track revenue-specific metrics
-async function trackRevenueEvent(supabase: any, event: string, data: any, userId: string | undefined | null) {
+async function trackRevenueEvent(supabase: unknown, event: string, data: unknown, userId: string | undefined | null) {
   const revenueData = {
     event_type: event,
     user_id: userId || null,
@@ -197,13 +186,13 @@ async function trackRevenueEvent(supabase: any, event: string, data: any, userId
 }
 
 // Update aggregated metrics for real-time dashboards
-async function updateAggregatedMetrics(supabase: any, event: string, data: any, userId: string | undefined | null) {
-  const today = new Date().toISOString().split('T')[0]
+async function updateAggregatedMetrics(supabase: unknown, event: string, data: unknown, userId: string | undefined | null) {
+  const today = new Date().toISOString().split('T')[0]'
   
   // Update daily aggregates
   const { data: existing } = await supabase
     .from('daily_analytics')
-    .select('*')
+    .select('*')'
     .eq('date', today)
     .single()
 
@@ -236,26 +225,22 @@ async function updateAggregatedMetrics(supabase: any, event: string, data: any, 
 }
 
 // Update file-specific analytics
-async function updateFileAnalytics(supabase: any, fileId: string, event: string, data: any) {
+async function updateFileAnalytics(supabase: unknown, fileId: string, event: string, data: unknown) {
   const { data: existing } = await supabase
     .from('file_analytics')
-    .select('*')
+    .select('*')'
     .eq('file_id', fileId)
     .single()
 
   const eventMap = {
-    'file_view': 'view_count',
-    'download_started': 'download_count',
-    'download_completed': 'download_count',
-    'link_copied': 'share_count',
-    'social_share': 'share_count'
+    'file_view': 'view_count', 'download_started': 'download_count', 'download_completed': 'download_count', 'link_copied': 'share_count', 'social_share': 'share_count'
   }
 
   const field = eventMap[event]
   if (!field) return
 
   if (existing) {
-    const updates: any = {
+    const updates: unknown = {
       [field]: (existing[field] || 0) + 1,
       last_activity: new Date().toISOString()
     }
@@ -293,7 +278,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('analytics_events')
-      .select('*')
+      .select('*')'
       .order('timestamp', { ascending: false })
       .limit(100)
 
@@ -309,10 +294,7 @@ export async function GET(request: NextRequest) {
 
     // Filter by time range
     const timeRangeMap = {
-      '1d': 1,
-      '7d': 7,
-      '30d': 30,
-      '90d': 90
+      '1d': 1, '7d': 7, '30d': 30, '90d': 90
     }
     
     const days = timeRangeMap[timeRange] || 7

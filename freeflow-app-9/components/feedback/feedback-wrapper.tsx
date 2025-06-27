@@ -37,7 +37,7 @@ export default function FeedbackWrapper({
 }: FeedbackWrapperProps) {
   const [comments, setComments] = useState<Comment[]>(initialComments)
 
-  const handleCommentAdd = (comment: Omit<Comment, 'id' | 'author' | 'created_at'>) => {
+  const handleCommentAdd = (comment: Omit<Comment, 'id' | &apos;author&apos; | &apos;created_at&apos;>) => {
     const newComment: Comment = {
       ...comment,
       id: `comment_${Date.now()}`,

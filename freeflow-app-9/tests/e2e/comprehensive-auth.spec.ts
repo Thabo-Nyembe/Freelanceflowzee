@@ -1,23 +1,23 @@
-import { test, expect } from '../fixtures/app-fixtures';
+import { test, expect } from &apos;../fixtures/app-fixtures&apos;;
 
-test.describe('🔐 Comprehensive Authentication Tests', () => {
-  test.describe('🔑 Login Functionality', () => {
-    test('should login with valid credentials', async ({ authPage, testUser }) => {
+test.describe(&apos;🔐 Comprehensive Authentication Tests&apos;, () => {
+  test.describe(&apos;🔑 Login Functionality&apos;, () => {
+    test(&apos;should login with valid credentials&apos;, async ({ authPage, testUser }) => {
       await authPage.gotoLogin();
       await authPage.attemptLogin(testUser.email, testUser.password, true);
       
-      expect(authPage.page.url()).toContain('/dashboard');
+      expect(authPage.page.url()).toContain(&apos;/dashboard&apos;);
     });
 
-    test('should show error with invalid credentials', async ({ authPage }) => {
+    test(&apos;should show error with invalid credentials&apos;, async ({ authPage }) => {
       await authPage.gotoLogin();
-      await authPage.attemptLogin('invalid@example.com', 'wrongpassword', false);
+      await authPage.attemptLogin(&apos;invalid@example.com&apos;, &apos;wrongpassword&apos;, false);
       
       const errorMessage = await authPage.getErrorMessage();
-      expect(errorMessage).toContain('Invalid');
+      expect(errorMessage).toContain(&apos;Invalid&apos;);
     });
 
-    test('should validate form elements on login page', async ({ authPage }) => {
+    test(&apos;should validate form elements on login page&apos;, async ({ authPage }) => {
       await authPage.gotoLogin();
       
       const elements = await authPage.verifyLoginFormElements();
@@ -30,56 +30,56 @@ test.describe('🔐 Comprehensive Authentication Tests', () => {
       expect(elements.signupLink).toBe(true);
     });
 
-    test('should remember user when "Remember me" is checked', async ({ authPage, testUser }) => {
+    test(&apos;should remember user when &quot;Remember me&quot; is checked&apos;, async ({ authPage, testUser }) => {
       await authPage.gotoLogin();
       await authPage.loginWithRememberMe(testUser.email, testUser.password);
       
-      expect(authPage.page.url()).toContain('/dashboard');
+      expect(authPage.page.url()).toContain(&apos;/dashboard&apos;);
     });
 
-    test('should toggle password visibility', async ({ authPage }) => {
+    test(&apos;should toggle password visibility&apos;, async ({ authPage }) => {
       await authPage.gotoLogin();
-      await authPage.passwordInput.fill('testpassword');
+      await authPage.passwordInput.fill(&apos;testpassword&apos;);
       
-      const initialType = await authPage.passwordInput.getAttribute('type');
-      expect(initialType).toBe('password');
+      const initialType = await authPage.passwordInput.getAttribute(&apos;type&apos;);
+      expect(initialType).toBe(&apos;password&apos;);
       
       await authPage.togglePasswordVisibility();
       
-      const newType = await authPage.passwordInput.getAttribute('type');
-      expect(newType).toBe('text');
+      const newType = await authPage.passwordInput.getAttribute(&apos;type&apos;);
+      expect(newType).toBe(&apos;text&apos;);
     });
   });
 
-  test.describe('📝 Signup Functionality', () => {
-    test('should signup with valid information', async ({ authPage }) => {
+  test.describe(&apos;📝 Signup Functionality&apos;, () => {
+    test(&apos;should signup with valid information&apos;, async ({ authPage }) => {
       await authPage.gotoSignup();
       await authPage.attemptSignup(
-        'Test User',
-        'newuser@example.com',
-        'ValidPassword123!',
-        'ValidPassword123!',
+        &apos;Test User&apos;,
+        &apos;newuser@example.com&apos;,
+        &apos;ValidPassword123!&apos;,
+        &apos;ValidPassword123!&apos;,
         true
       );
       
       expect(authPage.page.url()).toMatch(/\/(dashboard|verify-email)/);
     });
 
-    test('should show error with mismatched passwords', async ({ authPage }) => {
+    test(&apos;should show error with mismatched passwords&apos;, async ({ authPage }) => {
       await authPage.gotoSignup();
       await authPage.attemptSignup(
-        'Test User',
-        'test@example.com',
-        'password123',
-        'differentpassword',
+        &apos;Test User&apos;,
+        &apos;test@example.com&apos;,
+        &apos;password123&apos;,
+        &apos;differentpassword&apos;,
         false
       );
       
       const errorMessage = await authPage.getErrorMessage();
-      expect(errorMessage).toContain('match');
+      expect(errorMessage).toContain(&apos;match&apos;);
     });
 
-    test('should validate signup form elements', async ({ authPage }) => {
+    test(&apos;should validate signup form elements&apos;, async ({ authPage }) => {
       await authPage.gotoSignup();
       
       const elements = await authPage.verifySignupFormElements();
@@ -94,13 +94,13 @@ test.describe('🔐 Comprehensive Authentication Tests', () => {
       expect(elements.loginLink).toBe(true);
     });
 
-    test('should require terms acceptance', async ({ authPage }) => {
+    test(&apos;should require terms acceptance&apos;, async ({ authPage }) => {
       await authPage.gotoSignup();
       
-      await authPage.nameInput.fill('Test User');
-      await authPage.emailInput.fill('test@example.com');
-      await authPage.passwordInput.fill('password123');
-      await authPage.confirmPasswordInput.fill('password123');
+      await authPage.nameInput.fill(&apos;Test User&apos;);
+      await authPage.emailInput.fill(&apos;test@example.com&apos;);
+      await authPage.passwordInput.fill(&apos;password123&apos;);
+      await authPage.confirmPasswordInput.fill(&apos;password123&apos;);
       
       const isButtonEnabled = await authPage.isSignupButtonEnabled();
       expect(isButtonEnabled).toBe(false);
@@ -111,74 +111,74 @@ test.describe('🔐 Comprehensive Authentication Tests', () => {
       expect(isButtonEnabledAfter).toBe(true);
     });
 
-    test('should signup with newsletter subscription', async ({ authPage }) => {
+    test(&apos;should signup with newsletter subscription&apos;, async ({ authPage }) => {
       await authPage.gotoSignup();
       await authPage.signupWithNewsletter(
-        'Test User',
-        'newsletter@example.com',
-        'ValidPassword123!',
-        'ValidPassword123!'
+        &apos;Test User&apos;,
+        &apos;newsletter@example.com&apos;,
+        &apos;ValidPassword123!&apos;,
+        &apos;ValidPassword123!&apos;
       );
       
       expect(authPage.page.url()).toMatch(/\/(dashboard|verify-email)/);
     });
   });
 
-  test.describe('🔄 Navigation Between Forms', () => {
-    test('should navigate from login to signup', async ({ authPage }) => {
+  test.describe(&apos;🔄 Navigation Between Forms&apos;, () => {
+    test(&apos;should navigate from login to signup&apos;, async ({ authPage }) => {
       await authPage.gotoLogin();
       await authPage.navigateToSignupFromLogin();
       
-      expect(authPage.page.url()).toContain('/signup');
+      expect(authPage.page.url()).toContain(&apos;/signup&apos;);
       
       const elements = await authPage.verifySignupFormElements();
       expect(elements.form).toBe(true);
     });
 
-    test('should navigate from signup to login', async ({ authPage }) => {
+    test(&apos;should navigate from signup to login&apos;, async ({ authPage }) => {
       await authPage.gotoSignup();
       await authPage.navigateToLoginFromSignup();
       
-      expect(authPage.page.url()).toContain('/login');
+      expect(authPage.page.url()).toContain(&apos;/login&apos;);
       
       const elements = await authPage.verifyLoginFormElements();
       expect(elements.form).toBe(true);
     });
 
-    test('should navigate to password reset from login', async ({ authPage }) => {
+    test(&apos;should navigate to password reset from login&apos;, async ({ authPage }) => {
       await authPage.gotoLogin();
       await authPage.navigateToPasswordResetFromLogin();
       
-      expect(authPage.page.url()).toContain('/reset-password');
+      expect(authPage.page.url()).toContain(&apos;/reset-password&apos;);
     });
 
-    test('should navigate back to home', async ({ authPage }) => {
+    test(&apos;should navigate back to home&apos;, async ({ authPage }) => {
       await authPage.gotoLogin();
       await authPage.backToHome();
       
-      expect(authPage.page.url()).toBe('http://localhost:3000/');
+      expect(authPage.page.url()).toBe(&apos;http://localhost:3000/&apos;);
     });
   });
 
-  test.describe('🔐 Password Reset', () => {
-    test('should send reset email for valid email', async ({ authPage }) => {
+  test.describe(&apos;🔐 Password Reset&apos;, () => {
+    test(&apos;should send reset email for valid email&apos;, async ({ authPage }) => {
       await authPage.gotoPasswordReset();
-      await authPage.resetPassword('valid@example.com');
+      await authPage.resetPassword(&apos;valid@example.com&apos;);
       
       const successMessage = await authPage.getSuccessMessage();
-      expect(successMessage).toContain('sent');
+      expect(successMessage).toContain(&apos;sent&apos;);
     });
 
-    test('should return to login from reset page', async ({ authPage }) => {
+    test(&apos;should return to login from reset page&apos;, async ({ authPage }) => {
       await authPage.gotoPasswordReset();
       await authPage.backToLoginFromReset();
       
-      expect(authPage.page.url()).toContain('/login');
+      expect(authPage.page.url()).toContain(&apos;/login&apos;);
     });
   });
 
-  test.describe('🔒 Social Authentication', () => {
-    test('should display social auth options', async ({ authPage }) => {
+  test.describe(&apos;🔒 Social Authentication&apos;, () => {
+    test(&apos;should display social auth options&apos;, async ({ authPage }) => {
       await authPage.gotoLogin();
       
       const socialAuth = await authPage.verifySocialAuthOptions();
@@ -189,7 +189,7 @@ test.describe('🔐 Comprehensive Authentication Tests', () => {
       expect(socialAuth.linkedin).toBe(true);
     });
 
-    test('should handle Google OAuth', async ({ authPage }) => {
+    test(&apos;should handle Google OAuth&apos;, async ({ authPage }) => {
       await authPage.gotoLogin();
       await authPage.loginWithGoogle();
       
@@ -197,7 +197,7 @@ test.describe('🔐 Comprehensive Authentication Tests', () => {
       await authPage.page.waitForTimeout(2000);
     });
 
-    test('should handle GitHub OAuth', async ({ authPage }) => {
+    test(&apos;should handle GitHub OAuth&apos;, async ({ authPage }) => {
       await authPage.gotoLogin();
       await authPage.loginWithGitHub();
       
@@ -205,8 +205,8 @@ test.describe('🔐 Comprehensive Authentication Tests', () => {
     });
   });
 
-  test.describe('📱 Mobile Responsiveness', () => {
-    test('should display properly on mobile', async ({ authPage, mobileViewport }) => {
+  test.describe(&apos;📱 Mobile Responsiveness&apos;, () => {
+    test(&apos;should display properly on mobile&apos;, async ({ authPage, mobileViewport }) => {
       await authPage.page.setViewportSize(mobileViewport);
       await authPage.gotoLogin();
       
@@ -219,8 +219,8 @@ test.describe('🔐 Comprehensive Authentication Tests', () => {
     });
   });
 
-  test.describe('♿ Accessibility', () => {
-    test('should have proper form accessibility', async ({ authPage }) => {
+  test.describe(&apos;♿ Accessibility&apos;, () => {
+    test(&apos;should have proper form accessibility&apos;, async ({ authPage }) => {
       await authPage.gotoLogin();
       
       const accessibility = await authPage.checkFormAccessibility();
@@ -230,41 +230,41 @@ test.describe('🔐 Comprehensive Authentication Tests', () => {
     });
   });
 
-  test.describe('⚡ Performance', () => {
-    test('should load forms quickly', async ({ authPage }) => {
+  test.describe(&apos;⚡ Performance&apos;, () => {
+    test(&apos;should load forms quickly&apos;, async ({ authPage }) => {
       const loadTime = await authPage.measureFormLoadTime();
       
       expect(loadTime).toBeLessThan(3000); // 3 seconds
     });
   });
 
-  test.describe('🔍 Form Validation', () => {
-    test('should validate email format', async ({ authPage }) => {
+  test.describe(&apos;🔍 Form Validation&apos;, () => {
+    test(&apos;should validate email format&apos;, async ({ authPage }) => {
       await authPage.gotoLogin();
       
-      const validation = await authPage.testEmailValidation('invalid-email');
+      const validation = await authPage.testEmailValidation(&apos;invalid-email&apos;);
       
       if (validation) {
-        expect(validation).toContain('valid email');
+        expect(validation).toContain(&apos;valid email&apos;);
       }
     });
 
-    test('should validate password strength', async ({ authPage }) => {
+    test(&apos;should validate password strength&apos;, async ({ authPage }) => {
       await authPage.gotoSignup();
       
-      const weakPassword = await authPage.testPasswordStrength('123');
-      const strongPassword = await authPage.testPasswordStrength('StrongPassword123!');
+      const weakPassword = await authPage.testPasswordStrength(&apos;123&apos;);
+      const strongPassword = await authPage.testPasswordStrength(&apos;StrongPassword123!&apos;);
       
       if (weakPassword) {
-        expect(weakPassword).toContain('weak');
+        expect(weakPassword).toContain(&apos;weak&apos;);
       }
       
       if (strongPassword) {
-        expect(strongPassword).toContain('strong');
+        expect(strongPassword).toContain(&apos;strong&apos;);
       }
     });
 
-    test('should check required fields completion', async ({ authPage }) => {
+    test(&apos;should check required fields completion&apos;, async ({ authPage }) => {
       await authPage.gotoSignup();
       
       // Initially empty
@@ -272,10 +272,10 @@ test.describe('🔐 Comprehensive Authentication Tests', () => {
       expect(fieldStatus.allFilled).toBe(false);
       
       // Fill all required fields
-      await authPage.nameInput.fill('Test User');
-      await authPage.emailInput.fill('test@example.com');
-      await authPage.passwordInput.fill('password123');
-      await authPage.confirmPasswordInput.fill('password123');
+      await authPage.nameInput.fill(&apos;Test User&apos;);
+      await authPage.emailInput.fill(&apos;test@example.com&apos;);
+      await authPage.passwordInput.fill(&apos;password123&apos;);
+      await authPage.confirmPasswordInput.fill(&apos;password123&apos;);
       await authPage.termsCheckbox.check();
       
       fieldStatus = await authPage.areRequiredFieldsFilled();
@@ -283,17 +283,17 @@ test.describe('🔐 Comprehensive Authentication Tests', () => {
     });
   });
 
-  test.describe('🛡️ Security Testing', () => {
-    test('should handle SQL injection attempts', async ({ authPage }) => {
+  test.describe(&apos;🛡️ Security Testing&apos;, () => {
+    test(&apos;should handle SQL injection attempts&apos;, async ({ authPage }) => {
       await authPage.gotoLogin();
       
       const errorMessage = await authPage.testSQLInjection();
       
       expect(errorMessage).toBeTruthy();
-      expect(errorMessage).not.toContain('SQL');
+      expect(errorMessage).not.toContain(&apos;SQL&apos;);
     });
 
-    test('should handle XSS attempts', async ({ authPage }) => {
+    test(&apos;should handle XSS attempts&apos;, async ({ authPage }) => {
       await authPage.gotoLogin();
       
       const errorMessage = await authPage.testXSSAttempt();
@@ -301,7 +301,7 @@ test.describe('🔐 Comprehensive Authentication Tests', () => {
       expect(errorMessage).toBeTruthy();
     });
 
-    test('should implement rate limiting', async ({ authPage }) => {
+    test(&apos;should implement rate limiting&apos;, async ({ authPage }) => {
       await authPage.gotoLogin();
       
       const attempts = await authPage.testRateLimiting();
@@ -312,13 +312,13 @@ test.describe('🔐 Comprehensive Authentication Tests', () => {
     });
   });
 
-  test.describe('🔄 Two-Factor Authentication', () => {
-    test('should handle verification code entry', async ({ authPage }) => {
+  test.describe(&apos;🔄 Two-Factor Authentication&apos;, () => {
+    test(&apos;should handle verification code entry&apos;, async ({ authPage }) => {
       await authPage.gotoLogin();
       
       // Simulate 2FA scenario
       if (await authPage.twoFactorForm.isVisible()) {
-        await authPage.enterVerificationCode('123456');
+        await authPage.enterVerificationCode(&apos;123456&apos;);
         
         // Verify form submission
         const isButtonEnabled = await authPage.verifyCodeButton.isEnabled();
@@ -326,7 +326,7 @@ test.describe('🔐 Comprehensive Authentication Tests', () => {
       }
     });
 
-    test('should handle code resend', async ({ authPage }) => {
+    test(&apos;should handle code resend&apos;, async ({ authPage }) => {
       await authPage.gotoLogin();
       
       if (await authPage.twoFactorForm.isVisible()) {
@@ -334,29 +334,29 @@ test.describe('🔐 Comprehensive Authentication Tests', () => {
         
         const successMessage = await authPage.getSuccessMessage();
         if (successMessage) {
-          expect(successMessage).toContain('sent');
+          expect(successMessage).toContain(&apos;sent&apos;);
         }
       }
     });
   });
 
-  test.describe('🎯 Edge Cases', () => {
-    test('should clear form properly', async ({ authPage }) => {
+  test.describe(&apos;🎯 Edge Cases&apos;, () => {
+    test(&apos;should clear form properly&apos;, async ({ authPage }) => {
       await authPage.gotoLogin();
       
-      await authPage.emailInput.fill('test@example.com');
-      await authPage.passwordInput.fill('password');
+      await authPage.emailInput.fill(&apos;test@example.com&apos;);
+      await authPage.passwordInput.fill(&apos;password&apos;);
       
       await authPage.clearForm();
       
       const emailValue = await authPage.emailInput.inputValue();
       const passwordValue = await authPage.passwordInput.inputValue();
       
-      expect(emailValue).toBe('');
-      expect(passwordValue).toBe('');
+      expect(emailValue).toBe('&apos;);'
+      expect(passwordValue).toBe('&apos;);'
     });
 
-    test('should handle form submission with empty fields', async ({ authPage }) => {
+    test(&apos;should handle form submission with empty fields&apos;, async ({ authPage }) => {
       await authPage.gotoLogin();
       
       await authPage.loginButton.click();
@@ -365,7 +365,7 @@ test.describe('🔐 Comprehensive Authentication Tests', () => {
       expect(isButtonEnabled).toBe(true); // Button should still be enabled for accessibility
     });
 
-    test('should handle rapid form switching', async ({ authPage }) => {
+    test(&apos;should handle rapid form switching&apos;, async ({ authPage }) => {
       await authPage.gotoLogin();
       await authPage.navigateToSignupFromLogin();
       await authPage.navigateToLoginFromSignup();

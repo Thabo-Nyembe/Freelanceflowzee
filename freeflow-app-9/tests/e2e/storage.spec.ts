@@ -1,11 +1,11 @@
-import { test, expect, Page } from '@playwright/test'
-import path from 'path'
-import fs from 'fs'
+import { test, expect, Page } from &apos;@playwright/test&apos;
+import path from &apos;path&apos;
+import fs from &apos;fs&apos;
 
 // Test configuration
-const TEST_PROJECT_ID = 'test-project-12345'
+const TEST_PROJECT_ID = &apos;test-project-12345&apos;
 const TEST_TIMEOUT = 30000
-const BASE_URL = 'http://localhost:3001'
+const BASE_URL = &apos;http://localhost:3001&apos;
 
 // Helper function to create test files
 function createTestFile(filename: string, content: string, mimeType: string): File {
@@ -27,9 +27,9 @@ async function uploadFile(page: Page, options: {
   const {
     projectId,
     baseUrl,
-    filename = 'test-document.pdf',
-    content = '%PDF-1.4 Mock PDF content for testing',
-    mimeType = 'application/pdf',
+    filename = &apos;test-document.pdf&apos;,
+    content = &apos;%PDF-1.4 Mock PDF content for testing&apos;,
+    mimeType = &apos;application/pdf&apos;,
     fileData,
     overwrite = false
   } = options
@@ -44,15 +44,15 @@ async function uploadFile(page: Page, options: {
       const blob = new Blob([fileData.content], { type: fileData.mimeType })
       const file = new File([blob], fileData.filename, { type: fileData.mimeType })
       
-      formData.append('file', file)
-      formData.append('projectId', projectId)
+      formData.append(&apos;file&apos;, file)
+      formData.append(&apos;projectId&apos;, projectId)
       if (overwrite) {
-        formData.append('overwrite', 'true')
+        formData.append(&apos;overwrite&apos;, &apos;true&apos;)
       }
 
       try {
         const response = await fetch(`${baseUrl}/api/storage/upload`, {
-          method: 'POST',
+          method: &apos;POST&apos;,
           body: formData
         })
 
@@ -66,7 +66,7 @@ async function uploadFile(page: Page, options: {
       } catch (error) {
         return {
           success: false,
-          error: error.message || 'Upload failed',
+          error: error.message || &apos;Upload failed&apos;,
           status: 500
         }
       }
@@ -75,14 +75,14 @@ async function uploadFile(page: Page, options: {
   )
 }
 
-test.describe('File Storage System', () => {
+test.describe(&apos;File Storage System&apos;, () => {
   test.beforeEach(async ({ page }) => {
     // Set longer timeout for storage operations
     page.setDefaultTimeout(TEST_TIMEOUT)
   })
 
-  test.describe('File Upload Tests', () => {
-    test('should successfully upload a supported file (PDF)', async ({ page }) => {
+  test.describe(&apos;File Upload Tests&apos;, () => {
+    test(&apos;should successfully upload a supported file (PDF)&apos;, async ({ page }) => {
       const response = await uploadFile(page, {
         projectId: TEST_PROJECT_ID,
         baseUrl: BASE_URL
@@ -90,22 +90,22 @@ test.describe('File Storage System', () => {
 
       // Note: We expect this to fail with Supabase setup issues initially
       // This validates our error handling
-      expect(typeof response.success).toBe('boolean')
+      expect(typeof response.success).toBe(&apos;boolean&apos;)
       if (response.success) {
-        expect(response.data).toHaveProperty('id')
-        expect(response.data).toHaveProperty('filename')
-        expect(response.data.filename).toBe('test-document.pdf')
-        expect(response.data).toHaveProperty('size')
-        expect(response.data).toHaveProperty('mimeType', 'application/pdf')
-        expect(response.data).toHaveProperty('url')
+        expect(response.data).toHaveProperty(&apos;id&apos;)
+        expect(response.data).toHaveProperty(&apos;filename&apos;)
+        expect(response.data.filename).toBe(&apos;test-document.pdf&apos;)
+        expect(response.data).toHaveProperty(&apos;size&apos;)
+        expect(response.data).toHaveProperty(&apos;mimeType&apos;, &apos;application/pdf&apos;)
+        expect(response.data).toHaveProperty(&apos;url&apos;)
       } else {
-        // If Supabase isn't properly configured, we should get an informative error
-        expect(typeof response.error).toBe('string')
+        // If Supabase isn&apos;t properly configured, we should get an informative error
+        expect(typeof response.error).toBe(&apos;string&apos;)
         console.log(`Expected error (Supabase not configured): ${response.error}`)
       }
     })
 
-    test('should handle re-uploading same file with overwrite logic', async ({ page }) => {
+    test(&apos;should handle re-uploading same file with overwrite logic&apos;, async ({ page }) => {
       // First upload
       const firstUpload = await uploadFile(page, {
         projectId: TEST_PROJECT_ID,
@@ -120,59 +120,59 @@ test.describe('File Storage System', () => {
       })
 
       // Both should have consistent behavior
-      expect(typeof firstUpload.success).toBe('boolean')
-      expect(typeof secondUpload.success).toBe('boolean')
+      expect(typeof firstUpload.success).toBe(&apos;boolean&apos;)
+      expect(typeof secondUpload.success).toBe(&apos;boolean&apos;)
       
       if (secondUpload.success) {
         expect(secondUpload.data.overwritten).toBe(true)
       }
     })
 
-    test('should reject invalid file format (executable)', async ({ page }) => {
+    test(&apos;should reject invalid file format (executable)&apos;, async ({ page }) => {
       const response = await uploadFile(page, {
         projectId: TEST_PROJECT_ID,
         baseUrl: BASE_URL,
         fileData: {
-          filename: 'malicious.exe',
-          content: 'MZ fake executable content',
-          mimeType: 'application/x-msdownload'
+          filename: &apos;malicious.exe&apos;,
+          content: &apos;MZ fake executable content&apos;,
+          mimeType: &apos;application/x-msdownload&apos;
         }
       })
 
       expect(response.success).toBe(false)
-      expect(response.error).toContain('File type not allowed for security reasons')
+      expect(response.error).toContain(&apos;File type not allowed for security reasons&apos;)
     })
 
-    test('should reject oversized files', async ({ page }) => {
-      // Create a large file description (we won't actually create 101MB in memory)
+    test(&apos;should reject oversized files&apos;, async ({ page }) => {
+      // Create a large file description (we won&apos;t actually create 101MB in memory)
       const response = await page.evaluate(
         async ({ projectId, baseUrl }) => {
           const formData = new FormData()
           
           // Create a mock large file by setting size property
-          const largeContent = 'x'.repeat(1000) // Small content but we'll modify the size check
-          const blob = new Blob([largeContent], { type: 'application/pdf' })
+          const largeContent = &apos;x'.repeat(1000) // Small content but we&apos;ll modify the size check'
+          const blob = new Blob([largeContent], { type: &apos;application/pdf&apos; })
           
           // Override the size property to simulate a large file
-          Object.defineProperty(blob, 'size', {
+          Object.defineProperty(blob, &apos;size&apos;, {
             value: 101 * 1024 * 1024, // 101MB
             writable: false
           })
           
-          const file = new File([blob], 'large-file.pdf', { type: 'application/pdf' })
+          const file = new File([blob], &apos;large-file.pdf&apos;, { type: &apos;application/pdf&apos; })
           
           // Override the size property on the file as well
-          Object.defineProperty(file, 'size', {
+          Object.defineProperty(file, &apos;size&apos;, {
             value: 101 * 1024 * 1024, // 101MB
             writable: false
           })
           
-          formData.append('file', file)
-          formData.append('projectId', projectId)
+          formData.append(&apos;file&apos;, file)
+          formData.append(&apos;projectId&apos;, projectId)
 
           try {
             const response = await fetch(`${baseUrl}/api/storage/upload`, {
-              method: 'POST',
+              method: &apos;POST&apos;,
               body: formData
             })
 
@@ -185,7 +185,7 @@ test.describe('File Storage System', () => {
           } catch (error) {
             return {
               success: false,
-              error: error.message || 'Upload failed',
+              error: error.message || &apos;Upload failed&apos;,
               status: 500
             }
           }
@@ -194,14 +194,14 @@ test.describe('File Storage System', () => {
       )
 
       expect(response.success).toBe(false)
-      expect(response.error).toContain('File size exceeds maximum allowed size')
+      expect(response.error).toContain(&apos;File size exceeds maximum allowed size&apos;)
     })
 
-    test('should upload multiple supported file types', async ({ page }) => {
+    test(&apos;should upload multiple supported file types&apos;, async ({ page }) => {
       const fileTypes = [
-        { filename: 'test.txt', content: 'Hello world', mimeType: 'text/plain' },
-        { filename: 'test.png', content: 'PNG fake content', mimeType: 'image/png' },
-        { filename: 'test.mp3', content: 'MP3 fake content', mimeType: 'audio/mpeg' }
+        { filename: &apos;test.txt&apos;, content: &apos;Hello world&apos;, mimeType: &apos;text/plain&apos; },
+        { filename: &apos;test.png&apos;, content: &apos;PNG fake content&apos;, mimeType: &apos;image/png&apos; },
+        { filename: &apos;test.mp3&apos;, content: &apos;MP3 fake content&apos;, mimeType: &apos;audio/mpeg&apos; }
       ]
 
       for (const fileTest of fileTypes) {
@@ -212,27 +212,27 @@ test.describe('File Storage System', () => {
         })
 
         // Either succeeds or fails with informative error
-        expect(typeof response.success).toBe('boolean')
+        expect(typeof response.success).toBe(&apos;boolean&apos;)
         if (!response.success) {
           console.log(`${fileTest.filename} upload result: ${response.error}`)
         }
       }
     })
 
-    test('should validate project ID parameter', async ({ page }) => {
+    test(&apos;should validate project ID parameter&apos;, async ({ page }) => {
       const response = await page.evaluate(
         async ({ baseUrl }) => {
           const formData = new FormData()
           
-          const blob = new Blob(['test content'], { type: 'application/pdf' })
-          const file = new File([blob], 'test.pdf', { type: 'application/pdf' })
+          const blob = new Blob([&apos;test content&apos;], { type: &apos;application/pdf&apos; })
+          const file = new File([blob], &apos;test.pdf&apos;, { type: &apos;application/pdf&apos; })
           
-          formData.append('file', file)
+          formData.append(&apos;file&apos;, file)
           // Intentionally omit projectId
 
           try {
             const response = await fetch(`${baseUrl}/api/storage/upload`, {
-              method: 'POST',
+              method: &apos;POST&apos;,
               body: formData
             })
 
@@ -245,7 +245,7 @@ test.describe('File Storage System', () => {
           } catch (error) {
             return {
               success: false,
-              error: error.message || 'Upload failed',
+              error: error.message || &apos;Upload failed&apos;,
               status: 500
             }
           }
@@ -254,19 +254,19 @@ test.describe('File Storage System', () => {
       )
 
       expect(response.success).toBe(false)
-      expect(response.error).toContain('Project ID is required')
+      expect(response.error).toContain(&apos;Project ID is required&apos;)
     })
 
-    test('should validate required file field', async ({ page }) => {
+    test(&apos;should validate required file field&apos;, async ({ page }) => {
       const response = await page.evaluate(
         async ({ projectId, baseUrl }) => {
           const formData = new FormData()
-          formData.append('projectId', projectId)
+          formData.append(&apos;projectId&apos;, projectId)
           // Intentionally omit file
 
           try {
             const response = await fetch(`${baseUrl}/api/storage/upload`, {
-              method: 'POST',
+              method: &apos;POST&apos;,
               body: formData
             })
 
@@ -279,7 +279,7 @@ test.describe('File Storage System', () => {
           } catch (error) {
             return {
               success: false,
-              error: error.message || 'Upload failed',
+              error: error.message || &apos;Upload failed&apos;,
               status: 500
             }
           }
@@ -288,12 +288,12 @@ test.describe('File Storage System', () => {
       )
 
       expect(response.success).toBe(false)
-      expect(response.error).toContain('No file provided')
+      expect(response.error).toContain(&apos;No file provided&apos;)
     })
   })
 
-  test.describe('File Download Tests', () => {
-    test('should handle file not found gracefully', async ({ page }) => {
+  test.describe(&apos;File Download Tests&apos;, () => {
+    test(&apos;should handle file not found gracefully&apos;, async ({ page }) => {
       const response = await page.evaluate(
         async ({ projectId, baseUrl }) => {
           try {
@@ -307,7 +307,7 @@ test.describe('File Storage System', () => {
           } catch (error) {
             return {
               success: false,
-              error: error.message || 'Download failed',
+              error: error.message || &apos;Download failed&apos;,
               status: 500
             }
           }
@@ -316,11 +316,11 @@ test.describe('File Storage System', () => {
       )
 
       expect(response.success).toBe(false)
-      expect(response.error).toContain('File not found')
+      expect(response.error).toContain(&apos;File not found&apos;)
       expect(response.status).toBe(404)
     })
 
-    test('should validate project ID for downloads', async ({ page }) => {
+    test(&apos;should validate project ID for downloads&apos;, async ({ page }) => {
       const response = await page.evaluate(
         async ({ baseUrl }) => {
           try {
@@ -334,7 +334,7 @@ test.describe('File Storage System', () => {
           } catch (error) {
             return {
               success: false,
-              error: error.message || 'Download failed',
+              error: error.message || &apos;Download failed&apos;,
               status: 500
             }
           }
@@ -343,18 +343,18 @@ test.describe('File Storage System', () => {
       )
 
       expect(response.success).toBe(false)
-      expect(response.error).toContain('Project ID is required')
+      expect(response.error).toContain(&apos;Project ID is required&apos;)
       expect(response.status).toBe(400)
     })
 
-    test('should generate signed download URLs', async ({ page }) => {
+    test(&apos;should generate signed download URLs&apos;, async ({ page }) => {
       const response = await page.evaluate(
         async ({ projectId, baseUrl }) => {
           try {
             const response = await fetch(`${baseUrl}/api/storage/download/test.pdf`, {
-              method: 'POST',
+              method: &apos;POST&apos;,
               headers: {
-                'Content-Type': 'application/json'
+                &apos;Content-Type&apos;: &apos;application/json&apos;
               },
               body: JSON.stringify({
                 projectId: projectId,
@@ -372,7 +372,7 @@ test.describe('File Storage System', () => {
           } catch (error) {
             return {
               success: false,
-              error: error.message || 'URL generation failed',
+              error: error.message || &apos;URL generation failed&apos;,
               status: 500
             }
           }
@@ -381,53 +381,53 @@ test.describe('File Storage System', () => {
       )
 
       // Either succeeds or fails with informative error about missing file
-      expect(typeof response.success).toBe('boolean')
+      expect(typeof response.success).toBe(&apos;boolean&apos;)
       if (response.success) {
-        expect(response.data).toHaveProperty('signedUrl')
-        expect(response.data).toHaveProperty('expiresAt')
-        expect(response.data.filename).toBe('test.pdf')
+        expect(response.data).toHaveProperty(&apos;signedUrl&apos;)
+        expect(response.data).toHaveProperty(&apos;expiresAt&apos;)
+        expect(response.data.filename).toBe(&apos;test.pdf&apos;)
       } else {
-        console.log(`Expected error (file doesn't exist): ${response.error}`)
+        console.log(`Expected error (file doesn&apos;t exist): ${response.error}`)
       }
     })
   })
 
-  test.describe('Security and Error Handling', () => {
-    test('should sanitize file names properly', async ({ page }) => {
+  test.describe(&apos;Security and Error Handling&apos;, () => {
+    test(&apos;should sanitize file names properly&apos;, async ({ page }) => {
       const response = await uploadFile(page, {
         projectId: TEST_PROJECT_ID,
         baseUrl: BASE_URL,
         fileData: {
-          filename: '../../../etc/passwd.txt',
-          content: 'malicious path traversal attempt',
-          mimeType: 'text/plain'
+          filename: &apos;../../../etc/passwd.txt&apos;,
+          content: &apos;malicious path traversal attempt&apos;,
+          mimeType: &apos;text/plain&apos;
         }
       })
 
       if (response.success) {
         // Filename should be sanitized
-        expect(response.data.filename).not.toContain('../')
+        expect(response.data.filename).not.toContain(&apos;../&apos;)
         expect(response.data.filename).toMatch(/^[a-zA-Z0-9._-]+$/)
       } else {
         // Should fail gracefully
-        expect(typeof response.error).toBe('string')
+        expect(typeof response.error).toBe(&apos;string&apos;)
       }
     })
 
-    test('should handle network errors gracefully', async ({ page }) => {
+    test(&apos;should handle network errors gracefully&apos;, async ({ page }) => {
       // Test with invalid URL to simulate network error
       const response = await page.evaluate(
         async ({ projectId }) => {
           const formData = new FormData()
-          const blob = new Blob(['test'], { type: 'application/pdf' })
-          const file = new File([blob], 'test.pdf', { type: 'application/pdf' })
+          const blob = new Blob([&apos;test&apos;], { type: &apos;application/pdf&apos; })
+          const file = new File([blob], &apos;test.pdf&apos;, { type: &apos;application/pdf&apos; })
           
-          formData.append('file', file)
-          formData.append('projectId', projectId)
+          formData.append(&apos;file&apos;, file)
+          formData.append(&apos;projectId&apos;, projectId)
 
           try {
-            const response = await fetch('http://invalid-url:99999/api/storage/upload', {
-              method: 'POST',
+            const response = await fetch(&apos;http://invalid-url:99999/api/storage/upload&apos;, {
+              method: &apos;POST&apos;,
               body: formData
             })
 
@@ -439,7 +439,7 @@ test.describe('File Storage System', () => {
           } catch (error) {
             return {
               success: false,
-              error: error.message || 'Network error',
+              error: error.message || &apos;Network error&apos;,
               networkError: true
             }
           }
@@ -448,7 +448,7 @@ test.describe('File Storage System', () => {
       )
 
       expect(response.success).toBe(false)
-      expect(typeof response.error).toBe('string')
+      expect(typeof response.error).toBe(&apos;string&apos;)
       expect(response.networkError).toBe(true)
     })
   })

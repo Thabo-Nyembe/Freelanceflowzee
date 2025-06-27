@@ -1,8 +1,8 @@
-import { test as base } from '@playwright/test';
-import { DashboardPage } from '../page-objects/dashboard-page';
-import { AuthPage } from '../page-objects/auth-page';
-import { ProjectPage } from '../page-objects/project-page';
-import { PaymentPage } from '../page-objects/payment-page';
+import { test as base } from &apos;@playwright/test&apos;;
+import { DashboardPage } from &apos;../page-objects/dashboard-page&apos;;
+import { AuthPage } from &apos;../page-objects/auth-page&apos;;
+import { ProjectPage } from &apos;../page-objects/project-page&apos;;
+import { PaymentPage } from &apos;../page-objects/payment-page&apos;;
 
 // Declare the types of your fixtures
 type Fixtures = {
@@ -10,7 +10,7 @@ type Fixtures = {
   authPage: AuthPage;
   projectPage: ProjectPage;
   paymentPage: PaymentPage;
-  authenticatedPage: any;
+  authenticatedPage: unknown;
 };
 
 // Extend the base test with your fixtures
@@ -19,8 +19,8 @@ export const test = base.extend<Fixtures>({
   authenticatedPage: async ({ page }, use) => {
     // Set test mode headers
     await page.setExtraHTTPHeaders({
-      'x-test-mode': 'true',
-      'user-agent': 'Playwright/Test Runner'
+      &apos;x-test-mode&apos;: &apos;true&apos;,
+      &apos;user-agent&apos;: &apos;Playwright/Test Runner&apos;
     });
 
     await use(page);
@@ -44,4 +44,4 @@ export const test = base.extend<Fixtures>({
   },
 });
 
-export { expect } from '@playwright/test';
+export { expect } from &apos;@playwright/test&apos;;

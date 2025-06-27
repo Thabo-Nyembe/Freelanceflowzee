@@ -36,10 +36,10 @@ const LuxuryCard = React.forwardRef<HTMLDivElement, LuxuryCardProps>(
       emerald: "bg-gradient-to-br from-emerald-50/80 to-teal-50/60",
       amber: "bg-gradient-to-br from-amber-50/80 to-orange-50/60",
       slate: "bg-gradient-to-br from-slate-50/80 to-gray-50/60"
-    }[gradient] : ""
+    }[gradient] : "
 
-    const hoverClasses = hover ? "hover:shadow-3xl hover:scale-[1.02] hover:border-white/50" : ""
-    const blurClasses = blur ? "backdrop-blur-xl" : ""
+    const hoverClasses = hover ? "hover:shadow-3xl hover:scale-[1.02] hover:border-white/50" : "
+    const blurClasses = blur ? "backdrop-blur-xl" : "
 
     return (
       <div

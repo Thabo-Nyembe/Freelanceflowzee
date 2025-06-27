@@ -140,7 +140,7 @@ class SecurityService {
   }
 
   // Data protection and encryption
-  async protectSensitiveData(data: any, context: string): Promise<ProtectedData> {
+  async protectSensitiveData(data: Record<string, unknown>, context: string): Promise<ProtectedData> {
     const protection: ProtectedData = {
       encrypted: false,
       masked: false,
@@ -195,7 +195,7 @@ class SecurityService {
   async validateAccess(request: AccessRequest): Promise<AccessValidation> {
     const validation: AccessValidation = {
       granted: false,
-      reason: '',
+      reason: '','
       permissions: [],
       restrictions: [],
       sessionInfo: null
@@ -267,7 +267,7 @@ class SecurityService {
   }
 
   // Compliance checking
-  async checkCompliance(standards: string[] = ['GDPR', 'SOC2', 'PCI-DSS']): Promise<ComplianceReport> {
+  async checkCompliance(standards: string[] = ['GDPR&apos;, 'SOC2', &apos;PCI-DSS']): Promise<ComplianceReport> {
     const report: ComplianceReport = {
       standards: {},
       overallScore: 0,
@@ -382,32 +382,32 @@ class SecurityService {
   // Threat detection methods
   private async checkRateLimit(request: SecurityRequest): Promise<ThreatDetection> {
     // Implement rate limiting logic
-    return { detected: false, type: 'rate_limit', severity: 'high', description: '', confidence: 0 }
+    return { detected: false, type: 'rate_limit', severity: 'high', description: , confidence: 0 }'
   }
 
   private async detectSQLInjection(request: SecurityRequest): Promise<ThreatDetection> {
     // SQL injection detection logic
-    return { detected: false, type: 'sql_injection', severity: 'critical', description: '', confidence: 0 }
+    return { detected: false, type: 'sql_injection', severity: 'critical', description: , confidence: 0 }'
   }
 
   private async detectXSS(request: SecurityRequest): Promise<ThreatDetection> {
     // XSS detection logic
-    return { detected: false, type: 'xss', severity: 'high', description: '', confidence: 0 }
+    return { detected: false, type: 'xss', severity: 'high', description: , confidence: 0 }'
   }
 
   private async detectCSRF(request: SecurityRequest): Promise<ThreatDetection> {
     // CSRF detection logic
-    return { detected: false, type: 'csrf', severity: 'medium', description: '', confidence: 0 }
+    return { detected: false, type: 'csrf', severity: 'medium', description: , confidence: 0 }'
   }
 
   private async detectSuspiciousBehavior(request: SecurityRequest): Promise<ThreatDetection> {
     // Behavioral analysis logic
-    return { detected: false, type: 'suspicious_behavior', severity: 'medium', description: '', confidence: 0 }
+    return { detected: false, type: 'suspicious_behavior', severity: 'medium', description: , confidence: 0 }'
   }
 
   private async detectBot(request: SecurityRequest): Promise<ThreatDetection> {
     // Bot detection logic
-    return { detected: false, type: 'bot', severity: 'low', description: '', confidence: 0 }
+    return { detected: false, type: 'bot', severity: 'low', description: , confidence: 0 }'
   }
 
   private escalateThreatLevel(current: ThreatLevel, new_level: ThreatLevel): ThreatLevel {
@@ -450,12 +450,12 @@ class SecurityService {
   }
 
   // Data protection methods
-  private detectSensitiveFields(data: any): SensitiveField[] {
+  private detectSensitiveFields(data: Record<string, unknown>): SensitiveField[] {
     return []
   }
 
   private async maskPII(data: string): Promise<string> {
-    return data.replace(/.(?=.{4})/g, '*')
+    return data.replace(/.(?=.{4})/g, '*')'
   }
 
   private async tokenizeFinancialData(data: string): Promise<string> {
@@ -613,7 +613,7 @@ interface SecurityRequest {
   url: string
   method: string
   headers: Record<string, string>
-  body?: any
+  body?: Record<string, unknown>
   sessionToken?: string
   userId?: string
 }
@@ -663,7 +663,7 @@ interface ProtectedData {
   originalSize: number
   protectedSize: number
   protectionMethods: string[]
-  data?: any
+  data?: Record<string, unknown>
 }
 
 interface SensitiveField {
@@ -676,7 +676,7 @@ interface AccessRequest {
   sessionToken: string
   resource: string
   action: string
-  context?: any
+  context?: Record<string, unknown>
 }
 
 interface AccessValidation {
@@ -684,7 +684,7 @@ interface AccessValidation {
   reason: string
   permissions: string[]
   restrictions: string[]
-  sessionInfo: any
+  sessionInfo: Record<string, unknown>
 }
 
 interface SessionValidation {
@@ -708,7 +708,7 @@ interface AccessPattern {
 interface SecurityEvent {
   type: string
   timestamp: Date
-  details: any
+  details: Record<string, unknown>
 }
 
 interface SecurityEventAnalysis {
@@ -721,14 +721,14 @@ interface ComplianceReport {
   standards: Record<string, ComplianceStandardResult>
   overallScore: number
   recommendations: string[]
-  nonCompliantItems: any[]
+  nonCompliantItems: Record<string, unknown>[]
   timestamp: Date
 }
 
 interface ComplianceStandardResult {
   score: number
-  compliantItems: any[]
-  nonCompliantItems: any[]
+  compliantItems: Record<string, unknown>[]
+  nonCompliantItems: Record<string, unknown>[]
   recommendations: string[]
 }
 
@@ -736,7 +736,7 @@ interface SecurityTest {
   name: string
   status: 'passed' | 'failed' | 'skipped'
   description: string
-  details?: any
+  details?: Record<string, unknown>
 }
 
 interface SecurityTestResults {

@@ -1,23 +1,23 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from &apos;@playwright/test&apos;
 
-test.describe('FreeflowZee Interactive Elements Comprehensive Test', () => {
+test.describe(&apos;FreeflowZee Interactive Elements Comprehensive Test&apos;, () => {
   test.beforeEach(async ({ page }) => {
     // Test mode setup for bypassing authentication
     await page.addInitScript(() => {
-      localStorage.setItem('test-mode', 'true')
+      localStorage.setItem(&apos;test-mode&apos;, &apos;true&apos;)
     })
   })
 
-  test('All navigation routes should be accessible', async ({ page }) => {
+  test(&apos;All navigation routes should be accessible&apos;, async ({ page }) => {
     // Test public routes
     const publicRoutes = [
-      { path: '/', expected: 200 },
-      { path: '/features', expected: 200 },
-      { path: '/demo', expected: 200 },
-      { path: '/payment', expected: 200 },
-      { path: '/contact', expected: 200 },
-      { path: '/login', expected: 200 },
-      { path: '/signup', expected: 200 }
+      { path: &apos;/', expected: 200 },'
+      { path: &apos;/features&apos;, expected: 200 },
+      { path: &apos;/demo&apos;, expected: 200 },
+      { path: &apos;/payment&apos;, expected: 200 },
+      { path: &apos;/contact&apos;, expected: 200 },
+      { path: &apos;/login&apos;, expected: 200 },
+      { path: &apos;/signup&apos;, expected: 200 }
     ]
 
     for (const route of publicRoutes) {
@@ -26,7 +26,7 @@ test.describe('FreeflowZee Interactive Elements Comprehensive Test', () => {
     }
 
     // Test protected routes (should redirect to login)
-    const protectedRoutes = ['/dashboard', '/dashboard/projects-hub', '/dashboard/files-hub']
+    const protectedRoutes = [&apos;/dashboard&apos;, &apos;/dashboard/projects-hub&apos;, &apos;/dashboard/files-hub&apos;]
     
     for (const route of protectedRoutes) {
       const response = await page.goto(`http://localhost:3000${route}`)
@@ -35,229 +35,229 @@ test.describe('FreeflowZee Interactive Elements Comprehensive Test', () => {
     }
   })
 
-  test('Universal Pinpoint Feedback System interactive elements', async ({ page }) => {
-    await page.goto('http://localhost:3000/dashboard/projects-hub', { 
-      headers: { 'x-test-mode': 'true' } 
+  test(&apos;Universal Pinpoint Feedback System interactive elements&apos;, async ({ page }) => {
+    await page.goto(&apos;http://localhost:3000/dashboard/projects-hub&apos;, { 
+      headers: { &apos;x-test-mode&apos;: &apos;true&apos; } 
     })
     
     // Wait for tabs to load
-    await page.waitForSelector('[data-testid="projects-tabs"]', { timeout: 10000 })
+    await page.waitForSelector(&apos;[data-testid=&quot;projects-tabs&quot;]&apos;, { timeout: 10000 })
     
     // Test Collaboration tab with UPF
-    await page.click('text=Collaboration')
+    await page.click(&apos;text=Collaboration&apos;)
     await page.waitForTimeout(1000)
     
     // Test pinpoint comment functionality
-    const addPinButton = page.locator('button:has-text("Add Pin Comment")')
+    const addPinButton = page.locator(&apos;button:has-text(&quot;Add Pin Comment&quot;)&apos;)
     await expect(addPinButton).toBeVisible()
     await addPinButton.click()
     
     // Test AI analysis button
-    const aiAnalysisButton = page.locator('button:has-text("AI Analysis")')
+    const aiAnalysisButton = page.locator(&apos;button:has-text(&quot;AI Analysis&quot;)&apos;)
     if (await aiAnalysisButton.isVisible()) {
       await aiAnalysisButton.click()
       await page.waitForTimeout(500)
     }
     
-    console.log('✅ Universal Pinpoint Feedback System - Interactive elements working')
+    console.log(&apos;✅ Universal Pinpoint Feedback System - Interactive elements working&apos;)
   })
 
-  test('Enhanced Community Hub navigation and buttons', async ({ page }) => {
-    await page.goto('http://localhost:3000/dashboard/community', { 
-      headers: { 'x-test-mode': 'true' } 
+  test(&apos;Enhanced Community Hub navigation and buttons&apos;, async ({ page }) => {
+    await page.goto(&apos;http://localhost:3000/dashboard/community&apos;, { 
+      headers: { &apos;x-test-mode&apos;: &apos;true&apos; } 
     })
     
-    await page.waitForSelector('[role="tablist"]', { timeout: 10000 })
+    await page.waitForSelector(&apos;[role=&quot;tablist&quot;]&apos;, { timeout: 10000 })
     
     // Test Creator Marketplace tab
-    await page.click('text=Creator Marketplace')
+    await page.click(&apos;text=Creator Marketplace&apos;)
     await page.waitForTimeout(1000)
     
     // Test Follow Creator button
-    const followButtons = page.locator('button:has-text("Follow")')
+    const followButtons = page.locator(&apos;button:has-text(&quot;Follow&quot;)&apos;)
     if (await followButtons.first().isVisible()) {
       await followButtons.first().click()
-      console.log('✅ Follow Creator button - Working')
+      console.log(&apos;✅ Follow Creator button - Working&apos;)
     }
     
     // Test Social Wall tab
-    await page.click('text=Social Wall')
+    await page.click(&apos;text=Social Wall&apos;)
     await page.waitForTimeout(1000)
     
     // Test Create Post button
-    const createPostButton = page.locator('button:has-text("Create Post")')
+    const createPostButton = page.locator(&apos;button:has-text(&quot;Create Post&quot;)&apos;)
     if (await createPostButton.isVisible()) {
       await createPostButton.click()
-      console.log('✅ Create Post button - Working')
+      console.log(&apos;✅ Create Post button - Working&apos;)
     }
     
-    console.log('✅ Enhanced Community Hub - All interactive elements working')
+    console.log(&apos;✅ Enhanced Community Hub - All interactive elements working&apos;)
   })
 
-  test('Files Hub upload/download functionality', async ({ page }) => {
-    await page.goto('http://localhost:3000/dashboard/files-hub', { 
-      headers: { 'x-test-mode': 'true' } 
+  test(&apos;Files Hub upload/download functionality&apos;, async ({ page }) => {
+    await page.goto(&apos;http://localhost:3000/dashboard/files-hub&apos;, { 
+      headers: { &apos;x-test-mode&apos;: &apos;true&apos; } 
     })
     
-    await page.waitForSelector('h1:has-text("Enterprise Files Hub")', { timeout: 10000 })
+    await page.waitForSelector(&apos;h1:has-text(&quot;Enterprise Files Hub&quot;)&apos;, { timeout: 10000 })
     
     // Test Upload Files button
-    const uploadButton = page.locator('[data-testid="upload-file-btn"]')
+    const uploadButton = page.locator(&apos;[data-testid=&quot;upload-file-btn&quot;]&apos;)
     await expect(uploadButton).toBeVisible()
-    await expect(uploadButton).toContainText('Upload Files')
+    await expect(uploadButton).toContainText(&apos;Upload Files&apos;)
     
     // Test New Folder button
-    const newFolderButton = page.locator('[data-testid="new-folder-btn"]')
+    const newFolderButton = page.locator(&apos;[data-testid=&quot;new-folder-btn&quot;]&apos;)
     await expect(newFolderButton).toBeVisible()
     await newFolderButton.click()
     
     // Handle the prompt dialog
-    page.on('dialog', async dialog => {
-      expect(dialog.type()).toBe('prompt')
-      await dialog.accept('Test Folder')
+    page.on(&apos;dialog&apos;, async dialog => {
+      expect(dialog.type()).toBe(&apos;prompt&apos;)
+      await dialog.accept(&apos;Test Folder&apos;)
     })
     
     // Test download functionality (mock file interaction)
-    const downloadButton = page.locator('button:has-text("Download")')
+    const downloadButton = page.locator(&apos;button:has-text(&quot;Download&quot;)&apos;)
     if (await downloadButton.first().isVisible()) {
       await downloadButton.first().click()
-      console.log('✅ Download button - Working')
+      console.log(&apos;✅ Download button - Working&apos;)
     }
     
-    console.log('✅ Files Hub - Upload/Download interactive elements working')
+    console.log(&apos;✅ Files Hub - Upload/Download interactive elements working&apos;)
   })
 
-  test('My Day AI Planning interactive features', async ({ page }) => {
-    await page.goto('http://localhost:3000/dashboard/my-day', { 
-      headers: { 'x-test-mode': 'true' } 
+  test(&apos;My Day AI Planning interactive features&apos;, async ({ page }) => {
+    await page.goto(&apos;http://localhost:3000/dashboard/my-day&apos;, { 
+      headers: { &apos;x-test-mode&apos;: &apos;true&apos; } 
     })
     
-    await page.waitForSelector('h1:has-text("My Day Today")', { timeout: 10000 })
+    await page.waitForSelector(&apos;h1:has-text(&quot;My Day Today&quot;)&apos;, { timeout: 10000 })
     
     // Test Add Task button
-    const addTaskButton = page.locator('button:has-text("Add Task")')
+    const addTaskButton = page.locator(&apos;button:has-text(&quot;Add Task&quot;)&apos;)
     if (await addTaskButton.isVisible()) {
       await addTaskButton.click()
-      console.log('✅ Add Task button - Working')
+      console.log(&apos;✅ Add Task button - Working&apos;)
     }
     
     // Test Start Timer button
-    const startTimerButton = page.locator('button:has-text("Start Timer")')
+    const startTimerButton = page.locator(&apos;button:has-text(&quot;Start Timer&quot;)&apos;)
     if (await startTimerButton.isVisible()) {
       await startTimerButton.click()
-      console.log('✅ Start Timer button - Working')
+      console.log(&apos;✅ Start Timer button - Working&apos;)
     }
     
     // Test Generate Schedule button
-    const generateScheduleButton = page.locator('button:has-text("Generate Schedule")')
+    const generateScheduleButton = page.locator(&apos;button:has-text(&quot;Generate Schedule&quot;)&apos;)
     if (await generateScheduleButton.isVisible()) {
       await generateScheduleButton.click()
-      console.log('✅ Generate Schedule button - Working')
+      console.log(&apos;✅ Generate Schedule button - Working&apos;)
     }
     
-    console.log('✅ My Day AI Planning - All interactive elements working')
+    console.log(&apos;✅ My Day AI Planning - All interactive elements working&apos;)
   })
 
-  test('Escrow System management interface', async ({ page }) => {
-    await page.goto('http://localhost:3000/dashboard/escrow', { 
-      headers: { 'x-test-mode': 'true' } 
+  test(&apos;Escrow System management interface&apos;, async ({ page }) => {
+    await page.goto(&apos;http://localhost:3000/dashboard/escrow&apos;, { 
+      headers: { &apos;x-test-mode&apos;: &apos;true&apos; } 
     })
     
-    await page.waitForSelector('h1:has-text("Professional Escrow System")', { timeout: 10000 })
+    await page.waitForSelector(&apos;h1:has-text(&quot;Professional Escrow System&quot;)&apos;, { timeout: 10000 })
     
     // Test Release Funds button
-    const releaseFundsButton = page.locator('button:has-text("Release Funds")')
+    const releaseFundsButton = page.locator(&apos;button:has-text(&quot;Release Funds&quot;)&apos;)
     if (await releaseFundsButton.first().isVisible()) {
       await releaseFundsButton.first().click()
-      console.log('✅ Release Funds button - Working')
+      console.log(&apos;✅ Release Funds button - Working&apos;)
     }
     
     // Test View Details button
-    const viewDetailsButton = page.locator('button:has-text("View Details")')
+    const viewDetailsButton = page.locator(&apos;button:has-text(&quot;View Details&quot;)&apos;)
     if (await viewDetailsButton.first().isVisible()) {
       await viewDetailsButton.first().click()
-      console.log('✅ View Details button - Working')
+      console.log(&apos;✅ View Details button - Working&apos;)
     }
     
-    console.log('✅ Escrow System - All interactive elements working')
+    console.log(&apos;✅ Escrow System - All interactive elements working&apos;)
   })
 
-  test('AI Create system functionality', async ({ page }) => {
-    await page.goto('http://localhost:3000/dashboard/ai-create', { 
-      headers: { 'x-test-mode': 'true' } 
+  test(&apos;AI Create system functionality&apos;, async ({ page }) => {
+    await page.goto(&apos;http://localhost:3000/dashboard/ai-create&apos;, { 
+      headers: { &apos;x-test-mode&apos;: &apos;true&apos; } 
     })
     
-    await page.waitForSelector('h1:has-text("AI Create Studio")', { timeout: 10000 })
+    await page.waitForSelector(&apos;h1:has-text(&quot;AI Create Studio&quot;)&apos;, { timeout: 10000 })
     
     // Test Generate Assets button
-    const generateAssetsButton = page.locator('button:has-text("Generate Assets")')
+    const generateAssetsButton = page.locator(&apos;button:has-text(&quot;Generate Assets&quot;)&apos;)
     if (await generateAssetsButton.isVisible()) {
       await generateAssetsButton.click()
-      console.log('✅ Generate Assets button - Working')
+      console.log(&apos;✅ Generate Assets button - Working&apos;)
     }
     
     // Test Preview Asset button
-    const previewAssetButton = page.locator('button:has-text("Preview Asset")')
+    const previewAssetButton = page.locator(&apos;button:has-text(&quot;Preview Asset&quot;)&apos;)
     if (await previewAssetButton.first().isVisible()) {
       await previewAssetButton.first().click()
-      console.log('✅ Preview Asset button - Working')
+      console.log(&apos;✅ Preview Asset button - Working&apos;)
     }
     
-    console.log('✅ AI Create System - All interactive elements working')
+    console.log(&apos;✅ AI Create System - All interactive elements working&apos;)
   })
 
-  test('Video Studio interactive controls', async ({ page }) => {
-    await page.goto('http://localhost:3000/dashboard/video-studio', { 
-      headers: { 'x-test-mode': 'true' } 
+  test(&apos;Video Studio interactive controls&apos;, async ({ page }) => {
+    await page.goto(&apos;http://localhost:3000/dashboard/video-studio&apos;, { 
+      headers: { &apos;x-test-mode&apos;: &apos;true&apos; } 
     })
     
-    await page.waitForSelector('h1:has-text("Professional Video Studio")', { timeout: 10000 })
+    await page.waitForSelector(&apos;h1:has-text(&quot;Professional Video Studio&quot;)&apos;, { timeout: 10000 })
     
     // Test Record button
-    const recordButton = page.locator('button:has-text("Record")')
+    const recordButton = page.locator(&apos;button:has-text(&quot;Record&quot;)&apos;)
     if (await recordButton.isVisible()) {
       await recordButton.click()
-      console.log('✅ Record button - Working')
+      console.log(&apos;✅ Record button - Working&apos;)
     }
     
     // Test Edit button
-    const editButton = page.locator('button:has-text("Edit")')
+    const editButton = page.locator(&apos;button:has-text(&quot;Edit&quot;)&apos;)
     if (await editButton.first().isVisible()) {
       await editButton.first().click()
-      console.log('✅ Edit button - Working')
+      console.log(&apos;✅ Edit button - Working&apos;)
     }
     
-    console.log('✅ Video Studio - All interactive elements working')
+    console.log(&apos;✅ Video Studio - All interactive elements working&apos;)
   })
 
-  test('Canvas creative tools functionality', async ({ page }) => {
-    await page.goto('http://localhost:3000/dashboard/canvas', { 
-      headers: { 'x-test-mode': 'true' } 
+  test(&apos;Canvas creative tools functionality&apos;, async ({ page }) => {
+    await page.goto(&apos;http://localhost:3000/dashboard/canvas&apos;, { 
+      headers: { &apos;x-test-mode&apos;: &apos;true&apos; } 
     })
     
-    await page.waitForSelector('h1', { timeout: 10000 })
+    await page.waitForSelector(&apos;h1&apos;, { timeout: 10000 })
     
     // Test any canvas-specific buttons that exist
-    const canvasButtons = page.locator('button')
+    const canvasButtons = page.locator(&apos;button&apos;)
     const buttonCount = await canvasButtons.count()
     
     if (buttonCount > 0) {
       console.log(`✅ Canvas - Found ${buttonCount} interactive buttons`)
       // Test first button click
       await canvasButtons.first().click()
-      console.log('✅ Canvas button interaction - Working')
+      console.log(&apos;✅ Canvas button interaction - Working&apos;)
     }
     
-    console.log('✅ Canvas - Interactive elements accessible')
+    console.log(&apos;✅ Canvas - Interactive elements accessible&apos;)
   })
 
-  test('Payment integration system', async ({ page }) => {
-    await page.goto('http://localhost:3000/payment')
+  test(&apos;Payment integration system&apos;, async ({ page }) => {
+    await page.goto(&apos;http://localhost:3000/payment&apos;)
     
-    await page.waitForSelector('h1', { timeout: 10000 })
+    await page.waitForSelector(&apos;h1&apos;, { timeout: 10000 })
     
     // Test payment form interactions
-    const paymentButtons = page.locator('button')
+    const paymentButtons = page.locator(&apos;button&apos;)
     const buttonCount = await paymentButtons.count()
     
     if (buttonCount > 0) {
@@ -265,30 +265,30 @@ test.describe('FreeflowZee Interactive Elements Comprehensive Test', () => {
     }
     
     // Test email input field
-    const emailInput = page.locator('input[type="email"]')
+    const emailInput = page.locator(&apos;input[type=&quot;email&quot;]&apos;)
     if (await emailInput.isVisible()) {
-      await emailInput.fill('test@example.com')
-      console.log('✅ Email input - Working')
+      await emailInput.fill(&apos;test@example.com&apos;)
+      console.log(&apos;✅ Email input - Working&apos;)
     }
     
-    console.log('✅ Payment Integration - All interactive elements working')
+    console.log(&apos;✅ Payment Integration - All interactive elements working&apos;)
   })
 })
 
-test.describe('FreeflowZee Navigation System', () => {
-  test('Header navigation and dropdowns work correctly', async ({ page }) => {
-    await page.goto('http://localhost:3000/')
+test.describe(&apos;FreeflowZee Navigation System&apos;, () => {
+  test(&apos;Header navigation and dropdowns work correctly&apos;, async ({ page }) => {
+    await page.goto(&apos;http://localhost:3000/&apos;)
     
     // Test main navigation links
     const navLinks = [
-      'Features',
-      'How it Works',
-      'Docs',
-      'Community'
+      &apos;Features&apos;,
+      &apos;How it Works&apos;,
+      &apos;Docs&apos;,
+      &apos;Community&apos;
     ]
     
     for (const linkText of navLinks) {
-      const link = page.locator(`a:has-text("${linkText}")`)
+      const link = page.locator(`a:has-text(&quot;${linkText}&quot;)`)
       if (await link.isVisible()) {
         await link.click()
         await page.waitForTimeout(500)
@@ -298,17 +298,17 @@ test.describe('FreeflowZee Navigation System', () => {
       }
     }
     
-    console.log('✅ Header Navigation - All links working')
+    console.log(&apos;✅ Header Navigation - All links working&apos;)
   })
 
-  test('Footer navigation links are functional', async ({ page }) => {
-    await page.goto('http://localhost:3000/')
+  test(&apos;Footer navigation links are functional&apos;, async ({ page }) => {
+    await page.goto(&apos;http://localhost:3000/&apos;)
     
     // Scroll to footer
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
     
     // Test footer links
-    const footerLinks = page.locator('footer a')
+    const footerLinks = page.locator(&apos;footer a&apos;)
     const footerLinkCount = await footerLinks.count()
     
     if (footerLinkCount > 0) {
@@ -317,8 +317,8 @@ test.describe('FreeflowZee Navigation System', () => {
       // Test first few footer links
       for (let i = 0; i < Math.min(3, footerLinkCount); i++) {
         const link = footerLinks.nth(i)
-        const href = await link.getAttribute('href')
-        if (href && href.startsWith('/')) {
+        const href = await link.getAttribute(&apos;href&apos;)
+        if (href && href.startsWith(&apos;/')) {'
           await link.click()
           await page.waitForTimeout(500)
           await page.goBack()
@@ -327,41 +327,41 @@ test.describe('FreeflowZee Navigation System', () => {
       }
     }
     
-    console.log('✅ Footer Navigation - All links working')
+    console.log(&apos;✅ Footer Navigation - All links working&apos;)
   })
 })
 
-test.describe('FreeflowZee Authentication Flow', () => {
-  test('Login and signup forms are interactive', async ({ page }) => {
+test.describe(&apos;FreeflowZee Authentication Flow&apos;, () => {
+  test(&apos;Login and signup forms are interactive&apos;, async ({ page }) => {
     // Test login page
-    await page.goto('http://localhost:3000/login')
+    await page.goto(&apos;http://localhost:3000/login&apos;)
     
-    const emailInput = page.locator('input[type="email"]')
-    const passwordInput = page.locator('input[type="password"]')
-    const loginButton = page.locator('button:has-text("Sign In")')
+    const emailInput = page.locator(&apos;input[type=&quot;email&quot;]&apos;)
+    const passwordInput = page.locator(&apos;input[type=&quot;password&quot;]&apos;)
+    const loginButton = page.locator(&apos;button:has-text(&quot;Sign In&quot;)&apos;)
     
     if (await emailInput.isVisible()) {
-      await emailInput.fill('test@example.com')
-      console.log('✅ Login email input - Working')
+      await emailInput.fill(&apos;test@example.com&apos;)
+      console.log(&apos;✅ Login email input - Working&apos;)
     }
     
     if (await passwordInput.isVisible()) {
-      await passwordInput.fill('testpassword')
-      console.log('✅ Login password input - Working')
+      await passwordInput.fill(&apos;testpassword&apos;)
+      console.log(&apos;✅ Login password input - Working&apos;)
     }
     
     if (await loginButton.isVisible()) {
-      console.log('✅ Login button - Visible and interactive')
+      console.log(&apos;✅ Login button - Visible and interactive&apos;)
     }
     
     // Test signup page
-    await page.goto('http://localhost:3000/signup')
+    await page.goto(&apos;http://localhost:3000/signup&apos;)
     
-    const signupButton = page.locator('button:has-text("Sign Up")')
+    const signupButton = page.locator(&apos;button:has-text(&quot;Sign Up&quot;)&apos;)
     if (await signupButton.isVisible()) {
-      console.log('✅ Signup button - Visible and interactive')
+      console.log(&apos;✅ Signup button - Visible and interactive&apos;)
     }
     
-    console.log('✅ Authentication Forms - All interactive elements working')
+    console.log(&apos;✅ Authentication Forms - All interactive elements working&apos;)
   })
 }) 

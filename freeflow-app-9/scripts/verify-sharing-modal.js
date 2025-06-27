@@ -18,9 +18,9 @@ async function verifySharedModal() {
     console.log('🔍 Looking for share buttons...');
     
     // Wait for share buttons to be visible
-    await page.waitForSelector('[data-testid="share-btn"]', { timeout: 10000 });
+    await page.waitForSelector('[data-testid= "share-btn"]', { timeout: 10000 });
     
-    const shareButtons = await page.locator('[data-testid="share-btn"]').count();
+    const shareButtons = await page.locator('[data-testid= "share-btn"]').count();
     console.log(`✅ Found ${shareButtons} share buttons`);
     
     if (shareButtons === 0) {
@@ -28,7 +28,7 @@ async function verifySharedModal() {
     }
     
     console.log('📱 Clicking first share button...');
-    await page.locator('[data-testid="share-btn"]').first().click();
+    await page.locator('[data-testid= "share-btn"]').first().click();
     
     // Wait for modal to appear
     console.log('⏳ Waiting for sharing modal to appear...');

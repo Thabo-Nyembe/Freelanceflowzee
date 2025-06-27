@@ -35,7 +35,7 @@ async function integrateRealContent() {
     );
     
     console.log('✅ Updated mock data files with real content');
-    console.log('📁 Files updated:');
+    console.log('📁 Files updated: ');
     console.log('  - users.json (15 real users)');
     console.log('  - projects.json (20 real projects)');
     console.log('  - posts.json (30 real posts)');

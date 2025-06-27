@@ -10,13 +10,13 @@ interface Comment {
   user_id?: string
   content: string
   comment_type: 'image' | 'video' | 'code' | 'audio' | 'doc' | 'text'
-  position_data?: any
+  position_data?: unknown
   priority: 'low' | 'medium' | 'high' | 'urgent'
   status: 'open' | 'resolved' | 'in_progress'
   created_at?: string
   updated_at?: string
   voice_note_url?: string
-  ai_analysis?: any
+  ai_analysis?: unknown
 }
 
 // Types for UPF API
@@ -75,7 +75,7 @@ function hasValidEnvironment() {
 // Mock data for fallback mode
 const mockComments = [
   {
-    id: '1',
+    id: '1','
     file_id: 'brand-animation.mp4',
     project_id: 'project-1',
     user_id: 'user-1',
@@ -96,7 +96,7 @@ const mockComments = [
     updated_at: new Date().toISOString()
   },
   {
-    id: '2',
+    id: '2','
     file_id: 'homepage-mockup.jpg',
     project_id: 'project-1',
     user_id: 'user-2',
@@ -297,7 +297,7 @@ export async function GET(request: NextRequest) {
         try {
           const { data: comments, error } = await supabase
             .from('upf_comments')
-            .select('*')
+            .select('*')'
             .eq('file_id', fileId || 'test-file')
             .order('created_at', { ascending: false })
 
@@ -325,7 +325,7 @@ export async function GET(request: NextRequest) {
           // Get analytics
           const { data: analytics } = await supabase
             .from('upf_analytics')
-            .select('*')
+            .select('*')'
             .eq('project_id', 'project-1')
             .order('date', { ascending: false })
             .limit(1)
@@ -372,8 +372,7 @@ export async function GET(request: NextRequest) {
             trends: ['Animation timing concerns', 'Positive color reception'],
             priorities: ['Address video timing', 'Minor UI adjustments'],
             categories: {
-              'Design Feedback': 1,
-              'Timing Feedback': 1
+              'Design Feedback': 1, 'Timing Feedback': 1
             }
           },
           mode: hasValidEnvironment() ? 'database' : 'fallback',
@@ -426,9 +425,8 @@ export async function GET(request: NextRequest) {
 // Comment Management Functions
 async function handleAddComment(
   commentData: UPFCommentRequest,
-  supabase: any,
-  user: any
-) {
+  supabase: unknown,
+  user: unknown) {
   try {
     // Validate file exists
     const { data: file, error: fileError } = await supabase
@@ -543,7 +541,7 @@ async function handleAddComment(
   }
 }
 
-async function handleUpdateComment(body: any, supabase: any, user: any) {
+async function handleUpdateComment(body: unknown, supabase: unknown, user: unknown) {
   try {
     const { commentId, updates } = body
 
@@ -626,7 +624,7 @@ async function handleUpdateComment(body: any, supabase: any, user: any) {
   }
 }
 
-async function handleDeleteComment(body: any, supabase: any, user: any) {
+async function handleDeleteComment(body: unknown, supabase: unknown, user: unknown) {
   try {
     const { commentId } = body
 
@@ -699,9 +697,8 @@ async function handleDeleteComment(body: any, supabase: any, user: any) {
 
 async function handleAddReaction(
   reactionData: UPFReactionRequest,
-  supabase: any,
-  user: any
-) {
+  supabase: unknown,
+  user: unknown) {
   try {
     // Remove existing reaction from same user
     await supabase
@@ -719,7 +716,7 @@ async function handleAddReaction(
         reaction_type: reactionData.reactionType,
         created_at: new Date().toISOString()
       })
-      .select('*')
+      .select('*')'
       .single()
 
     if (error) {
@@ -745,9 +742,8 @@ async function handleAddReaction(
 
 async function handleAIAnalysis(
   analysisData: AIAnalysisRequest,
-  supabase: any,
-  user: any
-) {
+  supabase: unknown,
+  user: unknown) {
   try {
     const analysis = await generateAIAnalysis(
       analysisData.content,
@@ -769,7 +765,7 @@ async function handleAIAnalysis(
   }
 }
 
-async function handleVoiceNoteUpload(body: any, supabase: any, user: any) {
+async function handleVoiceNoteUpload(body: unknown, supabase: unknown, user: unknown) {
   try {
     const { fileName, fileData, duration, waveform } = body
 
@@ -787,7 +783,7 @@ async function handleVoiceNoteUpload(body: any, supabase: any, user: any) {
         waveform_data: waveform,
         created_at: new Date().toISOString()
       })
-      .select('*')
+      .select('*')'
       .single()
 
     if (error) {
@@ -812,7 +808,7 @@ async function handleVoiceNoteUpload(body: any, supabase: any, user: any) {
   }
 }
 
-async function handleRemoveReaction(body: any, supabase: any, user: any) {
+async function handleRemoveReaction(body: unknown, supabase: unknown, user: unknown) {
   try {
     const { commentId } = body
 
@@ -843,7 +839,7 @@ async function handleRemoveReaction(body: any, supabase: any, user: any) {
   }
 }
 
-async function handleMarkResolved(body: any, supabase: any, user: any) {
+async function handleMarkResolved(body: unknown, supabase: unknown, user: unknown) {
   try {
     const { commentId, resolved = true } = body
 
@@ -885,7 +881,7 @@ async function handleMarkResolved(body: any, supabase: any, user: any) {
         updated_at: new Date().toISOString()
       })
       .eq('id', commentId)
-      .select('*')
+      .select('*')'
       .single()
 
     if (updateError) {
@@ -923,7 +919,7 @@ async function handleMarkResolved(body: any, supabase: any, user: any) {
   }
 }
 
-async function handleAddReply(body: any, supabase: any, user: any) {
+async function handleAddReply(body: unknown, supabase: unknown, user: unknown) {
   try {
     const { parentCommentId, content, priority = 'medium' } = body
 
@@ -996,7 +992,7 @@ async function handleAddReply(body: any, supabase: any, user: any) {
   }
 }
 
-async function handleGenerateSummary(body: any, supabase: any, user: any) {
+async function handleGenerateSummary(body: unknown, supabase: unknown, user: unknown) {
   try {
     const { projectId, fileId, timeframe = 7 } = body
 
@@ -1048,7 +1044,7 @@ async function handleGenerateSummary(body: any, supabase: any, user: any) {
 }
 
 // Data Retrieval Functions
-async function getComments(supabase: any, fileId: string | null, user: any) {
+async function getComments(supabase: unknown, fileId: string | null, user: unknown) {
   if (!fileId) {
     return NextResponse.json(
       { error: 'File ID required' },
@@ -1090,14 +1086,14 @@ async function getComments(supabase: any, fileId: string | null, user: any) {
     total: comments?.length || 0,
     aiInsights,
     stats: {
-      open: comments?.filter((c: any) => c.status === 'open').length || 0,
-      resolved: comments?.filter((c: any) => c.status === 'resolved').length || 0,
-      highPriority: comments?.filter((c: any) => c.priority === 'high' || c.priority === 'urgent').length || 0
+      open: comments?.filter((c: unknown) => c.status === 'open').length || 0,
+      resolved: comments?.filter((c: unknown) => c.status === 'resolved').length || 0,
+      highPriority: comments?.filter((c: unknown) => c.priority === 'high' || c.priority === 'urgent').length || 0
     }
   })
 }
 
-async function getProjectComments(supabase: any, projectId: string | null, user: any) {
+async function getProjectComments(supabase: unknown, projectId: string | null, user: unknown) {
   if (!projectId) {
     return NextResponse.json(
       { error: 'Project ID required' },
@@ -1129,7 +1125,7 @@ async function getProjectComments(supabase: any, projectId: string | null, user:
   })
 }
 
-async function getCommentAnalytics(supabase: any, projectId: string | null, user: any) {
+async function getCommentAnalytics(supabase: unknown, projectId: string | null, user: unknown) {
   if (!projectId) {
     return NextResponse.json(
       { error: 'Project ID required' },
@@ -1152,22 +1148,22 @@ async function getCommentAnalytics(supabase: any, projectId: string | null, user
   const stats = {
     totalComments: analytics?.length || 0,
     byStatus: {
-      open: analytics?.filter((c: any) => c.status === 'open').length || 0,
-      resolved: analytics?.filter((c: any) => c.status === 'resolved').length || 0,
-      in_progress: analytics?.filter((c: any) => c.status === 'in_progress').length || 0
+      open: analytics?.filter((c: unknown) => c.status === 'open').length || 0,
+      resolved: analytics?.filter((c: unknown) => c.status === 'resolved').length || 0,
+      in_progress: analytics?.filter((c: unknown) => c.status === 'in_progress').length || 0
     },
     byPriority: {
-      urgent: analytics?.filter((c: any) => c.priority === 'urgent').length || 0,
-      high: analytics?.filter((c: any) => c.priority === 'high').length || 0,
-      medium: analytics?.filter((c: any) => c.priority === 'medium').length || 0,
-      low: analytics?.filter((c: any) => c.priority === 'low').length || 0
+      urgent: analytics?.filter((c: unknown) => c.priority === 'urgent').length || 0,
+      high: analytics?.filter((c: unknown) => c.priority === 'high').length || 0,
+      medium: analytics?.filter((c: unknown) => c.priority === 'medium').length || 0,
+      low: analytics?.filter((c: unknown) => c.priority === 'low').length || 0
     },
     byType: {
-      image: analytics?.filter((c: any) => c.comment_type === 'image').length || 0,
-      video: analytics?.filter((c: any) => c.comment_type === 'video').length || 0,
-      code: analytics?.filter((c: any) => c.comment_type === 'code').length || 0,
-      doc: analytics?.filter((c: any) => c.comment_type === 'doc').length || 0,
-      text: analytics?.filter((c: any) => c.comment_type === 'text').length || 0
+      image: analytics?.filter((c: unknown) => c.comment_type === 'image').length || 0,
+      video: analytics?.filter((c: unknown) => c.comment_type === 'video').length || 0,
+      code: analytics?.filter((c: unknown) => c.comment_type === 'code').length || 0,
+      doc: analytics?.filter((c: unknown) => c.comment_type === 'doc').length || 0,
+      text: analytics?.filter((c: unknown) => c.comment_type === 'text').length || 0
     }
   }
 
@@ -1181,18 +1177,9 @@ async function getCommentAnalytics(supabase: any, projectId: string | null, user
 async function generateAIAnalysis(
   content: string,
   fileType: string,
-  context?: any
-): Promise<any> {
+  context?: unknown): Promise<any> {
   // Simulate AI analysis - in production, integrate with OpenAI, Claude, etc.
-  const categories = [
-    'UX Enhancement',
-    'Accessibility',
-    'Performance',
-    'Visual Design',
-    'Content Strategy',
-    'Technical Implementation',
-    'User Flow',
-    'Responsive Design'
+  const categories = ['UX Enhancement', 'Accessibility', 'Performance', 'Visual Design', 'Content Strategy', 'Technical Implementation', 'User Flow', 'Responsive Design'
   ]
 
   const severities = ['info', 'warning', 'error'] as const
@@ -1200,14 +1187,7 @@ async function generateAIAnalysis(
   const severity = severities[Math.floor(Math.random() * severities.length)]
 
   const summaries = {
-    'UX Enhancement': 'Suggestion focuses on improving user experience and interaction flow',
-    'Accessibility': 'Important accessibility consideration for inclusive design',
-    'Performance': 'Performance optimization opportunity identified',
-    'Visual Design': 'Visual design improvement with aesthetic and functional benefits',
-    'Content Strategy': 'Content-related suggestion for better communication',
-    'Technical Implementation': 'Technical implementation detail requiring attention',
-    'User Flow': 'User journey and flow optimization suggestion',
-    'Responsive Design': 'Responsive design issue affecting cross-device experience'
+    'UX Enhancement': 'Suggestion focuses on improving user experience and interaction flow', 'Accessibility': 'Important accessibility consideration for inclusive design', 'Performance': 'Performance optimization opportunity identified', 'Visual Design': 'Visual design improvement with aesthetic and functional benefits', 'Content Strategy': 'Content-related suggestion for better communication', 'Technical Implementation': 'Technical implementation detail requiring attention', 'User Flow': 'User journey and flow optimization suggestion', 'Responsive Design': 'Responsive design issue affecting cross-device experience'
   }
 
   return {
@@ -1215,17 +1195,14 @@ async function generateAIAnalysis(
     category,
     severity,
     confidence: Math.random() * 0.3 + 0.7, // 70-100% confidence
-    suggestions: [
-      'Consider implementing this change in the next iteration',
-      'Test with user feedback before finalizing',
-      'Align with design system guidelines'
+    suggestions: ['Consider implementing this change in the next iteration', 'Test with user feedback before finalizing', 'Align with design system guidelines'
     ],
     estimatedEffort: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)],
     tags: generateRelevantTags(content, fileType)
   }
 }
 
-async function generateCommentsSummary(comments: any[]): Promise<any> {
+async function generateCommentsSummary(comments: unknown[]): Promise<any> {
   if (comments.length === 0) return null
 
   const themes = extractCommentThemes(comments)
@@ -1238,17 +1215,14 @@ async function generateCommentsSummary(comments: any[]): Promise<any> {
     totalComments: comments.length,
     mainThemes: themes,
     priorityDistribution,
-    recommendations: [
-      'Focus on high-priority items first',
-      'Consider grouping similar feedback',
-      'Schedule review session for complex items'
+    recommendations: ['Focus on high-priority items first', 'Consider grouping similar feedback', 'Schedule review session for complex items'
     ],
     estimatedResolutionTime: calculateEstimatedTime(comments)
   }
 }
 
 // Helper Functions
-function extractCommentThemes(comments: any[]): string[] {
+function extractCommentThemes(comments: unknown[]): string[] {
   const themes = comments.map(c => c.ai_analysis?.category).filter(Boolean)
   const themeCount = themes.reduce((acc, theme) => {
     acc[theme] = (acc[theme] || 0) + 1
@@ -1279,7 +1253,7 @@ function generateRelevantTags(content: string, fileType: string): string[] {
   return tags
 }
 
-function calculateEstimatedTime(comments: any[]): string {
+function calculateEstimatedTime(comments: unknown[]): string {
   const priorityWeights = { urgent: 4, high: 3, medium: 2, low: 1 }
   const totalWeight = comments.reduce((sum, comment) => {
     return sum + (priorityWeights[comment.priority as keyof typeof priorityWeights] || 1)
@@ -1291,7 +1265,7 @@ function calculateEstimatedTime(comments: any[]): string {
   return '1+ weeks'
 }
 
-function calculateTrends(analytics: any[]): any {
+function calculateTrends(analytics: unknown[]): any {
   // Simple trend calculation - in production, use more sophisticated analysis
   const now = new Date()
   const lastWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
@@ -1309,12 +1283,11 @@ function calculateTrends(analytics: any[]): any {
 }
 
 async function sendMentionNotifications(
-  supabase: any,
+  supabase: unknown,
   mentions: string[],
-  comment: any,
-  user: any,
-  file: any
-) {
+  comment: unknown,
+  user: unknown,
+  file: unknown) {
   for (const mentionedUserId of mentions) {
     await supabase.from('notifications').insert({
       user_id: mentionedUserId,
@@ -1332,7 +1305,7 @@ async function sendMentionNotifications(
   }
 }
 
-async function createActivityLog(supabase: any, activity: any) {
+async function createActivityLog(supabase: unknown, activity: unknown) {
   await supabase.from('project_activity').insert({
     project_id: activity.projectId,
     user_id: activity.userId,
@@ -1345,7 +1318,7 @@ async function createActivityLog(supabase: any, activity: any) {
 }
 
 // Additional GET endpoint handlers
-async function getCommentThread(supabase: any, commentId: string | null, user: any) {
+async function getCommentThread(supabase: unknown, commentId: string | null, user: unknown) {
   if (!commentId) {
     return NextResponse.json(
       { error: 'Comment ID required' },
@@ -1388,7 +1361,7 @@ async function getCommentThread(supabase: any, commentId: string | null, user: a
   })
 }
 
-async function getAIInsights(supabase: any, projectId: string | null, user: any) {
+async function getAIInsights(supabase: unknown, projectId: string | null, user: unknown) {
   if (!projectId) {
     return NextResponse.json(
       { error: 'Project ID required' },
@@ -1420,7 +1393,7 @@ async function getAIInsights(supabase: any, projectId: string | null, user: any)
 }
 
 // Enhanced AI analysis functions
-async function generateAdvancedSummary(comments: any[]): Promise<any> {
+async function generateAdvancedSummary(comments: unknown[]): Promise<any> {
   if (comments.length === 0) {
     return {
       overview: 'No comments found for the specified timeframe',
@@ -1461,7 +1434,7 @@ async function generateAdvancedSummary(comments: any[]): Promise<any> {
   }
 }
 
-async function generateAIInsights(comments: any[]): Promise<any> {
+async function generateAIInsights(comments: unknown[]): Promise<any> {
   const categories = comments.map(c => c.ai_analysis?.category).filter(Boolean)
   const severities = comments.map(c => c.ai_analysis?.severity).filter(Boolean)
   
@@ -1483,11 +1456,7 @@ async function generateAIInsights(comments: any[]): Promise<any> {
     severityDistribution,
     trends,
     predictions,
-    topRecommendations: [
-      'Prioritize high-severity issues first',
-      'Focus on UX enhancements for better user experience',
-      'Address accessibility concerns for inclusive design',
-      'Consider performance optimizations for better speed'
+    topRecommendations: ['Prioritize high-severity issues first', 'Focus on UX enhancements for better user experience', 'Address accessibility concerns for inclusive design', 'Consider performance optimizations for better speed'
     ],
     confidenceScore: calculateOverallConfidence(comments),
     lastAnalysis: new Date().toISOString()
@@ -1495,7 +1464,7 @@ async function generateAIInsights(comments: any[]): Promise<any> {
 }
 
 // Helper functions for advanced analysis
-function extractDetailedThemes(comments: any[]): any[] {
+function extractDetailedThemes(comments: unknown[]): unknown[] {
   const themeMap = new Map()
 
   comments.forEach(comment => {
@@ -1527,7 +1496,7 @@ function extractDetailedThemes(comments: any[]): any[] {
   return Array.from(themeMap.values()).sort((a, b) => b.count - a.count)
 }
 
-function analyzeUserActivity(comments: any[]): any[] {
+function analyzeUserActivity(comments: unknown[]): unknown[] {
   const userActivity = new Map()
 
   comments.forEach(comment => {
@@ -1561,19 +1530,19 @@ function analyzeUserActivity(comments: any[]): any[] {
     .sort((a, b) => b.commentCount - a.commentCount)
 }
 
-function analyzeTimeline(comments: any[]): any {
+function analyzeTimeline(comments: unknown[]): any {
   const dailyActivity = new Map()
   const now = new Date()
   
   for (let i = 6; i >= 0; i--) {
     const date = new Date(now)
     date.setDate(date.getDate() - i)
-    const dateKey = date.toISOString().split('T')[0]
+    const dateKey = date.toISOString().split('T')[0]'
     dailyActivity.set(dateKey, { date: dateKey, comments: 0, resolved: 0 })
   }
 
   comments.forEach(comment => {
-    const dateKey = comment.created_at.split('T')[0]
+    const dateKey = comment.created_at.split('T')[0]'
     if (dailyActivity.has(dateKey)) {
       const day = dailyActivity.get(dateKey)
       day.comments++
@@ -1592,7 +1561,7 @@ function analyzeTimeline(comments: any[]): any {
   }
 }
 
-function generateActionableRecommendations(stats: any, themes: any[], userActivity: any[]): string[] {
+function generateActionableRecommendations(stats: unknown, themes: unknown[], userActivity: unknown[]): string[] {
   const recommendations: string[] = []
 
   // Add completion rate based recommendations
@@ -1610,7 +1579,7 @@ function generateActionableRecommendations(stats: any, themes: any[], userActivi
   return recommendations
 }
 
-function calculateAverageResponseTime(comments: any[]): number {
+function calculateAverageResponseTime(comments: unknown[]): number {
   const resolvedComments = comments.filter(c => c.status === 'resolved' && c.updated_at)
   if (resolvedComments.length === 0) return 0
 
@@ -1623,7 +1592,7 @@ function calculateAverageResponseTime(comments: any[]): number {
   return Math.round(totalTime / resolvedComments.length / (1000 * 60 * 60)) // Hours
 }
 
-function analyzeCategoryTrends(comments: any[]): any {
+function analyzeCategoryTrends(comments: unknown[]): any {
   const last7Days = comments.filter(c => {
     const commentDate = new Date(c.created_at)
     const weekAgo = new Date()
@@ -1650,7 +1619,7 @@ function analyzeCategoryTrends(comments: any[]): any {
   }
 }
 
-function generatePredictions(comments: any[]): any {
+function generatePredictions(comments: unknown[]): any {
   const recentComments = comments.slice(0, 10)
   const urgentRatio = recentComments.filter(c => c.priority === 'urgent').length / recentComments.length
   
@@ -1663,7 +1632,7 @@ function generatePredictions(comments: any[]): any {
   }
 }
 
-function calculateOverallConfidence(comments: any[]): number {
+function calculateOverallConfidence(comments: unknown[]): number {
   const confidenceScores = comments
     .map(c => c.ai_analysis?.confidence)
     .filter(c => typeof c === 'number')
@@ -1674,7 +1643,7 @@ function calculateOverallConfidence(comments: any[]): number {
   return Math.round(avgConfidence * 100)
 }
 
-function calculateTrendDirection(dailyData: any[]): string {
+function calculateTrendDirection(dailyData: unknown[]): string {
   if (dailyData.length < 2) return 'stable'
   
   const recent = dailyData.slice(-3).reduce((sum, day) => sum + day.comments, 0)
@@ -1685,7 +1654,7 @@ function calculateTrendDirection(dailyData: any[]): string {
   return 'stable'
 }
 
-function calculateProjectedCompletion(comments: any[]): string {
+function calculateProjectedCompletion(comments: unknown[]): string {
   const openComments = comments.filter(c => c.status === 'open').length
   const avgResolutionTime = calculateAverageResponseTime(comments)
   

@@ -15,8 +15,8 @@ class CriticalIssueFixer {
       exec(command, { maxBuffer: 1024 * 1024 * 10 }, (error, stdout, stderr) => {
         resolve({
           success: !error,
-          stdout: stdout || '',
-          stderr: stderr || '',
+          stdout: stdout || '','
+          stderr: stderr || '','
           error: error
         });
       });
@@ -30,12 +30,7 @@ class CriticalIssueFixer {
   async fixWebpackCache() {
     await this.log('🔧 Fixing webpack cache corruption...');
     
-    const commands = [
-      'rm -rf .next',
-      'rm -rf node_modules/.cache',
-      'rm -rf test-results',
-      'rm -rf playwright-report',
-      'rm -rf tsconfig.tsbuildinfo'
+    const commands = ['rm -rf .next', 'rm -rf node_modules/.cache', 'rm -rf test-results', 'rm -rf playwright-report', 'rm -rf tsconfig.tsbuildinfo'
     ];
     
     for (const cmd of commands) {
@@ -113,8 +108,7 @@ ${this.issues.map(issue => `- ⚠️ ${issue}`).join('\n') || '- None identified
 
 ## 🎯 Next Steps
 ${this.issues.length === 0 ? 
-  '- Run the unified test runner to validate all fixes\n- Execute `npm run test:unified-runner`' :
-  '- Address remaining issues above\n- Re-run this fix script after making manual corrections'
+  '- Run the unified test runner to validate all fixes\n- Execute `npm run test:unified-runner`' : '- Address remaining issues above\n- Re-run this fix script after making manual corrections'
 }
 
 ---

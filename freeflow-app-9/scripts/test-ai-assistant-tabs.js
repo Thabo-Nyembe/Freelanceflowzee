@@ -23,22 +23,22 @@ const AI_ASSISTANT_ELEMENTS = {
   name: 'AI Assistant',
   url: '/dashboard/ai-assistant',
   tabs: [
-    { id: 'chat', name: 'Chat', selector: '[role="tab"][data-value="chat"]' },
-    { id: 'analyze', name: 'Analyze', selector: '[role="tab"][data-value="analyze"]' },
-    { id: 'generate', name: 'Generate', selector: '[role="tab"][data-value="generate"]' },
-    { id: 'history', name: 'History', selector: '[role="tab"][data-value="history"]' }
+    { id: 'chat', name: 'Chat', selector: '[role= "tab"][data-value= "chat"]' },
+    { id: 'analyze', name: 'Analyze', selector: '[role= "tab"][data-value= "analyze"]' },
+    { id: 'generate', name: 'Generate', selector: '[role= "tab"][data-value= "generate"]' },
+    { id: 'history', name: 'History', selector: '[role= "tab"][data-value= "history"]' }
   ],
   buttons: [
-    { id: 'send-message', name: 'Send Message', selector: '[data-testid="send-btn"]' },
-    { id: 'start-analysis', name: 'Start Analysis', selector: '[data-testid="analyze-btn"]' },
-    { id: 'generate-content', name: 'Generate Content', selector: '[data-testid="generate-btn"]' },
-    { id: 'clear-chat', name: 'Clear Chat', selector: '[data-testid="clear-btn"]' }
+    { id: 'send-message', name: 'Send Message', selector: '[data-testid= "send-btn"]' },
+    { id: 'start-analysis', name: 'Start Analysis', selector: '[data-testid= "analyze-btn"]' },
+    { id: 'generate-content', name: 'Generate Content', selector: '[data-testid= "generate-btn"]' },
+    { id: 'clear-chat', name: 'Clear Chat', selector: '[data-testid= "clear-btn"]' }
   ],
   aiFeatures: [
-    { id: 'chat-input', name: 'Chat Input', selector: 'textarea[placeholder*="Ask"], input[placeholder*="Ask"]' },
-    { id: 'analysis-panel', name: 'Analysis Panel', selector: '.analysis-panel, [data-testid="analysis-panel"]' },
-    { id: 'generation-options', name: 'Generation Options', selector: '.generation-options, [data-testid="generation-options"]' },
-    { id: 'ai-response', name: 'AI Response', selector: '.ai-response, [data-testid="ai-response"]' }
+    { id: 'chat-input', name: 'Chat Input', selector: 'textarea[placeholder*= "Ask"], input[placeholder*= "Ask"]' },
+    { id: 'analysis-panel', name: 'Analysis Panel', selector: '.analysis-panel, [data-testid= "analysis-panel"]' },
+    { id: 'generation-options', name: 'Generation Options', selector: '.generation-options, [data-testid= "generation-options"]' },
+    { id: 'ai-response', name: 'AI Response', selector: '.ai-response, [data-testid= "ai-response"]' }
   ],
   smartTools: [
     { id: 'design-analysis', name: 'Design Analysis', selector: 'button:has-text("Design Analysis")' },
@@ -92,9 +92,9 @@ class AIAssistantTester {
     try {
       const tabSelectors = [
         tab.selector,
-        `[role="tab"]:has-text("${tab.name}")`,
+        `[role= "tab"]:has-text("${tab.name}")`,
         `button:has-text("${tab.name}")`,
-        `[data-value="${tab.id}"]`,
+        `[data-value= "${tab.id}"]`,
         `#${tab.id}-tab`
       ];
 
@@ -122,7 +122,7 @@ class AIAssistantTester {
 
       const isActive = await tabElement.getAttribute('aria-selected') === 'true' ||
                       await tabElement.getAttribute('data-state') === 'active' ||
-                      (await tabElement.getAttribute('class') || '').includes('active');
+                      (await tabElement.getAttribute('class') || ).includes('active');'
 
       const screenshotPath = `ai-assistant-${tab.id}-tab.png`;
       await this.page.screenshot({ path: screenshotPath });
@@ -165,8 +165,8 @@ class AIAssistantTester {
       const buttonSelectors = [
         button.selector,
         `button:has-text("${button.name}")`,
-        `[aria-label="${button.name}"]`,
-        `[title="${button.name}"]`,
+        `[aria-label= "${button.name}"]`,
+        `[title= "${button.name}"]`,
         `#${button.id}`
       ];
 
@@ -331,12 +331,12 @@ class AIAssistantTester {
     const passRate = Math.round((this.results.passed / this.results.total) * 100);
     
     console.log('\n📊 AI ASSISTANT TEST REPORT');
-    console.log('=' .repeat(50));
+    console.log('=' .repeat(50));'
     console.log(`✅ Passed: ${this.results.passed}/${this.results.total} (${passRate}%)`);
     console.log(`❌ Failed: ${this.results.failed}/${this.results.total}`);
     console.log(`📸 Screenshots: ${this.results.screenshots.length}`);
     
-    console.log('\n📋 Detailed Results:');
+    console.log('\n📋 Detailed Results: ');
     this.results.details.forEach(result => {
       const icon = result.status === 'passed' ? '✅' : result.status === 'warning' ? '⚠️' : '❌';
       console.log(`${icon} ${result.name}: ${result.status}`);
@@ -374,8 +374,7 @@ class AIAssistantTester {
       
       const report = this.generateReport();
       
-      await fs.writeFile(
-        'ai-assistant-test-report.json',
+      await fs.writeFile('ai-assistant-test-report.json',
         JSON.stringify(report, null, 2)
       );
       

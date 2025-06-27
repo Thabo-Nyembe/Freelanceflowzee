@@ -2,8 +2,8 @@ export interface Project {
   id: string
   title: string
   description: string
-  status: 'active' | 'completed' | 'archived' | 'draft'
-  priority: 'low' | 'medium' | 'high'
+  status: &apos;active&apos; | &apos;completed&apos; | &apos;archived&apos; | &apos;draft&apos;
+  priority: &apos;low&apos; | &apos;medium&apos; | &apos;high&apos;
   budget: number
   spent: number
   client_name: string
@@ -33,7 +33,7 @@ declare global {
     __TEST_PROJECT_UPDATE__: {
       id: string
       progress: number
-      status: Project['status']
+      status: Project[&apos;status&apos;]
     }
     __TEST_HYDRATION_MISMATCH__: {
       server: Project[]

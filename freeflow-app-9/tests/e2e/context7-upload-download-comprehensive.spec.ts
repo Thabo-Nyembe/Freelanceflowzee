@@ -1,63 +1,63 @@
-import { test, expect, Page, Download } from '@playwright/test';
-import { createReadStream, readFileSync, writeFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { test, expect, Page, Download } from &apos;@playwright/test&apos;;
+import { createReadStream, readFileSync, writeFileSync, existsSync } from &apos;fs&apos;;
+import { join } from &apos;path&apos;;
 
 // Context7 Test Configuration
 const CONFIG = {
-  baseURL: 'http://localhost:3000',
+  baseURL: &apos;http://localhost:3000&apos;,
   timeout: 30000,
   viewport: { width: 1280, height: 720 },
   testFiles: {
-    image: 'public/media/placeholder-image.jpg',
-    video: 'public/media/placeholder-video.mp4',
-    audio: 'public/media/placeholder-audio.wav',
-    document: 'public/media/placeholder-doc.pdf'
+    image: &apos;public/media/placeholder-image.jpg&apos;,
+    video: &apos;public/media/placeholder-video.mp4&apos;,
+    audio: &apos;public/media/placeholder-audio.wav&apos;,
+    document: &apos;public/media/placeholder-doc.pdf&apos;
   }
 };
 
 // Test Suite Configuration - Context7 MCP Patterns
 const TEST_SCENARIOS = [
   {
-    name: 'Files Hub - Enterprise File Operations',
-    url: '/dashboard/files-hub',
-    uploadSelector: '[data-testid="upload-file-btn"]',
-    downloadSelector: '[data-testid="download-file-btn"]',
-    fileInputSelector: 'input[type="file"]',
-    progressSelector: '[data-testid="upload-progress"]',
-    features: ['drag-drop', 'bulk-upload', 'progress-tracking', 'file-preview']
+    name: &apos;Files Hub - Enterprise File Operations&apos;,
+    url: &apos;/dashboard/files-hub&apos;,
+    uploadSelector: &apos;[data-testid=&quot;upload-file-btn&quot;]&apos;,
+    downloadSelector: &apos;[data-testid=&quot;download-file-btn&quot;]&apos;,
+    fileInputSelector: &apos;input[type=&quot;file&quot;]&apos;,
+    progressSelector: &apos;[data-testid=&quot;upload-progress&quot;]&apos;,
+    features: [&apos;drag-drop&apos;, &apos;bulk-upload&apos;, &apos;progress-tracking&apos;, &apos;file-preview&apos;]
   },
   {
-    name: 'AI Create - Asset Upload/Download',
-    url: '/dashboard/ai-create',
-    uploadSelector: '[data-testid="upload-asset-btn"]',
-    downloadSelector: '[data-testid="download-asset-btn"]',
-    features: ['ai-preview', 'smart-suggestions', 'format-optimization']
+    name: &apos;AI Create - Asset Upload/Download&apos;,
+    url: &apos;/dashboard/ai-create&apos;,
+    uploadSelector: &apos;[data-testid=&quot;upload-asset-btn&quot;]&apos;,
+    downloadSelector: &apos;[data-testid=&quot;download-asset-btn&quot;]&apos;,
+    features: [&apos;ai-preview&apos;, &apos;smart-suggestions&apos;, &apos;format-optimization&apos;]
   },
   {
-    name: 'Video Studio - Media Management',
-    url: '/dashboard/video-studio',
-    uploadSelector: 'button:has-text("Upload")',
-    downloadSelector: 'button:has-text("Export")',
-    features: ['timeline-scrubbing', 'real-time-preview', 'export-queue']
+    name: &apos;Video Studio - Media Management&apos;,
+    url: &apos;/dashboard/video-studio&apos;,
+    uploadSelector: &apos;button:has-text(&quot;Upload&quot;)&apos;,
+    downloadSelector: &apos;button:has-text(&quot;Export&quot;)&apos;,
+    features: [&apos;timeline-scrubbing&apos;, &apos;real-time-preview&apos;, &apos;export-queue&apos;]
   },
   {
-    name: 'Escrow System - Document Downloads',
-    url: '/dashboard/escrow',
-    downloadSelector: '[data-testid="download-receipt-btn"]',
-    contractSelector: '[data-testid="contract-download"]',
-    features: ['document-preview', 'digital-signatures', 'audit-trail']
+    name: &apos;Escrow System - Document Downloads&apos;,
+    url: &apos;/dashboard/escrow&apos;,
+    downloadSelector: &apos;[data-testid=&quot;download-receipt-btn&quot;]&apos;,
+    contractSelector: &apos;[data-testid=&quot;contract-download&quot;]&apos;,
+    features: [&apos;document-preview&apos;, &apos;digital-signatures&apos;, &apos;audit-trail&apos;]
   },
   {
-    name: 'Universal Pinpoint Feedback',
-    url: '/dashboard/projects-hub',
-    tabSelector: '[data-testid="collaboration-tab"]',
-    uploadSelector: '[data-testid="upload-media-btn"]',
-    voiceSelector: '[data-testid="voice-record-btn"]',
-    features: ['voice-notes', 'ai-analysis', 'threaded-comments']
+    name: &apos;Universal Pinpoint Feedback&apos;,
+    url: &apos;/dashboard/projects-hub&apos;,
+    tabSelector: &apos;[data-testid=&quot;collaboration-tab&quot;]&apos;,
+    uploadSelector: &apos;[data-testid=&quot;upload-media-btn&quot;]&apos;,
+    voiceSelector: &apos;[data-testid=&quot;voice-record-btn&quot;]&apos;,
+    features: [&apos;voice-notes&apos;, &apos;ai-analysis&apos;, &apos;threaded-comments&apos;]
   }
 ];
 
-test.describe('🎯 Context7 Upload/Download Comprehensive Test Suite', () => {
+test.describe(&apos;🎯 Context7 Upload/Download Comprehensive Test Suite&apos;, () => {
   // Configure browser context for file operations
   test.use({ 
     acceptDownloads: true,
@@ -67,7 +67,7 @@ test.describe('🎯 Context7 Upload/Download Comprehensive Test Suite', () => {
   // Helper function for navigation with test mode
   async function navigateWithTestMode(page: Page, url: string) {
     await page.goto(`${CONFIG.baseURL}${url}`, {
-      waitUntil: 'networkidle',
+      waitUntil: &apos;networkidle&apos;,
       timeout: CONFIG.timeout
     });
     
@@ -76,8 +76,8 @@ test.describe('🎯 Context7 Upload/Download Comprehensive Test Suite', () => {
   }
 
   // Context7 Upload Test Pattern
-  async function testUploadFunctionality(page: Page, scenario: any) {
-    if (!scenario.uploadSelector) return { success: false, reason: 'No upload selector' };
+  async function testUploadFunctionality(page: Page, scenario: unknown) {
+    if (!scenario.uploadSelector) return { success: false, reason: &apos;No upload selector&apos; };
 
     try {
       // Check if upload button exists
@@ -85,9 +85,9 @@ test.describe('🎯 Context7 Upload/Download Comprehensive Test Suite', () => {
       await expect(uploadBtn).toBeVisible({ timeout: 10000 });
 
       // Test drag and drop if supported
-      if (scenario.features?.includes('drag-drop')) {
-        const uploadArea = uploadBtn.locator('..');
-        await uploadArea.dispatchEvent('dragover');
+      if (scenario.features?.includes(&apos;drag-drop&apos;)) {
+        const uploadArea = uploadBtn.locator(&apos;..&apos;);
+        await uploadArea.dispatchEvent(&apos;dragover&apos;);
         // Check for visual feedback
         await expect(uploadArea).toHaveClass(/border-primary|drag-over|drop-zone-active/, { timeout: 5000 });
       }
@@ -106,25 +106,25 @@ test.describe('🎯 Context7 Upload/Download Comprehensive Test Suite', () => {
         }
       }
 
-      return { success: true, details: 'Upload functionality working' };
+      return { success: true, details: &apos;Upload functionality working&apos; };
     } catch (error) {
       return { success: false, reason: error.message };
     }
   }
 
   // Context7 Download Test Pattern  
-  async function testDownloadFunctionality(page: Page, scenario: any) {
-    if (!scenario.downloadSelector) return { success: false, reason: 'No download selector' };
+  async function testDownloadFunctionality(page: Page, scenario: unknown) {
+    if (!scenario.downloadSelector) return { success: false, reason: &apos;No download selector&apos; };
 
     try {
       const downloadBtn = page.locator(scenario.downloadSelector);
       
       if (await downloadBtn.count() === 0) {
-        return { success: false, reason: 'Download button not found' };
+        return { success: false, reason: &apos;Download button not found&apos; };
       }
 
       // Set up download promise before clicking
-      const downloadPromise = page.waitForEvent('download', { timeout: 15000 });
+      const downloadPromise = page.waitForEvent(&apos;download&apos;, { timeout: 15000 });
       
       // Click download button
       await downloadBtn.click();
@@ -148,14 +148,14 @@ test.describe('🎯 Context7 Upload/Download Comprehensive Test Suite', () => {
   }
 
   // Test Files Hub Comprehensive Operations
-  test('Files Hub - Complete Upload/Download Workflow', async ({ page }) => {
-    console.log('🔍 Testing Files Hub comprehensive file operations...');
+  test(&apos;Files Hub - Complete Upload/Download Workflow&apos;, async ({ page }) => {
+    console.log(&apos;🔍 Testing Files Hub comprehensive file operations...&apos;);
     
-    await navigateWithTestMode(page, '/dashboard/files-hub');
+    await navigateWithTestMode(page, &apos;/dashboard/files-hub&apos;);
     
     // Check for main file hub elements
-    await expect(page.locator('text=Enterprise Files Hub')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('button:has-text("Upload Files")')).toBeVisible();
+    await expect(page.locator(&apos;text=Enterprise Files Hub&apos;)).toBeVisible({ timeout: 10000 });
+    await expect(page.locator(&apos;button:has-text(&quot;Upload Files&quot;)&apos;)).toBeVisible();
     
     // Test file upload
     const uploadResult = await testUploadFunctionality(page, TEST_SCENARIOS[0]);
@@ -165,61 +165,61 @@ test.describe('🎯 Context7 Upload/Download Comprehensive Test Suite', () => {
     const downloadResult = await testDownloadFunctionality(page, TEST_SCENARIOS[0]);
     // Note: Download might fail if no files exist, which is acceptable
     
-    console.log('✅ Files Hub - Upload/Download tested');
+    console.log(&apos;✅ Files Hub - Upload/Download tested&apos;);
   });
 
   // Test AI Create Asset Operations
-  test('AI Create - Asset Upload and Download', async ({ page }) => {
-    console.log('🔍 Testing AI Create asset operations...');
+  test(&apos;AI Create - Asset Upload and Download&apos;, async ({ page }) => {
+    console.log(&apos;🔍 Testing AI Create asset operations...&apos;);
     
-    await navigateWithTestMode(page, '/dashboard/ai-create');
+    await navigateWithTestMode(page, &apos;/dashboard/ai-create&apos;);
     
     // Wait for AI Create interface
-    await page.waitForSelector('h1, [data-testid="ai-create-header"]', { timeout: 10000 });
+    await page.waitForSelector(&apos;h1, [data-testid=&quot;ai-create-header&quot;]&apos;, { timeout: 10000 });
     
     const scenario = TEST_SCENARIOS[1];
     
     // Test asset upload
     const uploadResult = await testUploadFunctionality(page, scenario);
-    console.log(`Upload result: ${uploadResult.success ? 'SUCCESS' : uploadResult.reason}`);
+    console.log(`Upload result: ${uploadResult.success ? &apos;SUCCESS&apos; : uploadResult.reason}`);
     
     // Test asset download
     const downloadResult = await testDownloadFunctionality(page, scenario);
-    console.log(`Download result: ${downloadResult.success ? 'SUCCESS' : downloadResult.reason}`);
+    console.log(`Download result: ${downloadResult.success ? &apos;SUCCESS&apos; : downloadResult.reason}`);
     
-    console.log('✅ AI Create - Asset operations tested');
+    console.log(&apos;✅ AI Create - Asset operations tested&apos;);
   });
 
   // Test Video Studio Media Operations
-  test('Video Studio - Media Upload and Export', async ({ page }) => {
-    console.log('🔍 Testing Video Studio media operations...');
+  test(&apos;Video Studio - Media Upload and Export&apos;, async ({ page }) => {
+    console.log(&apos;🔍 Testing Video Studio media operations...&apos;);
     
-    await navigateWithTestMode(page, '/dashboard/video-studio');
+    await navigateWithTestMode(page, &apos;/dashboard/video-studio&apos;);
     
     const scenario = TEST_SCENARIOS[2];
     
     // Test media upload
     const uploadResult = await testUploadFunctionality(page, scenario);
-    console.log(`Upload result: ${uploadResult.success ? 'SUCCESS' : uploadResult.reason}`);
+    console.log(`Upload result: ${uploadResult.success ? &apos;SUCCESS&apos; : uploadResult.reason}`);
     
     // Test export functionality
     const downloadResult = await testDownloadFunctionality(page, scenario);
-    console.log(`Export result: ${downloadResult.success ? 'SUCCESS' : downloadResult.reason}`);
+    console.log(`Export result: ${downloadResult.success ? &apos;SUCCESS&apos; : downloadResult.reason}`);
     
-    console.log('✅ Video Studio - Media operations tested');
+    console.log(&apos;✅ Video Studio - Media operations tested&apos;);
   });
 
   // Test Escrow Document Downloads
-  test('Escrow System - Document Download Operations', async ({ page }) => {
-    console.log('🔍 Testing Escrow document downloads...');
+  test(&apos;Escrow System - Document Download Operations&apos;, async ({ page }) => {
+    console.log(&apos;🔍 Testing Escrow document downloads...&apos;);
     
-    await navigateWithTestMode(page, '/dashboard/escrow');
+    await navigateWithTestMode(page, &apos;/dashboard/escrow&apos;);
     
     const scenario = TEST_SCENARIOS[3];
     
     // Test receipt download
     const receiptResult = await testDownloadFunctionality(page, scenario);
-    console.log(`Receipt download: ${receiptResult.success ? 'SUCCESS' : receiptResult.reason}`);
+    console.log(`Receipt download: ${receiptResult.success ? &apos;SUCCESS&apos; : receiptResult.reason}`);
     
     // Test contract download if available
     if (scenario.contractSelector) {
@@ -227,17 +227,17 @@ test.describe('🎯 Context7 Upload/Download Comprehensive Test Suite', () => {
         ...scenario,
         downloadSelector: scenario.contractSelector
       });
-      console.log(`Contract download: ${contractResult.success ? 'SUCCESS' : contractResult.reason}`);
+      console.log(`Contract download: ${contractResult.success ? &apos;SUCCESS&apos; : contractResult.reason}`);
     }
     
-    console.log('✅ Escrow System - Document downloads tested');
+    console.log(&apos;✅ Escrow System - Document downloads tested&apos;);
   });
 
   // Test Universal Pinpoint Feedback
-  test('Universal Pinpoint Feedback - Media Upload and Voice Notes', async ({ page }) => {
-    console.log('🔍 Testing Universal Pinpoint Feedback...');
+  test(&apos;Universal Pinpoint Feedback - Media Upload and Voice Notes&apos;, async ({ page }) => {
+    console.log(&apos;🔍 Testing Universal Pinpoint Feedback...&apos;);
     
-    await navigateWithTestMode(page, '/dashboard/projects-hub');
+    await navigateWithTestMode(page, &apos;/dashboard/projects-hub&apos;);
     
     const scenario = TEST_SCENARIOS[4];
     
@@ -252,7 +252,7 @@ test.describe('🎯 Context7 Upload/Download Comprehensive Test Suite', () => {
     
     // Test media upload for feedback
     const uploadResult = await testUploadFunctionality(page, scenario);
-    console.log(`Media upload: ${uploadResult.success ? 'SUCCESS' : uploadResult.reason}`);
+    console.log(`Media upload: ${uploadResult.success ? &apos;SUCCESS&apos; : uploadResult.reason}`);
     
     // Test voice recording if available
     if (scenario.voiceSelector) {
@@ -260,63 +260,63 @@ test.describe('🎯 Context7 Upload/Download Comprehensive Test Suite', () => {
       if (await voiceBtn.isVisible()) {
         await voiceBtn.click();
         // Check for recording indicator
-        await expect(page.locator('[data-testid="recording-indicator"]')).toBeVisible({ timeout: 5000 });
-        console.log('✅ Voice recording functionality detected');
+        await expect(page.locator(&apos;[data-testid=&quot;recording-indicator&quot;]&apos;)).toBeVisible({ timeout: 5000 });
+        console.log(&apos;✅ Voice recording functionality detected&apos;);
       }
     }
     
-    console.log('✅ Universal Pinpoint Feedback tested');
+    console.log(&apos;✅ Universal Pinpoint Feedback tested&apos;);
   });
 
   // Test Enhanced Interactive Features
-  test('Enhanced Interactive Features - Drag & Drop and Progress Tracking', async ({ page }) => {
-    console.log('🔍 Testing enhanced interactive features...');
+  test(&apos;Enhanced Interactive Features - Drag & Drop and Progress Tracking&apos;, async ({ page }) => {
+    console.log(&apos;🔍 Testing enhanced interactive features...&apos;);
     
-    await navigateWithTestMode(page, '/dashboard/files-hub');
+    await navigateWithTestMode(page, &apos;/dashboard/files-hub&apos;);
     
     // Test drag and drop functionality
-    const uploadArea = page.locator('[data-testid="upload-file-btn"]').locator('..');
+    const uploadArea = page.locator(&apos;[data-testid=&quot;upload-file-btn&quot;]&apos;).locator(&apos;..&apos;);
     if (await uploadArea.isVisible()) {
       // Simulate drag over
-      await uploadArea.dispatchEvent('dragover', {
+      await uploadArea.dispatchEvent(&apos;dragover&apos;, {
         dataTransfer: {
-          types: ['Files'],
+          types: [&apos;Files&apos;],
           files: []
         }
       });
       
       // Check for visual feedback
       const hasDropClass = await uploadArea.evaluate(el => 
-        el.classList.contains('border-primary') || 
-        el.classList.contains('drag-over') ||
-        el.classList.contains('drop-zone-active')
+        el.classList.contains(&apos;border-primary&apos;) || 
+        el.classList.contains(&apos;drag-over&apos;) ||
+        el.classList.contains(&apos;drop-zone-active&apos;)
       );
       
       if (hasDropClass) {
-        console.log('✅ Drag and drop visual feedback working');
+        console.log(&apos;✅ Drag and drop visual feedback working&apos;);
       }
     }
     
     // Test smart download button features
-    const downloadBtn = page.locator('[data-testid="download-file-btn"]');
+    const downloadBtn = page.locator(&apos;[data-testid=&quot;download-file-btn&quot;]&apos;);
     if (await downloadBtn.isVisible()) {
       await downloadBtn.click();
       
       // Check for progress indicator
-      const progressIndicator = page.locator('[role="progressbar"], [data-testid="download-progress"]');
+      const progressIndicator = page.locator(&apos;[role=&quot;progressbar&quot;], [data-testid=&quot;download-progress&quot;]&apos;);
       const progressVisible = await progressIndicator.isVisible({ timeout: 3000 }).catch(() => false);
       
       if (progressVisible) {
-        console.log('✅ Download progress tracking working');
+        console.log(&apos;✅ Download progress tracking working&apos;);
       }
     }
     
-    console.log('✅ Enhanced interactive features tested');
+    console.log(&apos;✅ Enhanced interactive features tested&apos;);
   });
 
   // Performance and Reliability Test
-  test('Upload/Download Performance and Reliability', async ({ page }) => {
-    console.log('🔍 Testing upload/download performance...');
+  test(&apos;Upload/Download Performance and Reliability&apos;, async ({ page }) => {
+    console.log(&apos;🔍 Testing upload/download performance...&apos;);
     
     interface PerformanceResult {
       scenario: string;
@@ -347,45 +347,45 @@ test.describe('🎯 Context7 Upload/Download Comprehensive Test Suite', () => {
     }
     
     // Log performance results
-    console.log('📊 Performance Results:');
+    console.log(&apos;📊 Performance Results:&apos;);
     performanceResults.forEach(result => {
-      console.log(`   ${result.scenario}: ${result.navigationTime}ms navigation, Upload: ${result.uploadSuccess ? '✅' : '❌'}, Download: ${result.downloadSuccess ? '✅' : '❌'}`);
+      console.log(`   ${result.scenario}: ${result.navigationTime}ms navigation, Upload: ${result.uploadSuccess ? &apos;✅' : &apos;❌'}, Download: ${result.downloadSuccess ? &apos;✅' : &apos;❌'}`);
     });
     
     // Assert reasonable navigation times (under 5 seconds)
     const avgNavigationTime = performanceResults.reduce((sum, r) => sum + r.navigationTime, 0) / performanceResults.length;
     expect(avgNavigationTime).toBeLessThan(5000);
     
-    console.log('✅ Performance and reliability test completed');
+    console.log(&apos;✅ Performance and reliability test completed&apos;);
   });
 
   // API Integration Test
-  test('Upload/Download API Integration', async ({ page, request }) => {
-    console.log('🔍 Testing API integration...');
+  test(&apos;Upload/Download API Integration&apos;, async ({ page, request }) => {
+    console.log(&apos;🔍 Testing API integration...&apos;);
     
     // Test upload API endpoint
-    const uploadResponse = await request.get('/api/upload');
+    const uploadResponse = await request.get(&apos;/api/upload&apos;);
     console.log(`Upload API status: ${uploadResponse.status()}`);
     
     // Test storage analytics API
-    const analyticsResponse = await request.get('/api/storage/analytics');
+    const analyticsResponse = await request.get(&apos;/api/storage/analytics&apos;);
     console.log(`Analytics API status: ${analyticsResponse.status()}`);
     
     // Test collaboration UPF API
-    const upfResponse = await request.get('/api/collaboration/upf');
+    const upfResponse = await request.get(&apos;/api/collaboration/upf&apos;);
     console.log(`UPF API status: ${upfResponse.status()}`);
     
-    console.log('✅ API integration test completed');
+    console.log(&apos;✅ API integration test completed&apos;);
   });
 });
 
 // Additional Context7 Test Utilities
-test.describe('Context7 Interactive Component Verification', () => {
+test.describe(&apos;Context7 Interactive Component Verification&apos;, () => {
   
-  test('Enhanced Upload Button Component', async ({ page }) => {
-    await navigateWithTestMode(page, '/dashboard/files-hub');
+  test(&apos;Enhanced Upload Button Component&apos;, async ({ page }) => {
+    await navigateWithTestMode(page, &apos;/dashboard/files-hub&apos;);
     
-    const uploadBtn = page.locator('[data-testid="upload-file-btn"]');
+    const uploadBtn = page.locator(&apos;[data-testid=&quot;upload-file-btn&quot;]&apos;);
     await expect(uploadBtn).toBeVisible();
     
     // Test enhanced features
@@ -395,36 +395,36 @@ test.describe('Context7 Interactive Component Verification', () => {
     await uploadBtn.click();
     // Verify enhanced upload dialog or functionality
     
-    console.log('✅ Enhanced Upload Button verified');
+    console.log(&apos;✅ Enhanced Upload Button verified&apos;);
   });
 
-  test('Smart Download Button Component', async ({ page }) => {
-    await navigateWithTestMode(page, '/dashboard/files-hub');
+  test(&apos;Smart Download Button Component&apos;, async ({ page }) => {
+    await navigateWithTestMode(page, &apos;/dashboard/files-hub&apos;);
     
-    const downloadBtn = page.locator('[data-testid="download-file-btn"]');
+    const downloadBtn = page.locator(&apos;[data-testid=&quot;download-file-btn&quot;]&apos;);
     if (await downloadBtn.isVisible()) {
       await downloadBtn.click();
       
       // Check for smart download features
-      const progressBar = page.locator('[role="progressbar"]');
-      const statusText = page.locator('text=/Downloaded|Downloading|Download/');
+      const progressBar = page.locator(&apos;[role=&quot;progressbar&quot;]&apos;);
+      const statusText = page.locator(&apos;text=/Downloaded|Downloading|Download/&apos;);
       
       const hasProgress = await progressBar.isVisible({ timeout: 3000 }).catch(() => false);
       const hasStatus = await statusText.isVisible({ timeout: 3000 }).catch(() => false);
       
       if (hasProgress || hasStatus) {
-        console.log('✅ Smart Download Button features detected');
+        console.log(&apos;✅ Smart Download Button features detected&apos;);
       }
     }
     
-    console.log('✅ Smart Download Button verified');
+    console.log(&apos;✅ Smart Download Button verified&apos;);
   });
 });
 
 // Helper function for test data cleanup
 async function navigateWithTestMode(page: Page, url: string) {
   await page.goto(`${CONFIG.baseURL}${url}`, {
-    waitUntil: 'networkidle',
+    waitUntil: &apos;networkidle&apos;,
     timeout: CONFIG.timeout
   });
   await page.waitForTimeout(2000);

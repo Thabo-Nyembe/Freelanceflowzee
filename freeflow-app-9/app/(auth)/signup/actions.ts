@@ -40,7 +40,7 @@ export async function signup(formData: FormData) {
       password: password,
       options: {
         data: {
-          full_name: fullName || '',
+          full_name: fullName || '','
           email_verified: false, // Track verification status
         },
         emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
@@ -68,9 +68,9 @@ export async function signup(formData: FormData) {
       }
     }
 
-    revalidatePath('/', 'layout')
+    revalidatePath('/', 'layout')'
     redirect('/login?message=Account created successfully! You can log in now. Email verification is optional but recommended for security.')
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Check if this is a Next.js redirect error and re-throw it
     if (error?.digest?.startsWith('NEXT_REDIRECT')) {
       throw error

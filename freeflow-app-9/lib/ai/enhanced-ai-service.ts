@@ -3,10 +3,10 @@
 interface AIContext {
   userId: string
   sessionId: string
-  projectData?: any
-  clientData?: any
-  performanceMetrics?: any
-  preferences?: any
+  projectData?: Record<string, unknown>
+  clientData?: Record<string, unknown>
+  performanceMetrics?: Record<string, unknown>
+  preferences?: Record<string, unknown>
 }
 
 interface AIResponse {
@@ -19,7 +19,7 @@ interface AIResponse {
     estimatedTime?: string
     impact?: string
   }>
-  insights?: any[]
+  insights?: Record<string, unknown>[]
   confidence: number
 }
 
@@ -29,7 +29,7 @@ interface BusinessInsight {
   description: string
   impact: 'high' | 'medium' | 'low'
   actionable: boolean
-  data: any
+  data: Record<string, unknown>
   recommendations: string[]
 }
 
@@ -75,11 +75,7 @@ class EnhancedAIService {
 • Consider productizing your services (templates, courses, done-for-you solutions)
 
 Based on similar freelancers, these changes typically result in 35-50% revenue growth within 6 months.`,
-        suggestions: [
-          'Show me pricing optimization strategies',
-          'Analyze my most profitable project types', 
-          'Help me create retainer packages',
-          'What upselling opportunities do I have?'
+        suggestions: ['Show me pricing optimization strategies', 'Analyze my most profitable project types', 'Help me create retainer packages', 'What upselling opportunities do I have?'
         ],
         actionItems: [
           { title: 'Update pricing for new clients', action: 'increase_rates', priority: 'high', estimatedTime: '1 hour', impact: 'high' },
@@ -108,11 +104,7 @@ Based on similar freelancers, these changes typically result in 35-50% revenue g
 • Set up automated project status emails for clients
 • Use calendar blocking to batch similar tasks
 • Create standardized project kickoff and completion checklists`,
-        suggestions: [
-          'Review my current project deadlines',
-          'Suggest workflow automation for projects',
-          'Help me improve project communication',
-          'Analyze project profitability patterns'
+        suggestions: ['Review my current project deadlines', 'Suggest workflow automation for projects', 'Help me improve project communication', 'Analyze project profitability patterns'
         ],
         actionItems: [
           { title: 'Review project timeline', action: 'review_timeline', priority: 'high', estimatedTime: '30 minutes', impact: 'medium' },
@@ -141,11 +133,7 @@ Based on similar freelancers, these changes typically result in 35-50% revenue g
 • Offer strategic consulting beyond project delivery
 • Share industry insights and trends relevant to their business
 • Introduce clients to each other when synergies exist (builds loyalty)`,
-        suggestions: [
-          'Draft a client check-in email template',
-          'Create a client onboarding sequence',
-          'Suggest ways to get more referrals',
-          'Help me handle difficult client situations'
+        suggestions: ['Draft a client check-in email template', 'Create a client onboarding sequence', 'Suggest ways to get more referrals', 'Help me handle difficult client situations'
         ],
         actionItems: [
           { title: 'Create client onboarding template', action: 'create_onboarding', priority: 'medium', estimatedTime: '2 hours', impact: 'high' },
@@ -181,11 +169,7 @@ Based on similar freelancers, these changes typically result in 35-50% revenue g
 • Review weekly to identify time drains and optimize
 
 These optimizations typically result in 25-35% productivity gains and 10-15 extra billable hours per week.`,
-        suggestions: [
-          'Help me create a time blocking schedule',
-          'Suggest automation tools for my workflow',
-          'Analyze my time tracking patterns',
-          'Create productivity improvement plan'
+        suggestions: ['Help me create a time blocking schedule', 'Suggest automation tools for my workflow', 'Analyze my time tracking patterns', 'Create productivity improvement plan'
         ],
         actionItems: [
           { title: 'Set up time blocking schedule', action: 'time_blocking', priority: 'high', estimatedTime: '1 hour', impact: 'high' },
@@ -221,11 +205,7 @@ Ask me specific questions about any of these areas, or try commands like:
 • "How do I improve client relationships?"
 
 What would you like to focus on first?`,
-      suggestions: [
-        'Show me revenue optimization tips',
-        'Analyze my business performance',
-        'Suggest workflow improvements',
-        'Help me plan this week priorities'
+      suggestions: ['Show me revenue optimization tips', 'Analyze my business performance', 'Suggest workflow improvements', 'Help me plan this week priorities'
       ],
       actionItems: [
         { title: 'Complete business assessment', action: 'assessment', priority: 'medium', estimatedTime: '15 minutes', impact: 'high' },
@@ -236,7 +216,7 @@ What would you like to focus on first?`,
   }
 
   // Content generation for various business needs
-  async generateContent(type: string, context: any): Promise<string> {
+  async generateContent(type: string, context: Record<string, unknown>): Promise<string> {
     switch (type) {
       case 'client-email':
         return `Subject: Project Update - [Project Name]
@@ -302,7 +282,7 @@ Ready to get started? Let's schedule a call to discuss next steps!`
   }
 
   // Smart automation suggestions
-  async suggestAutomations(context: AIContext): Promise<any[]> {
+  async suggestAutomations(context: AIContext): Promise<unknown[]> {
     return [
       {
         id: 'smart-invoicing',
@@ -427,7 +407,7 @@ Ready to get started? Let's schedule a call to discuss next steps!`
     }
   }
 
-  private async tryAIProviders(prompt: string, context: any): Promise<AIResponse | null> {
+  private async tryAIProviders(prompt: string, context: Record<string, unknown>): Promise<AIResponse | null> {
     // Try OpenAI first
     if (this.aiProviders.openai) {
       try {
@@ -451,7 +431,7 @@ Ready to get started? Let's schedule a call to discuss next steps!`
     return null
   }
 
-  private generateEnhancedHeuristicResponse(input: string, context: AIContext, analysis: any): AIResponse {
+  private generateEnhancedHeuristicResponse(input: string, context: AIContext, analysis: Record<string, unknown>): AIResponse {
     const lowercaseInput = input.toLowerCase()
     
     // Revenue optimization responses
@@ -601,46 +581,31 @@ What would you like to focus on first?`,
     const baseKeywords = input.toLowerCase()
     
     if (baseKeywords.includes('revenue')) {
-      return [
-        'Show me pricing optimization strategies',
-        'Analyze my most profitable project types', 
-        'Help me create retainer packages',
-        'What upselling opportunities do I have?'
+      return ['Show me pricing optimization strategies', 'Analyze my most profitable project types', 'Help me create retainer packages', 'What upselling opportunities do I have?'
       ]
     }
     
     if (baseKeywords.includes('project')) {
-      return [
-        'Review my current project deadlines',
-        'Suggest workflow automation for projects',
-        'Help me improve project communication',
-        'Analyze project profitability patterns'
+      return ['Review my current project deadlines', 'Suggest workflow automation for projects', 'Help me improve project communication', 'Analyze project profitability patterns'
       ]
     }
     
     if (baseKeywords.includes('client')) {
-      return [
-        'Draft a client check-in email template',
-        'Create a client onboarding sequence',
-        'Suggest ways to get more referrals',
-        'Help me handle difficult client situations'
+      return ['Draft a client check-in email template', 'Create a client onboarding sequence', 'Suggest ways to get more referrals', 'Help me handle difficult client situations'
       ]
     }
     
-    return [
-      'Show me revenue optimization tips',
-      'Analyze my business performance',
-      'Suggest workflow improvements',
-      'Help me plan this week\'s priorities'
+    return ['Show me revenue optimization tips', 'Analyze my business performance', 'Suggest workflow improvements',
+      'Help me plan this week\'s priorities
     ]
   }
 
-  private generateActionItems(input: string, context: AIContext, analysis: any): any[] {
+  private generateActionItems(input: string, context: AIContext, analysis: Record<string, unknown>): Record<string, unknown>[] {
     // Generate contextual action items based on input and business analysis
     return []
   }
 
-  private generateInsights(context: AIContext, analysis: any): any[] {
+  private generateInsights(context: AIContext, analysis: Record<string, unknown>): Record<string, unknown>[] {
     // Generate business insights based on context and analysis
     return []
   }
@@ -652,7 +617,7 @@ What would you like to focus on first?`,
   private async detectOpportunities(context: AIContext): Promise<BusinessInsight[]> { return [] }
   private async analyzeWorkflow(context: AIContext): Promise<any> { return {} }
   private async predictRevenue(context: AIContext, days: number): Promise<number> { return 0 }
-  private async analyzeTrend(context: AIContext, metric: string): Promise<string> { return 'stable' }
+  private async analyzeTrend(context: AIContext, metric: string): Promise<string> { return &apos;stable&apos; }
   private async predictProjectCompletion(context: AIContext): Promise<any> { return {} }
   private async assessProjectRisks(context: AIContext): Promise<any> { return {} }
   private async predictResourceNeeds(context: AIContext): Promise<any> { return {} }
@@ -666,16 +631,16 @@ What would you like to focus on first?`,
   private identifyOpportunities(context: AIContext): string[] { return [] }
   private identifyThreats(context: AIContext): string[] { return [] }
   
-  private async callOpenAI(prompt: string, context: any): Promise<AIResponse | null> { return null }
-  private async callAnthropic(prompt: string, context: any): Promise<AIResponse | null> { return null }
+  private async callOpenAI(prompt: string, context: Record<string, unknown>): Promise<AIResponse | null> { return null }
+  private async callAnthropic(prompt: string, context: Record<string, unknown>): Promise<AIResponse | null> { return null }
   
-  private buildClientEmailPrompt(context: any): string { return '' }
-  private buildProposalPrompt(context: any): string { return '' }
-  private buildInvoicePrompt(context: any): string { return '' }
-  private buildProgressReportPrompt(context: any): string { return '' }
-  private buildMarketingPrompt(context: any): string { return '' }
-  private buildTestimonialPrompt(context: any): string { return '' }
-  private generateFallbackContent(type: string, context: any): string { return '' }
+  private buildClientEmailPrompt(context: Record<string, unknown>): string { return '&apos; }'
+  private buildProposalPrompt(context: Record<string, unknown>): string { return '&apos; }'
+  private buildInvoicePrompt(context: Record<string, unknown>): string { return '&apos; }'
+  private buildProgressReportPrompt(context: Record<string, unknown>): string { return '&apos; }'
+  private buildMarketingPrompt(context: Record<string, unknown>): string { return '&apos; }'
+  private buildTestimonialPrompt(context: Record<string, unknown>): string { return '&apos; }'
+  private generateFallbackContent(type: string, context: Record<string, unknown>): string { return '&apos; }'
 }
 
 // Create and export singleton instance

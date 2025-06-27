@@ -1,4 +1,4 @@
-"use client"
+"use client
 
 import { createClient } from '@/lib/supabase/client'
 
@@ -36,7 +36,7 @@ class CommunityService {
   private supabase = createClient()
 
   // Posts Methods
-  async createPost(post: Omit<Post, 'id' | 'likesCount' | 'commentsCount' | 'createdAt' | 'updatedAt'>): Promise<Post> {
+  async createPost(post: Omit<Post, 'id' | &apos;likesCount&apos; | &apos;commentsCount&apos; | &apos;createdAt&apos; | &apos;updatedAt&apos;>): Promise<Post> {
     if (!this.supabase) {
       throw new Error('Supabase client not initialized')
     }
@@ -126,7 +126,7 @@ class CommunityService {
   }
 
   // Comments Methods
-  async createComment(comment: Omit<Comment, 'id' | 'createdAt' | 'updatedAt'>): Promise<Comment> {
+  async createComment(comment: Omit<Comment, 'id' | &apos;createdAt&apos; | &apos;updatedAt&apos;>): Promise<Comment> {
     if (!this.supabase) {
       throw new Error('Supabase client not initialized')
     }
@@ -174,7 +174,7 @@ class CommunityService {
   }
 
   // Helper methods
-  private transformPost(post: any): Post {
+  private transformPost(post: Record<string, unknown>): Post {
     return {
       id: post.id,
       userId: post.user_id,
@@ -193,7 +193,7 @@ class CommunityService {
     }
   }
 
-  private transformComment(comment: any): Comment {
+  private transformComment(comment: Record<string, unknown>): Comment {
     return {
       id: comment.id,
       postId: comment.post_id,

@@ -47,12 +47,8 @@ async function setupWasabi() {
               Principal: {
                 AWS: `arn:aws:iam::*:user/*`
               },
-              Action: [
-                's3:GetObject',
-                's3:PutObject',
-                's3:DeleteObject',
-                's3:GetObjectVersion'
-              ],
+              Action: ['s3:GetObject', 's3:PutObject', 's3:DeleteObject',
+                's3:GetObjectVersion'],
               Resource: `arn:aws:s3:::${bucketName}/*`
             }
           ]
@@ -86,22 +82,22 @@ async function setupWasabi() {
     console.log('│ AWS S3:     $0.023/GB/month (standard)     │');
     console.log('│ Supabase:   $0.021/GB/month (standard)     │');
     console.log('└─────────────────────────────────────────────┘');
-    console.log('');
-    console.log('📊 For 100GB of storage:');
+    console.log('');'
+    console.log('📊 For 100GB of storage: ');
     console.log('   • Wasabi:     $0.59/month');
     console.log('   • Traditional: $2.30/month');
     console.log('   • Monthly Savings: $1.71 (74% cost reduction)');
     console.log('   • Annual Savings: $20.52');
-    console.log('');
+    console.log('');'
 
     console.log('🎉 WASABI SETUP COMPLETE!');
-    console.log('');
-    console.log('📋 Configuration Summary:');
+    console.log('');'
+    console.log('📋 Configuration Summary: ');
     console.log(`   • Bucket Name: ${bucketName}`);
     console.log(`   • Region: ${process.env.WASABI_REGION || 'us-east-1'}`);
     console.log(`   • Endpoint: ${process.env.WASABI_ENDPOINT || 'https://s3.wasabisys.com'}`);
     console.log(`   • Access Key: ${process.env.WASABI_ACCESS_KEY_ID?.substring(0, 8)}...`);
-    console.log('');
+    console.log('');'
     console.log('🚀 Your FreeflowZee application is now ready for multi-cloud storage!');
     console.log('   • Large files will automatically route to Wasabi for cost savings');
     console.log('   • Small frequently accessed files stay on Supabase for speed');
@@ -109,8 +105,8 @@ async function setupWasabi() {
 
   } catch (error) {
     console.error('❌ Wasabi setup failed:', error.message);
-    console.log('');
-    console.log('🔧 Troubleshooting Tips:');
+    console.log('');'
+    console.log('🔧 Troubleshooting Tips: ');
     console.log('   1. Verify your Wasabi credentials in .env.local');
     console.log('   2. Check that your Wasabi account has bucket creation permissions');
     console.log('   3. Ensure the region is correctly configured');

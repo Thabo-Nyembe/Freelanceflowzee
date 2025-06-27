@@ -11,7 +11,7 @@ const fs = require('fs');
 const path = require('path');
 
 console.log('🎯 BIT 5: Guided Demo Scenarios Creation');
-console.log('========================================');
+console.log('======================================== ');
 
 class DemoScenariosCreator {
   constructor() {
@@ -208,20 +208,8 @@ class DemoScenariosCreator {
     return `'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useDashboardMetrics, useDemoContent } from '@/components/dashboard/demo-content-provider';
-import { 
-  TrendingUp, 
-  DollarSign, 
-  Users, 
-  Star, 
-  ArrowRight, 
-  Play,
-  CheckCircle,
-  Award
-} from 'lucide-react';
 
 export function ClientPresentationDemo() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -262,31 +250,31 @@ export function ClientPresentationDemo() {
     switch (slide.content) {
       case 'overview':
         return (
-          <div className="text-center space-y-6">
-            <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-8 rounded-xl">
-              <h2 className="text-3xl font-bold mb-4">Welcome to FreeflowZee</h2>
-              <p className="text-xl opacity-90">The premier platform connecting clients with top-tier freelancers</p>
+          <div className= "text-center space-y-6">
+            <div className= "bg-gradient-to-r from-blue-500 to-purple-600 text-white p-8 rounded-xl">
+              <h2 className= "text-3xl font-bold mb-4">Welcome to FreeflowZee</h2>
+              <p className= "text-xl opacity-90">The premier platform connecting clients with top-tier freelancers</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className= "grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card>
-                <CardContent className="p-6 text-center">
-                  <Users className="h-12 w-12 mx-auto mb-4 text-blue-500" />
-                  <h3 className="font-bold mb-2">Expert Freelancers</h3>
-                  <p className="text-gray-600">Vetted professionals ready for your projects</p>
+                <CardContent className= "p-6 text-center">
+                  <Users className= "h-12 w-12 mx-auto mb-4 text-blue-500" />
+                  <h3 className= "font-bold mb-2">Expert Freelancers</h3>
+                  <p className= "text-gray-600">Vetted professionals ready for your projects</p>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-6 text-center">
-                  <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-500" />
-                  <h3 className="font-bold mb-2">Secure Payments</h3>
-                  <p className="text-gray-600">Protected escrow system for all transactions</p>
+                <CardContent className= "p-6 text-center">
+                  <CheckCircle className= "h-12 w-12 mx-auto mb-4 text-green-500" />
+                  <h3 className= "font-bold mb-2">Secure Payments</h3>
+                  <p className= "text-gray-600">Protected escrow system for all transactions</p>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-6 text-center">
-                  <Award className="h-12 w-12 mx-auto mb-4 text-purple-500" />
-                  <h3 className="font-bold mb-2">Quality Guaranteed</h3>
-                  <p className="text-gray-600">Satisfaction guaranteed on every project</p>
+                <CardContent className= "p-6 text-center">
+                  <Award className= "h-12 w-12 mx-auto mb-4 text-purple-500" />
+                  <h3 className= "font-bold mb-2">Quality Guaranteed</h3>
+                  <p className= "text-gray-600">Satisfaction guaranteed on every project</p>
                 </CardContent>
               </Card>
             </div>
@@ -295,39 +283,39 @@ export function ClientPresentationDemo() {
 
       case 'metrics':
         return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-center mb-6">Platform Performance</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className= "space-y-6">
+            <h2 className= "text-2xl font-bold text-center mb-6">Platform Performance</h2>
+            <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
-                <CardContent className="p-6 text-center">
-                  <DollarSign className="h-8 w-8 mx-auto mb-2 text-green-500" />
-                  <div className="text-2xl font-bold text-green-600">$45.6K</div>
-                  <div className="text-sm text-gray-500">Monthly Revenue</div>
-                  <Badge className="mt-2 bg-green-100 text-green-800">+12.5% growth</Badge>
+                <CardContent className= "p-6 text-center">
+                  <DollarSign className= "h-8 w-8 mx-auto mb-2 text-green-500" />
+                  <div className= "text-2xl font-bold text-green-600">$45.6K</div>
+                  <div className= "text-sm text-gray-500">Monthly Revenue</div>
+                  <Badge className= "mt-2 bg-green-100 text-green-800">+12.5% growth</Badge>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-6 text-center">
-                  <Users className="h-8 w-8 mx-auto mb-2 text-blue-500" />
-                  <div className="text-2xl font-bold text-blue-600">1,247</div>
-                  <div className="text-sm text-gray-500">Active Users</div>
-                  <Badge className="mt-2 bg-blue-100 text-blue-800">+8.2% growth</Badge>
+                <CardContent className= "p-6 text-center">
+                  <Users className= "h-8 w-8 mx-auto mb-2 text-blue-500" />
+                  <div className= "text-2xl font-bold text-blue-600">1,247</div>
+                  <div className= "text-sm text-gray-500">Active Users</div>
+                  <Badge className= "mt-2 bg-blue-100 text-blue-800">+8.2% growth</Badge>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-6 text-center">
-                  <TrendingUp className="h-8 w-8 mx-auto mb-2 text-purple-500" />
-                  <div className="text-2xl font-bold text-purple-600">94.2%</div>
-                  <div className="text-sm text-gray-500">Success Rate</div>
-                  <Badge className="mt-2 bg-purple-100 text-purple-800">+2.1% improvement</Badge>
+                <CardContent className= "p-6 text-center">
+                  <TrendingUp className= "h-8 w-8 mx-auto mb-2 text-purple-500" />
+                  <div className= "text-2xl font-bold text-purple-600">94.2%</div>
+                  <div className= "text-sm text-gray-500">Success Rate</div>
+                  <Badge className= "mt-2 bg-purple-100 text-purple-800">+2.1% improvement</Badge>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-6 text-center">
-                  <Star className="h-8 w-8 mx-auto mb-2 text-yellow-500" />
-                  <div className="text-2xl font-bold text-yellow-600">4.9/5</div>
-                  <div className="text-sm text-gray-500">Client Rating</div>
-                  <Badge className="mt-2 bg-yellow-100 text-yellow-800">Excellent</Badge>
+                <CardContent className= "p-6 text-center">
+                  <Star className= "h-8 w-8 mx-auto mb-2 text-yellow-500" />
+                  <div className= "text-2xl font-bold text-yellow-600">4.9/5</div>
+                  <div className= "text-sm text-gray-500">Client Rating</div>
+                  <Badge className= "mt-2 bg-yellow-100 text-yellow-800">Excellent</Badge>
                 </CardContent>
               </Card>
             </div>
@@ -336,22 +324,22 @@ export function ClientPresentationDemo() {
 
       case 'portfolio':
         return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-center mb-6">Featured Projects</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className= "space-y-6">
+            <h2 className= "text-2xl font-bold text-center mb-6">Featured Projects</h2>
+            <div className= "grid grid-cols-1 md:grid-cols-2 gap-6">
               {projects?.slice(0, 4).map((project, index) => (
-                <Card key={index} className="hover:shadow-lg transition-shadow">
+                <Card key={index} className= "hover:shadow-lg transition-shadow">
                   <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg">{project.title}</CardTitle>
-                      <Badge className="bg-green-100 text-green-800">{project.status}</Badge>
+                    <div className= "flex justify-between items-start">
+                      <CardTitle className= "text-lg">{project.title}</CardTitle>
+                      <Badge className= "bg-green-100 text-green-800">{project.status}</Badge>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-600 mb-4">{project.description}</p>
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-green-600">{project.budget}</span>
-                      <span className="text-sm text-gray-500">{project.category}</span>
+                    <p className= "text-gray-600 mb-4">{project.description}</p>
+                    <div className= "flex justify-between items-center">
+                      <span className= "font-bold text-green-600">{project.budget}</span>
+                      <span className= "text-sm text-gray-500">{project.category}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -362,29 +350,29 @@ export function ClientPresentationDemo() {
 
       case 'testimonials':
         return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-center mb-6">What Our Clients Say</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="bg-blue-50 border-blue-200">
-                <CardContent className="p-6">
-                  <div className="flex items-center mb-4">
+          <div className= "space-y-6">
+            <h2 className= "text-2xl font-bold text-center mb-6">What Our Clients Say</h2>
+            <div className= "grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className= "bg-blue-50 border-blue-200">
+                <CardContent className= "p-6">
+                  <div className= "flex items-center mb-4">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <Star key={i} className= "h-4 w-4 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
-                  <p className="italic mb-4">"FreeflowZee helped us find the perfect freelancer for our web development project. The quality exceeded our expectations!"</p>
-                  <div className="font-semibold">- Sarah Johnson, Tech Startup CEO</div>
+                  <p className=&quot;italic mb-4">"FreeflowZee helped us find the perfect freelancer for our web development project. The quality exceeded our expectations!&quot;</p>"
+                  <div className= "font-semibold">- Sarah Johnson, Tech Startup CEO</div>
                 </CardContent>
               </Card>
-              <Card className="bg-green-50 border-green-200">
-                <CardContent className="p-6">
-                  <div className="flex items-center mb-4">
+              <Card className= "bg-green-50 border-green-200">
+                <CardContent className= "p-6">
+                  <div className= "flex items-center mb-4">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <Star key={i} className= "h-4 w-4 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
-                  <p className="italic mb-4">"The escrow system gave us confidence in the payment process. Communication tools made collaboration seamless."</p>
-                  <div className="font-semibold">- Michael Chen, Marketing Director</div>
+                  <p className= "italic mb-4">"The escrow system gave us confidence in the payment process. Communication tools made collaboration seamless.&quot;</p>"
+                  <div className= "font-semibold">- Michael Chen, Marketing Director</div>
                 </CardContent>
               </Card>
             </div>
@@ -393,16 +381,16 @@ export function ClientPresentationDemo() {
 
       case 'cta':
         return (
-          <div className="text-center space-y-6">
-            <div className="bg-gradient-to-r from-purple-500 to-blue-600 text-white p-8 rounded-xl">
-              <h2 className="text-3xl font-bold mb-4">Ready to Start Your Next Project?</h2>
-              <p className="text-xl opacity-90 mb-6">Join thousands of satisfied clients who trust FreeflowZee</p>
-              <div className="space-y-4">
-                <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100">
+          <div className= "text-center space-y-6">
+            <div className= "bg-gradient-to-r from-purple-500 to-blue-600 text-white p-8 rounded-xl">
+              <h2 className= "text-3xl font-bold mb-4">Ready to Start Your Next Project?</h2>
+              <p className= "text-xl opacity-90 mb-6">Join thousands of satisfied clients who trust FreeflowZee</p>
+              <div className= "space-y-4">
+                <Button size= "lg" className= "bg-white text-purple-600 hover:bg-gray-100">
                   Start Your Project Today
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className= "ml-2 h-5 w-5" />
                 </Button>
-                <div className="text-sm opacity-80">
+                <div className= "text-sm opacity-80">
                   ✓ No setup fees ✓ Secure payments ✓ 24/7 support
                 </div>
               </div>
@@ -416,49 +404,49 @@ export function ClientPresentationDemo() {
   };
 
   return (
-    <div className="client-presentation-demo min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className= "client-presentation-demo min-h-screen bg-gray-50 p-6">
+      <div className= "max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className= "flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-2xl font-bold">Client Presentation</h1>
-            <p className="text-gray-600">Professional demo for potential clients</p>
+            <h1 className= "text-2xl font-bold">Client Presentation</h1>
+            <p className= "text-gray-600">Professional demo for potential clients</p>
           </div>
-          <Badge className="bg-blue-100 text-blue-800">
+          <Badge className= "bg-blue-100 text-blue-800">
             🎭 Demo Mode - Client Focused
           </Badge>
         </div>
 
         {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex justify-between text-sm text-gray-500 mb-2">
+        <div className= "mb-8">
+          <div className= "flex justify-between text-sm text-gray-500 mb-2">
             <span>Slide {currentSlide + 1} of {slides.length}</span>
             <span>{slides[currentSlide].title}</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className= "w-full bg-gray-200 rounded-full h-2">
             <div 
-              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+              className= "bg-blue-500 h-2 rounded-full transition-all duration-300"
               style={{ width: \`\${((currentSlide + 1) / slides.length) * 100}%\` }}
             ></div>
           </div>
         </div>
 
         {/* Slide Content */}
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-8 min-h-[500px]">
+        <div className= "bg-white rounded-xl shadow-lg p-8 mb-8 min-h-[500px]">
           {renderSlideContent()}
         </div>
 
         {/* Navigation */}
-        <div className="flex justify-between items-center">
+        <div className= "flex justify-between items-center">
           <Button 
-            variant="outline" 
+            variant= "outline" 
             onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
             disabled={currentSlide === 0}
           >
             Previous
           </Button>
           
-          <div className="flex space-x-2">
+          <div className= "flex space-x-2">
             {slides.map((_, index) => (
               <button
                 key={index}
@@ -475,7 +463,7 @@ export function ClientPresentationDemo() {
             disabled={currentSlide === slides.length - 1}
           >
             Next
-            <ArrowRight className="ml-2 h-4 w-4" />
+            <ArrowRight className= "ml-2 h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -489,69 +477,66 @@ export function ClientPresentationDemo() {
     return `'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { TrendingUp, DollarSign, Users, BarChart3 } from 'lucide-react';
 
 export function InvestorDemo() {
   return (
-    <div className="investor-demo p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">FreeflowZee: Investment Opportunity</h1>
-          <Badge className="bg-green-100 text-green-800">📈 Growth Focused</Badge>
+    <div className= "investor-demo p-6 bg-gray-50 min-h-screen">
+      <div className= "max-w-6xl mx-auto">
+        <div className= "flex justify-between items-center mb-8">
+          <h1 className= "text-3xl font-bold">FreeflowZee: Investment Opportunity</h1>
+          <Badge className= "bg-green-100 text-green-800">📈 Growth Focused</Badge>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-green-500" />
+              <CardTitle className= "flex items-center gap-2">
+                <DollarSign className= "h-5 w-5 text-green-500" />
                 Revenue Growth
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">+127%</div>
-              <p className="text-sm text-gray-500">Year over year</p>
+              <div className= "text-2xl font-bold text-green-600">+127%</div>
+              <p className= "text-sm text-gray-500">Year over year</p>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-blue-500" />
+              <CardTitle className= "flex items-center gap-2">
+                <Users className= "h-5 w-5 text-blue-500" />
                 User Acquisition
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">+89%</div>
-              <p className="text-sm text-gray-500">Monthly growth</p>
+              <div className= "text-2xl font-bold text-blue-600">+89%</div>
+              <p className= "text-sm text-gray-500">Monthly growth</p>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-purple-500" />
+              <CardTitle className= "flex items-center gap-2">
+                <BarChart3 className= "h-5 w-5 text-purple-500" />
                 Market Share
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-purple-600">12.4%</div>
-              <p className="text-sm text-gray-500">In target segment</p>
+              <div className= "text-2xl font-bold text-purple-600">12.4%</div>
+              <p className= "text-sm text-gray-500">In target segment</p>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-orange-500" />
+              <CardTitle className= "flex items-center gap-2">
+                <TrendingUp className= "h-5 w-5 text-orange-500" />
                 Retention Rate
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">94.2%</div>
-              <p className="text-sm text-gray-500">Client retention</p>
+              <div className= "text-2xl font-bold text-orange-600">94.2%</div>
+              <p className= "text-sm text-gray-500">Client retention</p>
             </CardContent>
           </Card>
         </div>
@@ -561,22 +546,22 @@ export function InvestorDemo() {
             <CardTitle>Market Opportunity & Growth Strategy</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600 mb-4">
+            <p className= "text-gray-600 mb-4">
               FreeflowZee is positioned to capture significant market share in the $400B global freelance economy.
               Our platform combines cutting-edge technology with proven business models to deliver exceptional value.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-xl font-bold text-blue-600">$400B</div>
-                <div className="text-sm text-gray-600">Global Market Size</div>
+            <div className= "grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className= "text-center p-4 bg-blue-50 rounded-lg">
+                <div className= "text-xl font-bold text-blue-600">$400B</div>
+                <div className= "text-sm text-gray-600">Global Market Size</div>
               </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-xl font-bold text-green-600">36%</div>
-                <div className="text-sm text-gray-600">Annual Growth Rate</div>
+              <div className= "text-center p-4 bg-green-50 rounded-lg">
+                <div className= "text-xl font-bold text-green-600">36%</div>
+                <div className= "text-sm text-gray-600">Annual Growth Rate</div>
               </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <div className="text-xl font-bold text-purple-600">$2.4B</div>
-                <div className="text-sm text-gray-600">Addressable Market</div>
+              <div className= "text-center p-4 bg-purple-50 rounded-lg">
+                <div className= "text-xl font-bold text-purple-600">$2.4B</div>
+                <div className= "text-sm text-gray-600">Addressable Market</div>
               </div>
             </div>
           </CardContent>
@@ -592,7 +577,7 @@ export function InvestorDemo() {
     return `'use client';
 import React from 'react';
 export function FreelancerOnboardingDemo() {
-  return <div className="p-6">Freelancer onboarding demo content...</div>;
+  return <div className= "p-6">Freelancer onboarding demo content...</div>;
 }`;
   }
 
@@ -600,7 +585,7 @@ export function FreelancerOnboardingDemo() {
     return `'use client';
 import React from 'react';
 export function FeatureWalkthroughDemo() {
-  return <div className="p-6">Feature walkthrough demo content...</div>;
+  return <div className= "p-6">Feature walkthrough demo content...</div>;
 }`;
   }
 
@@ -608,14 +593,11 @@ export function FeatureWalkthroughDemo() {
     return `'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { ClientPresentationDemo } from './client-presentation-demo';
 import { InvestorDemo } from './investor-demo';
 import { FreelancerOnboardingDemo } from './freelancer-onboarding-demo';
 import { FeatureWalkthroughDemo } from './feature-walkthrough-demo';
-import { Users, TrendingUp, Briefcase, Map } from 'lucide-react';
 
 export function DemoRouter() {
   const [activeDemo, setActiveDemo] = useState(null);
@@ -666,9 +648,9 @@ export function DemoRouter() {
   if (activeDemo) {
     const DemoComponent = activeDemo.component;
     return (
-      <div className="min-h-screen">
-        <div className="p-4 bg-gray-100 border-b">
-          <Button variant="outline" onClick={() => setActiveDemo(null)}>
+      <div className= "min-h-screen">
+        <div className= "p-4 bg-gray-100 border-b">
+          <Button variant= "outline" onClick={() => setActiveDemo(null)}>
             ← Back to Demo Selection
           </Button>
         </div>
@@ -678,43 +660,43 @@ export function DemoRouter() {
   }
 
   return (
-    <div className="demo-router p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-4">FreeflowZee Demo Center</h1>
-          <p className="text-gray-600 text-lg">Choose your demo scenario based on your audience</p>
-          <Badge className="mt-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+    <div className= "demo-router p-6 bg-gray-50 min-h-screen">
+      <div className= "max-w-6xl mx-auto">
+        <div className= "text-center mb-8">
+          <h1 className= "text-3xl font-bold mb-4">FreeflowZee Demo Center</h1>
+          <p className= "text-gray-600 text-lg">Choose your demo scenario based on your audience</p>
+          <Badge className= "mt-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
             🎭 Interactive Demos Available
           </Badge>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className= "grid grid-cols-1 md:grid-cols-2 gap-6">
           {demoScenarios.map((scenario) => (
-            <Card key={scenario.id} className="hover:shadow-xl transition-all cursor-pointer group">
+            <Card key={scenario.id} className= "hover:shadow-xl transition-all cursor-pointer group">
               <CardHeader>
-                <div className="flex items-center gap-4">
+                <div className= "flex items-center gap-4">
                   <div className={\`p-3 rounded-lg \${scenario.color}\`}>
-                    <scenario.icon className="h-6 w-6 text-white" />
+                    <scenario.icon className= "h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl">{scenario.title}</CardTitle>
-                    <p className="text-gray-600">{scenario.description}</p>
+                    <CardTitle className= "text-xl">{scenario.title}</CardTitle>
+                    <p className= "text-gray-600">{scenario.description}</p>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className= "space-y-3">
                   <div>
-                    <div className="text-sm font-medium text-gray-700">Target Audience:</div>
-                    <div className="text-sm text-gray-600">{scenario.audience}</div>
+                    <div className= "text-sm font-medium text-gray-700">Target Audience:</div>
+                    <div className= "text-sm text-gray-600">{scenario.audience}</div>
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-gray-700">Duration:</div>
-                    <div className="text-sm text-gray-600">{scenario.duration}</div>
+                    <div className= "text-sm font-medium text-gray-700">Duration:</div>
+                    <div className= "text-sm text-gray-600">{scenario.duration}</div>
                   </div>
                   <Button 
-                    className="w-full group-hover:bg-primary group-hover:text-white transition-colors"
-                    variant="outline"
+                    className= "w-full group-hover:bg-primary group-hover:text-white transition-colors"
+                    variant= "outline"
                     onClick={() => setActiveDemo(scenario)}
                   >
                     Start Demo
@@ -725,11 +707,11 @@ export function DemoRouter() {
           ))}
         </div>
 
-        <div className="mt-12 text-center">
-          <Card className="bg-blue-50 border-blue-200">
-            <CardContent className="p-6">
-              <h3 className="font-bold text-blue-900 mb-2">Demo Tips</h3>
-              <div className="text-blue-700 text-sm space-y-1">
+        <div className= "mt-12 text-center">
+          <Card className= "bg-blue-50 border-blue-200">
+            <CardContent className= "p-6">
+              <h3 className= "font-bold text-blue-900 mb-2">Demo Tips</h3>
+              <div className= "text-blue-700 text-sm space-y-1">
                 <p>• Each demo uses real data from our content population system</p>
                 <p>• Demos are optimized for different audience types and use cases</p>
                 <p>• All metrics and showcased features are based on actual platform capabilities</p>
@@ -887,7 +869,7 @@ Interactive tour of FreeflowZee's key features for product evaluators and new us
   // Generate comprehensive report
   generateReport() {
     console.log('\n📋 DEMO SCENARIOS CREATION SUMMARY');
-    console.log('==================================');
+    console.log('================================== ');
     
     const total = this.results.summary.created + this.results.summary.failed + this.results.summary.skipped;
     const successRate = Math.round(((this.results.summary.created + this.results.summary.skipped) / total) * 100);
@@ -957,15 +939,10 @@ Interactive tour of FreeflowZee's key features for product evaluators and new us
       successRate,
       results: this.results,
       scenariosCreated: Object.keys(this.results.scenarios).filter(
-        key => this.results.scenarios[key].status === 'created'
-      ).length,
+        key => this.results.scenarios[key].status === 'created').length,
       totalScenarios: Object.keys(this.results.scenarios).length,
-      usageInstructions: [
-        'Import DemoRouter component',
-        'Navigate to /demo-router',
-        'Select audience-appropriate demo',
-        'Follow documentation guides'
-      ]
+      usageInstructions: ['Import DemoRouter component', 'Navigate to /demo-router', 'Select audience-appropriate demo',
+        'Follow documentation guides']
     };
 
     fs.writeFileSync('demo-scenarios-creation-report.json', JSON.stringify(reportData, null, 2));

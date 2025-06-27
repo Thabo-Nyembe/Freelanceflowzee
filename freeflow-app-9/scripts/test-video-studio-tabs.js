@@ -23,22 +23,22 @@ const VIDEO_STUDIO_ELEMENTS = {
   name: 'Video Studio',
   url: '/dashboard/video-studio',
   tabs: [
-    { id: 'projects', name: 'Projects', selector: '[role="tab"][data-value="projects"]' },
-    { id: 'templates', name: 'Templates', selector: '[role="tab"][data-value="templates"]' },
-    { id: 'assets', name: 'Assets', selector: '[role="tab"][data-value="assets"]' },
-    { id: 'analytics', name: 'Analytics', selector: '[role="tab"][data-value="analytics"]' }
+    { id: 'projects', name: 'Projects', selector: '[role= "tab"][data-value= "projects"]' },
+    { id: 'templates', name: 'Templates', selector: '[role= "tab"][data-value= "templates"]' },
+    { id: 'assets', name: 'Assets', selector: '[role= "tab"][data-value= "assets"]' },
+    { id: 'analytics', name: 'Analytics', selector: '[role= "tab"][data-value= "analytics"]' }
   ],
   buttons: [
-    { id: 'create-video', name: 'Create Video', selector: '[data-testid="create-video-btn"]' },
-    { id: 'upload-media', name: 'Upload Media', selector: '[data-testid="upload-media-btn"]' },
-    { id: 'export-video', name: 'Export Video', selector: '[data-testid="export-video-btn"]' },
-    { id: 'share-video', name: 'Share Video', selector: '[data-testid="share-video-btn"]' }
+    { id: 'create-video', name: 'Create Video', selector: '[data-testid= "create-video-btn"]' },
+    { id: 'upload-media', name: 'Upload Media', selector: '[data-testid= "upload-media-btn"]' },
+    { id: 'export-video', name: 'Export Video', selector: '[data-testid= "export-video-btn"]' },
+    { id: 'share-video', name: 'Share Video', selector: '[data-testid= "share-video-btn"]' }
   ],
   videoControls: [
-    { id: 'play-pause', name: 'Play/Pause', selector: '[aria-label*="Play"], [aria-label*="Pause"]' },
-    { id: 'timeline', name: 'Timeline', selector: '[role="slider"], .timeline' },
-    { id: 'volume', name: 'Volume', selector: '[aria-label*="Volume"]' },
-    { id: 'fullscreen', name: 'Fullscreen', selector: '[aria-label*="Fullscreen"]' }
+    { id: 'play-pause', name: 'Play/Pause', selector: '[aria-label*= "Play"], [aria-label*= "Pause"]' },
+    { id: 'timeline', name: 'Timeline', selector: '[role= "slider"], .timeline' },
+    { id: 'volume', name: 'Volume', selector: '[aria-label*= "Volume"]' },
+    { id: 'fullscreen', name: 'Fullscreen', selector: '[aria-label*= "Fullscreen"]' }
   ],
   editingTools: [
     { id: 'trim', name: 'Trim', selector: 'button:has-text("Trim")' },
@@ -91,9 +91,9 @@ class VideoStudioTester {
     try {
       const tabSelectors = [
         tab.selector,
-        `[role="tab"]:has-text("${tab.name}")`,
+        `[role= "tab"]:has-text("${tab.name}")`,
         `button:has-text("${tab.name}")`,
-        `[data-value="${tab.id}"]`,
+        `[data-value= "${tab.id}"]`,
         `#${tab.id}-tab`
       ];
 
@@ -121,7 +121,7 @@ class VideoStudioTester {
 
       const isActive = await tabElement.getAttribute('aria-selected') === 'true' ||
                       await tabElement.getAttribute('data-state') === 'active' ||
-                      (await tabElement.getAttribute('class') || '').includes('active');
+                      (await tabElement.getAttribute('class') || ).includes('active');'
 
       const screenshotPath = `video-studio-${tab.id}-tab.png`;
       await this.page.screenshot({ path: screenshotPath });
@@ -164,8 +164,8 @@ class VideoStudioTester {
       const buttonSelectors = [
         button.selector,
         `button:has-text("${button.name}")`,
-        `[aria-label="${button.name}"]`,
-        `[title="${button.name}"]`,
+        `[aria-label= "${button.name}"]`,
+        `[title= "${button.name}"]`,
         `#${button.id}`
       ];
 
@@ -318,12 +318,12 @@ class VideoStudioTester {
     const passRate = Math.round((this.results.passed / this.results.total) * 100);
     
     console.log('\n📊 VIDEO STUDIO TEST REPORT');
-    console.log('=' .repeat(50));
+    console.log('=' .repeat(50));'
     console.log(`✅ Passed: ${this.results.passed}/${this.results.total} (${passRate}%)`);
     console.log(`❌ Failed: ${this.results.failed}/${this.results.total}`);
     console.log(`📸 Screenshots: ${this.results.screenshots.length}`);
     
-    console.log('\n📋 Detailed Results:');
+    console.log('\n📋 Detailed Results: ');
     this.results.details.forEach(result => {
       const icon = result.status === 'passed' ? '✅' : result.status === 'warning' ? '⚠️' : '❌';
       console.log(`${icon} ${result.name}: ${result.status}`);
@@ -361,8 +361,7 @@ class VideoStudioTester {
       
       const report = this.generateReport();
       
-      await fs.writeFile(
-        'video-studio-test-report.json',
+      await fs.writeFile('video-studio-test-report.json',
         JSON.stringify(report, null, 2)
       );
       

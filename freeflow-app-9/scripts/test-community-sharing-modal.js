@@ -11,7 +11,7 @@ test.describe('Enhanced Community Hub Sharing Modal', () => {
     console.log('🔍 Testing share button visibility...');
     
     // Look for share buttons in posts
-    const shareButtons = page.locator('[data-testid="share-btn"]');
+    const shareButtons = page.locator('[data-testid= "share-btn"]');
     
     // Wait for at least one share button to be visible
     await expect(shareButtons.first()).toBeVisible({ timeout: 10000 });
@@ -26,7 +26,7 @@ test.describe('Enhanced Community Hub Sharing Modal', () => {
     console.log('🔍 Testing sharing modal functionality...');
     
     // Wait for share button and click it
-    const shareButton = page.locator('[data-testid="share-btn"]').first();
+    const shareButton = page.locator('[data-testid= "share-btn"]').first();
     await shareButton.waitFor({ state: 'visible', timeout: 10000 });
     
     console.log('📱 Clicking share button...');
@@ -48,7 +48,7 @@ test.describe('Enhanced Community Hub Sharing Modal', () => {
     console.log('🔍 Testing modal close functionality...');
     
     // Open modal
-    const shareButton = page.locator('[data-testid="share-btn"]').first();
+    const shareButton = page.locator('[data-testid= "share-btn"]').first();
     await shareButton.click();
     
     // Wait for modal to open
@@ -56,7 +56,7 @@ test.describe('Enhanced Community Hub Sharing Modal', () => {
     await expect(modal).toBeVisible();
     
     // Click close button
-    const closeButton = page.locator('button').filter({ hasText: /×/ }).or(page.locator('[aria-label="Close"]'));
+    const closeButton = page.locator('button').filter({ hasText: /×/ }).or(page.locator('[aria-label= "Close"]'));
     await closeButton.click();
     
     // Check if modal is closed
@@ -69,19 +69,14 @@ test.describe('Enhanced Community Hub Sharing Modal', () => {
     console.log('🔍 Testing social media sharing buttons...');
     
     // Open modal
-    const shareButton = page.locator('[data-testid="share-btn"]').first();
+    const shareButton = page.locator('[data-testid= "share-btn"]').first();
     await shareButton.click();
     
     // Wait for modal to open
     await expect(page.locator('.fixed.inset-0.bg-black.bg-opacity-50')).toBeVisible();
     
     // Check for social media buttons
-    const socialButtons = [
-      'Facebook',
-      'Twitter', 
-      'LinkedIn',
-      'Instagram',
-      'Email'
+    const socialButtons = ['Facebook', 'Twitter', 'LinkedIn', 'Instagram', 'Email'
     ];
     
     for (const social of socialButtons) {
@@ -98,14 +93,14 @@ test.describe('Enhanced Community Hub Sharing Modal', () => {
     await page.context().grantPermissions(['clipboard-write', 'clipboard-read']);
     
     // Open modal
-    const shareButton = page.locator('[data-testid="share-btn"]').first();
+    const shareButton = page.locator('[data-testid= "share-btn"]').first();
     await shareButton.click();
     
     // Wait for modal to open
     await expect(page.locator('.fixed.inset-0.bg-black.bg-opacity-50')).toBeVisible();
     
     // Click copy link button
-    const copyButton = page.locator('button').filter({ hasText: /Copy/ }).or(page.locator('[aria-label*="Copy"]'));
+    const copyButton = page.locator('button').filter({ hasText: /Copy/ }).or(page.locator('[aria-label*= "Copy"]'));
     await copyButton.click();
     
     // Check for success message or state change
@@ -118,7 +113,7 @@ test.describe('Enhanced Community Hub Sharing Modal', () => {
     console.log('🔍 Testing post information display...');
     
     // Open modal
-    const shareButton = page.locator('[data-testid="share-btn"]').first();
+    const shareButton = page.locator('[data-testid= "share-btn"]').first();
     await shareButton.click();
     
     // Wait for modal to open

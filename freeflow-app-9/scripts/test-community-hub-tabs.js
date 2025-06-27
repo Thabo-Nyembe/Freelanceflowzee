@@ -23,28 +23,28 @@ const COMMUNITY_HUB_ELEMENTS = {
   name: 'Community Hub',
   url: '/dashboard/community',
   tabs: [
-    { id: 'feed', name: 'Feed', selector: '[role="tab"][data-value="feed"]' },
-    { id: 'creators', name: 'Creators', selector: '[role="tab"][data-value="creators"]' },
-    { id: 'showcase', name: 'Showcase', selector: '[role="tab"][data-value="showcase"]' },
-    { id: 'events', name: 'Events', selector: '[role="tab"][data-value="events"]' }
+    { id: 'feed', name: 'Feed', selector: '[role= "tab"][data-value= "feed"]' },
+    { id: 'creators', name: 'Creators', selector: '[role= "tab"][data-value= "creators"]' },
+    { id: 'showcase', name: 'Showcase', selector: '[role= "tab"][data-value= "showcase"]' },
+    { id: 'events', name: 'Events', selector: '[role= "tab"][data-value= "events"]' }
   ],
   buttons: [
-    { id: 'create-post', name: 'Create Post', selector: '[data-testid="create-post-btn"]' },
-    { id: 'follow-creator', name: 'Follow Creator', selector: '[data-testid="follow-btn"]' },
-    { id: 'like-post', name: 'Like Post', selector: '[data-testid="like-btn"]' },
-    { id: 'share-post', name: 'Share Post', selector: '[data-testid="share-btn"]' }
+    { id: 'create-post', name: 'Create Post', selector: '[data-testid= "create-post-btn"]' },
+    { id: 'follow-creator', name: 'Follow Creator', selector: '[data-testid= "follow-btn"]' },
+    { id: 'like-post', name: 'Like Post', selector: '[data-testid= "like-btn"]' },
+    { id: 'share-post', name: 'Share Post', selector: '[data-testid= "share-btn"]' }
   ],
   socialElements: [
-    { id: 'post-card', name: 'Post Card', selector: '.post-card, [data-testid="post-card"]' },
-    { id: 'creator-profile', name: 'Creator Profile', selector: '.creator-profile, [data-testid="creator-profile"]' },
-    { id: 'trending-hashtags', name: 'Trending Hashtags', selector: '.trending-hashtags, [data-testid="trending-hashtags"]' },
-    { id: 'featured-creators', name: 'Featured Creators', selector: '.featured-creators, [data-testid="featured-creators"]' }
+    { id: 'post-card', name: 'Post Card', selector: '.post-card, [data-testid= "post-card"]' },
+    { id: 'creator-profile', name: 'Creator Profile', selector: '.creator-profile, [data-testid= "creator-profile"]' },
+    { id: 'trending-hashtags', name: 'Trending Hashtags', selector: '.trending-hashtags, [data-testid= "trending-hashtags"]' },
+    { id: 'featured-creators', name: 'Featured Creators', selector: '.featured-creators, [data-testid= "featured-creators"]' }
   ],
   interactions: [
-    { id: 'comment-input', name: 'Comment Input', selector: 'input[placeholder*="comment"], textarea[placeholder*="comment"]' },
-    { id: 'reaction-button', name: 'Reaction Button', selector: '[aria-label*="reaction"], .reaction-btn' },
-    { id: 'share-modal', name: 'Share Modal', selector: '[role="dialog"], .share-modal' },
-    { id: 'search-creators', name: 'Search Creators', selector: 'input[placeholder*="Search creators"]' }
+    { id: 'comment-input', name: 'Comment Input', selector: 'input[placeholder*= "comment"], textarea[placeholder*= "comment"]' },
+    { id: 'reaction-button', name: 'Reaction Button', selector: '[aria-label*= "reaction"], .reaction-btn' },
+    { id: 'share-modal', name: 'Share Modal', selector: '[role= "dialog"], .share-modal' },
+    { id: 'search-creators', name: 'Search Creators', selector: 'input[placeholder*= "Search creators"]' }
   ]
 };
 
@@ -91,9 +91,9 @@ class CommunityHubTester {
     try {
       const tabSelectors = [
         tab.selector,
-        `[role="tab"]:has-text("${tab.name}")`,
+        `[role= "tab"]:has-text("${tab.name}")`,
         `button:has-text("${tab.name}")`,
-        `[data-value="${tab.id}"]`,
+        `[data-value= "${tab.id}"]`,
         `#${tab.id}-tab`
       ];
 
@@ -121,7 +121,7 @@ class CommunityHubTester {
 
       const isActive = await tabElement.getAttribute('aria-selected') === 'true' ||
                       await tabElement.getAttribute('data-state') === 'active' ||
-                      (await tabElement.getAttribute('class') || '').includes('active');
+                      (await tabElement.getAttribute('class') || ).includes('active');'
 
       const screenshotPath = `community-hub-${tab.id}-tab.png`;
       await this.page.screenshot({ path: screenshotPath });
@@ -164,8 +164,8 @@ class CommunityHubTester {
       const buttonSelectors = [
         button.selector,
         `button:has-text("${button.name}")`,
-        `[aria-label="${button.name}"]`,
-        `[title="${button.name}"]`,
+        `[aria-label= "${button.name}"]`,
+        `[title= "${button.name}"]`,
         `#${button.id}`
       ];
 
@@ -324,12 +324,12 @@ class CommunityHubTester {
     const passRate = Math.round((this.results.passed / this.results.total) * 100);
     
     console.log('\n📊 COMMUNITY HUB TEST REPORT');
-    console.log('=' .repeat(50));
+    console.log('=' .repeat(50));'
     console.log(`✅ Passed: ${this.results.passed}/${this.results.total} (${passRate}%)`);
     console.log(`❌ Failed: ${this.results.failed}/${this.results.total}`);
     console.log(`📸 Screenshots: ${this.results.screenshots.length}`);
     
-    console.log('\n📋 Detailed Results:');
+    console.log('\n📋 Detailed Results: ');
     this.results.details.forEach(result => {
       const icon = result.status === 'passed' ? '✅' : result.status === 'warning' ? '⚠️' : '❌';
       console.log(`${icon} ${result.name}: ${result.status}`);
@@ -367,8 +367,7 @@ class CommunityHubTester {
       
       const report = this.generateReport();
       
-      await fs.writeFile(
-        'community-hub-test-report.json',
+      await fs.writeFile('community-hub-test-report.json',
         JSON.stringify(report, null, 2)
       );
       

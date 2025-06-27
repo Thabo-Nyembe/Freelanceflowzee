@@ -3,145 +3,10 @@
 import React, { useReducer, useState, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Progress } from '@/components/ui/progress'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Download,
-  Eye,
-  Lock,
-  Unlock,
-  Calendar,
-  Clock,
-  DollarSign,
-  Shield,
-  CheckCircle,
-  AlertTriangle,
-  Star,
-  MessageCircle,
-  FileText,
-  Image as ImageIcon,
-  Video,
-  Users,
-  TrendingUp,
-  BarChart3,
-  Activity,
-  Zap,
-  Globe,
-  Share,
-  QrCode,
-  ExternalLink
-} from 'lucide-react'
-
-// Context7 Pattern: Advanced State Management for Client Portal
-interface ClientPortalState {
-  selectedProject: Project | null
-  accessLevel: 'guest' | 'preview' | 'premium'
-  downloadRequests: DownloadRequest[]
-  notifications: Notification[]
-  analytics: ProjectAnalytics | null
-  isLoading: boolean
-  error: string | null
-  activeTab: string
-}
-
-interface Project {
-  id: string
-  name: string
-  description: string
-  status: 'draft' | 'review' | 'approved' | 'delivered'
-  progress: number
-  files: ProjectFile[]
-  milestones: Milestone[]
-  pricing: ProjectPricing
-  timeline: TimelineEvent[]
-  shareSettings: ShareSettings
-}
-
-interface ProjectFile {
-  id: string
-  name: string
-  type: 'image' | 'video' | 'document' | 'archive'
-  size: number
-  url: string
-  thumbnail?: string
-  accessLevel: 'guest' | 'preview' | 'premium'
-  downloadCount: number
-  lastAccessed: string
-  watermark?: boolean
-}
-
-interface DownloadRequest {
-  id: string
-  fileId: string
-  fileName: string
-  requestedAt: string
-  status: 'pending' | 'approved' | 'downloaded'
-  expiresAt: string
-}
-
-interface Milestone {
-  id: string
-  title: string
-  description: string
-  status: 'pending' | 'completed' | 'overdue'
-  dueDate: string
-  payment?: number
-}
-
-interface ProjectPricing {
-  total: number
-  paid: number
-  currency: string
-  licensing: {
-    digital: number
-    print: number
-    commercial: number
-  }
-}
-
-interface TimelineEvent {
-  id: string
-  title: string
-  description: string
-  date: string
-  type: 'milestone' | 'payment' | 'delivery' | 'feedback'
-}
-
-interface ShareSettings {
-  publicLink: string
-  qrCode: string
-  password?: string
-  expiryDate?: string
-  allowDownloads: boolean
-  showWatermarks: boolean
-}
-
-interface ProjectAnalytics {
-  views: number
-  downloads: number
-  shares: number
-  engagement: number
-  topFiles: { name: string; views: number }[]
-  viewerLocations: { country: string; count: number }[]
-}
-
-interface Notification {
-  id: string
-  title: string
-  message: string
-  type: 'info' | 'success' | 'warning' | 'error'
-  timestamp: string
-  read: boolean
-}
-
-type ClientPortalAction =
-  | { type: 'SET_PROJECT'; project: Project }
+ project: Project }
   | { type: 'SET_ACCESS_LEVEL'; level: ClientPortalState['accessLevel'] }
   | { type: 'ADD_DOWNLOAD_REQUEST'; request: DownloadRequest }
-  | { type: 'UPDATE_DOWNLOAD_REQUEST'; requestId: string; updates: Partial<DownloadRequest> }
+  | { type: &apos;UPDATE_DOWNLOAD_REQUEST&apos;; requestId: string; updates: Partial<DownloadRequest> }
   | { type: 'SET_ANALYTICS'; analytics: ProjectAnalytics }
   | { type: 'ADD_NOTIFICATION'; notification: Notification }
   | { type: 'MARK_NOTIFICATION_READ'; notificationId: string }
@@ -275,7 +140,7 @@ export function AdvancedClientPortal({
   clientId,
   initialAccessLevel = 'guest',
   onUpgradeAccess,
-  className = ''
+  className = '
 }: AdvancedClientPortalProps) {
   const [state, dispatch] = useReducer(clientPortalReducer, {
     selectedProject: mockProject,
@@ -313,13 +178,13 @@ export function AdvancedClientPortal({
   const getAccessBadge = (level: string) => {
     switch (level) {
       case 'guest':
-        return <Badge variant="outline" className="bg-gray-50">Guest</Badge>
+        return <Badge variant= "outline" className= "bg-gray-50">Guest</Badge>
       case 'preview':
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700">Preview</Badge>
+        return <Badge variant= "outline" className= "bg-blue-50 text-blue-700">Preview</Badge>
       case 'premium':
-        return <Badge className="bg-gradient-to-r from-purple-500 to-blue-600 text-white">Premium</Badge>
+        return <Badge className= "bg-gradient-to-r from-purple-500 to-blue-600 text-white">Premium</Badge>
       default:
-        return <Badge variant="outline">Unknown</Badge>
+        return <Badge variant= "outline">Unknown</Badge>
     }
   }
 
@@ -330,10 +195,10 @@ export function AdvancedClientPortal({
 
   if (!state.selectedProject) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <AlertTriangle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600">Project not found</p>
+      <div className= "flex items-center justify-center h-64">
+        <div className= "text-center">
+          <AlertTriangle className= "w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <p className= "text-gray-600">Project not found</p>
         </div>
       </div>
     )
@@ -342,48 +207,48 @@ export function AdvancedClientPortal({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className= "flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{state.selectedProject.name}</h1>
-          <p className="text-gray-600 mt-1">{state.selectedProject.description}</p>
+          <h1 className= "text-2xl font-bold text-gray-900">{state.selectedProject.name}</h1>
+          <p className= "text-gray-600 mt-1">{state.selectedProject.description}</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className= "flex items-center gap-3">
           {getAccessBadge(state.accessLevel)}
-          <Badge variant="outline" className="bg-green-50 text-green-700">
+          <Badge variant= "outline" className= "bg-green-50 text-green-700">
             {state.selectedProject.status.charAt(0).toUpperCase() + state.selectedProject.status.slice(1)}
           </Badge>
         </div>
       </div>
 
       {/* Progress Overview */}
-      <Card className="bg-white/70 backdrop-blur-sm border-white/20">
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <Card className= "bg-white/70 backdrop-blur-sm border-white/20">
+        <CardContent className= "p-6">
+          <div className= "grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Project Progress</h3>
-              <div className="flex items-center gap-3">
-                <Progress value={state.selectedProject.progress} className="flex-1" />
-                <span className="text-sm font-medium">{state.selectedProject.progress}%</span>
+              <h3 className= "text-sm font-medium text-gray-700 mb-2">Project Progress</h3>
+              <div className= "flex items-center gap-3">
+                <Progress value={state.selectedProject.progress} className= "flex-1" />
+                <span className= "text-sm font-medium">{state.selectedProject.progress}%</span>
               </div>
             </div>
             
             <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Total Value</h3>
-              <p className="text-lg font-semibold text-gray-900">
+              <h3 className= "text-sm font-medium text-gray-700 mb-2">Total Value</h3>
+              <p className= "text-lg font-semibold text-gray-900">
                 ${state.selectedProject.pricing.total.toLocaleString()}
               </p>
             </div>
             
             <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Files Available</h3>
-              <p className="text-lg font-semibold text-gray-900">
+              <h3 className= "text-sm font-medium text-gray-700 mb-2">Files Available</h3>
+              <p className= "text-lg font-semibold text-gray-900">
                 {state.selectedProject.files.length}
               </p>
             </div>
             
             <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Total Views</h3>
-              <p className="text-lg font-semibold text-gray-900">
+              <h3 className= "text-sm font-medium text-gray-700 mb-2">Total Views</h3>
+              <p className= "text-lg font-semibold text-gray-900">
                 {state.analytics?.views || 0}
               </p>
             </div>
@@ -392,45 +257,45 @@ export function AdvancedClientPortal({
       </Card>
 
       {/* Files Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {state.selectedProject.files.map((file) => (
-          <Card key={file.id} className="bg-white/70 backdrop-blur-sm border-white/20 overflow-hidden">
-            <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-              {file.type === 'image' && <ImageIcon className="w-8 h-8 text-gray-400" />}
-              {file.type === 'video' && <Video className="w-8 h-8 text-gray-400" />}
-              {file.type === 'document' && <FileText className="w-8 h-8 text-gray-400" />}
+          <Card key={file.id} className= "bg-white/70 backdrop-blur-sm border-white/20 overflow-hidden">
+            <div className= "aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+              {file.type === 'image' && <ImageIcon className= "w-8 h-8 text-gray-400" />}
+              {file.type === 'video' && <Video className= "w-8 h-8 text-gray-400" />}
+              {file.type === 'document' && <FileText className= "w-8 h-8 text-gray-400" />}
             </div>
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="font-medium text-sm truncate">{file.name}</h3>
+            <CardContent className= "p-4">
+              <div className= "flex items-start justify-between mb-2">
+                <h3 className= "font-medium text-sm truncate">{file.name}</h3>
                 {getAccessBadge(file.accessLevel)}
               </div>
-              <p className="text-xs text-gray-500 mb-3">{Math.round(file.size / 1024)} KB</p>
+              <p className= "text-xs text-gray-500 mb-3">{Math.round(file.size / 1024)} KB</p>
               
-              <div className="flex gap-2">
+              <div className= "flex gap-2">
                 {canAccess(file.accessLevel) ? (
                   <>
-                    <Button size="sm" variant="outline" className="flex-1">
-                      <Eye className="w-3 h-3 mr-1" />
+                    <Button size= "sm" variant= "outline" className= "flex-1">
+                      <Eye className= "w-3 h-3 mr-1" />
                       View
                     </Button>
                     <Button 
-                      size="sm" 
-                      className="flex-1"
+                      size= "sm" 
+                      className= "flex-1"
                       onClick={() => requestDownload(file)}
                     >
-                      <Download className="w-3 h-3 mr-1" />
+                      <Download className= "w-3 h-3 mr-1" />
                       Download
                     </Button>
                   </>
                 ) : (
                   <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="w-full"
+                    size= "sm" 
+                    variant= "outline" 
+                    className= "w-full"
                     onClick={() => onUpgradeAccess?.(file.accessLevel)}
                   >
-                    <Lock className="w-3 h-3 mr-1" />
+                    <Lock className= "w-3 h-3 mr-1" />
                     Upgrade to Access
                   </Button>
                 )}

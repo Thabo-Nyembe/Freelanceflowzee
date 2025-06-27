@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Calculate startup-specific cost metrics
-function calculateStartupMetrics(analytics: any) {
+function calculateStartupMetrics(analytics: unknown) {
   const STARTUP_BUDGET = parseFloat(process.env.STORAGE_MONTHLY_BUDGET || '50');
   const SUPABASE_LIMIT = parseFloat(process.env.STORAGE_SUPABASE_LIMIT || '15');
   
@@ -169,7 +169,7 @@ function calculateStartupMetrics(analytics: any) {
 }
 
 // Calculate the cost impact of optimization
-function calculateOptimizationImpact(optimization: any) {
+function calculateOptimizationImpact(optimization: unknown) {
   const savedBytes = optimization.saved;
   
   // Calculate monthly savings from moving files to Wasabi
@@ -232,7 +232,7 @@ async function checkStartupBudget() {
 }
 
 // Generate startup-specific recommendations
-function generateStartupRecommendations(metrics: any): string[] {
+function generateStartupRecommendations(metrics: unknown): string[] {
   const recommendations: string[] = [];
   
   // Budget-based recommendations

@@ -7,14 +7,8 @@ const { spawn } = require('child_process');
 class TestIssueFixer {
   constructor() {
     this.fixes = [];
-    this.issues = [
-      'timeout_issues',
-      'browser_crashes', 
-      'json_parsing_errors',
-      'missing_elements',
-      'suspense_boundary_issues',
-      'performance_optimization'
-    ];
+    this.issues = ['timeout_issues', 'browser_crashes', 'json_parsing_errors', 'missing_elements', 'suspense_boundary_issues',
+      'performance_optimization'];
   }
 
   async runCommand(command) {
@@ -44,19 +38,16 @@ class TestIssueFixer {
     
     // Increase timeouts
     config = config.replace(
-      /timeout: 45000/g,
-      'timeout: 60000'
+      /timeout: 45000/g, 'timeout: 60000'
     );
     
     config = config.replace(
-      /actionTimeout: 15000/g,
-      'actionTimeout: 30000'
+      /actionTimeout: 15000/g, 'actionTimeout: 30000'
     );
     
     // Add better retry configuration
     config = config.replace(
-      /retries: process\.env\.CI \? 2 : 1/,
-      'retries: process.env.CI ? 3 : 2'
+      /retries: process\.env\.CI \? 2 : 1/, 'retries: process.env.CI ? 3 : 2'
     );
     
     fs.writeFileSync(configPath, config);
@@ -71,7 +62,7 @@ class TestIssueFixer {
       /await page\.waitForLoadState\('networkidle'\);/g,
       `await page.waitForLoadState('domcontentloaded');
     // Wait for critical elements to be visible
-    await page.waitForSelector('[data-testid="dashboard-title"]', { timeout: 30000 }).catch(() => {
+    await page.waitForSelector('[data-testid= "dashboard-title"]', { timeout: 30000 }).catch(() => {
       console.log('Dashboard title not found, continuing...');
     });`
     );
@@ -92,7 +83,7 @@ class TestIssueFixer {
     const browserOptions = `
   /* Browser launch options to prevent crashes */
   use: {
-    /* Base URL to use in actions like await page.goto('/') */
+    /* Base URL to use in actions like await page.goto('/') */'
     baseURL: 'http://localhost:3001',
     
     /* Collect trace when retrying the failed test. */
@@ -117,18 +108,8 @@ class TestIssueFixer {
     
     /* Browser launch options */
     launchOptions: {
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--disable-gpu',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding'
-      ]
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-accelerated-2d-canvas', '--no-first-run', '--no-zygote', '--disable-gpu', '--disable-background-timer-throttling', '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding']
     }
   },`;
     
@@ -165,12 +146,12 @@ export async function GET(request: NextRequest) {
         success: true,
         data: {
           projects: [
-            { id: '1', name: 'Test Project 1', status: 'active' },
-            { id: '2', name: 'Test Project 2', status: 'draft' }
+            { id: '1', name: 'Test Project 1', status: 'active' },'
+            { id: '2', name: 'Test Project 2', status: 'draft' }'
           ],
           team: [
-            { id: '1', name: 'Alice Johnson', avatar: '/avatars/alice.jpg' },
-            { id: '2', name: 'Bob Smith', avatar: '/avatars/bob.jpg' }
+            { id: '1', name: 'Alice Johnson', avatar: '/avatars/alice.jpg' },'
+            { id: '2', name: 'Bob Smith', avatar: '/avatars/bob.jpg' }'
           ],
           stats: {
             totalProjects: 2,
@@ -192,7 +173,7 @@ export async function GET(request: NextRequest) {
     });
     
   } catch (error) {
-    console.error('Dashboard API error:', error);
+    console.error('Dashboard API error: ', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
@@ -248,14 +229,14 @@ export async function GET(request: NextRequest) {
       const testIds = [
         { selector: 'h1', testId: 'dashboard-title' },
         { selector: 'button.*[Nn]ew.*[Pp]roject', testId: 'new-project-button' },
-        { selector: '[role="tablist"]', testId: 'dashboard-tabs' },
-        { selector: '[data-tab="team"]', testId: 'team-tab' },
-        { selector: '[data-tab="projects"]', testId: 'projects-tab' }
+        { selector: '[role= "tablist"]', testId: 'dashboard-tabs' },
+        { selector: '[data-tab= "team"]', testId: 'team-tab' },
+        { selector: '[data-tab= "projects"]', testId: 'projects-tab' }
       ];
       
       // Check if test IDs are missing and add them
       testIds.forEach(({ selector, testId }) => {
-        if (!dashboardPage.includes(`data-testid="${testId}"`)) {
+        if (!dashboardPage.includes(`data-testid= "${testId}"`)) {
           console.log(`Adding missing test ID: ${testId}`);
           // This is a simplified approach - in practice, you'd need to modify the actual JSX
         }
@@ -274,42 +255,42 @@ interface DashboardTestWrapperProps {
 
 export function DashboardTestWrapper({ children }: DashboardTestWrapperProps) {
   return (
-    <div data-testid="dashboard-container">
-      <h1 data-testid="dashboard-title">Dashboard</h1>
+    <div data-testid= "dashboard-container">
+      <h1 data-testid= "dashboard-title">Dashboard</h1>
       
-      <div role="tablist" data-testid="dashboard-tabs">
+      <div role= "tablist" data-testid= "dashboard-tabs">
         <button 
-          role="tab" 
-          data-testid="projects-tab"
-          data-tab="projects"
-          aria-selected="true"
+          role= "tab" 
+          data-testid= "projects-tab"
+          data-tab= "projects"
+          aria-selected= "true"
         >
           Projects
         </button>
         <button 
-          role="tab" 
-          data-testid="team-tab"
-          data-tab="team"
-          aria-selected="false"
+          role= "tab" 
+          data-testid= "team-tab"
+          data-tab= "team"
+          aria-selected= "false"
         >
           Team
         </button>
       </div>
       
-      <div data-testid="projects-hub">
-        <button data-testid="new-project-button">
+      <div data-testid= "projects-hub">
+        <button data-testid= "new-project-button">
           New Project
         </button>
         {/* Projects content */}
       </div>
       
-      <div data-testid="team-hub" style={{ display: 'none' }}>
-        <div data-testid="team-member" data-member-id="1">
-          <img src="/avatars/alice.jpg" alt="Alice Johnson" />
+      <div data-testid= "team-hub" style={{ display: 'none&apos; }}>
+        <div data-testid= "team-member" data-member-id="1">"
+          <img src= "/avatars/alice.jpg" alt= "Alice Johnson" / alt=>
           <span>Alice Johnson</span>
         </div>
-        <div data-testid="team-member" data-member-id="2">
-          <img src="/avatars/bob.jpg" alt="Bob Smith" />
+        <div data-testid= "team-member" data-member-id=&quot;2">"
+          <img src= "/avatars/bob.jpg" alt= "Bob Smith" / alt=>
           <span>Bob Smith</span>
         </div>
       </div>

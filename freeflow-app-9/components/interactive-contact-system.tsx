@@ -4,96 +4,7 @@ import React, { useState, useReducer, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Clock, 
-  MessageCircle, 
-  Video, 
-  Calendar,
-  ExternalLink,
-  Copy,
-  Check,
-  Globe,
-  Users,
-  Shield,
-  Zap,
-  ChevronRight,
-  Star
-} from 'lucide-react'
-
-// Context7 Pattern: Centralized Contact Configuration
-const CONTACT_CONFIG = {
-  email: {
-    primary: 'hello@freeflowzee.com',
-    sales: 'sales@freeflowzee.com',
-    support: 'support@freeflowzee.com',
-    partnerships: 'partnerships@freeflowzee.com'
-  },
-  phone: {
-    primary: '+1 (555) 123-4567',
-    sales: '+1 (555) 123-SALES',
-    support: '+1 (555) 123-HELP',
-    international: '+44 20 7946 0958'
-  },
-  location: {
-    headquarters: 'San Francisco, CA',
-    coordinates: '37.7749,-122.4194',
-    timezone: 'PST (UTC-8)',
-    address: '123 Creative Street, San Francisco, CA 94103'
-  },
-  businessHours: {
-    weekdays: 'Monday - Friday: 9:00 AM - 6:00 PM PST',
-    weekend: 'Saturday: 10:00 AM - 4:00 PM PST',
-    sunday: 'Sunday: Closed'
-  },
-  socialMedia: {
-    twitter: 'https://twitter.com/freeflowzee',
-    linkedin: 'https://linkedin.com/company/freeflowzee',
-    github: 'https://github.com/freeflowzee',
-    instagram: 'https://instagram.com/freeflowzee'
-  },
-  responseTime: {
-    general: '< 24 hours',
-    sales: '< 2 hours',
-    support: '< 4 hours',
-    urgent: '< 1 hour'
-  }
-}
-
-// Context7 Pattern: Contact State Management
-interface ContactState {
-  activeMethod: 'email' | 'phone' | 'chat' | 'calendar'
-  formData: {
-    name: string
-    email: string
-    company: string
-    phone: string
-    subject: string
-    message: string
-    priority: 'low' | 'medium' | 'high' | 'urgent'
-    department: 'sales' | 'support' | 'partnerships' | 'general'
-  }
-  ui: {
-    isSubmitting: boolean
-    isSuccess: boolean
-    showScheduler: boolean
-    copiedItem: string | null
-  }
-  preferences: {
-    preferredContact: 'email' | 'phone' | 'chat'
-    timezone: string
-    language: string
-  }
-}
-
-type ContactAction = 
-  | { type: 'SET_ACTIVE_METHOD'; method: 'email' | 'phone' | 'chat' | 'calendar' }
-  | { type: 'UPDATE_FORM_FIELD'; field: keyof ContactState['formData']; value: string }
+ field: keyof ContactState['formData']; value: string }
   | { type: 'SET_SUBMITTING'; submitting: boolean }
   | { type: 'SET_SUCCESS'; success: boolean }
   | { type: 'TOGGLE_SCHEDULER'; show: boolean }
@@ -121,12 +32,12 @@ function contactReducer(state: ContactState, action: ContactAction): ContactStat
       return {
         ...state,
         formData: {
-          name: '',
-          email: '',
-          company: '',
-          phone: '',
-          subject: '',
-          message: '',
+          name: '','
+          email: '','
+          company: '','
+          phone: '','
+          subject: '','
+          message: '','
           priority: 'medium',
           department: 'general'
         },
@@ -140,12 +51,12 @@ function contactReducer(state: ContactState, action: ContactAction): ContactStat
 const initialState: ContactState = {
   activeMethod: 'email',
   formData: {
-    name: '',
-    email: '',
-    company: '',
-    phone: '',
-    subject: '',
-    message: '',
+    name: '','
+    email: '','
+    company: '','
+    phone: '','
+    subject: '','
+    message: '','
     priority: 'medium',
     department: 'general'
   },
@@ -175,10 +86,10 @@ export function InteractiveContactSystem({
   showMethods = true,
   showForm = true,
   showScheduler = true,
-  className = ''
+  className = '
 }: InteractiveContactSystemProps) {
   const [state, dispatch] = useReducer(contactReducer, initialState)
-  const [localTime, setLocalTime] = useState('')
+  const [localTime, setLocalTime] = useState('')'
 
   // Context7 Pattern: Real-time local time display
   useEffect(() => {
@@ -256,46 +167,46 @@ export function InteractiveContactSystem({
     description?: string
     badge?: string
   }) => (
-    <Card className="hover:shadow-lg transition-all duration-300 group cursor-pointer" onClick={action}>
-      <CardContent className="p-6">
-        <div className="flex items-start space-x-4">
-          <div className="p-3 bg-indigo-100 rounded-full group-hover:bg-indigo-200 transition-colors">
-            <Icon className="w-6 h-6 text-indigo-600" />
+    <Card className= "hover:shadow-lg transition-all duration-300 group cursor-pointer" onClick={action}>
+      <CardContent className= "p-6">
+        <div className= "flex items-start space-x-4">
+          <div className= "p-3 bg-indigo-100 rounded-full group-hover:bg-indigo-200 transition-colors">
+            <Icon className= "w-6 h-6 text-indigo-600" />
           </div>
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
+          <div className= "flex-1">
+            <div className= "flex items-center justify-between mb-2">
+              <h3 className= "font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
                 {title}
               </h3>
               {badge && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant= "secondary" className= "text-xs">
                   {badge}
                 </Badge>
               )}
             </div>
-            <p className="text-gray-600 group-hover:text-indigo-500 transition-colors font-medium">
+            <p className= "text-gray-600 group-hover:text-indigo-500 transition-colors font-medium">
               {value}
             </p>
             {description && (
-              <p className="text-sm text-gray-500 mt-1">{description}</p>
+              <p className= "text-sm text-gray-500 mt-1">{description}</p>
             )}
-            <div className="flex items-center mt-3 space-x-2">
+            <div className= "flex items-center mt-3 space-x-2">
               <Button
-                variant="ghost"
-                size="sm"
+                variant= "ghost"
+                size= "sm"
                 onClick={(e) => {
                   e.stopPropagation()
                   handleCopyToClipboard(value, title)
                 }}
-                className="h-8 px-2"
+                className= "h-8 px-2"
               >
                 {state.ui.copiedItem === title ? (
-                  <Check className="w-3 h-3 text-green-600" />
+                  <Check className= "w-3 h-3 text-green-600" />
                 ) : (
-                  <Copy className="w-3 h-3" />
+                  <Copy className= "w-3 h-3" />
                 )}
               </Button>
-              <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 transition-colors" />
+              <ExternalLink className= "w-4 h-4 text-gray-400 group-hover:text-indigo-500 transition-colors" />
             </div>
           </div>
         </div>
@@ -306,27 +217,27 @@ export function InteractiveContactSystem({
   if (variant === 'compact') {
     return (
       <div className={`space-y-4 ${className}`}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className= "grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Button
-            variant="outline"
+            variant= "outline"
             onClick={() => handleDirectAction('email', CONTACT_CONFIG.email.primary)}
-            className="justify-start h-auto p-4"
+            className= "justify-start h-auto p-4"
           >
-            <Mail className="w-5 h-5 mr-3" />
-            <div className="text-left">
-              <div className="font-medium">Email Us</div>
-              <div className="text-sm text-gray-500">{CONTACT_CONFIG.email.primary}</div>
+            <Mail className= "w-5 h-5 mr-3" />
+            <div className= "text-left">
+              <div className= "font-medium">Email Us</div>
+              <div className= "text-sm text-gray-500">{CONTACT_CONFIG.email.primary}</div>
             </div>
           </Button>
           <Button
-            variant="outline"
+            variant= "outline"
             onClick={() => handleDirectAction('phone', CONTACT_CONFIG.phone.primary)}
-            className="justify-start h-auto p-4"
+            className= "justify-start h-auto p-4"
           >
-            <Phone className="w-5 h-5 mr-3" />
-            <div className="text-left">
-              <div className="font-medium">Call Us</div>
-              <div className="text-sm text-gray-500">{CONTACT_CONFIG.phone.primary}</div>
+            <Phone className= "w-5 h-5 mr-3" />
+            <div className= "text-left">
+              <div className= "font-medium">Call Us</div>
+              <div className= "text-sm text-gray-500">{CONTACT_CONFIG.phone.primary}</div>
             </div>
           </Button>
         </div>
@@ -338,103 +249,103 @@ export function InteractiveContactSystem({
     <div className={`space-y-8 ${className}`} suppressHydrationWarning>
       {/* Contact Methods */}
       {showMethods && (
-        <div className="space-y-6">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Get in Touch</h2>
-            <p className="text-lg text-gray-600 mb-6">
+        <div className= "space-y-6">
+          <div className= "text-center">
+            <h2 className= "text-3xl font-bold text-gray-900 mb-4">Get in Touch</h2>
+            <p className= "text-lg text-gray-600 mb-6">
               Choose the best way to reach our team. We're here to help!
             </p>
-            <div className="flex items-center justify-center text-sm text-gray-500">
-              <Clock className="w-4 h-4 mr-2" />
+            <div className= "flex items-center justify-center text-sm text-gray-500">
+              <Clock className= "w-4 h-4 mr-2" />
               <span>PST Time: {localTime}</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <ContactMethod
               icon={Mail}
-              title="Email"
+              title= "Email"
               value={CONTACT_CONFIG.email.primary}
               action={() => handleDirectAction('email', CONTACT_CONFIG.email.primary)}
               description={`Response time: ${CONTACT_CONFIG.responseTime.general}`}
-              badge="Primary"
+              badge= "Primary"
             />
             <ContactMethod
               icon={Phone}
-              title="Phone"
+              title= "Phone"
               value={CONTACT_CONFIG.phone.primary}
               action={() => handleDirectAction('phone', CONTACT_CONFIG.phone.primary)}
-              description="Available during business hours"
-              badge="Direct"
+              description= "Available during business hours"
+              badge= "Direct"
             />
             <ContactMethod
               icon={MessageCircle}
-              title="Live Chat"
-              value="Start Chat"
+              title= "Live Chat"
+              value= "Start Chat"
               action={() => dispatch({ type: 'SET_ACTIVE_METHOD', method: 'chat' })}
-              description="Available 24/7"
-              badge="Instant"
+              description= "Available 24/7"
+              badge= "Instant"
             />
             <ContactMethod
               icon={Calendar}
-              title="Schedule Call"
-              value="Book Meeting"
+              title= "Schedule Call"
+              value= "Book Meeting"
               action={() => dispatch({ type: 'TOGGLE_SCHEDULER', show: true })}
-              description="Choose your preferred time"
-              badge="Personal"
+              description= "Choose your preferred time"
+              badge= "Personal"
             />
           </div>
 
           {/* Specialized Contact Options */}
-          <div className="bg-gray-50 rounded-lg p-6">
-            <h3 className="font-semibold text-gray-900 mb-4">Specialized Support</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className= "bg-gray-50 rounded-lg p-6">
+            <h3 className= "font-semibold text-gray-900 mb-4">Specialized Support</h3>
+            <div className= "grid grid-cols-1 md:grid-cols-3 gap-4">
               <Button
-                variant="ghost"
+                variant= "ghost"
                 onClick={() => handleDirectAction('email', CONTACT_CONFIG.email.sales)}
-                className="justify-start h-auto p-4 hover:bg-green-50"
+                className= "justify-start h-auto p-4 hover:bg-green-50"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-green-100 rounded-full">
-                    <Star className="w-4 h-4 text-green-600" />
+                <div className= "flex items-center space-x-3">
+                  <div className= "p-2 bg-green-100 rounded-full">
+                    <Star className= "w-4 h-4 text-green-600" />
                   </div>
-                  <div className="text-left">
-                    <div className="font-medium">Sales Inquiries</div>
-                    <div className="text-sm text-gray-500">
+                  <div className= "text-left">
+                    <div className= "font-medium">Sales Inquiries</div>
+                    <div className= "text-sm text-gray-500">
                       {CONTACT_CONFIG.email.sales}
                     </div>
                   </div>
                 </div>
               </Button>
               <Button
-                variant="ghost"
+                variant= "ghost"
                 onClick={() => handleDirectAction('email', CONTACT_CONFIG.email.support)}
-                className="justify-start h-auto p-4 hover:bg-blue-50"
+                className= "justify-start h-auto p-4 hover:bg-blue-50"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-blue-100 rounded-full">
-                    <Shield className="w-4 h-4 text-blue-600" />
+                <div className= "flex items-center space-x-3">
+                  <div className= "p-2 bg-blue-100 rounded-full">
+                    <Shield className= "w-4 h-4 text-blue-600" />
                   </div>
-                  <div className="text-left">
-                    <div className="font-medium">Technical Support</div>
-                    <div className="text-sm text-gray-500">
+                  <div className= "text-left">
+                    <div className= "font-medium">Technical Support</div>
+                    <div className= "text-sm text-gray-500">
                       {CONTACT_CONFIG.email.support}
                     </div>
                   </div>
                 </div>
               </Button>
               <Button
-                variant="ghost"
+                variant= "ghost"
                 onClick={() => handleDirectAction('email', CONTACT_CONFIG.email.partnerships)}
-                className="justify-start h-auto p-4 hover:bg-purple-50"
+                className= "justify-start h-auto p-4 hover:bg-purple-50"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-purple-100 rounded-full">
-                    <Users className="w-4 h-4 text-purple-600" />
+                <div className= "flex items-center space-x-3">
+                  <div className= "p-2 bg-purple-100 rounded-full">
+                    <Users className= "w-4 h-4 text-purple-600" />
                   </div>
-                  <div className="text-left">
-                    <div className="font-medium">Partnerships</div>
-                    <div className="text-sm text-gray-500">
+                  <div className= "text-left">
+                    <div className= "font-medium">Partnerships</div>
+                    <div className= "text-sm text-gray-500">
                       {CONTACT_CONFIG.email.partnerships}
                     </div>
                   </div>
@@ -447,9 +358,9 @@ export function InteractiveContactSystem({
 
       {/* Contact Form */}
       {showForm && (
-        <Card className="bg-white shadow-xl">
+        <Card className= "bg-white shadow-xl">
           <CardHeader>
-            <CardTitle className="text-2xl">Send us a Message</CardTitle>
+            <CardTitle className= "text-2xl">Send us a Message</CardTitle>
             <CardDescription>
               Fill out the form below and we'll get back to you within 24 hours.
             </CardDescription>
@@ -457,16 +368,16 @@ export function InteractiveContactSystem({
           <CardContent>
             {state.ui.isSuccess ? (
               <Alert>
-                <Check className="h-4 w-4" />
+                <Check className= "h-4 w-4" />
                 <AlertDescription>
                   Thank you for your message! We'll get back to you soon.
                 </AlertDescription>
               </Alert>
             ) : (
-              <form onSubmit={handleFormSubmit} className="space-y-6" suppressHydrationWarning>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <form onSubmit={handleFormSubmit} className= "space-y-6" suppressHydrationWarning>
+                <div className= "grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className= "block text-sm font-medium text-gray-700 mb-1">
                       Name *
                     </label>
                     <Input
@@ -477,16 +388,16 @@ export function InteractiveContactSystem({
                         field: 'name', 
                         value: e.target.value 
                       })}
-                      placeholder="Your full name"
+                      placeholder= "Your full name"
                       suppressHydrationWarning
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className= "block text-sm font-medium text-gray-700 mb-1">
                       Email *
                     </label>
                     <Input
-                      type="email"
+                      type= "email"
                       required
                       value={state.formData.email}
                       onChange={(e) => dispatch({ 
@@ -494,15 +405,15 @@ export function InteractiveContactSystem({
                         field: 'email', 
                         value: e.target.value 
                       })}
-                      placeholder="your@email.com"
+                      placeholder= "your@email.com"
                       suppressHydrationWarning
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className= "grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className= "block text-sm font-medium text-gray-700 mb-1">
                       Company
                     </label>
                     <Input
@@ -512,30 +423,30 @@ export function InteractiveContactSystem({
                         field: 'company', 
                         value: e.target.value 
                       })}
-                      placeholder="Your company name"
+                      placeholder= "Your company name"
                       suppressHydrationWarning
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className= "block text-sm font-medium text-gray-700 mb-1">
                       Phone
                     </label>
                     <Input
-                      type="tel"
+                      type= "tel"
                       value={state.formData.phone}
                       onChange={(e) => dispatch({ 
                         type: 'UPDATE_FORM_FIELD', 
                         field: 'phone', 
                         value: e.target.value 
                       })}
-                      placeholder="+1 (555) 123-4567"
+                      placeholder= "+1 (555) 123-4567"
                       suppressHydrationWarning
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className= "block text-sm font-medium text-gray-700 mb-1">
                     Subject *
                   </label>
                   <Input
@@ -546,13 +457,13 @@ export function InteractiveContactSystem({
                       field: 'subject', 
                       value: e.target.value 
                     })}
-                    placeholder="How can we help you?"
+                    placeholder= "How can we help you?"
                     suppressHydrationWarning
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className= "block text-sm font-medium text-gray-700 mb-1">
                     Message *
                   </label>
                   <Textarea
@@ -564,15 +475,15 @@ export function InteractiveContactSystem({
                       field: 'message', 
                       value: e.target.value 
                     })}
-                    placeholder="Tell us more about your project and how we can help..."
+                    placeholder= "Tell us more about your project and how we can help..."
                     suppressHydrationWarning
                   />
                 </div>
 
                 <Button
-                  type="submit"
+                  type= "submit"
                   disabled={state.ui.isSubmitting}
-                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                  className= "w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
                   suppressHydrationWarning
                 >
                   {state.ui.isSubmitting ? (
@@ -580,7 +491,7 @@ export function InteractiveContactSystem({
                   ) : (
                     <>
                       Send Message
-                      <ChevronRight className="ml-2 w-4 h-4" />
+                      <ChevronRight className= "ml-2 w-4 h-4" />
                     </>
                   )}
                 </Button>
@@ -591,22 +502,22 @@ export function InteractiveContactSystem({
       )}
 
       {/* Business Information */}
-      <div className="bg-gray-50 rounded-lg p-6">
-        <h3 className="font-semibold text-gray-900 mb-4">Visit Our Office</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-3">
-            <div className="flex items-center space-x-3">
-              <MapPin className="w-5 h-5 text-indigo-600" />
+      <div className= "bg-gray-50 rounded-lg p-6">
+        <h3 className= "font-semibold text-gray-900 mb-4">Visit Our Office</h3>
+        <div className= "grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className= "space-y-3">
+            <div className= "flex items-center space-x-3">
+              <MapPin className= "w-5 h-5 text-indigo-600" />
               <div>
-                <p className="font-medium text-gray-900">Headquarters</p>
-                <p className="text-gray-600">{CONTACT_CONFIG.location.address}</p>
+                <p className= "font-medium text-gray-900">Headquarters</p>
+                <p className= "text-gray-600">{CONTACT_CONFIG.location.address}</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <Clock className="w-5 h-5 text-indigo-600" />
+            <div className= "flex items-center space-x-3">
+              <Clock className= "w-5 h-5 text-indigo-600" />
               <div>
-                <p className="font-medium text-gray-900">Business Hours</p>
-                <div className="text-sm text-gray-600">
+                <p className= "font-medium text-gray-900">Business Hours</p>
+                <div className= "text-sm text-gray-600">
                   <p>{CONTACT_CONFIG.businessHours.weekdays}</p>
                   <p>{CONTACT_CONFIG.businessHours.weekend}</p>
                   <p>{CONTACT_CONFIG.businessHours.sunday}</p>
@@ -614,19 +525,19 @@ export function InteractiveContactSystem({
               </div>
             </div>
           </div>
-          <div className="space-y-3">
-            <div className="flex items-center space-x-3">
-              <Globe className="w-5 h-5 text-indigo-600" />
+          <div className= "space-y-3">
+            <div className= "flex items-center space-x-3">
+              <Globe className= "w-5 h-5 text-indigo-600" />
               <div>
-                <p className="font-medium text-gray-900">Global Reach</p>
-                <p className="text-gray-600">Supporting clients worldwide</p>
+                <p className= "font-medium text-gray-900">Global Reach</p>
+                <p className= "text-gray-600">Supporting clients worldwide</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <Zap className="w-5 h-5 text-indigo-600" />
+            <div className= "flex items-center space-x-3">
+              <Zap className= "w-5 h-5 text-indigo-600" />
               <div>
-                <p className="font-medium text-gray-900">Response Time</p>
-                <p className="text-gray-600">Average response under 4 hours</p>
+                <p className= "font-medium text-gray-900">Response Time</p>
+                <p className= "text-gray-600">Average response under 4 hours</p>
               </div>
             </div>
           </div>

@@ -23,7 +23,7 @@ const https = require('https');
 const http = require('http');
 
 console.log('🎨 FreeflowZee Mock Data Population');
-console.log('===================================');
+console.log('=================================== ');
 console.log('📦 Downloading free stock content and creating test data...\n');
 
 class MockDataPopulator {
@@ -46,7 +46,7 @@ class MockDataPopulator {
     };
   }
 
-  async downloadFile(url, outputPath, description = '') {
+  async downloadFile(url, outputPath, description = '') {'
     return new Promise((resolve, reject) => {
       const protocol = url.startsWith('https') ? https : http;
       
@@ -283,11 +283,7 @@ The new design direction looks fantastic! Really loving the modern approach.
     console.log('\n🎵 Creating Audio Sample Files...');
     
     // Create simple placeholder audio files (empty files with proper extensions)
-    const audioFiles = [
-      'client-voice-note-1.wav',
-      'project-discussion.mp3',
-      'feedback-recording.wav',
-      'team-meeting-notes.mp3'
+    const audioFiles = ['client-voice-note-1.wav', 'project-discussion.mp3', 'feedback-recording.wav', 'team-meeting-notes.mp3'
     ];
 
     for (const audioFile of audioFiles) {
@@ -600,7 +596,7 @@ The new design direction looks fantastic! Really loving the modern approach.
           },
           {
             role: 'assistant',
-            content: 'Perfect for enterprise! Focus on:\n\n✅ **Clean lines** - No decorative elements\n✅ **Professional colors** - Navy, gray, or deep blue\n✅ **Strong typography** - Sans-serif, easily readable\n✅ **Scalability** - Works at small sizes on business cards\n\nI recommend starting with a geometric "D" that incorporates subtle flow lines. Would you like me to suggest specific color palettes?',
+            content: 'Perfect for enterprise! Focus on:\n\n✅ **Clean lines** - No decorative elements\n✅ **Professional colors** - Navy, gray, or deep blue\n✅ **Strong typography** - Sans-serif, easily readable\n✅ **Scalability** - Works at small sizes on business cards\n\nI recommend starting with a geometric "D" that incorporates subtle flow lines. Would you like me to suggest specific color palettes?',"
             timestamp: '2024-12-18T09:06:00Z'
           }
         ],
@@ -618,7 +614,7 @@ The new design direction looks fantastic! Really loving the modern approach.
           },
           {
             role: 'assistant',
-            content: 'Excellent choice for a fitness app! Here\'s my analysis:\n\n🟣 **#4F46E5 (Indigo)**: Trust, reliability, premium feel\n🟡 **#EC4899 (Pink)**: Energy, motivation, fun\n🟢 **#10B981 (Green)**: Health, growth, success\n\n**Strengths:**\n- High contrast for accessibility\n- Energetic yet professional\n- Appeals to diverse demographics\n\n**Suggestions:**\n- Use indigo for primary UI elements\n- Pink for call-to-action buttons\n- Green for progress indicators\n\nThis palette balances motivation with trustworthiness!',
+            content: 'Excellent choice for a fitness app! Here\'s my analysis:\n\n🟣 **#4F46E5 (Indigo)**: Trust, reliability, premium feel\n🟡 **#EC4899 (Pink)**: Energy, motivation, fun\n🟢 **#10B981 (Green)**: Health, growth, success\n\n**Strengths:**\n- High contrast for accessibility\n- Energetic yet professional\n- Appeals to diverse demographics\n\n**Suggestions:**\n- Use indigo for primary UI elements\n- Pink for call-to-action buttons\n- Green for progress indicators\n\nThis palette balances motivation with trustworthiness!','
             timestamp: '2024-12-17T15:31:00Z'
           }
         ],
@@ -743,7 +739,7 @@ const mockData = ${JSON.stringify(endpoint.data, null, 2)};
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const limit = parseInt(searchParams.get('limit') || '10');
-  const offset = parseInt(searchParams.get('offset') || '0');
+  const offset = parseInt(searchParams.get('offset') || '0');'
   
   const paginatedData = mockData.slice(offset, offset + limit);
   
@@ -925,9 +921,9 @@ This will download fresh images and regenerate all mock data files.
       await fsPromises.writeFile('TESTING_GUIDE.md', readme);
 
       // Final summary
-      console.log('\n' + '='.repeat(60));
+      console.log('\n' + '='.repeat(60));'
       console.log('🎉 MOCK DATA POPULATION COMPLETE!');
-      console.log('='.repeat(60));
+      console.log('='.repeat(60));'
       console.log(`📁 Downloaded Files: ${this.downloadedFiles.length}`);
       console.log(`📊 Projects: ${this.mockData.projects.length}`);
       console.log(`👥 Users: ${this.mockData.users.length}`);

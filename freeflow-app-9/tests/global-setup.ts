@@ -1,6 +1,6 @@
-import { chromium, FullConfig } from '@playwright/test';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { chromium, FullConfig } from &apos;@playwright/test&apos;;
+import { promises as fs } from &apos;fs&apos;;
+import path from &apos;path&apos;;
 
 async function globalSetup(config: FullConfig) {
   const { baseURL } = config.projects[0].use;
@@ -9,8 +9,8 @@ async function globalSetup(config: FullConfig) {
 
   // Set test mode headers
   await page.setExtraHTTPHeaders({
-    'x-test-mode': 'true',
-    'user-agent': 'Playwright/Test Runner'
+    &apos;x-test-mode&apos;: &apos;true&apos;,
+    &apos;user-agent&apos;: &apos;Playwright/Test Runner&apos;
   });
 
   try {
@@ -32,24 +32,24 @@ async function globalSetup(config: FullConfig) {
     await page.goto(`${baseURL}/login`);
 
     // Fill login form with test credentials
-    await page.fill('[data-testid="email-input"]', 'test@freeflowzee.com');
-    await page.fill('[data-testid="password-input"]', 'testpassword');
-    await page.click('[data-testid="login-button"]');
+    await page.fill(&apos;[data-testid=&quot;email-input&quot;]&apos;, &apos;test@freeflowzee.com&apos;);
+    await page.fill(&apos;[data-testid=&quot;password-input&quot;]&apos;, &apos;testpassword&apos;);
+    await page.click(&apos;[data-testid=&quot;login-button&quot;]&apos;);
 
     // Wait for successful login and navigation
-    await page.waitForURL('**/dashboard');
+    await page.waitForURL(&apos;**/dashboard&apos;);
 
     // Ensure storage directory exists
-    const storageDir = path.join(process.cwd(), 'tests', 'storage');
+    const storageDir = path.join(process.cwd(), &apos;tests&apos;, &apos;storage&apos;);
     await fs.mkdir(storageDir, { recursive: true });
 
     // Store authentication state
     await page.context().storageState({
-      path: path.join(storageDir, 'storage-state.json')
+      path: path.join(storageDir, &apos;storage-state.json&apos;)
     });
 
   } catch (error) {
-    console.error('Global setup failed:', error);
+    console.error(&apos;Global setup failed:&apos;, error);
     throw error;
   } finally {
     await browser.close();

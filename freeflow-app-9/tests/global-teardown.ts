@@ -1,19 +1,19 @@
-import { FullConfig } from '@playwright/test';
-import fs from 'fs';
-import path from 'path';
+import { FullConfig } from &apos;@playwright/test&apos;;
+import fs from &apos;fs&apos;;
+import path from &apos;path&apos;;
 
 async function globalTeardown(config: FullConfig) {
   // Clean up storage state file
-  const storageStatePath = './tests/storage-state.json';
+  const storageStatePath = &apos;./tests/storage-state.json&apos;;
   if (fs.existsSync(storageStatePath)) {
     fs.unlinkSync(storageStatePath);
   }
 
   // Clean up test artifacts older than 7 days
   const artifactDirs = [
-    'test-results/screenshots',
-    'test-results/videos',
-    'test-results/traces'
+    &apos;test-results/screenshots&apos;,
+    &apos;test-results/videos&apos;,
+    &apos;test-results/traces&apos;
   ];
 
   const sevenDaysAgo = new Date();

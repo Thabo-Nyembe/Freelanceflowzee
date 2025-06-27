@@ -135,7 +135,7 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
       amount: paymentIntent.amount,
       currency: paymentIntent.currency,
       customer_id: paymentIntent.customer as string,
-      description: metadata.description || '',
+      description: metadata.description || '','
       timestamp: new Date().toISOString(),
     })
 
@@ -335,7 +335,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 }
 
 // Helper functions (these would connect to your actual database)
-async function logPaymentEvent(event: any) {
+async function logPaymentEvent(event: unknown) {
   // In a real app, this would save to your database
   console.log('📊 Payment event logged:', event)
 }
@@ -345,12 +345,12 @@ async function activateProject(projectId: string) {
   console.log('✅ Project activated:', projectId)
 }
 
-async function sendPaymentConfirmationEmail(data: any) {
+async function sendPaymentConfirmationEmail(data: unknown) {
   // In a real app, this would send an email via your email service
   console.log('📧 Payment confirmation email queued:', data.email)
 }
 
-async function sendPaymentFailureEmail(data: any) {
+async function sendPaymentFailureEmail(data: unknown) {
   // In a real app, this would send a failure notification email
   console.log('📧 Payment failure email queued:', data.email)
 }
@@ -360,17 +360,17 @@ async function updateSubscriptionStatus(subscriptionId: string, status: string) 
   console.log('🔄 Subscription status updated:', subscriptionId, status)
 }
 
-async function createSubscriptionRecord(data: any) {
+async function createSubscriptionRecord(data: unknown) {
   // In a real app, this would create a subscription record in your database
   console.log('💾 Subscription record created:', data.subscription_id)
 }
 
-async function updateSubscriptionRecord(subscriptionId: string, updates: any) {
+async function updateSubscriptionRecord(subscriptionId: string, updates: unknown) {
   // In a real app, this would update subscription record in your database
   console.log('💾 Subscription record updated:', subscriptionId)
 }
 
-async function createCustomerRecord(data: any) {
+async function createCustomerRecord(data: unknown) {
   // In a real app, this would create a customer record in your database
   console.log('💾 Customer record created:', data.stripe_customer_id)
 }

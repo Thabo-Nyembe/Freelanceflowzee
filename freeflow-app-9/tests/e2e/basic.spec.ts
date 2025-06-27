@@ -1,13 +1,13 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from &apos;@playwright/test&apos;;
 
-test.describe('Basic functionality tests', () => {
-  test('should load the homepage', async ({ page }) => {
-    await page.goto('/');
+test.describe(&apos;Basic functionality tests&apos;, () => {
+  test(&apos;should load the homepage&apos;, async ({ page }) => {
+    await page.goto(&apos;/');'
     await expect(page).toHaveTitle(/FreeflowZee/);
   });
 
-  test('should navigate to projects hub', async ({ page }) => {
-    await page.goto('/dashboard/projects-hub');
-    await expect(page.locator('[data-testid="projects-hub"]')).toBeVisible();
+  test(&apos;should navigate to projects hub&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard/projects-hub&apos;);
+    await expect(page.locator(&apos;[data-testid=&quot;projects-hub&quot;]&apos;)).toBeVisible();
   });
 }); 

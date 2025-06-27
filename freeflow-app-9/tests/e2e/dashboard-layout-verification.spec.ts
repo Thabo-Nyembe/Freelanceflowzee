@@ -1,63 +1,63 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from &apos;@playwright/test&apos;
 
-test.describe('Dashboard Layout Verification', () => {
+test.describe(&apos;Dashboard Layout Verification&apos;, () => {
   
   test.beforeEach(async ({ page }) => {
     // Set viewport for consistent testing
     await page.setViewportSize({ width: 1200, height: 800 })
     
     // Navigate to dashboard with test mode headers
-    await page.goto('/dashboard', {
-      waitUntil: 'networkidle',
+    await page.goto(&apos;/dashboard&apos;, {
+      waitUntil: &apos;networkidle&apos;,
       timeout: 30000
     })
     
     // Set test mode headers to bypass authentication
     await page.setExtraHTTPHeaders({
-      'x-test-mode': 'true',
-      'x-test-user': JSON.stringify({
-        id: 'test-user-123',
-        email: 'test@example.com',
-        user_metadata: { full_name: 'Test User' }
+      &apos;x-test-mode&apos;: &apos;true&apos;,
+      &apos;x-test-user&apos;: JSON.stringify({
+        id: &apos;test-user-123&apos;,
+        email: &apos;test@example.com&apos;,
+        user_metadata: { full_name: &apos;Test User&apos; }
       })
     })
   })
 
-  test('dashboard layout uses full screen height', async ({ page }) => {
+  test(&apos;dashboard layout uses full screen height&apos;, async ({ page }) => {
     // Check that the dashboard layout container uses full viewport height
-    const layoutContainer = page.locator('.dashboard-layout')
+    const layoutContainer = page.locator(&apos;.dashboard-layout&apos;)
     await expect(layoutContainer).toBeVisible()
     
     // Verify the container has proper height classes
     await expect(layoutContainer).toHaveClass(/min-h-screen/)
     
-    // Check that content doesn't overflow
+    // Check that content doesn&apos;t overflow
     const boundingBox = await layoutContainer.boundingBox()
     expect(boundingBox?.height).toBeGreaterThan(700) // Should use most of viewport
   })
 
-  test('dashboard content area scrolls properly', async ({ page }) => {
+  test(&apos;dashboard content area scrolls properly&apos;, async ({ page }) => {
     // Navigate to a content-heavy page
-    await page.click('[href="/dashboard/projects-hub"]')
-    await page.waitForLoadState('networkidle')
+    await page.click(&apos;[href=&quot;/dashboard/projects-hub&quot;]&apos;)
+    await page.waitForLoadState(&apos;networkidle&apos;)
     
     // Check that content area is scrollable
-    const contentArea = page.locator('.dashboard-content')
+    const contentArea = page.locator(&apos;.dashboard-content&apos;)
     await expect(contentArea).toBeVisible()
     
     // Verify scrollable properties
     const isScrollable = await contentArea.evaluate((el) => {
       return el.scrollHeight > el.clientHeight || 
-             getComputedStyle(el).overflowY === 'auto' ||
-             getComputedStyle(el).overflowY === 'scroll'
+             getComputedStyle(el).overflowY === &apos;auto&apos; ||
+             getComputedStyle(el).overflowY === &apos;scroll&apos;
     })
     
     expect(isScrollable).toBeTruthy()
   })
 
-  test('sidebar navigation works on desktop', async ({ page }) => {
+  test(&apos;sidebar navigation works on desktop&apos;, async ({ page }) => {
     // Check that sidebar is visible on desktop
-    const sidebar = page.locator('.dashboard-sidebar')
+    const sidebar = page.locator(&apos;.dashboard-sidebar&apos;)
     await expect(sidebar).toBeVisible()
     
     // Verify sidebar positioning
@@ -66,36 +66,36 @@ test.describe('Dashboard Layout Verification', () => {
     expect(sidebarBox?.width).toBe(256) // Should be 256px wide
   })
 
-  test('mobile header appears on small screens', async ({ page }) => {
+  test(&apos;mobile header appears on small screens&apos;, async ({ page }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 })
     await page.reload()
     
     // Check that mobile header is visible
-    const mobileHeader = page.locator('.mobile-header')
+    const mobileHeader = page.locator(&apos;.mobile-header&apos;)
     await expect(mobileHeader).toBeVisible()
     
     // Check that desktop sidebar is hidden
-    const sidebar = page.locator('.dashboard-sidebar')
+    const sidebar = page.locator(&apos;.dashboard-sidebar&apos;)
     await expect(sidebar).not.toHaveClass(/open/)
   })
 
-  test('mobile menu toggle works correctly', async ({ page }) => {
+  test(&apos;mobile menu toggle works correctly&apos;, async ({ page }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 })
     await page.reload()
     
     // Click mobile menu button
-    const menuButton = page.locator('.mobile-menu-button')
+    const menuButton = page.locator(&apos;.mobile-menu-button&apos;)
     await expect(menuButton).toBeVisible()
     await menuButton.click()
     
     // Check that sidebar opens
-    const sidebar = page.locator('.dashboard-sidebar')
+    const sidebar = page.locator(&apos;.dashboard-sidebar&apos;)
     await expect(sidebar).toHaveClass(/open/)
     
     // Check that overlay appears
-    const overlay = page.locator('.dashboard-nav-mobile-overlay')
+    const overlay = page.locator(&apos;.dashboard-nav-mobile-overlay&apos;)
     await expect(overlay).toBeVisible()
     
     // Click overlay to close
@@ -103,10 +103,10 @@ test.describe('Dashboard Layout Verification', () => {
     await expect(sidebar).not.toHaveClass(/open/)
   })
 
-  test('dashboard content has proper spacing on different screen sizes', async ({ page }) => {
+  test(&apos;dashboard content has proper spacing on different screen sizes&apos;, async ({ page }) => {
     // Test desktop spacing
     await page.setViewportSize({ width: 1200, height: 800 })
-    const contentDesktop = page.locator('.dashboard-content')
+    const contentDesktop = page.locator(&apos;.dashboard-content&apos;)
     const desktopPadding = await contentDesktop.evaluate((el) => 
       getComputedStyle(el).padding
     )
@@ -114,7 +114,7 @@ test.describe('Dashboard Layout Verification', () => {
     // Test tablet spacing
     await page.setViewportSize({ width: 768, height: 1024 })
     await page.reload()
-    const contentTablet = page.locator('.dashboard-content')
+    const contentTablet = page.locator(&apos;.dashboard-content&apos;)
     const tabletPadding = await contentTablet.evaluate((el) => 
       getComputedStyle(el).padding
     )
@@ -122,21 +122,21 @@ test.describe('Dashboard Layout Verification', () => {
     // Test mobile spacing
     await page.setViewportSize({ width: 375, height: 667 })
     await page.reload()
-    const contentMobile = page.locator('.dashboard-content')
+    const contentMobile = page.locator(&apos;.dashboard-content&apos;)
     const mobilePadding = await contentMobile.evaluate((el) => 
       getComputedStyle(el).padding
     )
     
     // Verify padding decreases on smaller screens
     expect(desktopPadding).not.toBe(mobilePadding)
-    console.log('Desktop padding:', desktopPadding)
-    console.log('Tablet padding:', tabletPadding)
-    console.log('Mobile padding:', mobilePadding)
+    console.log(&apos;Desktop padding:&apos;, desktopPadding)
+    console.log(&apos;Tablet padding:&apos;, tabletPadding)
+    console.log(&apos;Mobile padding:&apos;, mobilePadding)
   })
 
-  test('dashboard layout prevents horizontal overflow', async ({ page }) => {
-    // Check that layout doesn't cause horizontal scrolling
-    const body = page.locator('body')
+  test(&apos;dashboard layout prevents horizontal overflow&apos;, async ({ page }) => {
+    // Check that layout doesn&apos;t cause horizontal scrolling
+    const body = page.locator(&apos;body&apos;)
     const hasHorizontalScroll = await body.evaluate((el) => {
       return document.documentElement.scrollWidth > document.documentElement.clientWidth
     })
@@ -144,17 +144,17 @@ test.describe('Dashboard Layout Verification', () => {
     expect(hasHorizontalScroll).toBeFalsy()
   })
 
-  test('z-index layering works correctly', async ({ page }) => {
+  test(&apos;z-index layering works correctly&apos;, async ({ page }) => {
     // Set mobile viewport and open menu
     await page.setViewportSize({ width: 375, height: 667 })
     await page.reload()
     
-    await page.click('.mobile-menu-button')
+    await page.click(&apos;.mobile-menu-button&apos;)
     
     // Check z-index values
-    const overlay = page.locator('.dashboard-nav-mobile-overlay')
-    const sidebar = page.locator('.dashboard-sidebar')
-    const header = page.locator('.mobile-header')
+    const overlay = page.locator(&apos;.dashboard-nav-mobile-overlay&apos;)
+    const sidebar = page.locator(&apos;.dashboard-sidebar&apos;)
+    const header = page.locator(&apos;.mobile-header&apos;)
     
     const overlayZ = await overlay.evaluate((el) => getComputedStyle(el).zIndex)
     const sidebarZ = await sidebar.evaluate((el) => getComputedStyle(el).zIndex) 
@@ -165,26 +165,26 @@ test.describe('Dashboard Layout Verification', () => {
     expect(parseInt(sidebarZ)).toBeGreaterThan(parseInt(overlayZ))
   })
 
-  test('custom scrollbar styling is applied', async ({ page }) => {
+  test(&apos;custom scrollbar styling is applied&apos;, async ({ page }) => {
     // Check that custom scrollbar styles are applied to content area
-    const contentArea = page.locator('.dashboard-content')
+    const contentArea = page.locator(&apos;.dashboard-content&apos;)
     
     const scrollbarWidth = await contentArea.evaluate((el) => {
       const style = getComputedStyle(el)
-      return style.getPropertyValue('scrollbar-width')
+      return style.getPropertyValue(&apos;scrollbar-width&apos;)
     })
     
     // Should have thin scrollbar or webkit scrollbar styling
-    expect(scrollbarWidth === 'thin' || scrollbarWidth === 'auto').toBeTruthy()
+    expect(scrollbarWidth === &apos;thin&apos; || scrollbarWidth === &apos;auto&apos;).toBeTruthy()
   })
 
-  test('responsive breakpoints work correctly', async ({ page }) => {
+  test(&apos;responsive breakpoints work correctly&apos;, async ({ page }) => {
     const breakpoints = [
-      { width: 375, height: 667, name: 'mobile' },
-      { width: 768, height: 1024, name: 'tablet' },
-      { width: 1024, height: 768, name: 'desktop-small' },
-      { width: 1200, height: 800, name: 'desktop' },
-      { width: 1440, height: 900, name: 'desktop-large' }
+      { width: 375, height: 667, name: &apos;mobile&apos; },
+      { width: 768, height: 1024, name: &apos;tablet&apos; },
+      { width: 1024, height: 768, name: &apos;desktop-small&apos; },
+      { width: 1200, height: 800, name: &apos;desktop&apos; },
+      { width: 1440, height: 900, name: &apos;desktop-large&apos; }
     ]
     
     for (const bp of breakpoints) {
@@ -192,7 +192,7 @@ test.describe('Dashboard Layout Verification', () => {
       await page.reload()
       
       // Check that layout adapts properly
-      const mainContent = page.locator('.dashboard-main')
+      const mainContent = page.locator(&apos;.dashboard-main&apos;)
       await expect(mainContent).toBeVisible()
       
       // Verify no layout breaks
@@ -206,22 +206,22 @@ test.describe('Dashboard Layout Verification', () => {
   })
 })
 
-test.describe('Landing Page Dropdown Verification', () => {
+test.describe(&apos;Landing Page Dropdown Verification&apos;, () => {
   
   test.beforeEach(async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' })
+    await page.goto(&apos;/', { waitUntil: &apos;networkidle&apos; })'
   })
 
-  test('product dropdown appears and positions correctly', async ({ page }) => {
+  test(&apos;product dropdown appears and positions correctly&apos;, async ({ page }) => {
     // Hover over Product dropdown
-    const productButton = page.locator('button:has-text("Product")')
+    const productButton = page.locator(&apos;button:has-text(&quot;Product&quot;)&apos;)
     await productButton.hover()
     
     // Check dropdown appears
-    const dropdown = page.locator('.site-header-dropdown').first()
+    const dropdown = page.locator(&apos;.site-header-dropdown&apos;).first()
     await expect(dropdown).toBeVisible()
     
-    // Check dropdown doesn't get cut off
+    // Check dropdown doesn&apos;t get cut off
     const dropdownBox = await dropdown.boundingBox()
     const viewport = page.viewportSize()
     
@@ -231,76 +231,76 @@ test.describe('Landing Page Dropdown Verification', () => {
     }
   })
 
-  test('resources dropdown has proper sections', async ({ page }) => {
+  test(&apos;resources dropdown has proper sections&apos;, async ({ page }) => {
     // Hover over Resources dropdown
-    const resourcesButton = page.locator('button:has-text("Resources")')
+    const resourcesButton = page.locator(&apos;button:has-text(&quot;Resources&quot;)&apos;)
     await resourcesButton.hover()
     
     // Check dropdown appears with sections
-    const dropdown = page.locator('.resources-dropdown')
+    const dropdown = page.locator(&apos;.resources-dropdown&apos;)
     await expect(dropdown).toBeVisible()
     
     // Check for section titles
-    await expect(page.locator('.resources-dropdown-title:has-text("Learn")')).toBeVisible()
-    await expect(page.locator('.resources-dropdown-title:has-text("Connect")')).toBeVisible()
+    await expect(page.locator(&apos;.resources-dropdown-title:has-text(&quot;Learn&quot;)&apos;)).toBeVisible()
+    await expect(page.locator(&apos;.resources-dropdown-title:has-text(&quot;Connect&quot;)&apos;)).toBeVisible()
   })
 
-  test('mobile menu works on landing page', async ({ page }) => {
+  test(&apos;mobile menu works on landing page&apos;, async ({ page }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 })
     await page.reload()
     
     // Click mobile menu button
-    const menuButton = page.locator('[aria-label="Toggle Menu"]')
+    const menuButton = page.locator(&apos;[aria-label=&quot;Toggle Menu&quot;]&apos;)
     await menuButton.click()
     
     // Check mobile menu appears
-    const mobileMenu = page.locator('.border-t.md\\:hidden.bg-white')
+    const mobileMenu = page.locator(&apos;.border-t.md\\:hidden.bg-white&apos;)
     await expect(mobileMenu).toBeVisible()
     
     // Check backdrop appears
-    const backdrop = page.locator('.fixed.inset-0.z-30')
+    const backdrop = page.locator(&apos;.fixed.inset-0.z-30&apos;)
     await expect(backdrop).toBeVisible()
   })
 
-  test('dropdown links are clickable and close dropdown', async ({ page }) => {
+  test(&apos;dropdown links are clickable and close dropdown&apos;, async ({ page }) => {
     // Hover over Product dropdown
-    const productButton = page.locator('button:has-text("Product")')
+    const productButton = page.locator(&apos;button:has-text(&quot;Product&quot;)&apos;)
     await productButton.hover()
     
     // Click on Features link
-    const featuresLink = page.locator('.site-nav-dropdown-item[href="/features"]')
+    const featuresLink = page.locator(&apos;.site-nav-dropdown-item[href=&quot;/features&quot;]&apos;)
     await expect(featuresLink).toBeVisible()
     
-    // Note: We don't actually click since it would navigate away
+    // Note: We don&apos;t actually click since it would navigate away
     // Instead we verify the link has proper href
-    await expect(featuresLink).toHaveAttribute('href', '/features')
+    await expect(featuresLink).toHaveAttribute(&apos;href&apos;, &apos;/features&apos;)
   })
 })
 
-test.describe('Performance and Accessibility', () => {
+test.describe(&apos;Performance and Accessibility&apos;, () => {
   
-  test('layout meets accessibility standards', async ({ page }) => {
-    await page.goto('/dashboard')
+  test(&apos;layout meets accessibility standards&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard&apos;)
     
     // Check for skip link
-    const skipLink = page.locator('.skip-to-content')
+    const skipLink = page.locator(&apos;.skip-to-content&apos;)
     await expect(skipLink).toBeHidden() // Should be hidden until focused
     
     // Tab to focus skip link
-    await page.keyboard.press('Tab')
+    await page.keyboard.press(&apos;Tab&apos;)
     await expect(skipLink).toBeFocused()
   })
 
-  test('focus management works correctly', async ({ page }) => {
-    await page.goto('/')
+  test(&apos;focus management works correctly&apos;, async ({ page }) => {
+    await page.goto(&apos;/')'
     
     // Tab through navigation
-    await page.keyboard.press('Tab') // Skip link
-    await page.keyboard.press('Tab') // First interactive element
+    await page.keyboard.press(&apos;Tab&apos;) // Skip link
+    await page.keyboard.press(&apos;Tab&apos;) // First interactive element
     
     // Check focus is visible
-    const focused = page.locator(':focus')
+    const focused = page.locator(&apos;:focus&apos;)
     await expect(focused).toBeVisible()
     
     // Verify focus has proper outline
@@ -310,10 +310,10 @@ test.describe('Performance and Accessibility', () => {
     expect(focusOutline).toBeTruthy()
   })
 
-  test('layout renders within performance budget', async ({ page }) => {
+  test(&apos;layout renders within performance budget&apos;, async ({ page }) => {
     const startTime = Date.now()
     
-    await page.goto('/dashboard', { waitUntil: 'networkidle' })
+    await page.goto(&apos;/dashboard&apos;, { waitUntil: &apos;networkidle&apos; })
     
     const loadTime = Date.now() - startTime
     

@@ -13,7 +13,7 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
 }
 
 console.log('🧪 FreeflowZee Test User Creation')
-console.log('📍 Supabase URL:', SUPABASE_URL)
+console.log('📍 Supabase URL: ', SUPABASE_URL)
 console.log('🔑 Using Service Role Key for admin operations\n')
 
 // Create admin client for user management
@@ -271,8 +271,8 @@ async function createSampleProjects(userId, userData) {
       client_email: 'client@acmecorp.com',
       progress: 75,
       priority: 'high',
-      start_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days ago
-      end_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // 14 days from now
+      start_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days ago'
+      end_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // 14 days from now'
     },
     {
       title: 'E-commerce Website Development',
@@ -283,8 +283,8 @@ async function createSampleProjects(userId, userData) {
       client_email: 'store@fashionstore.com',
       progress: 100,
       priority: 'medium',
-      start_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days ago
-      end_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // 7 days ago
+      start_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days ago'
+      end_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // 7 days ago'
     },
     {
       title: 'Mobile App UI/UX Design',
@@ -295,8 +295,8 @@ async function createSampleProjects(userId, userData) {
       client_email: 'startup@techstartup.com',
       progress: 0,
       priority: 'medium',
-      start_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now
-      end_date: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // 28 days from now
+      start_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now'
+      end_date: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // 28 days from now'
     }
   ]
 
@@ -337,7 +337,7 @@ async function verifyUserCreation() {
     )
 
     if (testUsers.length > 0) {
-      console.log('\n🧪 Test users found:')
+      console.log('\n🧪 Test users found: ')
       testUsers.forEach(user => {
         console.log(`  ✅ ${user.email} (ID: ${user.id})`)
         console.log(`     Created: ${new Date(user.created_at).toLocaleString()}`)
@@ -356,7 +356,7 @@ async function verifyUserCreation() {
 
 async function displayLoginInstructions(results) {
   console.log('\n📋 LOGIN INSTRUCTIONS')
-  console.log('=' .repeat(50))
+  console.log('=' .repeat(50))'
   
   const successfulUsers = results.filter(r => r.success)
   
@@ -365,7 +365,7 @@ async function displayLoginInstructions(results) {
     return
   }
 
-  console.log('\n🔐 You can now log in with these test accounts:')
+  console.log('\n🔐 You can now log in with these test accounts: ')
   console.log('\n📱 Application URL: http://localhost:3002/login')
   
   successfulUsers.forEach(result => {

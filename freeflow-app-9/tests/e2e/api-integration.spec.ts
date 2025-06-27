@@ -1,29 +1,29 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from &apos;@playwright/test&apos;;
 
-test.describe('API Integration Tests', () => {
+test.describe(&apos;API Integration Tests&apos;, () => {
   test.beforeEach(async ({ page }) => {
-    await page.setExtraHTTPHeaders({ 'x-test-mode': 'true' });
+    await page.setExtraHTTPHeaders({ &apos;x-test-mode&apos;: &apos;true&apos; });
   });
 
-  test('storage upload API should respond correctly', async ({ request }) => {
+  test(&apos;storage upload API should respond correctly&apos;, async ({ request }) => {
     // Test GET endpoint
-    const response = await request.get('/api/storage/upload', {
-      headers: { 'x-test-mode': 'true' }
+    const response = await request.get(&apos;/api/storage/upload&apos;, {
+      headers: { &apos;x-test-mode&apos;: &apos;true&apos; }
     });
     
     expect(response.status()).toBe(200);
     
     const data = await response.json();
     expect(data.success).toBe(true);
-    expect(data.message).toContain('Storage upload endpoint is working');
+    expect(data.message).toContain(&apos;Storage upload endpoint is working&apos;);
   });
 
-  test('project access API should handle password method', async ({ request }) => {
-    const response = await request.post('/api/projects/test-project/access', {
-      headers: { 'x-test-mode': 'true' },
+  test(&apos;project access API should handle password method&apos;, async ({ request }) => {
+    const response = await request.post(&apos;/api/projects/test-project/access&apos;, {
+      headers: { &apos;x-test-mode&apos;: &apos;true&apos; },
       data: {
-        method: 'password',
-        password: 'test123'
+        method: &apos;password&apos;,
+        password: &apos;test123&apos;
       }
     });
     
@@ -34,12 +34,12 @@ test.describe('API Integration Tests', () => {
     expect(data.accessToken).toBeDefined();
   });
 
-  test('project access API should handle access code method', async ({ request }) => {
-    const response = await request.post('/api/projects/test-project/access', {
-      headers: { 'x-test-mode': 'true' },
+  test(&apos;project access API should handle access code method&apos;, async ({ request }) => {
+    const response = await request.post(&apos;/api/projects/test-project/access&apos;, {
+      headers: { &apos;x-test-mode&apos;: &apos;true&apos; },
       data: {
-        method: 'code',
-        accessCode: 'PREMIUM2024'
+        method: &apos;code&apos;,
+        accessCode: &apos;PREMIUM2024&apos;
       }
     });
     
@@ -50,12 +50,12 @@ test.describe('API Integration Tests', () => {
     expect(data.accessToken).toBeDefined();
   });
 
-  test('project access API should reject invalid credentials', async ({ request }) => {
-    const response = await request.post('/api/projects/test-project/access', {
-      headers: { 'x-test-mode': 'true' },
+  test(&apos;project access API should reject invalid credentials&apos;, async ({ request }) => {
+    const response = await request.post(&apos;/api/projects/test-project/access&apos;, {
+      headers: { &apos;x-test-mode&apos;: &apos;true&apos; },
       data: {
-        method: 'password',
-        password: 'invalid-password'
+        method: &apos;password&apos;,
+        password: &apos;invalid-password&apos;
       }
     });
     
@@ -63,29 +63,29 @@ test.describe('API Integration Tests', () => {
     
     const data = await response.json();
     expect(data.success).toBe(false);
-    expect(data.error).toContain('Invalid password');
+    expect(data.error).toContain(&apos;Invalid password&apos;);
   });
 
-  test('API endpoints should handle test mode properly', async ({ request }) => {
+  test(&apos;API endpoints should handle test mode properly&apos;, async ({ request }) => {
     // Test with test mode header
-    const testResponse = await request.get('/api/projects/test-project/access', {
-      headers: { 'x-test-mode': 'true' }
+    const testResponse = await request.get(&apos;/api/projects/test-project/access&apos;, {
+      headers: { &apos;x-test-mode&apos;: &apos;true&apos; }
     });
     
     expect(testResponse.status()).toBe(200);
     
     const testData = await testResponse.json();
     expect(testData.success).toBe(true);
-    expect(testData.message).toContain('endpoint is working');
+    expect(testData.message).toContain(&apos;endpoint is working&apos;);
   });
 
-  test('should test AI Create API', async ({ request }) => {
-    const response = await request.post('/api/ai/create', {
+  test(&apos;should test AI Create API&apos;, async ({ request }) => {
+    const response = await request.post(&apos;/api/ai/create&apos;, {
       data: {
-        field: 'photography',
-        assetType: 'luts',
-        quality: 'standard',
-        prompt: 'cinematic color grading'
+        field: &apos;photography&apos;,
+        assetType: &apos;luts&apos;,
+        quality: &apos;standard&apos;,
+        prompt: &apos;cinematic color grading&apos;
       }
     })
 
@@ -93,24 +93,24 @@ test.describe('API Integration Tests', () => {
     
     if (response.ok()) {
       const data = await response.json()
-      expect(data).toHaveProperty('assets')
+      expect(data).toHaveProperty(&apos;assets&apos;)
     }
   })
 
-  test('should test collaboration API', async ({ request }) => {
-    const response = await request.get('/api/collaboration/upf/test')
+  test(&apos;should test collaboration API&apos;, async ({ request }) => {
+    const response = await request.get(&apos;/api/collaboration/upf/test&apos;)
     
     expect(response.status()).toBeLessThan(500)
   })
 
-  test('should test analytics API', async ({ request }) => {
-    const response = await request.get('/api/analytics/demo')
+  test(&apos;should test analytics API&apos;, async ({ request }) => {
+    const response = await request.get(&apos;/api/analytics/demo&apos;)
     
     expect(response.status()).toBeLessThan(500)
   })
 
-  test('should test storage API', async ({ request }) => {
-    const response = await request.get('/api/storage/analytics')
+  test(&apos;should test storage API&apos;, async ({ request }) => {
+    const response = await request.get(&apos;/api/storage/analytics&apos;)
     
     expect(response.status()).toBeLessThan(500)
   })

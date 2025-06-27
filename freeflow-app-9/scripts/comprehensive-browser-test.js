@@ -25,7 +25,7 @@ test.describe('Browser Error Detection Suite', () => {
   });
 
   test('should load landing page without errors', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/');'
     expect(consoleErrors).toHaveLength(0);
     expect(networkErrors).toHaveLength(0);
   });
@@ -37,7 +37,7 @@ test.describe('Browser Error Detection Suite', () => {
   });
 
   test('should check all interactive elements', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/');'
     
     // Test navigation menu
     await test.step('Navigation Menu', async () => {
@@ -60,7 +60,7 @@ test.describe('Browser Error Detection Suite', () => {
   });
 
   test('should verify API endpoints', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/');'
     
     // Monitor network requests
     await test.step('API Endpoints', async () => {
@@ -74,11 +74,11 @@ test.describe('Browser Error Detection Suite', () => {
   });
 
   test('should check for memory leaks', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/');'
     
     // Perform multiple navigation operations
     for (let i = 0; i < 5; i++) {
-      await page.goto('/');
+      await page.goto('/');'
       await page.goto('/dashboard');
     }
     

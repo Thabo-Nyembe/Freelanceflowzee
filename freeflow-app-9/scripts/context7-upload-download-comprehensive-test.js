@@ -32,22 +32,22 @@ const TEST_SCENARIOS = [
   {
     name: 'Files Hub Upload/Download',
     url: '/dashboard/files-hub',
-    uploadBtn: 'button[data-testid="upload-file-btn"]',
-    downloadBtn: 'button[data-testid="download-file-btn"]',
-    fileInput: 'input[type="file"]',
+    uploadBtn: 'button[data-testid= "upload-file-btn"]',
+    downloadBtn: 'button[data-testid= "download-file-btn"]',
+    fileInput: 'input[type= "file"]',
     description: 'Main file management hub with multi-cloud storage'
   },
   {
     name: 'Projects Hub File Operations',
     url: '/dashboard/projects-hub',
     uploadBtn: 'button:has-text("Upload")',
-    downloadBtn: 'button:has(svg[data-testid="Download"])',
+    downloadBtn: 'button:has(svg[data-testid= "Download"])',
     description: 'Project-specific file uploads and downloads'
   },
   {
     name: 'Gallery Downloads',
     url: '/dashboard/gallery',
-    downloadBtn: 'button:has(svg[data-testid="Download"])',
+    downloadBtn: 'button:has(svg[data-testid= "Download"])',
     description: 'Client gallery file downloads'
   },
   {
@@ -65,7 +65,7 @@ const TEST_SCENARIOS = [
   {
     name: 'Client Zone Downloads',
     url: '/dashboard/client-zone',
-    downloadBtn: 'button:has(svg[data-testid="Download"])',
+    downloadBtn: 'button:has(svg[data-testid= "Download"])',
     description: 'Client access file downloads'
   },
   {
@@ -116,9 +116,9 @@ class TestReporter {
     const duration = this.results.endTime - this.results.startTime;
     const successRate = ((this.results.passed / this.results.total) * 100).toFixed(1);
 
-    console.log('\n' + '='.repeat(80));
+    console.log('\n' + '='.repeat(80));'
     console.log('🎯 COMPREHENSIVE UPLOAD/DOWNLOAD TEST RESULTS');
-    console.log('='.repeat(80));
+    console.log('='.repeat(80));'
     console.log(`\n📊 SUMMARY:`);
     console.log(`   • Total Tests: ${this.results.total}`);
     console.log(`   • Passed: ${this.results.passed} ✅`);
@@ -141,7 +141,7 @@ class TestReporter {
       }
     });
 
-    console.log('\n' + '='.repeat(80));
+    console.log('\n' + '='.repeat(80));'
     return this.results;
   }
 }
@@ -243,11 +243,11 @@ async function authenticateUser(page) {
     await page.goto(`${TEST_CONFIG.baseUrl}/login`);
     
     // Fill login form (test mode bypass)
-    await page.fill('input[type="email"]', 'test@example.com');
-    await page.fill('input[type="password"]', 'password');
+    await page.fill('input[type= "email"]', 'test@example.com');
+    await page.fill('input[type= "password"]', 'password');
     
     // Submit form
-    await page.click('button[type="submit"]');
+    await page.click('button[type= "submit"]');
     
     // Wait for redirect to dashboard
     await page.waitForURL('**/dashboard**', { timeout: 10000 });
@@ -372,8 +372,7 @@ async function runComprehensiveTest() {
             );
           } else {
             reporter.addResult(
-              `${scenario.name} - Download`,
-              'failed',
+              `${scenario.name} - Download`, 'failed',
               { error: 'Download button not found' }
             );
           }
@@ -384,8 +383,7 @@ async function runComprehensiveTest() {
       } catch (error) {
         console.log(`   ❌ ${scenario.name} failed: ${error.message}`);
         reporter.addResult(
-          scenario.name,
-          'failed',
+          scenario.name, 'failed',
           { error: error.message }
         );
       }
@@ -398,7 +396,7 @@ async function runComprehensiveTest() {
       await page.goto(`${TEST_CONFIG.baseUrl}/dashboard/files-hub`);
       
       // Test multiple file selection
-      const fileItems = page.locator('[data-testid="file-item"]');
+      const fileItems = page.locator('[data-testid= "file-item"]');
       const fileCount = await fileItems.count();
       
       if (fileCount > 0) {
@@ -434,8 +432,7 @@ async function runComprehensiveTest() {
       for (const [type, filePath] of fileTypes) {
         try {
           const uploadResult = await fileTester.testUpload(
-            'button[data-testid="upload-file-btn"]',
-            'input[type="file"]',
+            'button[data-testid= "upload-file-btn"]', 'input[type= "file"]',
             filePath
           );
           
@@ -446,8 +443,7 @@ async function runComprehensiveTest() {
           );
         } catch (error) {
           reporter.addResult(
-            `File Type Validation - ${type}`,
-            'failed',
+            `File Type Validation - ${type}`, 'failed',
             { error: error.message }
           );
         }

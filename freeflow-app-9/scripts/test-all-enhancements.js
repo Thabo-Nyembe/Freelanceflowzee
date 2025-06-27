@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 console.log('🧪 FreeflowZee Enhanced Features Test Suite');
-console.log('===========================================');
+console.log('=========================================== ');
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ouzcjoxaupimazrivyta.supabase.co';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91emNqb3hhdXBpbWF6cml2eXRhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDA3NzA5NiwiZXhwIjoyMDY1NjUzMDk2fQ.HIHZQ0KuRBIwZwaTPLxD1E5RQfcQ_e0ar-oC93rTGdQ';
@@ -20,11 +20,11 @@ async function testDatabaseEnhancements() {
     console.log('   📊 Testing projects table enhancements...');
     const { data: projects, error: projectsError } = await supabase
       .from('projects')
-      .select('*')
+      .select('*')'
       .limit(1);
     
     if (projectsError) {
-      console.log('   ❌ Projects table error:', projectsError.message);
+      console.log('   ❌ Projects table error: ', projectsError.message);
     } else {
       console.log('   ✅ Projects table accessible');
     }
@@ -33,11 +33,11 @@ async function testDatabaseEnhancements() {
     console.log('   📁 Testing enhanced file storage...');
     const { data: files, error: filesError } = await supabase
       .from('file_storage')
-      .select('*')
+      .select('*')'
       .limit(1);
     
     if (filesError) {
-      console.log('   ❌ File storage error:', filesError.message);
+      console.log('   ❌ File storage error: ', filesError.message);
     } else {
       console.log('   ✅ Enhanced file storage accessible');
     }
@@ -46,11 +46,11 @@ async function testDatabaseEnhancements() {
     console.log('   📈 Testing storage analytics...');
     const { data: analytics, error: analyticsError } = await supabase
       .from('storage_analytics')
-      .select('*')
+      .select('*')'
       .limit(1);
     
     if (analyticsError) {
-      console.log('   ❌ Storage analytics error:', analyticsError.message);
+      console.log('   ❌ Storage analytics error: ', analyticsError.message);
     } else {
       console.log('   ✅ Storage analytics accessible');
     }
@@ -59,11 +59,11 @@ async function testDatabaseEnhancements() {
     console.log('   🎯 Testing Universal Pinpoint Feedback system...');
     const { data: upfComments, error: upfError } = await supabase
       .from('upf_comments')
-      .select('*')
+      .select('*')'
       .limit(1);
     
     if (upfError) {
-      console.log('   ❌ UPF system error:', upfError.message);
+      console.log('   ❌ UPF system error: ', upfError.message);
     } else {
       console.log('   ✅ UPF system accessible');
     }
@@ -72,11 +72,11 @@ async function testDatabaseEnhancements() {
     console.log('   🤝 Testing real-time collaboration...');
     const { data: cursors, error: cursorsError } = await supabase
       .from('realtime_cursors')
-      .select('*')
+      .select('*')'
       .limit(1);
     
     if (cursorsError) {
-      console.log('   ❌ Real-time collaboration error:', cursorsError.message);
+      console.log('   ❌ Real-time collaboration error: ', cursorsError.message);
     } else {
       console.log('   ✅ Real-time collaboration accessible');
     }
@@ -139,12 +139,8 @@ async function testAPIEndpoints() {
   
   try {
     // Test if local server is running
-    const testEndpoints = [
-      'http://localhost:3000/api/storage/upload',
-      'http://localhost:3000/api/storage/analytics',
-      'http://localhost:3000/api/collaboration/universal-feedback',
-      'http://localhost:3000/api/analytics/dashboard'
-    ];
+    const testEndpoints = ['http://localhost:3000/api/storage/upload', 'http://localhost:3000/api/storage/analytics', 'http://localhost:3000/api/collaboration/universal-feedback',
+      'http://localhost:3000/api/analytics/dashboard'];
 
     for (const endpoint of testEndpoints) {
       try {
@@ -165,7 +161,7 @@ async function testAPIEndpoints() {
     }
 
   } catch (error) {
-    console.log('   ❌ API endpoints test failed:', error.message);
+    console.log('   ❌ API endpoints test failed: ', error.message);
   }
 }
 
@@ -250,10 +246,10 @@ async function runAllTests() {
   await testCostOptimization();
   const report = await generateTestReport();
   
-  console.log('\n' + '='.repeat(50));
+  console.log('\n' + '='.repeat(50));'
   console.log('🎉 FREEFLOWZEE ENHANCEMENT TEST COMPLETE');
-  console.log('='.repeat(50));
-  console.log('📊 Database:', report.database.status);
+  console.log('='.repeat(50));'
+  console.log('📊 Database: ', report.database.status);
   console.log('📦 Storage:', report.storage.upload_download);
   console.log('💰 Cost Optimization:', report.storage.cost_optimization);
   console.log('🎯 UPF System:', report.features.universal_pinpoint_feedback);

@@ -7,18 +7,7 @@ console.log('============================================');
 require('dotenv').config({ path: '.env.local' });
 
 // 1. Environment Validation
-const requiredEnvVars = [
-  'NEXT_PUBLIC_SUPABASE_URL',
-  'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-  'SUPABASE_SERVICE_ROLE_KEY',
-  'STRIPE_PUBLISHABLE_KEY',
-  'STRIPE_SECRET_KEY',
-  'AWS_ACCESS_KEY_ID',
-  'AWS_SECRET_ACCESS_KEY',
-  'SUPABASE_ACCESS_TOKEN',
-  'WASABI_SECRET_ACCESS_KEY',
-  'WASABI_BUCKET_NAME',
-  'VERCEL_TOKEN'
+const requiredEnvVars = ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'STRIPE_PUBLISHABLE_KEY', 'STRIPE_SECRET_KEY', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'SUPABASE_ACCESS_TOKEN', 'WASABI_SECRET_ACCESS_KEY', 'WASABI_BUCKET_NAME', 'VERCEL_TOKEN'
 ];
 
 console.log('\n📋 Validating Environment Variables...');
@@ -101,7 +90,7 @@ const testEndpoints = async () => {
 
 // 4. Deployment Summary
 console.log('\n📊 Production Deployment Summary');
-console.log('================================');
+console.log('================================ ');
 console.log(`🌐 Supabase Project: supabase-freeflow`);
 console.log(`🏗️  Project ID: ouzcjoxaupimazrivyta`);
 console.log(`💳 Stripe: Test mode configured`);

@@ -1,148 +1,148 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from &apos;@playwright/test&apos;;
 
-test.describe('🚀 Context7 Upload/Download UI/UX Verification', () => {
+test.describe(&apos;🚀 Context7 Upload/Download UI/UX Verification&apos;, () => {
   
   test.beforeEach(async ({ page }) => {
     // Enable test mode for authentication bypass
     await page.addInitScript(() => {
-      window.localStorage.setItem('test-mode', 'true');
+      window.localStorage.setItem(&apos;test-mode&apos;, &apos;true&apos;);
     });
     
     // Add test mode header for API requests
     await page.setExtraHTTPHeaders({
-      'x-test-mode': 'true'
+      &apos;x-test-mode&apos;: &apos;true&apos;
     });
   });
 
-  test('Dashboard Navigation and Files Hub Access', async ({ page }) => {
-    console.log('🔍 Testing dashboard navigation...');
+  test(&apos;Dashboard Navigation and Files Hub Access&apos;, async ({ page }) => {
+    console.log(&apos;🔍 Testing dashboard navigation...&apos;);
     
-    await page.goto('/dashboard');
-    await page.waitForLoadState('networkidle');
+    await page.goto(&apos;/dashboard&apos;);
+    await page.waitForLoadState(&apos;networkidle&apos;);
     
     // Check if dashboard loads
-    await expect(page.locator('text=Dashboard')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator(&apos;text=Dashboard&apos;)).toBeVisible({ timeout: 10000 });
     
     // Look for Files Hub link/button (more flexible selector)
-    const filesHubSelector = page.locator('a[href*="files"], button:has-text("Files"), text=Files');
+    const filesHubSelector = page.locator(&apos;a[href*=&quot;files&quot;], button:has-text(&quot;Files&quot;), text=Files&apos;);
     await expect(filesHubSelector.first()).toBeVisible({ timeout: 5000 });
     
-    console.log('✅ Dashboard navigation verified');
+    console.log(&apos;✅ Dashboard navigation verified&apos;);
   });
 
-  test('Files Hub Component Verification', async ({ page }) => {
-    console.log('🔍 Testing Files Hub component...');
+  test(&apos;Files Hub Component Verification&apos;, async ({ page }) => {
+    console.log(&apos;🔍 Testing Files Hub component...&apos;);
     
-    await page.goto('/dashboard/files-hub');
-    await page.waitForLoadState('networkidle');
+    await page.goto(&apos;/dashboard/files-hub&apos;);
+    await page.waitForLoadState(&apos;networkidle&apos;);
     
     // More flexible content checks
     const pageContent = await page.content();
-    console.log('Page contains Files:', pageContent.includes('Files'));
-    console.log('Page contains Upload:', pageContent.includes('Upload'));
-    console.log('Page contains Storage:', pageContent.includes('Storage'));
+    console.log(&apos;Page contains Files:&apos;, pageContent.includes(&apos;Files&apos;));
+    console.log(&apos;Page contains Upload:&apos;, pageContent.includes(&apos;Upload&apos;));
+    console.log(&apos;Page contains Storage:&apos;, pageContent.includes(&apos;Storage&apos;));
     
     // Look for any upload functionality
-    const uploadElements = page.locator('button:has-text("Upload"), input[type="file"], [data-testid*="upload"]');
+    const uploadElements = page.locator(&apos;button:has-text(&quot;Upload&quot;), input[type=&quot;file&quot;], [data-testid*=&quot;upload&quot;]&apos;);
     const uploadCount = await uploadElements.count();
     console.log(`Found ${uploadCount} upload elements`);
     
     if (uploadCount > 0) {
       await expect(uploadElements.first()).toBeVisible();
-      console.log('✅ Upload functionality found');
+      console.log(&apos;✅ Upload functionality found&apos;);
     }
     
     // Look for any download functionality  
-    const downloadElements = page.locator('button:has-text("Download"), a[download], [data-testid*="download"]');
+    const downloadElements = page.locator(&apos;button:has-text(&quot;Download&quot;), a[download], [data-testid*=&quot;download&quot;]&apos;);
     const downloadCount = await downloadElements.count();
     console.log(`Found ${downloadCount} download elements`);
     
-    console.log('✅ Files Hub component verified');
+    console.log(&apos;✅ Files Hub component verified&apos;);
   });
 
-  test('API Endpoints Verification', async ({ page }) => {
-    console.log('🔍 Testing API endpoints...');
+  test(&apos;API Endpoints Verification&apos;, async ({ page }) => {
+    console.log(&apos;🔍 Testing API endpoints...&apos;);
     
     // Test upload API
-    const uploadResponse = await page.request.get('/api/storage/upload');
+    const uploadResponse = await page.request.get(&apos;/api/storage/upload&apos;);
     console.log(`Upload API status: ${uploadResponse.status()}`);
     expect(uploadResponse.status()).toBeLessThan(500); // Allow 200, 404, 405 but not 500
     
     // Test analytics API
     try {
-      const analyticsResponse = await page.request.get('/api/storage/analytics');
+      const analyticsResponse = await page.request.get(&apos;/api/storage/analytics&apos;);
       console.log(`Analytics API status: ${analyticsResponse.status()}`);
     } catch (error) {
-      console.log('Analytics API error (expected in some cases)');
+      console.log(&apos;Analytics API error (expected in some cases)&apos;);
     }
     
-    console.log('✅ API endpoints verified');
+    console.log(&apos;✅ API endpoints verified&apos;);
   });
 
-  test('Interactive Component Enhancement', async ({ page }) => {
-    console.log('🔍 Testing interactive component enhancement...');
+  test(&apos;Interactive Component Enhancement&apos;, async ({ page }) => {
+    console.log(&apos;🔍 Testing interactive component enhancement...&apos;);
     
-    await page.goto('/dashboard/files-hub');
-    await page.waitForLoadState('networkidle');
+    await page.goto(&apos;/dashboard/files-hub&apos;);
+    await page.waitForLoadState(&apos;networkidle&apos;);
     
     // Test for any interactive elements
-    const buttons = page.locator('button');
+    const buttons = page.locator(&apos;button&apos;);
     const buttonCount = await buttons.count();
     console.log(`Found ${buttonCount} interactive buttons`);
     
     if (buttonCount > 0) {
       // Test hover effects on first button
       await buttons.first().hover();
-      console.log('✅ Button hover interaction tested');
+      console.log(&apos;✅ Button hover interaction tested&apos;);
     }
     
     // Test for any form elements
-    const inputs = page.locator('input');
+    const inputs = page.locator(&apos;input&apos;);
     const inputCount = await inputs.count();
     console.log(`Found ${inputCount} input elements`);
     
-    console.log('✅ Interactive components verified');
+    console.log(&apos;✅ Interactive components verified&apos;);
   });
 
-  test('Context7 Enhanced Upload Flow', async ({ page }) => {
-    console.log('🔍 Testing Context7 enhanced upload flow...');
+  test(&apos;Context7 Enhanced Upload Flow&apos;, async ({ page }) => {
+    console.log(&apos;🔍 Testing Context7 enhanced upload flow...&apos;);
     
-    await page.goto('/dashboard/files-hub');
-    await page.waitForLoadState('networkidle');
+    await page.goto(&apos;/dashboard/files-hub&apos;);
+    await page.waitForLoadState(&apos;networkidle&apos;);
     
     // Look for file input (hidden or visible)
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.locator(&apos;input[type=&quot;file&quot;]&apos;);
     const fileInputCount = await fileInput.count();
     console.log(`Found ${fileInputCount} file input elements`);
     
     if (fileInputCount > 0) {
       // Test file selection capability (without actually uploading)
-      const testFile = 'public/media/placeholder-image.jpg';
+      const testFile = &apos;public/media/placeholder-image.jpg&apos;;
       
       try {
         // Set files to trigger change event
         await fileInput.first().setInputFiles(testFile);
-        console.log('✅ File input interaction successful');
+        console.log(&apos;✅ File input interaction successful&apos;);
         
         // Wait for any upload UI changes
         await page.waitForTimeout(1000);
         
       } catch (error) {
-        console.log('File input interaction failed (may be hidden):', error.message);
+        console.log(&apos;File input interaction failed (may be hidden):&apos;, error.message);
       }
     }
     
-    console.log('✅ Enhanced upload flow tested');
+    console.log(&apos;✅ Enhanced upload flow tested&apos;);
   });
 
-  test('Context7 Enhanced Download Flow', async ({ page }) => {
-    console.log('🔍 Testing Context7 enhanced download flow...');
+  test(&apos;Context7 Enhanced Download Flow&apos;, async ({ page }) => {
+    console.log(&apos;🔍 Testing Context7 enhanced download flow...&apos;);
     
-    await page.goto('/dashboard/files-hub');
-    await page.waitForLoadState('networkidle');
+    await page.goto(&apos;/dashboard/files-hub&apos;);
+    await page.waitForLoadState(&apos;networkidle&apos;);
     
     // Look for download buttons or links
-    const downloadElements = page.locator('button:has-text("Download"), a[href*="download"], [data-testid*="download"]');
+    const downloadElements = page.locator(&apos;button:has-text(&quot;Download&quot;), a[href*=&quot;download&quot;], [data-testid*=&quot;download&quot;]&apos;);
     const downloadCount = await downloadElements.count();
     console.log(`Found ${downloadCount} download elements`);
     
@@ -150,34 +150,34 @@ test.describe('🚀 Context7 Upload/Download UI/UX Verification', () => {
       // Test download button interaction (without triggering actual download)
       try {
         await downloadElements.first().hover();
-        console.log('✅ Download element hover successful');
+        console.log(&apos;✅ Download element hover successful&apos;);
       } catch (error) {
-        console.log('Download element interaction failed:', error.message);
+        console.log(&apos;Download element interaction failed:&apos;, error.message);
       }
     }
     
-    console.log('✅ Enhanced download flow tested');
+    console.log(&apos;✅ Enhanced download flow tested&apos;);
   });
 
-  test('Performance and Accessibility', async ({ page }) => {
-    console.log('🔍 Testing performance and accessibility...');
+  test(&apos;Performance and Accessibility&apos;, async ({ page }) => {
+    console.log(&apos;🔍 Testing performance and accessibility...&apos;);
     
     const startTime = Date.now();
-    await page.goto('/dashboard/files-hub');
-    await page.waitForLoadState('networkidle');
+    await page.goto(&apos;/dashboard/files-hub&apos;);
+    await page.waitForLoadState(&apos;networkidle&apos;);
     const loadTime = Date.now() - startTime;
     
     console.log(`Page load time: ${loadTime}ms`);
     expect(loadTime).toBeLessThan(10000); // Should load within 10 seconds
     
     // Check for basic accessibility
-    const headings = await page.locator('h1, h2, h3').count();
+    const headings = await page.locator(&apos;h1, h2, h3&apos;).count();
     console.log(`Found ${headings} heading elements`);
     
-    const buttons = await page.locator('button').count();
+    const buttons = await page.locator(&apos;button&apos;).count();
     console.log(`Found ${buttons} button elements`);
     
-    console.log('✅ Performance and accessibility verified');
+    console.log(&apos;✅ Performance and accessibility verified&apos;);
   });
 
 }); 

@@ -1,5 +1,5 @@
-import { test as base, type Page } from '@playwright/test';
-import { createClient } from '@supabase/supabase-js';
+import { test as base, type Page } from &apos;@playwright/test&apos;;
+import { createClient } from &apos;@supabase/supabase-js&apos;;
 
 // Define custom fixtures
 type CustomFixtures = {
@@ -12,8 +12,8 @@ export const test = base.extend<CustomFixtures>({
   // Authenticate before tests
   auth: async ({ page }, use) => {
     // Log in test user via POST request
-    await page.goto('http://localhost:3001');
-    const response = await page.request.post('http://localhost:3001/api/auth/test-login');
+    await page.goto(&apos;http://localhost:3001&apos;);
+    const response = await page.request.post(&apos;http://localhost:3001/api/auth/test-login&apos;);
     expect(response.ok()).toBeTruthy();
 
     // Wait for cookies to be set
@@ -25,8 +25,8 @@ export const test = base.extend<CustomFixtures>({
   // Set up authenticated page
   authenticatedPage: async ({ page }, use) => {
     // Log in test user via POST request
-    await page.goto('http://localhost:3001');
-    const response = await page.request.post('http://localhost:3001/api/auth/test-login');
+    await page.goto(&apos;http://localhost:3001&apos;);
+    const response = await page.request.post(&apos;http://localhost:3001/api/auth/test-login&apos;);
     expect(response.ok()).toBeTruthy();
 
     // Wait for cookies to be set
@@ -36,4 +36,4 @@ export const test = base.extend<CustomFixtures>({
   }
 });
 
-export { expect } from '@playwright/test'; 
+export { expect } from &apos;@playwright/test&apos;; 

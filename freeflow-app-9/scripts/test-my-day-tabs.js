@@ -23,34 +23,34 @@ const MY_DAY_ELEMENTS = {
   name: 'My Day Today',
   url: '/dashboard/my-day',
   tabs: [
-    { id: 'today', name: 'Today', selector: '[role="tab"][data-value="today"]' },
-    { id: 'schedule', name: 'Schedule', selector: '[role="tab"][data-value="schedule"]' },
-    { id: 'tasks', name: 'Tasks', selector: '[role="tab"][data-value="tasks"]' },
-    { id: 'insights', name: 'Insights', selector: '[role="tab"][data-value="insights"]' }
+    { id: 'today', name: 'Today', selector: '[role= "tab"][data-value= "today"]' },
+    { id: 'schedule', name: 'Schedule', selector: '[role= "tab"][data-value= "schedule"]' },
+    { id: 'tasks', name: 'Tasks', selector: '[role= "tab"][data-value= "tasks"]' },
+    { id: 'insights', name: 'Insights', selector: '[role= "tab"][data-value= "insights"]' }
   ],
   buttons: [
-    { id: 'add-task', name: 'Add Task', selector: '[data-testid="add-task-btn"]' },
-    { id: 'start-timer', name: 'Start Timer', selector: '[data-testid="start-timer-btn"]' },
-    { id: 'complete-task', name: 'Complete Task', selector: '[data-testid="complete-task-btn"]' },
-    { id: 'view-analytics', name: 'View Analytics', selector: '[data-testid="analytics-btn"]' }
+    { id: 'add-task', name: 'Add Task', selector: '[data-testid= "add-task-btn"]' },
+    { id: 'start-timer', name: 'Start Timer', selector: '[data-testid= "start-timer-btn"]' },
+    { id: 'complete-task', name: 'Complete Task', selector: '[data-testid= "complete-task-btn"]' },
+    { id: 'view-analytics', name: 'View Analytics', selector: '[data-testid= "analytics-btn"]' }
   ],
   productivityFeatures: [
-    { id: 'task-priority', name: 'Task Priority', selector: '.task-priority, [data-testid="task-priority"]' },
-    { id: 'time-estimate', name: 'Time Estimate', selector: '.time-estimate, [data-testid="time-estimate"]' },
-    { id: 'progress-tracker', name: 'Progress Tracker', selector: '.progress-tracker, [data-testid="progress-tracker"]' },
-    { id: 'ai-insights', name: 'AI Insights', selector: '.ai-insights, [data-testid="ai-insights"]' }
+    { id: 'task-priority', name: 'Task Priority', selector: '.task-priority, [data-testid= "task-priority"]' },
+    { id: 'time-estimate', name: 'Time Estimate', selector: '.time-estimate, [data-testid= "time-estimate"]' },
+    { id: 'progress-tracker', name: 'Progress Tracker', selector: '.progress-tracker, [data-testid= "progress-tracker"]' },
+    { id: 'ai-insights', name: 'AI Insights', selector: '.ai-insights, [data-testid= "ai-insights"]' }
   ],
   timeManagement: [
     { id: 'pomodoro-timer', name: 'Pomodoro Timer', selector: 'button:has-text("Pomodoro"), .pomodoro-timer' },
     { id: 'break-reminder', name: 'Break Reminder', selector: 'button:has-text("Break"), .break-reminder' },
     { id: 'focus-mode', name: 'Focus Mode', selector: 'button:has-text("Focus"), .focus-mode' },
-    { id: 'time-tracking', name: 'Time Tracking', selector: '.time-tracking, [data-testid="time-tracking"]' }
+    { id: 'time-tracking', name: 'Time Tracking', selector: '.time-tracking, [data-testid= "time-tracking"]' }
   ],
   smartFeatures: [
-    { id: 'smart-scheduling', name: 'Smart Scheduling', selector: '.smart-schedule, [data-testid="smart-schedule"]' },
-    { id: 'productivity-score', name: 'Productivity Score', selector: '.productivity-score, [data-testid="productivity-score"]' },
-    { id: 'energy-levels', name: 'Energy Levels', selector: '.energy-levels, [data-testid="energy-levels"]' },
-    { id: 'peak-hours', name: 'Peak Hours', selector: '.peak-hours, [data-testid="peak-hours"]' }
+    { id: 'smart-scheduling', name: 'Smart Scheduling', selector: '.smart-schedule, [data-testid= "smart-schedule"]' },
+    { id: 'productivity-score', name: 'Productivity Score', selector: '.productivity-score, [data-testid= "productivity-score"]' },
+    { id: 'energy-levels', name: 'Energy Levels', selector: '.energy-levels, [data-testid= "energy-levels"]' },
+    { id: 'peak-hours', name: 'Peak Hours', selector: '.peak-hours, [data-testid= "peak-hours"]' }
   ]
 };
 
@@ -97,9 +97,9 @@ class MyDayTester {
     try {
       const tabSelectors = [
         tab.selector,
-        `[role="tab"]:has-text("${tab.name}")`,
+        `[role= "tab"]:has-text("${tab.name}")`,
         `button:has-text("${tab.name}")`,
-        `[data-value="${tab.id}"]`,
+        `[data-value= "${tab.id}"]`,
         `#${tab.id}-tab`
       ];
 
@@ -127,7 +127,7 @@ class MyDayTester {
 
       const isActive = await tabElement.getAttribute('aria-selected') === 'true' ||
                       await tabElement.getAttribute('data-state') === 'active' ||
-                      (await tabElement.getAttribute('class') || '').includes('active');
+                      (await tabElement.getAttribute('class') || ).includes('active');'
 
       const screenshotPath = `my-day-${tab.id}-tab.png`;
       await this.page.screenshot({ path: screenshotPath });
@@ -170,8 +170,8 @@ class MyDayTester {
       const buttonSelectors = [
         button.selector,
         `button:has-text("${button.name}")`,
-        `[aria-label="${button.name}"]`,
-        `[title="${button.name}"]`,
+        `[aria-label= "${button.name}"]`,
+        `[title= "${button.name}"]`,
         `#${button.id}`
       ];
 
@@ -377,12 +377,12 @@ class MyDayTester {
     const passRate = Math.round((this.results.passed / this.results.total) * 100);
     
     console.log('\n📊 MY DAY TODAY TEST REPORT');
-    console.log('=' .repeat(50));
+    console.log('=' .repeat(50));'
     console.log(`✅ Passed: ${this.results.passed}/${this.results.total} (${passRate}%)`);
     console.log(`❌ Failed: ${this.results.failed}/${this.results.total}`);
     console.log(`📸 Screenshots: ${this.results.screenshots.length}`);
     
-    console.log('\n📋 Detailed Results:');
+    console.log('\n📋 Detailed Results: ');
     this.results.details.forEach(result => {
       const icon = result.status === 'passed' ? '✅' : result.status === 'warning' ? '⚠️' : '❌';
       console.log(`${icon} ${result.name}: ${result.status}`);
@@ -421,8 +421,7 @@ class MyDayTester {
       
       const report = this.generateReport();
       
-      await fs.writeFile(
-        'my-day-test-report.json',
+      await fs.writeFile('my-day-test-report.json',
         JSON.stringify(report, null, 2)
       );
       

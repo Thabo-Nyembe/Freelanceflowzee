@@ -124,7 +124,7 @@ async function testSEO() {
   const response = await fetch(CONFIG.baseUrl);
   const html = await response.text();
   
-  const hasSEO = html.includes('<title>') && html.includes('meta name="description"');
+  const hasSEO = html.includes('<title>') && html.includes('meta name= "description"');
   return {
     success: hasSEO,
     error: hasSEO ? null : 'SEO metadata missing'

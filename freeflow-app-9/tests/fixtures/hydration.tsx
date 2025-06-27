@@ -1,14 +1,14 @@
-import React from 'react';
-import { render } from '@testing-library/react';
-import { createClient } from '@supabase/supabase-js';
+import React from &apos;react&apos;;
+import { render } from &apos;@testing-library/react&apos;;
+import { createClient } from &apos;@supabase/supabase-js&apos;;
 
 // Mock Supabase client
-const mockSupabaseClient = createClient('http://localhost:54321', 'test-anon-key');
+const mockSupabaseClient = createClient(&apos;http://localhost:54321&apos;, &apos;test-anon-key&apos;);
 
 // Create a wrapper component that provides all necessary context
 export const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div data-testid="test-wrapper">
+    <div data-testid=&quot;test-wrapper&quot;>
       {children}
     </div>
   );
@@ -28,21 +28,21 @@ export async function waitForHydration() {
 // Mock data for hydration tests
 export const mockHydrationData = {
   user: {
-    id: 'test-user-id',
-    email: 'test@example.com',
+    id: &apos;test-user-id&apos;,
+    email: &apos;test@example.com&apos;,
   },
   projects: [
     {
-      id: 'test-project-id',
-      title: 'Test Project',
-      description: 'A test project',
+      id: &apos;test-project-id&apos;,
+      title: &apos;Test Project&apos;,
+      description: &apos;A test project&apos;,
     },
   ],
   posts: [
     {
-      id: 'test-post-id',
-      title: 'Test Post',
-      content: 'Test content',
+      id: &apos;test-post-id&apos;,
+      title: &apos;Test Post&apos;,
+      content: &apos;Test content&apos;,
     },
   ],
 };

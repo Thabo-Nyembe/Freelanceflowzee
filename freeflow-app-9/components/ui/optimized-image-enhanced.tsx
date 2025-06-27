@@ -142,17 +142,14 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
     if (blurDataURL) return blurDataURL
     
     // Simple base64 placeholder
-    return 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k='
+    return 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k= '
   }
 
   // Image container styles
   const containerClasses = cn(
     'relative overflow-hidden',
     {
-      'group cursor-pointer': zoomOnHover,
-      'transition-opacity duration-500 ease-in-out': fadeIn,
-      'opacity-0': fadeIn && !isLoaded,
-      'opacity-100': fadeIn && isLoaded,
+      'group cursor-pointer': zoomOnHover, 'transition-opacity duration-500 ease-in-out': fadeIn, 'opacity-0': fadeIn && !isLoaded, 'opacity-100': fadeIn && isLoaded,
     },
     className
   )
@@ -170,12 +167,12 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
   const ErrorFallback = () => (
     <div className={cn(
       'flex items-center justify-center bg-gray-100 text-gray-400 text-sm',
-      fill ? 'absolute inset-0' : '',
+      fill ? 'absolute inset-0' : ,'
       !fill && width && height ? `w-[${width}px] h-[${height}px]` : 'min-h-[200px]'
     )}>
-      <div className="text-center">
-        <svg className="mx-auto h-12 w-12 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      <div className= "text-center">
+        <svg className= "mx-auto h-12 w-12 text-gray-300 mb-2" fill= "none" viewBox= "0 0 24 24" stroke= "currentColor">
+          <path strokeLinecap= "round" strokeLinejoin= "round" strokeWidth={1} d= "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
         <p>Image failed to load</p>
       </div>
@@ -186,7 +183,7 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
   const LoadingPlaceholder = () => (
     <div className={cn(
       'animate-pulse bg-gray-200',
-      fill ? 'absolute inset-0' : '',
+      fill ? 'absolute inset-0' : ,'
       !fill && width && height ? `w-[${width}px] h-[${height}px]` : 'min-h-[200px]'
     )} />
   )
@@ -217,24 +214,22 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
             className={cn(
               'transition-all duration-300',
               {
-                'group-hover:scale-110': zoomOnHover,
-                'opacity-0': !isLoaded && fadeIn,
-                'opacity-100': isLoaded || !fadeIn,
+                'group-hover:scale-110': zoomOnHover, 'opacity-0': !isLoaded && fadeIn, 'opacity-100': isLoaded || !fadeIn,
               }
             )}
           />
 
           {/* Overlay */}
           {overlay && overlayContent && (
-            <div className="absolute inset-0 bg-purple-100/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+            <div className= "absolute inset-0 bg-purple-100/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
               {overlayContent}
             </div>
           )}
 
           {/* Loading indicator */}
           {!isLoaded && !hasError && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className= "absolute inset-0 flex items-center justify-center bg-gray-100">
+              <div className= "animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
           )}
         </>
@@ -286,8 +281,8 @@ export const PictureComponent: React.FC<OptimizedImageProps & {
 }> = ({ webpSrc, avifSrc, src, alt, ...props }) => {
   return (
     <picture>
-      {avifSrc && <source srcSet={avifSrc} type="image/avif" />}
-      {webpSrc && <source srcSet={webpSrc} type="image/webp" />}
+      {avifSrc && <source srcSet={avifSrc} type= "image/avif" />}
+      {webpSrc && <source srcSet={webpSrc} type= "image/webp" />}
       <OptimizedImageEnhanced src={src} alt={alt} {...props} />
     </picture>
   )
@@ -307,7 +302,7 @@ export const ImageGallery: React.FC<{
 }> = ({ images, columns = 3, gap = 16, onImageClick }) => {
   return (
     <div 
-      className="grid"
+      className= "grid"
       style={{
         gridTemplateColumns: `repeat(${columns}, 1fr)`,
         gap: `${gap}px`
@@ -317,7 +312,7 @@ export const ImageGallery: React.FC<{
         <OptimizedImageEnhanced
           key={index}
           {...image}
-          className="w-full h-auto cursor-pointer hover:opacity-80 transition-opacity"
+          className= "w-full h-auto cursor-pointer hover:opacity-80 transition-opacity"
           zoomOnHover
           onClick={() => onImageClick?.(index)}
         />
@@ -328,7 +323,7 @@ export const ImageGallery: React.FC<{
 
 // Progressive image loading hook
 export const useProgressiveImage = (src: string, fallbackSrc?: string) => {
-  const [currentSrc, setCurrentSrc] = useState(fallbackSrc || '')
+  const [currentSrc, setCurrentSrc] = useState(fallbackSrc || '')'
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
 
@@ -372,7 +367,7 @@ export const useImagePerformance = () => {
       // Get image size if available
       fetch(src, { method: 'HEAD' })
         .then(response => {
-          const size = parseInt(response.headers.get('content-length') || '0')
+          const size = parseInt(response.headers.get('content-length') || '0')'
           
           setMetrics({
             loadTime,

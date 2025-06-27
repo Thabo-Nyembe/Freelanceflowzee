@@ -1,49 +1,7 @@
 'use client'
 
 import React, { useState, useReducer, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Bell, Check, CheckCircle, AlertCircle, Clock, MessageSquare, DollarSign, Users, Zap, Filter, Search, Settings, Brain, Sparkles, TrendingUp } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-
-// Types for notification system
-interface Notification {
-  id: string
-  type: 'payment' | 'project' | 'collaboration' | 'system' | 'ai_insight' | 'client'
-  priority: 'low' | 'medium' | 'high' | 'urgent'
-  title: string
-  message: string
-  timestamp: Date
-  read: boolean
-  actionRequired: boolean
-  aiGenerated?: boolean
-  metadata?: {
-    projectId?: string
-    clientId?: string
-    amount?: number
-    deadline?: Date
-    sentiment?: 'positive' | 'neutral' | 'negative'
-  }
-}
-
-interface NotificationState {
-  notifications: Notification[]
-  unreadCount: number
-  filter: 'all' | 'unread' | 'urgent' | 'ai_insights'
-  searchTerm: string
-  loading: boolean
-  aiProcessing: boolean
-}
-
-type NotificationAction = 
-  | { type: 'ADD_NOTIFICATION'; payload: Notification }
-  | { type: 'MARK_READ'; payload: string }
-  | { type: 'MARK_ALL_READ' }
-  | { type: 'DELETE_NOTIFICATION'; payload: string }
+ payload: string }
   | { type: 'SET_FILTER'; payload: NotificationState['filter'] }
   | { type: 'SET_SEARCH'; payload: string }
   | { type: 'SET_LOADING'; payload: boolean }
@@ -116,7 +74,7 @@ const notificationReducer = (state: NotificationState, action: NotificationActio
 // Mock notifications with AI-generated insights
 const generateMockNotifications = (): Notification[] => [
   {
-    id: '1',
+    id: '1','
     type: 'ai_insight',
     priority: 'high',
     title: 'AI Revenue Optimization Alert',
@@ -128,7 +86,7 @@ const generateMockNotifications = (): Notification[] => [
     metadata: { sentiment: 'positive' }
   },
   {
-    id: '2',
+    id: '2','
     type: 'payment',
     priority: 'urgent',
     title: 'Payment Received: $2,500',
@@ -139,7 +97,7 @@ const generateMockNotifications = (): Notification[] => [
     metadata: { amount: 2500, clientId: 'client-1', sentiment: 'positive' }
   },
   {
-    id: '3',
+    id: '3','
     type: 'project',
     priority: 'high',
     title: 'Project Deadline Approaching',
@@ -150,7 +108,7 @@ const generateMockNotifications = (): Notification[] => [
     metadata: { projectId: 'proj-1', deadline: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000) }
   },
   {
-    id: '4',
+    id: '4','
     type: 'collaboration',
     priority: 'medium',
     title: 'New Feedback on Brand Guidelines',
@@ -161,7 +119,7 @@ const generateMockNotifications = (): Notification[] => [
     metadata: { clientId: 'sarah-chen', sentiment: 'positive' }
   },
   {
-    id: '5',
+    id: '5','
     type: 'ai_insight',
     priority: 'medium',
     title: 'Client Communication Pattern Alert',
@@ -173,7 +131,7 @@ const generateMockNotifications = (): Notification[] => [
     metadata: { sentiment: 'positive' }
   },
   {
-    id: '6',
+    id: '6','
     type: 'client',
     priority: 'high',
     title: 'New Project Inquiry',
@@ -184,7 +142,7 @@ const generateMockNotifications = (): Notification[] => [
     metadata: { amount: 8500, sentiment: 'positive' }
   },
   {
-    id: '7',
+    id: '7','
     type: 'system',
     priority: 'low',
     title: 'Weekly Analytics Ready',
@@ -195,7 +153,7 @@ const generateMockNotifications = (): Notification[] => [
     metadata: { sentiment: 'positive' }
   },
   {
-    id: '8',
+    id: '8','
     type: 'ai_insight',
     priority: 'medium',
     title: 'Project Efficiency Recommendation',
@@ -213,7 +171,7 @@ export default function NotificationsPage() {
     notifications: generateMockNotifications(),
     unreadCount: 6,
     filter: 'all',
-    searchTerm: '',
+    searchTerm: '','
     loading: false,
     aiProcessing: false
   })
@@ -236,13 +194,13 @@ export default function NotificationsPage() {
 
   const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {
-      case 'payment': return <DollarSign className="h-4 w-4" />
-      case 'project': return <Clock className="h-4 w-4" />
-      case 'collaboration': return <MessageSquare className="h-4 w-4" />
-      case 'client': return <Users className="h-4 w-4" />
-      case 'ai_insight': return <Brain className="h-4 w-4" />
-      case 'system': return <Bell className="h-4 w-4" />
-      default: return <Bell className="h-4 w-4" />
+      case &apos;payment&apos;: return <DollarSign className= "h-4 w-4" />
+      case &apos;project&apos;: return <Clock className= "h-4 w-4" />
+      case &apos;collaboration&apos;: return <MessageSquare className= "h-4 w-4" />
+      case &apos;client&apos;: return <Users className= "h-4 w-4" />
+      case &apos;ai_insight&apos;: return <Brain className= "h-4 w-4" />
+      case &apos;system&apos;: return <Bell className= "h-4 w-4" />
+      default: return <Bell className= "h-4 w-4" />
     }
   }
 
@@ -295,7 +253,7 @@ export default function NotificationsPage() {
         type: 'ai_insight' as const,
         priority: 'high' as const,
         title: 'Revenue Opportunity Detected',
-        message: 'AI found 3 past clients who haven\'t worked with you in 6+ months. Reach out with a 15% returning client discount.',
+        message: 'AI found 3 past clients who haven\'t worked with you in 6+ months. Reach out with a 15% returning client discount.','
         timestamp: new Date(),
         read: false,
         actionRequired: true,
@@ -322,50 +280,50 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50/30 p-4">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className= "min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50/30 p-4">
+      <div className= "max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className= "flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <Bell className="h-8 w-8 text-purple-600" />
+            <h1 className= "text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <Bell className= "h-8 w-8 text-purple-600" />
               Notifications
               {state.unreadCount > 0 && (
-                <Badge variant="secondary" className="bg-red-500 text-white">
+                <Badge variant= "secondary" className= "bg-red-500 text-white">
                   {state.unreadCount}
                 </Badge>
               )}
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className= "text-gray-600 mt-1">
               Stay updated with your projects, payments, and AI insights with real-time updates
             </p>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className= "flex items-center gap-3">
             <Button
               onClick={generateAIInsight}
               disabled={state.aiProcessing}
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+              className= "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
             >
               {state.aiProcessing ? (
                 <>
-                  <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                  <div className= "animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />
                   Generating AI Insights...
                 </>
               ) : (
                 <>
-                  <Brain className="h-4 w-4 mr-2" />
+                  <Brain className= "h-4 w-4 mr-2" />
                   Generate AI Insights
                 </>
               )}
             </Button>
             
             <Button
-              variant="outline"
+              variant= "outline"
               onClick={() => dispatch({ type: 'MARK_ALL_READ' })}
               disabled={state.unreadCount === 0}
             >
-              <CheckCircle className="h-4 w-4 mr-2" />
+              <CheckCircle className= "h-4 w-4 mr-2" />
               Mark All Read
             </Button>
           </div>
@@ -373,47 +331,47 @@ export default function NotificationsPage() {
 
         {/* Controls */}
         <Card>
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-              <div className="flex items-center gap-4 w-full sm:w-auto">
-                <div className="relative flex-1 sm:flex-none">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <CardContent className= "p-4">
+            <div className= "flex flex-col sm:flex-row gap-4 items-center justify-between">
+              <div className= "flex items-center gap-4 w-full sm:w-auto">
+                <div className= "relative flex-1 sm:flex-none">
+                  <Search className= "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Search notifications..."
+                    placeholder= "Search notifications..."
                     value={state.searchTerm}
                     onChange={(e) => dispatch({ type: 'SET_SEARCH', payload: e.target.value })}
-                    className="pl-10 w-full sm:w-80"
+                    className= "pl-10 w-full sm:w-80"
                   />
                 </div>
                 
-                <Select value={state.filter} onValueChange={(value: NotificationState['filter']) => dispatch({ type: 'SET_FILTER', payload: value })}>
-                  <SelectTrigger className="w-40">
+                <Select value={state.filter} onValueChange={(value: NotificationState['filter']) => dispatch({ type: &apos;SET_FILTER&apos;, payload: value })}>
+                  <SelectTrigger className= "w-40">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="unread">Unread ({state.notifications.filter(n => !n.read).length})</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
-                    <SelectItem value="ai_insights">AI Insights</SelectItem>
+                    <SelectItem value= "all">All</SelectItem>
+                    <SelectItem value= "unread">Unread ({state.notifications.filter(n => !n.read).length})</SelectItem>
+                    <SelectItem value= "urgent">Urgent</SelectItem>
+                    <SelectItem value= "ai_insights">AI Insights</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {selectedNotifications.length > 0 && (
-                <div className="flex gap-2">
-                  <span className="text-xs text-gray-500 mr-2 flex items-center">
+                <div className= "flex gap-2">
+                  <span className= "text-xs text-gray-500 mr-2 flex items-center">
                     Bulk Actions:
                   </span>
                   <Button
-                    size="sm"
-                    variant="outline"
+                    size= "sm"
+                    variant= "outline"
                     onClick={() => handleBulkAction('read')}
                   >
                     Mark Read ({selectedNotifications.length})
                   </Button>
                   <Button
-                    size="sm"
-                    variant="outline"
+                    size= "sm"
+                    variant= "outline"
                     onClick={() => handleBulkAction('delete')}
                   >
                     Delete ({selectedNotifications.length})
@@ -425,40 +383,40 @@ export default function NotificationsPage() {
         </Card>
 
         {/* Notification Tabs */}
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="payments">Payments</TabsTrigger>
-            <TabsTrigger value="projects">Projects</TabsTrigger>
-            <TabsTrigger value="collaboration">Collaboration</TabsTrigger>
-            <TabsTrigger value="ai">AI Insights</TabsTrigger>
-            <TabsTrigger value="clients">Clients</TabsTrigger>
+        <Tabs defaultValue= "all" className= "w-full">
+          <TabsList className= "grid w-full grid-cols-6">
+            <TabsTrigger value= "all">All</TabsTrigger>
+            <TabsTrigger value= "payments">Payments</TabsTrigger>
+            <TabsTrigger value= "projects">Projects</TabsTrigger>
+            <TabsTrigger value= "collaboration">Collaboration</TabsTrigger>
+            <TabsTrigger value= "ai">AI Insights</TabsTrigger>
+            <TabsTrigger value= "clients">Clients</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="all" className="space-y-4">
+          <TabsContent value= "all" className= "space-y-4">
             {filteredNotifications.length === 0 ? (
               <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Bell className="h-12 w-12 text-gray-400 mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No notifications found</h3>
-                  <p className="text-gray-600 text-center">
-                    {state.searchTerm ? 'Try adjusting your search terms' : 'You\'re all caught up!'}
+                <CardContent className= "flex flex-col items-center justify-center py-12">
+                  <Bell className= "h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className= "text-lg font-semibold text-gray-900 mb-2">No notifications found</h3>
+                  <p className= "text-gray-600 text-center">
+                    {state.searchTerm ? 'Try adjusting your search terms' : 'You\'re all caught up!'}'
                   </p>
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-3">
+              <div className= "space-y-3">
                 {filteredNotifications.map((notification) => (
                   <Card
                     key={notification.id}
                     className={`transition-all duration-200 hover:shadow-md ${
                       !notification.read ? 'bg-blue-50/50 border-blue-200' : 'bg-white'
-                    } ${selectedNotifications.includes(notification.id) ? 'ring-2 ring-purple-500' : ''}`}
+                    } ${selectedNotifications.includes(notification.id) ? 'ring-2 ring-purple-500' : }`}'
                   >
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-4">
+                    <CardContent className= "p-4">
+                      <div className= "flex items-start gap-4">
                         <input
-                          type="checkbox"
+                          type= "checkbox"
                           checked={selectedNotifications.includes(notification.id)}
                           onChange={(e) => {
                             if (e.target.checked) {
@@ -467,14 +425,14 @@ export default function NotificationsPage() {
                               setSelectedNotifications(selectedNotifications.filter(id => id !== notification.id))
                             }
                           }}
-                          className="mt-1"
+                          className= "mt-1"
                         />
                         
-                        <div className="flex-shrink-0">
+                        <div className= "flex-shrink-0">
                           <div className={`w-2 h-2 rounded-full ${getPriorityColor(notification.priority)} mt-2`} />
                         </div>
 
-                        <div className="flex-shrink-0 mt-1">
+                        <div className= "flex-shrink-0 mt-1">
                           <div className={`p-2 rounded-full ${
                             notification.aiGenerated ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-600'
                           }`}>
@@ -482,51 +440,51 @@ export default function NotificationsPage() {
                           </div>
                         </div>
 
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold text-gray-900 truncate">
+                        <div className= "flex-1 min-w-0">
+                          <div className= "flex items-center gap-2 mb-1">
+                            <h4 className= "font-semibold text-gray-900 truncate">
                               {notification.title}
                             </h4>
                             {notification.aiGenerated && (
-                              <Badge variant="secondary" className="bg-purple-100 text-purple-700 text-xs">
-                                <Sparkles className="h-3 w-3 mr-1" />
+                              <Badge variant= "secondary" className= "bg-purple-100 text-purple-700 text-xs">
+                                <Sparkles className= "h-3 w-3 mr-1" />
                                 AI
                               </Badge>
                             )}
                             {notification.actionRequired && (
-                              <Badge variant="secondary" className="bg-orange-100 text-orange-700 text-xs">
+                              <Badge variant= "secondary" className= "bg-orange-100 text-orange-700 text-xs">
                                 Action Required
                               </Badge>
                             )}
                           </div>
                           
-                          <p className="text-gray-600 text-sm mb-2 line-clamp-2">
+                          <p className= "text-gray-600 text-sm mb-2 line-clamp-2">
                             {notification.message}
                           </p>
                           
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-gray-500">
+                          <div className= "flex items-center justify-between">
+                            <span className= "text-xs text-gray-500">
                               {formatTimeAgo(notification.timestamp)}
                             </span>
                             
-                            <div className="flex gap-2">
+                            <div className= "flex gap-2">
                               {!notification.read && (
                                 <Button
-                                  size="sm"
-                                  variant="ghost"
+                                  size= "sm"
+                                  variant= "ghost"
                                   onClick={() => handleMarkRead(notification.id)}
-                                  className="text-xs"
+                                  className= "text-xs"
                                 >
-                                  <Check className="h-3 w-3 mr-1" />
+                                  <Check className= "h-3 w-3 mr-1" />
                                   Mark Read
                                 </Button>
                               )}
                               
                               <Button
-                                size="sm"
-                                variant="ghost"
+                                size= "sm"
+                                variant= "ghost"
                                 onClick={() => handleDelete(notification.id)}
-                                className="text-xs text-red-600 hover:text-red-700"
+                                className= "text-xs text-red-600 hover:text-red-700"
                               >
                                 Delete
                               </Button>
@@ -542,17 +500,17 @@ export default function NotificationsPage() {
           </TabsContent>
 
           {/* Individual tabs would filter by type */}
-          <TabsContent value="payments">
-            <div className="space-y-3">
+          <TabsContent value= "payments">
+            <div className= "space-y-3">
               {filteredNotifications.filter(n => n.type === 'payment').map((notification) => (
-                <Card key={notification.id} className="bg-green-50/50 border-green-200">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <DollarSign className="h-5 w-5 text-green-600" />
+                <Card key={notification.id} className= "bg-green-50/50 border-green-200">
+                  <CardContent className= "p-4">
+                    <div className= "flex items-center gap-3">
+                      <DollarSign className= "h-5 w-5 text-green-600" />
                       <div>
-                        <h4 className="font-semibold text-gray-900">{notification.title}</h4>
-                        <p className="text-sm text-gray-600">{notification.message}</p>
-                        <span className="text-xs text-gray-500">{formatTimeAgo(notification.timestamp)}</span>
+                        <h4 className= "font-semibold text-gray-900">{notification.title}</h4>
+                        <p className= "text-sm text-gray-600">{notification.message}</p>
+                        <span className= "text-xs text-gray-500">{formatTimeAgo(notification.timestamp)}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -561,25 +519,25 @@ export default function NotificationsPage() {
             </div>
           </TabsContent>
 
-          <TabsContent value="ai">
-            <div className="space-y-3">
+          <TabsContent value= "ai">
+            <div className= "space-y-3">
               {filteredNotifications.filter(n => n.aiGenerated).map((notification) => (
-                <Card key={notification.id} className="bg-purple-50/50 border-purple-200">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 rounded-full bg-purple-100 text-purple-600">
-                        <Brain className="h-5 w-5" />
+                <Card key={notification.id} className= "bg-purple-50/50 border-purple-200">
+                  <CardContent className= "p-4">
+                    <div className= "flex items-start gap-3">
+                      <div className= "p-2 rounded-full bg-purple-100 text-purple-600">
+                        <Brain className= "h-5 w-5" />
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h4 className="font-semibold text-gray-900">{notification.title}</h4>
-                          <Badge variant="secondary" className="bg-purple-100 text-purple-700">
-                            <Sparkles className="h-3 w-3 mr-1" />
+                      <div className= "flex-1">
+                        <div className= "flex items-center gap-2 mb-2">
+                          <h4 className= "font-semibold text-gray-900">{notification.title}</h4>
+                          <Badge variant= "secondary" className= "bg-purple-100 text-purple-700">
+                            <Sparkles className= "h-3 w-3 mr-1" />
                             AI Generated
                           </Badge>
                         </div>
-                        <p className="text-sm text-gray-600 mb-2">{notification.message}</p>
-                        <span className="text-xs text-gray-500">{formatTimeAgo(notification.timestamp)}</span>
+                        <p className= "text-sm text-gray-600 mb-2">{notification.message}</p>
+                        <span className= "text-xs text-gray-500">{formatTimeAgo(notification.timestamp)}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -589,52 +547,52 @@ export default function NotificationsPage() {
           </TabsContent>
 
           {/* Add other tab contents as needed */}
-          <TabsContent value="projects">
-            <div className="text-center py-8">
-              <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">Project notifications will appear here</p>
+          <TabsContent value= "projects">
+            <div className= "text-center py-8">
+              <Clock className= "h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className= "text-gray-600">Project notifications will appear here</p>
             </div>
           </TabsContent>
 
-          <TabsContent value="collaboration">
-            <div className="text-center py-8">
-              <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">Collaboration notifications will appear here</p>
+          <TabsContent value= "collaboration">
+            <div className= "text-center py-8">
+              <MessageSquare className= "h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className= "text-gray-600">Collaboration notifications will appear here</p>
             </div>
           </TabsContent>
 
-          <TabsContent value="clients">
-            <div className="text-center py-8">
-              <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">Client notifications will appear here</p>
+          <TabsContent value= "clients">
+            <div className= "text-center py-8">
+              <Users className= "h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className= "text-gray-600">Client notifications will appear here</p>
             </div>
           </TabsContent>
         </Tabs>
 
         {/* AI Insights Summary Card */}
-        <Card className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+        <Card className= "bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
+            <CardTitle className= "flex items-center gap-2">
+              <TrendingUp className= "h-5 w-5" />
               AI Performance Summary
             </CardTitle>
-            <CardDescription className="text-purple-100">
+            <CardDescription className= "text-purple-100">
               Your freelance business insights powered by AI with Smart Categorization & Priority Assessment
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold">+23%</div>
-                <div className="text-sm text-purple-100">Revenue Growth</div>
+            <div className= "grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className= "text-center">
+                <div className= "text-2xl font-bold">+23%</div>
+                <div className= "text-sm text-purple-100">Revenue Growth</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold">92%</div>
-                <div className="text-sm text-purple-100">Client Satisfaction</div>
+              <div className= "text-center">
+                <div className= "text-2xl font-bold">92%</div>
+                <div className= "text-sm text-purple-100">Client Satisfaction</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold">-15%</div>
-                <div className="text-sm text-purple-100">Project Time</div>
+              <div className= "text-center">
+                <div className= "text-2xl font-bold">-15%</div>
+                <div className= "text-sm text-purple-100">Project Time</div>
               </div>
             </div>
           </CardContent>

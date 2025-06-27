@@ -1,1 +1,1 @@
-export async function createProject(data: any) { return { success: true, id: '1' }; }
+export async function createProject(data: unknown) { return { success: true, id: '1' }; }'

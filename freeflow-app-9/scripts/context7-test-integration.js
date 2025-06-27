@@ -264,13 +264,12 @@ async function runPlaywrightTest(options) {
     grep
   } = options;
   
-  const args = [
-    'test',
+  const args = ['test',
     `tests/e2e/${spec}`,
-    project ? `--project=${project}` : '',
-    headed ? '--headed' : '',
-    debug ? '--debug' : '',
-    grep ? `--grep=${grep}` : '',
+    project ? `--project=${project}` : '','
+    headed ? '--headed' : ,'
+    debug ? '--debug' : ,'
+    grep ? `--grep=${grep}` : '','
     '--reporter=json'
   ].filter(Boolean);
   
@@ -380,30 +379,30 @@ function generateHTMLReport(data) {
   </style>
 </head>
 <body>
-  <div class="header">
+  <div class= "header">
     <h1>🚀 FreeflowZee Responsive Test Report</h1>
     <p>Generated: ${data.timestamp}</p>
   </div>
   
-  <div class="summary">
-    <div class="card">
+  <div class= "summary">
+    <div class= "card">
       <h3>📱 Mobile</h3>
-      <div class="metric success">✅ Passed</div>
+      <div class= "metric success">✅ Passed</div>
       <p>Responsive design working across mobile devices</p>
     </div>
-    <div class="card">
+    <div class= "card">
       <h3>💻 Desktop</h3>
-      <div class="metric success">✅ Passed</div>
+      <div class= "metric success">✅ Passed</div>
       <p>Layout scales properly on desktop screens</p>
     </div>
-    <div class="card">
+    <div class= "card">
       <h3>📊 Performance</h3>
-      <div class="metric success">A+</div>
+      <div class= "metric success">A+</div>
       <p>Excellent performance across all viewports</p>
     </div>
   </div>
   
-  <div class="card">
+  <div class= "card">
     <h2>🎯 Key Findings</h2>
     <ul>
       <li>✅ Mobile-first responsive design implementation working</li>

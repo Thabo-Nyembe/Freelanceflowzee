@@ -11,11 +11,7 @@ const AI_CREATE_TESTS = [
     name: 'AI Create - Generate Assets Tab',
     url: 'http://localhost:3000/dashboard/ai-create',
     tab: 'generate',
-    expectedElements: [
-      '[data-testid="generate-assets-btn"]',
-      'Creative Field',
-      'Asset Type',
-      'Generation Parameters'
+    expectedElements: ['[data-testid= "generate-assets-btn"]', 'Creative Field', 'Asset Type', 'Generation Parameters'
     ],
     buttons: [
       { testId: 'generate-assets-btn', name: 'Generate Assets' },
@@ -27,11 +23,7 @@ const AI_CREATE_TESTS = [
     name: 'AI Create - Asset Library Tab',
     url: 'http://localhost:3000/dashboard/ai-create',
     tab: 'library',
-    expectedElements: [
-      '[data-testid="upload-asset-btn"]',
-      '[data-testid="export-all-btn"]',
-      'Asset Library',
-      'Search assets'
+    expectedElements: ['[data-testid= "upload-asset-btn"]', '[data-testid= "export-all-btn"]', 'Asset Library', 'Search assets'
     ],
     buttons: [
       { testId: 'upload-asset-btn', name: 'Upload Asset' },
@@ -42,11 +34,8 @@ const AI_CREATE_TESTS = [
     name: 'AI Create - Advanced Settings Tab',
     url: 'http://localhost:3000/dashboard/ai-create',
     tab: 'settings',
-    expectedElements: [
-      'Quality Settings',
-      'AI Model Selection',
-      'Real-time Features'
-    ],
+    expectedElements: ['Quality Settings', 'AI Model Selection',
+      'Real-time Features'],
     buttons: []
   }
 ];
@@ -100,22 +89,22 @@ function testAICreateComponent() {
       result: mockTestResult
     });
 
-    console.log('');
+    console.log('');'
   });
 
   return testResults;
 }
 
 function generateAICreateReport(results) {
-  console.log('\n' + '='.repeat(60));
+  console.log('\n' + '='.repeat(60));'
   console.log('📊 AI CREATE TEST SUMMARY');
-  console.log('='.repeat(60));
+  console.log('='.repeat(60));'
   console.log(`✅ Passed: ${results.passed}`);
   console.log(`❌ Failed: ${results.failed}`);
   console.log(`📈 Success Rate: ${Math.round((results.passed / (results.passed + results.failed)) * 100)}%`);
 
   if (results.failed > 0) {
-    console.log('\n🔧 Failed Tests:');
+    console.log('\n🔧 Failed Tests: ');
     results.details
       .filter(detail => !detail.result.passed)
       .forEach(detail => {

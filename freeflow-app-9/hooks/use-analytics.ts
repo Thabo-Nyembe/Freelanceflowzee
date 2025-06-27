@@ -1,8 +1,8 @@
-'use client'
+'use client&apos;'
 
-import React, { useEffect, useCallback, useRef } from 'react'
-import { usePathname } from 'next/navigation'
-import { track } from '@vercel/analytics'
+import React, { useEffect, useCallback, useRef } from &apos;react&apos;
+import { usePathname } from &apos;next/navigation&apos;
+import { track } from &apos;@vercel/analytics&apos;
 
 interface AnalyticsEvent {
   event_type: string
@@ -39,7 +39,7 @@ class AnalyticsClient {
   }
 
   private initializeIfNeeded() {
-    if (this.isInitialized || typeof window === 'undefined') return
+    if (this.isInitialized || typeof window === &apos;undefined&apos;) return
 
     this.isInitialized = true
     this.setupPerformanceTracking()
@@ -50,11 +50,11 @@ class AnalyticsClient {
 
   private setupPerformanceTracking() {
     // Track Web Vitals using PerformanceObserver
-    if ('PerformanceObserver' in window) {
+    if (&apos;PerformanceObserver&apos; in window) {
       // Largest Contentful Paint
-      this.observePerformanceMetric('largest-contentful-paint', (entries) => {
+      this.observePerformanceMetric(&apos;largest-contentful-paint&apos;, (entries) => {
         const lastEntry = entries[entries.length - 1]
-        this.trackEvent('performance', 'lcp_measured', {
+        this.trackEvent(&apos;performance&apos;, &apos;lcp_measured&apos;, {
           performance_metrics: {
             largest_contentful_paint: lastEntry.startTime
           }
@@ -62,10 +62,10 @@ class AnalyticsClient {
       })
 
       // First Input Delay
-      this.observePerformanceMetric('first-input', (entries) => {
+      this.observePerformanceMetric(&apos;first-input&apos;, (entries) => {
         const firstEntry = entries[0]
         this.fidValue = firstEntry.processingStart - firstEntry.startTime
-        this.trackEvent('performance', 'fid_measured', {
+        this.trackEvent(&apos;performance&apos;, &apos;fid_measured&apos;, {
           performance_metrics: {
             first_input_delay: this.fidValue
           }
@@ -73,8 +73,8 @@ class AnalyticsClient {
       })
 
       // Cumulative Layout Shift
-      this.observePerformanceMetric('layout-shift', (entries) => {
-        entries.forEach((entry: any) => {
+      this.observePerformanceMetric(&apos;layout-shift&apos;, (entries) => {
+        entries.forEach((entry: unknown) => {
           if (!entry.hadRecentInput) {
             this.clsValue += entry.value
           }
@@ -83,14 +83,14 @@ class AnalyticsClient {
     }
 
     // Track page load performance
-    window.addEventListener('load', () => {
+    window.addEventListener(&apos;load&apos;, () => {
       setTimeout(() => {
         this.trackPagePerformance()
       }, 0)
     })
   }
 
-  private observePerformanceMetric(entryType: string, callback: (entries: any[]) => void) {
+  private observePerformanceMetric(entryType: string, callback: (entries: unknown[]) => void) {
     try {
       const observer = new PerformanceObserver((list) => {
         callback(list.getEntries())
@@ -103,16 +103,16 @@ class AnalyticsClient {
 
   private trackPageLoad() {
     // Track initial page load
-    this.trackEvent('page_view', 'page_loaded', {
+    this.trackEvent(&apos;page_view&apos;, &apos;page_loaded&apos;, {
       path: window.location.pathname,
       title: document.title,
-      referrer: document.referrer || 'direct'
+      referrer: document.referrer || &apos;direct&apos;
     })
   }
 
   private trackPagePerformance() {
-    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
-    const paint = performance.getEntriesByType('paint')
+    const navigation = performance.getEntriesByType(&apos;navigation&apos;)[0] as PerformanceNavigationTiming
+    const paint = performance.getEntriesByType(&apos;paint&apos;)
 
     const metrics: PerformanceMetrics = {
       page_load_time: navigation.loadEventEnd - navigation.fetchStart,
@@ -121,7 +121,7 @@ class AnalyticsClient {
 
     // Add paint timings
     paint.forEach((entry) => {
-      if (entry.name === 'first-contentful-paint') {
+      if (entry.name === &apos;first-contentful-paint&apos;) {
         metrics.first_contentful_paint = entry.startTime
       }
     })
@@ -131,14 +131,14 @@ class AnalyticsClient {
       metrics.cumulative_layout_shift = this.clsValue
     }
 
-    this.trackEvent('performance', 'page_performance', {
+    this.trackEvent(&apos;performance&apos;, &apos;page_performance&apos;, {
       performance_metrics: metrics
     })
   }
 
   private setupErrorTracking() {
-    window.addEventListener('error', (event) => {
-      this.trackEvent('error', 'javascript_error', {
+    window.addEventListener(&apos;error&apos;, (event) => {
+      this.trackEvent(&apos;error&apos;, &apos;javascript_error&apos;, {
         error_message: event.message,
         filename: event.filename,
         line_number: event.lineno,
@@ -147,9 +147,9 @@ class AnalyticsClient {
       })
     })
 
-    window.addEventListener('unhandledrejection', (event) => {
-      this.trackEvent('error', 'unhandled_promise_rejection', {
-        error_message: event.reason?.toString() || 'Unknown promise rejection',
+    window.addEventListener(&apos;unhandledrejection&apos;, (event) => {
+      this.trackEvent(&apos;error&apos;, &apos;unhandled_promise_rejection&apos;, {
+        error_message: event.reason?.toString() || &apos;Unknown promise rejection&apos;,
         stack: event.reason?.stack
       })
     })
@@ -157,16 +157,16 @@ class AnalyticsClient {
 
   private setupUnloadTracking() {
     const trackSessionEnd = () => {
-      this.trackEvent('session', 'session_ended', {
-        session_duration: Date.now() - parseInt(this.sessionId.split('-')[0])
+      this.trackEvent(&apos;session&apos;, &apos;session_ended&apos;, {
+        session_duration: Date.now() - parseInt(this.sessionId.split(&apos;-')[0])'
       })
       
       // Send any queued events before page unload
       this.flushEvents()
     }
 
-    window.addEventListener('beforeunload', trackSessionEnd)
-    window.addEventListener('pagehide', trackSessionEnd)
+    window.addEventListener(&apos;beforeunload&apos;, trackSessionEnd)
+    window.addEventListener(&apos;pagehide&apos;, trackSessionEnd)
   }
 
   public trackEvent(
@@ -198,7 +198,7 @@ class AnalyticsClient {
           ...properties
         })
       } catch (error) {
-        console.warn('Vercel Analytics tracking failed:', error)
+        console.warn(&apos;Vercel Analytics tracking failed:&apos;, error)
       }
     }
   }
@@ -206,62 +206,62 @@ class AnalyticsClient {
   private shouldTrackInVercel(eventType: string, eventName: string): boolean {
     // Track important business events in Vercel Analytics
     const importantEvents = [
-      'page_view',
-      'user_signup',
-      'user_login',
-      'project_created',
-      'payment_completed',
-      'file_uploaded',
-      'comment_added',
-      'feedback_submitted'
+      &apos;page_view&apos;,
+      &apos;user_signup&apos;,
+      &apos;user_login&apos;,
+      &apos;project_created&apos;,
+      &apos;payment_completed&apos;,
+      &apos;file_uploaded&apos;,
+      &apos;comment_added&apos;,
+      &apos;feedback_submitted&apos;
     ]
     
     return importantEvents.includes(eventName) || 
-           eventType === 'conversion' || 
-           eventType === 'business_metric'
+           eventType === &apos;conversion&apos; || 
+           eventType === &apos;business_metric&apos;
   }
 
   public trackPageView(path: string, title?: string) {
     const pageData = {
       path,
       title: title || document.title,
-      referrer: document.referrer || 'direct'
+      referrer: document.referrer || &apos;direct&apos;
     }
 
     // Track in our internal system
-    this.trackEvent('page_view', 'page_visited', pageData)
+    this.trackEvent(&apos;page_view&apos;, &apos;page_visited&apos;, pageData)
 
     // Also track in Vercel Analytics
     try {
-      track('page_view', pageData)
+      track(&apos;page_view&apos;, pageData)
     } catch (error) {
-      console.warn('Vercel Analytics page view tracking failed:', error)
+      console.warn(&apos;Vercel Analytics page view tracking failed:&apos;, error)
     }
   }
 
-  public trackUserAction(action: string, element?: string, value?: any) {
-    this.trackEvent('user_action', action, {
+  public trackUserAction(action: string, element?: string, value?: unknown) {
+    this.trackEvent(&apos;user_action&apos;, action, {
       element,
       value,
       path: window.location.pathname
     })
   }
 
-  public trackBusinessMetric(metricName: string, value: number, unit: string = 'count') {
+  public trackBusinessMetric(metricName: string, value: number, unit: string = &apos;count&apos;) {
     const metricData = {
       metric_name: metricName,
       value,
       unit
     }
 
-    this.trackEvent('business_metric', metricName, metricData)
+    this.trackEvent(&apos;business_metric&apos;, metricName, metricData)
 
     // Track key business metrics in Vercel Analytics
-    if (['revenue', 'conversion', 'signup', 'upgrade'].includes(metricName.toLowerCase())) {
+    if ([&apos;revenue&apos;, &apos;conversion&apos;, &apos;signup&apos;, &apos;upgrade&apos;].includes(metricName.toLowerCase())) {
       try {
-        track('business_metric', metricData)
+        track(&apos;business_metric&apos;, metricData)
       } catch (error) {
-        console.warn('Vercel Analytics business metric tracking failed:', error)
+        console.warn(&apos;Vercel Analytics business metric tracking failed:&apos;, error)
       }
     }
   }
@@ -277,7 +277,7 @@ class AnalyticsClient {
       // Use beacon API for reliable delivery
       if (navigator.sendBeacon) {
         const success = navigator.sendBeacon(
-          '/api/analytics/events',
+          &apos;/api/analytics/events&apos;,
           JSON.stringify(payload)
         )
         
@@ -289,24 +289,24 @@ class AnalyticsClient {
         this.sendWithFetch(payload)
       }
     } catch (error) {
-      console.error('Failed to send analytics event:', error)
+      console.error(&apos;Failed to send analytics event:&apos;, error)
       // Queue for retry
       this.eventQueue.push(event)
     }
   }
 
-  private async sendWithFetch(payload: any) {
+  private async sendWithFetch(payload: unknown) {
     try {
-      await fetch('/api/analytics/events', {
-        method: 'POST',
+      await fetch(&apos;/api/analytics/events&apos;, {
+        method: &apos;POST&apos;,
         headers: {
-          'Content-Type': 'application/json',
+          &apos;Content-Type&apos;: &apos;application/json&apos;,
         },
         body: JSON.stringify(payload),
         keepalive: true
       })
     } catch (error) {
-      console.error('Fetch analytics error:', error)
+      console.error(&apos;Fetch analytics error:&apos;, error)
     }
   }
 
@@ -323,7 +323,7 @@ class AnalyticsClient {
 let analyticsInstance: AnalyticsClient | null = null
 
 const getAnalytics = () => {
-  if (!analyticsInstance && typeof window !== 'undefined') {
+  if (!analyticsInstance && typeof window !== &apos;undefined&apos;) {
     analyticsInstance = new AnalyticsClient()
   }
   return analyticsInstance
@@ -332,7 +332,7 @@ const getAnalytics = () => {
 // React hook for analytics
 export function useAnalytics() {
   const pathname = usePathname()
-  const previousPath = useRef<string>('')
+  const previousPath = useRef<string>('&apos;)'
 
   // Track page views when pathname changes
   useEffect(() => {
@@ -363,7 +363,7 @@ export function useAnalytics() {
     }
   }, [])
 
-  const trackUserAction = useCallback((action: string, element?: string, value?: any) => {
+  const trackUserAction = useCallback((action: string, element?: string, value?: unknown) => {
     const analytics = getAnalytics()
     if (analytics) {
       analytics.trackUserAction(action, element, value)
@@ -378,27 +378,27 @@ export function useAnalytics() {
   }, [])
 
   const trackButtonClick = useCallback((buttonName: string, location?: string) => {
-    trackUserAction('button_clicked', buttonName, { location })
+    trackUserAction(&apos;button_clicked&apos;, buttonName, { location })
   }, [trackUserAction])
 
   const trackFormSubmit = useCallback((formName: string, success: boolean = true) => {
-    trackUserAction('form_submitted', formName, { success })
+    trackUserAction(&apos;form_submitted&apos;, formName, { success })
   }, [trackUserAction])
 
   const trackFileUpload = useCallback((fileName: string, fileSize: number, fileType: string) => {
-    trackUserAction('file_uploaded', 'file_upload', {
+    trackUserAction(&apos;file_uploaded&apos;, &apos;file_upload&apos;, {
       file_name: fileName,
       file_size: fileSize,
       file_type: fileType
     })
   }, [trackUserAction])
 
-  const trackPayment = useCallback((amount: number, currency: string = 'USD', success: boolean = true) => {
+  const trackPayment = useCallback((amount: number, currency: string = &apos;USD&apos;, success: boolean = true) => {
     if (success) {
-      trackBusinessMetric('revenue', amount, currency.toLowerCase())
-      trackBusinessMetric('payments_completed', 1, 'count')
+      trackBusinessMetric(&apos;revenue&apos;, amount, currency.toLowerCase())
+      trackBusinessMetric(&apos;payments_completed&apos;, 1, &apos;count&apos;)
     }
-    trackUserAction('payment_attempted', 'payment_form', {
+    trackUserAction(&apos;payment_attempted&apos;, &apos;payment_form&apos;, {
       amount,
       currency,
       success
@@ -406,12 +406,12 @@ export function useAnalytics() {
   }, [trackUserAction, trackBusinessMetric])
 
   const trackProjectCreated = useCallback(() => {
-    trackBusinessMetric('projects_created', 1, 'count')
-    trackUserAction('project_created', 'project_form')
+    trackBusinessMetric(&apos;projects_created&apos;, 1, &apos;count&apos;)
+    trackUserAction(&apos;project_created&apos;, &apos;project_form&apos;)
   }, [trackUserAction, trackBusinessMetric])
 
   const trackSearch = useCallback((query: string, results: number) => {
-    trackUserAction('search_performed', 'search_box', {
+    trackUserAction(&apos;search_performed&apos;, &apos;search_box&apos;, {
       query,
       results_count: results
     })
@@ -447,7 +447,7 @@ export const analytics = {
     }
   },
   
-  trackUserAction: (action: string, element?: string, value?: any) => {
+  trackUserAction: (action: string, element?: string, value?: unknown) => {
     const instance = getAnalytics()
     if (instance) {
       instance.trackUserAction(action, element, value)

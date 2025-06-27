@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Payment confirmation failed:', error)
     
     // Handle specific Stripe errors

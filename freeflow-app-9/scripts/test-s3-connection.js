@@ -25,10 +25,10 @@ const { S3Client, ListObjectsV2Command, CreateBucketCommand, HeadBucketCommand, 
 
 async function testS3Connection() {
   log('\n🔬 Testing S3 Connection with Supabase Storage...', 'cyan')
-  log('═'.repeat(60), 'cyan')
+  log('═'.repeat(60), 'cyan')'
 
   // Environment check
-  log('\n📋 Environment Configuration:', 'blue')
+  log('\n📋 Environment Configuration: ', 'blue')
   log(`S3_ACCESS_KEY_ID: ${process.env.S3_ACCESS_KEY_ID ? '✅ Set' : '❌ Missing'}`)
   log(`S3_SECRET_ACCESS_KEY: ${process.env.S3_SECRET_ACCESS_KEY ? '✅ Set' : '❌ Missing'}`)
   log(`S3_ENDPOINT: ${process.env.S3_ENDPOINT || '❌ Missing'}`)
@@ -103,8 +103,7 @@ async function testS3Connection() {
       Body: testContent,
       ContentType: 'application/json',
       Metadata: {
-        'test-type': 'connection-verification',
-        'created-by': 'freeflowzee-test-script'
+        'test-type': 'connection-verification', 'created-by': 'freeflowzee-test-script'
       }
     })
 
@@ -113,13 +112,13 @@ async function testS3Connection() {
 
     // Success summary
     log('\n🎉 S3 Connection Test Results:', 'green')
-    log('═'.repeat(40), 'green')
+    log('═'.repeat(40), 'green')'
     log('✅ Credentials authenticated successfully', 'green')
     log('✅ Bucket access confirmed', 'green')
     log('✅ File upload capability verified', 'green')
     log('✅ S3 integration ready for FreeflowZee!', 'green')
 
-    log('\n📋 Next Steps:', 'blue')
+    log('\n📋 Next Steps: ', 'blue')
     log('1. Your S3 credentials are properly configured', 'cyan')
     log('2. You can now use the S3 client in your application', 'cyan')
     log('3. Import from: lib/s3-client.ts', 'cyan')
@@ -127,7 +126,7 @@ async function testS3Connection() {
 
   } catch (error) {
     log('\n❌ S3 Connection Test Failed:', 'red')
-    log('═'.repeat(40), 'red')
+    log('═'.repeat(40), 'red')'
     log(`Error: ${error.message}`, 'red')
     
     if (error.$metadata) {
@@ -135,7 +134,7 @@ async function testS3Connection() {
       log(`Request ID: ${error.$metadata.requestId}`, 'red')
     }
 
-    log('\n🔧 Troubleshooting Tips:', 'yellow')
+    log('\n🔧 Troubleshooting Tips: ', 'yellow')
     log('1. Verify your S3 credentials are correct', 'yellow')
     log('2. Check if Supabase S3 is enabled in your project', 'yellow')
     log('3. Ensure the bucket name is valid (lowercase, no spaces)', 'yellow')

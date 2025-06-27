@@ -29,8 +29,8 @@ interface AIModelConfig {
   provider: string
   apiEndpoint: string
   headers: Record<string, string>
-  requestFormat: (prompt: string, params: any) => any
-  responseParser: (response: any) => string
+  requestFormat: (prompt: string, params: unknown) => any
+  responseParser: (response: unknown) => string
 }
 
 interface GeneratedAsset {
@@ -54,7 +54,7 @@ interface GeneratedAsset {
 const ASSET_GENERATORS = {
   photography: {
     luts: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Color Grading LUT`,
         format: '.cube',
         description: 'Professional color grading lookup table for cinematic looks',
@@ -63,7 +63,7 @@ const ASSET_GENERATORS = {
       })
     },
     presets: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Lightroom Preset`,
         format: '.xmp',
         description: 'Professional photo editing preset for Adobe Lightroom',
@@ -72,7 +72,7 @@ const ASSET_GENERATORS = {
       })
     },
     actions: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Photoshop Action`,
         format: '.atn',
         description: 'Automated photo effect for Adobe Photoshop',
@@ -81,7 +81,7 @@ const ASSET_GENERATORS = {
       })
     },
     overlays: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Photo Overlay Pack`,
         format: '.png',
         description: 'High-quality photo overlays for creative enhancement',
@@ -90,7 +90,7 @@ const ASSET_GENERATORS = {
       })
     },
     templates: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Portfolio Template`,
         format: '.psd',
         description: 'Professional portfolio layout template',
@@ -101,7 +101,7 @@ const ASSET_GENERATORS = {
   },
   videography: {
     transitions: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Video Transitions`,
         format: '.prproj',
         description: 'Smooth scene transitions for video editing',
@@ -110,7 +110,7 @@ const ASSET_GENERATORS = {
       })
     },
     luts: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Cinematic LUT`,
         format: '.cube',
         description: 'Film-style color grading for cinematic look',
@@ -119,7 +119,7 @@ const ASSET_GENERATORS = {
       })
     },
     titles: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Title Templates`,
         format: '.mogrt',
         description: 'Animated text overlays for video projects',
@@ -128,7 +128,7 @@ const ASSET_GENERATORS = {
       })
     },
     effects: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Visual Effects`,
         format: '.aep',
         description: 'Professional visual effects for After Effects',
@@ -137,7 +137,7 @@ const ASSET_GENERATORS = {
       })
     },
     audio: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Audio Track`,
         format: '.wav',
         description: 'Background music and sound effects',
@@ -148,7 +148,7 @@ const ASSET_GENERATORS = {
   },
   design: {
     templates: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Design Template`,
         format: '.ai',
         description: 'Professional design template for various projects',
@@ -157,7 +157,7 @@ const ASSET_GENERATORS = {
       })
     },
     patterns: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Seamless Patterns`,
         format: '.pat',
         description: 'Repeating background patterns for design projects',
@@ -166,7 +166,7 @@ const ASSET_GENERATORS = {
       })
     },
     icons: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Icon Set`,
         format: '.svg',
         description: 'Consistent icon collection for UI/UX projects',
@@ -175,7 +175,7 @@ const ASSET_GENERATORS = {
       })
     },
     fonts: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Custom Font`,
         format: '.otf',
         description: 'Brand-specific typography for design projects',
@@ -184,7 +184,7 @@ const ASSET_GENERATORS = {
       })
     },
     mockups: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Product Mockup`,
         format: '.psd',
         description: '3D product presentation mockups',
@@ -195,7 +195,7 @@ const ASSET_GENERATORS = {
   },
   music: {
     samples: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Audio Samples`,
         format: '.wav',
         description: 'High-quality drum hits, loops, and one-shots',
@@ -204,7 +204,7 @@ const ASSET_GENERATORS = {
       })
     },
     presets: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Synth Presets`,
         format: '.fxp',
         description: 'Professional synthesizer sound presets',
@@ -213,7 +213,7 @@ const ASSET_GENERATORS = {
       })
     },
     midi: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} MIDI Patterns`,
         format: '.mid',
         description: 'Chord progressions and melodic patterns',
@@ -222,7 +222,7 @@ const ASSET_GENERATORS = {
       })
     },
     stems: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Song Stems`,
         format: '.wav',
         description: 'Individual track elements for remixing',
@@ -231,7 +231,7 @@ const ASSET_GENERATORS = {
       })
     },
     effects: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Audio Effects`,
         format: '.fxp',
         description: 'Reverb, delay, and distortion presets',
@@ -239,10 +239,9 @@ const ASSET_GENERATORS = {
         size: '18.9 MB'
       })
     }
-  },
-  'web-development': {
+  }, 'web-development': {
     components: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} UI Components`,
         format: '.tsx',
         description: 'Reusable React/Vue component library',
@@ -251,7 +250,7 @@ const ASSET_GENERATORS = {
       })
     },
     animations: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} CSS Animations`,
         format: '.css',
         description: 'Smooth micro-interactions and animations',
@@ -260,7 +259,7 @@ const ASSET_GENERATORS = {
       })
     },
     themes: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Color Theme`,
         format: '.json',
         description: 'Complete design system with color variables',
@@ -269,7 +268,7 @@ const ASSET_GENERATORS = {
       })
     },
     templates: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Page Template`,
         format: '.html',
         description: 'Complete landing page or dashboard template',
@@ -278,7 +277,7 @@ const ASSET_GENERATORS = {
       })
     },
     snippets: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Code Snippets`,
         format: '.js',
         description: 'Utility functions and helper libraries',
@@ -289,7 +288,7 @@ const ASSET_GENERATORS = {
   },
   writing: {
     templates: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Content Templates`,
         format: '.docx',
         description: 'Professional content templates for various formats',
@@ -298,7 +297,7 @@ const ASSET_GENERATORS = {
       })
     },
     prompts: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Writing Prompts`,
         format: '.txt',
         description: 'Creative inspiration starters for writers',
@@ -307,7 +306,7 @@ const ASSET_GENERATORS = {
       })
     },
     outlines: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Content Outlines`,
         format: '.md',
         description: 'Structured content frameworks and outlines',
@@ -316,7 +315,7 @@ const ASSET_GENERATORS = {
       })
     },
     headlines: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Headline Variations`,
         format: '.txt',
         description: 'Compelling title options for content',
@@ -325,7 +324,7 @@ const ASSET_GENERATORS = {
       })
     },
     hooks: {
-      generate: (params: any) => ({
+      generate: (params: unknown) => ({
         name: `${params.style} Opening Hooks`,
         format: '.txt',
         description: 'Attention-grabbing introduction templates',
@@ -343,10 +342,9 @@ const AI_MODEL_CONFIGS: Record<string, AIModelConfig> = {
     provider: 'OpenAI',
     apiEndpoint: 'https://api.openai.com/v1/chat/completions',
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer {API_KEY}'
+      'Content-Type': 'application/json', 'Authorization': 'Bearer {API_KEY}'
     },
-    requestFormat: (prompt: string, params: any) => ({
+    requestFormat: (prompt: string, params: unknown) => ({
       model: 'gpt-4o-mini',
       messages: [
         {
@@ -361,17 +359,15 @@ const AI_MODEL_CONFIGS: Record<string, AIModelConfig> = {
       max_tokens: params.maxTokens || 1000,
       temperature: 0.7
     }),
-    responseParser: (response: any) => response.choices[0]?.message?.content || ''
-  },
-  'gpt-3.5-turbo': {
+    responseParser: (response: unknown) => response.choices[0]?.message?.content || '
+  }, 'gpt-3.5-turbo': {
     id: 'gpt-3.5-turbo',
     provider: 'OpenAI',
     apiEndpoint: 'https://api.openai.com/v1/chat/completions',
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer {API_KEY}'
+      'Content-Type': 'application/json', 'Authorization': 'Bearer {API_KEY}'
     },
-    requestFormat: (prompt: string, params: any) => ({
+    requestFormat: (prompt: string, params: unknown) => ({
       model: 'gpt-3.5-turbo',
       messages: [
         {
@@ -386,18 +382,15 @@ const AI_MODEL_CONFIGS: Record<string, AIModelConfig> = {
       max_tokens: params.maxTokens || 800,
       temperature: 0.7
     }),
-    responseParser: (response: any) => response.choices[0]?.message?.content || ''
-  },
-  'claude-3-haiku': {
+    responseParser: (response: unknown) => response.choices[0]?.message?.content || '
+  }, 'claude-3-haiku': {
     id: 'claude-3-haiku',
     provider: 'Anthropic',
     apiEndpoint: 'https://api.anthropic.com/v1/messages',
     headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': '{API_KEY}',
-      'anthropic-version': '2023-06-01'
+      'Content-Type': 'application/json', 'x-api-key': '{API_KEY}', 'anthropic-version': '2023-06-01'
     },
-    requestFormat: (prompt: string, params: any) => ({
+    requestFormat: (prompt: string, params: unknown) => ({
       model: 'claude-3-haiku-20240307',
       max_tokens: params.maxTokens || 1000,
       messages: [
@@ -407,16 +400,15 @@ const AI_MODEL_CONFIGS: Record<string, AIModelConfig> = {
         }
       ]
     }),
-    responseParser: (response: any) => response.content[0]?.text || ''
-  },
-  'gemini-pro': {
+    responseParser: (response: unknown) => response.content[0]?.text || '
+  }, 'gemini-pro': {
     id: 'gemini-pro',
     provider: 'Google',
     apiEndpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
     headers: {
       'Content-Type': 'application/json'
     },
-    requestFormat: (prompt: string, params: any) => ({
+    requestFormat: (prompt: string, params: unknown) => ({
       contents: [
         {
           parts: [
@@ -427,17 +419,15 @@ const AI_MODEL_CONFIGS: Record<string, AIModelConfig> = {
         }
       ]
     }),
-    responseParser: (response: any) => response.candidates[0]?.content?.parts[0]?.text || ''
-  },
-  'llama-2-7b': {
+    responseParser: (response: unknown) => response.candidates[0]?.content?.parts[0]?.text || '
+  }, 'llama-2-7b': {
     id: 'llama-2-7b',
     provider: 'Hugging Face',
     apiEndpoint: 'https://api-inference.huggingface.co/models/meta-llama/Llama-2-7b-chat-hf',
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer {API_KEY}'
+      'Content-Type': 'application/json', 'Authorization': 'Bearer {API_KEY}'
     },
-    requestFormat: (prompt: string, params: any) => ({
+    requestFormat: (prompt: string, params: unknown) => ({
       inputs: prompt,
       parameters: {
         max_new_tokens: params.maxTokens || 500,
@@ -445,17 +435,15 @@ const AI_MODEL_CONFIGS: Record<string, AIModelConfig> = {
         return_full_text: false
       }
     }),
-    responseParser: (response: any) => response[0]?.generated_text || ''
-  },
-  'mistral-7b': {
+    responseParser: (response: unknown) => response[0]?.generated_text || '
+  }, 'mistral-7b': {
     id: 'mistral-7b',
     provider: 'Hugging Face',
     apiEndpoint: 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1',
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer {API_KEY}'
+      'Content-Type': 'application/json', 'Authorization': 'Bearer {API_KEY}'
     },
-    requestFormat: (prompt: string, params: any) => ({
+    requestFormat: (prompt: string, params: unknown) => ({
       inputs: prompt,
       parameters: {
         max_new_tokens: params.maxTokens || 500,
@@ -463,7 +451,7 @@ const AI_MODEL_CONFIGS: Record<string, AIModelConfig> = {
         return_full_text: false
       }
     }),
-    responseParser: (response: any) => response[0]?.generated_text || ''
+    responseParser: (response: unknown) => response[0]?.generated_text || '
   }
 }
 
@@ -501,7 +489,7 @@ async function generateWithAI(prompt: string, modelConfig: AIModelConfig, apiKey
     return modelConfig.responseParser(data)
   } catch (error) {
     console.error('AI generation error:', error)
-    return ''
+    return '
   }
 }
 
@@ -631,7 +619,7 @@ Style: [style]
           if (nameMatch) assetName = nameMatch[1].trim()
           if (descMatch) assetDescription = descMatch[1].trim()
           if (tagsMatch) {
-            const aiTags = tagsMatch[1].split(',').map(tag => tag.trim().toLowerCase())
+            const aiTags = tagsMatch[1].split(',').map(tag => tag.trim().toLowerCase())'
             assetTags = [...baseAsset.tags, ...aiTags]
           }
           if (styleMatch) variation = styleMatch[1].trim()
@@ -726,8 +714,8 @@ function adjustSizeForQuality(baseSize: string, quality: string): string {
   }
   
   const multiplier = multipliers[quality as keyof typeof multipliers] || 1
-  const sizeNum = parseFloat(baseSize.replace(/[^\d.]/g, ''))
-  const unit = baseSize.replace(/[\d.]/g, '')
+  const sizeNum = parseFloat(baseSize.replace(/[^\d.]/g, ''))'
+  const unit = baseSize.replace(/[\d.]/g, '')'
   
   return `${(sizeNum * multiplier).toFixed(1)}${unit}`
 }
@@ -737,8 +725,8 @@ function calculateTotalSize(assets: GeneratedAsset[]): string {
   
   assets.forEach(asset => {
     const sizeStr = asset.metadata.size
-    const sizeNum = parseFloat(sizeStr.replace(/[^\d.]/g, ''))
-    const unit = sizeStr.replace(/[\d.]/g, '').trim().toLowerCase()
+    const sizeNum = parseFloat(sizeStr.replace(/[^\d.]/g, ''))'
+    const unit = sizeStr.replace(/[\d.]/g, '').trim().toLowerCase()'
     
     if (unit.includes('gb')) {
       totalMB += sizeNum * 1024
@@ -761,12 +749,7 @@ export async function GET() {
     message: 'AI Asset Generation API',
     supportedFields: Object.keys(ASSET_GENERATORS),
     version: '1.0.0',
-    features: [
-      'Field-specific asset generation',
-      'Quality-based generation',
-      'Multiple format support',
-      'Batch asset creation',
-      'Professional metadata'
+    features: ['Field-specific asset generation', 'Quality-based generation', 'Multiple format support', 'Batch asset creation', 'Professional metadata'
     ]
   })
 } 

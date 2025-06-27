@@ -19,6 +19,6 @@ export async function logout() {
     redirect('/error')
   }
 
-  revalidatePath('/', 'layout')
+  revalidatePath('/', 'layout')'
   redirect('/login')
 } 

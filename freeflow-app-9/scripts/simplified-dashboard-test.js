@@ -10,7 +10,7 @@ const { execSync } = require('child_process');
 const http = require('http');
 
 console.log('🍎 macOS-Friendly Dashboard Testing for FreeflowZee');
-console.log('=================================================');
+console.log('================================================= ');
 console.log('🚀 Bypassing Playwright browser issues with system browser testing');
 
 class SimplifiedDashboardTester {
@@ -31,7 +31,7 @@ class SimplifiedDashboardTester {
   async checkServerStatus() {
     console.log('\\n🔍 Checking Next.js server status...');
     try {
-      const response = await this.makeRequest('/');
+      const response = await this.makeRequest('/');'
       console.log(`✅ Server responding on ${this.baseUrl}`);
       console.log(`📊 Status: ${response.statusCode}`);
       return true;
@@ -65,7 +65,7 @@ class SimplifiedDashboardTester {
                       response.statusCode === 200 ? 'ACCESSIBLE' : 
                       `STATUS_${response.statusCode}`;
         
-        console.log(`${status === 'REDIRECT_TO_LOGIN' ? '🔐' : '✅'} ${page.name.padEnd(20)} | ${status} | ${page.priority}`);
+        console.log(`${status === 'REDIRECT_TO_LOGIN' ? '🔐' : '✅'} ${page.name.padEnd(20)} | ${status} | ${page.priority}`);'
         results.push({ page: page.name, status, accessible: status === 'ACCESSIBLE' });
       } catch (error) {
         console.log(`❌ ${page.name.padEnd(20)} | ERROR | ${page.priority}`);
@@ -83,7 +83,7 @@ class SimplifiedDashboardTester {
     console.log('   2. Click each tab to verify content switches');
     console.log('   3. Test all buttons for click responsiveness');
     console.log('   4. Verify console shows no critical errors');
-    console.log('');
+    console.log('');'
 
     this.dashboardPages.forEach((page, index) => {
       setTimeout(() => {
@@ -111,52 +111,25 @@ class SimplifiedDashboardTester {
     console.log('\\n📋 MANUAL VERIFICATION CHECKLIST');
     console.log('=================================');
     
-    const testItems = [
-      '🎯 Projects Hub (4 tabs: Active, Templates, Archive, Analytics)',
-      '   □ "Create Project" button works',
-      '   □ "Import Project" button works', 
-      '   □ "Quick Start" button works',
-      '   □ "View All" button works',
+    const testItems = ['🎯 Projects Hub (4 tabs: Active, Templates, Archive, Analytics)', '   □ "Create Project" button works', '   □ "Import Project" button works', '   □ "Quick Start" button works', '   □ "View All" button works',
       '   □ "Export Data" button works',
-      '',
-      '🎬 Video Studio (4 tabs: Projects, Templates, Assets, Analytics)',
-      '   □ "Record" button works',
-      '   □ "Edit" button works',
-      '   □ "Upload" button works',
-      '   □ "Share" button works',
-      '   □ "Export" button works',
-      '',
-      '👥 Community Hub (4 tabs: Feed, Creators, Showcase, Events)',
-      '   □ "Like" buttons work',
-      '   □ "Share" buttons work',
-      '   □ "Comment" buttons work',
-      '   □ "Follow Creator" buttons work',
-      '',
-      '🤖 AI Assistant (4 tabs: Chat, Analyze, Generate, History)',
-      '   □ "Send Message" button works',
-      '   □ "Take Action" button works',
-      '   □ "Quick Action" buttons work',
-      '   □ "Clear Chat" button works',
-      '',
-      '📅 My Day Today (4 tabs: Today, Tomorrow, This Week, Calendar)',
-      '   □ "Add Task" button works',
-      '   □ "View Calendar" button works',
-      '   □ "Generate Schedule" button works',
-      '   □ "Start Timer" button works',
-      '',
-      '📁 Files Hub (4 tabs: Recent, Projects, Shared, Trash)',
-      '   □ All existing buttons work',
-      '',
-      '💰 Escrow System (4 tabs: Active, Completed, Pending, Analytics)',
-      '   □ "Request Deposit" button works',
-      '   □ "Release Funds" button works',
-      '   □ "Download Receipt" button works',
-      '   □ "View Details" button works'
+      '','
+      '🎬 Video Studio (4 tabs: Projects, Templates, Assets, Analytics)', '   □ "Record" button works', '   □ "Edit" button works', '   □ "Upload" button works', '   □ "Share" button works', '   □ "Export" button works',
+      '','
+      '👥 Community Hub (4 tabs: Feed, Creators, Showcase, Events)', '   □ "Like" buttons work', '   □ "Share" buttons work', '   □ "Comment" buttons work', '   □ "Follow Creator" buttons work',
+      '','
+      '🤖 AI Assistant (4 tabs: Chat, Analyze, Generate, History)', '   □ "Send Message" button works', '   □ "Take Action" button works', '   □ "Quick Action" buttons work', '   □ "Clear Chat" button works',
+      '','
+      '📅 My Day Today (4 tabs: Today, Tomorrow, This Week, Calendar)', '   □ "Add Task" button works', '   □ "View Calendar" button works', '   □ "Generate Schedule" button works', '   □ "Start Timer" button works',
+      '','
+      '📁 Files Hub (4 tabs: Recent, Projects, Shared, Trash)', '   □ All existing buttons work',
+      '','
+      '💰 Escrow System (4 tabs: Active, Completed, Pending, Analytics)', '   □ "Request Deposit" button works', '   □ "Release Funds" button works', '   □ "Download Receipt" button works', '   □ "View Details" button works'
     ];
 
     testItems.forEach(item => console.log(item));
     
-    console.log('\\n🏆 SUCCESS CRITERIA:');
+    console.log('\\n🏆 SUCCESS CRITERIA: ');
     console.log('   ✅ All tabs visible and switchable');
     console.log('   ✅ All buttons respond to clicks');
     console.log('   ✅ No JavaScript console errors');
@@ -179,7 +152,7 @@ class SimplifiedDashboardTester {
 
     // Generate summary
     console.log('\\n📊 ROUTE TESTING SUMMARY');
-    console.log('========================');
+    console.log('======================== ');
     const accessible = routeResults.filter(r => r.accessible).length;
     const total = routeResults.length;
     console.log(`✅ Accessible: ${accessible}/${total}`);

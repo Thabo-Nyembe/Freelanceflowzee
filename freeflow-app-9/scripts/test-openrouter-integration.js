@@ -22,7 +22,7 @@ async function testOpenRouterAPI() {
   const baseUrl = 'http://localhost:3000'
   
   log('\n🤖 Testing OpenRouter AI Integration...', colors.cyan)
-  log('=' .repeat(50), colors.cyan)
+  log('=' .repeat(50), colors.cyan)'
 
   try {
     // Test 1: API Health Check
@@ -91,7 +91,7 @@ async function testOpenRouterAPI() {
     }
 
     log('\n🎉 OpenRouter Integration Test Complete!', colors.cyan)
-    log('=' .repeat(50), colors.cyan)
+    log('=' .repeat(50), colors.cyan)'
     
     // Instructions for setting up API key
     if (!connectionData.connected) {
@@ -108,7 +108,7 @@ async function testOpenRouterAPI() {
     return true
 
   } catch (error) {
-    log('\n❌ Test failed with error:', colors.red)
+    log('\n❌ Test failed with error: ', colors.red)
     log(error.message, colors.red)
     log('\nMake sure your development server is running on port 3000', colors.yellow)
     return false

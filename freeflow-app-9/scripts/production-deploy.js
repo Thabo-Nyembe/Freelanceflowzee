@@ -38,9 +38,9 @@ class ProductionDeployer {
     const timestamp = new Date().toISOString();
     const prefix = {
       info: '📋',
-      success: '✅',
+      success: '✅','
       warning: '⚠️',
-      error: '❌',
+      error: '❌','
       progress: '🔄'
     }[type] || '📋';
     
@@ -52,16 +52,8 @@ class ProductionDeployer {
     
     try {
       // Check required environment variables
-      const requiredEnvVars = [
-        'NEXT_PUBLIC_SUPABASE_URL',
-        'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-        'SUPABASE_SERVICE_ROLE_KEY',
-        'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY',
-        'STRIPE_SECRET_KEY',
-        'WASABI_ACCESS_KEY_ID',
-        'WASABI_SECRET_ACCESS_KEY',
-        'WASABI_BUCKET_NAME'
-      ];
+      const requiredEnvVars = ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY', 'STRIPE_SECRET_KEY', 'WASABI_ACCESS_KEY_ID', 'WASABI_SECRET_ACCESS_KEY',
+        'WASABI_BUCKET_NAME'];
       
       const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
       
@@ -72,7 +64,7 @@ class ProductionDeployer {
       
       // Check Node.js version
       const nodeVersion = process.version;
-      const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0]);
+      const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0]);'
       
       if (majorVersion < 18) {
         this.errors.push(`Node.js version ${nodeVersion} is not supported. Minimum version: 18.x`);
@@ -174,8 +166,8 @@ class ProductionDeployer {
   calculateBundleSize(manifest) {
     let totalSize = 0;
     
-    if (manifest.pages && manifest.pages['/']) {
-      manifest.pages['/'].forEach(chunk => {
+    if (manifest.pages && manifest.pages['/']) {'
+      manifest.pages['/'].forEach(chunk => {'
         if (chunk.endsWith('.js')) {
           const chunkPath = path.join('.next', 'static', chunk);
           if (fs.existsSync(chunkPath)) {
@@ -222,7 +214,7 @@ class ProductionDeployer {
       await this.waitForServer('http://localhost:3000', 30000);
       
       // Run Lighthouse audit
-      const lighthouseCmd = `lighthouse http://localhost:3000 --output=json --output-path=./lighthouse-production.json --chrome-flags="--headless --no-sandbox"`;
+      const lighthouseCmd = `lighthouse http://localhost:3000 --output=json --output-path=./lighthouse-production.json --chrome-flags= "--headless --no-sandbox"`;
       execSync(lighthouseCmd, { stdio: 'pipe' });
       
       // Parse results
@@ -310,18 +302,18 @@ class ProductionDeployer {
     fs.writeFileSync('production-deployment-report.json', JSON.stringify(report, null, 2));
     
     // Display summary
-    console.log('\n' + '='.repeat(60));
+    console.log('\n' + '='.repeat(60));'
     console.log('🚀 PRODUCTION DEPLOYMENT REPORT');
-    console.log('='.repeat(60));
+    console.log('='.repeat(60));'
     
-    console.log('\n📋 Checks Summary:');
+    console.log('\n📋 Checks Summary: ');
     Object.entries(this.checks).forEach(([check, passed]) => {
       const status = passed ? '✅' : '❌';
       console.log(`${status} ${check.charAt(0).toUpperCase() + check.slice(1)}`);
     });
     
     if (this.warnings.length > 0) {
-      console.log('\n⚠️ Warnings:');
+      console.log('\n⚠️ Warnings: ');
       this.warnings.forEach(warning => console.log(`   • ${warning}`));
     }
     

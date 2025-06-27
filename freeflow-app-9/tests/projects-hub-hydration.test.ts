@@ -1,43 +1,43 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from &apos;@playwright/test&apos;
 
 // Mock data
 const mockProjects = [{
-  id: '1',
-  title: 'Test Project',
-  status: 'active',
+  id: &apos;1','
+  title: &apos;Test Project&apos;,
+  status: &apos;active&apos;,
   progress: 50
 }]
 
 const mockStateChanges = {
   projectUpdates: {
-    id: '1',
+    id: &apos;1','
     progress: 75,
-    status: 'completed'
+    status: &apos;completed&apos;
   }
 }
 
-test.describe('ProjectsHub Hydration Tests', () => {
+test.describe(&apos;ProjectsHub Hydration Tests&apos;, () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/dashboard/projects-hub')
-    await page.waitForLoadState('networkidle')
+    await page.goto(&apos;/dashboard/projects-hub&apos;)
+    await page.waitForLoadState(&apos;networkidle&apos;)
   })
 
-  test('should hydrate project list without mismatches', async ({ page }) => {
-    const projectCards = await page.$$('[data-testid^="project-card-"]')
+  test(&apos;should hydrate project list without mismatches&apos;, async ({ page }) => {
+    const projectCards = await page.$$(&apos;[data-testid^=&quot;project-card-&quot;]&apos;)
     expect(projectCards.length).toBe(mockProjects.length)
 
-    const projectsGrid = page.locator('[data-testid="projects-grid"]')
-    const projectCard = page.locator('[data-testid="project-card-1"]')
+    const projectsGrid = page.locator(&apos;[data-testid=&quot;projects-grid&quot;]&apos;)
+    const projectCard = page.locator(&apos;[data-testid=&quot;project-card-1&quot;]&apos;)
     
     await expect(projectsGrid).toBeVisible()
-    await expect(projectCard).toHaveAttribute('data-hydrated', 'true')
+    await expect(projectCard).toHaveAttribute(&apos;data-hydrated&apos;, &apos;true&apos;)
   })
 
-  test('should handle state changes without hydration errors', async ({ page }) => {
-    const statusButton = page.locator('[data-testid="status-change-button"]')
-    const statusSelect = page.locator('[data-testid="status-select"]')
-    const projectStatus = page.locator('[data-testid="project-status"]')
-    const hydrationError = page.locator('[data-hydration-error]')
+  test(&apos;should handle state changes without hydration errors&apos;, async ({ page }) => {
+    const statusButton = page.locator(&apos;[data-testid=&quot;status-change-button&quot;]&apos;)
+    const statusSelect = page.locator(&apos;[data-testid=&quot;status-select&quot;]&apos;)
+    const projectStatus = page.locator(&apos;[data-testid=&quot;project-status&quot;]&apos;)
+    const hydrationError = page.locator(&apos;[data-hydration-error]&apos;)
 
     await statusButton.click()
     await statusSelect.selectOption(mockStateChanges.projectUpdates.status)
@@ -46,19 +46,19 @@ test.describe('ProjectsHub Hydration Tests', () => {
     await expect(hydrationError).not.toBeAttached()
   })
 
-  test('should maintain filter state during hydration', async ({ page }) => {
-    const searchInput = page.locator('[data-testid="search-input"]')
-    const statusFilter = page.locator('[data-testid="status-filter"]')
+  test(&apos;should maintain filter state during hydration&apos;, async ({ page }) => {
+    const searchInput = page.locator(&apos;[data-testid=&quot;search-input&quot;]&apos;)
+    const statusFilter = page.locator(&apos;[data-testid=&quot;status-filter&quot;]&apos;)
 
-    await searchInput.fill('test query')
-    await statusFilter.selectOption('active')
+    await searchInput.fill(&apos;test query&apos;)
+    await statusFilter.selectOption(&apos;active&apos;)
     
-    await expect(searchInput).toHaveValue('test query')
-    await expect(statusFilter).toHaveValue('active')
+    await expect(searchInput).toHaveValue(&apos;test query&apos;)
+    await expect(statusFilter).toHaveValue(&apos;active&apos;)
   })
 
-  test('should handle boundary cases without hydration errors', async ({ page }) => {
-    const serverTime = await page.getAttribute('[data-testid="server-time"]', 'data-time')
+  test(&apos;should handle boundary cases without hydration errors&apos;, async ({ page }) => {
+    const serverTime = await page.getAttribute(&apos;[data-testid=&quot;server-time&quot;]&apos;, &apos;data-time&apos;)
     const clientTime = await page.evaluate(() => new Date().toISOString())
     
     if (serverTime) {
@@ -66,68 +66,68 @@ test.describe('ProjectsHub Hydration Tests', () => {
     }
 
     await page.evaluate(`window.__TEST_PROJECTS__ = ${JSON.stringify(mockProjects)}`)
-    await expect(page.locator('[data-hydration-error]')).not.toBeAttached()
+    await expect(page.locator(&apos;[data-hydration-error]&apos;)).not.toBeAttached()
   })
 })
 
-test.describe('Dynamic Component Hydration Tests', () => {
-  test('should handle real-time updates without hydration errors', async ({ page }) => {
-    await page.goto('/dashboard/projects-hub')
+test.describe(&apos;Dynamic Component Hydration Tests&apos;, () => {
+  test(&apos;should handle real-time updates without hydration errors&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard/projects-hub&apos;)
 
     await page.evaluate(`window.__TEST_PROJECT_UPDATE__ = ${JSON.stringify(mockStateChanges.projectUpdates)}`)
 
-    const progressElement = page.locator(`[data-testid="project-progress-${mockStateChanges.projectUpdates.id}"]`)
-    const hydrationError = page.locator('[data-hydration-error]')
+    const progressElement = page.locator(`[data-testid=&quot;project-progress-${mockStateChanges.projectUpdates.id}&quot;]`)
+    const hydrationError = page.locator(&apos;[data-hydration-error]&apos;)
 
     await expect(progressElement).toHaveText(String(mockStateChanges.projectUpdates.progress))
     await expect(hydrationError).not.toBeAttached()
   })
 
-  test('should maintain component state during navigation', async ({ page }) => {
-    await page.goto('/dashboard/projects-hub')
+  test(&apos;should maintain component state during navigation&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard/projects-hub&apos;)
 
-    const searchInput = page.locator('[data-testid="search-input"]')
-    await searchInput.fill('test query')
+    const searchInput = page.locator(&apos;[data-testid=&quot;search-input&quot;]&apos;)
+    await searchInput.fill(&apos;test query&apos;)
 
-    const navDashboard = page.locator('[data-testid="nav-dashboard"]')
+    const navDashboard = page.locator(&apos;[data-testid=&quot;nav-dashboard&quot;]&apos;)
     await navDashboard.click()
     await page.goBack()
 
-    await expect(searchInput).toHaveValue('test query')
+    await expect(searchInput).toHaveValue(&apos;test query&apos;)
   })
 })
 
-test.describe('Error Boundary Hydration Tests', () => {
-  test('should handle component errors without breaking hydration', async ({ page }) => {
-    await page.goto('/dashboard/projects-hub')
+test.describe(&apos;Error Boundary Hydration Tests&apos;, () => {
+  test(&apos;should handle component errors without breaking hydration&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard/projects-hub&apos;)
 
     await page.evaluate(() => {
-      throw new Error('Simulated component error')
+      throw new Error(&apos;Simulated component error&apos;)
     })
 
-    const errorBoundary = page.locator('[data-testid="error-boundary"]')
-    const hydrationError = page.locator('[data-hydration-error]')
+    const errorBoundary = page.locator(&apos;[data-testid=&quot;error-boundary&quot;]&apos;)
+    const hydrationError = page.locator(&apos;[data-hydration-error]&apos;)
 
     await expect(errorBoundary).toBeVisible()
     await expect(hydrationError).not.toBeAttached()
   })
 })
 
-test.describe('Performance Impact Tests', () => {
-  test('should not impact performance during hydration', async ({ page }) => {
+test.describe(&apos;Performance Impact Tests&apos;, () => {
+  test(&apos;should not impact performance during hydration&apos;, async ({ page }) => {
     const startTime = Date.now()
-    await page.goto('/dashboard/projects-hub')
+    await page.goto(&apos;/dashboard/projects-hub&apos;)
 
-    await page.waitForSelector('[data-hydrated="true"]')
+    await page.waitForSelector(&apos;[data-hydrated=&quot;true&quot;]&apos;)
 
     const hydrationTime = Date.now() - startTime
     expect(hydrationTime).toBeLessThan(2000) // 2 seconds threshold
   })
 
-  test('should maintain responsiveness during state updates', async ({ page }) => {
-    await page.goto('/dashboard/projects-hub')
+  test(&apos;should maintain responsiveness during state updates&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard/projects-hub&apos;)
 
-    const viewModeToggle = page.locator('[data-testid="view-mode-toggle"]')
+    const viewModeToggle = page.locator(&apos;[data-testid=&quot;view-mode-toggle&quot;]&apos;)
     
     const startTime = Date.now()
     await viewModeToggle.click()

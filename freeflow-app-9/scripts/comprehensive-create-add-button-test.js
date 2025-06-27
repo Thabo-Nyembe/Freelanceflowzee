@@ -117,11 +117,11 @@ class CreateAddButtonTester {
       await this.page.waitForLoadState('networkidle');
 
       // Fill login form
-      await this.page.fill('input[type="email"]', TEST_CREDENTIALS.email);
-      await this.page.fill('input[type="password"]', TEST_CREDENTIALS.password);
+      await this.page.fill('input[type= "email"]', TEST_CREDENTIALS.email);
+      await this.page.fill('input[type= "password"]', TEST_CREDENTIALS.password);
       
       // Submit login
-      await this.page.click('button[type="submit"]');
+      await this.page.click('button[type= "submit"]');
       await this.page.waitForLoadState('networkidle');
       
       // Check if we're redirected to dashboard
@@ -151,7 +151,7 @@ class CreateAddButtonTester {
       await this.page.waitForTimeout(2000); // Wait for components to load
 
       // Check if button exists
-      const buttonSelector = `[data-testid="${button.testId}"]`;
+      const buttonSelector = `[data-testid= "${button.testId}"]`;
       const buttonExists = await this.page.isVisible(buttonSelector);
       
       if (!buttonExists) {
@@ -180,7 +180,7 @@ class CreateAddButtonTester {
         
         // Look for modal indicators
         const modalExists = await this.page.isVisible('.fixed.inset-0') || 
-                           await this.page.isVisible('[role="dialog"]') ||
+                           await this.page.isVisible('[role= "dialog"]') ||
                            await this.page.isVisible('.modal');
         
         if (modalExists) {
@@ -188,7 +188,7 @@ class CreateAddButtonTester {
           this.recordResult(testName, 'PASS', 'Button opens modal');
           
           // Close modal if possible
-          const closeButton = await this.page.locator('button:has-text("Cancel"), button:has-text("Close"), button[aria-label="Close"]').first();
+          const closeButton = await this.page.locator('button:has-text("Cancel"), button:has-text("Close"), button[aria-label= "Close"]').first();
           if (await closeButton.isVisible()) {
             await closeButton.click();
           }
@@ -215,7 +215,7 @@ class CreateAddButtonTester {
         await this.page.waitForTimeout(500);
         
         // Check if file input is triggered (hidden input becomes accessible)
-        const fileInputs = await this.page.locator('input[type="file"]').count();
+        const fileInputs = await this.page.locator('input[type= "file"]').count();
         if (fileInputs > 0) {
           console.log(`  ✅ File input available (${fileInputs} inputs found)`);
           this.recordResult(testName, 'PASS', `Button triggers file input (${fileInputs} inputs)`);
@@ -296,9 +296,9 @@ class CreateAddButtonTester {
   }
 
   generateReport() {
-    console.log('\n' + '='.repeat(60));
+    console.log('\n' + '='.repeat(60));'
     console.log('📊 CREATE/ADD BUTTON TEST REPORT');
-    console.log('='.repeat(60));
+    console.log('='.repeat(60));'
     
     console.log(`\n📈 Summary:`);
     console.log(`   Total Tests: ${this.results.total}`);

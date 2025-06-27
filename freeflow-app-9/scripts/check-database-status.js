@@ -7,7 +7,7 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ouzcjoxaup
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91emNqb3hhdXBpbWF6cml2eXRhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDA3NzA5NiwiZXhwIjoyMDY1NjUzMDk2fQ.HIHZQ0KuRBIwZwaTPLxD1E5RQfcQ_e0ar-oC93rTGdQ'
 
 console.log('🔍 FreeflowZee Database Status Check')
-console.log('📍 Supabase URL:', SUPABASE_URL)
+console.log('📍 Supabase URL: ', SUPABASE_URL)
 console.log('🔑 Using Service Role for comprehensive access\n')
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
@@ -21,7 +21,7 @@ async function checkTableExists(tableName) {
   try {
     const { data, error } = await supabase
       .from(tableName)
-      .select('*')
+      .select('*')'
       .limit(1)
     
     if (error) {
@@ -31,7 +31,7 @@ async function checkTableExists(tableName) {
     // Get row count
     const { count, error: countError } = await supabase
       .from(tableName)
-      .select('*', { count: 'exact', head: true })
+      .select('*', { count: 'exact', head: true })'
     
     return { 
       exists: true, 
@@ -107,7 +107,7 @@ async function main() {
   let criticalMissing = 0
   
   console.log('📊 Database Tables Status:')
-  console.log('=' .repeat(60))
+  console.log('=' .repeat(60))'
   
   for (const table of requiredTables) {
     const status = await checkTableExists(table.name)
@@ -123,7 +123,7 @@ async function main() {
   }
   
   console.log('\n📦 Storage Buckets Status:')
-  console.log('=' .repeat(60))
+  console.log('=' .repeat(60))'
   
   const storageStatus = await checkStorageBuckets()
   if (storageStatus.exists) {
@@ -132,8 +132,8 @@ async function main() {
     console.log(`❌ Storage error: ${storageStatus.error}`)
   }
   
-  console.log('\n👤 Authentication Status:')
-  console.log('=' .repeat(60))
+  console.log('\n👤 Authentication Status: ')
+  console.log('=' .repeat(60))'
   
   const authStatus = await checkAuthUsers()
   if (authStatus.accessible) {
@@ -143,8 +143,8 @@ async function main() {
   }
   
   // Summary
-  console.log('\n📋 SUMMARY:')
-  console.log('=' .repeat(60))
+  console.log('\n📋 SUMMARY: ')
+  console.log('=' .repeat(60))'
   
   const completionRate = Math.round((existingTables / totalTables) * 100)
   console.log(`📊 Tables: ${existingTables}/${totalTables} (${completionRate}%)`)
@@ -166,7 +166,7 @@ async function main() {
     console.log('🔴 Database setup incomplete')
     console.log('❌ Manual setup required')
     
-    console.log('\n🔧 NEXT STEPS:')
+    console.log('\n🔧 NEXT STEPS: ')
     console.log('1. Run SQL scripts in Supabase SQL Editor:')
     console.log('   - scripts/supabase-schema.sql (main tables)')
     console.log('   - scripts/create-upf-tables.sql (UPF system)')

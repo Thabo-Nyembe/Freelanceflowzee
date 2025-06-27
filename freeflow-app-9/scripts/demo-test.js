@@ -5,7 +5,7 @@ const http = require('http');
 const BASE_URL = 'http://localhost:3001';
 const TEST_ENDPOINTS = [
   // Public Routes (should return 200)
-  { path: '/', name: 'Landing Page', expectedStatus: 200 },
+  { path: '/', name: 'Landing Page', expectedStatus: 200 },'
   { path: '/login', name: 'Login Page', expectedStatus: 200 },
   { path: '/signup', name: 'Signup Page', expectedStatus: 200 },
   { path: '/features', name: 'Features Page', expectedStatus: 200 },
@@ -115,7 +115,7 @@ async function runDemo() {
   const failedTests = totalTests - passedTests;
   
   console.log('\n📈 SUMMARY:');
-  console.log('============');
+  console.log('============ ');
   console.log(`Total Tests: ${totalTests}`);
   console.log(`✅ Passed: ${passedTests}`);
   console.log(`❌ Failed: ${failedTests}`);

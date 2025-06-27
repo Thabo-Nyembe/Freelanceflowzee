@@ -1,49 +1,49 @@
 // FreeflowZee Service Worker - PWA Features
-const CACHE_NAME = 'freeflowzee-v1'
-const OFFLINE_CACHE = 'freeflowzee-offline-v1'
+const CACHE_NAME = &apos;freeflowzee-v1&apos;
+const OFFLINE_CACHE = &apos;freeflowzee-offline-v1&apos;
 
 // Core app files to cache for offline functionality
 const STATIC_ASSETS = [
-  '/',
-  '/dashboard',
-  '/projects',
-  '/payment',
-  '/offline',
-  '/manifest.json',
-  '/_next/static/css/app/layout.css',
+  &apos;/','
+  &apos;/dashboard&apos;,
+  &apos;/projects&apos;,
+  &apos;/payment&apos;,
+  &apos;/offline&apos;,
+  &apos;/manifest.json&apos;,
+  &apos;/_next/static/css/app/layout.css&apos;,
   // Add critical static assets here
 ]
 
 // API routes that should be cached
 const API_CACHE_PATTERNS = [
-  '/api/projects',
-  '/api/payments/create-intent-enhanced',
-  '/api/storage',
+  &apos;/api/projects&apos;,
+  &apos;/api/payments/create-intent-enhanced&apos;,
+  &apos;/api/storage&apos;,
 ]
 
 // Install event - cache core assets
-self.addEventListener('install', (event) => {
-  console.log('🔧 Service Worker installing...')
+self.addEventListener(&apos;install&apos;, (event) => {
+  console.log(&apos;🔧 Service Worker installing...&apos;)
   
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('📦 Caching core assets')
+        console.log(&apos;📦 Caching core assets&apos;)
         return cache.addAll(STATIC_ASSETS)
       })
       .then(() => {
-        console.log('✅ Service Worker installed successfully')
+        console.log(&apos;✅ Service Worker installed successfully&apos;)
         return self.skipWaiting()
       })
       .catch((error) => {
-        console.error('❌ Service Worker install failed:', error)
+        console.error(&apos;❌ Service Worker install failed:&apos;, error)
       })
   )
 })
 
 // Activate event - clean up old caches
-self.addEventListener('activate', (event) => {
-  console.log('🚀 Service Worker activating...')
+self.addEventListener(&apos;activate&apos;, (event) => {
+  console.log(&apos;🚀 Service Worker activating...&apos;)
   
   event.waitUntil(
     caches.keys()
@@ -51,31 +51,31 @@ self.addEventListener('activate', (event) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
             if (cacheName !== CACHE_NAME && cacheName !== OFFLINE_CACHE) {
-              console.log('🗑️ Deleting old cache:', cacheName)
+              console.log(&apos;🗑️ Deleting old cache:&apos;, cacheName)
               return caches.delete(cacheName)
             }
           })
         )
       })
       .then(() => {
-        console.log('✅ Service Worker activated successfully')
+        console.log(&apos;✅ Service Worker activated successfully&apos;)
         return self.clients.claim()
       })
   )
 })
 
 // Fetch event - implement caching strategies
-self.addEventListener('fetch', (event) => {
+self.addEventListener(&apos;fetch&apos;, (event) => {
   const { request } = event
   const url = new URL(request.url)
 
   // Skip non-HTTP requests
-  if (!request.url.startsWith('http')) {
+  if (!request.url.startsWith(&apos;http&apos;)) {
     return
   }
 
   // Handle different types of requests
-  if (request.method === 'GET') {
+  if (request.method === &apos;GET&apos;) {
     // Static assets - Cache First strategy
     if (isStaticAsset(url)) {
       event.respondWith(cacheFirstStrategy(request))
@@ -94,27 +94,27 @@ self.addEventListener('fetch', (event) => {
     }
   }
   // POST requests - Network only with offline fallback
-  else if (request.method === 'POST') {
+  else if (request.method === &apos;POST&apos;) {
     event.respondWith(networkOnlyWithFallback(request))
   }
 })
 
 // Background sync for offline form submissions
-self.addEventListener('sync', (event) => {
-  console.log('🔄 Background sync triggered:', event.tag)
+self.addEventListener(&apos;sync&apos;, (event) => {
+  console.log(&apos;🔄 Background sync triggered:&apos;, event.tag)
   
-  if (event.tag === 'payment-submission') {
+  if (event.tag === &apos;payment-submission&apos;) {
     event.waitUntil(syncPaymentSubmissions())
-  } else if (event.tag === 'project-update') {
+  } else if (event.tag === &apos;project-update&apos;) {
     event.waitUntil(syncProjectUpdates())
-  } else if (event.tag === 'file-upload') {
+  } else if (event.tag === &apos;file-upload&apos;) {
     event.waitUntil(syncFileUploads())
   }
 })
 
 // Push notification handling
-self.addEventListener('push', (event) => {
-  console.log('📱 Push notification received')
+self.addEventListener(&apos;push&apos;, (event) => {
+  console.log(&apos;📱 Push notification received&apos;)
   
   let notificationData = {}
   
@@ -122,26 +122,26 @@ self.addEventListener('push', (event) => {
     try {
       notificationData = event.data.json()
     } catch (error) {
-      notificationData = { title: 'FreeflowZee', body: event.data.text() }
+      notificationData = { title: &apos;FreeflowZee&apos;, body: event.data.text() }
     }
   }
 
   const options = {
-    title: notificationData.title || 'FreeflowZee',
-    body: notificationData.body || 'You have a new notification',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/badge-72x72.png',
-    tag: notificationData.tag || 'general',
+    title: notificationData.title || &apos;FreeflowZee&apos;,
+    body: notificationData.body || &apos;You have a new notification&apos;,
+    icon: &apos;/icons/icon-192x192.png&apos;,
+    badge: &apos;/icons/badge-72x72.png&apos;,
+    tag: notificationData.tag || &apos;general&apos;,
     data: notificationData,
     actions: [
       {
-        action: 'view',
-        title: 'View',
-        icon: '/icons/view-icon.png'
+        action: &apos;view&apos;,
+        title: &apos;View&apos;,
+        icon: &apos;/icons/view-icon.png&apos;
       },
       {
-        action: 'dismiss',
-        title: 'Dismiss'
+        action: &apos;dismiss&apos;,
+        title: &apos;Dismiss&apos;
       }
     ],
     vibrate: [200, 100, 200],
@@ -154,36 +154,36 @@ self.addEventListener('push', (event) => {
 })
 
 // Notification click handling
-self.addEventListener('notificationclick', (event) => {
-  console.log('🔔 Notification clicked:', event.action)
+self.addEventListener(&apos;notificationclick&apos;, (event) => {
+  console.log(&apos;🔔 Notification clicked:&apos;, event.action)
   
   event.notification.close()
 
-  if (event.action === 'view') {
-    const url = event.notification.data?.url || '/dashboard'
+  if (event.action === &apos;view&apos;) {
+    const url = event.notification.data?.url || &apos;/dashboard&apos;
     event.waitUntil(
       clients.openWindow(url)
     )
-  } else if (event.action === 'dismiss') {
+  } else if (event.action === &apos;dismiss&apos;) {
     // Just close the notification
     return
   } else {
     // Default action - open app
     event.waitUntil(
-      clients.openWindow('/dashboard')
+      clients.openWindow(&apos;/dashboard&apos;)
     )
   }
 })
 
 // Message handling for communication with main thread
-self.addEventListener('message', (event) => {
-  console.log('💬 Message received:', event.data)
+self.addEventListener(&apos;message&apos;, (event) => {
+  console.log(&apos;💬 Message received:&apos;, event.data)
   
-  if (event.data.type === 'CACHE_CLEAR') {
+  if (event.data.type === &apos;CACHE_CLEAR&apos;) {
     event.waitUntil(clearAllCaches())
-  } else if (event.data.type === 'CACHE_UPDATE') {
+  } else if (event.data.type === &apos;CACHE_UPDATE&apos;) {
     event.waitUntil(updateCache(event.data.urls))
-  } else if (event.data.type === 'SKIP_WAITING') {
+  } else if (event.data.type === &apos;SKIP_WAITING&apos;) {
     self.skipWaiting()
   }
 })
@@ -204,8 +204,8 @@ async function cacheFirstStrategy(request) {
     
     return networkResponse
   } catch (error) {
-    console.log('Cache first strategy failed:', error)
-    return new Response('Offline - Asset not available', { status: 503 })
+    console.log(&apos;Cache first strategy failed:&apos;, error)
+    return new Response(&apos;Offline - Asset not available&apos;, { status: 503 })
   }
 }
 
@@ -221,7 +221,7 @@ async function networkFirstStrategy(request) {
     
     return networkResponse
   } catch (error) {
-    console.log('Network failed, trying cache:', error)
+    console.log(&apos;Network failed, trying cache:&apos;, error)
     
     const cachedResponse = await caches.match(request)
     if (cachedResponse) {
@@ -229,13 +229,13 @@ async function networkFirstStrategy(request) {
     }
     
     // Return offline page for navigation requests
-    if (request.mode === 'navigate') {
-      return caches.match('/offline')
+    if (request.mode === &apos;navigate&apos;) {
+      return caches.match(&apos;/offline&apos;)
     }
     
-    return new Response('Offline - Content not available', { 
+    return new Response(&apos;Offline - Content not available&apos;, { 
       status: 503,
-      headers: { 'Content-Type': 'text/plain' }
+      headers: { &apos;Content-Type&apos;: &apos;text/plain&apos; }
     })
   }
 }
@@ -251,7 +251,7 @@ async function staleWhileRevalidateStrategy(request) {
     }
     return networkResponse
   }).catch((error) => {
-    console.log('Background fetch failed:', error)
+    console.log(&apos;Background fetch failed:&apos;, error)
   })
 
   // Return cached version immediately, or wait for network if no cache
@@ -262,52 +262,52 @@ async function networkOnlyWithFallback(request) {
   try {
     return await fetch(request)
   } catch (error) {
-    console.log('Network request failed, storing for sync:', error)
+    console.log(&apos;Network request failed, storing for sync:&apos;, error)
     
     // Store for background sync
-    if (request.url.includes('/api/payments/')) {
+    if (request.url.includes(&apos;/api/payments/&apos;)) {
       await storePaymentForSync(request)
-    } else if (request.url.includes('/api/projects/')) {
+    } else if (request.url.includes(&apos;/api/projects/&apos;)) {
       await storeProjectUpdateForSync(request)
     }
     
     return new Response(JSON.stringify({
       success: false,
-      error: 'Request stored for background sync',
+      error: &apos;Request stored for background sync&apos;,
       queued: true
     }), {
       status: 202,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { &apos;Content-Type&apos;: &apos;application/json&apos; }
     })
   }
 }
 
 // Helper Functions
 function isStaticAsset(url) {
-  return url.pathname.includes('/_next/static/') ||
-         url.pathname.includes('/icons/') ||
-         url.pathname.includes('/images/') ||
-         url.pathname.endsWith('.css') ||
-         url.pathname.endsWith('.js') ||
-         url.pathname.endsWith('.png') ||
-         url.pathname.endsWith('.jpg') ||
-         url.pathname.endsWith('.svg')
+  return url.pathname.includes(&apos;/_next/static/&apos;) ||
+         url.pathname.includes(&apos;/icons/&apos;) ||
+         url.pathname.includes(&apos;/images/&apos;) ||
+         url.pathname.endsWith(&apos;.css&apos;) ||
+         url.pathname.endsWith(&apos;.js&apos;) ||
+         url.pathname.endsWith(&apos;.png&apos;) ||
+         url.pathname.endsWith(&apos;.jpg&apos;) ||
+         url.pathname.endsWith(&apos;.svg&apos;)
 }
 
 function isAPICall(url) {
-  return url.pathname.startsWith('/api/')
+  return url.pathname.startsWith(&apos;/api/&apos;)
 }
 
 function isPageRequest(url) {
-  return url.pathname === '/' ||
-         url.pathname.startsWith('/dashboard') ||
-         url.pathname.startsWith('/projects') ||
-         url.pathname.startsWith('/payment')
+  return url.pathname === &apos;/' ||'
+         url.pathname.startsWith(&apos;/dashboard&apos;) ||
+         url.pathname.startsWith(&apos;/projects&apos;) ||
+         url.pathname.startsWith(&apos;/payment&apos;)
 }
 
 // Background Sync Functions
 async function syncPaymentSubmissions() {
-  console.log('🔄 Syncing payment submissions...')
+  console.log(&apos;🔄 Syncing payment submissions...&apos;)
   
   try {
     const db = await openIndexedDB()
@@ -318,31 +318,31 @@ async function syncPaymentSubmissions() {
         const response = await fetch(payment.url, payment.request)
         if (response.ok) {
           await removeStoredPayment(db, payment.id)
-          console.log('✅ Payment synced successfully')
+          console.log(&apos;✅ Payment synced successfully&apos;)
         }
       } catch (error) {
-        console.log('❌ Payment sync failed:', error)
+        console.log(&apos;❌ Payment sync failed:&apos;, error)
       }
     }
   } catch (error) {
-    console.log('❌ Payment sync error:', error)
+    console.log(&apos;❌ Payment sync error:&apos;, error)
   }
 }
 
 async function syncProjectUpdates() {
-  console.log('🔄 Syncing project updates...')
+  console.log(&apos;🔄 Syncing project updates...&apos;)
   // Similar implementation for project updates
 }
 
 async function syncFileUploads() {
-  console.log('🔄 Syncing file uploads...')
+  console.log(&apos;🔄 Syncing file uploads...&apos;)
   // Similar implementation for file uploads
 }
 
 async function storePaymentForSync(request) {
   const db = await openIndexedDB()
-  const transaction = db.transaction(['payments'], 'readwrite')
-  const store = transaction.objectStore('payments')
+  const transaction = db.transaction([&apos;payments&apos;], &apos;readwrite&apos;)
+  const store = transaction.objectStore(&apos;payments&apos;)
   
   const paymentData = {
     id: Date.now(),
@@ -362,7 +362,7 @@ async function storeProjectUpdateForSync(request) {
 
 async function openIndexedDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('FreeflowZeeDB', 1)
+    const request = indexedDB.open(&apos;FreeflowZeeDB&apos;, 1)
     
     request.onerror = () => reject(request.error)
     request.onsuccess = () => resolve(request.result)
@@ -370,24 +370,24 @@ async function openIndexedDB() {
     request.onupgradeneeded = (event) => {
       const db = event.target.result
       
-      if (!db.objectStoreNames.contains('payments')) {
-        db.createObjectStore('payments', { keyPath: 'id' })
+      if (!db.objectStoreNames.contains(&apos;payments&apos;)) {
+        db.createObjectStore(&apos;payments&apos;, { keyPath: &apos;id&apos; })
       }
       
-      if (!db.objectStoreNames.contains('projects')) {
-        db.createObjectStore('projects', { keyPath: 'id' })
+      if (!db.objectStoreNames.contains(&apos;projects&apos;)) {
+        db.createObjectStore(&apos;projects&apos;, { keyPath: &apos;id&apos; })
       }
       
-      if (!db.objectStoreNames.contains('files')) {
-        db.createObjectStore('files', { keyPath: 'id' })
+      if (!db.objectStoreNames.contains(&apos;files&apos;)) {
+        db.createObjectStore(&apos;files&apos;, { keyPath: &apos;id&apos; })
       }
     }
   })
 }
 
 async function getStoredPayments(db) {
-  const transaction = db.transaction(['payments'], 'readonly')
-  const store = transaction.objectStore('payments')
+  const transaction = db.transaction([&apos;payments&apos;], &apos;readonly&apos;)
+  const store = transaction.objectStore(&apos;payments&apos;)
   return new Promise((resolve, reject) => {
     const request = store.getAll()
     request.onerror = () => reject(request.error)
@@ -396,8 +396,8 @@ async function getStoredPayments(db) {
 }
 
 async function removeStoredPayment(db, id) {
-  const transaction = db.transaction(['payments'], 'readwrite')
-  const store = transaction.objectStore('payments')
+  const transaction = db.transaction([&apos;payments&apos;], &apos;readwrite&apos;)
+  const store = transaction.objectStore(&apos;payments&apos;)
   return new Promise((resolve, reject) => {
     const request = store.delete(id)
     request.onerror = () => reject(request.error)
@@ -408,13 +408,13 @@ async function removeStoredPayment(db, id) {
 async function clearAllCaches() {
   const cacheNames = await caches.keys()
   await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)))
-  console.log('🗑️ All caches cleared')
+  console.log(&apos;🗑️ All caches cleared&apos;)
 }
 
 async function updateCache(urls) {
   const cache = await caches.open(CACHE_NAME)
   await Promise.all(urls.map(url => cache.add(url)))
-  console.log('📦 Cache updated with new URLs')
+  console.log(&apos;📦 Cache updated with new URLs&apos;)
 }
 
-console.log('🚀 FreeflowZee Service Worker loaded successfully') 
+console.log(&apos;🚀 FreeflowZee Service Worker loaded successfully&apos;) 

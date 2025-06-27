@@ -1,8 +1,8 @@
-import { test as base } from '@playwright/test';
-import { DashboardPage } from '../page-objects/dashboard-page';
-import { LandingPage } from '../page-objects/landing-page';
-import { PaymentPage } from '../page-objects/payment-page';
-import { AuthPage } from '../page-objects/auth-page';
+import { test as base } from &apos;@playwright/test&apos;;
+import { DashboardPage } from &apos;../page-objects/dashboard-page&apos;;
+import { LandingPage } from &apos;../page-objects/landing-page&apos;;
+import { PaymentPage } from &apos;../page-objects/payment-page&apos;;
+import { AuthPage } from &apos;../page-objects/auth-page&apos;;
 
 // Extend basic test fixture
 type TestFixtures = {
@@ -23,8 +23,8 @@ export const test = base.extend<TestFixtures>({
   // Setup test user
   testUser: async ({}, use) => {
     await use({
-      email: 'test@example.com',
-      password: 'testpass123'
+      email: &apos;test@example.com&apos;,
+      password: &apos;testpass123&apos;
     });
   },
 

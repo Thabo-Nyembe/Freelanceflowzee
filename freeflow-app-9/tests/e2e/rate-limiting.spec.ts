@@ -1,39 +1,39 @@
 // 🧪 Rate Limiting Tests
 // Tests rate limiting functionality for the /api/projects/[slug]/access endpoint
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from &apos;@playwright/test&apos;;
 
 // Configuration for accessing the API
 test.use({
-  baseURL: 'http://localhost:3001',
+  baseURL: &apos;http://localhost:3001&apos;,
   extraHTTPHeaders: {
-    'Content-Type': 'application/json'
+    &apos;Content-Type&apos;: &apos;application/json&apos;
   },
 });
 
-const TEST_PROJECT_SLUG = 'premium-brand-identity-package';
+const TEST_PROJECT_SLUG = &apos;premium-brand-identity-package&apos;;
 
 const VALID_CREDENTIALS = {
-  password: 'secure-unlock-2024',
-  accessCode: 'BRAND2024'
+  password: &apos;secure-unlock-2024&apos;,
+  accessCode: &apos;BRAND2024&apos;
 };
 
 // Run tests in isolation
-test.describe.configure({ mode: 'serial' });
+test.describe.configure({ mode: &apos;serial&apos; });
 
-test.describe('🚫 Rate Limiting', () => {
+test.describe(&apos;🚫 Rate Limiting&apos;, () => {
   // Clear rate limits before each test
   test.beforeEach(async ({ request }) => {
-    await request.post('/api/projects/clear-rate-limits', {
+    await request.post(&apos;/api/projects/clear-rate-limits&apos;, {
       headers: {
-        'x-admin-key': 'test-admin-key'
+        &apos;x-admin-key&apos;: &apos;test-admin-key&apos;
       }
     });
     // Wait a bit to ensure rate limits are cleared
     await new Promise(resolve => setTimeout(resolve, 1000));
   });
     
-  test('should implement rate limiting after 5 failed attempts', async ({ request }) => {
+  test(&apos;should implement rate limiting after 5 failed attempts&apos;, async ({ request }) => {
     // Make 5 failed attempts
     for (let i = 0; i < 5; i++) {
       const response = await request.post(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
@@ -54,23 +54,23 @@ test.describe('🚫 Rate Limiting', () => {
     // 6th attempt should be rate limited
     const response = await request.post(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
       data: {
-        password: 'wrong-password-6'
+        password: &apos;wrong-password-6&apos;
       }
     });
 
     const data = await response.json();
-    console.log('Final attempt response:', {
+    console.log(&apos;Final attempt response:&apos;, {
       status: response.status(),
       data
     });
 
     expect(response.status()).toBe(429);
-    expect(data.error).toContain('Too many failed attempts');
-    expect(data.code).toBe('rate_limited');
+    expect(data.error).toContain(&apos;Too many failed attempts&apos;);
+    expect(data.code).toBe(&apos;rate_limited&apos;);
     expect(data.retryAfter).toBeGreaterThan(0);
   });
 
-  test('should clear rate limiting on successful access', async ({ request }) => {
+  test(&apos;should clear rate limiting on successful access&apos;, async ({ request }) => {
     // Make a few failed attempts
     for (let i = 0; i < 3; i++) {
       const response = await request.post(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
@@ -93,7 +93,7 @@ test.describe('🚫 Rate Limiting', () => {
     });
 
     const successData = await successResponse.json();
-    console.log('Success response:', {
+    console.log(&apos;Success response:&apos;, {
       status: successResponse.status(),
       data: successData
     });
@@ -103,12 +103,12 @@ test.describe('🚫 Rate Limiting', () => {
     // Next attempt should not be rate limited
     const nextResponse = await request.post(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
       data: {
-        password: 'wrong-password-after-success'
+        password: &apos;wrong-password-after-success&apos;
       }
     });
 
     const nextData = await nextResponse.json();
-    console.log('Next attempt response:', {
+    console.log(&apos;Next attempt response:&apos;, {
       status: nextResponse.status(),
       data: nextData
     });

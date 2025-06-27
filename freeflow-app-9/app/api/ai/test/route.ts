@@ -41,7 +41,7 @@ export async function GET() {
       }
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('AI Test Error:', error)
     return NextResponse.json({
       success: false,

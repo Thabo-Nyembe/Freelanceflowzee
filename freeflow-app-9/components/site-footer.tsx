@@ -4,33 +4,29 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Twitter, 
-  Linkedin, 
-  Github, 
-  Facebook,
-  Instagram,
-  Home,
-  FolderOpen,
-  CreditCard,
-  Shield,
-  HelpCircle,
-  FileText,
-  ExternalLink
-} from 'lucide-react'
+import { Mail, Phone, MapPin, ExternalLink, HelpCircle, Shield, FileText, Home, Twitter, Github, Linkedin } from 'lucide-react'
 
 interface SiteFooterProps {
   variant?: 'default' | 'minimal'
 }
 
+const socialLinks = [
+  { label: 'Twitter', href: 'https://twitter.com/freeflowzee', icon: Twitter, handle: '@freeflowzee' },
+  { label: 'GitHub', href: 'https://github.com/freeflowzee', icon: Github, handle: '@freeflowzee' },
+  { label: 'LinkedIn', href: 'https://linkedin.com/company/freeflowzee', icon: Linkedin, handle: 'freeflowzee' }
+]
+
 export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
   const [email, setEmail] = useState('')
   const [isSubscribed, setIsSubscribed] = useState(false)
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubscribed(true)
+  }
+
   const handleEmailClick = () => {
-    window.location.href = 'mailto:hello@freelanceflowzee.com?subject=Contact from FreeflowZee Website'
+    window.location.href = 'mailto:hello@freelanceflowzee.com'
   }
 
   const handlePhoneClick = () => {
@@ -38,54 +34,8 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
   }
 
   const handleAddressClick = () => {
-    // Open in Google Maps with the address
-    const address = encodeURIComponent('San Francisco, CA')
-    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${address}`
-    window.open(mapsUrl, '_blank', 'noopener,noreferrer')
+    window.open('https://maps.google.com/?q=San+Francisco,+CA', '_blank')
   }
-
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (email.trim()) {
-      setIsSubscribed(true)
-      console.log('Newsletter signup:', email)
-      setEmail('')
-    }
-  }
-
-  // Social media links with real URLs
-  const socialLinks = [
-    { 
-      icon: Twitter, 
-      href: 'https://twitter.com/freelanceflowzee', 
-      label: 'Twitter',
-      handle: '@freelanceflowzee' 
-    },
-    { 
-      icon: Linkedin, 
-      href: 'https://linkedin.com/company/freelanceflowzee', 
-      label: 'LinkedIn',
-      handle: 'freelanceflowzee' 
-    },
-    { 
-      icon: Github, 
-      href: 'https://github.com/freelanceflowzee', 
-      label: 'GitHub',
-      handle: 'freelanceflowzee' 
-    },
-    { 
-      icon: Facebook, 
-      href: 'https://facebook.com/freelanceflowzee', 
-      label: 'Facebook',
-      handle: 'freelanceflowzee' 
-    },
-    { 
-      icon: Instagram, 
-      href: 'https://instagram.com/freelanceflowzee', 
-      label: 'Instagram',
-      handle: '@freelanceflowzee' 
-    },
-  ]
 
   if (variant === 'minimal') {
     return (
@@ -93,21 +43,15 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="flex items-center space-x-4">
-              <Link href="/" className="text-xl font-bold text-indigo-600 hover:text-indigo-700">
-                FreeflowZee
+              <Link href="/" className="text-gray-500 hover:text-gray-600">
+                Terms
               </Link>
-              <span className="text-gray-500">© 2024 All rights reserved</span>
+              <Link href="/" className="text-gray-500 hover:text-gray-600">
+                Privacy
+              </Link>
             </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" onClick={handleEmailClick}>
-                <Mail className="w-4 h-4 mr-2" />
-                Contact
-              </Button>
-              <Link href="/contact">
-                <Button variant="outline" size="sm">
-                  Support
-                </Button>
-              </Link>
+            <div className="text-gray-400">
+              © {new Date().getFullYear()} FreeflowZee. All rights reserved.
             </div>
           </div>
         </div>
@@ -264,7 +208,7 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
                 {isSubscribed ? (
                   <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
                     <p className="font-medium">🎉 Thanks for subscribing!</p>
-                    <p className="text-sm">You'll receive our latest content in your inbox.</p>
+                    <p className="text-sm">You&apos;ll receive our latest content in your inbox.</p>
                   </div>
                 ) : (
                   <form onSubmit={handleNewsletterSubmit} className="space-y-3">
@@ -332,7 +276,7 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
                 </Button>
               </Link>
               <Link href="/contact">
-                                    <Button size="sm" variant="outline" className="border-purple-300 text-white hover:bg-purple-50 hover:text-purple-900">
+                <Button size="sm" variant="outline" className="border-purple-300 text-white hover:bg-purple-50 hover:text-purple-900">
                   Contact Sales
                 </Button>
               </Link>

@@ -92,13 +92,9 @@ class BatchedTestRunner {
         return
       }
 
-      const args = [
-        'playwright', 'test',
-        ...existingTests,
-        '--timeout', batch.timeout.toString(),
-        '--workers', '1',
-        '--reporter', 'line',
-        '--max-failures', '3'
+      const args = ['playwright', 'test',
+        ...existingTests, '--timeout', batch.timeout.toString(), '--workers', '1','
+        '--reporter', 'line', '--max-failures', '3
       ]
 
       const testProcess = spawn('npx', args, {
@@ -106,8 +102,8 @@ class BatchedTestRunner {
         cwd: process.cwd()
       })
 
-      let output = ''
-      let errorOutput = ''
+      let output = '
+      let errorOutput = '
 
       testProcess.stdout.on('data', (data) => {
         const text = data.toString()
@@ -195,7 +191,7 @@ class BatchedTestRunner {
 
   generateReport(totalDuration) {
     this.log('\n📈 TEST BATCH SUMMARY', 'bright')
-    this.log('=' .repeat(50), 'blue')
+    this.log('=' .repeat(50), 'blue')'
 
     const passed = this.results.filter(r => r.status === 'passed').length
     const failed = this.results.filter(r => r.status === 'failed').length
@@ -204,8 +200,8 @@ class BatchedTestRunner {
 
     this.results.forEach(result => {
       const icon = {
-        passed: '✅',
-        failed: '❌',
+        passed: '✅','
+        failed: '❌','
         skipped: '⚠️',
         error: '💥'
       }[result.status]

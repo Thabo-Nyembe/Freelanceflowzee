@@ -5,79 +5,30 @@ const fs = require('fs');
 
 console.log('🧪 FreeflowZee Create/Add Button Functionality Test');
 console.log('==================================================');
-console.log('📅 Date:', new Date().toISOString());
+console.log('📅 Date: ', new Date().toISOString());
 console.log('🔧 Testing Method: HTTP + HTML Analysis');
-console.log('');
+console.log('');'
 
 // Test configuration
 const BASE_URL = 'http://localhost:3004';
-const TEST_ROUTES = [
-  '/dashboard',
-  '/dashboard/projects-hub', 
-  '/dashboard/files-hub',
-  '/dashboard/ai-create',
-  '/dashboard/video-studio',
-  '/dashboard/community',
-  '/dashboard/my-day',
-  '/dashboard/escrow',
-  '/dashboard/time-tracking'
+const TEST_ROUTES = ['/dashboard', '/dashboard/projects-hub', '/dashboard/files-hub', '/dashboard/ai-create', '/dashboard/video-studio', '/dashboard/community', '/dashboard/my-day', '/dashboard/escrow', '/dashboard/time-tracking'
 ];
 
-const API_ENDPOINTS = [
-  '/api/ai/chat',
-  '/api/collaboration/upf',
-  '/api/storage/analytics',
-  '/api/upload'
+const API_ENDPOINTS = ['/api/ai/chat', '/api/collaboration/upf', '/api/storage/analytics', '/api/upload'
 ];
 
 // Expected buttons with their test IDs
 const EXPECTED_BUTTONS = {
-  'Dashboard': [
-    'new-project-btn',
-    'create-project-btn', 
-    'create-invoice-btn',
-    'upload-files-btn',
-    'schedule-meeting-btn'
-  ],
-  'Projects Hub': [
-    'create-project-btn',
-    'new-project-btn'
-  ],
-  'Files Hub': [
-    'upload-file-btn',
-    'create-folder-btn'
-  ],
-  'AI Create': [
-    'generate-assets-btn',
-    'preview-asset-btn',
-    'download-asset-btn',
-    'upload-asset-btn',
-    'export-all-btn'
-  ],
-  'Video Studio': [
-    'create-video-btn',
-    'upload-media-btn',
-    'upload-btn'
-  ],
-  'Community': [
-    'create-post-btn'
-  ],
-  'My Day': [
-    'add-task-btn',
-    'start-timer-btn'
-  ],
-  'Escrow': [
-    'create-escrow-btn',
-    'create-deposit-btn',
-    'add-milestone-btn'
-  ],
-  'Time Tracking': [
-    'start-timer-btn',
-    'add-entry-btn',
-    'create-project-btn',
-    'export-timesheet-btn',
-    'generate-report-btn'
-  ]
+  'Dashboard': ['new-project-btn', 'create-project-btn', 'create-invoice-btn', 'upload-files-btn', 'schedule-meeting-btn'
+  ], 'Projects Hub': ['create-project-btn', 'new-project-btn'
+  ], 'Files Hub': ['upload-file-btn', 'create-folder-btn'
+  ], 'AI Create': ['generate-assets-btn', 'preview-asset-btn', 'download-asset-btn', 'upload-asset-btn', 'export-all-btn'
+  ], 'Video Studio': ['create-video-btn', 'upload-media-btn', 'upload-btn'
+  ], 'Community': ['create-post-btn'
+  ], 'My Day': ['add-task-btn', 'start-timer-btn'
+  ], 'Escrow': ['create-escrow-btn', 'create-deposit-btn', 'add-milestone-btn'
+  ], 'Time Tracking': ['start-timer-btn', 'add-entry-btn', 'create-project-btn', 'export-timesheet-btn',
+    'generate-report-btn']
 };
 
 class SimpleButtonTester {
@@ -116,7 +67,7 @@ class SimpleButtonTester {
         resolve({
           statusCode: 0,
           error: error.message,
-          data: ''
+          data: '
         });
       });
       
@@ -125,14 +76,14 @@ class SimpleButtonTester {
         resolve({
           statusCode: 0,
           error: 'Timeout',
-          data: ''
+          data: '
         });
       });
     });
   }
 
   async testRoutes() {
-    console.log('📍 Testing Dashboard Routes:');
+    console.log('📍 Testing Dashboard Routes: ');
     console.log('============================');
     
     for (const route of TEST_ROUTES) {
@@ -150,14 +101,14 @@ class SimpleButtonTester {
         this.results.summary.workingRoutes++;
       }
       
-      const status = response.statusCode >= 200 && response.statusCode < 400 ? '✅' : '❌';
-      console.log(`${status} ${route}: HTTP ${response.statusCode}${response.error ? ' (' + response.error + ')' : ''}`);
+      const status = response.statusCode >= 200 && response.statusCode < 400 ? '✅' : &apos;❌';
+      console.log(`${status} ${route}: HTTP ${response.statusCode}${response.error ? ' (' + response.error + ')' : }`);
     }
-    console.log('');
+    console.log('');'
   }
 
   async testAPIEndpoints() {
-    console.log('📍 Testing API Endpoints:');
+    console.log('📍 Testing API Endpoints: ');
     console.log('=========================');
     
     for (const endpoint of API_ENDPOINTS) {
@@ -175,28 +126,19 @@ class SimpleButtonTester {
         this.results.summary.workingAPIs++;
       }
       
-      const status = response.statusCode === 200 ? '✅' : response.statusCode >= 400 && response.statusCode < 500 ? '🟡' : '❌';
-      console.log(`${status} ${endpoint}: HTTP ${response.statusCode}${response.error ? ' (' + response.error + ')' : ''}`);
+      const status = response.statusCode === 200 ? '✅' : response.statusCode >= 400 && response.statusCode < 500 ? &apos;🟡&apos; : &apos;❌';
+      console.log(`${status} ${endpoint}: HTTP ${response.statusCode}${response.error ? ' (' + response.error + ')' : }`);
     }
-    console.log('');
+    console.log('');'
   }
 
   async testButtonImplementations() {
-    console.log('📍 Testing Button Implementations:');
+    console.log('📍 Testing Button Implementations: ');
     console.log('==================================');
     
     // Read component files and check for button implementations
-    const componentFiles = [
-      'app/(app)/dashboard/page.tsx',
-      'app/(app)/dashboard/projects-hub/page.tsx',
-      'components/hubs/files-hub.tsx',
-      'components/collaboration/ai-create.tsx',
-      'app/(app)/dashboard/video-studio/page.tsx',
-      'components/community/enhanced-community-hub.tsx',
-      'app/(app)/dashboard/my-day/page.tsx',
-      'app/(app)/dashboard/escrow/page.tsx',
-      'app/(app)/dashboard/time-tracking/page.tsx'
-    ];
+    const componentFiles = ['app/(app)/dashboard/page.tsx', 'app/(app)/dashboard/projects-hub/page.tsx', 'components/hubs/files-hub.tsx', 'components/collaboration/ai-create.tsx', 'app/(app)/dashboard/video-studio/page.tsx', 'components/community/enhanced-community-hub.tsx', 'app/(app)/dashboard/my-day/page.tsx', 'app/(app)/dashboard/escrow/page.tsx',
+      'app/(app)/dashboard/time-tracking/page.tsx'];
     
     for (const [componentName, expectedButtons] of Object.entries(EXPECTED_BUTTONS)) {
       this.results.summary.expectedButtons += expectedButtons.length;
@@ -206,8 +148,8 @@ class SimpleButtonTester {
       // Find corresponding file
       const file = componentFiles.find(f => {
         const fileName = f.toLowerCase();
-        const compName = componentName.toLowerCase().replace(/\s+/g, '-');
-        return fileName.includes(compName) || fileName.includes(compName.replace('-', ''));
+        const compName = componentName.toLowerCase().replace(/\s+/g, '-');'
+        return fileName.includes(compName) || fileName.includes(compName.replace('-', ));
       });
       
       if (file && fs.existsSync(file)) {
@@ -215,7 +157,7 @@ class SimpleButtonTester {
           const content = fs.readFileSync(file, 'utf8');
           
           for (const buttonId of expectedButtons) {
-            if (content.includes(`data-testid="${buttonId}"`) || content.includes(`testid="${buttonId}"`)) {
+            if (content.includes(`data-testid= "${buttonId}"`) || content.includes(`testid= "${buttonId}"`)) {
               foundButtons.push(buttonId);
               this.results.summary.foundButtons++;
             }
@@ -246,11 +188,11 @@ class SimpleButtonTester {
         console.log(`     Missing: ${missing.join(', ')}`);
       }
     }
-    console.log('');
+    console.log('');'
   }
 
   generateReport() {
-    console.log('📊 Test Results Summary:');
+    console.log('📊 Test Results Summary: ');
     console.log('========================');
     
     const routeSuccessRate = this.results.summary.totalRoutes > 0 ? 
@@ -269,7 +211,7 @@ class SimpleButtonTester {
     const overallScore = Math.round((routeSuccessRate + apiSuccessRate + buttonSuccessRate) / 3);
     console.log(`📈 Overall Score: ${overallScore}%`);
     
-    console.log('');
+    console.log('');'
     
     if (overallScore >= 90) {
       console.log('🎉 EXCELLENT! All systems are working great!');

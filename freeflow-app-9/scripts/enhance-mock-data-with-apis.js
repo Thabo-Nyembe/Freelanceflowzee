@@ -21,7 +21,7 @@ const https = require('https');
 const http = require('http');
 
 console.log('🚀 FreeflowZee Enhanced Mock Data Generator');
-console.log('============================================');
+console.log('============================================ ');
 console.log('📈 Enhancing mock data with real API content...\n');
 
 class EnhancedMockDataGenerator {
@@ -37,7 +37,7 @@ class EnhancedMockDataGenerator {
       const protocol = url.startsWith('https') ? https : http;
       
       protocol.get(url, (response) => {
-        let data = '';
+        let data = '';'
         
         response.on('data', (chunk) => {
           data += chunk;
@@ -61,7 +61,7 @@ class EnhancedMockDataGenerator {
     });
   }
 
-  async downloadBinaryFile(url, outputPath, description = '') {
+  async downloadBinaryFile(url, outputPath, description = '') {'
     return new Promise((resolve, reject) => {
       const protocol = url.startsWith('https') ? https : http;
       
@@ -138,9 +138,7 @@ class EnhancedMockDataGenerator {
   async fetchRobohashAvatars() {
     console.log('\n🤖 Fetching Robohash Robot Avatars...');
     
-    const robotSeeds = [
-      'robo-alex', 'robo-sarah', 'robo-mike', 'robo-emma',
-      'robo-david', 'robo-lisa', 'robo-john', 'robo-anna'
+    const robotSeeds = ['robo-alex', 'robo-sarah', 'robo-mike', 'robo-emma', 'robo-david', 'robo-lisa', 'robo-john', 'robo-anna'
     ];
 
     for (const seed of robotSeeds) {
@@ -618,7 +616,7 @@ export async function GET(request: NextRequest) {
     
     // Add pagination
     const limit = parseInt(searchParams.get('limit') || '10');
-    const offset = parseInt(searchParams.get('offset') || '0');
+    const offset = parseInt(searchParams.get('offset') || '0');'
     const paginatedData = Array.isArray(data) ? data.slice(offset, offset + limit) : data;
     
     // Add filtering by tags if provided
@@ -626,7 +624,7 @@ export async function GET(request: NextRequest) {
     let filteredData = paginatedData;
     
     if (tags && Array.isArray(paginatedData)) {
-      const tagArray = tags.split(',');
+      const tagArray = tags.split(',');'
       filteredData = paginatedData.filter(item => 
         item.tags && tagArray.some(tag => item.tags.includes(tag.trim()))
       );
@@ -877,9 +875,9 @@ Enjoy exploring the enhanced capabilities! 🚀
       await fs.writeFile('ENHANCED_TESTING_GUIDE.md', guide);
 
       // Final summary
-      console.log('\n' + '='.repeat(70));
+      console.log('\n' + '='.repeat(70));'
       console.log('🎉 ENHANCED MOCK DATA GENERATION COMPLETE!');
-      console.log('='.repeat(70));
+      console.log('='.repeat(70));'
       console.log(`🖼️  Images Downloaded: ${this.apiResults.length ? 'Multiple sources' : 'Processing...'}`);
       console.log(`📊 Enhanced Projects: ${enhancedProjects.length}`);
       console.log(`👥 Enhanced Users: ${enhancedUsers.length}`);

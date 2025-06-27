@@ -134,8 +134,7 @@ export const ENTERPRISE_CONFIG = {
     // Smart routing based on access patterns
     rules: {
       // Keep only critical real-time files on Supabase
-      supabaseOnly: [
-        'thumbnails',                // Fast thumbnail serving
+      supabaseOnly: ['thumbnails',                // Fast thumbnail serving
         'avatars',                   // User profile pictures
         'realtime_chat',             // Real-time chat files
         'temp_processing',           // Temporary processing files
@@ -144,8 +143,7 @@ export const ENTERPRISE_CONFIG = {
       ],
       
       // Route everything else to Wasabi for massive savings
-      wasabiFirst: [
-        'videos',                    // All video content
+      wasabiFirst: ['videos',                    // All video content
         'audio',                     // All audio content
         'documents',                 // PDFs, docs, etc.
         'images_large',              // Large images
@@ -204,7 +202,7 @@ export class EnterpriseOptimizer {
     fileSize: number, 
     mimeType: string, 
     accessPattern?: 'frequent' | 'normal' | 'infrequent',
-    metadata?: any
+    metadata?: Record<string, unknown>
   ): boolean {
     // ENTERPRISE STRATEGY: Use Pro features intelligently for maximum efficiency
     
@@ -230,7 +228,7 @@ export class EnterpriseOptimizer {
   /**
    * Enterprise cost analysis vs standard enterprise cloud (AWS/GCP/Azure)
    */
-  static calculateEnterpriseSavings(files: any[]): {
+  static calculateEnterpriseSavings(files: Record<string, unknown>[]): {
     currentCost: number;
     awsEnterpriseCost: number;
     gcpEnterpriseCost: number;
@@ -472,27 +470,11 @@ export class EnterpriseOptimizer {
     };
     
     // Enterprise features being utilized
-    const enterpriseFeatures = [
-      '🏢 Multi-cloud architecture with enterprise SLAs',
-      '⚡ Edge optimization with Vercel Pro global deployment',
-      '🔒 Enterprise security with Supabase Pro advanced auth',
-      '💾 Cost-optimized storage with Wasabi Pro enterprise features',
-      '📊 Advanced analytics and monitoring across all platforms',
-      '🔄 Automated lifecycle management and optimization',
-      '🌍 Global CDN with 99.9% uptime guarantee',
-      '🛡️ Compliance-ready with SOC2, GDPR, HIPAA certifications'
+    const enterpriseFeatures = ['🏢 Multi-cloud architecture with enterprise SLAs', '⚡ Edge optimization with Vercel Pro global deployment', '🔒 Enterprise security with Supabase Pro advanced auth', '💾 Cost-optimized storage with Wasabi Pro enterprise features', '📊 Advanced analytics and monitoring across all platforms', '🔄 Automated lifecycle management and optimization', '🌍 Global CDN with 99.9% uptime guarantee', '🛡️ Compliance-ready with SOC2, GDPR, HIPAA certifications'
     ];
     
     // Next optimization opportunities
-    const nextOptimizations = [
-      '📈 Implement predictive scaling based on usage patterns',
-      '🎯 Set up automated cost alerts and budget management',
-      '🔍 Advanced analytics for storage access pattern optimization',
-      '⚡ Consider CDN optimization for global performance',
-      '📊 Implement advanced monitoring and alerting',
-      '🔄 Set up automated compliance reporting',
-      '💡 Explore AI-powered storage optimization',
-      '🌐 Consider multi-region disaster recovery setup'
+    const nextOptimizations = ['📈 Implement predictive scaling based on usage patterns', '🎯 Set up automated cost alerts and budget management', '🔍 Advanced analytics for storage access pattern optimization', '⚡ Consider CDN optimization for global performance', '📊 Implement advanced monitoring and alerting', '🔄 Set up automated compliance reporting', '💡 Explore AI-powered storage optimization', '🌐 Consider multi-region disaster recovery setup'
     ];
     
     return {

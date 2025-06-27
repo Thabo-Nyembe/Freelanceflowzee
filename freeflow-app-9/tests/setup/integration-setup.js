@@ -1,16 +1,16 @@
-import '@testing-library/jest-dom';
-import { server } from '../mocks/server';
+import &apos;@testing-library/jest-dom&apos;;
+import { server } from &apos;../mocks/server&apos;;
 
 // Establish API mocking before all tests
 beforeAll(() => {
   // Enable the MSW API mocking
   server.listen({
-    onUnhandledRequest: 'warn'
+    onUnhandledRequest: &apos;warn&apos;
   });
 });
 
 // Reset any request handlers that we may add during the tests,
-// so they don't affect other tests.
+// so they don&apos;t affect other tests.
 afterEach(() => {
   server.resetHandlers();
 });
@@ -21,13 +21,13 @@ afterAll(() => {
 });
 
 // Mock Next.js router
-jest.mock('next/router', () => ({
+jest.mock(&apos;next/router&apos;, () => ({
   useRouter() {
     return {
-      route: '/',
-      pathname: '',
+      route: &apos;/','
+      pathname: '&apos;,'
       query: {},
-      asPath: '',
+      asPath: '&apos;,'
       push: jest.fn(),
       replace: jest.fn(),
       reload: jest.fn(),
@@ -44,7 +44,7 @@ jest.mock('next/router', () => ({
 }));
 
 // Mock Supabase client
-jest.mock('@/lib/supabase/client', () => ({
+jest.mock(&apos;@/lib/supabase/client&apos;, () => ({
   supabaseClient: {
     auth: {
       getSession: jest.fn(),

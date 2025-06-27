@@ -1,4 +1,4 @@
-import type { Page, Locator } from '@playwright/test';
+import type { Page, Locator } from &apos;@playwright/test&apos;;
 
 export class DashboardPage {
   readonly page: Page;
@@ -83,138 +83,138 @@ export class DashboardPage {
     this.page = page;
     
     // Navigation elements
-    this.sidebar = page.locator('[data-testid="sidebar"]');
-    this.header = page.locator('[data-testid="header"]');
-    this.userAvatar = page.locator('[data-testid="user-avatar"]');
-    this.notificationsBell = page.locator('[data-testid="notifications"]');
-    this.searchBar = page.locator('[data-testid="search-bar"]');
+    this.sidebar = page.locator(&apos;[data-testid=&quot;sidebar&quot;]&apos;);
+    this.header = page.locator(&apos;[data-testid=&quot;header&quot;]&apos;);
+    this.userAvatar = page.locator(&apos;[data-testid=&quot;user-avatar&quot;]&apos;);
+    this.notificationsBell = page.locator(&apos;[data-testid=&quot;notifications&quot;]&apos;);
+    this.searchBar = page.locator(&apos;[data-testid=&quot;search-bar&quot;]&apos;);
 
     // Sidebar navigation
-    this.dashboardLink = page.getByRole('link', { name: 'Dashboard' });
-    this.projectsLink = page.getByRole('link', { name: 'Projects' });
-    this.teamLink = page.getByRole('link', { name: 'Team' });
-    this.communityLink = page.getByRole('link', { name: 'Community' });
-    this.analyticsLink = page.getByRole('link', { name: 'Analytics' });
-    this.settingsLink = page.getByRole('link', { name: 'Settings' });
+    this.dashboardLink = page.getByRole(&apos;link&apos;, { name: &apos;Dashboard&apos; });
+    this.projectsLink = page.getByRole(&apos;link&apos;, { name: &apos;Projects&apos; });
+    this.teamLink = page.getByRole(&apos;link&apos;, { name: &apos;Team&apos; });
+    this.communityLink = page.getByRole(&apos;link&apos;, { name: &apos;Community&apos; });
+    this.analyticsLink = page.getByRole(&apos;link&apos;, { name: &apos;Analytics&apos; });
+    this.settingsLink = page.getByRole(&apos;link&apos;, { name: &apos;Settings&apos; });
 
     // Main content area
-    this.mainContent = page.locator('main');
-    this.welcomeMessage = page.locator('[data-testid="welcome-message"]');
-    this.quickActions = page.locator('[data-testid="quick-actions"]');
-    this.recentProjects = page.locator('[data-testid="recent-projects"]');
-    this.projectCards = page.locator('[data-testid="project-card"]');
+    this.mainContent = page.locator(&apos;main&apos;);
+    this.welcomeMessage = page.locator(&apos;[data-testid=&quot;welcome-message&quot;]&apos;);
+    this.quickActions = page.locator(&apos;[data-testid=&quot;quick-actions&quot;]&apos;);
+    this.recentProjects = page.locator(&apos;[data-testid=&quot;recent-projects&quot;]&apos;);
+    this.projectCards = page.locator(&apos;[data-testid=&quot;project-card&quot;]&apos;);
 
     // Stats and metrics
-    this.statsCards = page.locator('[data-testid="stats-card"]');
-    this.revenueCard = page.locator('[data-testid="revenue-card"]');
-    this.projectsCard = page.locator('[data-testid="projects-card"]');
-    this.clientsCard = page.locator('[data-testid="clients-card"]');
-    this.earningsCard = page.locator('[data-testid="earnings-card"]');
+    this.statsCards = page.locator(&apos;[data-testid=&quot;stats-card&quot;]&apos;);
+    this.revenueCard = page.locator(&apos;[data-testid=&quot;revenue-card&quot;]&apos;);
+    this.projectsCard = page.locator(&apos;[data-testid=&quot;projects-card&quot;]&apos;);
+    this.clientsCard = page.locator(&apos;[data-testid=&quot;clients-card&quot;]&apos;);
+    this.earningsCard = page.locator(&apos;[data-testid=&quot;earnings-card&quot;]&apos;);
 
     // Quick action buttons
-    this.newProjectButton = page.getByRole('button', { name: 'New Project' });
-    this.uploadFileButton = page.getByRole('button', { name: 'Upload File' });
-    this.inviteTeamButton = page.getByRole('button', { name: 'Invite Team' });
-    this.createInvoiceButton = page.getByRole('button', { name: 'Create Invoice' });
+    this.newProjectButton = page.getByRole(&apos;button&apos;, { name: &apos;New Project&apos; });
+    this.uploadFileButton = page.getByRole(&apos;button&apos;, { name: &apos;Upload File&apos; });
+    this.inviteTeamButton = page.getByRole(&apos;button&apos;, { name: &apos;Invite Team&apos; });
+    this.createInvoiceButton = page.getByRole(&apos;button&apos;, { name: &apos;Create Invoice&apos; });
 
     // Project Hub
-    this.projectsHub = page.locator('[data-testid="projects-hub"]');
-    this.projectsList = page.locator('[data-testid="projects-list"]');
-    this.projectSearchInput = page.locator('[data-testid="project-search"]');
-    this.filterButtons = page.locator('[data-testid="filter-button"]');
-    this.sortDropdown = page.locator('[data-testid="sort-dropdown"]');
+    this.projectsHub = page.locator(&apos;[data-testid=&quot;projects-hub&quot;]&apos;);
+    this.projectsList = page.locator(&apos;[data-testid=&quot;projects-list&quot;]&apos;);
+    this.projectSearchInput = page.locator(&apos;[data-testid=&quot;project-search&quot;]&apos;);
+    this.filterButtons = page.locator(&apos;[data-testid=&quot;filter-button&quot;]&apos;);
+    this.sortDropdown = page.locator(&apos;[data-testid=&quot;sort-dropdown&quot;]&apos;);
 
     // Team Hub
-    this.teamHub = page.locator('[data-testid="team-hub"]');
-    this.teamMembers = page.locator('[data-testid="team-member"]');
-    this.memberAvatars = page.locator('[data-testid="member-avatar"]');
-    this.addMemberButton = page.getByRole('button', { name: 'Add Member' });
+    this.teamHub = page.locator(&apos;[data-testid=&quot;team-hub&quot;]&apos;);
+    this.teamMembers = page.locator(&apos;[data-testid=&quot;team-member&quot;]&apos;);
+    this.memberAvatars = page.locator(&apos;[data-testid=&quot;member-avatar&quot;]&apos;);
+    this.addMemberButton = page.getByRole(&apos;button&apos;, { name: &apos;Add Member&apos; });
 
     // Community Tab
-    this.communityTab = page.locator('[data-testid="community-tab"]');
-    this.communityPosts = page.locator('[data-testid="community-post"]');
-    this.newPostButton = page.getByRole('button', { name: 'New Post' });
+    this.communityTab = page.locator(&apos;[data-testid=&quot;community-tab&quot;]&apos;);
+    this.communityPosts = page.locator(&apos;[data-testid=&quot;community-post&quot;]&apos;);
+    this.newPostButton = page.getByRole(&apos;button&apos;, { name: &apos;New Post&apos; });
 
     // Analytics Dashboard
-    this.analyticsSection = page.locator('[data-testid="analytics-section"]');
-    this.chartsContainer = page.locator('[data-testid="charts-container"]');
-    this.performanceMetrics = page.locator('[data-testid="performance-metrics"]');
+    this.analyticsSection = page.locator(&apos;[data-testid=&quot;analytics-section&quot;]&apos;);
+    this.chartsContainer = page.locator(&apos;[data-testid=&quot;charts-container&quot;]&apos;);
+    this.performanceMetrics = page.locator(&apos;[data-testid=&quot;performance-metrics&quot;]&apos;);
 
     // Modals and overlays
-    this.modal = page.locator('[role="dialog"]');
-    this.confirmationModal = page.locator('[data-testid="confirmation-modal"]');
-    this.loadingSpinner = page.locator('[data-testid="loading-spinner"]');
+    this.modal = page.locator(&apos;[role=&quot;dialog&quot;]&apos;);
+    this.confirmationModal = page.locator(&apos;[data-testid=&quot;confirmation-modal&quot;]&apos;);
+    this.loadingSpinner = page.locator(&apos;[data-testid=&quot;loading-spinner&quot;]&apos;);
 
     // Project form elements
-    this.projectTitleInput = page.locator('input[name="title"], input[id="title"], input[placeholder*="title" i]').first();
-    this.projectDescriptionInput = page.locator('textarea[name="description"], textarea[id="description"], textarea[placeholder*="description" i]').first();
-    this.projectClientNameInput = page.locator('input[name="clientName"], input[id="clientName"], input[placeholder*="client name" i]').first();
-    this.projectClientEmailInput = page.locator('input[name="clientEmail"], input[id="clientEmail"], input[placeholder*="client email" i]').first();
-    this.projectBudgetInput = page.locator('input[name="budget"], input[id="budget"], input[placeholder*="budget" i]').first();
-    this.projectStartDateInput = page.locator('input[name="startDate"], input[id="startDate"], input[placeholder*="start date" i]').first();
-    this.projectEndDateInput = page.locator('input[name="endDate"], input[id="endDate"], input[placeholder*="end date" i]').first();
-    this.projectPrioritySelect = page.locator('select[name="priority"], select[id="priority"]').first();
-    this.projectStatusSelect = page.locator('select[name="status"], select[id="status"]').first();
-    this.projectSubmitButton = page.locator('button[type="submit"]');
-    this.projectErrorMessage = page.locator('[data-testid="error-message"]');
+    this.projectTitleInput = page.locator(&apos;input[name=&quot;title&quot;], input[id=&quot;title&quot;], input[placeholder*=&quot;title&quot; i]&apos;).first();
+    this.projectDescriptionInput = page.locator(&apos;textarea[name=&quot;description&quot;], textarea[id=&quot;description&quot;], textarea[placeholder*=&quot;description&quot; i]&apos;).first();
+    this.projectClientNameInput = page.locator(&apos;input[name=&quot;clientName&quot;], input[id=&quot;clientName&quot;], input[placeholder*=&quot;client name&quot; i]&apos;).first();
+    this.projectClientEmailInput = page.locator(&apos;input[name=&quot;clientEmail&quot;], input[id=&quot;clientEmail&quot;], input[placeholder*=&quot;client email&quot; i]&apos;).first();
+    this.projectBudgetInput = page.locator(&apos;input[name=&quot;budget&quot;], input[id=&quot;budget&quot;], input[placeholder*=&quot;budget&quot; i]&apos;).first();
+    this.projectStartDateInput = page.locator(&apos;input[name=&quot;startDate&quot;], input[id=&quot;startDate&quot;], input[placeholder*=&quot;start date&quot; i]&apos;).first();
+    this.projectEndDateInput = page.locator(&apos;input[name=&quot;endDate&quot;], input[id=&quot;endDate&quot;], input[placeholder*=&quot;end date&quot; i]&apos;).first();
+    this.projectPrioritySelect = page.locator(&apos;select[name=&quot;priority&quot;], select[id=&quot;priority&quot;]&apos;).first();
+    this.projectStatusSelect = page.locator(&apos;select[name=&quot;status&quot;], select[id=&quot;status&quot;]&apos;).first();
+    this.projectSubmitButton = page.locator(&apos;button[type=&quot;submit&quot;]&apos;);
+    this.projectErrorMessage = page.locator(&apos;[data-testid=&quot;error-message&quot;]&apos;);
   }
 
   async goto() {
-    await this.page.goto('/dashboard');
-    await this.page.waitForLoadState('networkidle');
+    await this.page.goto(&apos;/dashboard&apos;);
+    await this.page.waitForLoadState(&apos;networkidle&apos;);
     await this.waitForDashboardToLoad();
   }
 
   async waitForDashboardToLoad() {
-    await this.mainContent.waitFor({ state: 'visible' });
+    await this.mainContent.waitFor({ state: &apos;visible&apos; });
     await this.page.waitForTimeout(1000); // Wait for animations
   }
 
   // Navigation methods
   async navigateToProjects() {
     await this.projectsLink.click();
-    await this.page.waitForURL('**/projects**');
+    await this.page.waitForURL(&apos;**/projects**&apos;);
   }
 
   async navigateToTeam() {
     await this.teamLink.click();
-    await this.page.waitForURL('**/team**');
+    await this.page.waitForURL(&apos;**/team**&apos;);
   }
 
   async navigateToCommunity() {
     await this.communityLink.click();
-    await this.page.waitForURL('**/community**');
+    await this.page.waitForURL(&apos;**/community**&apos;);
   }
 
   async navigateToAnalytics() {
     await this.analyticsLink.click();
-    await this.page.waitForURL('**/analytics**');
+    await this.page.waitForURL(&apos;**/analytics**&apos;);
   }
 
   async navigateToSettings() {
     await this.settingsLink.click();
-    await this.page.waitForURL('**/settings**');
+    await this.page.waitForURL(&apos;**/settings**&apos;);
   }
 
   // Quick actions
   async createNewProject() {
     await this.newProjectButton.click();
-    await this.modal.waitFor({ state: 'visible' });
+    await this.modal.waitFor({ state: &apos;visible&apos; });
   }
 
   async uploadFile() {
     await this.uploadFileButton.click();
-    await this.modal.waitFor({ state: 'visible' });
+    await this.modal.waitFor({ state: &apos;visible&apos; });
   }
 
   async inviteTeamMember() {
     await this.inviteTeamButton.click();
-    await this.modal.waitFor({ state: 'visible' });
+    await this.modal.waitFor({ state: &apos;visible&apos; });
   }
 
   async createInvoice() {
     await this.createInvoiceButton.click();
-    await this.page.waitForURL('**/invoice**');
+    await this.page.waitForURL(&apos;**/invoice**&apos;);
   }
 
   // Project operations
@@ -229,7 +229,7 @@ export class DashboardPage {
 
   async sortProjects(sortBy: string) {
     await this.sortDropdown.click();
-    await this.page.getByRole('option', { name: sortBy }).click();
+    await this.page.getByRole(&apos;option&apos;, { name: sortBy }).click();
   }
 
   async selectProject(projectName: string) {
@@ -239,44 +239,44 @@ export class DashboardPage {
   async deleteProject(projectName: string) {
     const projectCard = this.projectCards.filter({ hasText: projectName });
     await projectCard.hover();
-    await projectCard.getByRole('button', { name: 'Delete' }).click();
-    await this.confirmationModal.waitFor({ state: 'visible' });
-    await this.page.getByRole('button', { name: 'Confirm' }).click();
+    await projectCard.getByRole(&apos;button&apos;, { name: &apos;Delete&apos; }).click();
+    await this.confirmationModal.waitFor({ state: &apos;visible&apos; });
+    await this.page.getByRole(&apos;button&apos;, { name: &apos;Confirm&apos; }).click();
   }
 
   // Team operations
   async addTeamMember(email: string, role: string) {
     await this.addMemberButton.click();
-    await this.modal.waitFor({ state: 'visible' });
-    await this.page.getByLabel('Email').fill(email);
-    await this.page.getByLabel('Role').selectOption(role);
-    await this.page.getByRole('button', { name: 'Send Invite' }).click();
+    await this.modal.waitFor({ state: &apos;visible&apos; });
+    await this.page.getByLabel(&apos;Email&apos;).fill(email);
+    await this.page.getByLabel(&apos;Role&apos;).selectOption(role);
+    await this.page.getByRole(&apos;button&apos;, { name: &apos;Send Invite&apos; }).click();
   }
 
   async removeTeamMember(memberName: string) {
     const member = this.teamMembers.filter({ hasText: memberName });
     await member.hover();
-    await member.getByRole('button', { name: 'Remove' }).click();
-    await this.confirmationModal.waitFor({ state: 'visible' });
-    await this.page.getByRole('button', { name: 'Confirm' }).click();
+    await member.getByRole(&apos;button&apos;, { name: &apos;Remove&apos; }).click();
+    await this.confirmationModal.waitFor({ state: &apos;visible&apos; });
+    await this.page.getByRole(&apos;button&apos;, { name: &apos;Confirm&apos; }).click();
   }
 
   // Community operations
   async createPost(content: string) {
     await this.newPostButton.click();
-    await this.modal.waitFor({ state: 'visible' });
-    await this.page.getByLabel('Post content').fill(content);
-    await this.page.getByRole('button', { name: 'Post' }).click();
+    await this.modal.waitFor({ state: &apos;visible&apos; });
+    await this.page.getByLabel(&apos;Post content&apos;).fill(content);
+    await this.page.getByRole(&apos;button&apos;, { name: &apos;Post&apos; }).click();
   }
 
   async likePost(postId: string) {
-    await this.page.locator(`[data-testid="post-${postId}"]`).getByRole('button', { name: 'Like' }).click();
+    await this.page.locator(`[data-testid=&quot;post-${postId}&quot;]`).getByRole(&apos;button&apos;, { name: &apos;Like&apos; }).click();
   }
 
   async commentOnPost(postId: string, comment: string) {
-    await this.page.locator(`[data-testid="post-${postId}"]`).getByRole('button', { name: 'Comment' }).click();
-    await this.page.getByLabel('Comment').fill(comment);
-    await this.page.getByRole('button', { name: 'Submit' }).click();
+    await this.page.locator(`[data-testid=&quot;post-${postId}&quot;]`).getByRole(&apos;button&apos;, { name: &apos;Comment&apos; }).click();
+    await this.page.getByLabel(&apos;Comment&apos;).fill(comment);
+    await this.page.getByRole(&apos;button&apos;, { name: &apos;Submit&apos; }).click();
   }
 
   // Verification methods
@@ -348,7 +348,7 @@ export class DashboardPage {
     const names = [];
     
     for (const project of projects) {
-      const title = await project.locator('h3, h4').first().textContent();
+      const title = await project.locator(&apos;h3, h4&apos;).first().textContent();
       if (title) names.push(title.trim());
     }
     
@@ -361,7 +361,7 @@ export class DashboardPage {
     const names = [];
     
     for (const member of members) {
-      const name = await member.locator('[data-testid="member-name"]').textContent();
+      const name = await member.locator(&apos;[data-testid=&quot;member-name&quot;]&apos;).textContent();
       if (name) names.push(name.trim());
     }
     
@@ -413,7 +413,7 @@ export class DashboardPage {
 
   // Error handling
   async handleError() {
-    const errorMessage = this.page.locator('[data-testid="error-message"]');
+    const errorMessage = this.page.locator(&apos;[data-testid=&quot;error-message&quot;]&apos;);
     if (await errorMessage.isVisible()) {
       return await errorMessage.textContent();
     }
@@ -422,21 +422,21 @@ export class DashboardPage {
 
   async dismissModal() {
     if (await this.modal.isVisible()) {
-      await this.page.keyboard.press('Escape');
-      await this.modal.waitFor({ state: 'hidden' });
+      await this.page.keyboard.press(&apos;Escape&apos;);
+      await this.modal.waitFor({ state: &apos;hidden&apos; });
     }
   }
 
   async logout() {
     await this.userAvatar.click();
-    await this.page.getByRole('menuitem', { name: 'Logout' }).click();
-    await this.page.waitForURL('**/login');
+    await this.page.getByRole(&apos;menuitem&apos;, { name: &apos;Logout&apos; }).click();
+    await this.page.waitForURL(&apos;**/login&apos;);
   }
 
   async openProjectCreationForm() {
     await this.newProjectButton.click();
-    await this.modal.waitFor({ state: 'visible' });
-    await this.projectTitleInput.waitFor({ state: 'visible' });
+    await this.modal.waitFor({ state: &apos;visible&apos; });
+    await this.projectTitleInput.waitFor({ state: &apos;visible&apos; });
   }
 
   async createProject(data: {
@@ -469,10 +469,10 @@ export class DashboardPage {
       await this.projectEndDateInput.fill(data.endDate);
     }
     if (data.priority) {
-      await this.page.selectOption('select[name="priority"], select[id="priority"]', data.priority);
+      await this.page.selectOption(&apos;select[name=&quot;priority&quot;], select[id=&quot;priority&quot;]&apos;, data.priority);
     }
     if (data.status) {
-      await this.page.selectOption('select[name="status"], select[id="status"]', data.status);
+      await this.page.selectOption(&apos;select[name=&quot;status&quot;], select[id=&quot;status&quot;]&apos;, data.status);
     }
 
     await this.projectSubmitButton.click();

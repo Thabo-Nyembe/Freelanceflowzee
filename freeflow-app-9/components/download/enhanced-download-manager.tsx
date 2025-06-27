@@ -1,123 +1,16 @@
-"use client"
+"use client
 
 import React, { useReducer, useCallback, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { 
-  Download,
-  FileText,
-  Image,
-  Video,
-  Music,
-  Archive,
-  ExternalLink,
-  Share2,
-  Copy,
-  Check,
-  Play,
-  Pause,
-  RotateCcw,
-  Trash2,
-  Eye,
-  Star,
-  Clock,
-  AlertCircle,
-  CheckCircle,
-  Globe,
-  Lock,
-  Zap,
-  Heart,
-  Shield,
-  DollarSign,
-  Unlock,
-  CreditCard,
-  TrendingUp
-} from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
-import { cn } from '@/lib/utils'
-
-// Context7 Pattern: Enhanced Download Item with Escrow Integration
-interface DownloadItem {
-  id: string
-  fileName: string
-  fileSize: number
-  fileType: string
-  downloadUrl: string
-  shareUrl: string
-  progress: number
-  status: 'pending' | 'downloading' | 'completed' | 'paused' | 'error' | 'cancelled' | 'escrow_locked' | 'payment_required'
-  speed: number // bytes per second
-  timeRemaining: number // seconds
-  startTime?: Date
-  completedTime?: Date
-  error?: string
-  isPublic: boolean
-  downloadCount: number
-  views: number
-  seoTitle: string
-  seoDescription: string
-  thumbnailUrl?: string
-  previewUrl?: string
-  // Escrow Integration
-  escrowProtected: boolean
-  escrowAmount?: number
-  escrowStatus?: 'none' | 'pending' | 'secured' | 'released' | 'disputed'
-  accessLevel: 'public' | 'password' | 'escrow' | 'premium'
-  unlockPrice?: number
-  paymentRequired: boolean
-  clientId?: string
-  projectId?: string
-  milestoneId?: string
-}
-
-interface EscrowTransaction {
-  id: string
-  downloadId: string
-  amount: number
-  currency: string
-  status: 'pending' | 'processing' | 'completed' | 'failed' | 'disputed'
-  clientName: string
-  projectTitle: string
-  createdAt: Date
-  completedAt?: Date
-}
-
-// Context7 Enhanced State Management
-interface DownloadState {
-  downloads: DownloadItem[]
-  filter: 'all' | 'downloading' | 'completed' | 'error' | 'escrow_locked'
-  selectedItems: string[]
-  copiedLinks: Set<string>
-  escrowTransactions: EscrowTransaction[]
-  analytics: {
-    totalDownloads: number
-    successRate: number
-    averageSpeed: number
-    escrowProtectedFiles: number
-    totalEscrowValue: number
-  }
-  paymentModalOpen: boolean
-  selectedPaymentItem: string | null
-}
-
-type DownloadAction =
-  | { type: 'SET_DOWNLOADS'; payload: DownloadItem[] }
-  | { type: 'ADD_DOWNLOAD'; payload: DownloadItem }
-  | { type: 'UPDATE_DOWNLOAD'; payload: { id: string; updates: Partial<DownloadItem> } }
+ payload: DownloadItem }
+  | { type: &apos;UPDATE_DOWNLOAD&apos;; payload: { id: string; updates: Partial<DownloadItem> } }
   | { type: 'REMOVE_DOWNLOAD'; payload: string }
   | { type: 'SET_FILTER'; payload: DownloadState['filter'] }
   | { type: 'TOGGLE_SELECTION'; payload: string }
   | { type: 'CLEAR_SELECTION' }
   | { type: 'SET_COPIED_LINK'; payload: { id: string; copied: boolean } }
   | { type: 'ADD_ESCROW_TRANSACTION'; payload: EscrowTransaction }
-  | { type: 'UPDATE_ESCROW_TRANSACTION'; payload: { id: string; updates: Partial<EscrowTransaction> } }
-  | { type: 'UPDATE_ANALYTICS'; payload: Partial<DownloadState['analytics']> }
+  | { type: &apos;UPDATE_ESCROW_TRANSACTION&apos;; payload: { id: string; updates: Partial<EscrowTransaction> } }
+  | { type: &apos;UPDATE_ANALYTICS&apos;; payload: Partial<DownloadState['analytics']> }
   | { type: 'TOGGLE_PAYMENT_MODAL'; payload: { open: boolean; itemId?: string } }
 
 // Context7 Reducer Pattern
@@ -324,7 +217,7 @@ export function EnhancedDownloadManager({
     const k = 1024
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]'
   }, [])
 
   const formatSpeed = useCallback((bytesPerSecond: number) => {
@@ -335,7 +228,7 @@ export function EnhancedDownloadManager({
     if (!seconds || seconds === Infinity) return '--'
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}`
+    return `${mins}:${secs.toString().padStart(2, '0')}`'
   }, [])
 
   // Context7 Pattern: Enhanced Action Handlers
@@ -491,7 +384,7 @@ export function EnhancedDownloadManager({
       currency: 'USD',
       status: 'processing',
       clientName: 'Client Name',
-      projectTitle: item.fileName.replace(/\.[^/.]+$/, ""),
+      projectTitle: item.fileName.replace(/\.[^/.]+$/, ""),"
       createdAt: new Date()
     }
 
@@ -573,8 +466,8 @@ export function EnhancedDownloadManager({
   const getStatusBadge = (item: DownloadItem) => {
     if (item.escrowProtected && item.paymentRequired) {
       return (
-        <Badge className="bg-amber-100 text-amber-800">
-          <Lock className="h-3 w-3 mr-1" />
+        <Badge className= "bg-amber-100 text-amber-800">
+          <Lock className= "h-3 w-3 mr-1" />
           Payment Required
         </Badge>
       )
@@ -582,60 +475,60 @@ export function EnhancedDownloadManager({
 
     switch (item.status) {
       case 'downloading':
-        return <Badge className="bg-blue-100 text-blue-800">Downloading</Badge>
+        return <Badge className= "bg-blue-100 text-blue-800">Downloading</Badge>
       case 'completed':
-        return <Badge className="bg-green-100 text-green-800">Completed</Badge>
+        return <Badge className= "bg-green-100 text-green-800">Completed</Badge>
       case 'paused':
-        return <Badge className="bg-yellow-100 text-yellow-800">Paused</Badge>
+        return <Badge className= "bg-yellow-100 text-yellow-800">Paused</Badge>
       case 'error':
-        return <Badge className="bg-red-100 text-red-800">Error</Badge>
+        return <Badge className= "bg-red-100 text-red-800">Error</Badge>
       case 'escrow_locked':
         return (
-          <Badge className="bg-purple-100 text-purple-800">
-            <Shield className="h-3 w-3 mr-1" />
+          <Badge className= "bg-purple-100 text-purple-800">
+            <Shield className= "h-3 w-3 mr-1" />
             Escrow Locked
           </Badge>
         )
       default:
-        return <Badge variant="outline">Pending</Badge>
+        return <Badge variant= "outline">Pending</Badge>
     }
   }
 
   return (
-    <div className="space-y-6" data-testid="enhanced-download-manager">
+    <div className= "space-y-6" data-testid= "enhanced-download-manager">
       {/* Analytics Overview */}
       {enableAnalytics && (
-        <Card className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-indigo-200">
+        <Card className= "bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-indigo-200">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-indigo-800">
-              <TrendingUp className="h-5 w-5" />
+            <CardTitle className= "flex items-center gap-2 text-indigo-800">
+              <TrendingUp className= "h-5 w-5" />
               Download Analytics
             </CardTitle>
-            <CardDescription className="text-indigo-600">
+            <CardDescription className= "text-indigo-600">
               Track your download performance and escrow protection metrics
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-indigo-700">{state.analytics.totalDownloads}</div>
-                <div className="text-sm text-indigo-600">Total Downloads</div>
+            <div className= "grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div className= "text-center">
+                <div className= "text-2xl font-bold text-indigo-700">{state.analytics.totalDownloads}</div>
+                <div className= "text-sm text-indigo-600">Total Downloads</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-indigo-700">{state.analytics.successRate}%</div>
-                <div className="text-sm text-indigo-600">Success Rate</div>
+              <div className= "text-center">
+                <div className= "text-2xl font-bold text-indigo-700">{state.analytics.successRate}%</div>
+                <div className= "text-sm text-indigo-600">Success Rate</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-indigo-700">{state.analytics.averageSpeed} MB/s</div>
-                <div className="text-sm text-indigo-600">Avg Speed</div>
+              <div className= "text-center">
+                <div className= "text-2xl font-bold text-indigo-700">{state.analytics.averageSpeed} MB/s</div>
+                <div className= "text-sm text-indigo-600">Avg Speed</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-indigo-700">{state.analytics.escrowProtectedFiles}</div>
-                <div className="text-sm text-indigo-600">Escrow Protected</div>
+              <div className= "text-center">
+                <div className= "text-2xl font-bold text-indigo-700">{state.analytics.escrowProtectedFiles}</div>
+                <div className= "text-sm text-indigo-600">Escrow Protected</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-indigo-700">${state.analytics.totalEscrowValue.toLocaleString()}</div>
-                <div className="text-sm text-indigo-600">Escrow Value</div>
+              <div className= "text-center">
+                <div className= "text-2xl font-bold text-indigo-700">${state.analytics.totalEscrowValue.toLocaleString()}</div>
+                <div className= "text-sm text-indigo-600">Escrow Value</div>
               </div>
             </div>
           </CardContent>
@@ -645,30 +538,30 @@ export function EnhancedDownloadManager({
       {/* Controls */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className= "flex items-center justify-between">
             <div>
-              <CardTitle className="flex items-center gap-2">
-                <Download className="h-5 w-5 text-primary" />
+              <CardTitle className= "flex items-center gap-2">
+                <Download className= "h-5 w-5 text-primary" />
                 Download Manager
               </CardTitle>
               <CardDescription>
                 Manage your downloads with escrow protection and analytics
               </CardDescription>
             </div>
-            <div className="flex items-center gap-2">
+            <div className= "flex items-center gap-2">
               <Select 
                 value={state.filter} 
-                onValueChange={(value: any) => dispatch({ type: 'SET_FILTER', payload: value })}
+                onValueChange={(value: unknown) => dispatch({ type: 'SET_FILTER', payload: value })}
               >
-                <SelectTrigger className="w-40">
+                <SelectTrigger className= "w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Downloads</SelectItem>
-                  <SelectItem value="downloading">Downloading</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="escrow_locked">Escrow Locked</SelectItem>
-                  <SelectItem value="error">Errors</SelectItem>
+                  <SelectItem value= "all">All Downloads</SelectItem>
+                  <SelectItem value= "downloading">Downloading</SelectItem>
+                  <SelectItem value= "completed">Completed</SelectItem>
+                  <SelectItem value= "escrow_locked">Escrow Locked</SelectItem>
+                  <SelectItem value= "error">Errors</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -677,27 +570,27 @@ export function EnhancedDownloadManager({
         <CardContent>
           {/* Batch Actions */}
           {state.selectedItems.length > 0 && (
-            <div className="mb-4 p-3 bg-muted rounded-lg">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">
+            <div className= "mb-4 p-3 bg-muted rounded-lg">
+              <div className= "flex items-center justify-between">
+                <span className= "text-sm font-medium">
                   {state.selectedItems.length} item(s) selected
                 </span>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline">
-                    <Play className="h-4 w-4 mr-1" />
+                <div className= "flex gap-2">
+                  <Button size= "sm" variant= "outline">
+                    <Play className= "h-4 w-4 mr-1" />
                     Start All
                   </Button>
-                  <Button size="sm" variant="outline">
-                    <Pause className="h-4 w-4 mr-1" />
+                  <Button size= "sm" variant= "outline">
+                    <Pause className= "h-4 w-4 mr-1" />
                     Pause All
                   </Button>
-                  <Button size="sm" variant="outline">
-                    <RotateCcw className="h-4 w-4 mr-1" />
+                  <Button size= "sm" variant= "outline">
+                    <RotateCcw className= "h-4 w-4 mr-1" />
                     Retry All
                   </Button>
                   <Button 
-                    size="sm" 
-                    variant="outline"
+                    size= "sm" 
+                    variant= "outline"
                     onClick={() => dispatch({ type: 'CLEAR_SELECTION' })}
                   >
                     Clear Selection
@@ -708,12 +601,12 @@ export function EnhancedDownloadManager({
           )}
 
           {/* Download List */}
-          <div className="space-y-4">
+          <div className= "space-y-4">
             {filteredDownloads.length === 0 ? (
-              <div className="text-center py-12">
-                <Download className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No downloads</h3>
-                <p className="mt-1 text-sm text-gray-500">
+              <div className= "text-center py-12">
+                <Download className= "mx-auto h-12 w-12 text-gray-400" />
+                <h3 className= "mt-2 text-sm font-medium text-gray-900">No downloads</h3>
+                <p className= "mt-1 text-sm text-gray-500">
                   Your downloads will appear here.
                 </p>
               </div>
@@ -728,19 +621,19 @@ export function EnhancedDownloadManager({
                     "transition-all duration-200",
                     isSelected && "ring-2 ring-primary"
                   )}>
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
+                    <CardContent className= "p-6">
+                      <div className= "flex items-start gap-4">
                         {/* File Icon */}
-                        <div className="flex-shrink-0 mt-1">
-                          <FileIcon className="h-8 w-8 text-primary" />
+                        <div className= "flex-shrink-0 mt-1">
+                          <FileIcon className= "h-8 w-8 text-primary" />
                         </div>
 
                         {/* File Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between mb-2">
+                        <div className= "flex-1 min-w-0">
+                          <div className= "flex items-start justify-between mb-2">
                             <div>
-                              <h4 className="font-semibold text-lg truncate">{item.fileName}</h4>
-                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              <h4 className= "font-semibold text-lg truncate">{item.fileName}</h4>
+                              <div className= "flex items-center gap-4 text-sm text-muted-foreground">
                                 <span>{formatFileSize(item.fileSize)}</span>
                                 <span>•</span>
                                 <span>{item.views} views</span>
@@ -748,11 +641,11 @@ export function EnhancedDownloadManager({
                                 <span>{item.downloadCount} downloads</span>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className= "flex items-center gap-2">
                               {getStatusBadge(item)}
                               {item.escrowProtected && (
-                                <Badge className="bg-emerald-100 text-emerald-800">
-                                  <Shield className="h-3 w-3 mr-1" />
+                                <Badge className= "bg-emerald-100 text-emerald-800">
+                                  <Shield className= "h-3 w-3 mr-1" />
                                   ${item.escrowAmount} Escrow
                                 </Badge>
                               )}
@@ -761,116 +654,116 @@ export function EnhancedDownloadManager({
 
                           {/* Progress Bar */}
                           {(item.status === 'downloading' || item.status === 'paused') && (
-                            <div className="mb-3">
-                              <div className="flex items-center justify-between text-sm mb-1">
+                            <div className= "mb-3">
+                              <div className= "flex items-center justify-between text-sm mb-1">
                                 <span>{item.progress.toFixed(1)}%</span>
-                                <div className="flex items-center gap-4">
+                                <div className= "flex items-center gap-4">
                                   <span>{formatSpeed(item.speed)}</span>
                                   <span>ETA: {formatTime(item.timeRemaining)}</span>
                                 </div>
                               </div>
-                              <Progress value={item.progress} className="h-2" />
+                              <Progress value={item.progress} className= "h-2" />
                             </div>
                           )}
 
                           {/* Error Message */}
                           {item.status === 'error' && item.error && (
-                            <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-                              <AlertCircle className="h-4 w-4 inline mr-1" />
+                            <div className= "mb-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+                              <AlertCircle className= "h-4 w-4 inline mr-1" />
                               {item.error}
                             </div>
                           )}
 
                           {/* Escrow Payment Required */}
                           {item.escrowProtected && item.paymentRequired && (
-                            <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded">
-                              <div className="flex items-center gap-2 text-amber-800 mb-2">
-                                <CreditCard className="h-4 w-4" />
-                                <span className="font-medium">Payment Required</span>
+                            <div className= "mb-3 p-3 bg-amber-50 border border-amber-200 rounded">
+                              <div className= "flex items-center gap-2 text-amber-800 mb-2">
+                                <CreditCard className= "h-4 w-4" />
+                                <span className= "font-medium">Payment Required</span>
                               </div>
-                              <p className="text-sm text-amber-700 mb-3">
+                              <p className= "text-sm text-amber-700 mb-3">
                                 This file is protected by escrow. Complete payment to download.
                               </p>
                               <Button
-                                size="sm"
-                                className="bg-amber-600 hover:bg-amber-700"
+                                size= "sm"
+                                className= "bg-amber-600 hover:bg-amber-700"
                                 onClick={() => handleEscrowPayment(item)}
                               >
-                                <CreditCard className="h-4 w-4 mr-2" />
+                                <CreditCard className= "h-4 w-4 mr-2" />
                                 Pay ${item.escrowAmount} - Secure Escrow
                               </Button>
                             </div>
                           )}
 
                           {/* Action Buttons */}
-                          <div className="flex items-center gap-2 pt-3 border-t">
+                          <div className= "flex items-center gap-2 pt-3 border-t">
                             {/* Download Control */}
                             {item.status === 'pending' && (
                               <Button 
-                                size="sm" 
+                                size= "sm" 
                                 onClick={() => startDownload(item.id)}
                                 disabled={item.paymentRequired}
                               >
-                                <Play className="h-4 w-4 mr-1" />
+                                <Play className= "h-4 w-4 mr-1" />
                                 Start
                               </Button>
                             )}
                             {item.status === 'downloading' && (
-                              <Button size="sm" variant="outline" onClick={() => pauseDownload(item.id)}>
-                                <Pause className="h-4 w-4 mr-1" />
+                              <Button size= "sm" variant= "outline" onClick={() => pauseDownload(item.id)}>
+                                <Pause className= "h-4 w-4 mr-1" />
                                 Pause
                               </Button>
                             )}
                             {item.status === 'paused' && (
-                              <Button size="sm" onClick={() => resumeDownload(item.id)}>
-                                <Play className="h-4 w-4 mr-1" />
+                              <Button size= "sm" onClick={() => resumeDownload(item.id)}>
+                                <Play className= "h-4 w-4 mr-1" />
                                 Resume
                               </Button>
                             )}
                             {item.status === 'error' && (
-                              <Button size="sm" onClick={() => retryDownload(item.id)}>
-                                <RotateCcw className="h-4 w-4 mr-1" />
+                              <Button size= "sm" onClick={() => retryDownload(item.id)}>
+                                <RotateCcw className= "h-4 w-4 mr-1" />
                                 Retry
                               </Button>
                             )}
                             {item.status === 'completed' && (
-                              <Button size="sm" variant="outline">
-                                <Download className="h-4 w-4 mr-1" />
+                              <Button size= "sm" variant= "outline">
+                                <Download className= "h-4 w-4 mr-1" />
                                 Open
                               </Button>
                             )}
 
                             {/* Other Actions */}
-                            <Button size="sm" variant="outline" onClick={() => shareItem(item)}>
-                              <Share2 className="h-4 w-4 mr-1" />
+                            <Button size= "sm" variant= "outline" onClick={() => shareItem(item)}>
+                              <Share2 className= "h-4 w-4 mr-1" />
                               Share
                             </Button>
                             
                             <Button 
-                              size="sm" 
-                              variant="outline"
+                              size= "sm" 
+                              variant= "outline"
                               onClick={() => copyToClipboard(item.downloadUrl, item.id)}
                             >
                               {isCopied ? (
-                                <Check className="h-4 w-4 mr-1" />
+                                <Check className= "h-4 w-4 mr-1" />
                               ) : (
-                                <Copy className="h-4 w-4 mr-1" />
+                                <Copy className= "h-4 w-4 mr-1" />
                               )}
                               Copy Link
                             </Button>
 
-                            <Button size="sm" variant="outline">
-                              <Eye className="h-4 w-4 mr-1" />
+                            <Button size= "sm" variant= "outline">
+                              <Eye className= "h-4 w-4 mr-1" />
                               Preview
                             </Button>
 
                             {item.status !== 'downloading' && (
                               <Button 
-                                size="sm" 
-                                variant="outline"
+                                size= "sm" 
+                                variant= "outline"
                                 onClick={() => removeDownload(item.id)}
                               >
-                                <Trash2 className="h-4 w-4 mr-1" />
+                                <Trash2 className= "h-4 w-4 mr-1" />
                                 Remove
                               </Button>
                             )}
@@ -878,11 +771,11 @@ export function EnhancedDownloadManager({
                             {/* Escrow Actions */}
                             {item.escrowProtected && item.escrowStatus === 'secured' && (
                               <Button 
-                                size="sm" 
-                                variant="outline"
-                                className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                                size= "sm" 
+                                variant= "outline"
+                                className= "border-emerald-200 text-emerald-700 hover:bg-emerald-50"
                               >
-                                <Unlock className="h-4 w-4 mr-1" />
+                                <Unlock className= "h-4 w-4 mr-1" />
                                 Release Escrow
                               </Button>
                             )}
@@ -899,31 +792,31 @@ export function EnhancedDownloadManager({
       </Card>
 
       {/* Marketing Footer */}
-      <Card className="bg-gradient-to-r from-purple-50 via-pink-50 to-red-50 border-purple-200">
-        <CardContent className="p-6">
-          <div className="text-center space-y-4">
-            <div className="flex justify-center items-center gap-2">
-              <Heart className="h-5 w-5 text-red-500" />
-              <span className="font-semibold">Powered by {brandName}</span>
+      <Card className= "bg-gradient-to-r from-purple-50 via-pink-50 to-red-50 border-purple-200">
+        <CardContent className= "p-6">
+          <div className= "text-center space-y-4">
+            <div className= "flex justify-center items-center gap-2">
+              <Heart className= "h-5 w-5 text-red-500" />
+              <span className= "font-semibold">Powered by {brandName}</span>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className= "text-sm text-muted-foreground">
               Professional download management with enterprise-grade escrow protection
             </p>
-            <div className="flex justify-center items-center gap-6 text-sm">
-              <div className="flex items-center gap-1">
-                <Shield className="h-4 w-4 text-emerald-600" />
+            <div className= "flex justify-center items-center gap-6 text-sm">
+              <div className= "flex items-center gap-1">
+                <Shield className= "h-4 w-4 text-emerald-600" />
                 <span>Escrow Protected</span>
               </div>
-              <div className="flex items-center gap-1">
-                <Zap className="h-4 w-4 text-yellow-600" />
+              <div className= "flex items-center gap-1">
+                <Zap className= "h-4 w-4 text-yellow-600" />
                 <span>High-Speed Downloads</span>
               </div>
-              <div className="flex items-center gap-1">
-                <TrendingUp className="h-4 w-4 text-blue-600" />
+              <div className= "flex items-center gap-1">
+                <TrendingUp className= "h-4 w-4 text-blue-600" />
                 <span>Advanced Analytics</span>
               </div>
             </div>
-            <Button size="sm" variant="outline" className="mt-4">
+            <Button size= "sm" variant= "outline" className= "mt-4">
               Upgrade to Premium
             </Button>
           </div>
@@ -934,10 +827,10 @@ export function EnhancedDownloadManager({
       <Dialog open={state.paymentModalOpen} onOpenChange={(open) => 
         dispatch({ type: 'TOGGLE_PAYMENT_MODAL', payload: { open } })
       }>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className= "sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-primary" />
+            <DialogTitle className= "flex items-center gap-2">
+              <CreditCard className= "h-5 w-5 text-primary" />
               Secure Escrow Payment
             </DialogTitle>
             <DialogDescription>
@@ -950,62 +843,62 @@ export function EnhancedDownloadManager({
             if (!item) return null
             
             return (
-              <div className="space-y-4">
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded">
-                      <FileText className="h-5 w-5 text-primary" />
+              <div className= "space-y-4">
+                <div className= "p-4 bg-gray-50 rounded-lg">
+                  <div className= "flex items-center gap-3">
+                    <div className= "p-2 bg-primary/10 rounded">
+                      <FileText className= "h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h4 className="font-medium">{item.fileName}</h4>
-                      <p className="text-sm text-muted-foreground">
+                      <h4 className= "font-medium">{item.fileName}</h4>
+                      <p className= "text-sm text-muted-foreground">
                         {formatFileSize(item.fileSize)}
                       </p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
+                <div className= "space-y-3">
+                  <div className= "flex justify-between items-center">
                     <span>File Access</span>
-                    <span className="font-medium">${item.escrowAmount}</span>
+                    <span className= "font-medium">${item.escrowAmount}</span>
                   </div>
-                  <div className="flex justify-between items-center text-sm text-muted-foreground">
+                  <div className= "flex justify-between items-center text-sm text-muted-foreground">
                     <span>Processing Fee</span>
                     <span>$0.00</span>
                   </div>
-                  <div className="border-t pt-2">
-                    <div className="flex justify-between items-center font-medium">
+                  <div className= "border-t pt-2">
+                    <div className= "flex justify-between items-center font-medium">
                       <span>Total</span>
                       <span>${item.escrowAmount}</span>
                     </div>
                   </div>
                 </div>
                 
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-green-700">
-                    <Shield className="h-4 w-4" />
+                <div className= "space-y-2">
+                  <div className= "flex items-center gap-2 text-sm text-green-700">
+                    <Shield className= "h-4 w-4" />
                     <span>Funds held securely in escrow</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-blue-700">
-                    <CheckCircle className="h-4 w-4" />
+                  <div className= "flex items-center gap-2 text-sm text-blue-700">
+                    <CheckCircle className= "h-4 w-4" />
                     <span>Instant download access after payment</span>
                   </div>
                 </div>
                 
-                <div className="flex gap-2 pt-4">
+                <div className= "flex gap-2 pt-4">
                   <Button 
-                    variant="outline" 
-                    className="flex-1"
+                    variant= "outline" 
+                    className= "flex-1"
                     onClick={() => dispatch({ type: 'TOGGLE_PAYMENT_MODAL', payload: { open: false } })}
                   >
                     Cancel
                   </Button>
                   <Button 
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                    className= "flex-1 bg-emerald-600 hover:bg-emerald-700"
                     onClick={() => handleEscrowPayment(item)}
                   >
-                    <CreditCard className="h-4 w-4 mr-2" />
+                    <CreditCard className= "h-4 w-4 mr-2" />
                     Pay Now
                   </Button>
                 </div>

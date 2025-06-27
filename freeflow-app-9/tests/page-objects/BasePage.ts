@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator } from &apos;@playwright/test&apos;;
 
 export class BasePage {
   readonly page: Page;
@@ -8,14 +8,14 @@ export class BasePage {
   }
 
   async waitForPageLoad() {
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState(&apos;networkidle&apos;);
   }
 
   async getByTestId(testId: string): Promise<Locator> {
     return this.page.getByTestId(testId);
   }
 
-  async getByRole(role: 'button' | 'link' | 'heading' | 'textbox' | 'checkbox' | 'radio' | 'tab' | 'tabpanel' | 'dialog' | 'alert' | 'alertdialog' | 'menu' | 'menuitem' | 'menubar' | 'navigation' | 'list' | 'listitem', name?: string): Promise<Locator> {
+  async getByRole(role: &apos;button&apos; | &apos;link&apos; | &apos;heading&apos; | &apos;textbox&apos; | &apos;checkbox&apos; | &apos;radio&apos; | &apos;tab&apos; | &apos;tabpanel&apos; | &apos;dialog&apos; | &apos;alert&apos; | &apos;alertdialog&apos; | &apos;menu&apos; | &apos;menuitem&apos; | &apos;menubar&apos; | &apos;navigation&apos; | &apos;list&apos; | &apos;listitem&apos;, name?: string): Promise<Locator> {
     return name ? this.page.getByRole(role, { name }) : this.page.getByRole(role);
   }
 

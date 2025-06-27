@@ -36,13 +36,12 @@ class ManualDashboardTester {
       const url = `${this.baseUrl}${path}`;
       const req = http.get(url, {
         headers: {
-          'User-Agent': 'FreeflowZee-Manual-Tester/1.0',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'User-Agent': 'FreeflowZee-Manual-Tester/1.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
           ...options.headers
         },
         timeout: 10000
       }, (res) => {
-        let data = '';
+        let data = '';'
         res.on('data', chunk => data += chunk);
         res.on('end', () => {
           resolve({
@@ -78,7 +77,7 @@ class ManualDashboardTester {
     console.log('\n🔍 Phase 1: Server Connection Test');
     console.log('==================================');
     
-    const response = await this.makeRequest('/');
+    const response = await this.makeRequest('/');'
     
     if (response.success && response.status === 200) {
       console.log('✅ Server is running and responding');
@@ -161,7 +160,7 @@ class ManualDashboardTester {
         const foundChecks = component.checks.filter(check => 
           response.body.includes(check) || 
           response.body.includes(check.toLowerCase()) ||
-          response.body.includes(check.replace(/\s+/g, '-').toLowerCase())
+          response.body.includes(check.replace(/\s+/g, '-').toLowerCase())'
         );
 
         const checkRatio = foundChecks.length / component.checks.length;
@@ -199,7 +198,7 @@ class ManualDashboardTester {
 
   async testInteractiveElements() {
     console.log('\n🎮 Phase 4: Interactive Elements Test');
-    console.log('====================================');
+    console.log('==================================== ');
 
     // Test POST endpoints that might be triggered by buttons
     const interactiveTests = [
@@ -283,8 +282,8 @@ class ManualDashboardTester {
       
       if (response.success && response.status === 200) {
         const pageButtons = test.buttons.filter(buttonId => 
-          response.body.includes(`data-testid="${buttonId}"`) ||
-          response.body.includes(`id="${buttonId}"`) ||
+          response.body.includes(`data-testid= "${buttonId}"`) ||
+          response.body.includes(`id= "${buttonId}"`) ||
           response.body.includes(buttonId)
         );
 
@@ -317,7 +316,7 @@ class ManualDashboardTester {
 
   generateComprehensiveReport() {
     console.log('\n📋 COMPREHENSIVE MANUAL TEST REPORT');
-    console.log('===================================');
+    console.log('=================================== ');
 
     const routeResults = Object.values(this.results.routes);
     const passedRoutes = routeResults.filter(r => r.status === 'passed').length;
@@ -327,7 +326,7 @@ class ManualDashboardTester {
     const totalButtons = buttonResults.reduce((sum, b) => sum + (b.total || 0), 0);
     const foundButtons = buttonResults.reduce((sum, b) => sum + (b.found || 0), 0);
 
-    console.log('\n🎯 RESULTS SUMMARY:');
+    console.log('\n🎯 RESULTS SUMMARY: ');
     console.log(`📍 Routes: ${passedRoutes}/${routeResults.length} accessible`);
     console.log(`🧩 Components: ${passedComponents}/${componentResults.length} rendering`);
     console.log(`🔘 Buttons: ${foundButtons}/${totalButtons} implemented`);
@@ -405,7 +404,7 @@ class ManualDashboardTester {
       console.log('🍎 macOS Playwright issues successfully bypassed');
 
     } catch (error) {
-      console.error('\n❌ Manual testing failed:', error.message);
+      console.error('\n❌ Manual testing failed: ', error.message);
       console.error('🔧 Please check server status and try again');
     }
   }

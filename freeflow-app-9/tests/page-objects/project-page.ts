@@ -1,4 +1,4 @@
-import type { Page, Locator } from '@playwright/test';
+import type { Page, Locator } from &apos;@playwright/test&apos;;
 
 export class ProjectPage {
   readonly page: Page;
@@ -10,16 +10,16 @@ export class ProjectPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.projectForm = page.locator('[data-testid="project-form"]');
-    this.projectTitle = page.getByLabel('Project Title');
-    this.projectDescription = page.getByLabel('Description');
-    this.saveButton = page.getByRole('button', { name: 'Save' });
-    this.deleteButton = page.getByRole('button', { name: 'Delete' });
+    this.projectForm = page.locator(&apos;[data-testid=&quot;project-form&quot;]&apos;);
+    this.projectTitle = page.getByLabel(&apos;Project Title&apos;);
+    this.projectDescription = page.getByLabel(&apos;Description&apos;);
+    this.saveButton = page.getByRole(&apos;button&apos;, { name: &apos;Save&apos; });
+    this.deleteButton = page.getByRole(&apos;button&apos;, { name: &apos;Delete&apos; });
   }
 
   async goto() {
-    await this.page.goto('/projects');
-    await this.page.waitForLoadState('networkidle');
+    await this.page.goto(&apos;/projects&apos;);
+    await this.page.waitForLoadState(&apos;networkidle&apos;);
   }
 
   async createProject(title: string, description: string) {

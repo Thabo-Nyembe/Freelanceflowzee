@@ -1,111 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useReducer, useCallback } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Slider } from '@/components/ui/slider'
-import { 
-  MousePointer, 
-  Square, 
-  Circle, 
-  Type, 
-  Move, 
-  RotateCcw, 
-  Copy, 
-  Trash2, 
-  Layers, 
-  Eye, 
-  EyeOff, 
-  Users, 
-  Palette, 
-  Grid, 
-  Undo, 
-  Redo,
-  Download,
-  Share2,
-  GitBranch,
-  Clock,
-  Sparkles
-} from 'lucide-react'
-
-// Types for real-time collaboration
-interface CanvasObject {
-  id: string
-  type: 'rectangle' | 'circle' | 'text' | 'line' | 'component'
-  x: number
-  y: number
-  width: number
-  height: number
-  rotation: number
-  fill: string
-  stroke: string
-  strokeWidth: number
-  text?: string
-  fontSize?: number
-  fontFamily?: string
-  opacity: number
-  locked: boolean
-  visible: boolean
-  userId: string
-  createdAt: string
-  updatedAt: string
-}
-
-interface UserCursor {
-  userId: string
-  userName: string
-  userColor: string
-  x: number
-  y: number
-  isActive: boolean
-  tool: string
-  timestamp: number
-}
-
-interface CanvasVersion {
-  id: string
-  name: string
-  timestamp: string
-  objects: CanvasObject[]
-  createdBy: string
-  description: string
-}
-
-interface ComponentLibraryItem {
-  id: string
-  name: string
-  category: string
-  thumbnail: string
-  objects: CanvasObject[]
-  description: string
-  tags: string[]
-}
-
-interface CanvasState {
-  objects: CanvasObject[]
-  selectedObjects: string[]
-  activeTool: string
-  zoom: number
-  panX: number
-  panY: number
-  cursors: UserCursor[]
-  isCollaborating: boolean
-  versions: CanvasVersion[]
-  currentVersion: string
-  componentLibrary: ComponentLibraryItem[]
-  showGrid: boolean
-  snapToGrid: boolean
-  gridSize: number
-  undoStack: CanvasObject[][]
-  redoStack: CanvasObject[][]
-  isRecording: boolean
-  collaborators: number
-}
-
-type CanvasAction = 
-  | { type: 'ADD_OBJECT'; object: CanvasObject }
-  | { type: 'UPDATE_OBJECT'; id: string; updates: Partial<CanvasObject> }
+ id: string; updates: Partial<CanvasObject> }
   | { type: 'DELETE_OBJECTS'; ids: string[] }
   | { type: 'SELECT_OBJECTS'; ids: string[] }
   | { type: 'SET_TOOL'; tool: string }
@@ -259,7 +155,7 @@ interface RealTimeCanvasCollaborationProps {
     color: string
   }
   onSave?: (objects: CanvasObject[]) => void
-  onShare?: (shareData: any) => void
+  onShare?: (shareData: unknown) => void
   className?: string
 }
 
@@ -268,7 +164,7 @@ export function RealTimeCanvasCollaboration({
   currentUser,
   onSave,
   onShare,
-  className = ''
+  className = '
 }: RealTimeCanvasCollaborationProps) {
   const [state, dispatch] = useReducer(canvasReducer, initialState)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -534,7 +430,7 @@ export function RealTimeCanvasCollaboration({
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const link = document.createElement('a')
+    const link = document.createElement('a')'
     link.download = `canvas-${projectId}.png`
     link.href = canvas.toDataURL()
     link.click()
@@ -543,71 +439,62 @@ export function RealTimeCanvasCollaboration({
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className= "flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-purple-600" />
+          <h2 className= "text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <Sparkles className= "h-6 w-6 text-purple-600" />
             Real-Time Canvas Collaboration
           </h2>
-          <p className="text-gray-600">Figma-level design collaboration with live cursors</p>
+          <p className= "text-gray-600">Figma-level design collaboration with live cursors</p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className= "flex items-center gap-2">
           {/* Collaborators */}
-          <div className="flex items-center gap-1">
+          <div className= "flex items-center gap-1">
             {collaborators.map(collab => (
               <div
                 key={collab.id}
                 className={`w-8 h-8 rounded-full border-2 ${collab.isActive ? 'border-green-400' : 'border-gray-300'}`}
                 style={{ borderColor: collab.isActive ? collab.color : undefined }}
               >
-                <img
-                  src={collab.avatar}
-                  alt={collab.name}
-                  className="w-full h-full rounded-full object-cover"
-                />
+                <img src={collab.avatar} alt={collab.name}>
               </div>
             ))}
-            <Badge variant="outline" className="ml-2">
-              <Users className="h-3 w-3 mr-1" />
+            <Badge >
+              <Users >
               {state.collaborators} online
             </Badge>
           </div>
 
-          <Button onClick={saveVersion} size="sm" variant="outline">
-            <GitBranch className="h-4 w-4 mr-2" />
+          <Button onClick={saveVersion}>
+            <GitBranch >
             Save Version
           </Button>
 
-          <Button onClick={exportCanvas} size="sm" variant="outline">
-            <Download className="h-4 w-4 mr-2" />
+          <Button onClick={exportCanvas}>
+            <Download >
             Export
           </Button>
 
-          <Button onClick={() => onShare?.({ projectId, objects: state.objects })} size="sm">
-            <Share2 className="h-4 w-4 mr-2" />
+          <Button > onShare?.({ projectId, objects: state.objects })} size= "sm">
+            <Share2 >
             Share
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-4">
+      <div >
         {/* Toolbar */}
-        <div className="col-span-2 space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Tools</CardTitle>
+        <div >
+          <Card >
+            <CardHeader >
+              <CardTitle >Tools</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent >
               {tools.map(tool => (
-                <Button
-                  key={tool.id}
-                  variant={state.activeTool === tool.id ? 'default' : 'outline'}
-                  size="sm"
-                  className="w-full justify-start"
-                  onClick={() => dispatch({ type: 'SET_TOOL', tool: tool.id })}
+                <Button key={tool.id} variant={state.activeTool === tool.id ? &apos;default&apos; : &apos;outline&apos;}> dispatch({ type: &apos;SET_TOOL&apos;, tool: tool.id })}
                 >
-                  <tool.icon className="h-4 w-4 mr-2" />
+                  <tool >
                   {tool.label}
                 </Button>
               ))}
@@ -615,47 +502,37 @@ export function RealTimeCanvasCollaboration({
           </Card>
 
           {/* Component Library */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Components</CardTitle>
+          <Card >
+            <CardHeader >
+              <CardTitle >Components</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent >
               {state.componentLibrary.map(component => (
-                <div
-                  key={component.id}
-                  className="p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-                  onClick={() => addComponentFromLibrary(component)}
+                <div key={component.id}> addComponentFromLibrary(component)}
                 >
-                  <div className="text-xs font-medium">{component.name}</div>
-                  <div className="text-xs text-gray-500">{component.category}</div>
+                  <div >{component.name}</div>
+                  <div >{component.category}</div>
                 </div>
               ))}
             </CardContent>
           </Card>
 
           {/* Layers */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Layers</CardTitle>
+          <Card >
+            <CardHeader >
+              <CardTitle >Layers</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1">
+            <CardContent >
               {state.objects.map(obj => (
-                <div
-                  key={obj.id}
-                  className={`flex items-center justify-between p-1 rounded text-xs ${
+                <div key={obj.id} className={`flex items-center justify-between p-1 rounded text-xs ${
                     state.selectedObjects.includes(obj.id) ? 'bg-purple-100' : 'hover:bg-gray-50'
-                  }`}
-                  onClick={() => dispatch({ type: 'SELECT_OBJECTS', ids: [obj.id] })}
+                  }> dispatch({ type: 'SELECT_OBJECTS', ids: [obj.id] })}
                 >
-                  <span className="flex items-center gap-1">
-                    <Layers className="h-3 w-3" />
+                  <span >
+                    <Layers >
                     {obj.type} {obj.id.slice(-4)}
                   </span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-4 w-4 p-0"
-                    onClick={(e) => {
+                  <Button > {
                       e.stopPropagation()
                       dispatch({
                         type: 'UPDATE_OBJECT',
@@ -664,7 +541,7 @@ export function RealTimeCanvasCollaboration({
                       })
                     }}
                   >
-                    {obj.visible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                    {obj.visible ? <Eye > : <EyeOff >}
                   </Button>
                 </div>
               ))}
@@ -673,80 +550,58 @@ export function RealTimeCanvasCollaboration({
         </div>
 
         {/* Canvas */}
-        <div className="col-span-8">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm">Canvas</CardTitle>
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => dispatch({ type: 'UNDO' })}
+        <div >
+          <Card >
+            <CardHeader >
+              <div >
+                <CardTitle >Canvas</CardTitle>
+                <div >
+                  <Button > dispatch({ type: &apos;UNDO&apos; })}
                     disabled={state.undoStack.length === 0}
                   >
-                    <Undo className="h-4 w-4" />
+                    <Undo >
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => dispatch({ type: 'REDO' })}
+                  <Button > dispatch({ type: &apos;REDO&apos; })}
                     disabled={state.redoStack.length === 0}
                   >
-                    <Redo className="h-4 w-4" />
+                    <Redo >
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => dispatch({ type: 'TOGGLE_GRID' })}
+                  <Button > dispatch({ type: &apos;TOGGLE_GRID&apos; })}
                   >
-                    <Grid className="h-4 w-4" />
+                    <Grid >
                   </Button>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs">Zoom:</span>
-                    <Slider
-                      value={[state.zoom]}
-                      onValueChange={([zoom]) => dispatch({ type: 'SET_ZOOM', zoom })}
+                  <div >
+                    <span >Zoom:</span>
+                    <Slider value={[state.zoom]}> dispatch({ type: &apos;SET_ZOOM&apos;, zoom })}
                       min={10}
                       max={500}
                       step={10}
-                      className="w-20"
+                      className= "w-20"
                     />
-                    <span className="text-xs w-12">{state.zoom}%</span>
+                    <span >{state.zoom}%</span>
                   </div>
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <canvas
-                ref={canvasRef}
-                width={800}
-                height={600}
-                className="border border-gray-200 rounded-lg bg-white cursor-crosshair"
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                style={{ transform: `scale(${state.zoom / 100})`, transformOrigin: 'top left' }}
-              />
+            <CardContent >
+              <canvas ref={canvasRef} width={800} height={600} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} style={{ transform: `scale(${state.zoom / 100}>
             </CardContent>
           </Card>
         </div>
 
         {/* Properties Panel */}
-        <div className="col-span-2 space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Properties</CardTitle>
+        <div >
+          <Card >
+            <CardHeader >
+              <CardTitle >Properties</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent >
               {state.selectedObjects.length > 0 ? (
                 <>
-                  <div>
-                    <label className="text-xs font-medium">Fill Color</label>
-                    <div className="flex items-center gap-2 mt-1">
-                      <input
-                        type="color"
-                        value={state.objects.find(obj => obj.id === state.selectedObjects[0])?.fill || '#6366f1'}
+                  <div >
+                    <label >Fill Color</label>
+                    <div >
+                      <input > obj.id === state.selectedObjects[0])?.fill || &apos;#6366f1&apos;}
                         onChange={(e) => {
                           state.selectedObjects.forEach(id => {
                             dispatch({
@@ -756,16 +611,15 @@ export function RealTimeCanvasCollaboration({
                             })
                           })
                         }}
-                        className="w-8 h-8 rounded border"
+                        className= "w-8 h-8 rounded border"
                       />
-                      <Palette className="h-4 w-4 text-gray-400" />
+                      <Palette >
                     </div>
                   </div>
 
-                  <div>
-                    <label className="text-xs font-medium">Opacity</label>
-                    <Slider
-                      value={[state.objects.find(obj => obj.id === state.selectedObjects[0])?.opacity || 1]}
+                  <div >
+                    <label >Opacity</label>
+                    <Slider > obj.id === state.selectedObjects[0])?.opacity || 1]}
                       onValueChange={([opacity]) => {
                         state.selectedObjects.forEach(id => {
                           dispatch({
@@ -778,16 +632,12 @@ export function RealTimeCanvasCollaboration({
                       min={0}
                       max={100}
                       step={1}
-                      className="mt-1"
+                      className= "mt-1"
                     />
                   </div>
 
-                  <div className="flex gap-1">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="flex-1"
-                      onClick={() => {
+                  <div >
+                    <Button > {
                         // Copy selected objects
                         const selectedObjs = state.objects.filter(obj => state.selectedObjects.includes(obj.id))
                         selectedObjs.forEach(obj => {
@@ -803,48 +653,41 @@ export function RealTimeCanvasCollaboration({
                         })
                       }}
                     >
-                      <Copy className="h-3 w-3" />
+                      <Copy >
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="flex-1"
-                      onClick={() => dispatch({ type: 'DELETE_OBJECTS', ids: state.selectedObjects })}
+                    <Button > dispatch({ type: &apos;DELETE_OBJECTS&apos;, ids: state.selectedObjects })}
                     >
-                      <Trash2 className="h-3 w-3" />
+                      <Trash2 >
                     </Button>
                   </div>
                 </>
               ) : (
-                <p className="text-xs text-gray-500">Select an object to edit properties</p>
+                <p >Select an object to edit properties</p>
               )}
             </CardContent>
           </Card>
 
           {/* Version History */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Version History</CardTitle>
+          <Card >
+            <CardHeader >
+              <CardTitle >Version History</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent >
               {state.versions.length > 0 ? (
                 state.versions.slice(-5).map(version => (
-                  <div
-                    key={version.id}
-                    className="flex items-center justify-between p-2 border rounded text-xs hover:bg-gray-50 cursor-pointer"
-                    onClick={() => dispatch({ type: 'LOAD_VERSION', versionId: version.id })}
+                  <div key={version.id}> dispatch({ type: &apos;LOAD_VERSION&apos;, versionId: version.id })}
                   >
-                    <div>
-                      <div className="font-medium">{version.name}</div>
-                      <div className="text-gray-500">
-                        <Clock className="h-3 w-3 inline mr-1" />
+                    <div >
+                      <div >{version.name}</div>
+                      <div >
+                        <Clock >
                         {new Date(version.timestamp).toLocaleTimeString()}
                       </div>
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="text-xs text-gray-500">No versions saved yet</p>
+                <p >No versions saved yet</p>
               )}
             </CardContent>
           </Card>

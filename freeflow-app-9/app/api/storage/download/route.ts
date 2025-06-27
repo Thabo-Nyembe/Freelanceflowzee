@@ -17,12 +17,7 @@ export async function GET(request: NextRequest) {
     return new NextResponse(buffer, {
       status: 200,
       headers: {
-        'Content-Type': metadata.mimeType,
-        'Content-Disposition': `attachment; filename="${metadata.original_filename}"`,
-        'Content-Length': metadata.size.toString(),
-        'Cache-Control': 'private, max-age=3600',
-        'X-File-Provider': metadata.provider,
-        'X-File-Size': metadata.size.toString()
+        'Content-Type': metadata.mimeType, 'Content-Disposition': `attachment; filename= "${metadata.original_filename}"`, 'Content-Length': metadata.size.toString(), 'Cache-Control': 'private, max-age=3600', 'X-File-Provider': metadata.provider, 'X-File-Size': metadata.size.toString()
       }
     })
 

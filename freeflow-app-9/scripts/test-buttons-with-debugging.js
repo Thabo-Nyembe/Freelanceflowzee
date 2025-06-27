@@ -67,7 +67,7 @@ class ButtonDebugger {
       }
 
       // Check for tabs
-      const tabs = await this.page.locator('[role="tab"]').all();
+      const tabs = await this.page.locator('[role= "tab"]').all();
       console.log(`  📂 Found ${tabs.length} tab elements`);
       
       for (const tab of tabs) {
@@ -79,7 +79,7 @@ class ButtonDebugger {
 
       // Take screenshot for reference
       await this.page.screenshot({ 
-        path: `debug-screenshots/${pageName.replace(/\s+/g, '-').toLowerCase()}.png`,
+        path: `debug-screenshots/${pageName.replace(/\s+/g, '-').toLowerCase()}.png`,'
         fullPage: true 
       });
 
@@ -114,7 +114,7 @@ class ButtonDebugger {
       await this.page.waitForLoadState('networkidle');
       await this.page.waitForTimeout(2000);
 
-      const button = this.page.locator(`[data-testid="${testId}"]`);
+      const button = this.page.locator(`[data-testid= "${testId}"]`);
       const exists = await button.count() > 0;
       
       if (exists) {
@@ -172,19 +172,13 @@ async function main() {
     // Test specific important buttons
     console.log('\n🎯 Testing Specific Important Buttons...');
     await tester.testSpecificButton(
-      `${TEST_CONFIG.baseUrl}/dashboard/projects-hub`, 
-      'create-project-btn', 
-      'Projects Hub'
+      `${TEST_CONFIG.baseUrl}/dashboard/projects-hub`, 'create-project-btn', 'Projects Hub'
     );
     await tester.testSpecificButton(
-      `${TEST_CONFIG.baseUrl}/dashboard/ai-create`, 
-      'generate-btn', 
-      'AI Create'
+      `${TEST_CONFIG.baseUrl}/dashboard/ai-create`, 'generate-btn', 'AI Create'
     );
     await tester.testSpecificButton(
-      `${TEST_CONFIG.baseUrl}/dashboard`, 
-      'create-project-btn', 
-      'Dashboard'
+      `${TEST_CONFIG.baseUrl}/dashboard`, 'create-project-btn', 'Dashboard'
     );
 
   } catch (error) {

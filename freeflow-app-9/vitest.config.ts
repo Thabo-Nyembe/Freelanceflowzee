@@ -11,15 +11,14 @@ export default defineConfig({
     include: ['**/*.test.{ts,tsx}'],
     coverage: {
       reporter: ['text', 'json', 'html'],
-      exclude: [
-        'node_modules/',
+      exclude: ['node_modules/',
         '__tests__/setup.ts',
       ],
     },
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, './app'),
+      '@': resolve(__dirname, './app'),'
     },
   },
 }) 

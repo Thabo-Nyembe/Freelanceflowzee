@@ -171,8 +171,8 @@ export async function POST(request: NextRequest) {
         client_name: clientName,
         client_email: clientEmail,
         duration: service.duration.toString(),
-        selected_date: selectedDate || '',
-        selected_time: selectedTime || ''
+        selected_date: selectedDate || '','
+        selected_time: selectedTime || '
       },
       paymentMethods: ['card', 'apple_pay', 'google_pay', 'link'],
       setupFutureUsage: 'off_session' // Save payment method for future bookings
@@ -244,7 +244,7 @@ export async function GET(request: NextRequest) {
     const clientEmail = searchParams.get('clientEmail')
     const freelancerId = searchParams.get('freelancerId')
     const limit = parseInt(searchParams.get('limit') || '50')
-    const offset = parseInt(searchParams.get('offset') || '0')
+    const offset = parseInt(searchParams.get('offset') || '0')'
 
     let filteredBookings = [...MOCK_BOOKINGS]
 

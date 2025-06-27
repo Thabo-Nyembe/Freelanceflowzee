@@ -30,8 +30,8 @@ const colors = {
 };
 
 const symbols = {
-  success: '✅',
-  error: '❌',
+  success: '✅','
+  error: '❌','
   warning: '⚠️',
   info: '📋',
   rocket: '🚀',
@@ -82,9 +82,9 @@ class ProductionDeployerContext7 {
   }
 
   logSection(title) {
-    console.log('\n' + '='.repeat(80));
+    console.log('\n' + '='.repeat(80));'
     this.log(`${symbols.enterprise} ${title.toUpperCase()}`, 'info');
-    console.log('='.repeat(80));
+    console.log('='.repeat(80));'
   }
 
   async executeCommand(command, options = {}) {
@@ -100,7 +100,7 @@ class ProductionDeployerContext7 {
       return { 
         success: false, 
         error: error.message, 
-        output: error.stdout || error.stderr || ''
+        output: error.stdout || error.stderr || '
       };
     }
   }
@@ -112,7 +112,7 @@ class ProductionDeployerContext7 {
       // Check Node.js version
       this.log('Checking Node.js version...', 'check', 1);
       const nodeVersion = process.version;
-      const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0]);
+      const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0]);'
       
       if (majorVersion < this.config.nodeMinVersion) {
         this.results.errors.push(`Node.js ${nodeVersion} is not supported. Minimum: ${this.config.nodeMinVersion}.x`);
@@ -122,11 +122,7 @@ class ProductionDeployerContext7 {
 
       // Check required files
       this.log('Validating project structure...', 'check', 1);
-      const requiredFiles = [
-        'package.json',
-        'next.config.js',
-        '.env.local',
-        'tsconfig.json'
+      const requiredFiles = ['package.json', 'next.config.js', '.env.local', 'tsconfig.json'
       ];
 
       for (const file of requiredFiles) {
@@ -139,13 +135,7 @@ class ProductionDeployerContext7 {
 
       // Validate environment variables
       this.log('Checking environment variables...', 'check', 1);
-      const requiredEnvVars = [
-        'NEXT_PUBLIC_SUPABASE_URL',
-        'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-        'SUPABASE_SERVICE_ROLE_KEY',
-        'STRIPE_PUBLISHABLE_KEY',
-        'STRIPE_SECRET_KEY',
-        'VERCEL_TOKEN'
+      const requiredEnvVars = ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'STRIPE_PUBLISHABLE_KEY', 'STRIPE_SECRET_KEY', 'VERCEL_TOKEN'
       ];
 
       const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
@@ -172,9 +162,7 @@ class ProductionDeployerContext7 {
       this.log('Checking Context7 components...', 'context7', 1);
       
       // Check for Context7 patterns in codebase
-      const context7Files = [
-        'lib/context7/client.ts',
-        'components/providers/context7-provider.tsx'
+      const context7Files = ['lib/context7/client.ts', 'components/providers/context7-provider.tsx'
       ];
 
       let context7Found = false;
@@ -188,7 +176,7 @@ class ProductionDeployerContext7 {
       // Check for useReducer patterns (Context7 best practice)
       this.log('Validating Context7 useReducer patterns...', 'context7', 1);
       const result = await this.executeCommand(
-        'grep -r "useReducer" components/ --include="*.tsx" --include="*.ts" | wc -l',
+        'grep -r "useReducer" components/ --include= "*.tsx" --include= "*.ts" | wc -l',
         { silent: true }
       );
 
@@ -302,10 +290,8 @@ class ProductionDeployerContext7 {
 
       // Run basic build verification
       this.log('Verifying build integrity...', 'check', 2);
-      const buildFiles = [
-        '.next/build-manifest.json',
-        '.next/prerender-manifest.json'
-      ];
+      const buildFiles = ['.next/build-manifest.json',
+        '.next/prerender-manifest.json'];
 
       for (const file of buildFiles) {
         if (!fs.existsSync(file)) {
@@ -442,7 +428,7 @@ Generated: ${new Date().toISOString()}`;
     const successful = Object.values(this.checks).every(check => check === true);
 
     console.log('\n📊 DEPLOYMENT SUMMARY');
-    console.log('━'.repeat(50));
+    console.log('━'.repeat(50));'
     
     // Status
     if (successful) {
@@ -460,14 +446,14 @@ Generated: ${new Date().toISOString()}`;
     // URLs
     if (this.results.deploymentUrl) {
       console.log('\n🌐 LIVE DEPLOYMENT');
-      console.log('━'.repeat(30));
+      console.log('━'.repeat(30));'
       this.log(`Production URL: ${colors.cyan}${this.results.deploymentUrl}${colors.reset}`, 'deploy');
       this.log('Ready for live testing!', 'success');
     }
 
     // Checks
     console.log('\n✅ DEPLOYMENT CHECKS');
-    console.log('━'.repeat(30));
+    console.log('━'.repeat(30));'
     Object.entries(this.checks).forEach(([check, status]) => {
       const symbol = status ? symbols.success : symbols.error;
       const color = status ? colors.green : colors.red;
@@ -477,7 +463,7 @@ Generated: ${new Date().toISOString()}`;
     // Issues
     if (this.results.warnings.length > 0) {
       console.log('\n⚠️  WARNINGS');
-      console.log('━'.repeat(20));
+      console.log('━'.repeat(20));'
       this.results.warnings.forEach(warning => {
         this.log(warning, 'warning');
       });
@@ -485,13 +471,13 @@ Generated: ${new Date().toISOString()}`;
 
     if (this.results.errors.length > 0) {
       console.log('\n❌ ERRORS');
-      console.log('━'.repeat(15));
+      console.log('━'.repeat(15));'
       this.results.errors.forEach(error => {
         this.log(error, 'error');
       });
     }
 
-    console.log('\n' + '='.repeat(80));
+    console.log('\n' + '='.repeat(80));'
     
     return successful;
   }
@@ -499,7 +485,7 @@ Generated: ${new Date().toISOString()}`;
   async deploy() {
     console.log(`\n${symbols.enterprise} FREEFLOWZEE A+++ PRODUCTION DEPLOYMENT`);
     console.log(`${symbols.context7} Context7 Integration & Enterprise Features`);
-    console.log('━'.repeat(80));
+    console.log('━'.repeat(80));'
 
     try {
       // Execute deployment pipeline

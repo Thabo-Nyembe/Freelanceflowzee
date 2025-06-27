@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import React, { useState } from 'react';
 import { X, Copy, Share2, Facebook, Twitter, Linkedin, Instagram, Mail, Link, Code, Download } from 'lucide-react';
@@ -30,7 +30,7 @@ export function EnhancedSharingModal({
   const shareUrl = `${window.location.origin}${url}`;
   const encodedUrl = encodeURIComponent(shareUrl);
   const encodedTitle = encodeURIComponent(title);
-  const encodedDescription = encodeURIComponent(description || '');
+  const encodedDescription = encodeURIComponent(description || '');'
 
   const socialPlatforms = [
     {
@@ -54,7 +54,7 @@ export function EnhancedSharingModal({
     {
       name: 'Instagram',
       icon: Instagram,
-      url: '#',
+      url: '#','
       color: 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'
     },
     {
@@ -65,7 +65,7 @@ export function EnhancedSharingModal({
     }
   ];
 
-  const embedCode = `<iframe src="${shareUrl}" width="800" height="600" frameborder="0" allowfullscreen></iframe>`;
+  const embedCode = `<iframe src= "${shareUrl}" width= "800" height= "600" frameborder="0" allowfullscreen></iframe>`;"
 
   const handleCopyLink = async () => {
     try {
@@ -97,56 +97,50 @@ export function EnhancedSharingModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div className= "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className= "bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <div className="flex items-center space-x-2">
-            <Share2 className="w-5 h-5 text-blue-600" />
-            <h2 className="text-lg font-semibold">Share {type}</h2>
+        <div className= "flex items-center justify-between p-6 border-b">
+          <div className= "flex items-center space-x-2">
+            <Share2 className= "w-5 h-5 text-blue-600" />
+            <h2 className= "text-lg font-semibold">Share {type}</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            className= "p-1 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className= "w-5 h-5" />
           </button>
         </div>
 
         {/* Content Preview */}
-        <div className="p-6 border-b">
-          <div className="flex space-x-3">
+        <div className= "p-6 border-b">
+          <div className= "flex space-x-3">
             {imageUrl && (
-              <img 
-                src={imageUrl} 
-                alt={title}
-                className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-              />
+              <img src={imageUrl} alt={title}>
             )}
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-gray-900 truncate">{title}</h3>
+            <div >
+              <h3 >{title}</h3>
               {description && (
-                <p className="text-sm text-gray-500 line-clamp-2 mt-1">{description}</p>
+                <p >{description}</p>
               )}
-              <p className="text-xs text-gray-400 mt-1 truncate">{shareUrl}</p>
+              <p >{shareUrl}</p>
             </div>
           </div>
         </div>
 
         {/* Social Media Platforms */}
-        <div className="p-6">
-          <h3 className="text-sm font-medium text-gray-900 mb-3">Share on social media</h3>
-          <div className="grid grid-cols-3 gap-3">
+        <div >
+          <h3 >Share on social media</h3>
+          <div >
             {socialPlatforms.map((platform) => {
               const Icon = platform.icon;
               return (
-                <button
-                  key={platform.name}
-                  onClick={() => handleSocialShare(platform)}
+                <button key={platform.name}> handleSocialShare(platform)}
                   className={`${platform.color} text-white p-3 rounded-lg flex flex-col items-center space-y-1 transition-colors`}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{platform.name}</span>
+                  <Icon >
+                  <span >{platform.name}</span>
                 </button>
               );
             })}
@@ -154,43 +148,33 @@ export function EnhancedSharingModal({
         </div>
 
         {/* Copy Link */}
-        <div className="p-6 border-t">
-          <h3 className="text-sm font-medium text-gray-900 mb-3">Copy link</h3>
-          <div className="flex items-center space-x-2">
-            <div className="flex-1 bg-gray-50 rounded-lg p-3 text-sm text-gray-600 truncate">
+        <div >
+          <h3 >Copy link</h3>
+          <div >
+            <div >
               {shareUrl}
             </div>
-            <button
-              onClick={handleCopyLink}
-              className={`px-4 py-3 rounded-lg font-medium transition-colors ${
+            <button onClick={handleCopyLink} className={`px-4 py-3 rounded-lg font-medium transition-colors ${
                 copied 
                   ? 'bg-green-100 text-green-700' 
                   : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
-            >
-              {copied ? 'Copied!' : <Copy className="w-4 h-4" />}
+              }>
+              {copied ? &apos;Copied!&apos; : <Copy >}
             </button>
           </div>
         </div>
 
         {/* Embed Code (for portfolio/gallery items) */}
         {(type === 'portfolio' || type === 'gallery') && (
-          <div className="p-6 border-t">
-            <h3 className="text-sm font-medium text-gray-900 mb-3">Embed code</h3>
-            <div className="space-y-2">
-              <textarea
-                value={embedCode}
-                readOnly
-                className="w-full h-20 p-3 text-xs bg-gray-50 border rounded-lg resize-none font-mono"
-              />
-              <button
-                onClick={handleCopyEmbed}
-                className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
+          <div >
+            <h3 >Embed code</h3>
+            <div >
+              <textarea value={embedCode}>
+              <button onClick={handleCopyEmbed} className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
                   embedCopied 
                     ? 'bg-green-100 text-green-700' 
                     : 'bg-gray-600 text-white hover:bg-gray-700'
-                }`}
-              >
+                }>
                 {embedCopied ? 'Embed Code Copied!' : 'Copy Embed Code'}
               </button>
             </div>
@@ -198,15 +182,15 @@ export function EnhancedSharingModal({
         )}
 
         {/* Additional Options */}
-        <div className="p-6 border-t bg-gray-50">
-          <div className="grid grid-cols-2 gap-3">
-            <button className="flex items-center justify-center space-x-2 py-2 px-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-              <Download className="w-4 h-4" />
-              <span className="text-sm font-medium">Download</span>
+        <div >
+          <div >
+            <button >
+              <Download >
+              <span >Download</span>
             </button>
-            <button className="flex items-center justify-center space-x-2 py-2 px-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-              <Link className="w-4 h-4" />
-              <span className="text-sm font-medium">Get QR Code</span>
+            <button >
+              <Link >
+              <span >Get QR Code</span>
             </button>
           </div>
         </div>

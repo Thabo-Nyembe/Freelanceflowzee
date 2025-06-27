@@ -63,7 +63,7 @@ interface ActivityEvent {
   id: string
   type: 'annotation_added' | 'approval_given' | 'file_uploaded' | 'escrow_updated' | 'download_unlocked'
   userId: string
-  data: any
+  data: unknown
   timestamp: string
   isRead: boolean
   priority: 'low' | 'medium' | 'high' | 'urgent'
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handleAddVideoAnnotation(data: any, supabase: any, user: any) {
+async function handleAddVideoAnnotation(data: unknown, supabase: unknown, user: unknown) {
   try {
     const { fileId, content, timestamp, type, priority, mentions } = data
 
@@ -237,7 +237,7 @@ async function handleAddVideoAnnotation(data: any, supabase: any, user: any) {
   }
 }
 
-async function handleAddImageAnnotation(data: any, supabase: any, user: any) {
+async function handleAddImageAnnotation(data: unknown, supabase: unknown, user: unknown) {
   try {
     const { fileId, content, position, type, priority, mentions } = data
 
@@ -329,7 +329,7 @@ async function handleAddImageAnnotation(data: any, supabase: any, user: any) {
   }
 }
 
-async function handleUpdateClientPreference(data: any, supabase: any, user: any) {
+async function handleUpdateClientPreference(data: unknown, supabase: unknown, user: unknown) {
   try {
     const { fileId, type, notes } = data
 
@@ -427,7 +427,7 @@ async function handleUpdateClientPreference(data: any, supabase: any, user: any)
   }
 }
 
-async function handleSubmitApproval(data: any, supabase: any, user: any) {
+async function handleSubmitApproval(data: unknown, supabase: unknown, user: unknown) {
   try {
     const { projectId, stepId, status, comments, triggerEscrow } = data
 
@@ -520,7 +520,7 @@ async function handleSubmitApproval(data: any, supabase: any, user: any) {
   }
 }
 
-async function handleEscrowRelease(data: any, supabase: any, user: any) {
+async function handleEscrowRelease(data: unknown, supabase: unknown, user: unknown) {
   try {
     const { projectId, stepId, amount } = data
 
@@ -637,7 +637,7 @@ async function handleEscrowRelease(data: any, supabase: any, user: any) {
   }
 }
 
-async function handleGenerateDownloadAccess(data: any, supabase: any, user: any) {
+async function handleGenerateDownloadAccess(data: unknown, supabase: unknown, user: unknown) {
   try {
     const { projectId, password } = data
 
@@ -687,7 +687,7 @@ async function handleGenerateDownloadAccess(data: any, supabase: any, user: any)
 
     // Generate download tokens
     const downloadTokens = await Promise.all(
-      deliverables.map(async (deliverable: any) => {
+      deliverables.map(async (deliverable: unknown) => {
         const token = await generateDownloadToken(supabase, {
           projectId,
           deliverableId: deliverable.id,
@@ -740,7 +740,7 @@ async function handleGenerateDownloadAccess(data: any, supabase: any, user: any)
 }
 
 // Helper functions
-async function createActivityEvent(supabase: any, eventData: any) {
+async function createActivityEvent(supabase: unknown, eventData: unknown) {
   try {
     await supabase.from('real_time_activity').insert({
       id: `act_${Date.now()}`,
@@ -761,7 +761,7 @@ async function createActivityEvent(supabase: any, eventData: any) {
   }
 }
 
-async function sendMentionNotifications(supabase: any, data: any) {
+async function sendMentionNotifications(supabase: unknown, data: unknown) {
   try {
     for (const mentionedUserId of data.mentions) {
       await supabase.from('notifications').insert({
@@ -788,12 +788,12 @@ async function sendMentionNotifications(supabase: any, data: any) {
   }
 }
 
-async function checkApprovalWorkflow(supabase: any, projectId: string, data: any) {
+async function checkApprovalWorkflow(supabase: unknown, projectId: string, data: unknown) {
   try {
     // Check if there are pending approval steps that need attention
     const { data: pendingSteps } = await supabase
       .from('approval_steps')
-      .select('*')
+      .select('*')'
       .eq('project_id', projectId)
       .eq('status', 'pending')
       .order('order')
@@ -812,7 +812,7 @@ async function checkApprovalWorkflow(supabase: any, projectId: string, data: any
   }
 }
 
-async function checkAllApproversCompleted(supabase: any, stepId: string): Promise<boolean> {
+async function checkAllApproversCompleted(supabase: unknown, stepId: string): Promise<boolean> {
   try {
     const { data: step } = await supabase
       .from('approval_steps')
@@ -834,11 +834,11 @@ async function checkAllApproversCompleted(supabase: any, stepId: string): Promis
   }
 }
 
-async function advanceToNextApprovalStep(supabase: any, projectId: string, currentStepId: string) {
+async function advanceToNextApprovalStep(supabase: unknown, projectId: string, currentStepId: string) {
   try {
     const { data: nextStep } = await supabase
       .from('approval_steps')
-      .select('*')
+      .select('*')'
       .eq('project_id', projectId)
       .eq('status', 'pending')
       .order('order')
@@ -861,14 +861,14 @@ async function advanceToNextApprovalStep(supabase: any, projectId: string, curre
 
 function generateSecurePassword(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-  let password = ''
+  let password = '
   for (let i = 0; i < 12; i++) {
     password += chars.charAt(Math.floor(Math.random() * chars.length))
   }
   return password
 }
 
-async function generateDownloadToken(supabase: any, data: any): Promise<string> {
+async function generateDownloadToken(supabase: unknown, data: unknown): Promise<string> {
   const token = `dt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   
   await supabase.from('download_tokens').insert({
@@ -883,7 +883,7 @@ async function generateDownloadToken(supabase: any, data: any): Promise<string> 
   return token
 }
 
-async function sendDownloadReadyNotification(supabase: any, data: any) {
+async function sendDownloadReadyNotification(supabase: unknown, data: unknown) {
   try {
     await supabase.from('notifications').insert({
       user_id: data.clientId,
@@ -956,7 +956,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function getFileAnnotations(supabase: any, fileId: string | null, user: any) {
+async function getFileAnnotations(supabase: unknown, fileId: string | null, user: unknown) {
   if (!fileId) {
     return NextResponse.json(
       { error: 'File ID required' },
@@ -985,7 +985,7 @@ async function getFileAnnotations(supabase: any, fileId: string | null, user: an
   })
 }
 
-async function getClientPreferences(supabase: any, projectId: string | null, user: any) {
+async function getClientPreferences(supabase: unknown, projectId: string | null, user: unknown) {
   if (!projectId) {
     return NextResponse.json(
       { error: 'Project ID required' },
@@ -1012,14 +1012,14 @@ async function getClientPreferences(supabase: any, projectId: string | null, use
   return NextResponse.json({
     preferences: preferences || [],
     summary: {
-      favorites: preferences?.filter((p: any) => p.type === 'favorite').length || 0,
-      likes: preferences?.filter((p: any) => p.type === 'like').length || 0,
-      selected: preferences?.filter((p: any) => p.type === 'selected_for_final').length || 0
+      favorites: preferences?.filter((p: unknown) => p.type === 'favorite').length || 0,
+      likes: preferences?.filter((p: unknown) => p.type === 'like').length || 0,
+      selected: preferences?.filter((p: unknown) => p.type === 'selected_for_final').length || 0
     }
   })
 }
 
-async function getRealTimeActivity(supabase: any, projectId: string | null, user: any) {
+async function getRealTimeActivity(supabase: unknown, projectId: string | null, user: unknown) {
   if (!projectId) {
     return NextResponse.json(
       { error: 'Project ID required' },
@@ -1046,11 +1046,11 @@ async function getRealTimeActivity(supabase: any, projectId: string | null, user
 
   return NextResponse.json({
     activity: activity || [],
-    unreadCount: activity?.filter((a: any) => !a.is_read && a.user_id !== user.id).length || 0
+    unreadCount: activity?.filter((a: unknown) => !a.is_read && a.user_id !== user.id).length || 0
   })
 }
 
-async function getApprovalStatus(supabase: any, projectId: string | null, user: any) {
+async function getApprovalStatus(supabase: unknown, projectId: string | null, user: unknown) {
   if (!projectId) {
     return NextResponse.json(
       { error: 'Project ID required' },
@@ -1060,7 +1060,7 @@ async function getApprovalStatus(supabase: any, projectId: string | null, user: 
 
   const { data: steps, error } = await supabase
     .from('approval_steps')
-    .select('*')
+    .select('*')'
     .eq('project_id', projectId)
     .order('order')
 
@@ -1071,12 +1071,12 @@ async function getApprovalStatus(supabase: any, projectId: string | null, user: 
     )
   }
 
-  const currentStep = steps?.find((step: any) => step.status === 'in_progress') || 
-                     steps?.find((step: any) => step.status === 'pending')
+  const currentStep = steps?.find((step: unknown) => step.status === 'in_progress') || 
+                     steps?.find((step: unknown) => step.status === 'pending')
 
   return NextResponse.json({
     steps: steps || [],
     currentStep,
-    overallProgress: steps ? (steps.filter((s: any) => s.status === 'approved').length / steps.length) * 100 : 0
+    overallProgress: steps ? (steps.filter((s: unknown) => s.status === 'approved').length / steps.length) * 100 : 0
   })
 } 

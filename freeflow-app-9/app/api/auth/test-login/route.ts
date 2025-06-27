@@ -34,16 +34,16 @@ export async function POST() {
     })
 
     // Set cookies in response
-    response.cookies.set('sb-access-token', session?.access_token || '', {
-      path: '/',
+    response.cookies.set('sb-access-token', session?.access_token || , {'
+      path: '/','
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7 // 1 week
     })
 
-    response.cookies.set('sb-refresh-token', session?.refresh_token || '', {
-      path: '/',
+    response.cookies.set('sb-refresh-token', session?.refresh_token || , {'
+      path: '/','
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -51,7 +51,7 @@ export async function POST() {
     })
 
     return response
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json({
       success: false,
       message: error.message

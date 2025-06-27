@@ -71,7 +71,7 @@ class DemoFixerTester {
       }
       
     } catch (error) {
-      console.error('❌ Error fixing S3 issue:', error.message);
+      console.error('❌ Error fixing S3 issue: ', error.message);
       this.results.errors.push(`S3 Fix: ${error.message}`);
     }
   }
@@ -93,7 +93,7 @@ class DemoFixerTester {
       console.log(`📄 Page title: ${title}`);
 
       // Look for demo content
-      const demoContent = await this.page.locator('h1, h2, [data-testid*="demo"]').first().textContent().catch(() => null);
+      const demoContent = await this.page.locator('h1, h2, [data-testid*= "demo"]').first().textContent().catch(() => null);
       
       if (demoContent) {
         console.log(`✅ Demo content found: ${demoContent}`);
@@ -143,7 +143,7 @@ class DemoFixerTester {
       }
 
       // Test navigation between tabs
-      const tabs = await this.page.locator('[role="tab"], .tab, [data-value]').all();
+      const tabs = await this.page.locator('[role= "tab"], .tab, [data-value]').all();
       if (tabs.length > 0) {
         console.log(`✅ Found ${tabs.length} navigation tabs`);
         
@@ -175,7 +175,7 @@ class DemoFixerTester {
       await this.page.waitForTimeout(2000);
 
       // Look for project content
-      const projectElements = await this.page.locator('.project, [data-testid*="project"], .card').count();
+      const projectElements = await this.page.locator('.project, [data-testid*= "project"], .card').count();
       
       if (projectElements > 0) {
         console.log(`✅ Projects Hub has ${projectElements} project elements`);
@@ -184,13 +184,13 @@ class DemoFixerTester {
       }
 
       // Check for any content
-      const pageContent = await this.page.locator('main').textContent().catch(() => '');
+      const pageContent = await this.page.locator('main').textContent().catch(() => );'
       if (pageContent.length > 50) {
         console.log('✅ Projects Hub has content');
       }
 
     } catch (error) {
-      console.error('❌ Error testing projects hub:', error.message);
+      console.error('❌ Error testing projects hub: ', error.message);
       this.results.errors.push(`Projects Hub: ${error.message}`);
     }
   }
@@ -210,9 +210,9 @@ class DemoFixerTester {
       recommendations: this.getRecommendations()
     };
 
-    console.log('\n' + '='.repeat(60));
+    console.log('\n' + '='.repeat(60));'
     console.log('🎭 DEMO ROUTER FIX & TEST REPORT');
-    console.log('='.repeat(60));
+    console.log('='.repeat(60));'
     
     console.log(`\n📊 RESULTS:`);
     console.log(`   S3 Issue Fixed: ${report.summary.s3Fixed ? '✅' : '❌'}`);

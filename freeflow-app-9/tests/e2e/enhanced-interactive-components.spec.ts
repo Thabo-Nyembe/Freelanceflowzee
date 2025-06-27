@@ -1,51 +1,51 @@
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from &apos;@playwright/test&apos;;
 
 // Context7 enhanced interactive testing
-test.describe('Enhanced UI/UX Components', () => {
+test.describe(&apos;Enhanced UI/UX Components&apos;, () => {
   
-  test('Enhanced Upload Button - Drag & Drop', async ({ page }) => {
-    await page.goto('/dashboard/files-hub');
+  test(&apos;Enhanced Upload Button - Drag & Drop&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard/files-hub&apos;);
     
     // Test drag and drop functionality
-    const uploadArea = page.locator('[data-testid="upload-file-btn"]').locator('..');
+    const uploadArea = page.locator(&apos;[data-testid=&quot;upload-file-btn&quot;]&apos;).locator(&apos;..&apos;);
     await expect(uploadArea).toBeVisible();
     
     // Simulate file drop
-    await uploadArea.dispatchEvent('dragover');
+    await uploadArea.dispatchEvent(&apos;dragover&apos;);
     await expect(uploadArea).toHaveClass(/border-primary/);
     
     // Test upload button click
-    await page.locator('[data-testid="upload-file-btn"]').click();
-    await expect(page.locator('[data-testid="file-input"]')).toBeAttached();
+    await page.locator(&apos;[data-testid=&quot;upload-file-btn&quot;]&apos;).click();
+    await expect(page.locator(&apos;[data-testid=&quot;file-input&quot;]&apos;)).toBeAttached();
   });
 
-  test('Smart Download Button - Progress Tracking', async ({ page }) => {
-    await page.goto('/dashboard/files-hub');
+  test(&apos;Smart Download Button - Progress Tracking&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard/files-hub&apos;);
     
     // Test download button functionality
-    const downloadBtn = page.locator('[data-testid="download-file-btn"]');
+    const downloadBtn = page.locator(&apos;[data-testid=&quot;download-file-btn&quot;]&apos;);
     await downloadBtn.click();
     
     // Check for progress indicator
-    await expect(page.locator('[role="progressbar"]')).toBeVisible();
+    await expect(page.locator(&apos;[role=&quot;progressbar&quot;]&apos;)).toBeVisible();
     
     // Wait for download completion
-    await expect(downloadBtn).toContainText('Downloaded!');
+    await expect(downloadBtn).toContainText(&apos;Downloaded!&apos;);
   });
 
-  test('Voice Recording Button - Real-time Features', async ({ page }) => {
-    await page.goto('/dashboard/projects-hub');
+  test(&apos;Voice Recording Button - Real-time Features&apos;, async ({ page }) => {
+    await page.goto(&apos;/dashboard/projects-hub&apos;);
     
     // Navigate to collaboration tab
-    await page.locator('[data-testid="collaboration-tab"]').click();
+    await page.locator(&apos;[data-testid=&quot;collaboration-tab&quot;]&apos;).click();
     
     // Test voice recording
-    const voiceBtn = page.locator('[data-testid="voice-record-btn"]');
+    const voiceBtn = page.locator(&apos;[data-testid=&quot;voice-record-btn&quot;]&apos;);
     await voiceBtn.click();
     
     // Check for recording UI
-    await expect(page.locator('[data-testid="recording-indicator"]')).toBeVisible();
+    await expect(page.locator(&apos;[data-testid=&quot;recording-indicator&quot;]&apos;)).toBeVisible();
   });
 
 });

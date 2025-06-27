@@ -27,7 +27,7 @@ const nextConfig = {
     
     // Server actions
     serverActions: {
-      allowedOrigins: ["localhost:3001"]
+      allowedOrigins: ["localhost:3000"]
     },
     
     // External packages

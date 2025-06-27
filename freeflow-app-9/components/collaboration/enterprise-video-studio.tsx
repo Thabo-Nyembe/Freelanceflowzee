@@ -1,142 +1,10 @@
 'use client'
 
 import React, { useState, useReducer, useRef, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Video, Mic, Monitor, StopCircle, Play, Pause, Square, Settings, Share2, Download, Edit3, Scissors, Volume2, Camera, Users, MessageSquare, Eye, Clock, BarChart3, Subtitles, Sparkles, Zap, Brain, TrendingUp, ChevronRight, ChevronLeft, RotateCcw, RotateCw, Maximize, Minimize } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-
-// Context7 Enhanced State Management for Video Studio
-interface VideoStudioState {
-  isRecording: boolean
-  isPaused: boolean
-  recordingMode: 'screen' | 'camera' | 'both'
-  audioEnabled: boolean
-  videoEnabled: boolean
-  currentTime: number
-  duration: number
-  zoom: number
-  isPlaying: boolean
-  selectedClip: string | null
-  recordings: VideoRecording[]
-  liveViewers: ViewerPresence[]
-  comments: VideoComment[]
-  transcription: TranscriptionSegment[]
-  aiAnalysis: AIVideoAnalysis
-  collaborators: Collaborator[]
-  isLiveSession: boolean
-  qualitySettings: QualitySettings
-  annotations: VideoAnnotation[]
-  chapters: VideoChapter[]
-  isEditing: boolean
-  editingTool: 'trim' | 'cut' | 'merge' | 'effects' | null
-  exportProgress: number
-  viewerAnalytics: ViewerAnalytics
-}
-
-interface VideoRecording {
-  id: string
-  title: string
-  duration: number
-  size: number
-  format: string
-  quality: string
-  thumbnail: string
-  createdAt: string
-  views: number
-  comments: number
-  likes: number
-  shares: number
-  url: string
-  transcriptUrl?: string
-  aiSummary?: string
-  tags: string[]
-  isPublic: boolean
-  downloadEnabled: boolean
-  passwordProtected: boolean
-  expiresAt?: string
-}
-
-interface ViewerPresence {
-  id: string
-  name: string
-  avatar: string
-  timestamp: number
-  isActive: boolean
-  cursor: { x: number; y: number }
-  isWatching: boolean
-}
-
-interface VideoComment {
-  id: string
-  userId: string
-  userName: string
-  userAvatar: string
-  content: string
-  timestamp: number
-  videoTimestamp: number
-  replies: VideoComment[]
-  reactions: { type: string; count: number }[]
-  createdAt: string
-  isResolved: boolean
-  aiSentiment?: 'positive' | 'negative' | 'neutral'
-}
-
-interface TranscriptionSegment {
-  id: string
-  text: string
+ y: number }
   startTime: number
   endTime: number
-  speaker?: string
-  confidence: number
-  aiGenerated: boolean
-  isEdited: boolean
-}
-
-interface AIVideoAnalysis {
-  summary: string
-  keyTopics: string[]
-  sentiment: 'positive' | 'negative' | 'neutral'
-  engagementScore: number
-  suggestedTags: string[]
-  optimizationTips: string[]
-  accessibilityScore: number
-  qualityScore: number
-  contentType: string
-  difficulty: 'beginner' | 'intermediate' | 'advanced'
-  estimatedWatchTime: number
-}
-
-interface Collaborator {
-  id: string
-  name: string
-  avatar: string
-  role: 'owner' | 'editor' | 'viewer' | 'commenter'
-  isOnline: boolean
-  permissions: string[]
-  lastSeen: string
-}
-
-interface QualitySettings {
-  resolution: '720p' | '1080p' | '1440p' | '4K'
-  frameRate: 30 | 60 | 120
-  bitrate: number
-  audioQuality: 'standard' | 'high' | 'lossless'
-  compression: 'fast' | 'balanced' | 'quality'
-}
-
-interface VideoAnnotation {
-  id: string
-  type: 'text' | 'arrow' | 'highlight' | 'blur' | 'shape'
-  content: string
-  position: { x: number; y: number }
-  startTime: number
-  endTime: number
-  style: any
+  style: unknown
   createdBy: string
 }
 
@@ -161,7 +29,7 @@ interface ViewerAnalytics {
 }
 
 // Enhanced Context7 Reducer
-const videoStudioReducer = (state: VideoStudioState, action: any): VideoStudioState => {
+const videoStudioReducer = (state: VideoStudioState, action: unknown): VideoStudioState => {
   switch (action.type) {
     case 'START_RECORDING':
       return { ...state, isRecording: true, isPaused: false }
@@ -220,7 +88,7 @@ const initialState: VideoStudioState = {
   comments: [],
   transcription: [],
   aiAnalysis: {
-    summary: '',
+    summary: '','
     keyTopics: [],
     sentiment: 'neutral',
     engagementScore: 0,
@@ -228,7 +96,7 @@ const initialState: VideoStudioState = {
     optimizationTips: [],
     accessibilityScore: 0,
     qualityScore: 0,
-    contentType: '',
+    contentType: '','
     difficulty: 'beginner',
     estimatedWatchTime: 0
   },
@@ -261,7 +129,7 @@ const initialState: VideoStudioState = {
 
 interface EnterpriseVideoStudioProps {
   projectId: string
-  currentUser: any
+  currentUser: unknown
   onRecordingComplete?: (recording: VideoRecording) => void
   onShare?: (recording: VideoRecording) => void
   className?: string
@@ -272,7 +140,7 @@ export function EnterpriseVideoStudio({
   currentUser,
   onRecordingComplete,
   onShare,
-  className = ''
+  className = '
 }: EnterpriseVideoStudioProps) {
   const [state, dispatch] = useReducer(videoStudioReducer, initialState)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -287,9 +155,9 @@ export function EnterpriseVideoStudio({
       dispatch({
         type: 'UPDATE_LIVE_VIEWERS',
         viewers: [
-          { id: '1', name: 'Sarah Chen', avatar: '/avatars/sarah-chen.jpg', timestamp: Date.now(), isActive: true, cursor: { x: 120, y: 80 }, isWatching: true },
-          { id: '2', name: 'Mike Johnson', avatar: '/avatars/mike.jpg', timestamp: Date.now(), isActive: true, cursor: { x: 200, y: 150 }, isWatching: true },
-          { id: '3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', timestamp: Date.now(), isActive: false, cursor: { x: 0, y: 0 }, isWatching: true }
+          { id: '1', name: 'Sarah Chen', avatar: '/avatars/sarah-chen.jpg', timestamp: Date.now(), isActive: true, cursor: { x: 120, y: 80 }, isWatching: true },'
+          { id: '2', name: 'Mike Johnson', avatar: '/avatars/mike.jpg', timestamp: Date.now(), isActive: true, cursor: { x: 200, y: 150 }, isWatching: true },'
+          { id: '3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', timestamp: Date.now(), isActive: false, cursor: { x: 0, y: 0 }, isWatching: true }'
         ]
       })
 
@@ -432,7 +300,7 @@ export function EnterpriseVideoStudio({
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}`
+    return `${mins}:${secs.toString().padStart(2, '0')}`'
   }
 
   const formatFileSize = (bytes: number) => {
@@ -442,87 +310,87 @@ export function EnterpriseVideoStudio({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className= "flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl">
-              <Video className="h-8 w-8 text-white" />
+          <h2 className= "text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <div className= "p-2 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl">
+              <Video className= "h-8 w-8 text-white" />
             </div>
             Enterprise Video Studio
           </h2>
-          <p className="text-gray-600 mt-1">
+          <p className= "text-gray-600 mt-1">
             Loom-level video recording with AI transcription, real-time collaboration & advanced editing
           </p>
         </div>
         
-        <div className="flex items-center gap-3">
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-            <Eye className="h-3 w-3 mr-1" />
+        <div className= "flex items-center gap-3">
+          <Badge variant= "outline" className= "bg-green-50 text-green-700 border-green-200">
+            <Eye className= "h-3 w-3 mr-1" />
             {state.liveViewers.filter(v => v.isWatching).length} watching
           </Badge>
-          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-            <Brain className="h-3 w-3 mr-1" />
+          <Badge variant= "outline" className= "bg-blue-50 text-blue-700 border-blue-200">
+            <Brain className= "h-3 w-3 mr-1" />
             AI Enhanced
           </Badge>
-          <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-            <Sparkles className="h-3 w-3 mr-1" />
+          <Badge variant= "outline" className= "bg-purple-50 text-purple-700 border-purple-200">
+            <Sparkles className= "h-3 w-3 mr-1" />
             Enterprise
           </Badge>
         </div>
       </div>
 
-      <Tabs defaultValue="record" className="w-full">
-        <TabsList className="grid grid-cols-5 w-full max-w-2xl">
-          <TabsTrigger value="record" className="flex items-center gap-2">
-            <Video className="h-4 w-4" />
+      <Tabs defaultValue= "record" className= "w-full">
+        <TabsList className= "grid grid-cols-5 w-full max-w-2xl">
+          <TabsTrigger value= "record" className= "flex items-center gap-2">
+            <Video className= "h-4 w-4" />
             Record
           </TabsTrigger>
-          <TabsTrigger value="edit" className="flex items-center gap-2">
-            <Edit3 className="h-4 w-4" />
+          <TabsTrigger value= "edit" className= "flex items-center gap-2">
+            <Edit3 className= "h-4 w-4" />
             Edit
           </TabsTrigger>
-          <TabsTrigger value="library" className="flex items-center gap-2">
-            <Square className="h-4 w-4" />
+          <TabsTrigger value= "library" className= "flex items-center gap-2">
+            <Square className= "h-4 w-4" />
             Library
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
+          <TabsTrigger value= "analytics" className= "flex items-center gap-2">
+            <TrendingUp className= "h-4 w-4" />
             Analytics
           </TabsTrigger>
-          <TabsTrigger value="collaborate" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
+          <TabsTrigger value= "collaborate" className= "flex items-center gap-2">
+            <Users className= "h-4 w-4" />
             Live Session
           </TabsTrigger>
         </TabsList>
 
         {/* Record Tab */}
-        <TabsContent value="record" className="space-y-6">
-          <div className="grid grid-cols-12 gap-6">
+        <TabsContent value= "record" className= "space-y-6">
+          <div className= "grid grid-cols-12 gap-6">
             {/* Recording Interface */}
-            <div className="col-span-8">
-              <Card className="bg-gradient-to-br from-slate-50 to-white border-slate-200/50">
+            <div className= "col-span-8">
+              <Card className= "bg-gradient-to-br from-slate-50 to-white border-slate-200/50">
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                      <Camera className="h-5 w-5 text-blue-600" />
+                  <div className= "flex items-center justify-between">
+                    <CardTitle className= "flex items-center gap-2">
+                      <Camera className= "h-5 w-5 text-blue-600" />
                       Recording Studio
                     </CardTitle>
-                    <div className="flex items-center gap-2">
+                    <div className= "flex items-center gap-2">
                       {state.isRecording && (
-                        <Badge variant="destructive" className="animate-pulse">
-                          <div className="w-2 h-2 bg-white rounded-full mr-2"></div>
+                        <Badge variant= "destructive" className= "animate-pulse">
+                          <div className= "w-2 h-2 bg-white rounded-full mr-2"></div>
                           REC {formatTime(state.currentTime)}
                         </Badge>
                       )}
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className= "space-y-4">
                   {/* Recording Preview */}
-                  <div className="relative bg-black rounded-lg aspect-video overflow-hidden">
+                  <div className= "relative bg-black rounded-lg aspect-video overflow-hidden">
                     <video
                       ref={videoRef}
-                      className="w-full h-full object-cover"
+                      className= "w-full h-full object-cover"
                       autoPlay
                       muted
                       playsInline
@@ -532,16 +400,16 @@ export function EnterpriseVideoStudio({
                     {state.liveViewers.map((viewer) => (
                       <div
                         key={viewer.id}
-                        className="absolute pointer-events-none transition-all duration-200"
+                        className= "absolute pointer-events-none transition-all duration-200"
                         style={{
                           left: `${viewer.cursor.x}px`,
                           top: `${viewer.cursor.y}px`,
                           transform: 'translate(-50%, -50%)'
                         }}
                       >
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                          <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded">
+                        <div className= "flex items-center gap-1">
+                          <div className= "w-3 h-3 bg-blue-500 rounded-full"></div>
+                          <span className= "text-xs bg-blue-500 text-white px-2 py-1 rounded">
                             {viewer.name}
                           </span>
                         </div>
@@ -550,23 +418,23 @@ export function EnterpriseVideoStudio({
                     
                     {/* Recording Controls Overlay */}
                     {state.isRecording && (
-                      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-                        <div className="flex items-center gap-3 bg-black/70 backdrop-blur-sm rounded-full px-4 py-2">
+                      <div className= "absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                        <div className= "flex items-center gap-3 bg-black/70 backdrop-blur-sm rounded-full px-4 py-2">
                           <Button
-                            size="sm"
+                            size= "sm"
                             variant={state.isPaused ? "default" : "outline"}
                             onClick={() => dispatch({ type: 'PAUSE_RECORDING' })}
-                            className="rounded-full"
+                            className= "rounded-full"
                           >
-                            {state.isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+                            {state.isPaused ? <Play className= "h-4 w-4" /> : <Pause className= "h-4 w-4" />}
                           </Button>
                           <Button
-                            size="sm"
-                            variant="destructive"
+                            size= "sm"
+                            variant= "destructive"
                             onClick={stopRecording}
-                            className="rounded-full"
+                            className= "rounded-full"
                           >
-                            <StopCircle className="h-4 w-4" />
+                            <StopCircle className= "h-4 w-4" />
                           </Button>
                         </div>
                       </div>
@@ -574,31 +442,31 @@ export function EnterpriseVideoStudio({
                   </div>
 
                   {/* Recording Controls */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+                  <div className= "flex items-center justify-between">
+                    <div className= "flex items-center gap-4">
                       <Select
                         value={state.recordingMode}
-                        onValueChange={(mode: any) => dispatch({ type: 'SET_RECORDING_MODE', mode })}
+                        onValueChange={(mode: unknown) => dispatch({ type: 'SET_RECORDING_MODE', mode })}
                       >
-                        <SelectTrigger className="w-40">
+                        <SelectTrigger className= "w-40">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="screen">
-                            <div className="flex items-center gap-2">
-                              <Monitor className="h-4 w-4" />
+                          <SelectItem value= "screen">
+                            <div className= "flex items-center gap-2">
+                              <Monitor className= "h-4 w-4" />
                               Screen Only
                             </div>
                           </SelectItem>
-                          <SelectItem value="camera">
-                            <div className="flex items-center gap-2">
-                              <Camera className="h-4 w-4" />
+                          <SelectItem value= "camera">
+                            <div className= "flex items-center gap-2">
+                              <Camera className= "h-4 w-4" />
                               Camera Only
                             </div>
                           </SelectItem>
-                          <SelectItem value="both">
-                            <div className="flex items-center gap-2">
-                              <Video className="h-4 w-4" />
+                          <SelectItem value= "both">
+                            <div className= "flex items-center gap-2">
+                              <Video className= "h-4 w-4" />
                               Screen + Camera
                             </div>
                           </SelectItem>
@@ -607,36 +475,36 @@ export function EnterpriseVideoStudio({
 
                       <Button
                         variant={state.audioEnabled ? "default" : "outline"}
-                        size="sm"
+                        size= "sm"
                         onClick={() => dispatch({ type: 'TOGGLE_AUDIO' })}
                       >
-                        <Mic className="h-4 w-4" />
+                        <Mic className= "h-4 w-4" />
                       </Button>
 
                       <Button
                         variant={state.videoEnabled ? "default" : "outline"}
-                        size="sm"
+                        size= "sm"
                         onClick={() => dispatch({ type: 'TOGGLE_VIDEO' })}
                       >
-                        <Camera className="h-4 w-4" />
+                        <Camera className= "h-4 w-4" />
                       </Button>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className= "flex items-center gap-2">
                       {!state.isRecording ? (
                         <Button
                           onClick={startRecording}
-                          className="bg-red-600 hover:bg-red-700 text-white"
+                          className= "bg-red-600 hover:bg-red-700 text-white"
                         >
-                          <Video className="h-4 w-4 mr-2" />
+                          <Video className= "h-4 w-4 mr-2" />
                           Start Recording
                         </Button>
                       ) : (
                         <Button
                           onClick={stopRecording}
-                          variant="destructive"
+                          variant= "destructive"
                         >
-                          <StopCircle className="h-4 w-4 mr-2" />
+                          <StopCircle className= "h-4 w-4 mr-2" />
                           Stop Recording
                         </Button>
                       )}
@@ -647,49 +515,49 @@ export function EnterpriseVideoStudio({
             </div>
 
             {/* Live Collaboration Panel */}
-            <div className="col-span-4">
-              <Card className="bg-gradient-to-br from-purple-50 to-white border-purple-200/50">
+            <div className= "col-span-4">
+              <Card className= "bg-gradient-to-br from-purple-50 to-white border-purple-200/50">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-purple-600" />
+                  <CardTitle className= "flex items-center gap-2">
+                    <Users className= "h-5 w-5 text-purple-600" />
                     Live Collaboration
                   </CardTitle>
                   <CardDescription>
                     Real-time viewers and AI assistance
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className= "space-y-4">
                   {/* Live Viewers */}
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-sm text-gray-700">Live Viewers ({state.liveViewers.length})</h4>
+                  <div className= "space-y-3">
+                    <h4 className= "font-medium text-sm text-gray-700">Live Viewers ({state.liveViewers.length})</h4>
                     {state.liveViewers.map((viewer) => (
-                      <div key={viewer.id} className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
+                      <div key={viewer.id} className= "flex items-center gap-3">
+                        <Avatar className= "h-8 w-8">
                           <AvatarImage src={viewer.avatar} />
                           <AvatarFallback>{viewer.name[0]}</AvatarFallback>
                         </Avatar>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">{viewer.name}</p>
-                          <p className="text-xs text-gray-500">
+                        <div className= "flex-1">
+                          <p className= "text-sm font-medium">{viewer.name}</p>
+                          <p className= "text-xs text-gray-500">
                             {viewer.isWatching ? 'Watching' : 'Idle'}
                           </p>
                         </div>
-                        <div className={`w-2 h-2 rounded-full ${viewer.isActive ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                        <div className={`w-2 h-2 rounded-full ${viewer.isActive ? &apos;bg-green-500&apos; : &apos;bg-gray-300&apos;}`}></div>
                       </div>
                     ))}
                   </div>
 
                   {/* AI Insights */}
                   {state.aiAnalysis.summary && (
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-                      <h4 className="font-medium text-sm text-blue-900 mb-2 flex items-center gap-2">
-                        <Brain className="h-4 w-4" />
+                    <div className= "bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                      <h4 className= "font-medium text-sm text-blue-900 mb-2 flex items-center gap-2">
+                        <Brain className= "h-4 w-4" />
                         AI Insights
                       </h4>
-                      <p className="text-sm text-blue-800 mb-2">{state.aiAnalysis.summary}</p>
-                      <div className="flex flex-wrap gap-1">
+                      <p className= "text-sm text-blue-800 mb-2">{state.aiAnalysis.summary}</p>
+                      <div className= "flex flex-wrap gap-1">
                         {state.aiAnalysis.keyTopics.map((topic, index) => (
-                          <Badge key={index} variant="outline" className="text-xs bg-blue-100 text-blue-700 border-blue-300">
+                          <Badge key={index} variant= "outline" className= "text-xs bg-blue-100 text-blue-700 border-blue-300">
                             {topic}
                           </Badge>
                         ))}
@@ -698,23 +566,23 @@ export function EnterpriseVideoStudio({
                   )}
 
                   {/* Quick Actions */}
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-sm text-gray-700">Quick Actions</h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button size="sm" variant="outline" className="text-xs">
-                        <Share2 className="h-3 w-3 mr-1" />
+                  <div className= "space-y-2">
+                    <h4 className= "font-medium text-sm text-gray-700">Quick Actions</h4>
+                    <div className= "grid grid-cols-2 gap-2">
+                      <Button size= "sm" variant= "outline" className= "text-xs">
+                        <Share2 className= "h-3 w-3 mr-1" />
                         Share
                       </Button>
-                      <Button size="sm" variant="outline" className="text-xs">
-                        <Download className="h-3 w-3 mr-1" />
+                      <Button size= "sm" variant= "outline" className= "text-xs">
+                        <Download className= "h-3 w-3 mr-1" />
                         Export
                       </Button>
-                      <Button size="sm" variant="outline" className="text-xs">
-                        <Subtitles className="h-3 w-3 mr-1" />
+                      <Button size= "sm" variant= "outline" className= "text-xs">
+                        <Subtitles className= "h-3 w-3 mr-1" />
                         Captions
                       </Button>
-                      <Button size="sm" variant="outline" className="text-xs">
-                        <Settings className="h-3 w-3 mr-1" />
+                      <Button size= "sm" variant= "outline" className= "text-xs">
+                        <Settings className= "h-3 w-3 mr-1" />
                         Settings
                       </Button>
                     </div>
@@ -726,63 +594,59 @@ export function EnterpriseVideoStudio({
         </TabsContent>
 
         {/* Library Tab */}
-        <TabsContent value="library" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <TabsContent value= "library" className= "space-y-6">
+          <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {state.recordings.map((recording) => (
-              <Card key={recording.id} className="group hover:shadow-lg transition-all duration-200">
-                <CardContent className="p-0">
-                  <div className="relative">
-                    <img
-                      src={recording.thumbnail}
-                      alt={recording.title}
-                      className="w-full h-40 object-cover rounded-t-lg"
-                    />
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Button size="sm" className="rounded-full">
-                        <Play className="h-4 w-4" />
+              <Card key={recording.id} className= "group hover:shadow-lg transition-all duration-200">
+                <CardContent className= "p-0">
+                  <div className= "relative">
+                    <img src={recording.thumbnail} alt={recording.title}>
+                    <div >
+                      <Button >
+                        <Play >
                       </Button>
                     </div>
-                    <Badge className="absolute top-2 right-2 bg-black/70 text-white">
+                    <Badge >
                       {formatTime(recording.duration)}
                     </Badge>
                   </div>
                   
-                  <div className="p-4 space-y-3">
-                    <h3 className="font-semibold text-gray-900 truncate">{recording.title}</h3>
+                  <div >
+                    <h3 >{recording.title}</h3>
                     
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <span>{recording.quality}</span>
-                      <span>{formatFileSize(recording.size * 1024 * 1024)}</span>
+                    <div >
+                      <span >{recording.quality}</span>
+                      <span >{formatFileSize(recording.size * 1024 * 1024)}</span>
                     </div>
                     
-                    <div className="flex items-center gap-4 text-xs text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <Eye className="h-3 w-3" />
+                    <div >
+                      <span >
+                        <Eye >
                         {recording.views}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <MessageSquare className="h-3 w-3" />
+                      <span >
+                        <MessageSquare >
                         {recording.comments}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <Share2 className="h-3 w-3" />
+                      <span >
+                        <Share2 >
                         {recording.shares}
                       </span>
                     </div>
                     
                     {recording.aiSummary && (
-                      <p className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                      <p >
                         {recording.aiSummary}
                       </p>
                     )}
                     
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" className="flex-1">
-                        <Edit3 className="h-3 w-3 mr-1" />
+                    <div >
+                      <Button >
+                        <Edit3 >
                         Edit
                       </Button>
-                      <Button size="sm" variant="outline" className="flex-1">
-                        <Share2 className="h-3 w-3 mr-1" />
+                      <Button >
+                        <Share2 >
                         Share
                       </Button>
                     </div>
@@ -794,52 +658,52 @@ export function EnterpriseVideoStudio({
         </TabsContent>
 
         {/* Analytics Tab */}
-        <TabsContent value="analytics" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-blue-100 text-sm">Total Views</p>
-                    <p className="text-2xl font-bold">{state.viewerAnalytics.totalViews.toLocaleString()}</p>
+        <TabsContent >
+          <div >
+            <Card >
+              <CardContent >
+                <div >
+                  <div >
+                    <p >Total Views</p>
+                    <p >{state.viewerAnalytics.totalViews.toLocaleString()}</p>
                   </div>
-                  <Eye className="h-8 w-8 text-blue-200" />
+                  <Eye >
                 </div>
               </CardContent>
             </Card>
             
-            <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-green-100 text-sm">Avg. Watch Time</p>
-                    <p className="text-2xl font-bold">{formatTime(state.viewerAnalytics.averageWatchTime)}</p>
+            <Card >
+              <CardContent >
+                <div >
+                  <div >
+                    <p >Avg. Watch Time</p>
+                    <p >{formatTime(state.viewerAnalytics.averageWatchTime)}</p>
                   </div>
-                  <Clock className="h-8 w-8 text-green-200" />
+                  <Clock >
                 </div>
               </CardContent>
             </Card>
             
-            <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-purple-100 text-sm">Engagement Rate</p>
-                    <p className="text-2xl font-bold">{state.viewerAnalytics.engagementRate}%</p>
+            <Card >
+              <CardContent >
+                <div >
+                  <div >
+                    <p >Engagement Rate</p>
+                    <p >{state.viewerAnalytics.engagementRate}%</p>
                   </div>
-                  <TrendingUp className="h-8 w-8 text-purple-200" />
+                  <TrendingUp >
                 </div>
               </CardContent>
             </Card>
             
-            <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-orange-100 text-sm">Peak Viewers</p>
-                    <p className="text-2xl font-bold">{state.viewerAnalytics.peakViewers}</p>
+            <Card >
+              <CardContent >
+                <div >
+                  <div >
+                    <p >Peak Viewers</p>
+                    <p >{state.viewerAnalytics.peakViewers}</p>
                   </div>
-                  <Users className="h-8 w-8 text-orange-200" />
+                  <Users >
                 </div>
               </CardContent>
             </Card>
@@ -847,26 +711,26 @@ export function EnterpriseVideoStudio({
         </TabsContent>
 
         {/* Live Session Tab */}
-        <TabsContent value="collaborate" className="space-y-6">
-          <Card className="bg-gradient-to-br from-emerald-50 to-white border-emerald-200/50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-emerald-600" />
+        <TabsContent >
+          <Card >
+            <CardHeader >
+              <CardTitle >
+                <Sparkles >
                 Enterprise Live Collaboration
               </CardTitle>
-              <CardDescription>
+              <CardDescription >
                 Real-time co-viewing, commenting, and AI-powered insights
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <Zap className="h-16 w-16 text-emerald-500 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Start Live Session</h3>
-                <p className="text-gray-600 mb-6">
+            <CardContent >
+              <div >
+                <Zap >
+                <h3 >Start Live Session</h3>
+                <p >
                   Invite team members for real-time collaboration with AI transcription and smart annotations
                 </p>
-                <Button className="bg-emerald-600 hover:bg-emerald-700">
-                  <Users className="h-4 w-4 mr-2" />
+                <Button >
+                  <Users >
                   Create Live Session
                 </Button>
               </div>

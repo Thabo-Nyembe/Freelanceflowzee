@@ -96,10 +96,7 @@ export async function GET(request: NextRequest) {
             files: files.slice(0, 3),
             transactions: transactions.slice(0, 3)
           },
-          availableTypes: [
-            'users', 'projects', 'posts', 'files', 'transactions', 
-            'analytics', 'images', 'dashboard', 'community', 
-            'files-hub', 'escrow', 'trending-posts', 'top-creators', 'recent-files'
+          availableTypes: ['users', 'projects', 'posts', 'files', 'transactions', 'analytics', 'images', 'dashboard', 'community', 'files-hub', 'escrow', 'trending-posts', 'top-creators', 'recent-files'
           ]
         };
     }

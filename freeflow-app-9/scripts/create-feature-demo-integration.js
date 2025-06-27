@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 
 console.log('🎭 FreeflowZee Demo Content Integration');
-console.log('=====================================');
+console.log('===================================== ');
 
 // Load demo content statistics
 function loadContentStats() {
@@ -25,7 +25,7 @@ function loadContentStats() {
       if (file.endsWith('.json')) {
         const filePath = path.join(contentDir, file);
         const content = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-        const key = file.replace('enhanced-', '').replace('.json', '');
+        const key = file.replace('enhanced-', ).replace('.json', );
         
         if (Array.isArray(content)) {
           stats[key] = content.length;
@@ -41,7 +41,7 @@ function loadContentStats() {
     
     return stats;
   } catch (error) {
-    console.error('❌ Error loading content stats:', error);
+    console.error('❌ Error loading content stats: ', error);
     return {};
   }
 }
@@ -61,21 +61,7 @@ function createDemoNavigation(stats) {
   const pageContent = `'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Users, 
-  FolderOpen, 
-  MessageSquare, 
-  FileText, 
-  DollarSign, 
-  BarChart3,
-  Play,
-  Eye,
-  ArrowRight,
-  Sparkles
-} from 'lucide-react';
 
 export default function FeatureDemoPage() {
   const [stats, setStats] = useState({
@@ -138,75 +124,75 @@ export default function FeatureDemoPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-violet-50/30">
-      <div className="container mx-auto px-4 py-8">
+    <div className= "min-h-screen bg-gradient-to-br from-slate-50 via-white to-violet-50/30">
+      <div className= "container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+        <div className= "text-center mb-12">
+          <h1 className= "text-4xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent mb-4">
             FreeflowZee Feature Demonstrations
           </h1>
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-6">
+          <p className= "text-xl text-slate-600 max-w-3xl mx-auto mb-6">
             Experience all platform features with realistic, populated content showcasing comprehensive capabilities
           </p>
           
           {/* Content Statistics */}
-          <div className="flex flex-wrap justify-center gap-4 mb-8">
-            <Badge variant="secondary" className="bg-green-100 text-green-700 px-4 py-2">
-              <Eye className="h-4 w-4 mr-2" />
+          <div className= "flex flex-wrap justify-center gap-4 mb-8">
+            <Badge variant= "secondary" className= "bg-green-100 text-green-700 px-4 py-2">
+              <Eye className= "h-4 w-4 mr-2" />
               {stats.users} Demo Users
             </Badge>
-            <Badge variant="secondary" className="bg-blue-100 text-blue-700 px-4 py-2">
-              <FolderOpen className="h-4 w-4 mr-2" />
+            <Badge variant= "secondary" className= "bg-blue-100 text-blue-700 px-4 py-2">
+              <FolderOpen className= "h-4 w-4 mr-2" />
               {stats.projects} Projects
             </Badge>
-            <Badge variant="secondary" className="bg-purple-100 text-purple-700 px-4 py-2">
-              <MessageSquare className="h-4 w-4 mr-2" />
+            <Badge variant= "secondary" className= "bg-purple-100 text-purple-700 px-4 py-2">
+              <MessageSquare className= "h-4 w-4 mr-2" />
               {stats.posts} Posts
             </Badge>
-            <Badge variant="secondary" className="bg-orange-100 text-orange-700 px-4 py-2">
-              <FileText className="h-4 w-4 mr-2" />
+            <Badge variant= "secondary" className= "bg-orange-100 text-orange-700 px-4 py-2">
+              <FileText className= "h-4 w-4 mr-2" />
               {stats.files} Files
             </Badge>
           </div>
 
           <Button 
             onClick={() => window.open('/dashboard', '_blank')}
-            size="lg"
-            className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white px-8 py-3"
+            size= "lg"
+            className= "bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white px-8 py-3"
           >
-            <Play className="h-5 w-5 mr-2" />
+            <Play className= "h-5 w-5 mr-2" />
             Launch Full Dashboard Demo
           </Button>
         </div>
 
         {/* Feature Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <div className= "grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {features.map((feature, index) => (
-            <Card key={index} className="group hover:shadow-xl transition-all duration-300 bg-white/60 backdrop-blur-xl border-white/20">
+            <Card key={index} className= "group hover:shadow-xl transition-all duration-300 bg-white/60 backdrop-blur-xl border-white/20">
               <CardHeader>
-                <div className="flex items-center justify-between mb-4">
+                <div className= "flex items-center justify-between mb-4">
                   <div className={\`p-3 rounded-xl bg-gradient-to-r \${feature.color} text-white\`}>
-                    <feature.icon className="h-6 w-6" />
+                    <feature.icon className= "h-6 w-6" />
                   </div>
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant= "outline" className= "text-xs">
                     {feature.stats}
                   </Badge>
                 </div>
-                <CardTitle className="text-xl group-hover:text-violet-600 transition-colors">
+                <CardTitle className= "text-xl group-hover:text-violet-600 transition-colors">
                   {feature.title}
                 </CardTitle>
-                <CardDescription className="text-slate-600">
+                <CardDescription className= "text-slate-600">
                   {feature.description}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Button 
-                  variant="outline" 
-                  className="w-full group-hover:bg-violet-50 group-hover:border-violet-200 transition-colors"
+                  variant= "outline" 
+                  className= "w-full group-hover:bg-violet-50 group-hover:border-violet-200 transition-colors"
                   onClick={() => window.open(feature.href, '_blank')}
                 >
                   Explore Feature
-                  <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className= "h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </CardContent>
             </Card>
@@ -214,13 +200,13 @@ export default function FeatureDemoPage() {
         </div>
 
         {/* Demo Information */}
-        <div className="bg-white/60 backdrop-blur-xl border-white/20 rounded-2xl p-8 shadow-lg">
-          <h2 className="text-2xl font-bold text-center mb-6">Demo Content Features</h2>
+        <div className= "bg-white/60 backdrop-blur-xl border-white/20 rounded-2xl p-8 shadow-lg">
+          <h2 className= "text-2xl font-bold text-center mb-6">Demo Content Features</h2>
           
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className= "grid md:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-lg font-semibold mb-4 text-violet-600">Realistic Data</h3>
-              <ul className="space-y-2 text-slate-600">
+              <h3 className= "text-lg font-semibold mb-4 text-violet-600">Realistic Data</h3>
+              <ul className= "space-y-2 text-slate-600">
                 <li>• Authentic user profiles from real APIs</li>
                 <li>• Professional project portfolios</li>
                 <li>• Engaging community content</li>
@@ -230,8 +216,8 @@ export default function FeatureDemoPage() {
             </div>
             
             <div>
-              <h3 className="text-lg font-semibold mb-4 text-violet-600">Enterprise Features</h3>
-              <ul className="space-y-2 text-slate-600">
+              <h3 className= "text-lg font-semibold mb-4 text-violet-600">Enterprise Features</h3>
+              <ul className= "space-y-2 text-slate-600">
                 <li>• Advanced analytics and reporting</li>
                 <li>• Secure escrow transaction system</li>
                 <li>• AI-powered content generation</li>
@@ -241,15 +227,15 @@ export default function FeatureDemoPage() {
             </div>
           </div>
           
-          <div className="text-center mt-8">
-            <p className="text-slate-600 mb-4">
+          <div className= "text-center mt-8">
+            <p className= "text-slate-600 mb-4">
               All features are populated with realistic content for comprehensive testing and demonstration
             </p>
-            <div className="flex justify-center gap-4">
-              <Button variant="outline" onClick={() => window.open('/api/demo/content', '_blank')}>
+            <div className= "flex justify-center gap-4">
+              <Button variant= "outline" onClick={() => window.open('/api/demo/content', '_blank')}>
                 View API Documentation
               </Button>
-              <Button variant="outline" onClick={() => window.location.reload()}>
+              <Button variant= "outline" onClick={() => window.location.reload()}>
                 Refresh Demo Data
               </Button>
             </div>
@@ -399,7 +385,7 @@ async function main() {
     }
 
     console.log('\n🎉 Demo Content Integration Complete!');
-    console.log('====================================');
+    console.log('==================================== ');
     console.log('✅ Feature demo page created at /demo-features');
     console.log('✅ API endpoints available at /api/demo/content');
     console.log('✅ Professional demonstration experience ready');

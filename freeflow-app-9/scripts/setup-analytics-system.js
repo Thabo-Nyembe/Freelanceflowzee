@@ -55,27 +55,27 @@ async function setupAnalyticsSystem() {
 
   try {
     // Step 1: Check environment variables
-    logStep('1', 'Checking Environment Configuration');
+    logStep('1', 'Checking Environment Configuration');'
     await checkEnvironment();
 
     // Step 2: Verify database setup files
-    logStep('2', 'Verifying Analytics Database Setup');
+    logStep('2', 'Verifying Analytics Database Setup');'
     await verifyDatabaseSetup();
 
     // Step 3: Check API endpoints
-    logStep('3', 'Verifying Analytics API Endpoints');
+    logStep('3', 'Verifying Analytics API Endpoints');'
     await verifyAPIEndpoints();
 
     // Step 4: Verify React components
-    logStep('4', 'Verifying Analytics Components');
+    logStep('4', 'Verifying Analytics Components');'
     await verifyComponents();
 
     // Step 5: Test analytics tracking
-    logStep('5', 'Testing Analytics System');
+    logStep('5', 'Testing Analytics System');'
     await testAnalyticsSystem();
 
     // Step 6: Generate setup instructions
-    logStep('6', 'Generating Setup Instructions');
+    logStep('6', 'Generating Setup Instructions');'
     await generateSetupInstructions();
 
     // Success summary
@@ -101,14 +101,11 @@ async function checkEnvironment() {
 
   const envContent = fs.readFileSync(envFile, 'utf8');
   
-  const requiredVars = [
-    'NEXT_PUBLIC_SUPABASE_URL',
-    'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-    'SUPABASE_SERVICE_ROLE_KEY'
-  ];
+  const requiredVars = ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+    'SUPABASE_SERVICE_ROLE_KEY'];
 
   const missingVars = requiredVars.filter(varName => 
-    !envContent.includes(varName + '=')
+    !envContent.includes(varName + '=')'
   );
 
   if (missingVars.length > 0) {
@@ -129,23 +126,13 @@ async function verifyDatabaseSetup() {
   const sqlContent = fs.readFileSync(sqlFile, 'utf8');
   
   // Check for required tables
-  const requiredTables = [
-    'analytics_events',
-    'business_metrics',
-    'user_sessions'
+  const requiredTables = ['analytics_events', 'business_metrics', 'user_sessions'
   ];
 
-  const requiredViews = [
-    'daily_metrics',
-    'hourly_events',
-    'performance_summary',
-    'user_activity_summary',
-    'revenue_summary'
+  const requiredViews = ['daily_metrics', 'hourly_events', 'performance_summary', 'user_activity_summary', 'revenue_summary'
   ];
 
-  const requiredFunctions = [
-    'get_analytics_summary',
-    'get_realtime_metrics'
+  const requiredFunctions = ['get_analytics_summary', 'get_realtime_metrics'
   ];
 
   let allPresent = true;
@@ -193,9 +180,7 @@ async function verifyDatabaseSetup() {
 }
 
 async function verifyAPIEndpoints() {
-  const apiFiles = [
-    'app/api/analytics/events/route.ts',
-    'app/api/analytics/dashboard/route.ts'
+  const apiFiles = ['app/api/analytics/events/route.ts', 'app/api/analytics/dashboard/route.ts'
   ];
 
   apiFiles.forEach(file => {
@@ -226,9 +211,7 @@ async function verifyAPIEndpoints() {
 }
 
 async function verifyComponents() {
-  const componentFiles = [
-    'components/analytics/analytics-dashboard.tsx',
-    'hooks/use-analytics.ts'
+  const componentFiles = ['components/analytics/analytics-dashboard.tsx', 'hooks/use-analytics.ts'
   ];
 
   componentFiles.forEach(file => {

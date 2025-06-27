@@ -11,7 +11,7 @@ const { chromium } = require('playwright');
     { name: 'AI Create', url: '/dashboard/ai-create', expectedTabs: ['Create', 'Library', 'Settings'] },
     { name: 'Files Hub', url: '/dashboard/files-hub', expectedTabs: ['Overview', 'Cloud Storage', 'Portfolio Gallery'] },
     { name: 'Analytics', url: '/dashboard/analytics', expectedTabs: ['Overview', 'Revenue', 'Projects', 'Time'] },
-    { name: 'My Day Today', url: '/dashboard/my-day', expectedTabs: ['Today\'s Tasks', 'Time Blocks', 'AI Insights', 'Analytics'] },
+    { name: 'My Day Today', url: '/dashboard/my-day', expectedTabs: ['Today\'s Tasks', 'Time Blocks', 'AI Insights', 'Analytics'] },'
     { name: 'Video Studio', url: '/dashboard/video-studio', expectedTabs: [] },
     { name: 'Escrow System', url: '/dashboard/escrow', expectedTabs: [] },
     { name: 'AI Assistant', url: '/dashboard/ai-assistant', expectedTabs: [] },
@@ -28,8 +28,8 @@ const { chromium } = require('playwright');
       await page.waitForTimeout(3000);
       
       // Check if tabs exist
-      const tabList = await page.$('[role="tablist"]');
-      const tabsFound = tabList ? await page.$$('[role="tab"]') : [];
+      const tabList = await page.$('[role= "tablist"]');
+      const tabsFound = tabList ? await page.$$('[role= "tab"]') : [];
       
       const result = {
         page: testPage.name,
@@ -76,7 +76,7 @@ const { chromium } = require('playwright');
   }
   
   console.log(`\n🎉 TAB TESTING COMPLETE! Summary:`);
-  console.log('==========================================');
+  console.log('========================================== ');
   
   let hasIssues = false;
   

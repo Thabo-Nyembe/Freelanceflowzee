@@ -22,7 +22,7 @@ const fs = require('fs');
 const path = require('path');
 
 console.log('🎭 FreeflowZee Demo Content Integration for Feature Demonstrations');
-console.log('==================================================================');
+console.log('================================================================== ');
 
 // Enhanced content file paths
 const ENHANCED_CONTENT_DIR = path.join(process.cwd(), 'public', 'enhanced-content', 'content');
@@ -36,20 +36,13 @@ function loadDemoContent() {
   
   try {
     // Load all enhanced content files
-    const contentFiles = [
-      'enhanced-users.json',
-      'enhanced-projects.json',
-      'enhanced-posts.json',
-      'enhanced-files.json',
-      'enhanced-transactions.json',
-      'enhanced-analytics.json',
-      'enhanced-images.json'
-    ];
+    const contentFiles = ['enhanced-users.json', 'enhanced-projects.json', 'enhanced-posts.json', 'enhanced-files.json', 'enhanced-transactions.json', 'enhanced-analytics.json',
+      'enhanced-images.json'];
 
     for (const file of contentFiles) {
       const filePath = path.join(ENHANCED_CONTENT_DIR, file);
       if (fs.existsSync(filePath)) {
-        const key = file.replace('enhanced-', '').replace('.json', '');
+        const key = file.replace('enhanced-', ).replace('.json', );
         content[key] = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
         console.log(`  ✅ Loaded ${key}: ${Array.isArray(content[key]) ? content[key].length : 'object'} items`);
       } else {
@@ -145,7 +138,7 @@ const loadDemoProjects = async () => {
     const projects = await demoContent.getDemoProjects();
     return projects;
   } catch (error) {
-    console.error('Error loading demo projects:', error);
+    console.error('Error loading demo projects: ', error);
     return [];
   }
 };`;
@@ -325,7 +318,7 @@ const loadAnalyticsData = async () => {
     await demoContent.initialize();
     return await demoContent.getDemoAnalytics();
   } catch (error) {
-    console.error('Error loading analytics:', error);
+    console.error('Error loading analytics: ', error);
     return null;
   }
 };`;
@@ -359,29 +352,16 @@ function createFeatureDemoPage(content) {
   const demoPageContent = `'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Users, 
-  FolderOpen, 
-  MessageSquare, 
-  FileText, 
-  DollarSign, 
-  BarChart3,
-  Play,
-  Eye,
-  Download
-} from 'lucide-react';
 
 interface DemoContent {
-  users: any[];
-  projects: any[];
-  posts: any[];
-  files: any[];
-  transactions: any[];
-  analytics: any;
+  users: unknown[];
+  projects: unknown[];
+  posts: unknown[];
+  files: unknown[];
+  transactions: unknown[];
+  analytics: unknown;
 }
 
 export default function FeatureDemoPage() {
@@ -424,10 +404,10 @@ export default function FeatureDemoPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-violet-50/30 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading realistic demo content...</p>
+      <div className= "min-h-screen bg-gradient-to-br from-slate-50 via-white to-violet-50/30 flex items-center justify-center">
+        <div className= "text-center">
+          <div className= "animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 mx-auto mb-4"></div>
+          <p className= "text-slate-600">Loading realistic demo content...</p>
         </div>
       </div>
     );
@@ -485,54 +465,54 @@ export default function FeatureDemoPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-violet-50/30">
-      <div className="container mx-auto px-4 py-8">
+    <div className= "min-h-screen bg-gradient-to-br from-slate-50 via-white to-violet-50/30">
+      <div className= "container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+        <div className= "text-center mb-12">
+          <h1 className= "text-4xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent mb-4">
             FreeflowZee Feature Demonstrations
           </h1>
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+          <p className= "text-xl text-slate-600 max-w-3xl mx-auto">
             Experience all features with realistic, populated content showcasing the full platform capabilities
           </p>
-          <div className="flex items-center justify-center gap-4 mt-6">
-            <Badge variant="secondary" className="bg-green-100 text-green-700">
-              <Eye className="h-4 w-4 mr-1" />
+          <div className= "flex items-center justify-center gap-4 mt-6">
+            <Badge variant= "secondary" className= "bg-green-100 text-green-700">
+              <Eye className= "h-4 w-4 mr-1" />
               {demoContent?.users?.length || 0} Demo Users
             </Badge>
-            <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-              <FolderOpen className="h-4 w-4 mr-1" />
+            <Badge variant= "secondary" className= "bg-blue-100 text-blue-700">
+              <FolderOpen className= "h-4 w-4 mr-1" />
               {demoContent?.projects?.length || 0} Projects
             </Badge>
-            <Badge variant="secondary" className="bg-purple-100 text-purple-700">
-              <MessageSquare className="h-4 w-4 mr-1" />
+            <Badge variant= "secondary" className= "bg-purple-100 text-purple-700">
+              <MessageSquare className= "h-4 w-4 mr-1" />
               {demoContent?.posts?.length || 0} Posts
             </Badge>
           </div>
         </div>
 
         {/* Feature Showcase */}
-        <Tabs value={activeDemo} onValueChange={setActiveDemo} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 mb-8">
+        <Tabs value={activeDemo} onValueChange={setActiveDemo} className= "w-full">
+          <TabsList className= "grid w-full grid-cols-3 lg:grid-cols-6 mb-8">
             {features.map((feature) => (
-              <TabsTrigger key={feature.id} value={feature.id} className="text-sm">
-                <feature.icon className="h-4 w-4 mr-1" />
-                {feature.title.split(' ')[0]}
+              <TabsTrigger key={feature.id} value={feature.id} className= "text-sm">
+                <feature.icon className= "h-4 w-4 mr-1" />
+                {feature.title.split(' ')[0]}'
               </TabsTrigger>
             ))}
           </TabsList>
 
           {features.map((feature) => (
             <TabsContent key={feature.id} value={feature.id}>
-              <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-lg">
+              <Card className= "bg-white/60 backdrop-blur-xl border-white/20 shadow-lg">
                 <CardHeader>
-                  <div className="flex items-center gap-3">
+                  <div className= "flex items-center gap-3">
                     <div className={\`p-2 rounded-lg \${feature.color} text-white\`}>
-                      <feature.icon className="h-6 w-6" />
+                      <feature.icon className= "h-6 w-6" />
                     </div>
                     <div>
-                      <CardTitle className="text-2xl">{feature.title}</CardTitle>
-                      <CardDescription className="text-lg">{feature.description}</CardDescription>
+                      <CardTitle className= "text-2xl">{feature.title}</CardTitle>
+                      <CardDescription className= "text-lg">{feature.description}</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
@@ -545,20 +525,20 @@ export default function FeatureDemoPage() {
         </Tabs>
 
         {/* Quick Actions */}
-        <div className="mt-12 text-center">
-          <div className="flex flex-wrap justify-center gap-4">
+        <div className= "mt-12 text-center">
+          <div className= "flex flex-wrap justify-center gap-4">
             <Button 
               onClick={() => window.open('/dashboard', '_blank')}
-              className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
+              className= "bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
             >
-              <Play className="h-4 w-4 mr-2" />
+              <Play className= "h-4 w-4 mr-2" />
               Open Full Dashboard
             </Button>
             <Button 
-              variant="outline"
+              variant= "outline"
               onClick={() => loadDemoContent()}
             >
-              <Download className="h-4 w-4 mr-2" />
+              <Download className= "h-4 w-4 mr-2" />
               Refresh Demo Data
             </Button>
           </div>
@@ -568,10 +548,10 @@ export default function FeatureDemoPage() {
   );
 }
 
-function FeatureDemo({ feature, data }: { feature: any; data: any }) {
+function FeatureDemo({ feature, data }: { feature: unknown; data: unknown}) {
   if (!data) {
     return (
-      <div className="text-center py-8 text-slate-500">
+      <div className= "text-center py-8 text-slate-500">
         <p>Demo data not available for {feature.title}</p>
       </div>
     );
@@ -580,45 +560,45 @@ function FeatureDemo({ feature, data }: { feature: any; data: any }) {
   switch (feature.id) {
     case 'overview':
       return (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <div className="text-2xl font-bold text-blue-600">{data.totalViews?.toLocaleString() || '12.5K'}</div>
-            <div className="text-sm text-blue-700">Total Views</div>
+        <div className= "grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className= "text-center p-4 bg-blue-50 rounded-lg">
+            <div className= "text-2xl font-bold text-blue-600">{data.totalViews?.toLocaleString() || &apos;12.5K&apos;}</div>
+            <div className= "text-sm text-blue-700">Total Views</div>
           </div>
-          <div className="text-center p-4 bg-green-50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">{data.totalDownloads?.toLocaleString() || '3.4K'}</div>
-            <div className="text-sm text-green-700">Downloads</div>
+          <div className= "text-center p-4 bg-green-50 rounded-lg">
+            <div className= "text-2xl font-bold text-green-600">{data.totalDownloads?.toLocaleString() || &apos;3.4K&apos;}</div>
+            <div className= "text-sm text-green-700">Downloads</div>
           </div>
-          <div className="text-center p-4 bg-purple-50 rounded-lg">
-            <div className="text-2xl font-bold text-purple-600">${data.totalRevenue?.toLocaleString() || '45.6K'}</div>
-            <div className="text-sm text-purple-700">Revenue</div>
+          <div className= "text-center p-4 bg-purple-50 rounded-lg">
+            <div className= "text-2xl font-bold text-purple-600">${data.totalRevenue?.toLocaleString() || &apos;45.6K&apos;}</div>
+            <div className= "text-sm text-purple-700">Revenue</div>
           </div>
-          <div className="text-center p-4 bg-orange-50 rounded-lg">
-            <div className="text-2xl font-bold text-orange-600">{data.averageRating || '4.7'}★</div>
-            <div className="text-sm text-orange-700">Rating</div>
+          <div className= "text-center p-4 bg-orange-50 rounded-lg">
+            <div className= "text-2xl font-bold text-orange-600">{data.averageRating || &apos;4.7&apos;}★</div>
+            <div className= "text-sm text-orange-700">Rating</div>
           </div>
         </div>
       );
 
     case 'projects':
       return (
-        <div className="grid gap-4">
+        <div className= "grid gap-4">
           {Array.isArray(data) && data.slice(0, 4).map((project, index) => (
-            <div key={index} className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center text-white font-bold">
-                {project.title?.charAt(0) || 'P'}
+            <div key={index} className= "flex items-center gap-4 p-4 bg-slate-50 rounded-lg">
+              <div className= "w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center text-white font-bold">
+                {project.title?.charAt(0) || 'P'}'
               </div>
-              <div className="flex-1">
-                <h4 className="font-semibold">{project.title || 'Sample Project'}</h4>
-                <p className="text-sm text-slate-600">{project.description?.slice(0, 100) || 'Project description'}...</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <Badge variant="secondary">{project.status || 'active'}</Badge>
-                  <Badge variant="outline">{project.type || 'design'}</Badge>
+              <div className= "flex-1">
+                <h4 className= "font-semibold">{project.title || &apos;Sample Project&apos;}</h4>
+                <p className= "text-sm text-slate-600">{project.description?.slice(0, 100) || &apos;Project description&apos;}...</p>
+                <div className= "flex items-center gap-2 mt-2">
+                  <Badge variant= "secondary">{project.status || &apos;active&apos;}</Badge>
+                  <Badge variant= "outline">{project.type || &apos;design&apos;}</Badge>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="font-semibold">${project.budget?.toLocaleString() || '5,000'}</div>
-                <div className="text-sm text-slate-600">{project.progress || 75}% complete</div>
+              <div className= "text-right">
+                <div className= "font-semibold">${project.budget?.toLocaleString() || &apos;5,000&apos;}</div>
+                <div className= "text-sm text-slate-600">{project.progress || 75}% complete</div>
               </div>
             </div>
           ))}
@@ -627,24 +607,20 @@ function FeatureDemo({ feature, data }: { feature: any; data: any }) {
 
     case 'community':
       return (
-        <div className="grid gap-4">
+        <div className= "grid gap-4">
           {Array.isArray(data) && data.slice(0, 5).map((post, index) => (
-            <div key={index} className="flex gap-4 p-4 bg-slate-50 rounded-lg">
-              <img 
-                src={post.author?.avatar || '/images/hero-real.jpg'} 
-                alt={post.author?.name || 'User'}
-                className="w-10 h-10 rounded-full object-cover"
-              />
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="font-semibold">{post.author?.name || 'Demo User'}</span>
-                  <span className="text-sm text-slate-600">{post.author?.profession || 'Designer'}</span>
+            <div key={index} className= "flex gap-4 p-4 bg-slate-50 rounded-lg">
+              <img src={post.author?.avatar || &apos;/images/hero-real.jpg&apos;} alt={post.author?.name || &apos;User&apos;}>
+              <div >
+                <div >
+                  <span >{post.author?.name || &apos;Demo User&apos;}</span>
+                  <span >{post.author?.profession || &apos;Designer&apos;}</span>
                 </div>
-                <p className="text-slate-700">{post.content?.slice(0, 150) || 'Sample post content'}...</p>
-                <div className="flex items-center gap-4 mt-2 text-sm text-slate-600">
-                  <span>❤️ {post.likes || 0}</span>
-                  <span>💬 {post.comments || 0}</span>
-                  <span>👁️ {post.views || 0}</span>
+                <p >{post.content?.slice(0, 150) || &apos;Sample post content&apos;}...</p>
+                <div >
+                  <span >❤️ {post.likes || 0}</span>
+                  <span >💬 {post.comments || 0}</span>
+                  <span >👁️ {post.views || 0}</span>
                 </div>
               </div>
             </div>
@@ -654,17 +630,17 @@ function FeatureDemo({ feature, data }: { feature: any; data: any }) {
 
     case 'files':
       return (
-        <div className="grid gap-3">
+        <div >
           {Array.isArray(data) && data.slice(0, 6).map((file, index) => (
-            <div key={index} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-              <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
-                <FileText className="h-4 w-4 text-blue-600" />
+            <div key={index}>
+              <div >
+                <FileText >
               </div>
-              <div className="flex-1">
-                <div className="font-medium">{file.name || 'sample-file.pdf'}</div>
-                <div className="text-sm text-slate-600">{file.sizeFormatted || '2.5 MB'}</div>
+              <div >
+                <div >{file.name || &apos;sample-file.pdf&apos;}</div>
+                <div >{file.sizeFormatted || &apos;2.5 MB&apos;}</div>
               </div>
-              <Badge variant="outline">{file.category || 'document'}</Badge>
+              <Badge >{file.category || &apos;document&apos;}</Badge>
             </div>
           ))}
         </div>
@@ -672,18 +648,18 @@ function FeatureDemo({ feature, data }: { feature: any; data: any }) {
 
     case 'escrow':
       return (
-        <div className="grid gap-4">
+        <div >
           {Array.isArray(data) && data.slice(0, 4).map((transaction, index) => (
-            <div key={index} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-              <div>
-                <div className="font-semibold">{transaction.projectTitle || 'Project Payment'}</div>
-                <div className="text-sm text-slate-600">
+            <div key={index}>
+              <div >
+                <div >{transaction.projectTitle || &apos;Project Payment&apos;}</div>
+                <div >
                   {transaction.client?.name || 'Client'} → {transaction.freelancer?.name || 'Freelancer'}
                 </div>
               </div>
-              <div className="text-right">
-                <div className="font-semibold text-green-600">${transaction.amount?.toLocaleString() || '2,500'}</div>
-                <Badge variant="secondary" className="mt-1">{transaction.status || 'active'}</Badge>
+              <div >
+                <div >${transaction.amount?.toLocaleString() || &apos;2,500&apos;}</div>
+                <Badge >{transaction.status || &apos;active&apos;}</Badge>
               </div>
             </div>
           ))}
@@ -692,36 +668,36 @@ function FeatureDemo({ feature, data }: { feature: any; data: any }) {
 
     case 'analytics':
       return (
-        <div className="space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">{data.overview?.totalViews?.toLocaleString() || '12.5K'}</div>
-              <div className="text-sm text-blue-700">Total Views</div>
+        <div >
+          <div >
+            <div >
+              <div >{data.overview?.totalViews?.toLocaleString() || &apos;12.5K&apos;}</div>
+              <div >Total Views</div>
             </div>
-            <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">{data.overview?.totalDownloads?.toLocaleString() || '3.4K'}</div>
-              <div className="text-sm text-green-700">Downloads</div>
+            <div >
+              <div >{data.overview?.totalDownloads?.toLocaleString() || &apos;3.4K&apos;}</div>
+              <div >Downloads</div>
             </div>
-            <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">${data.overview?.totalRevenue?.toLocaleString() || '45.6K'}</div>
-              <div className="text-sm text-purple-700">Revenue</div>
+            <div >
+              <div >${data.overview?.totalRevenue?.toLocaleString() || &apos;45.6K&apos;}</div>
+              <div >Revenue</div>
             </div>
-            <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg">
-              <div className="text-2xl font-bold text-orange-600">{data.overview?.completionRate || '94.2'}%</div>
-              <div className="text-sm text-orange-700">Completion</div>
+            <div >
+              <div >{data.overview?.completionRate || &apos;94.2&apos;}%</div>
+              <div >Completion</div>
             </div>
           </div>
           
-          <div className="bg-slate-50 rounded-lg p-4">
-            <h4 className="font-semibold mb-3">Top Countries</h4>
-            <div className="space-y-2">
+          <div >
+            <h4 >Top Countries</h4>
+            <div >
               {data.topCountries?.slice(0, 5).map((country, index) => (
-                <div key={index} className="flex justify-between items-center">
-                  <span>{country.country || 'Country'}</span>
-                  <span className="font-medium">{country.views?.toLocaleString() || '0'} views</span>
+                <div key={index}>
+                  <span >{country.country || &apos;Country&apos;}</span>
+                  <span >{country.views?.toLocaleString() || &apos;0'} views</span>'
                 </div>
               )) || (
-                <div className="text-slate-500">Analytics data loading...</div>
+                <div >Analytics data loading...</div>
               )}
             </div>
           </div>
@@ -730,8 +706,8 @@ function FeatureDemo({ feature, data }: { feature: any; data: any }) {
 
     default:
       return (
-        <div className="text-center py-8 text-slate-500">
-          <p>Feature demo content coming soon...</p>
+        <div >
+          <p >Feature demo content coming soon...</p>
         </div>
       );
   }
@@ -856,7 +832,7 @@ The FreeflowZee platform now features comprehensive, realistic content across al
     fs.writeFileSync(summaryPath, summary);
     console.log('  ✅ Demo integration summary generated');
   } catch (error) {
-    console.error('  ❌ Error generating summary:', error);
+    console.error('  ❌ Error generating summary: ', error);
   }
 }
 
@@ -890,7 +866,7 @@ async function main() {
     generateDemoSummary(content);
 
     console.log('\n🎉 Demo Content Integration Complete!');
-    console.log('==================================');
+    console.log('================================== ');
     console.log('✅ All dashboard features enhanced with realistic content');
     console.log('✅ Feature demo page created at /demo-features');
     console.log('✅ API endpoints available at /api/demo/content');

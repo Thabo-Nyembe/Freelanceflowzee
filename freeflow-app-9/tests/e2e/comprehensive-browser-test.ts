@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 // Test suite for comprehensive browser error checking
 test.describe('Browser Error Detection Suite', () => {
@@ -35,6 +35,41 @@ test.describe('Browser Error Detection Suite', () => {
     await page.goto('/dashboard');
     expect(consoleErrors).toHaveLength(0);
     expect(networkErrors).toHaveLength(0);
+  });
+
+  test('should handle network errors gracefully', async ({ page }) => {
+    // Simulate offline mode
+    await page.route('**/*', route => route.abort('internetdisconnected'));
+    await page.goto('/');
+    
+    // Check if network error handler is displayed
+    const networkError = await page.getByTestId('network-error');
+    await expect(networkError).toBeVisible();
+    
+    // Check retry functionality
+    const retryButton = await page.getByTestId('network-retry-button');
+    await expect(retryButton).toBeVisible();
+  });
+
+  test('should handle JavaScript disabled gracefully', async ({ page }) => {
+    await page.goto('/');
+    
+    // Check if noscript content is present
+    const noscriptContent = await page.getByTestId('js-disabled-fallback');
+    await expect(noscriptContent).toBeInViewport();
+  });
+
+  test('should handle error boundary gracefully', async ({ page }) => {
+    // Force an error by navigating to a non-existent route
+    await page.goto('/non-existent-page');
+    
+    // Check if error boundary is displayed
+    const errorBoundary = await page.getByTestId('error-boundary');
+    await expect(errorBoundary).toBeVisible();
+    
+    // Check retry functionality
+    const retryButton = await page.getByTestId('retry-button');
+    await expect(retryButton).toBeVisible();
   });
 
   test('should check all interactive elements', async ({ page }) => {

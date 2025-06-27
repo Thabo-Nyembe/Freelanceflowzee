@@ -1,4 +1,4 @@
-import type { Page, Locator } from '@playwright/test';
+import type { Page, Locator } from &apos;@playwright/test&apos;;
 
 export class PaymentPage {
   readonly page: Page;
@@ -50,53 +50,53 @@ export class PaymentPage {
     this.page = page;
     
     // Payment form elements
-    this.paymentForm = page.locator('[data-testid="payment-form"]');
-    this.cardNumberInput = page.getByLabel('Card number');
-    this.expiryDateInput = page.getByLabel('Expiry date');
-    this.cvcInput = page.getByLabel('CVC');
-    this.cardholderNameInput = page.getByLabel('Cardholder name');
-    this.billingAddressSection = page.locator('[data-testid="billing-address"]');
-    this.countrySelect = page.getByLabel('Country');
-    this.postalCodeInput = page.getByLabel('Postal code');
+    this.paymentForm = page.locator(&apos;[data-testid=&quot;payment-form&quot;]&apos;);
+    this.cardNumberInput = page.getByLabel(&apos;Card number&apos;);
+    this.expiryDateInput = page.getByLabel(&apos;Expiry date&apos;);
+    this.cvcInput = page.getByLabel(&apos;CVC&apos;);
+    this.cardholderNameInput = page.getByLabel(&apos;Cardholder name&apos;);
+    this.billingAddressSection = page.locator(&apos;[data-testid=&quot;billing-address&quot;]&apos;);
+    this.countrySelect = page.getByLabel(&apos;Country&apos;);
+    this.postalCodeInput = page.getByLabel(&apos;Postal code&apos;);
 
     // Payment buttons
-    this.payButton = page.getByRole('button', { name: 'Pay Now' });
-    this.cancelButton = page.getByRole('button', { name: 'Cancel' });
-    this.backButton = page.getByRole('button', { name: 'Back' });
+    this.payButton = page.getByRole(&apos;button&apos;, { name: &apos;Pay Now&apos; });
+    this.cancelButton = page.getByRole(&apos;button&apos;, { name: &apos;Cancel&apos; });
+    this.backButton = page.getByRole(&apos;button&apos;, { name: &apos;Back&apos; });
 
     // Payment methods
-    this.creditCardTab = page.getByRole('tab', { name: 'Credit Card' });
-    this.paypalButton = page.getByRole('button', { name: 'PayPal' });
-    this.applePayButton = page.getByRole('button', { name: 'Apple Pay' });
-    this.googlePayButton = page.getByRole('button', { name: 'Google Pay' });
-    this.bankTransferOption = page.getByRole('radio', { name: 'Bank Transfer' });
+    this.creditCardTab = page.getByRole(&apos;tab&apos;, { name: &apos;Credit Card&apos; });
+    this.paypalButton = page.getByRole(&apos;button&apos;, { name: &apos;PayPal&apos; });
+    this.applePayButton = page.getByRole(&apos;button&apos;, { name: &apos;Apple Pay&apos; });
+    this.googlePayButton = page.getByRole(&apos;button&apos;, { name: &apos;Google Pay&apos; });
+    this.bankTransferOption = page.getByRole(&apos;radio&apos;, { name: &apos;Bank Transfer&apos; });
 
     // Order summary
-    this.orderSummary = page.locator('[data-testid="order-summary"]');
-    this.itemsList = page.locator('[data-testid="items-list"]');
-    this.subtotalAmount = page.locator('[data-testid="subtotal"]');
-    this.taxAmount = page.locator('[data-testid="tax"]');
-    this.totalAmount = page.locator('[data-testid="total"]');
-    this.discountSection = page.locator('[data-testid="discount-section"]');
-    this.couponInput = page.getByLabel('Coupon code');
-    this.applyCouponButton = page.getByRole('button', { name: 'Apply' });
+    this.orderSummary = page.locator(&apos;[data-testid=&quot;order-summary&quot;]&apos;);
+    this.itemsList = page.locator(&apos;[data-testid=&quot;items-list&quot;]&apos;);
+    this.subtotalAmount = page.locator(&apos;[data-testid=&quot;subtotal&quot;]&apos;);
+    this.taxAmount = page.locator(&apos;[data-testid=&quot;tax&quot;]&apos;);
+    this.totalAmount = page.locator(&apos;[data-testid=&quot;total&quot;]&apos;);
+    this.discountSection = page.locator(&apos;[data-testid=&quot;discount-section&quot;]&apos;);
+    this.couponInput = page.getByLabel(&apos;Coupon code&apos;);
+    this.applyCouponButton = page.getByRole(&apos;button&apos;, { name: &apos;Apply&apos; });
 
     // Success/Error states
-    this.successMessage = page.locator('[data-testid="success-message"]');
-    this.errorMessage = page.locator('[data-testid="error-message"]');
-    this.processingSpinner = page.locator('[data-testid="processing-spinner"]');
-    this.paymentStatusIcon = page.locator('[data-testid="payment-status"]');
+    this.successMessage = page.locator(&apos;[data-testid=&quot;success-message&quot;]&apos;);
+    this.errorMessage = page.locator(&apos;[data-testid=&quot;error-message&quot;]&apos;);
+    this.processingSpinner = page.locator(&apos;[data-testid=&quot;processing-spinner&quot;]&apos;);
+    this.paymentStatusIcon = page.locator(&apos;[data-testid=&quot;payment-status&quot;]&apos;);
 
     // Security elements
-    this.securePaymentBadge = page.locator('[data-testid="secure-payment"]');
-    this.sslCertificate = page.locator('[data-testid="ssl-certificate"]');
-    this.cardSecurityInfo = page.locator('[data-testid="card-security"]');
+    this.securePaymentBadge = page.locator(&apos;[data-testid=&quot;secure-payment&quot;]&apos;);
+    this.sslCertificate = page.locator(&apos;[data-testid=&quot;ssl-certificate&quot;]&apos;);
+    this.cardSecurityInfo = page.locator(&apos;[data-testid=&quot;card-security&quot;]&apos;);
   }
 
   async goto() {
-    await this.page.goto('/payment');
-    await this.page.waitForLoadState('networkidle');
-    await this.paymentForm.waitFor({ state: 'visible' });
+    await this.page.goto(&apos;/payment&apos;);
+    await this.page.waitForLoadState(&apos;networkidle&apos;);
+    await this.paymentForm.waitFor({ state: &apos;visible&apos; });
   }
 
   // Payment methods
@@ -164,13 +164,13 @@ export class PaymentPage {
   }
 
   async getItemsList() {
-    const items = await this.itemsList.locator('[data-testid="order-item"]').all();
+    const items = await this.itemsList.locator(&apos;[data-testid=&quot;order-item&quot;]&apos;).all();
     const itemData = [];
     
     for (const item of items) {
-      const name = await item.locator('[data-testid="item-name"]').textContent();
-      const price = await item.locator('[data-testid="item-price"]').textContent();
-      const quantity = await item.locator('[data-testid="item-quantity"]').textContent();
+      const name = await item.locator(&apos;[data-testid=&quot;item-name&quot;]&apos;).textContent();
+      const price = await item.locator(&apos;[data-testid=&quot;item-price&quot;]&apos;).textContent();
+      const quantity = await item.locator(&apos;[data-testid=&quot;item-quantity&quot;]&apos;).textContent();
       
       itemData.push({ name, price, quantity });
     }
@@ -210,35 +210,35 @@ export class PaymentPage {
 
   // Payment status handling
   async waitForPaymentProcessing() {
-    await this.processingSpinner.waitFor({ state: 'visible' });
+    await this.processingSpinner.waitFor({ state: &apos;visible&apos; });
     // Wait for processing to complete
-    await this.processingSpinner.waitFor({ state: 'hidden', timeout: 30000 });
+    await this.processingSpinner.waitFor({ state: &apos;hidden&apos;, timeout: 30000 });
   }
 
   async waitForPaymentSuccess() {
-    await this.successMessage.waitFor({ state: 'visible' });
+    await this.successMessage.waitFor({ state: &apos;visible&apos; });
     return await this.successMessage.textContent();
   }
 
   async waitForPaymentError() {
-    await this.errorMessage.waitFor({ state: 'visible' });
+    await this.errorMessage.waitFor({ state: &apos;visible&apos; });
     return await this.errorMessage.textContent();
   }
 
   async getPaymentStatus() {
     if (await this.successMessage.isVisible()) {
-      return { status: 'success', message: await this.successMessage.textContent() };
+      return { status: &apos;success&apos;, message: await this.successMessage.textContent() };
     }
     
     if (await this.errorMessage.isVisible()) {
-      return { status: 'error', message: await this.errorMessage.textContent() };
+      return { status: &apos;error&apos;, message: await this.errorMessage.textContent() };
     }
     
     if (await this.processingSpinner.isVisible()) {
-      return { status: 'processing', message: 'Payment is being processed...' };
+      return { status: &apos;processing&apos;, message: &apos;Payment is being processed...&apos; };
     }
     
-    return { status: 'pending', message: 'Ready for payment' };
+    return { status: &apos;pending&apos;, message: &apos;Ready for payment&apos; };
   }
 
   // Form validation
@@ -246,7 +246,7 @@ export class PaymentPage {
     await this.cardNumberInput.fill(cardNumber);
     await this.cardNumberInput.blur();
     
-    const validation = this.page.locator('[data-testid="card-validation"]');
+    const validation = this.page.locator(&apos;[data-testid=&quot;card-validation&quot;]&apos;);
     if (await validation.isVisible()) {
       return await validation.textContent();
     }
@@ -258,10 +258,10 @@ export class PaymentPage {
   }
 
   async areRequiredFieldsFilled() {
-    const cardFilled = await this.cardNumberInput.inputValue() !== '';
-    const expiryFilled = await this.expiryDateInput.inputValue() !== '';
-    const cvcFilled = await this.cvcInput.inputValue() !== '';
-    const nameFilled = await this.cardholderNameInput.inputValue() !== '';
+    const cardFilled = await this.cardNumberInput.inputValue() !== '&apos;;'
+    const expiryFilled = await this.expiryDateInput.inputValue() !== '&apos;;'
+    const cvcFilled = await this.cvcInput.inputValue() !== '&apos;;'
+    const nameFilled = await this.cardholderNameInput.inputValue() !== '&apos;;'
     
     return {
       card: cardFilled,
@@ -275,10 +275,10 @@ export class PaymentPage {
   // Edge cases and testing
   async testInvalidCard() {
     await this.payWithCreditCard({
-      number: '4000000000000002', // Declined card
-      expiry: '12/28',
-      cvc: '123',
-      name: 'Test User'
+      number: &apos;4000000000000002&apos;, // Declined card
+      expiry: &apos;12/28&apos;,
+      cvc: &apos;123&apos;,
+      name: &apos;Test User&apos;
     });
     
     return await this.waitForPaymentError();
@@ -286,10 +286,10 @@ export class PaymentPage {
 
   async testExpiredCard() {
     await this.payWithCreditCard({
-      number: '4000000000000069', // Expired card
-      expiry: '12/20',
-      cvc: '123',
-      name: 'Test User'
+      number: &apos;4000000000000069&apos;, // Expired card
+      expiry: &apos;12/20&apos;,
+      cvc: &apos;123&apos;,
+      name: &apos;Test User&apos;
     });
     
     return await this.waitForPaymentError();
@@ -297,10 +297,10 @@ export class PaymentPage {
 
   async testInsufficientFunds() {
     await this.payWithCreditCard({
-      number: '4000000000009995', // Insufficient funds
-      expiry: '12/28',
-      cvc: '123',
-      name: 'Test User'
+      number: &apos;4000000000009995&apos;, // Insufficient funds
+      expiry: &apos;12/28&apos;,
+      cvc: &apos;123&apos;,
+      name: &apos;Test User&apos;
     });
     
     return await this.waitForPaymentError();
@@ -308,12 +308,12 @@ export class PaymentPage {
 
   async testValidCard() {
     await this.payWithCreditCard({
-      number: '4242424242424242', // Valid test card
-      expiry: '12/28',
-      cvc: '123',
-      name: 'Test User',
-      country: 'US',
-      postalCode: '12345'
+      number: &apos;4242424242424242&apos;, // Valid test card
+      expiry: &apos;12/28&apos;,
+      cvc: &apos;123&apos;,
+      name: &apos;Test User&apos;,
+      country: &apos;US&apos;,
+      postalCode: &apos;12345&apos;
     });
     
     await this.waitForPaymentProcessing();
@@ -345,13 +345,13 @@ export class PaymentPage {
   async testPaymentSecurity() {
     // Check for HTTPS
     const url = this.page.url();
-    const isHTTPS = url.startsWith('https://');
+    const isHTTPS = url.startsWith(&apos;https://&apos;);
     
     // Check for security badges
     const securityFeatures = await this.verifySecurityFeatures();
     
     // Check for input sanitization
-    const xssTest = '<script>alert("XSS")</script>';
+    const xssTest = &apos;<script>alert(&quot;XSS&quot;)</script>&apos;;
     await this.cardholderNameInput.fill(xssTest);
     const sanitizedValue = await this.cardholderNameInput.inputValue();
     
@@ -365,7 +365,7 @@ export class PaymentPage {
   // Cancel and navigation
   async cancelPayment() {
     await this.cancelButton.click();
-    await this.page.waitForURL('**/dashboard');
+    await this.page.waitForURL(&apos;**/dashboard&apos;);
   }
 
   async goBack() {
@@ -375,13 +375,13 @@ export class PaymentPage {
   // Accessibility testing
   async checkAccessibility() {
     // Check for proper labels
-    const inputs = await this.paymentForm.locator('input').all();
+    const inputs = await this.paymentForm.locator(&apos;input&apos;).all();
     const inputsWithoutLabels = [];
     
     for (const input of inputs) {
-      const id = await input.getAttribute('id');
-      const ariaLabel = await input.getAttribute('aria-label');
-      const label = this.page.locator(`label[for="${id}"]`);
+      const id = await input.getAttribute(&apos;id&apos;);
+      const ariaLabel = await input.getAttribute(&apos;aria-label&apos;);
+      const label = this.page.locator(`label[for=&quot;${id}&quot;]`);
       
       if (!ariaLabel && !(await label.isVisible())) {
         inputsWithoutLabels.push(id);
@@ -390,12 +390,12 @@ export class PaymentPage {
     
     // Check for keyboard navigation
     await this.cardNumberInput.focus();
-    await this.page.keyboard.press('Tab');
+    await this.page.keyboard.press(&apos;Tab&apos;);
     const focusedElement = await this.page.evaluate(() => document.activeElement?.tagName);
     
     return {
       inputsWithoutLabels,
-      keyboardNavigation: focusedElement === 'INPUT'
+      keyboardNavigation: focusedElement === &apos;INPUT&apos;
     };
   }
 } 

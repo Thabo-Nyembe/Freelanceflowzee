@@ -205,17 +205,10 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           success: true,
           message: 'Universal Pinpoint Feedback API',
-          supportedActions: [
-            'get_files',
-            'get_comments', 
-            'get_comment',
-            'get_analytics'
+          supportedActions: ['get_files', 'get_comments', 'get_comment', 'get_analytics'
           ],
           endpoints: {
-            'GET': 'Retrieve files, comments, or analytics',
-            'POST': 'Create comments or reactions',
-            'PUT': 'Update comments or file status',
-            'DELETE': 'Delete comments'
+            'GET': 'Retrieve files, comments, or analytics', 'POST': 'Create comments or reactions', 'PUT': 'Update comments or file status', 'DELETE': 'Delete comments'
           }
         })
     }

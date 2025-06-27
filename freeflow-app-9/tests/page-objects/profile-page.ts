@@ -1,4 +1,4 @@
-import type { Page, Locator } from '@playwright/test';
+import type { Page, Locator } from &apos;@playwright/test&apos;;
 
 export class ProfilePage {
   readonly page: Page;
@@ -9,15 +9,15 @@ export class ProfilePage {
 
   constructor(page: Page) {
     this.page = page;
-    this.profileForm = page.locator('[data-testid="profile-form"]');
-    this.nameInput = page.getByLabel('Name');
-    this.emailInput = page.getByLabel('Email');
-    this.saveButton = page.getByRole('button', { name: 'Save Changes' });
+    this.profileForm = page.locator(&apos;[data-testid=&quot;profile-form&quot;]&apos;);
+    this.nameInput = page.getByLabel(&apos;Name&apos;);
+    this.emailInput = page.getByLabel(&apos;Email&apos;);
+    this.saveButton = page.getByRole(&apos;button&apos;, { name: &apos;Save Changes&apos; });
   }
 
   async goto() {
-    await this.page.goto('/profile');
-    await this.page.waitForLoadState('networkidle');
+    await this.page.goto(&apos;/profile&apos;);
+    await this.page.waitForLoadState(&apos;networkidle&apos;);
   }
 
   async updateProfile(name: string, email: string) {

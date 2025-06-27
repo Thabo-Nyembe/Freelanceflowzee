@@ -3,7 +3,7 @@
 const { createClient } = require('@supabase/supabase-js')
 
 console.log('🚀 FreeflowZee Enhanced Database Setup & Verification')
-console.log('====================================================')
+console.log('==================================================== ')
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -30,7 +30,7 @@ async function checkTableExists(tableName) {
     // Get row count
     const { count } = await supabase
       .from(tableName)
-      .select('*', { count: 'exact', head: true })
+      .select('*', { count: 'exact', head: true })'
     
     return { exists: true, count: count || 0 }
   } catch (e) {
@@ -42,40 +42,21 @@ async function verifyEnhancedFeatures() {
   console.log('\n🔍 Verifying Enhanced Database Features...')
   
   // Check core tables with their expected enhancements
-  const coreTables = [
-    'projects',
-    'user_profiles', 
-    'file_storage',
-    'storage_analytics',
-    'feedback_comments',
-    'project_attachments',
-    'project_members',
-    'invoices',
-    'time_entries'
+  const coreTables = ['projects', 'user_profiles', 'file_storage', 'storage_analytics', 'feedback_comments', 'project_attachments', 'project_members', 'invoices', 'time_entries'
   ]
 
   // Check UPF system tables
-  const upfTables = [
-    'upf_comments',
-    'upf_reactions', 
-    'upf_attachments',
-    'upf_voice_notes',
-    'upf_analytics'
+  const upfTables = ['upf_comments', 'upf_reactions', 'upf_attachments', 'upf_voice_notes', 'upf_analytics'
   ]
 
   // Check new collaboration and analytics tables
-  const newTables = [
-    'realtime_cursors',
-    'collaboration_sessions',
-    'user_activity',
-    'performance_metrics',
-    'api_usage'
-  ]
+  const newTables = ['realtime_cursors', 'collaboration_sessions', 'user_activity', 'performance_metrics',
+    'api_usage']
 
   let allTablesExist = true
   let totalRows = 0
 
-  console.log('\n📊 Core FreeflowZee Tables:')
+  console.log('\n📊 Core FreeflowZee Tables: ')
   for (const table of coreTables) {
     const result = await checkTableExists(table)
     if (result && result.exists) {
@@ -172,15 +153,11 @@ async function verifyIndexes() {
     // Check for some key indexes
     const { data: indexes, error } = await supabase
       .rpc('pg_stat_user_indexes', {})
-      .select('*')
+      .select('*')'
     
     if (!error && indexes) {
-      const keyIndexes = [
-        'idx_projects_user_id',
-        'idx_file_storage_project_id', 
-        'idx_upf_comments_file_id',
-        'idx_storage_analytics_date'
-      ]
+      const keyIndexes = ['idx_projects_user_id', 'idx_file_storage_project_id', 'idx_upf_comments_file_id',
+        'idx_storage_analytics_date']
       
       let indexCount = 0
       for (const idx of keyIndexes) {
@@ -203,13 +180,13 @@ async function verifyIndexes() {
 }
 
 async function testCostOptimization() {
-  console.log('\n💰 Cost Optimization Features:')
+  console.log('\n💰 Cost Optimization Features: ')
   
   try {
     // Test storage analytics functionality
     const { data: analytics, error } = await supabase
       .from('storage_analytics')
-      .select('*')
+      .select('*')'
       .order('date', { ascending: false })
       .limit(1)
     
@@ -241,7 +218,7 @@ async function testCostOptimization() {
     }
     
   } catch (e) {
-    console.log('⚠️  Cost optimization verification incomplete:', e.message)
+    console.log('⚠️  Cost optimization verification incomplete: ', e.message)
   }
 }
 
@@ -260,9 +237,9 @@ async function main() {
   await testCostOptimization()
 
   // Summary Report
-  console.log('\n' + '='.repeat(60))
+  console.log('\n' + '='.repeat(60))'
   console.log('📋 ENHANCED FREEFLOWZEE DATABASE SUMMARY')
-  console.log('='.repeat(60))
+  console.log('='.repeat(60))'
   
   const completionPercentage = Math.round((dbStatus.existingTables / dbStatus.totalTables) * 100)
   

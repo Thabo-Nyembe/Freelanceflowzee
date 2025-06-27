@@ -18,7 +18,7 @@ export async function trackWebVitals() {
   }
 }
 
-function sendToAnalytics(metric: any) {
+function sendToAnalytics(metric: Record<string, unknown>) {
   // In production, send to your analytics service
   if (process.env.NODE_ENV === 'development') {
     console.log('📊 Web Vital:', metric.name, metric.value, metric.rating)

@@ -6,39 +6,21 @@ import { updateSession } from '@/utils/supabase/middleware'
 // Define public routes that don't require authentication
 const publicRoutes = [
   '/',
-  '/landing',
-  '/login',
-  '/signup',
-  '/features',
-  '/how-it-works',
-  '/docs',
-  '/tutorials',
-  '/community',
-  '/api-docs',
-  '/demo',
-  '/support',
-  '/contact',
-  '/payment',
-  '/blog',
-  '/newsletter',
-  '/privacy',
-  '/terms',
-  '/pricing',
-  '/careers',
-  '/cookies',
-  '/book-appointment',
-  '/community-showcase',
-  '/enhanced-collaboration-demo',
-  '/media-preview-demo'
+  '/landing', '/login', '/signup', '/features', '/how-it-works', '/docs', '/tutorials', 
+  '/community', '/api-docs', '/demo', '/support', '/contact', '/payment', '/blog', 
+  '/newsletter', '/privacy', '/terms', '/pricing', '/careers', '/cookies', 
+  '/book-appointment', '/community-showcase', '/enhanced-collaboration-demo', '/media-preview-demo'
 ]
 
 // Define protected routes that require authentication
 const protectedRoutes = [
   '/dashboard',
-  '/projects',
-  '/analytics',
-  '/feedback',
-  '/settings'
+  '/dashboard/ai-create',
+  '/dashboard/client-portal',
+  '/dashboard/files',
+  '/dashboard/projects',
+  '/dashboard/settings',
+  '/dashboard/billing'
 ]
 
 // Rate limiting for auth endpoints
@@ -91,9 +73,18 @@ export async function middleware(request: NextRequest) {
                      request.nextUrl.hostname.startsWith('192.168.') ||
                      request.nextUrl.hostname.endsWith('.local'))
 
-  // Check if current path is a public route - allow immediate access
+  // Log route access in development
+  if (process.env.NODE_ENV === 'development') {
+    if (publicRoutes.includes(pathname)) {
+      console.log('🌐 Public route detected:', pathname, '- allowing access')
+    } else {
+      console.log('🔧 Local development detected:', pathname, '- bypassing authentication for testing')
+    }
+    return NextResponse.next()
+  }
+
+  // Check if the route is public
   if (publicRoutes.includes(pathname)) {
-    console.log(`🌐 Public route detected: ${pathname} - allowing access`)
     return NextResponse.next()
   }
 
@@ -111,7 +102,7 @@ export async function middleware(request: NextRequest) {
 
   // Get client IP for rate limiting
   const ip = request.headers.get('x-forwarded-for') || 
-    request.headers.get('x-forwarded-for')?.split(',')[0] || 
+    request.headers.get('x-forwarded-for')?.split(',')[0] || '
     request.headers.get('x-real-ip') || 
     '127.0.0.1'
 
@@ -122,6 +113,12 @@ export async function middleware(request: NextRequest) {
     if (!checkAuthRateLimit(ip)) {
       return new NextResponse('Too many requests', { status: 429 })
     }
+  }
+
+  // Check if user is authenticated
+  const token = request.cookies.get('auth_token')
+  if (!token && protectedRoutes.includes(pathname)) {
+    return NextResponse.redirect(new URL('/login', request.url))
   }
 
   // Use authentication for protected routes

@@ -1,34 +1,34 @@
 export const testUsers = {
   admin: {
-    email: 'admin@freeflowzee.com',
-    password: 'admin123',
-    role: 'admin'
+    email: &apos;admin@freeflowzee.com&apos;,
+    password: &apos;admin123&apos;,
+    role: &apos;admin&apos;
   },
   user: {
-    email: 'user@freeflowzee.com', 
-    password: 'user123',
-    role: 'user'
+    email: &apos;user@freeflowzee.com&apos;, 
+    password: &apos;user123&apos;,
+    role: &apos;user&apos;
   },
   premium: {
-    email: 'premium@freeflowzee.com',
-    password: 'premium123',
-    role: 'premium'
+    email: &apos;premium@freeflowzee.com&apos;,
+    password: &apos;premium123&apos;,
+    role: &apos;premium&apos;
   }
 };
 
 export const testProjects = [
   {
-    id: 'test-project-1',
-    title: 'Test Premium Project',
-    status: 'active',
+    id: &apos;test-project-1&apos;,
+    title: &apos;Test Premium Project&apos;,
+    status: &apos;active&apos;,
     price: 2900, // $29.00 in cents
-    accessCode: 'PREMIUM2024',
-    password: 'test123'
+    accessCode: &apos;PREMIUM2024&apos;,
+    password: &apos;test123&apos;
   },
   {
-    id: 'test-project-2', 
-    title: 'Test Free Project',
-    status: 'active',
+    id: &apos;test-project-2&apos;, 
+    title: &apos;Test Free Project&apos;,
+    status: &apos;active&apos;,
     price: 0,
     accessCode: null,
     password: null
@@ -37,31 +37,31 @@ export const testProjects = [
 
 export const testPaymentCards = {
   valid: {
-    number: '4242424242424242',
-    expiry: '12/25',
-    cvc: '123'
+    number: &apos;4242424242424242&apos;,
+    expiry: &apos;12/25&apos;,
+    cvc: &apos;123&apos;
   },
   declined: {
-    number: '4000000000000002',
-    expiry: '12/25', 
-    cvc: '123'
+    number: &apos;4000000000000002&apos;,
+    expiry: &apos;12/25&apos;, 
+    cvc: &apos;123&apos;
   },
   insufficientFunds: {
-    number: '4000000000009995',
-    expiry: '12/25',
-    cvc: '123'
+    number: &apos;4000000000009995&apos;,
+    expiry: &apos;12/25&apos;,
+    cvc: &apos;123&apos;
   }
 };
 
 export const testMessages = {
   success: {
-    login: 'Successfully logged in',
-    payment: 'Payment completed successfully',
-    access: 'Access granted'
+    login: &apos;Successfully logged in&apos;,
+    payment: &apos;Payment completed successfully&apos;,
+    access: &apos;Access granted&apos;
   },
   error: {
-    invalidLogin: 'Invalid email or password',
-    paymentFailed: 'Payment failed',
-    accessDenied: 'Access denied'
+    invalidLogin: &apos;Invalid email or password&apos;,
+    paymentFailed: &apos;Payment failed&apos;,
+    accessDenied: &apos;Access denied&apos;
   }
 };

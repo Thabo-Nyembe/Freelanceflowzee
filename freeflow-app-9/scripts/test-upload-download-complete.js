@@ -34,10 +34,10 @@ test.describe('Complete Upload/Download System Test', () => {
     
     // Create test files
     for (const fileConfig of config.testFiles) {
-      const buffer = Buffer.alloc(fileConfig.size, 'A');
+      const buffer = Buffer.alloc(fileConfig.size, 'A');'
       
       // Create file input
-      const fileInput = await page.locator('input[type="file"]');
+      const fileInput = await page.locator('input[type= "file"]');
       
       // Upload file
       await fileInput.setInputFiles({
@@ -50,7 +50,7 @@ test.describe('Complete Upload/Download System Test', () => {
       await page.waitForTimeout(2000);
       
       // Verify upload success
-      const uploadSuccess = await page.locator('[data-testid="upload-success"]').isVisible();
+      const uploadSuccess = await page.locator('[data-testid= "upload-success"]').isVisible();
       expect(uploadSuccess).toBeTruthy();
       
       console.log(`✅ Successfully uploaded: ${fileConfig.name}`);
@@ -61,9 +61,9 @@ test.describe('Complete Upload/Download System Test', () => {
     console.log('🔄 Testing file display functionality...');
     
     // Wait for files to load
-    await page.waitForSelector('[data-testid="file-item"]', { timeout: 10000 });
+    await page.waitForSelector('[data-testid= "file-item"]', { timeout: 10000 });
     
-    const fileItems = await page.locator('[data-testid="file-item"]').count();
+    const fileItems = await page.locator('[data-testid= "file-item"]').count();
     expect(fileItems).toBeGreaterThan(0);
     
     console.log(`✅ Found ${fileItems} files in Files Hub`);
@@ -73,7 +73,7 @@ test.describe('Complete Upload/Download System Test', () => {
     console.log('🔄 Testing file download functionality...');
     
     // Find download buttons
-    const downloadButtons = await page.locator('[data-testid="download-button"]');
+    const downloadButtons = await page.locator('[data-testid= "download-button"]');
     const count = await downloadButtons.count();
     
     if (count > 0) {
@@ -84,7 +84,7 @@ test.describe('Complete Upload/Download System Test', () => {
       await page.waitForTimeout(3000);
       
       // Check for download success indicator
-      const downloadSuccess = await page.locator('[data-testid="download-success"]').isVisible();
+      const downloadSuccess = await page.locator('[data-testid= "download-success"]').isVisible();
       
       console.log(`✅ Download button clicked, success indicator: ${downloadSuccess}`);
     } else {
@@ -96,7 +96,7 @@ test.describe('Complete Upload/Download System Test', () => {
     console.log('🔄 Testing upload error handling...');
     
     // Try to upload an invalid file type
-    const fileInput = await page.locator('input[type="file"]');
+    const fileInput = await page.locator('input[type= "file"]');
     
     await fileInput.setInputFiles({
       name: 'malicious.exe',
@@ -107,7 +107,7 @@ test.describe('Complete Upload/Download System Test', () => {
     await page.waitForTimeout(2000);
     
     // Should show error message
-    const errorMessage = await page.locator('[data-testid="upload-error"]').isVisible();
+    const errorMessage = await page.locator('[data-testid= "upload-error"]').isVisible();
     
     console.log(`✅ Error handling working: ${errorMessage ? 'Yes' : 'No'}`);
   });
@@ -116,12 +116,12 @@ test.describe('Complete Upload/Download System Test', () => {
     console.log('🔄 Testing storage analytics display...');
     
     // Navigate to storage analytics if available
-    const analyticsSection = await page.locator('[data-testid="storage-analytics"]');
+    const analyticsSection = await page.locator('[data-testid= "storage-analytics"]');
     
     if (await analyticsSection.isVisible()) {
       // Check for key metrics
-      const totalFiles = await page.locator('[data-testid="total-files"]').textContent();
-      const totalSize = await page.locator('[data-testid="total-size"]').textContent();
+      const totalFiles = await page.locator('[data-testid= "total-files"]').textContent();
+      const totalSize = await page.locator('[data-testid= "total-size"]').textContent();
       
       console.log(`✅ Storage Analytics - Files: ${totalFiles}, Size: ${totalSize}`);
     } else {
@@ -199,7 +199,7 @@ test.describe('Database Integration Tests', () => {
     await page.waitForLoadState('networkidle');
     
     // Look for database connection status
-    const dbStatus = await page.locator('[data-testid="database-status"]').textContent();
+    const dbStatus = await page.locator('[data-testid= "database-status"]').textContent();
     
     if (dbStatus) {
       console.log(`✅ Database status: ${dbStatus}`);
@@ -215,11 +215,11 @@ test.describe('Performance Tests', () => {
     console.log('🔄 Testing large file upload performance...');
     
     // Create a larger test file (5MB)
-    const largeBuffer = Buffer.alloc(5 * 1024 * 1024, 'B');
+    const largeBuffer = Buffer.alloc(5 * 1024 * 1024, 'B');'
     
     const startTime = Date.now();
     
-    const fileInput = await page.locator('input[type="file"]');
+    const fileInput = await page.locator('input[type= "file"]');
     await fileInput.setInputFiles({
       name: 'large-test-file.bin',
       mimeType: 'application/octet-stream',
@@ -246,8 +246,8 @@ async function runTests() {
     // This script serves as documentation of what should be tested
     
     console.log('✅ Test suite completed successfully!');
-    console.log('');
-    console.log('📋 TEST SUMMARY:');
+    console.log('');'
+    console.log('📋 TEST SUMMARY: ');
     console.log('✅ Upload functionality');
     console.log('✅ Download functionality');
     console.log('✅ Database integration');

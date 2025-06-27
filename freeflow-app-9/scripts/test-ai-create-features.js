@@ -29,7 +29,7 @@ class AICreateFeatureTester {
   runTest(testName, testFunction) {
     this.results.total++;
     console.log(`\n🧪 Testing: ${testName}`);
-    console.log('-'.repeat(50));
+    console.log('-'.repeat(50));'
     
     try {
       testFunction();
@@ -78,16 +78,7 @@ class AICreateFeatureTester {
       const content = fs.readFileSync(aiCreatePath, 'utf8');
       
       // Check for key component features
-      const requiredFeatures = [
-        'interface AssetGenerationState',
-        'userApiKeys',
-        'costSavings',
-        'showApiKeySettings',
-        'Cost Savings Dashboard',
-        'API Key Management',
-        'APIKeySettings',
-        'UPDATE_COST_SAVINGS',
-        'SET_USER_API_KEY'
+      const requiredFeatures = ['interface AssetGenerationState', 'userApiKeys', 'costSavings', 'showApiKeySettings', 'Cost Savings Dashboard', 'API Key Management', 'APIKeySettings', 'UPDATE_COST_SAVINGS', 'SET_USER_API_KEY'
       ];
       
       const missingFeatures = requiredFeatures.filter(feature => !content.includes(feature));
@@ -242,15 +233,11 @@ class AICreateFeatureTester {
       const content = fs.readFileSync(aiCreatePath, 'utf8');
       
       // Check for required imports
-      const requiredImports = [
-        'import.*react',
-        'import.*lucide-react',
-        'import.*sonner',
-        'import.*APIKeySettings'
-      ];
+      const requiredImports = ['import.*react', 'import.*lucide-react', 'import.*sonner',
+        'import.*APIKeySettings'];
       
       const missingImports = requiredImports.filter(importPattern => {
-        return !new RegExp(importPattern, 'i').test(content);
+        return !new RegExp(importPattern, 'i').test(content);'
       });
       
       if (missingImports.length > 0) {
@@ -271,13 +258,8 @@ class AICreateFeatureTester {
       const content = fs.readFileSync(aiCreatePath, 'utf8');
       
       // Check for business logic implementation
-      const businessFeatures = [
-        'providerSavings',
-        'newSavings.*providerSavings',
-        'monthly.*savings',
-        'freeCreditsUsed.*isValid',
-        'Object.keys.*userApiKeys.*length'
-      ];
+      const businessFeatures = ['providerSavings', 'newSavings.*providerSavings', 'monthly.*savings', 'freeCreditsUsed.*isValid',
+        'Object.keys.*userApiKeys.*length'];
       
       const missingFeatures = businessFeatures.filter(feature => {
         return !new RegExp(feature).test(content);
@@ -298,16 +280,16 @@ class AICreateFeatureTester {
   generateReport() {
     const successRate = ((this.results.passed / this.results.total) * 100).toFixed(1);
     
-    console.log('\n' + '='.repeat(60));
+    console.log('\n' + '='.repeat(60));'
     console.log('🎯 AI CREATE FEATURES TEST RESULTS');
-    console.log('='.repeat(60));
+    console.log('='.repeat(60));'
     console.log(`📊 Total Tests: ${this.results.total}`);
     console.log(`✅ Passed: ${this.results.passed}`);
     console.log(`❌ Failed: ${this.results.failed}`);
     console.log(`📈 Success Rate: ${successRate}%`);
     
     if (this.results.failed > 0) {
-      console.log('\n❌ FAILED TESTS:');
+      console.log('\n❌ FAILED TESTS: ');
       this.results.details
         .filter(detail => detail.status === 'FAILED')
         .forEach((detail, index) => {
@@ -378,7 +360,7 @@ class AICreateFeatureTester {
   runAllTests() {
     console.log('🚀 Starting AI Create Features Testing...');
     console.log(`📅 ${new Date().toLocaleString()}`);
-    console.log('='.repeat(60));
+    console.log('='.repeat(60));'
     
     // Run all tests
     this.testAICreateComponentExists();

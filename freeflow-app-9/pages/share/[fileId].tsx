@@ -1,177 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import Head from 'next/head'
 import { GetServerSideProps } from 'next'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Progress } from '@/components/ui/progress'
-import { 
-  Download,
-  FileText,
-  Image,
-  Video,
-  Music,
-  Archive,
-  Eye,
-  Share2,
-  Copy,
-  Check,
-  Clock,
-  Globe,
-  Lock,
-  Star,
-  Heart,
-  MessageCircle,
-  Zap,
-  Shield,
-  Smartphone,
-  Monitor,
-  Users,
-  TrendingUp
-} from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
-
-interface SharedFile {
-  id: string
-  fileName: string
-  fileSize: number
-  fileType: string
-  downloadUrl: string
-  shareUrl: string
-  seoTitle: string
-  seoDescription: string
-  seoKeywords: string
-  uploadedAt: Date
-  expiresAt?: Date
-  downloadsRemaining?: number
-  totalDownloads: number
-  views: number
-  isPublic: boolean
-  requiresPassword: boolean
-  customMessage?: string
-  uploaderName?: string
-  uploaderAvatar?: string
-  thumbnailUrl?: string
-  previewUrl?: string
-}
-
-interface SharePageProps {
-  file: SharedFile | null
-  error?: string
-}
-
-export default function SharePage({ file, error }: SharePageProps) {
-  const [password, setPassword] = useState('')
-  const [isUnlocked, setIsUnlocked] = useState(!file?.requiresPassword)
-  const [downloadProgress, setDownloadProgress] = useState(0)
-  const [isDownloading, setIsDownloading] = useState(false)
-  const [copiedLink, setCopiedLink] = useState(false)
-  const { toast } = useToast()
-
-  // Enhanced SEO metadata
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freeflow-app-9-6egesbwif-thabo-5265s-projects.vercel.app'
-  const pageTitle = file?.seoTitle || `Download ${file?.fileName} - FreeflowZee File Sharing`
-  const pageDescription = file?.seoDescription || `Download ${file?.fileName} shared via FreeflowZee. Fast, secure file sharing with progress tracking.`
-  const pageUrl = `${baseUrl}/share/${file?.id}`
-  const ogImage = file?.thumbnailUrl || `${baseUrl}/images/file-sharing-preview.jpg`
-
-  useEffect(() => {
-    if (file && !file.requiresPassword) {
-      // Track view
-      trackView(file.id)
-    }
-  }, [file])
-
-  const trackView = async (fileId: string) => {
-    try {
-      await fetch('/api/analytics/track-view', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileId, type: 'view' })
-      })
-    } catch (error) {
-      console.error('Failed to track view:', error)
-    }
-  }
-
-  const trackDownload = async (fileId: string) => {
-    try {
-      await fetch('/api/analytics/track-download', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileId, type: 'download' })
-      })
-    } catch (error) {
-      console.error('Failed to track download:', error)
-    }
-  }
-
-  const getFileIcon = (type: string) => {
-    if (type.startsWith('image/')) return <Image className="h-8 w-8" />
-    if (type.startsWith('video/')) return <Video className="h-8 w-8" />
-    if (type.startsWith('audio/')) return <Music className="h-8 w-8" />
-    if (type.includes('zip') || type.includes('rar')) return <Archive className="h-8 w-8" />
-    return <FileText className="h-8 w-8" />
-  }
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
-
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!file) return
-
-    try {
-      const response = await fetch('/api/files/verify-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileId: file.id, password })
-      })
-
-      if (response.ok) {
-        setIsUnlocked(true)
-        trackView(file.id)
-        toast({
-          title: "Access Granted! 🔓",
-          description: "You can now download the file.",
-        })
-      } else {
-        toast({
-          title: "Incorrect Password",
-          description: "Please check your password and try again.",
-          variant: "destructive"
-        })
-      }
-    } catch (error) {
-      toast({
-        title: "Verification Failed",
-        description: "Please try again.",
-        variant: "destructive"
-      })
-    }
-  }
-
-  const handleDownload = async () => {
-    if (!file || !isUnlocked) return
-
-    setIsDownloading(true)
-    trackDownload(file.id)
-
-    // Simulate download progress
-    for (let progress = 0; progress <= 100; progress += 10) {
+ progress += 10) {
       await new Promise(resolve => setTimeout(resolve, 300))
       setDownloadProgress(progress)
     }
 
     // Trigger actual download
-    const link = document.createElement('a')
+    const link = document.createElement('a')'
     link.href = file.downloadUrl
     link.download = file.fileName
     document.body.appendChild(link)
@@ -227,21 +63,21 @@ export default function SharePage({ file, error }: SharePageProps) {
       <>
         <Head>
           <title>File Not Found - FreeflowZee</title>
-          <meta name="description" content="The requested file could not be found or has expired." />
-          <meta name="robots" content="noindex" />
+          <meta name= "description" content= "The requested file could not be found or has expired." />
+          <meta name= "robots" content= "noindex" />
         </Head>
         
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40 flex items-center justify-center p-4">
-          <Card className="w-full max-w-md">
-            <CardContent className="p-8 text-center">
-              <div className="h-16 w-16 mx-auto mb-4 rounded-full bg-destructive/10 flex items-center justify-center">
-                <FileText className="h-8 w-8 text-destructive" />
+        <div className= "min-h-screen bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40 flex items-center justify-center p-4">
+          <Card className= "w-full max-w-md">
+            <CardContent className= "p-8 text-center">
+              <div className= "h-16 w-16 mx-auto mb-4 rounded-full bg-destructive/10 flex items-center justify-center">
+                <FileText className= "h-8 w-8 text-destructive" />
               </div>
-              <h1 className="text-xl font-semibold mb-2">File Not Found</h1>
-              <p className="text-muted-foreground mb-6">
+              <h1 className= "text-xl font-semibold mb-2">File Not Found</h1>
+              <p className= "text-muted-foreground mb-6">
                 {error || 'The file you\'re looking for doesn\'t exist or has expired.'}
               </p>
-              <Button onClick={() => window.location.href = '/'}>
+              <Button onClick={() => window.location.href = &apos;/'}>'
                 Go to Homepage
               </Button>
             </CardContent>
@@ -255,130 +91,120 @@ export default function SharePage({ file, error }: SharePageProps) {
     <>
       <Head>
         <title>{file.seoTitle}</title>
-        <meta name="description" content={file.seoDescription} />
-        <meta name="keywords" content={file.seoKeywords} />
+        <meta name= "description" content={file.seoDescription} />
+        <meta name= "keywords" content={file.seoKeywords} />
         
         {/* Open Graph */}
-        <meta property="og:title" content={file.seoTitle} />
-        <meta property="og:description" content={file.seoDescription} />
-        <meta property="og:url" content={file.shareUrl} />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="FreeflowZee" />
-        {file.thumbnailUrl && <meta property="og:image" content={file.thumbnailUrl} />}
+        <meta property= "og:title" content={file.seoTitle} />
+        <meta property= "og:description" content={file.seoDescription} />
+        <meta property= "og:url" content={file.shareUrl} />
+        <meta property= "og:type" content= "website" />
+        <meta property= "og:site_name" content= "FreeflowZee" />
+        {file.thumbnailUrl && <meta property= "og:image" content={file.thumbnailUrl} />}
         
         {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={file.seoTitle} />
-        <meta name="twitter:description" content={file.seoDescription} />
-        {file.thumbnailUrl && <meta name="twitter:image" content={file.thumbnailUrl} />}
+        <meta name= "twitter:card" content= "summary_large_image" />
+        <meta name= "twitter:title" content={file.seoTitle} />
+        <meta name= "twitter:description" content={file.seoDescription} />
+        {file.thumbnailUrl && <meta name= "twitter:image" content={file.thumbnailUrl} />}
         
         {/* Additional SEO */}
-        <meta name="author" content="FreeflowZee" />
-        <meta name="robots" content="index, follow" />
-        <link rel="canonical" href={file.shareUrl} />
+        <meta name= "author" content= "FreeflowZee" />
+        <meta name= "robots" content= "index, follow" />
+        <link rel= "canonical" href={file.shareUrl} />
         
         {/* JSON-LD Structured Data */}
         <script
-          type="application/ld+json"
+          type= "application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "MediaObject",
-              "name": file.fileName,
-              "description": file.seoDescription,
-              "contentUrl": file.downloadUrl,
-              "encodingFormat": file.fileType,
-              "contentSize": file.fileSize,
-              "uploadDate": file.uploadedAt,
-              "publisher": {
-                "@type": "Organization",
-                "name": "FreeflowZee",
-                "url": "https://freeflowzee.com"
+              "@context": "https://schema.org", "@type": "MediaObject", "name": file.fileName, "description": file.seoDescription, "contentUrl": file.downloadUrl, "encodingFormat": file.fileType, "contentSize": file.fileSize, "uploadDate": file.uploadedAt, "publisher": {
+                "@type": "Organization", "name": "FreeflowZee", "url": "https://freeflowzee.com"
               }
             })
           }}
         />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40">
+      <div className= "min-h-screen bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40">
         {/* Header */}
-        <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Zap className="h-8 w-8 text-primary" />
-                <span className="text-xl font-bold">FreeflowZee</span>
+        <header className= "border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+          <div className= "container mx-auto px-4 py-4">
+            <div className= "flex items-center justify-between">
+              <div className= "flex items-center gap-2">
+                <Zap className= "h-8 w-8 text-primary" />
+                <span className= "text-xl font-bold">FreeflowZee</span>
               </div>
-              <Button variant="outline" onClick={() => window.location.href = '/'}>
+              <Button variant= "outline" onClick={() => window.location.href = &apos;/'}>'
                 Create Your Own
               </Button>
             </div>
           </div>
         </header>
 
-        <main className="container mx-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto space-y-8">
+        <main className= "container mx-auto px-4 py-8">
+          <div className= "max-w-4xl mx-auto space-y-8">
             {/* Main File Card */}
-            <Card className="overflow-hidden">
-              <CardContent className="p-8">
+            <Card className= "overflow-hidden">
+              <CardContent className= "p-8">
                 {!isUnlocked ? (
                   /* Password Protection */
-                  <div className="text-center space-y-6">
-                    <div className="flex items-center justify-center h-20 w-20 mx-auto bg-primary/10 rounded-full">
-                      <Lock className="h-10 w-10 text-primary" />
+                  <div className= "text-center space-y-6">
+                    <div className= "flex items-center justify-center h-20 w-20 mx-auto bg-primary/10 rounded-full">
+                      <Lock className= "h-10 w-10 text-primary" />
                     </div>
                     <div>
-                      <h1 className="text-2xl font-bold mb-2">Protected File</h1>
-                      <p className="text-muted-foreground">
+                      <h1 className= "text-2xl font-bold mb-2">Protected File</h1>
+                      <p className= "text-muted-foreground">
                         This file is password protected. Enter the password to access it.
                       </p>
                     </div>
-                    <form onSubmit={handlePasswordSubmit} className="max-w-sm mx-auto space-y-4">
+                    <form onSubmit={handlePasswordSubmit} className= "max-w-sm mx-auto space-y-4">
                       <div>
-                        <Label htmlFor="password">Password</Label>
+                        <Label htmlFor= "password">Password</Label>
                         <Input
-                          id="password"
-                          type="password"
+                          id= "password"
+                          type= "password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          placeholder="Enter password"
+                          placeholder= "Enter password"
                           required
                         />
                       </div>
-                      <Button type="submit" className="w-full">
+                      <Button type= "submit" className= "w-full">
                         Unlock File
                       </Button>
                     </form>
                   </div>
                 ) : (
                   /* File Access */
-                  <div className="space-y-6">
+                  <div className= "space-y-6">
                     {/* File Header */}
-                    <div className="flex items-start gap-4">
-                      <div className="flex items-center justify-center h-16 w-16 bg-primary/10 rounded-xl">
+                    <div className= "flex items-start gap-4">
+                      <div className= "flex items-center justify-center h-16 w-16 bg-primary/10 rounded-xl">
                         {getFileIcon(file.fileType)}
                       </div>
-                      <div className="flex-1 space-y-2">
-                        <h1 className="text-2xl font-bold">{file.fileName}</h1>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className= "flex-1 space-y-2">
+                        <h1 className= "text-2xl font-bold">{file.fileName}</h1>
+                        <div className= "flex items-center gap-4 text-sm text-muted-foreground">
                           <span>{formatFileSize(file.fileSize)}</span>
-                          <Badge variant="outline" className="gap-1">
-                            <Eye className="h-3 w-3" />
+                          <Badge variant= "outline" className= "gap-1">
+                            <Eye className= "h-3 w-3" />
                             {file.views} views
                           </Badge>
-                          <Badge variant="outline" className="gap-1">
-                            <Download className="h-3 w-3" />
+                          <Badge variant= "outline" className= "gap-1">
+                            <Download className= "h-3 w-3" />
                             {file.totalDownloads} downloads
                           </Badge>
                           {file.isPublic && (
-                            <Badge variant="outline" className="gap-1">
-                              <Globe className="h-3 w-3" />
+                            <Badge variant= "outline" className= "gap-1">
+                              <Globe className= "h-3 w-3" />
                               Public
                             </Badge>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Clock className="h-4 w-4" />
+                        <div className= "flex items-center gap-2 text-sm">
+                          <Clock className= "h-4 w-4" />
                           <span>Uploaded {file.uploadedAt.toLocaleDateString()}</span>
                           {file.expiresAt && (
                             <>
@@ -392,59 +218,59 @@ export default function SharePage({ file, error }: SharePageProps) {
 
                     {/* Custom Message */}
                     {file.customMessage && (
-                      <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg">
-                        <div className="flex items-start gap-3">
-                          <MessageCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+                      <div className= "bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg">
+                        <div className= "flex items-start gap-3">
+                          <MessageCircle className= "h-5 w-5 text-blue-600 mt-0.5" />
                           <div>
-                            <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                            <p className= "font-medium text-blue-900 dark:text-blue-100 mb-1">
                               Message from sender:
                             </p>
-                            <p className="text-blue-800 dark:text-blue-200">{file.customMessage}</p>
+                            <p className= "text-blue-800 dark:text-blue-200">{file.customMessage}</p>
                           </div>
                         </div>
                       </div>
                     )}
 
                     {/* Download Section */}
-                    <div className="space-y-4">
+                    <div className= "space-y-4">
                       {isDownloading ? (
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium">Downloading...</span>
-                            <span className="text-sm text-muted-foreground">{downloadProgress}%</span>
+                        <div className= "space-y-3">
+                          <div className= "flex items-center justify-between">
+                            <span className= "font-medium">Downloading...</span>
+                            <span className= "text-sm text-muted-foreground">{downloadProgress}%</span>
                           </div>
-                          <Progress value={downloadProgress} className="h-3" />
+                          <Progress value={downloadProgress} className= "h-3" />
                         </div>
                       ) : (
                         <Button 
                           onClick={handleDownload}
-                          size="lg"
-                          className="w-full gap-2 h-12 text-lg"
+                          size= "lg"
+                          className= "w-full gap-2 h-12 text-lg"
                         >
-                          <Download className="h-5 w-5" />
+                          <Download className= "h-5 w-5" />
                           Download {file.fileName}
                         </Button>
                       )}
 
-                      <div className="flex gap-2">
+                      <div className= "flex gap-2">
                         <Button 
-                          variant="outline" 
+                          variant= "outline" 
                           onClick={copyShareLink}
-                          className="flex-1 gap-2"
+                          className= "flex-1 gap-2"
                         >
                           {copiedLink ? (
-                            <Check className="h-4 w-4" />
+                            <Check className= "h-4 w-4" />
                           ) : (
-                            <Copy className="h-4 w-4" />
+                            <Copy className= "h-4 w-4" />
                           )}
                           {copiedLink ? 'Copied!' : 'Copy Link'}
                         </Button>
                         <Button 
-                          variant="outline" 
+                          variant= "outline" 
                           onClick={shareNatively}
-                          className="flex-1 gap-2"
+                          className= "flex-1 gap-2"
                         >
-                          <Share2 className="h-4 w-4" />
+                          <Share2 className= "h-4 w-4" />
                           Share
                         </Button>
                       </div>
@@ -452,8 +278,8 @@ export default function SharePage({ file, error }: SharePageProps) {
 
                     {/* Download Limit Warning */}
                     {file.downloadsRemaining !== undefined && (
-                      <div className="bg-amber-50 dark:bg-amber-950/20 p-3 rounded-lg">
-                        <p className="text-sm text-amber-800 dark:text-amber-200">
+                      <div className= "bg-amber-50 dark:bg-amber-950/20 p-3 rounded-lg">
+                        <p className= "text-sm text-amber-800 dark:text-amber-200">
                           <strong>Note:</strong> {file.downloadsRemaining} downloads remaining before this link expires.
                         </p>
                       </div>
@@ -464,32 +290,32 @@ export default function SharePage({ file, error }: SharePageProps) {
             </Card>
 
             {/* Features Showcase */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className= "grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card>
-                <CardContent className="p-6 text-center">
-                  <Shield className="h-8 w-8 mx-auto mb-3 text-primary" />
-                  <h3 className="font-semibold mb-2">Secure & Private</h3>
-                  <p className="text-sm text-muted-foreground">
+                <CardContent className= "p-6 text-center">
+                  <Shield className= "h-8 w-8 mx-auto mb-3 text-primary" />
+                  <h3 className= "font-semibold mb-2">Secure & Private</h3>
+                  <p className= "text-sm text-muted-foreground">
                     End-to-end encryption and password protection for all your files.
                   </p>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="p-6 text-center">
-                  <Zap className="h-8 w-8 mx-auto mb-3 text-primary" />
-                  <h3 className="font-semibold mb-2">Lightning Fast</h3>
-                  <p className="text-sm text-muted-foreground">
+                <CardContent className= "p-6 text-center">
+                  <Zap className= "h-8 w-8 mx-auto mb-3 text-primary" />
+                  <h3 className= "font-semibold mb-2">Lightning Fast</h3>
+                  <p className= "text-sm text-muted-foreground">
                     Upload and share files at blazing speed with our optimized infrastructure.
                   </p>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="p-6 text-center">
-                  <Users className="h-8 w-8 mx-auto mb-3 text-primary" />
-                  <h3 className="font-semibold mb-2">Easy Sharing</h3>
-                  <p className="text-sm text-muted-foreground">
+                <CardContent className= "p-6 text-center">
+                  <Users className= "h-8 w-8 mx-auto mb-3 text-primary" />
+                  <h3 className= "font-semibold mb-2">Easy Sharing</h3>
+                  <p className= "text-sm text-muted-foreground">
                     Share with anyone, anywhere. No registration required for recipients.
                   </p>
                 </CardContent>
@@ -497,23 +323,23 @@ export default function SharePage({ file, error }: SharePageProps) {
             </div>
 
             {/* CTA Section */}
-            <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-primary/20">
-              <CardContent className="p-8 text-center">
-                <Star className="h-12 w-12 mx-auto mb-4 text-primary" />
-                <h2 className="text-2xl font-bold mb-3">
+            <Card className= "bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-primary/20">
+              <CardContent className= "p-8 text-center">
+                <Star className= "h-12 w-12 mx-auto mb-4 text-primary" />
+                <h2 className= "text-2xl font-bold mb-3">
                   Love this file sharing experience?
                 </h2>
-                <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+                <p className= "text-muted-foreground mb-6 max-w-2xl mx-auto">
                   Join thousands of users who trust FreeflowZee for secure, fast, and reliable file sharing. 
                   Create your own shareable links in seconds - no registration required!
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button size="lg" onClick={() => window.location.href = '/'}>
-                    <Zap className="h-5 w-5 mr-2" />
+                <div className= "flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button size= "lg" onClick={() => window.location.href = &apos;/'}>'
+                    <Zap className= "h-5 w-5 mr-2" />
                     Start Sharing for Free
                   </Button>
-                  <Button variant="outline" size="lg">
-                    <TrendingUp className="h-5 w-5 mr-2" />
+                  <Button variant= "outline" size= "lg">
+                    <TrendingUp className= "h-5 w-5 mr-2" />
                     View Pricing
                   </Button>
                 </div>
@@ -521,41 +347,41 @@ export default function SharePage({ file, error }: SharePageProps) {
             </Card>
 
             {/* Trust Indicators */}
-            <div className="flex flex-wrap justify-center items-center gap-8 py-8 opacity-60">
-              <div className="flex items-center gap-2">
-                <Monitor className="h-5 w-5" />
-                <span className="text-sm">Desktop & Mobile</span>
+            <div className= "flex flex-wrap justify-center items-center gap-8 py-8 opacity-60">
+              <div className= "flex items-center gap-2">
+                <Monitor className= "h-5 w-5" />
+                <span className= "text-sm">Desktop & Mobile</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                <span className="text-sm">SSL Encrypted</span>
+              <div className= "flex items-center gap-2">
+                <Shield className= "h-5 w-5" />
+                <span className= "text-sm">SSL Encrypted</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Heart className="h-5 w-5" />
-                <span className="text-sm">Loved by 100K+ Users</span>
+              <div className= "flex items-center gap-2">
+                <Heart className= "h-5 w-5" />
+                <span className= "text-sm">Loved by 100K+ Users</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Smartphone className="h-5 w-5" />
-                <span className="text-sm">Works Everywhere</span>
+              <div className= "flex items-center gap-2">
+                <Smartphone className= "h-5 w-5" />
+                <span className= "text-sm">Works Everywhere</span>
               </div>
             </div>
           </div>
         </main>
 
         {/* Footer */}
-        <footer className="border-t bg-white/80 backdrop-blur-sm mt-16">
-          <div className="container mx-auto px-4 py-8">
-            <div className="flex flex-col md:flex-row items-center justify-between">
-              <div className="flex items-center gap-2 mb-4 md:mb-0">
-                <Zap className="h-6 w-6 text-primary" />
-                <span className="font-semibold">FreeflowZee</span>
-                <span className="text-muted-foreground">• Secure File Sharing</span>
+        <footer className= "border-t bg-white/80 backdrop-blur-sm mt-16">
+          <div className= "container mx-auto px-4 py-8">
+            <div className= "flex flex-col md:flex-row items-center justify-between">
+              <div className= "flex items-center gap-2 mb-4 md:mb-0">
+                <Zap className= "h-6 w-6 text-primary" />
+                <span className= "font-semibold">FreeflowZee</span>
+                <span className= "text-muted-foreground">• Secure File Sharing</span>
               </div>
-              <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                <a href="/privacy" className="hover:text-primary">Privacy</a>
-                <a href="/terms" className="hover:text-primary">Terms</a>
-                <a href="/contact" className="hover:text-primary">Contact</a>
-                <a href="/help" className="hover:text-primary">Help</a>
+              <div className= "flex items-center gap-6 text-sm text-muted-foreground">
+                <a href= "/privacy" className= "hover:text-primary">Privacy</a>
+                <a href= "/terms" className= "hover:text-primary">Terms</a>
+                <a href= "/contact" className= "hover:text-primary">Contact</a>
+                <a href= "/help" className= "hover:text-primary">Help</a>
               </div>
             </div>
           </div>

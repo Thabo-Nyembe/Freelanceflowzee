@@ -67,7 +67,7 @@ class WebVitalsChecker {
         console.log(`✅ First Load JS: ${Math.round(firstLoadJS/1024)}KB (Budget: ${BUNDLE_BUDGET.firstLoadJS/1024}KB)`);
       }
     } catch (error) {
-      console.error('❌ Bundle size check failed:', error.message);
+      console.error('❌ Bundle size check failed: ', error.message);
       this.results.errors.push(`Bundle analysis failed: ${error.message}`);
     }
   }
@@ -76,8 +76,8 @@ class WebVitalsChecker {
     let totalSize = 0;
     
     // Add main chunks
-    if (manifest.pages && manifest.pages['/']) {
-      manifest.pages['/'].forEach(chunk => {
+    if (manifest.pages && manifest.pages['/']) {'
+      manifest.pages['/'].forEach(chunk => {'
         if (chunk.endsWith('.js')) {
           const chunkPath = path.join(process.cwd(), '.next', 'static', chunk);
           if (fs.existsSync(chunkPath)) {
@@ -102,7 +102,7 @@ class WebVitalsChecker {
       await this.waitForServer('http://localhost:3000', 30000);
       
       // Run Lighthouse
-      const lighthouseCmd = `lighthouse http://localhost:3000 --output=json --output-path=./lighthouse-results.json --chrome-flags="--headless --no-sandbox"`;
+      const lighthouseCmd = `lighthouse http://localhost:3000 --output=json --output-path=./lighthouse-results.json --chrome-flags= "--headless --no-sandbox"`;
       execSync(lighthouseCmd, { stdio: 'inherit' });
       
       // Parse results
@@ -181,12 +181,12 @@ class WebVitalsChecker {
   }
 
   generateReport() {
-    console.log('\n📋 Performance Report:');
-    console.log('='.repeat(50));
+    console.log('\n📋 Performance Report: ');
+    console.log('='.repeat(50));'
     
     // Lighthouse Scores
     if (Object.keys(this.results.lighthouse).length > 0) {
-      console.log('\n🏆 Lighthouse Scores:');
+      console.log('\n🏆 Lighthouse Scores: ');
       Object.entries(this.results.lighthouse).forEach(([category, score]) => {
         const status = score >= 90 ? '✅' : score >= 70 ? '⚠️' : '❌';
         console.log(`${status} ${category}: ${Math.round(score)}/100`);
@@ -195,7 +195,7 @@ class WebVitalsChecker {
     
     // Bundle Analysis
     if (this.results.bundle.firstLoadJS) {
-      console.log('\n📦 Bundle Analysis:');
+      console.log('\n📦 Bundle Analysis: ');
       console.log(`First Load JS: ${Math.round(this.results.bundle.firstLoadJS/1024)}KB`);
     }
     
@@ -222,7 +222,7 @@ class WebVitalsChecker {
 
   async run() {
     console.log('🔍 FreeflowZee Web Vitals Checker');
-    console.log('='.repeat(50));
+    console.log('='.repeat(50));'
     
     try {
       // Build the application first

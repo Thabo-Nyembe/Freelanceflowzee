@@ -26,15 +26,13 @@ const SERVICE_AVAILABILITY = {
     wednesday: { start: '09:00', end: '17:00' },
     thursday: { start: '09:00', end: '17:00' },
     friday: { start: '09:00', end: '17:00' }
-  },
-  'service-2': {
+  }, 'service-2': {
     monday: { start: '10:00', end: '16:00' },
     tuesday: { start: '10:00', end: '16:00' },
     wednesday: { start: '10:00', end: '16:00' },
     thursday: { start: '10:00', end: '16:00' },
     friday: { start: '10:00', end: '16:00' }
-  },
-  'service-3': {
+  }, 'service-3': {
     monday: { start: '09:00', end: '15:00' },
     wednesday: { start: '09:00', end: '15:00' },
     friday: { start: '09:00', end: '15:00' }
@@ -43,11 +41,7 @@ const SERVICE_AVAILABILITY = {
 
 // Service durations (in minutes)
 const SERVICE_DURATIONS = {
-  'service-1': 90,
-  'service-2': 60,
-  'service-3': 120,
-  'service-4': 90,
-  'service-5': 30
+  'service-1': 90, 'service-2': 60, 'service-3': 120, 'service-4': 90, 'service-5': 30
 }
 
 function getDayName(date: Date): keyof typeof SERVICE_AVAILABILITY['service-1'] {
@@ -56,7 +50,7 @@ function getDayName(date: Date): keyof typeof SERVICE_AVAILABILITY['service-1'] 
 }
 
 function timeStringToMinutes(timeString: string): number {
-  const [hours, minutes] = timeString.split(':').map(Number)
+  const [hours, minutes] = timeString.split(':').map(Number)'
   return hours * 60 + minutes
 }
 

@@ -2,7 +2,7 @@
 // Comprehensive testing for the /api/projects/[slug]/access endpoint
 // Tests rate limiting, validation, security, and proper responses
 
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect } from &apos;@playwright/test&apos;;
 
 // Define test fixtures
 const test = base.extend({
@@ -12,37 +12,37 @@ const test = base.extend({
   },
   normalRequest: async ({ request }, use) => {
     // Configuration without test mode for rate limiting tests
-    const headers = { 'Content-Type': 'application/json' };
+    const headers = { &apos;Content-Type&apos;: &apos;application/json&apos; };
     await use(request.with({ extraHTTPHeaders: headers }));
   }
 });
 
 // Configuration for accessing the API
 test.use({
-  baseURL: 'http://localhost:3000',
+  baseURL: &apos;http://localhost:3000&apos;,
   extraHTTPHeaders: {
-    'Content-Type': 'application/json',
-    'x-test-mode': 'true'  // Add test mode header for all requests
+    &apos;Content-Type&apos;: &apos;application/json&apos;,
+    &apos;x-test-mode&apos;: &apos;true&apos;  // Add test mode header for all requests
   },
 });
 
-const TEST_PROJECT_SLUG = 'premium-brand-identity-package';
+const TEST_PROJECT_SLUG = &apos;premium-brand-identity-package&apos;;
 
 const VALID_CREDENTIALS = {
-  password: 'secure-unlock-2024',
-  accessCode: 'BRAND2024'
+  password: &apos;secure-unlock-2024&apos;,
+  accessCode: &apos;BRAND2024&apos;
 };
 
 const INVALID_CREDENTIALS = {
-  password: 'wrong-password',
-  accessCode: 'INVALID123'
+  password: &apos;wrong-password&apos;,
+  accessCode: &apos;INVALID123&apos;
 };
 
-test.describe('🔑 Access API Endpoint Testing', () => {
+test.describe(&apos;🔑 Access API Endpoint Testing&apos;, () => {
   
-  test.describe('✅ Valid Access Attempts', () => {
+  test.describe(&apos;✅ Valid Access Attempts&apos;, () => {
     
-    test('should grant access with valid password', async ({ request }) => {
+    test(&apos;should grant access with valid password&apos;, async ({ request }) => {
       const response = await request.post(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
         data: {
           password: VALID_CREDENTIALS.password
@@ -57,10 +57,10 @@ test.describe('🔑 Access API Endpoint Testing', () => {
       expect(data.projectSlug).toBe(TEST_PROJECT_SLUG);
       expect(data.unlockUrl).toBe(`/projects/${TEST_PROJECT_SLUG}/unlocked`);
       expect(data.expiresAt).toBeDefined();
-      expect(data.message).toBe('Access granted successfully');
+      expect(data.message).toBe(&apos;Access granted successfully&apos;);
     });
 
-    test('should grant access with valid access code', async ({ request }) => {
+    test(&apos;should grant access with valid access code&apos;, async ({ request }) => {
       const response = await request.post(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
         data: {
           accessCode: VALID_CREDENTIALS.accessCode
@@ -76,7 +76,7 @@ test.describe('🔑 Access API Endpoint Testing', () => {
       expect(data.unlockUrl).toBe(`/projects/${TEST_PROJECT_SLUG}/unlocked`);
     });
 
-    test('should grant access with both valid credentials', async ({ request }) => {
+    test(&apos;should grant access with both valid credentials&apos;, async ({ request }) => {
       const response = await request.post(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
         data: {
           password: VALID_CREDENTIALS.password,
@@ -91,9 +91,9 @@ test.describe('🔑 Access API Endpoint Testing', () => {
     });
   });
 
-  test.describe('❌ Invalid Access Attempts', () => {
+  test.describe(&apos;❌ Invalid Access Attempts&apos;, () => {
     
-    test('should reject invalid password', async ({ request }) => {
+    test(&apos;should reject invalid password&apos;, async ({ request }) => {
       const response = await request.post(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
         data: {
           password: INVALID_CREDENTIALS.password
@@ -101,17 +101,17 @@ test.describe('🔑 Access API Endpoint Testing', () => {
       });
 
       // Debug logging
-      console.log('Response status:', await response.status());
-      console.log('Response body:', await response.json());
+      console.log(&apos;Response status:&apos;, await response.status());
+      console.log(&apos;Response body:&apos;, await response.json());
 
       expect(response.status()).toBe(401);
       
       const data = await response.json();
-      expect(data.error).toBe('Invalid credentials');
-      expect(data.code).toBe('unauthorized');
+      expect(data.error).toBe(&apos;Invalid credentials&apos;);
+      expect(data.code).toBe(&apos;unauthorized&apos;);
     });
 
-    test('should reject invalid access code', async ({ request }) => {
+    test(&apos;should reject invalid access code&apos;, async ({ request }) => {
       const response = await request.post(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
         data: {
           accessCode: INVALID_CREDENTIALS.accessCode
@@ -121,11 +121,11 @@ test.describe('🔑 Access API Endpoint Testing', () => {
       expect(response.status()).toBe(401);
       
       const data = await response.json();
-      expect(data.error).toBe('Invalid credentials');
-      expect(data.code).toBe('unauthorized');
+      expect(data.error).toBe(&apos;Invalid credentials&apos;);
+      expect(data.code).toBe(&apos;unauthorized&apos;);
     });
 
-    test('should reject empty credentials', async ({ request }) => {
+    test(&apos;should reject empty credentials&apos;, async ({ request }) => {
       const response = await request.post(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
         data: {}
       });
@@ -133,29 +133,29 @@ test.describe('🔑 Access API Endpoint Testing', () => {
       expect(response.status()).toBe(400);
       
       const data = await response.json();
-      expect(data.error).toBe('Please enter either a password or access code');
-      expect(data.code).toBe('validation_error');
+      expect(data.error).toBe(&apos;Please enter either a password or access code&apos;);
+      expect(data.code).toBe(&apos;validation_error&apos;);
     });
 
-    test('should reject request with empty strings', async ({ request }) => {
+    test(&apos;should reject request with empty strings&apos;, async ({ request }) => {
       const response = await request.post(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
         data: {
-          password: '',
-          accessCode: ''
+          password: '&apos;,'
+          accessCode: '&apos;'
         }
       });
 
       expect(response.status()).toBe(400);
       
       const data = await response.json();
-      expect(data.error).toBe('Please enter either a password or access code');
-      expect(data.code).toBe('validation_error');
+      expect(data.error).toBe(&apos;Please enter either a password or access code&apos;);
+      expect(data.code).toBe(&apos;validation_error&apos;);
     });
   });
 
-  test.describe('🔍 GET Access Status Check', () => {
+  test.describe(&apos;🔍 GET Access Status Check&apos;, () => {
     
-    test('should validate access token via GET request', async ({ request }) => {
+    test(&apos;should validate access token via GET request&apos;, async ({ request }) => {
       // First, get a valid access token
       const authResponse = await request.post(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
         data: {
@@ -174,30 +174,30 @@ test.describe('🔑 Access API Endpoint Testing', () => {
       const checkData = await checkResponse.json();
       expect(checkData.valid).toBe(true);
       expect(checkData.projectSlug).toBe(TEST_PROJECT_SLUG);
-      expect(checkData.accessLevel).toBe('premium');
+      expect(checkData.accessLevel).toBe(&apos;premium&apos;);
     });
 
-    test('should reject invalid access token', async ({ request }) => {
+    test(&apos;should reject invalid access token&apos;, async ({ request }) => {
       const response = await request.get(`/api/projects/${TEST_PROJECT_SLUG}/access?token=invalid_token`);
       
       expect(response.status()).toBe(401);
       
       const data = await response.json();
-      expect(data.error).toBe('Invalid access token');
-      expect(data.code).toBe('invalid_token');
+      expect(data.error).toBe(&apos;Invalid access token&apos;);
+      expect(data.code).toBe(&apos;invalid_token&apos;);
     });
 
-    test('should require access token for GET request', async ({ request }) => {
+    test(&apos;should require access token for GET request&apos;, async ({ request }) => {
       const response = await request.get(`/api/projects/${TEST_PROJECT_SLUG}/access`);
       
       expect(response.status()).toBe(401);
       
       const data = await response.json();
-      expect(data.error).toBe('Access token required');
-      expect(data.code).toBe('missing_token');
+      expect(data.error).toBe(&apos;Access token required&apos;);
+      expect(data.code).toBe(&apos;missing_token&apos;);
     });
 
-    test('should accept token in Authorization header', async ({ request }) => {
+    test(&apos;should accept token in Authorization header&apos;, async ({ request }) => {
       // First, get a valid access token
       const authResponse = await request.post(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
         data: {
@@ -211,7 +211,7 @@ test.describe('🔑 Access API Endpoint Testing', () => {
       // Check access status with the token in header
       const checkResponse = await request.get(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
         headers: {
-          'Authorization': `Bearer ${accessToken}`
+          &apos;Authorization&apos;: `Bearer ${accessToken}`
         }
       });
       
@@ -222,21 +222,21 @@ test.describe('🔑 Access API Endpoint Testing', () => {
     });
   });
 
-  test.describe('🛡️ Security & Edge Cases', () => {
+  test.describe(&apos;🛡️ Security & Edge Cases&apos;, () => {
     
-    test('should handle malformed JSON gracefully', async ({ request }) => {
+    test(&apos;should handle malformed JSON gracefully&apos;, async ({ request }) => {
       const response = await request.post(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
-        data: 'invalid json string'
+        data: &apos;invalid json string&apos;
       });
 
       expect(response.status()).toBe(500);
       
       const data = await response.json();
-      expect(data.error).toBe('Internal server error');
-      expect(data.code).toBe('server_error');
+      expect(data.error).toBe(&apos;Internal server error&apos;);
+      expect(data.code).toBe(&apos;server_error&apos;);
     });
 
-    test('should reject request to non-existent project', async ({ request }) => {
+    test(&apos;should reject request to non-existent project&apos;, async ({ request }) => {
       const response = await request.post(`/api/projects/non-existent-project/access`, {
         data: {
           password: VALID_CREDENTIALS.password
@@ -246,11 +246,11 @@ test.describe('🔑 Access API Endpoint Testing', () => {
       expect(response.status()).toBe(404);
       
       const data = await response.json();
-      expect(data.error).toBe('Project not found');
-      expect(data.code).toBe('not_found');
+      expect(data.error).toBe(&apos;Project not found&apos;);
+      expect(data.code).toBe(&apos;not_found&apos;);
     });
 
-    test('should handle concurrent requests properly', async ({ request }) => {
+    test(&apos;should handle concurrent requests properly&apos;, async ({ request }) => {
       const promises = [];
       
       // Create 5 concurrent valid requests
@@ -275,7 +275,7 @@ test.describe('🔑 Access API Endpoint Testing', () => {
       }
     });
 
-    test('should generate unique access tokens', async ({ request }) => {
+    test(&apos;should generate unique access tokens&apos;, async ({ request }) => {
       const tokens = new Set();
       
       // Generate 10 access tokens
@@ -295,9 +295,9 @@ test.describe('🔑 Access API Endpoint Testing', () => {
     });
   });
 
-  test.describe('⏱️ Token Expiration', () => {
+  test.describe(&apos;⏱️ Token Expiration&apos;, () => {
     
-    test('should set future expiration date', async ({ request }) => {
+    test(&apos;should set future expiration date&apos;, async ({ request }) => {
       const response = await request.post(`/api/projects/${TEST_PROJECT_SLUG}/access`, {
         data: {
           password: VALID_CREDENTIALS.password

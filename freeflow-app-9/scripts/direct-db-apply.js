@@ -57,14 +57,8 @@ async function applyDatabaseUpdate() {
     // Test the new tables
     console.log('\n🔍 Verifying new tables...');
     
-    const tables = [
-      'community_posts',
-      'post_interactions', 
-      'post_comments',
-      'sharing_analytics',
-      'creator_profiles',
-      'creator_reviews'
-    ];
+    const tables = ['community_posts', 'post_interactions', 'post_comments', 'sharing_analytics', 'creator_profiles',
+      'creator_reviews'];
     
     for (const table of tables) {
       try {
@@ -92,13 +86,13 @@ async function applyDatabaseUpdate() {
 // Alternative method using Supabase SQL Editor format
 async function generateSupabaseInstructions() {
   console.log('\n📋 MANUAL SUPABASE SETUP INSTRUCTIONS:');
-  console.log('=====================================');
+  console.log('===================================== ');
   console.log('1. Go to https://supabase.com/dashboard');
   console.log('2. Select your project');
   console.log('3. Go to SQL Editor');
   console.log('4. Click "New Query"');
   console.log('5. Copy and paste the following SQL:');
-  console.log('');
+  console.log('');'
   
   const sqlPath = path.join(__dirname, 'database-update-new-features.sql');
   const sqlContent = fs.readFileSync(sqlPath, 'utf8');
@@ -106,7 +100,7 @@ async function generateSupabaseInstructions() {
   console.log('--- START SQL ---');
   console.log(sqlContent);
   console.log('--- END SQL ---');
-  console.log('');
+  console.log('');'
   console.log('6. Click "Run" to execute');
   console.log('7. Verify all tables were created successfully');
 }

@@ -1,4 +1,4 @@
-import { type Page, type Locator, expect } from '@playwright/test'
+import { type Page, type Locator, expect } from &apos;@playwright/test&apos;
 
 export class ProjectsHubPage {
   readonly page: Page
@@ -25,78 +25,78 @@ export class ProjectsHubPage {
     this.page = page
 
     // Initialize locators
-    this.createProjectButton = page.getByTestId('create-project-button')
-    this.importProjectButton = page.getByTestId('import-project-button')
-    this.projectTemplatesSection = page.getByTestId('project-templates-section')
-    this.projectManagementSection = page.getByTestId('project-management-section')
-    this.createProjectDialog = page.getByTestId('create-project-dialog')
-    this.importProjectDialog = page.getByTestId('import-project-dialog')
-    this.successMessage = page.getByTestId('success-message')
-    this.importSuccessMessage = page.getByTestId('import-success-message')
-    this.brandIdentityTemplate = page.getByTestId('brand-identity-template')
-    this.websiteDesignTemplate = page.getByTestId('website-design-template')
-    this.mobileAppTemplate = page.getByTestId('mobile-app-template')
-    this.templateDetailsDialog = page.getByTestId('template-details-dialog')
-    this.projectsList = page.getByTestId('projects-list')
-    this.projectFilters = page.getByTestId('project-filters')
-    this.projectSortOptions = page.getByTestId('project-sort-options')
-    this.projectSearchInput = page.getByTestId('project-search-input')
+    this.createProjectButton = page.getByTestId(&apos;create-project-button&apos;)
+    this.importProjectButton = page.getByTestId(&apos;import-project-button&apos;)
+    this.projectTemplatesSection = page.getByTestId(&apos;project-templates-section&apos;)
+    this.projectManagementSection = page.getByTestId(&apos;project-management-section&apos;)
+    this.createProjectDialog = page.getByTestId(&apos;create-project-dialog&apos;)
+    this.importProjectDialog = page.getByTestId(&apos;import-project-dialog&apos;)
+    this.successMessage = page.getByTestId(&apos;success-message&apos;)
+    this.importSuccessMessage = page.getByTestId(&apos;import-success-message&apos;)
+    this.brandIdentityTemplate = page.getByTestId(&apos;brand-identity-template&apos;)
+    this.websiteDesignTemplate = page.getByTestId(&apos;website-design-template&apos;)
+    this.mobileAppTemplate = page.getByTestId(&apos;mobile-app-template&apos;)
+    this.templateDetailsDialog = page.getByTestId(&apos;template-details-dialog&apos;)
+    this.projectsList = page.getByTestId(&apos;projects-list&apos;)
+    this.projectFilters = page.getByTestId(&apos;project-filters&apos;)
+    this.projectSortOptions = page.getByTestId(&apos;project-sort-options&apos;)
+    this.projectSearchInput = page.getByTestId(&apos;project-search-input&apos;)
   }
 
   // Navigation
   async goto() {
-    await this.page.goto('/dashboard/projects')
-    await this.page.waitForSelector('[data-testid="projects-hub"]', { state: 'visible', timeout: 10000 })
+    await this.page.goto(&apos;/dashboard/projects&apos;)
+    await this.page.waitForSelector(&apos;[data-testid=&quot;projects-hub&quot;]&apos;, { state: &apos;visible&apos;, timeout: 10000 })
   }
 
   // Selectors aligned with component implementation
   private selectors = {
     // Main container
-    projectsHub: '[data-testid="projects-hub"]',
+    projectsHub: &apos;[data-testid=&quot;projects-hub&quot;]&apos;,
     
     // Buttons
-    createProjectBtn: '[data-testid="create-project-btn"]',
-    importProjectBtn: '[data-testid="import-project-btn"]',
-    quickStartBtn: '[data-testid="quick-start-btn"]',
+    createProjectBtn: &apos;[data-testid=&quot;create-project-btn&quot;]&apos;,
+    importProjectBtn: &apos;[data-testid=&quot;import-project-btn&quot;]&apos;,
+    quickStartBtn: &apos;[data-testid=&quot;quick-start-btn&quot;]&apos;,
     
     // Form inputs
-    projectTitleInput: '[data-testid="project-title-input"]',
-    projectDescriptionInput: '[data-testid="project-description-input"]',
-    projectClientNameInput: '[data-testid="project-client-name-input"]',
-    projectClientEmailInput: '[data-testid="project-client-email-input"]',
-    projectBudgetInput: '[data-testid="project-budget-input"]',
-    projectStartDateInput: '[data-testid="project-start-date-input"]',
-    projectEndDateInput: '[data-testid="project-end-date-input"]',
-    projectPrioritySelect: '[data-testid="project-priority-select"]',
-    projectStatusSelect: '[data-testid="project-status-select"]',
-    projectSubmitButton: '[data-testid="project-submit-button"]',
+    projectTitleInput: &apos;[data-testid=&quot;project-title-input&quot;]&apos;,
+    projectDescriptionInput: &apos;[data-testid=&quot;project-description-input&quot;]&apos;,
+    projectClientNameInput: &apos;[data-testid=&quot;project-client-name-input&quot;]&apos;,
+    projectClientEmailInput: &apos;[data-testid=&quot;project-client-email-input&quot;]&apos;,
+    projectBudgetInput: &apos;[data-testid=&quot;project-budget-input&quot;]&apos;,
+    projectStartDateInput: &apos;[data-testid=&quot;project-start-date-input&quot;]&apos;,
+    projectEndDateInput: &apos;[data-testid=&quot;project-end-date-input&quot;]&apos;,
+    projectPrioritySelect: &apos;[data-testid=&quot;project-priority-select&quot;]&apos;,
+    projectStatusSelect: &apos;[data-testid=&quot;project-status-select&quot;]&apos;,
+    projectSubmitButton: &apos;[data-testid=&quot;project-submit-button&quot;]&apos;,
     
     // Filters and search
-    searchInput: '[data-testid="search-input"]',
-    statusFilter: '[data-testid="status-filter"]',
-    priorityFilter: '[data-testid="priority-filter"]',
+    searchInput: &apos;[data-testid=&quot;search-input&quot;]&apos;,
+    statusFilter: &apos;[data-testid=&quot;status-filter&quot;]&apos;,
+    priorityFilter: &apos;[data-testid=&quot;priority-filter&quot;]&apos;,
     
     // View toggles
-    viewToggle: '[data-testid="view-toggle"]',
-    gridView: '[data-testid="grid-view"]',
-    listView: '[data-testid="list-view"]',
+    viewToggle: &apos;[data-testid=&quot;view-toggle&quot;]&apos;,
+    gridView: &apos;[data-testid=&quot;grid-view&quot;]&apos;,
+    listView: &apos;[data-testid=&quot;list-view&quot;]&apos;,
     
     // Project card elements
-    projectCard: '[data-testid="project-card"]',
-    projectTitle: '[data-testid="project-title"]',
-    projectDescription: '[data-testid="project-description"]',
-    projectMenu: '[data-testid="project-menu"]',
+    projectCard: &apos;[data-testid=&quot;project-card&quot;]&apos;,
+    projectTitle: &apos;[data-testid=&quot;project-title&quot;]&apos;,
+    projectDescription: &apos;[data-testid=&quot;project-description&quot;]&apos;,
+    projectMenu: &apos;[data-testid=&quot;project-menu&quot;]&apos;,
     
     // Loading and empty states
-    loadingSpinner: '[data-testid="loading-spinner"]',
-    emptyState: '[data-testid="empty-state"]'
+    loadingSpinner: &apos;[data-testid=&quot;loading-spinner&quot;]&apos;,
+    emptyState: &apos;[data-testid=&quot;empty-state&quot;]&apos;
   }
 
   // Actions with proper error handling and loading state checks
-  async createProject(projectData: any) {
+  async createProject(projectData: unknown) {
     try {
       await this.page.click(this.selectors.createProjectBtn)
-      await this.page.waitForSelector(this.selectors.projectTitleInput, { state: 'visible' })
+      await this.page.waitForSelector(this.selectors.projectTitleInput, { state: &apos;visible&apos; })
       
       await this.page.fill(this.selectors.projectTitleInput, projectData.title)
       await this.page.fill(this.selectors.projectDescriptionInput, projectData.description)
@@ -107,36 +107,36 @@ export class ProjectsHubPage {
       await this.page.fill(this.selectors.projectEndDateInput, projectData.endDate)
       
       await this.page.click(this.selectors.projectPrioritySelect)
-      await this.page.click(`[data-value="${projectData.priority}"]`)
+      await this.page.click(`[data-value=&quot;${projectData.priority}&quot;]`)
       
       await this.page.click(this.selectors.projectStatusSelect)
-      await this.page.click(`[data-value="${projectData.status}"]`)
+      await this.page.click(`[data-value=&quot;${projectData.status}&quot;]`)
       
       await this.page.click(this.selectors.projectSubmitButton)
       
       // Wait for loading state to complete
-      await this.page.waitForSelector(this.selectors.loadingSpinner, { state: 'hidden' })
+      await this.page.waitForSelector(this.selectors.loadingSpinner, { state: &apos;hidden&apos; })
       
       return { success: true }
     } catch (error) {
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : &apos;Unknown error occurred&apos;
       }
     }
   }
 
   async importProject(filePath: string) {
     await this.page.click(this.selectors.importProjectBtn)
-    await this.page.click('[data-testid="source-json"]')
-    await this.page.setInputFiles('[data-testid="file-input"]', filePath)
-    await this.page.click('[data-testid="start-import-btn"]')
+    await this.page.click(&apos;[data-testid=&quot;source-json&quot;]&apos;)
+    await this.page.setInputFiles(&apos;[data-testid=&quot;file-input&quot;]&apos;, filePath)
+    await this.page.click(&apos;[data-testid=&quot;start-import-btn&quot;]&apos;)
   }
 
   async quickStartProject(templateName: string) {
     await this.page.click(this.selectors.quickStartBtn)
-    await this.page.click(`[data-testid="template-${templateName}"]`)
-    await this.page.click('[data-testid="select-template-btn"]')
+    await this.page.click(`[data-testid=&quot;template-${templateName}&quot;]`)
+    await this.page.click(&apos;[data-testid=&quot;select-template-btn&quot;]&apos;)
   }
 
   async searchProjects(searchTerm: string) {
@@ -146,19 +146,19 @@ export class ProjectsHubPage {
 
   async filterByStatus(status: string) {
     await this.page.click(this.selectors.statusFilter)
-    await this.page.click(`role=option[name="${status}"]`)
+    await this.page.click(`role=option[name=&quot;${status}&quot;]`)
   }
 
   async filterByPriority(priority: string) {
     await this.page.click(this.selectors.priorityFilter)
-    await this.page.click(`role=option[name="${priority}"]`)
+    await this.page.click(`role=option[name=&quot;${priority}&quot;]`)
   }
 
   // View toggle with proper wait conditions
-  async toggleView(view: 'grid' | 'list') {
-    const viewSelector = view === 'grid' ? this.selectors.gridView : this.selectors.listView
+  async toggleView(view: &apos;grid&apos; | &apos;list&apos;) {
+    const viewSelector = view === &apos;grid&apos; ? this.selectors.gridView : this.selectors.listView
     await this.page.click(viewSelector)
-    await this.page.waitForSelector(this.selectors.projectCard, { state: 'visible' })
+    await this.page.waitForSelector(this.selectors.projectCard, { state: &apos;visible&apos; })
   }
 
   async openProjectMenu(projectTitle: string) {
@@ -170,43 +170,43 @@ export class ProjectsHubPage {
 
   async deleteProject(projectTitle: string, confirm = false) {
     await this.openProjectMenu(projectTitle)
-    await this.page.click('role=menuitem[name="Delete Project"]')
+    await this.page.click(&apos;role=menuitem[name=&quot;Delete Project&quot;]&apos;)
     if (confirm) {
-      await this.page.click('role=button[name="Delete"]')
+      await this.page.click(&apos;role=button[name=&quot;Delete&quot;]&apos;)
     } else {
-      await this.page.click('role=button[name="Cancel"]')
+      await this.page.click(&apos;role=button[name=&quot;Cancel&quot;]&apos;)
     }
   }
 
   // Assertion helpers with proper wait conditions
   async expectProjectVisible(title: string) {
-    await this.page.waitForSelector(this.selectors.projectCard, { state: 'visible' })
-    await expect(this.page.locator(`${this.selectors.projectTitle}:has-text("${title}")`)).toBeVisible()
+    await this.page.waitForSelector(this.selectors.projectCard, { state: &apos;visible&apos; })
+    await expect(this.page.locator(`${this.selectors.projectTitle}:has-text(&quot;${title}&quot;)`)).toBeVisible()
   }
 
   async expectProjectNotVisible(title: string) {
-    await expect(this.page.locator(`${this.selectors.projectTitle}:has-text("${title}")`)).not.toBeVisible()
+    await expect(this.page.locator(`${this.selectors.projectTitle}:has-text(&quot;${title}&quot;)`)).not.toBeVisible()
   }
 
-  async expectProjectDetails(projectData: any) {
-    await this.page.waitForSelector(this.selectors.projectCard, { state: 'visible' })
-    await expect(this.page.locator(`${this.selectors.projectTitle}:has-text("${projectData.title}")`)).toBeVisible()
-    await expect(this.page.locator(`${this.selectors.projectDescription}:has-text("${projectData.description}")`)).toBeVisible()
+  async expectProjectDetails(projectData: unknown) {
+    await this.page.waitForSelector(this.selectors.projectCard, { state: &apos;visible&apos; })
+    await expect(this.page.locator(`${this.selectors.projectTitle}:has-text(&quot;${projectData.title}&quot;)`)).toBeVisible()
+    await expect(this.page.locator(`${this.selectors.projectDescription}:has-text(&quot;${projectData.description}&quot;)`)).toBeVisible()
   }
 
   async expectEmptyState() {
-    await this.page.waitForSelector(this.selectors.emptyState, { state: 'visible' })
+    await this.page.waitForSelector(this.selectors.emptyState, { state: &apos;visible&apos; })
   }
 
   async expectLoadingState() {
-    await this.page.waitForSelector(this.selectors.loadingSpinner, { state: 'visible' })
+    await this.page.waitForSelector(this.selectors.loadingSpinner, { state: &apos;visible&apos; })
   }
 
   // Enhanced assertions
   async expectFormValidation() {
-    await expect(this.page.getByTestId('project-title-input')).toHaveAttribute('aria-invalid', 'true')
-    await expect(this.page.getByTestId('project-description-input')).toHaveAttribute('aria-invalid', 'true')
-    await expect(this.page.getByTestId('project-client-email-input')).toHaveAttribute('aria-invalid', 'true')
+    await expect(this.page.getByTestId(&apos;project-title-input&apos;)).toHaveAttribute(&apos;aria-invalid&apos;, &apos;true&apos;)
+    await expect(this.page.getByTestId(&apos;project-description-input&apos;)).toHaveAttribute(&apos;aria-invalid&apos;, &apos;true&apos;)
+    await expect(this.page.getByTestId(&apos;project-client-email-input&apos;)).toHaveAttribute(&apos;aria-invalid&apos;, &apos;true&apos;)
   }
 
   async expectProjectCount(count: number) {
@@ -215,8 +215,8 @@ export class ProjectsHubPage {
 
   // Template handling
   async expectTemplatePreview(templateName: string) {
-    await expect(this.page.locator(`[data-testid="template-${templateName}"]`)).toBeVisible()
-    await expect(this.page.locator(`[data-testid="template-${templateName}-preview"]`)).toBeVisible()
+    await expect(this.page.locator(`[data-testid=&quot;template-${templateName}&quot;]`)).toBeVisible()
+    await expect(this.page.locator(`[data-testid=&quot;template-${templateName}-preview&quot;]`)).toBeVisible()
   }
 
   // Filter validation
@@ -234,7 +234,7 @@ export class ProjectsHubPage {
     await this.searchProjects(searchTerm)
     await this.expectProjectCount(expectedCount)
     if (expectedCount === 0) {
-      await expect(this.page.getByText(`No results found for "${searchTerm}"`)).toBeVisible()
+      await expect(this.page.getByText(`No results found for &quot;${searchTerm}&quot;`)).toBeVisible()
     }
   }
 
@@ -245,21 +245,21 @@ export class ProjectsHubPage {
     budget: string;
     deadline: string;
   }) {
-    await this.page.getByTestId('project-name-input').fill(details.name);
-    await this.page.getByTestId('project-description-input').fill(details.description);
-    await this.page.getByTestId('project-type-select').selectOption(details.type);
-    await this.page.getByTestId('project-budget-input').fill(details.budget);
-    await this.page.getByTestId('project-deadline-input').fill(details.deadline);
+    await this.page.getByTestId(&apos;project-name-input&apos;).fill(details.name);
+    await this.page.getByTestId(&apos;project-description-input&apos;).fill(details.description);
+    await this.page.getByTestId(&apos;project-type-select&apos;).selectOption(details.type);
+    await this.page.getByTestId(&apos;project-budget-input&apos;).fill(details.budget);
+    await this.page.getByTestId(&apos;project-deadline-input&apos;).fill(details.deadline);
   }
 
   async submitProjectForm() {
-    await this.page.getByTestId('submit-project-button').click();
-    await this.page.waitForSelector('[data-testid="success-message"]', { state: 'visible', timeout: 10000 });
+    await this.page.getByTestId(&apos;submit-project-button&apos;).click();
+    await this.page.waitForSelector(&apos;[data-testid=&quot;success-message&quot;]&apos;, { state: &apos;visible&apos;, timeout: 10000 });
   }
 
   async uploadProjectFile(filePath: string) {
-    const fileInput = this.page.getByTestId('project-file-input');
+    const fileInput = this.page.getByTestId(&apos;project-file-input&apos;);
     await fileInput.setInputFiles(filePath);
-    await this.page.waitForSelector('[data-testid="import-success-message"]', { state: 'visible', timeout: 10000 });
+    await this.page.waitForSelector(&apos;[data-testid=&quot;import-success-message&quot;]&apos;, { state: &apos;visible&apos;, timeout: 10000 });
   }
 } 

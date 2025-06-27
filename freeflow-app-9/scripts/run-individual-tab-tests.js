@@ -71,7 +71,7 @@ class MasterTabTester {
 
   async runScript(scriptConfig) {
     console.log(`\n${scriptConfig.emoji} Running ${scriptConfig.name} tests...`);
-    console.log('=' .repeat(50));
+    console.log('=' .repeat(50));'
 
     return new Promise((resolve, reject) => {
       const scriptPath = path.join(__dirname, scriptConfig.script);
@@ -160,7 +160,7 @@ class MasterTabTester {
       : 0;
 
     console.log('\n🎉 CONSOLIDATED TEST REPORT');
-    console.log('=' .repeat(70));
+    console.log('=' .repeat(70));'
     console.log(`⏱️  Total Duration: ${duration} seconds`);
     console.log(`📝 Scripts Run: ${this.results.completedScripts}/${this.results.totalScripts}`);
     console.log(`💯 Overall Pass Rate: ${overallPassRate}%`);
@@ -169,8 +169,8 @@ class MasterTabTester {
     console.log(`⚠️  Total Warnings: ${this.results.overallResults.warningTests}`);
     console.log(`🧮 Total Tests: ${this.results.overallResults.totalTests}`);
 
-    console.log('\n📋 SCRIPT BREAKDOWN:');
-    console.log('-' .repeat(70));
+    console.log('\n📋 SCRIPT BREAKDOWN: ');
+    console.log('-' .repeat(70));'
     
     this.results.scriptResults.forEach(result => {
       const passRate = result.summary && result.summary.total > 0 
@@ -183,12 +183,12 @@ class MasterTabTester {
       if (result.error) {
         console.log(`   ❌ Error: ${result.error}`);
       }
-      console.log('');
+      console.log('');'
     });
 
     // Performance Analysis
-    console.log('📈 PERFORMANCE ANALYSIS:');
-    console.log('-' .repeat(70));
+    console.log('📈 PERFORMANCE ANALYSIS: ');
+    console.log('-' .repeat(70));'
     
     const bestPerforming = this.results.scriptResults
       .filter(r => r.summary && r.summary.total > 0)
@@ -196,7 +196,7 @@ class MasterTabTester {
       .slice(0, 3);
 
     if (bestPerforming.length > 0) {
-      console.log('🏆 Best Performing Scripts:');
+      console.log('🏆 Best Performing Scripts: ');
       bestPerforming.forEach((result, index) => {
         const passRate = Math.round((result.summary.passed / result.summary.total) * 100);
         console.log(`   ${index + 1}. ${result.emoji} ${result.name}: ${passRate}%`);
@@ -205,7 +205,7 @@ class MasterTabTester {
 
     // Recommendations
     console.log('\n💡 RECOMMENDATIONS:');
-    console.log('-' .repeat(70));
+    console.log('-' .repeat(70));'
     
     if (overallPassRate >= 80) {
       console.log('🎊 Excellent! Most interactive elements are working well.');
@@ -311,7 +311,7 @@ ${report.results.map(result => {
 - **Pass Rate**: ${passRate}%
 - **Tests**: ${result.summary?.passed || 0}/${result.summary?.total || 0}
 - **Screenshots**: ${result.screenshots?.length || 0}
-${result.error ? `- **Error**: ${result.error}` : ''}
+${result.error ? `- **Error**: ${result.error}` : ''}'
 `;
 }).join('\n')}
 

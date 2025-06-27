@@ -1,12 +1,14 @@
-import '@testing-library/jest-dom'
+// Import required testing libraries
+const jestDom = require('@testing-library/jest-dom')
+require('whatwg-fetch')
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
   useRouter: () => ({
-    route: '/',
-    pathname: '',
+    route: '/','
+    pathname: '','
     query: {},
-    asPath: '',
+    asPath: '','
     push: jest.fn(),
     replace: jest.fn(),
     reload: jest.fn(),
@@ -28,7 +30,7 @@ jest.mock('next/navigation', () => ({
     replace: jest.fn(),
     back: jest.fn(),
   }),
-  usePathname: () => '/',
+  usePathname: () => '/','
   useSearchParams: () => new URLSearchParams(),
 }))
 
@@ -37,12 +39,30 @@ jest.mock('next/image', () => ({
   __esModule: true,
   default: (props) => {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img {...props} alt={props.alt} />;
+    return <img alt={props.alt}>;
   },
 }))
 
+// Mock IntersectionObserver
+const MockIntersectionObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  disconnect: jest.fn(),
+  unobserve: jest.fn()
+}))
+
+global.IntersectionObserver = MockIntersectionObserver
+
+// Mock ResizeObserver
+const MockResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  disconnect: jest.fn(),
+  unobserve: jest.fn()
+}))
+
+global.ResizeObserver = MockResizeObserver
+
 // Mock window.matchMedia
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(global, 'matchMedia', {
   writable: true,
   value: jest.fn().mockImplementation(query => ({
     matches: false,
@@ -52,35 +72,20 @@ Object.defineProperty(window, 'matchMedia', {
     removeListener: jest.fn(),
     addEventListener: jest.fn(),
     removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
-});
+    dispatchEvent: jest.fn()
+  }))
+})
 
-// Mock IntersectionObserver
-class MockIntersectionObserver {
-  observe = jest.fn();
-  unobserve = jest.fn();
-  disconnect = jest.fn();
-}
+// Mock scrollTo
+global.scrollTo = jest.fn()
 
-Object.defineProperty(window, 'IntersectionObserver', {
-  writable: true,
-  configurable: true,
-  value: MockIntersectionObserver,
-});
+// Suppress console errors during tests
+console.error = jest.fn()
 
-// Mock ResizeObserver
-class MockResizeObserver {
-  observe = jest.fn();
-  unobserve = jest.fn();
-  disconnect = jest.fn();
-}
-
-Object.defineProperty(window, 'ResizeObserver', {
-  writable: true,
-  configurable: true,
-  value: MockResizeObserver,
-});
+// Set up environment variables
+process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-key'
+process.env.STRIPE_PUBLISHABLE_KEY = 'test-key'
 
 // Setup environment variables
 process.env.NEXT_PUBLIC_SITE_URL = 'http://localhost:3000'

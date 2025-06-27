@@ -1,142 +1,7 @@
 'use client'
 
 import React, { useReducer, useState, useCallback, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Textarea } from '@/components/ui/textarea'
-import { 
-  Calendar,
-  Clock,
-  MapPin,
-  Video,
-  Phone,
-  User,
-  Mail,
-  MessageSquare,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-  Settings,
-  Zap,
-  Globe,
-  Users,
-  Star,
-  FileText,
-  Link,
-  Copy,
-  Share2,
-  MoreHorizontal,
-  CalendarDays,
-  Timer,
-  DollarSign,
-  Award,
-  Target,
-  TrendingUp,
-  BarChart,
-  PieChart,
-  Activity,
-  Bookmark,
-  Bell,
-  Filter,
-  Search,
-  Download,
-  Upload,
-  Archive,
-  Edit,
-  Trash2,
-  Eye,
-  EyeOff,
-  RefreshCw,
-  Send
-} from 'lucide-react'
-
-// Context7 useReducer Pattern for Booking State Management
-type BookingSlot = {
-  id: string
-  date: string
-  startTime: string
-  endTime: string
-  duration: number
-  available: boolean
-  price?: number
-  serviceType: string
-  location: 'online' | 'office' | 'client'
-  maxAttendees: number
-  currentAttendees: number
-  timezone: string
-}
-
-type BookingService = {
-  id: string
-  name: string
-  description: string
-  duration: number
-  price: number
-  category: string
-  color: string
-  requirements: string[]
-  deliverables: string[]
-  isActive: boolean
-  popularity: number
-  rating: number
-  bookingCount: number
-}
-
-type BookingRequest = {
-  id: string
-  clientName: string
-  clientEmail: string
-  clientPhone?: string
-  serviceId: string
-  slotId: string
-  message: string
-  requirements: string[]
-  budget?: number
-  timeline: string
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed'
-  createdAt: string
-  confirmedAt?: string
-  meetingLink?: string
-  notes: string
-  paymentStatus: 'pending' | 'paid' | 'refunded'
-  paymentAmount: number
-}
-
-type CalendarView = 'month' | 'week' | 'day' | 'list'
-
-type BookingState = {
-  services: BookingService[]
-  slots: BookingSlot[]
-  requests: BookingRequest[]
-  selectedDate: Date
-  selectedService: BookingService | null
-  selectedSlot: BookingSlot | null
-  calendarView: CalendarView
-  currentMonth: Date
-  availability: {
-    [key: string]: BookingSlot[]
-  }
-  bookingForm: {
-    clientName: string
-    clientEmail: string
-    clientPhone: string
-    message: string
-    requirements: string[]
-    budget: number | null
-    timeline: string
-  }
-  filters: {
-    serviceType: string[]
-    status: string[]
-    dateRange: { start: string; end: string } | null
-    priceRange: { min: number; max: number } | null
+ max: number } | null
   }
   showBookingDialog: boolean
   showServiceDialog: boolean
@@ -154,8 +19,8 @@ type BookingAction =
   | { type: 'SELECT_SLOT'; payload: BookingSlot | null }
   | { type: 'SET_CALENDAR_VIEW'; payload: CalendarView }
   | { type: 'SET_CURRENT_MONTH'; payload: Date }
-  | { type: 'UPDATE_BOOKING_FORM'; payload: Partial<BookingState['bookingForm']> }
-  | { type: 'SET_FILTERS'; payload: Partial<BookingState['filters']> }
+  | { type: &apos;UPDATE_BOOKING_FORM&apos;; payload: Partial<BookingState['bookingForm']> }
+  | { type: &apos;SET_FILTERS&apos;; payload: Partial<BookingState['filters']> }
   | { type: 'TOGGLE_BOOKING_DIALOG'; payload?: boolean }
   | { type: 'TOGGLE_SERVICE_DIALOG'; payload?: boolean }
   | { type: 'TOGGLE_ANALYTICS'; payload?: boolean }
@@ -165,13 +30,13 @@ type BookingAction =
   | { type: 'RESET_FORM' }
 
 const initialBookingForm = {
-  clientName: '',
-  clientEmail: '',
-  clientPhone: '',
-  message: '',
+  clientName: '','
+  clientEmail: '','
+  clientPhone: '','
+  message: '','
   requirements: [],
   budget: null,
-  timeline: ''
+  timeline: '
 }
 
 const initialState: BookingState = {
@@ -349,12 +214,12 @@ const generateMockSlots = (date: Date): BookingSlot[] => {
   const timeSlots = ['09:00', '10:30', '14:00', '15:30', '17:00']
   
   timeSlots.forEach((time, index) => {
-    const [hours, minutes] = time.split(':').map(Number)
-    const endTime = `${hours + 1}:${minutes.toString().padStart(2, '0')}`
+    const [hours, minutes] = time.split(':').map(Number)'
+    const endTime = `${hours + 1}:${minutes.toString().padStart(2, '0')}`'
     
     slots.push({
-      id: `slot_${date.toISOString().split('T')[0]}_${time}`,
-      date: date.toISOString().split('T')[0],
+      id: `slot_${date.toISOString().split('T')[0]}_${time}`,'
+      date: date.toISOString().split('T')[0],'
       startTime: time,
       endTime: endTime,
       duration: 60,
@@ -386,7 +251,7 @@ const mockRequests: BookingRequest[] = [
     timeline: '6 weeks',
     status: 'pending',
     createdAt: '2024-02-01T10:30:00Z',
-    notes: '',
+    notes: '','
     paymentStatus: 'pending',
     paymentAmount: 300
   },
@@ -436,7 +301,7 @@ interface EnhancedCalendarBookingProps {
 }
 
 export function EnhancedCalendarBooking({ 
-  className = '',
+  className = '','
   showAnalytics = true,
   allowClientBooking = true,
   mode = 'freelancer'
@@ -476,7 +341,7 @@ export function EnhancedCalendarBooking({
         requirements: state.selectedService.requirements,
         status: 'pending',
         createdAt: new Date().toISOString(),
-        notes: '',
+        notes: '','
         paymentStatus: 'pending',
         paymentAmount: state.selectedService.price
       }
@@ -506,11 +371,11 @@ export function EnhancedCalendarBooking({
 
   const getStatusIcon = (status: BookingRequest['status']) => {
     switch (status) {
-      case 'pending': return <AlertCircle className="w-3 h-3" />
-      case 'confirmed': return <CheckCircle className="w-3 h-3" />
-      case 'cancelled': return <XCircle className="w-3 h-3" />
-      case 'completed': return <Star className="w-3 h-3" />
-      default: return <Clock className="w-3 h-3" />
+      case &apos;pending&apos;: return <AlertCircle className= "w-3 h-3" />
+      case &apos;confirmed&apos;: return <CheckCircle className= "w-3 h-3" />
+      case &apos;cancelled&apos;: return <XCircle className= "w-3 h-3" />
+      case &apos;completed&apos;: return <Star className= "w-3 h-3" />
+      default: return <Clock className= "w-3 h-3" />
     }
   }
 
@@ -535,32 +400,32 @@ export function EnhancedCalendarBooking({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+      <div className= "flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 bg-clip-text text-transparent">
+          <h1 className= "text-3xl font-bold tracking-tight bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 bg-clip-text text-transparent">
             Enhanced Booking System
           </h1>
-          <p className="text-slate-600 font-light">
+          <p className= "text-slate-600 font-light">
             Professional calendar management inspired by Calendly and Acuity
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200 text-emerald-700">
-            <TrendingUp className="w-3 h-3 mr-1" />
+        <div className= "flex items-center gap-2">
+          <Badge variant= "outline" className= "bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200 text-emerald-700">
+            <TrendingUp className= "w-3 h-3 mr-1" />
             ${totalRevenue.toLocaleString()} Revenue
           </Badge>
-          <Badge variant="outline" className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 text-blue-700">
-            <CalendarDays className="w-3 h-3 mr-1" />
+          <Badge variant= "outline" className= "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 text-blue-700">
+            <CalendarDays className= "w-3 h-3 mr-1" />
             {monthlyBookings} This Month
           </Badge>
           <Button
-            variant="outline"
-            size="sm"
+            variant= "outline"
+            size= "sm"
             onClick={() => dispatch({ type: 'TOGGLE_ANALYTICS' })}
-            className="bg-white/60 border-white/20"
+            className= "bg-white/60 border-white/20"
           >
-            <BarChart className="w-4 h-4 mr-2" />
+            <BarChart className= "w-4 h-4 mr-2" />
             Analytics
           </Button>
         </div>
@@ -568,53 +433,53 @@ export function EnhancedCalendarBooking({
 
       {/* Quick Stats */}
       {state.showAnalytics && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200/50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+        <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className= "bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200/50">
+            <CardContent className= "p-6">
+              <div className= "flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-600">Total Bookings</p>
-                  <p className="text-2xl font-bold text-blue-900">{state.requests.length}</p>
+                  <p className= "text-sm font-medium text-blue-600">Total Bookings</p>
+                  <p className= "text-2xl font-bold text-blue-900">{state.requests.length}</p>
                 </div>
-                <CalendarDays className="w-8 h-8 text-blue-500" />
+                <CalendarDays className= "w-8 h-8 text-blue-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200/50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+          <Card className= "bg-gradient-to-br from-green-50 to-emerald-50 border-green-200/50">
+            <CardContent className= "p-6">
+              <div className= "flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-600">Revenue</p>
-                  <p className="text-2xl font-bold text-green-900">${totalRevenue.toLocaleString()}</p>
+                  <p className= "text-sm font-medium text-green-600">Revenue</p>
+                  <p className= "text-2xl font-bold text-green-900">${totalRevenue.toLocaleString()}</p>
                 </div>
-                <DollarSign className="w-8 h-8 text-green-500" />
+                <DollarSign className= "w-8 h-8 text-green-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200/50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+          <Card className= "bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200/50">
+            <CardContent className= "p-6">
+              <div className= "flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-purple-600">Avg Rating</p>
-                  <p className="text-2xl font-bold text-purple-900">
+                  <p className= "text-sm font-medium text-purple-600">Avg Rating</p>
+                  <p className= "text-2xl font-bold text-purple-900">
                     {(state.services.reduce((sum, s) => sum + s.rating, 0) / state.services.length).toFixed(1)}
                   </p>
                 </div>
-                <Star className="w-8 h-8 text-purple-500" />
+                <Star className= "w-8 h-8 text-purple-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-orange-50 to-red-50 border-orange-200/50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+          <Card className= "bg-gradient-to-br from-orange-50 to-red-50 border-orange-200/50">
+            <CardContent className= "p-6">
+              <div className= "flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-orange-600">Active Services</p>
-                  <p className="text-2xl font-bold text-orange-900">{state.services.filter(s => s.isActive).length}</p>
+                  <p className= "text-sm font-medium text-orange-600">Active Services</p>
+                  <p className= "text-2xl font-bold text-orange-900">{state.services.filter(s => s.isActive).length}</p>
                 </div>
-                <Target className="w-8 h-8 text-orange-500" />
+                <Target className= "w-8 h-8 text-orange-500" />
               </div>
             </CardContent>
           </Card>
@@ -622,112 +487,112 @@ export function EnhancedCalendarBooking({
       )}
 
       {/* Main Content */}
-      <Tabs defaultValue="calendar" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 bg-white/60 backdrop-blur-xl border-white/20">
-          <TabsTrigger value="calendar" className="flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
+      <Tabs defaultValue= "calendar" className= "space-y-6">
+        <TabsList className= "grid w-full grid-cols-4 bg-white/60 backdrop-blur-xl border-white/20">
+          <TabsTrigger value= "calendar" className= "flex items-center gap-2">
+            <Calendar className= "w-4 h-4" />
             Calendar
           </TabsTrigger>
-          <TabsTrigger value="services" className="flex items-center gap-2">
-            <Target className="w-4 h-4" />
+          <TabsTrigger value= "services" className= "flex items-center gap-2">
+            <Target className= "w-4 h-4" />
             Services
           </TabsTrigger>
-          <TabsTrigger value="requests" className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4" />
+          <TabsTrigger value= "requests" className= "flex items-center gap-2">
+            <MessageSquare className= "w-4 h-4" />
             Requests ({state.requests.length})
           </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center gap-2">
-            <Settings className="w-4 h-4" />
+          <TabsTrigger value= "settings" className= "flex items-center gap-2">
+            <Settings className= "w-4 h-4" />
             Settings
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="calendar" className="space-y-6">
+        <TabsContent value= "calendar" className= "space-y-6">
           {/* Calendar View */}
-          <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-luxury">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
+          <Card className= "bg-white/60 backdrop-blur-xl border-white/20 shadow-luxury">
+            <CardHeader className= "flex flex-row items-center justify-between">
+              <CardTitle className= "flex items-center gap-2">
+                <Calendar className= "w-5 h-5" />
                 Availability Calendar
               </CardTitle>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="bg-white/60 border-white/20">
-                  <ChevronLeft className="w-4 h-4" />
+              <div className= "flex items-center gap-2">
+                <Button variant= "outline" size= "sm" className= "bg-white/60 border-white/20">
+                  <ChevronLeft className= "w-4 h-4" />
                 </Button>
-                <Button variant="outline" size="sm" className="bg-white/60 border-white/20">
+                <Button variant= "outline" size= "sm" className= "bg-white/60 border-white/20">
                   Today
                 </Button>
-                <Button variant="outline" size="sm" className="bg-white/60 border-white/20">
-                  <ChevronRight className="w-4 h-4" />
+                <Button variant= "outline" size= "sm" className= "bg-white/60 border-white/20">
+                  <ChevronRight className= "w-4 h-4" />
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
               {/* Calendar implementation would go here */}
-              <div className="text-center py-12 text-slate-600">
-                <Calendar className="w-16 h-16 mx-auto mb-4 text-slate-400" />
-                <h3 className="text-lg font-medium mb-2">Calendar View</h3>
+              <div className= "text-center py-12 text-slate-600">
+                <Calendar className= "w-16 h-16 mx-auto mb-4 text-slate-400" />
+                <h3 className= "text-lg font-medium mb-2">Calendar View</h3>
                 <p>Interactive calendar with booking slots and availability management</p>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="services" className="space-y-6">
+        <TabsContent value= "services" className= "space-y-6">
           {/* Services Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {state.services.map((service) => (
               <Card 
                 key={service.id} 
-                className="group bg-white/60 backdrop-blur-xl border-white/20 shadow-luxury hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
+                className= "group bg-white/60 backdrop-blur-xl border-white/20 shadow-luxury hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
                 onClick={() => dispatch({ type: 'SELECT_SERVICE', payload: service })}
               >
                 {/* Service Header */}
                 <div className={`h-2 bg-gradient-to-r ${service.color}`}></div>
                 
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
+                <CardContent className= "p-6">
+                  <div className= "flex items-start justify-between mb-4">
                     <div>
-                      <h3 className="font-semibold text-slate-800 mb-1">{service.name}</h3>
-                      <Badge variant="outline" className="text-xs bg-slate-50 text-slate-600 border-slate-200">
+                      <h3 className= "font-semibold text-slate-800 mb-1">{service.name}</h3>
+                      <Badge variant= "outline" className= "text-xs bg-slate-50 text-slate-600 border-slate-200">
                         {service.category}
                       </Badge>
                     </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-slate-900">${service.price}</p>
-                      <p className="text-xs text-slate-500">{service.duration} min</p>
+                    <div className= "text-right">
+                      <p className= "text-lg font-bold text-slate-900">${service.price}</p>
+                      <p className= "text-xs text-slate-500">{service.duration} min</p>
                     </div>
                   </div>
 
-                  <p className="text-sm text-slate-600 mb-4 line-clamp-2">{service.description}</p>
+                  <p className= "text-sm text-slate-600 mb-4 line-clamp-2">{service.description}</p>
 
                   {/* Stats */}
-                  <div className="flex items-center justify-between text-xs text-slate-500 mb-4">
-                    <div className="flex items-center gap-1">
-                      <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                  <div className= "flex items-center justify-between text-xs text-slate-500 mb-4">
+                    <div className= "flex items-center gap-1">
+                      <Star className= "w-3 h-3 fill-amber-400 text-amber-400" />
                       <span>{service.rating}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="w-3 h-3" />
+                    <div className= "flex items-center gap-1">
+                      <Users className= "w-3 h-3" />
                       <span>{service.bookingCount} bookings</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <TrendingUp className="w-3 h-3" />
+                    <div className= "flex items-center gap-1">
+                      <TrendingUp className= "w-3 h-3" />
                       <span>{service.popularity}% popular</span>
                     </div>
                   </div>
 
                   {/* Requirements */}
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-slate-700">Requirements:</p>
-                    <div className="flex flex-wrap gap-1">
+                  <div className= "space-y-2">
+                    <p className= "text-xs font-medium text-slate-700">Requirements:</p>
+                    <div className= "flex flex-wrap gap-1">
                       {service.requirements.slice(0, 2).map((req, index) => (
-                        <Badge key={index} variant="outline" className="text-xs bg-blue-50 text-blue-600 border-blue-200">
+                        <Badge key={index} variant= "outline" className= "text-xs bg-blue-50 text-blue-600 border-blue-200">
                           {req}
                         </Badge>
                       ))}
                       {service.requirements.length > 2 && (
-                        <Badge variant="outline" className="text-xs bg-slate-50 text-slate-600 border-slate-200">
+                        <Badge variant= "outline" className= "text-xs bg-slate-50 text-slate-600 border-slate-200">
                           +{service.requirements.length - 2} more
                         </Badge>
                       )}
@@ -735,29 +600,29 @@ export function EnhancedCalendarBooking({
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-2 mt-4">
+                  <div className= "flex gap-2 mt-4">
                     <Button 
-                      size="sm" 
-                      className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+                      size= "sm" 
+                      className= "flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
                       onClick={(e) => {
                         e.stopPropagation()
                         dispatch({ type: 'SELECT_SERVICE', payload: service })
                         dispatch({ type: 'TOGGLE_BOOKING_DIALOG', payload: true })
                       }}
                     >
-                      <Calendar className="w-4 h-4 mr-2" />
+                      <Calendar className= "w-4 h-4 mr-2" />
                       Book Now
                     </Button>
                     <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="bg-white/60 border-white/20"
+                      size= "sm" 
+                      variant= "outline" 
+                      className= "bg-white/60 border-white/20"
                       onClick={(e) => {
                         e.stopPropagation()
                         // Copy booking link
                       }}
                     >
-                      <Share2 className="w-4 h-4" />
+                      <Share2 className= "w-4 h-4" />
                     </Button>
                   </div>
                 </CardContent>
@@ -766,36 +631,36 @@ export function EnhancedCalendarBooking({
           </div>
 
           {/* Add Service Button */}
-          <Card className="bg-white/60 backdrop-blur-xl border-white/20 border-dashed shadow-luxury hover:shadow-xl transition-all duration-300 cursor-pointer">
-            <CardContent className="p-12 text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Plus className="w-8 h-8 text-indigo-600" />
+          <Card className= "bg-white/60 backdrop-blur-xl border-white/20 border-dashed shadow-luxury hover:shadow-xl transition-all duration-300 cursor-pointer">
+            <CardContent className= "p-12 text-center">
+              <div className= "w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Plus className= "w-8 h-8 text-indigo-600" />
               </div>
-              <h3 className="text-lg font-medium text-slate-800 mb-2">Add New Service</h3>
-              <p className="text-slate-600 mb-6">Create a new booking service with custom duration and pricing</p>
+              <h3 className= "text-lg font-medium text-slate-800 mb-2">Add New Service</h3>
+              <p className= "text-slate-600 mb-6">Create a new booking service with custom duration and pricing</p>
               <Button 
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+                className= "bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
                 onClick={() => dispatch({ type: 'TOGGLE_SERVICE_DIALOG', payload: true })}
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className= "w-4 h-4 mr-2" />
                 Create Service
               </Button>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="requests" className="space-y-6">
+        <TabsContent value= "requests" className= "space-y-6">
           {/* Requests List */}
-          <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-luxury">
+          <Card className= "bg-white/60 backdrop-blur-xl border-white/20 shadow-luxury">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5" />
+              <div className= "flex items-center justify-between">
+                <CardTitle className= "flex items-center gap-2">
+                  <MessageSquare className= "w-5 h-5" />
                   Booking Requests
                 </CardTitle>
-                <div className="flex items-center gap-2">
+                <div className= "flex items-center gap-2">
                   <select 
-                    className="px-3 py-1.5 text-sm border rounded-md bg-white/60 border-white/20 focus:bg-white"
+                    className= "px-3 py-1.5 text-sm border rounded-md bg-white/60 border-white/20 focus:bg-white"
                     onChange={(e) => {
                       const status = e.target.value
                       dispatch({ 
@@ -804,113 +669,113 @@ export function EnhancedCalendarBooking({
                       })
                     }}
                   >
-                    <option value="">All Status</option>
-                    <option value="pending">Pending</option>
-                    <option value="confirmed">Confirmed</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
+                    <option value="">All Status</option>"
+                    <option value= "pending">Pending</option>
+                    <option value= "confirmed">Confirmed</option>
+                    <option value= "completed">Completed</option>
+                    <option value= "cancelled">Cancelled</option>
                   </select>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className= "space-y-4">
               {filteredRequests.map((request) => {
                 const service = state.services.find(s => s.id === request.serviceId)
                 
                 return (
-                  <Card key={request.id} className="bg-white/40 border-white/30">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full flex items-center justify-center text-sm font-medium">
+                  <Card key={request.id} className= "bg-white/40 border-white/30">
+                    <CardContent className= "p-4">
+                      <div className= "flex items-start justify-between mb-3">
+                        <div className= "flex items-start gap-3">
+                          <div className= "w-10 h-10 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full flex items-center justify-center text-sm font-medium">
                             {request.clientName[0]}
                           </div>
                           <div>
-                            <h4 className="font-medium text-slate-800">{request.clientName}</h4>
-                            <p className="text-sm text-slate-600">{request.clientEmail}</p>
-                            <p className="text-xs text-slate-500">{new Date(request.createdAt).toLocaleDateString()}</p>
+                            <h4 className= "font-medium text-slate-800">{request.clientName}</h4>
+                            <p className= "text-sm text-slate-600">{request.clientEmail}</p>
+                            <p className= "text-xs text-slate-500">{new Date(request.createdAt).toLocaleDateString()}</p>
                           </div>
                         </div>
                         
-                        <div className="flex items-center gap-2">
+                        <div className= "flex items-center gap-2">
                           <Badge className={`text-xs ${getStatusColor(request.status)}`}>
                             {getStatusIcon(request.status)}
-                            <span className="ml-1 capitalize">{request.status}</span>
+                            <span className= "ml-1 capitalize">{request.status}</span>
                           </Badge>
-                          <Button size="sm" variant="outline" className="w-8 h-8 p-0">
-                            <MoreHorizontal className="w-4 h-4" />
+                          <Button size= "sm" variant= "outline" className= "w-8 h-8 p-0">
+                            <MoreHorizontal className= "w-4 h-4" />
                           </Button>
                         </div>
                       </div>
 
                       {service && (
-                        <div className="mb-3">
-                          <Badge variant="outline" className={`text-xs bg-gradient-to-r ${service.color} text-white border-0`}>
+                        <div className= "mb-3">
+                          <Badge variant= "outline" className={`text-xs bg-gradient-to-r ${service.color} text-white border-0`}>
                             {service.name}
                           </Badge>
-                          <span className="text-sm text-slate-600 ml-2">${service.price} • {service.duration} min</span>
+                          <span className= "text-sm text-slate-600 ml-2">${service.price} • {service.duration} min</span>
                         </div>
                       )}
 
-                      <p className="text-sm text-slate-700 mb-3 line-clamp-2">{request.message}</p>
+                      <p className= "text-sm text-slate-700 mb-3 line-clamp-2">{request.message}</p>
 
                       {request.budget && (
-                        <div className="flex items-center gap-4 text-xs text-slate-500 mb-3">
-                          <span className="flex items-center gap-1">
-                            <DollarSign className="w-3 h-3" />
+                        <div className= "flex items-center gap-4 text-xs text-slate-500 mb-3">
+                          <span className= "flex items-center gap-1">
+                            <DollarSign className= "w-3 h-3" />
                             Budget: ${request.budget.toLocaleString()}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
+                          <span className= "flex items-center gap-1">
+                            <Clock className= "w-3 h-3" />
                             Timeline: {request.timeline}
                           </span>
                         </div>
                       )}
 
                       {request.status === 'pending' && (
-                        <div className="flex gap-2">
+                        <div className= "flex gap-2">
                           <Button 
-                            size="sm" 
-                            className="bg-green-600 hover:bg-green-700 text-white"
+                            size= "sm" 
+                            className= "bg-green-600 hover:bg-green-700 text-white"
                             onClick={() => dispatch({ 
                               type: 'UPDATE_REQUEST_STATUS', 
                               payload: { id: request.id, status: 'confirmed' } 
                             })}
                           >
-                            <CheckCircle className="w-4 h-4 mr-2" />
+                            <CheckCircle className= "w-4 h-4 mr-2" />
                             Confirm
                           </Button>
                           <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="text-red-600 border-red-200 hover:bg-red-50"
+                            size= "sm" 
+                            variant= "outline" 
+                            className= "text-red-600 border-red-200 hover:bg-red-50"
                             onClick={() => dispatch({ 
                               type: 'UPDATE_REQUEST_STATUS', 
                               payload: { id: request.id, status: 'cancelled' } 
                             })}
                           >
-                            <XCircle className="w-4 h-4 mr-2" />
+                            <XCircle className= "w-4 h-4 mr-2" />
                             Decline
                           </Button>
                         </div>
                       )}
 
                       {request.status === 'confirmed' && request.meetingLink && (
-                        <div className="flex items-center gap-2">
+                        <div className= "flex items-center gap-2">
                           <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="bg-blue-50 text-blue-600 border-blue-200"
+                            size= "sm" 
+                            variant= "outline" 
+                            className= "bg-blue-50 text-blue-600 border-blue-200"
                           >
-                            <Video className="w-4 h-4 mr-2" />
+                            <Video className= "w-4 h-4 mr-2" />
                             Join Meeting
                           </Button>
                           <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="bg-white/60 border-white/20"
+                            size= "sm" 
+                            variant= "outline" 
+                            className= "bg-white/60 border-white/20"
                           >
-                            <Copy className="w-4 h-4" />
+                            <Copy className= "w-4 h-4" />
                           </Button>
                         </div>
                       )}
@@ -920,29 +785,29 @@ export function EnhancedCalendarBooking({
               })}
 
               {filteredRequests.length === 0 && (
-                <div className="text-center py-12">
-                  <MessageSquare className="w-16 h-16 mx-auto mb-4 text-slate-400" />
-                  <h3 className="text-lg font-medium text-slate-800 mb-2">No booking requests</h3>
-                  <p className="text-slate-600">When clients book your services, they'll appear here</p>
+                <div className= "text-center py-12">
+                  <MessageSquare className= "w-16 h-16 mx-auto mb-4 text-slate-400" />
+                  <h3 className= "text-lg font-medium text-slate-800 mb-2">No booking requests</h3>
+                  <p className= "text-slate-600">When clients book your services, they&apos;ll appear here</p>
                 </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="settings" className="space-y-6">
+        <TabsContent value= "settings" className= "space-y-6">
           {/* Settings */}
-          <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-luxury">
+          <Card className= "bg-white/60 backdrop-blur-xl border-white/20 shadow-luxury">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="w-5 h-5" />
+              <CardTitle className= "flex items-center gap-2">
+                <Settings className= "w-5 h-5" />
                 Booking Settings
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="text-center py-12 text-slate-600">
-                <Settings className="w-16 h-16 mx-auto mb-4 text-slate-400" />
-                <h3 className="text-lg font-medium mb-2">Booking Configuration</h3>
+            <CardContent className= "space-y-6">
+              <div className= "text-center py-12 text-slate-600">
+                <Settings className= "w-16 h-16 mx-auto mb-4 text-slate-400" />
+                <h3 className= "text-lg font-medium mb-2">Booking Configuration</h3>
                 <p>Manage availability, notifications, and booking preferences</p>
               </div>
             </CardContent>
@@ -951,83 +816,83 @@ export function EnhancedCalendarBooking({
       </Tabs>
 
       {/* Booking Dialog */}
-      <Dialog open={state.showBookingDialog} onOpenChange={(open) => dispatch({ type: 'TOGGLE_BOOKING_DIALOG', payload: open })}>
-        <DialogContent className="bg-white/95 backdrop-blur-xl border-white/20 max-w-md">
+      <Dialog open={state.showBookingDialog} onOpenChange={(open) => dispatch({ type: &apos;TOGGLE_BOOKING_DIALOG&apos;, payload: open })}>
+        <DialogContent className= "bg-white/95 backdrop-blur-xl border-white/20 max-w-md">
           <DialogHeader>
             <DialogTitle>Book {state.selectedService?.name}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className= "space-y-4">
             <div>
-              <label className="text-sm font-medium text-slate-700">Full Name</label>
+              <label className= "text-sm font-medium text-slate-700">Full Name</label>
               <Input
                 value={state.bookingForm.clientName}
                 onChange={(e) => dispatch({ 
                   type: 'UPDATE_BOOKING_FORM', 
                   payload: { clientName: e.target.value } 
                 })}
-                placeholder="Enter your full name"
-                className="mt-1"
+                placeholder= "Enter your full name"
+                className= "mt-1"
               />
             </div>
             
             <div>
-              <label className="text-sm font-medium text-slate-700">Email Address</label>
+              <label className= "text-sm font-medium text-slate-700">Email Address</label>
               <Input
-                type="email"
+                type= "email"
                 value={state.bookingForm.clientEmail}
                 onChange={(e) => dispatch({ 
                   type: 'UPDATE_BOOKING_FORM', 
                   payload: { clientEmail: e.target.value } 
                 })}
-                placeholder="Enter your email"
-                className="mt-1"
+                placeholder= "Enter your email"
+                className= "mt-1"
               />
             </div>
             
             <div>
-              <label className="text-sm font-medium text-slate-700">Phone Number (Optional)</label>
+              <label className= "text-sm font-medium text-slate-700">Phone Number (Optional)</label>
               <Input
                 value={state.bookingForm.clientPhone}
                 onChange={(e) => dispatch({ 
                   type: 'UPDATE_BOOKING_FORM', 
                   payload: { clientPhone: e.target.value } 
                 })}
-                placeholder="Enter your phone number"
-                className="mt-1"
+                placeholder= "Enter your phone number"
+                className= "mt-1"
               />
             </div>
             
             <div>
-              <label className="text-sm font-medium text-slate-700">Project Details</label>
+              <label className= "text-sm font-medium text-slate-700">Project Details</label>
               <Textarea
                 value={state.bookingForm.message}
                 onChange={(e) => dispatch({ 
                   type: 'UPDATE_BOOKING_FORM', 
                   payload: { message: e.target.value } 
                 })}
-                placeholder="Tell us about your project requirements..."
+                placeholder= "Tell us about your project requirements..."
                 rows={3}
-                className="mt-1"
+                className= "mt-1"
               />
             </div>
             
-            <div className="flex gap-2">
+            <div className= "flex gap-2">
               <Button 
                 onClick={handleBookingSubmit}
                 disabled={state.loading}
-                className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+                className= "flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
               >
                 {state.loading ? (
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  <RefreshCw className= "w-4 h-4 mr-2 animate-spin" />
                 ) : (
-                  <Send className="w-4 h-4 mr-2" />
+                  <Send className= "w-4 h-4 mr-2" />
                 )}
                 Submit Booking
               </Button>
               <Button 
-                variant="outline" 
+                variant= "outline" 
                 onClick={() => dispatch({ type: 'TOGGLE_BOOKING_DIALOG', payload: false })}
-                className="bg-white/60 border-white/20"
+                className= "bg-white/60 border-white/20"
               >
                 Cancel
               </Button>

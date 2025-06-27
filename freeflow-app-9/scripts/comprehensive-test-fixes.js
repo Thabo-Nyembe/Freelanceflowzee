@@ -200,7 +200,7 @@ async function testExternalLinkIcon() {
     
     // Check for SVG icons and external link patterns
     const hasIcons = html.includes('<svg') || html.includes('icon');
-    const hasExternalLinks = html.includes('target="_blank"') || html.includes('external');
+    const hasExternalLinks = html.includes('target= "_blank"') || html.includes('external');
     
     return {
       success: response.ok && hasIcons,
@@ -270,7 +270,7 @@ async function testNavigation() {
     const navElements = [
       html.includes('<nav') || html.includes('header'),
       html.includes('logo') || html.includes('FreeflowZee'),
-      html.includes('<a ') || html.includes('href=')
+      html.includes('<a ') || html.includes('href= ')
     ];
     
     const passedElements = navElements.filter(Boolean).length;
@@ -342,7 +342,7 @@ async function testSEOMetadata() {
     
     const seoElements = [
       html.includes('<title>'),
-      html.includes('meta name="description"'),
+      html.includes('meta name= "description"'),
       html.includes('og:title') || html.includes('og:description'),
       html.includes('twitter:card')
     ];

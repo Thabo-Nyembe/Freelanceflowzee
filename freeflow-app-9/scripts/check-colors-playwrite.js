@@ -4,7 +4,7 @@ const { execSync } = require('child_process');
 const http = require('http');
 
 console.log('🎨 FreeFlowZee Color Visibility Checker');
-console.log('=====================================');
+console.log('===================================== ');
 
 // Test if server is running
 function testServerConnection(port = 3000) {
@@ -46,41 +46,25 @@ async function checkColorIssues() {
     {
       name: 'Landing Page',
       url: `http://localhost:${serverPort}/`,
-      checks: [
-        'Check for black backgrounds',
-        'Verify text visibility',
-        'Test button contrast',
-        'Check hero section'
+      checks: ['Check for black backgrounds', 'Verify text visibility', 'Test button contrast', 'Check hero section'
       ]
     },
     {
       name: 'Community Hub',
       url: `http://localhost:${serverPort}/dashboard/community`,
-      checks: [
-        'Video component backgrounds',
-        'Audio component colors',
-        'Creator cards visibility',
-        'Social wall contrast'
+      checks: ['Video component backgrounds', 'Audio component colors', 'Creator cards visibility', 'Social wall contrast'
       ]
     },
     {
       name: 'Collaboration Page',
       url: `http://localhost:${serverPort}/dashboard/collaboration`,
-      checks: [
-        'Chat interface',
-        'Video call interface',
-        'Media previews',
-        'Comment overlays'
+      checks: ['Chat interface', 'Video call interface', 'Media previews', 'Comment overlays'
       ]
     },
     {
       name: 'Demo Modal',
       url: `http://localhost:${serverPort}/demo`,
-      checks: [
-        'Modal backgrounds',
-        'Video controls',
-        'Feature cards',
-        'CTA buttons'
+      checks: ['Modal backgrounds', 'Video controls', 'Feature cards', 'CTA buttons'
       ]
     }
   ];
@@ -91,15 +75,8 @@ async function checkColorIssues() {
       const issues = [];
       
       // Find elements with potentially problematic backgrounds
-      const problematicSelectors = [
-        '[class*="bg-black"]',
-        '[class*="bg-gray-900"]',
-        '[class*="bg-slate-900"]',
-        '[class*="from-purple-900"]',
-        '[class*="from-blue-900"]',
-        '[class*="from-indigo-900"]',
-        '[class*="text-white"]'
-      ];
+      const problematicSelectors = ['[class*= "bg-black"]', '[class*= "bg-gray-900"]', '[class*= "bg-slate-900"]', '[class*= "from-purple-900"]', '[class*= "from-blue-900"]', '[class*= "from-indigo-900"]',
+        '[class*= "text-white"]'];
       
       problematicSelectors.forEach(selector => {
         const elements = document.querySelectorAll(selector);
@@ -135,7 +112,7 @@ async function checkColorIssues() {
       });
       
       // Check for elements that might be invisible
-      const allElements = document.querySelectorAll('*');
+      const allElements = document.querySelectorAll('*');'
       let hiddenCount = 0;
       allElements.forEach(el => {
         const style = window.getComputedStyle(el);
@@ -162,7 +139,7 @@ async function checkColorIssues() {
     
     try {
       // Simulate a basic curl request to check if page loads
-      const curlResult = execSync(`curl -s -o /dev/null -w "%{http_code}" "${testCase.url}"`, { encoding: 'utf8' });
+      const curlResult = execSync(`curl -s -o /dev/null -w "%{http_code}" "${testCase.url}"`, { encoding: 'utf8' });"
       
       if (curlResult.trim() === '200') {
         console.log('✅ Page loads successfully');
@@ -201,16 +178,16 @@ async function checkColorIssues() {
       console.log(`❌ Error testing ${testCase.name}: ${error.message}`);
     }
     
-    console.log(''); // Empty line for spacing
+    console.log(''); // Empty line for spacing'
   }
 
   console.log('🎨 Color Visibility Summary');
-  console.log('============================');
+  console.log('============================ ');
   console.log('✅ CSS override rules are in place');
   console.log('✅ Comprehensive black background elimination implemented');
   console.log('✅ Purple and white theme system active');
-  console.log('');
-  console.log('💡 Manual verification recommended:');
+  console.log('');'
+  console.log('💡 Manual verification recommended: ');
   console.log('   1. Open browser to http://localhost:' + serverPort);
   console.log('   2. Navigate through different pages');
   console.log('   3. Check dashboard components');

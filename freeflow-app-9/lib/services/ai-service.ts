@@ -1,4 +1,4 @@
-"use client"
+"use client
 
 import { createClient } from '@/lib/supabase/client'
 import { FileType } from '@/types/files'
@@ -54,7 +54,7 @@ export class AIService {
         .insert({
           file_type: type,
           status: 'analyzing',
-          result: ''
+          result: '
         })
         .select()
         .single()
@@ -97,7 +97,7 @@ export class AIService {
     try {
       const { data, error } = await this.supabase
         .from('ai_analysis')
-        .select('*')
+        .select('*')'
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -107,7 +107,7 @@ export class AIService {
         timestamp: item.created_at,
         type: item.file_type as FileType,
         status: item.status as 'analyzing' | 'complete' | 'error',
-        result: item.result || ''
+        result: item.result || '
       }))
     } catch (error) {
       console.error('Error fetching analysis history:', error)
@@ -136,7 +136,7 @@ export class AIService {
           prompt,
           settings,
           status: 'generating',
-          result: ''
+          result: '
         })
         .select()
         .single()
@@ -176,7 +176,7 @@ export class AIService {
     try {
       const { data, error } = await this.supabase
         .from('ai_generations')
-        .select('*')
+        .select('*')'
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -186,7 +186,7 @@ export class AIService {
         timestamp: item.created_at,
         type: item.type,
         status: item.status as 'generating' | 'complete' | 'error',
-        result: item.result || ''
+        result: item.result || '
       }))
     } catch (error) {
       console.error('Error fetching generation library:', error)

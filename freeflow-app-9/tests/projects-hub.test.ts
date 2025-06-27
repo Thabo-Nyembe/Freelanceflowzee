@@ -1,11 +1,11 @@
-import { test, expect } from './setup'
-import { ProjectsHubPage } from './page-objects/projects-hub-page'
-import { testProjects, invalidData, projectTemplates } from './fixtures/project-fixtures'
+import { test, expect } from &apos;./setup&apos;
+import { ProjectsHubPage } from &apos;./page-objects/projects-hub-page&apos;
+import { testProjects, invalidData, projectTemplates } from &apos;./fixtures/project-fixtures&apos;
 
 // Increase timeout for all tests in this file
 test.setTimeout(60000)
 
-test.describe('Projects Hub', () => {
+test.describe(&apos;Projects Hub&apos;, () => {
   let projectsHub: ProjectsHubPage
 
   test.beforeEach(async ({ authenticatedPage }) => {
@@ -13,7 +13,7 @@ test.describe('Projects Hub', () => {
     await projectsHub.goto()
   })
 
-  test('should display UI elements correctly', async () => {
+  test(&apos;should display UI elements correctly&apos;, async () => {
     // Wait for and verify key UI elements
     await expect(projectsHub.createProjectButton).toBeVisible({ timeout: 10000 })
     await expect(projectsHub.importProjectButton).toBeVisible({ timeout: 10000 })
@@ -21,18 +21,18 @@ test.describe('Projects Hub', () => {
     await expect(projectsHub.projectManagementSection).toBeVisible({ timeout: 10000 })
   })
 
-  test('should handle project creation', async () => {
+  test(&apos;should handle project creation&apos;, async () => {
     // Open create project dialog
     await projectsHub.createProjectButton.click()
     await expect(projectsHub.createProjectDialog).toBeVisible({ timeout: 10000 })
 
     // Fill project details
     await projectsHub.fillProjectDetails({
-      name: 'Test Project',
-      description: 'A test project created by Playwright',
-      type: 'Brand Identity',
-      budget: '5000',
-      deadline: '2024-12-31'
+      name: &apos;Test Project&apos;,
+      description: &apos;A test project created by Playwright&apos;,
+      type: &apos;Brand Identity&apos;,
+      budget: &apos;5000&apos;,
+      deadline: &apos;2024-12-31&apos;
     })
 
     // Submit and verify
@@ -40,17 +40,17 @@ test.describe('Projects Hub', () => {
     await expect(projectsHub.successMessage).toBeVisible({ timeout: 10000 })
   })
 
-  test('should handle project import', async () => {
+  test(&apos;should handle project import&apos;, async () => {
     // Open import dialog
     await projectsHub.importProjectButton.click()
     await expect(projectsHub.importProjectDialog).toBeVisible({ timeout: 10000 })
 
     // Upload project file
-    await projectsHub.uploadProjectFile('test-data/project.json')
+    await projectsHub.uploadProjectFile(&apos;test-data/project.json&apos;)
     await expect(projectsHub.importSuccessMessage).toBeVisible({ timeout: 10000 })
   })
 
-  test('should display project templates', async () => {
+  test(&apos;should display project templates&apos;, async () => {
     // Verify template sections
     await expect(projectsHub.brandIdentityTemplate).toBeVisible({ timeout: 10000 })
     await expect(projectsHub.websiteDesignTemplate).toBeVisible({ timeout: 10000 })
@@ -61,7 +61,7 @@ test.describe('Projects Hub', () => {
     await expect(projectsHub.templateDetailsDialog).toBeVisible({ timeout: 10000 })
   })
 
-  test('should manage existing projects', async () => {
+  test(&apos;should manage existing projects&apos;, async () => {
     // Wait for projects to load
     await expect(projectsHub.projectsList).toBeVisible({ timeout: 10000 })
 
@@ -71,158 +71,158 @@ test.describe('Projects Hub', () => {
     await expect(projectsHub.projectSearchInput).toBeVisible()
 
     // Test project search
-    await projectsHub.searchProjects('Test Project')
-    await expect(projectsHub.projectsList).toContainText('Test Project', { timeout: 10000 })
+    await projectsHub.searchProjects(&apos;Test Project&apos;)
+    await expect(projectsHub.projectsList).toContainText(&apos;Test Project&apos;, { timeout: 10000 })
   })
 
-  test.describe('UI Elements', () => {
-    test('should display all project management buttons', async ({ page }) => {
-      await page.waitForSelector('[data-testid="create-project-btn"]', { state: 'visible' })
-      await expect(page.getByTestId('create-project-btn')).toBeVisible()
-      await expect(page.getByTestId('import-project-btn')).toBeVisible()
-      await expect(page.getByTestId('quick-start-btn')).toBeVisible()
+  test.describe(&apos;UI Elements&apos;, () => {
+    test(&apos;should display all project management buttons&apos;, async ({ page }) => {
+      await page.waitForSelector(&apos;[data-testid=&quot;create-project-btn&quot;]&apos;, { state: &apos;visible&apos; })
+      await expect(page.getByTestId(&apos;create-project-btn&apos;)).toBeVisible()
+      await expect(page.getByTestId(&apos;import-project-btn&apos;)).toBeVisible()
+      await expect(page.getByTestId(&apos;quick-start-btn&apos;)).toBeVisible()
     })
 
-    test('should display project filters and search', async ({ page }) => {
-      await page.waitForSelector('[data-testid="search-input"]', { state: 'visible' })
-      await expect(page.getByRole('searchbox')).toBeVisible()
-      await expect(page.getByRole('combobox', { name: 'Filter by status' })).toBeVisible()
-      await expect(page.getByRole('combobox', { name: 'Filter by priority' })).toBeVisible()
+    test(&apos;should display project filters and search&apos;, async ({ page }) => {
+      await page.waitForSelector(&apos;[data-testid=&quot;search-input&quot;]&apos;, { state: &apos;visible&apos; })
+      await expect(page.getByRole(&apos;searchbox&apos;)).toBeVisible()
+      await expect(page.getByRole(&apos;combobox&apos;, { name: &apos;Filter by status&apos; })).toBeVisible()
+      await expect(page.getByRole(&apos;combobox&apos;, { name: &apos;Filter by priority&apos; })).toBeVisible()
     })
 
-    test('should toggle between grid and list views', async ({ page }) => {
-      await page.waitForSelector('[data-testid="view-toggle"]', { state: 'visible' })
-      await projectsHub.toggleView('list')
-      await expect(page.locator('.grid-cols-1')).toBeVisible()
+    test(&apos;should toggle between grid and list views&apos;, async ({ page }) => {
+      await page.waitForSelector(&apos;[data-testid=&quot;view-toggle&quot;]&apos;, { state: &apos;visible&apos; })
+      await projectsHub.toggleView(&apos;list&apos;)
+      await expect(page.locator(&apos;.grid-cols-1&apos;)).toBeVisible()
       
-      await projectsHub.toggleView('grid')
-      await expect(page.locator('.md\\:grid-cols-2')).toBeVisible()
+      await projectsHub.toggleView(&apos;grid&apos;)
+      await expect(page.locator(&apos;.md\\:grid-cols-2&apos;)).toBeVisible()
     })
   })
 
-  test.describe('Project Creation', () => {
-    test('should create a new project with all fields', async ({ page }) => {
-      await page.waitForSelector('[data-testid="create-project-btn"]', { state: 'visible' })
+  test.describe(&apos;Project Creation&apos;, () => {
+    test(&apos;should create a new project with all fields&apos;, async ({ page }) => {
+      await page.waitForSelector(&apos;[data-testid=&quot;create-project-btn&quot;]&apos;, { state: &apos;visible&apos; })
       await projectsHub.createProject(testProjects.valid)
-      await page.waitForSelector('[data-testid="project-card"]', { state: 'visible' })
+      await page.waitForSelector(&apos;[data-testid=&quot;project-card&quot;]&apos;, { state: &apos;visible&apos; })
       await projectsHub.expectProjectVisible(testProjects.valid.title)
       await projectsHub.expectProjectDetails(testProjects.valid)
     })
 
-    test('should validate required fields in project creation', async ({ page }) => {
-      await page.getByTestId('create-project-btn').click()
-      await page.getByTestId('project-submit-button').click()
+    test(&apos;should validate required fields in project creation&apos;, async ({ page }) => {
+      await page.getByTestId(&apos;create-project-btn&apos;).click()
+      await page.getByTestId(&apos;project-submit-button&apos;).click()
       await projectsHub.expectFormValidation()
     })
 
-    test('should validate email format in project creation', async ({ page }) => {
-      await page.getByTestId('create-project-btn').click()
-      await page.getByTestId('project-client-email-input').fill(invalidData.invalidEmail.clientEmail)
-      await page.getByTestId('project-submit-button').click()
-      await expect(page.getByText('Invalid email format')).toBeVisible()
+    test(&apos;should validate email format in project creation&apos;, async ({ page }) => {
+      await page.getByTestId(&apos;create-project-btn&apos;).click()
+      await page.getByTestId(&apos;project-client-email-input&apos;).fill(invalidData.invalidEmail.clientEmail)
+      await page.getByTestId(&apos;project-submit-button&apos;).click()
+      await expect(page.getByText(&apos;Invalid email format&apos;)).toBeVisible()
     })
 
-    test('should handle project creation errors gracefully', async () => {
+    test(&apos;should handle project creation errors gracefully&apos;, async () => {
       const result = await projectsHub.createProjectWithErrorHandling(invalidData.missingRequired)
       expect(result.success).toBe(false)
       expect(result.error).toBeTruthy()
     })
   })
 
-  test.describe('Project Import', () => {
-    test('should import project from JSON file', async () => {
-      await projectsHub.importProject('test-data/project.json')
-      await projectsHub.expectProjectVisible('Imported Project')
+  test.describe(&apos;Project Import&apos;, () => {
+    test(&apos;should import project from JSON file&apos;, async () => {
+      await projectsHub.importProject(&apos;test-data/project.json&apos;)
+      await projectsHub.expectProjectVisible(&apos;Imported Project&apos;)
       await projectsHub.expectLoadingState()
     })
 
-    test('should validate imported project data', async ({ page }) => {
-      await page.getByTestId('import-project-btn').click()
-      await page.setInputFiles('[data-testid="file-input"]', 'test-data/invalid-project.json')
-      await expect(page.getByText('Invalid project data format')).toBeVisible()
+    test(&apos;should validate imported project data&apos;, async ({ page }) => {
+      await page.getByTestId(&apos;import-project-btn&apos;).click()
+      await page.setInputFiles(&apos;[data-testid=&quot;file-input&quot;]&apos;, &apos;test-data/invalid-project.json&apos;)
+      await expect(page.getByText(&apos;Invalid project data format&apos;)).toBeVisible()
     })
   })
 
-  test.describe('Quick Start Templates', () => {
-    test('should create project from template', async () => {
-      await projectsHub.quickStartProject('brand-identity')
-      await projectsHub.expectProjectVisible('Brand Identity Project')
+  test.describe(&apos;Quick Start Templates&apos;, () => {
+    test(&apos;should create project from template&apos;, async () => {
+      await projectsHub.quickStartProject(&apos;brand-identity&apos;)
+      await projectsHub.expectProjectVisible(&apos;Brand Identity Project&apos;)
       await projectsHub.expectProjectDetails({
-        title: 'Brand Identity Project',
+        title: &apos;Brand Identity Project&apos;,
         description: projectTemplates.brandIdentity.description,
-        clientName: '',
-        status: 'active',
-        priority: 'high'
+        clientName: '&apos;,'
+        status: &apos;active&apos;,
+        priority: &apos;high&apos;
       })
     })
 
-    test('should display template previews', async ({ page }) => {
-      await page.getByTestId('quick-start-btn').click()
-      await expect(page.getByTestId('template-brand-identity')).toBeVisible()
-      await expect(page.getByTestId('template-web-design')).toBeVisible()
-      await expect(page.getByTestId('template-marketing')).toBeVisible()
+    test(&apos;should display template previews&apos;, async ({ page }) => {
+      await page.getByTestId(&apos;quick-start-btn&apos;).click()
+      await expect(page.getByTestId(&apos;template-brand-identity&apos;)).toBeVisible()
+      await expect(page.getByTestId(&apos;template-web-design&apos;)).toBeVisible()
+      await expect(page.getByTestId(&apos;template-marketing&apos;)).toBeVisible()
     })
   })
 
-  test.describe('Project Management', () => {
-    test('should delete project with confirmation', async () => {
+  test.describe(&apos;Project Management&apos;, () => {
+    test(&apos;should delete project with confirmation&apos;, async () => {
       await projectsHub.createProject(testProjects.valid)
       await projectsHub.deleteProject(testProjects.valid.title, true)
       await projectsHub.expectProjectNotVisible(testProjects.valid.title)
     })
 
-    test('should cancel project deletion', async () => {
+    test(&apos;should cancel project deletion&apos;, async () => {
       await projectsHub.createProject(testProjects.valid)
       await projectsHub.deleteProject(testProjects.valid.title, false)
       await projectsHub.expectProjectVisible(testProjects.valid.title)
     })
 
-    test('should update project status', async ({ page }) => {
+    test(&apos;should update project status&apos;, async ({ page }) => {
       await projectsHub.createProject(testProjects.valid)
       await projectsHub.openProjectMenu(testProjects.valid.title)
-      await page.getByRole('menuitem', { name: 'Change Status' }).click()
-      await page.getByRole('option', { name: 'Completed' }).click()
-      await expect(page.locator(`[data-status="completed"]`)).toBeVisible()
+      await page.getByRole(&apos;menuitem&apos;, { name: &apos;Change Status&apos; }).click()
+      await page.getByRole(&apos;option&apos;, { name: &apos;Completed&apos; }).click()
+      await expect(page.locator(`[data-status=&quot;completed&quot;]`)).toBeVisible()
     })
   })
 
-  test.describe('Search and Filtering', () => {
-    test('should filter projects by status', async () => {
+  test.describe(&apos;Search and Filtering&apos;, () => {
+    test(&apos;should filter projects by status&apos;, async () => {
       await projectsHub.createProject(testProjects.valid)
-      await projectsHub.filterByStatus('active')
+      await projectsHub.filterByStatus(&apos;active&apos;)
       await projectsHub.expectProjectVisible(testProjects.valid.title)
       
-      await projectsHub.filterByStatus('completed')
+      await projectsHub.filterByStatus(&apos;completed&apos;)
       await projectsHub.expectProjectNotVisible(testProjects.valid.title)
     })
 
-    test('should filter projects by priority', async () => {
+    test(&apos;should filter projects by priority&apos;, async () => {
       await projectsHub.createProject(testProjects.valid)
       await projectsHub.filterByPriority(testProjects.valid.priority)
       await projectsHub.expectProjectVisible(testProjects.valid.title)
       
-      await projectsHub.filterByPriority('low')
+      await projectsHub.filterByPriority(&apos;low&apos;)
       await projectsHub.expectProjectNotVisible(testProjects.valid.title)
     })
 
-    test('should search projects by title', async () => {
+    test(&apos;should search projects by title&apos;, async () => {
       await projectsHub.createProject(testProjects.valid)
       await projectsHub.expectSearchResults(testProjects.valid.title, 1)
-      await projectsHub.expectSearchResults('nonexistent project', 0)
+      await projectsHub.expectSearchResults(&apos;nonexistent project&apos;, 0)
     })
 
-    test('should search projects by client name', async () => {
+    test(&apos;should search projects by client name&apos;, async () => {
       await projectsHub.createProject(testProjects.valid)
       await projectsHub.expectSearchResults(testProjects.valid.clientName, 1)
     })
   })
 
-  test.describe('Empty States and Loading', () => {
-    test('should display empty state when no projects exist', async () => {
+  test.describe(&apos;Empty States and Loading&apos;, () => {
+    test(&apos;should display empty state when no projects exist&apos;, async () => {
       await projectsHub.expectEmptyState()
     })
 
-    test('should display loading state during operations', async () => {
+    test(&apos;should display loading state during operations&apos;, async () => {
       await projectsHub.createProject(testProjects.valid)
       await projectsHub.expectLoadingState()
     })

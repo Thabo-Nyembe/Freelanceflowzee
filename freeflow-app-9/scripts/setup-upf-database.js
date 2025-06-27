@@ -18,18 +18,18 @@ async function setupDatabase() {
   console.log('\n🔧 MANUAL DATABASE SETUP REQUIRED');
   console.log('══════════════════════════════════════════════════════════');
   console.log('Due to Supabase security restrictions, please follow these steps:');
-  console.log('');
-  console.log('1. 🌐 Open your Supabase dashboard:');
+  console.log('');'
+  console.log('1. 🌐 Open your Supabase dashboard: ');
   console.log('   https://supabase.com/dashboard/project/zozfeysmzonzvrelyhjf');
-  console.log('');
+  console.log('');'
   console.log('2. 📊 Go to "SQL Editor" in the left sidebar');
-  console.log('');
+  console.log('');'
   console.log('3. 📋 Copy and paste the SQL from: scripts/create-upf-tables.sql');
-  console.log('');
+  console.log('');'
   console.log('4. ▶️  Click "Run" to execute the SQL script');
-  console.log('');
+  console.log('');'
   console.log('5. ✅ Verify tables are created in the "Database" section');
-  console.log('');
+  console.log('');'
   console.log('══════════════════════════════════════════════════════════');
 
   // Test connection to verify credentials work
@@ -43,7 +43,7 @@ async function setupDatabase() {
     
     if (error && error.code !== 'PGRST116') {
       // PGRST116 is "relation does not exist" which is expected for new projects
-      console.log('❌ Connection test failed:', error.message);
+      console.log('❌ Connection test failed: ', error.message);
       console.log('   Please check your Supabase credentials in .env.local');
     } else {
       console.log('✅ Supabase connection successful!');
@@ -59,8 +59,8 @@ async function setupDatabase() {
   console.log('3. Visit: http://localhost:3000/dashboard/collaboration');
   console.log('4. Click on the "Universal Pinpoint Feedback" tab');
   console.log('5. Start adding comments to your files!');
-  console.log('');
-  console.log('📖 For detailed usage instructions, see:');
+  console.log('');'
+  console.log('📖 For detailed usage instructions, see: ');
   console.log('   UNIVERSAL_PINPOINT_FEEDBACK_DOCUMENTATION.md');
 }
 

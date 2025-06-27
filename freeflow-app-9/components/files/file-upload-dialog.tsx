@@ -1,4 +1,4 @@
-"use client"
+"use client
 
 import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
@@ -11,7 +11,7 @@ import { createBrowserClient } from '@supabase/ssr'
 interface FileUploadDialogProps {
   isOpen: boolean
   onClose: () => void
-  onUploadComplete: (files: any[]) => void
+  onUploadComplete: (files: Record<string, unknown>[]) => void
 }
 
 export function FileUploadDialog({ isOpen, onClose, onUploadComplete }: FileUploadDialogProps) {
@@ -46,7 +46,7 @@ export function FileUploadDialog({ isOpen, onClose, onUploadComplete }: FileUplo
 
   const uploadFiles = async () => {
     setUploading(true)
-    const uploadedFiles: any[] = []
+    const uploadedFiles: Record<string, unknown>[] = []
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -88,7 +88,7 @@ export function FileUploadDialog({ isOpen, onClose, onUploadComplete }: FileUplo
 
           uploadedFiles.push(fileRecord)
           setProgress(prev => ({ ...prev, [file.name]: 100 }))
-        } catch (error: any) {
+        } catch (error: Record<string, unknown>) {
           console.error(`Error uploading ${file.name}:`, error)
           setErrors(prev => ({ ...prev, [file.name]: error.message }))
         }
@@ -104,7 +104,7 @@ export function FileUploadDialog({ isOpen, onClose, onUploadComplete }: FileUplo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className= "sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Upload Files</DialogTitle>
           <DialogDescription>
@@ -120,39 +120,39 @@ export function FileUploadDialog({ isOpen, onClose, onUploadComplete }: FileUplo
           `}
         >
           <input {...getInputProps()} />
-          <Upload className="h-10 w-10 text-gray-400 mx-auto mb-4" />
-          <p className="text-sm text-gray-600">
+          <Upload className= "h-10 w-10 text-gray-400 mx-auto mb-4" />
+          <p className= "text-sm text-gray-600">
             {isDragActive
               ? "Drop the files here"
-              : "Drag 'n' drop files here, or click to select files"}
+              : "Drag 'n' drop files here, or click to select files"}'
           </p>
         </div>
 
         {files.length > 0 && (
-          <div className="mt-4 space-y-4">
+          <div className= "mt-4 space-y-4">
             {files.map(file => (
-              <div key={file.name} className="flex items-center gap-4">
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium">{file.name}</p>
+              <div key={file.name} className= "flex items-center gap-4">
+                <div className= "flex-1 space-y-1">
+                  <div className= "flex items-center justify-between">
+                    <p className= "text-sm font-medium">{file.name}</p>
                     <Button
-                      variant="ghost"
-                      size="sm"
+                      variant= "ghost"
+                      size= "sm"
                       onClick={() => removeFile(file)}
                     >
-                      <X className="h-4 w-4" />
+                      <X className= "h-4 w-4" />
                     </Button>
                   </div>
                   <Progress value={progress[file.name] || 0} />
                   {errors[file.name] && (
-                    <p className="text-xs text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
+                    <p className= "text-xs text-red-600 flex items-center gap-1">
+                      <AlertCircle className= "h-3 w-3" />
                       {errors[file.name]}
                     </p>
                   )}
                   {progress[file.name] === 100 && !errors[file.name] && (
-                    <p className="text-xs text-green-600 flex items-center gap-1">
-                      <CheckCircle className="h-3 w-3" />
+                    <p className= "text-xs text-green-600 flex items-center gap-1">
+                      <CheckCircle className= "h-3 w-3" />
                       Upload complete
                     </p>
                   )}
@@ -162,14 +162,14 @@ export function FileUploadDialog({ isOpen, onClose, onUploadComplete }: FileUplo
           </div>
         )}
 
-        <div className="flex justify-end gap-4 mt-6">
-          <Button variant="outline" onClick={onClose}>
+        <div className= "flex justify-end gap-4 mt-6">
+          <Button variant= "outline" onClick={onClose}>
             Cancel
           </Button>
           <Button
             onClick={uploadFiles}
             disabled={files.length === 0 || uploading}
-            className="bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+            className= "bg-gradient-to-r from-purple-600 to-blue-600 text-white"
           >
             {uploading ? 'Uploading...' : 'Upload Files'}
           </Button>

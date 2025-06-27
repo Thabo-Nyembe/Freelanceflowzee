@@ -61,7 +61,7 @@ export async function login(formData: FormData) {
     }
 
     return { error: 'Login failed. Please try again.' }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Login error:', error)
     return { error: 'An unexpected error occurred. Please try again.' }
   }
@@ -91,7 +91,7 @@ export async function signup(formData: FormData) {
     }
 
     return { success: true }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Signup error:', error)
     return { error: 'An unexpected error occurred. Please try again.' }
   }
@@ -110,7 +110,7 @@ export async function resendVerification(email: string) {
     }
 
     return { success: true }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Resend verification error:', error)
     return { error: 'An unexpected error occurred. Please try again.' }
   }

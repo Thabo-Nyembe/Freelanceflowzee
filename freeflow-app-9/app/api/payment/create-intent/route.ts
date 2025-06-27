@@ -26,8 +26,7 @@ export async function POST(request: NextRequest) {
       isTestMode,
       userAgent: request.headers.get('user-agent'),
       testHeaders: {
-        'x-test-mode': request.headers.get('x-test-mode'),
-        'x-payment-test': request.headers.get('x-payment-test')
+        'x-test-mode': request.headers.get('x-test-mode'), 'x-payment-test': request.headers.get('x-payment-test')
       },
       nodeEnv: process.env.NODE_ENV,
       hasStripeKey: !!STRIPE_SECRET_KEY

@@ -44,7 +44,7 @@ export class StartupStorageOptimizer {
   /**
    * Startup-optimized file routing (aggressive cost savings)
    */
-  static shouldUseWasabi(fileSize: number, mimeType: string, metadata?: any): boolean {
+  static shouldUseWasabi(fileSize: number, mimeType: string, metadata?: Record<string, unknown>): boolean {
     // STARTUP RULE: Use Wasabi for almost everything to save money
     
     // Only keep tiny essential files on Supabase
@@ -64,7 +64,7 @@ export class StartupStorageOptimizer {
   /**
    * Calculate potential startup savings
    */
-  static calculateStartupSavings(files: any[]): {
+  static calculateStartupSavings(files: Record<string, unknown>[]): {
     currentCost: number;
     optimizedCost: number;
     monthlySavings: number;
@@ -247,7 +247,7 @@ export async function dailyStartupOptimization() {
 }
 
 // BUDGET ALERT SYSTEM for startups
-async function sendBudgetAlert(budgetStatus: any) {
+async function sendBudgetAlert(budgetStatus: Record<string, unknown>) {
   console.log('🚨 BUDGET ALERT: Storage costs need attention!');
   console.log('Recommendations:', budgetStatus.recommendations.join('\n'));
   

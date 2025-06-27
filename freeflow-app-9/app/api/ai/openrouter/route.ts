@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString()
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('OpenRouter API error:', error)
     
     return NextResponse.json(
@@ -94,14 +94,12 @@ export async function GET(request: NextRequest) {
       success: true,
       message: 'OpenRouter AI API is ready',
       endpoints: {
-        'POST /api/ai/openrouter': 'Generate AI responses',
-        'GET /api/ai/openrouter?test=connection': 'Test connection',
-        'GET /api/ai/openrouter?test=models': 'List available models'
+        'POST /api/ai/openrouter': 'Generate AI responses', 'GET /api/ai/openrouter?test=connection': 'Test connection', 'GET /api/ai/openrouter?test=models': 'List available models'
       },
       timestamp: new Date().toISOString()
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('OpenRouter GET error:', error)
     
     return NextResponse.json(

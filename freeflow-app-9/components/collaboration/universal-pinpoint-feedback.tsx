@@ -4,139 +4,8 @@ import React, { useState, useRef, useReducer, useEffect, useCallback } from 'rea
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  MessageCircle, 
-  Pin, 
-  MapPin,
-  Mic,
-  MicOff,
-  Play,
-  Pause,
-  Video,
-  Image as ImageIcon,
-  FileText,
-  Code,
-  Send,
-  X,
-  ChevronDown,
-  Star,
-  CheckCircle,
-  AlertCircle,
-  Clock,
-  User,
-  Sparkles,
-  Volume2,
-  Download,
-  Eye,
-  Filter,
-  Search,
-  MoreHorizontal,
-  Heart,
-  ThumbsUp,
-  MessageSquare,
-  Zap,
-  Target,
-  Grid,
-  List,
-  Settings
-} from 'lucide-react'
-import DocViewer, { DocViewerRenderers } from '@cyntler/react-doc-viewer'
-import '@cyntler/react-doc-viewer/dist/index.css'
-
-// Types for Universal Comment System
-interface UPFComment {
-  id: string
-  userId: string
-  userName: string
-  userAvatar?: string
-  content: string
-  type: 'image' | 'video' | 'code' | 'audio' | 'doc' | 'text'
-  position?: {
-    x?: number
-    y?: number
-    timestamp?: number
-    line?: number
-    startChar?: number
-    endChar?: number
-  }
-  status: 'open' | 'resolved' | 'in_progress'
-  priority: 'low' | 'medium' | 'high' | 'urgent'
-  createdAt: string
-  updatedAt?: string
-  replies: UPFComment[]
-  reactions: UPFReaction[]
-  mentions: string[]
-  voiceNote?: {
-    url: string
-    duration: number
-    waveform: number[]
-  }
-  aiSuggestion?: {
-    summary: string
-    category: string
-    severity: 'info' | 'warning' | 'error'
-  }
-  attachments?: UPFAttachment[]
-}
-
-interface UPFReaction {
-  userId: string
-  type: 'like' | 'love' | 'laugh' | 'angry' | 'sad' | 'thumbs_up' | 'thumbs_down'
-  createdAt: string
-}
-
-interface UPFAttachment {
-  id: string
-  name: string
-  url: string
-  type: string
-  size: number
-}
-
-interface MediaFile {
-  id: string
-  name: string
-  type: 'image' | 'video' | 'pdf' | 'code' | 'audio' | 'doc'
-  url: string
-  thumbnail?: string
-  metadata?: {
-    duration?: number
-    dimensions?: { width: number; height: number }
-    pageCount?: number
-    language?: string
-  }
-}
-
-// Context7 Pattern: Advanced State Management
-interface UPFState {
-  activeFile: MediaFile | null
-  comments: UPFComment[]
-  filteredComments: UPFComment[]
-  isRecording: boolean
-  recordingDuration: number
-  selectedPosition: UPFComment['position'] | null
-  isAddingComment: boolean
-  commentContent: string
-  commentType: UPFComment['type']
-  commentPriority: UPFComment['priority']
-  voiceBlob: Blob | null
-  isPlayingAudio: { [key: string]: boolean }
-  viewMode: 'grid' | 'overlay' | 'timeline'
-  filterBy: 'all' | 'open' | 'resolved' | 'priority'
-  searchQuery: string
-  showAISuggestions: boolean
-  isProcessingAI: boolean
-  clientMode: boolean
-}
-
-type UPFAction =
-  | { type: 'SET_ACTIVE_FILE'; file: MediaFile | null }
-  | { type: 'ADD_COMMENT'; comment: UPFComment }
-  | { type: 'UPDATE_COMMENT'; id: string; updates: Partial<UPFComment> }
+ comment: UPFComment }
+  | { type: &apos;UPDATE_COMMENT&apos;; id: string; updates: Partial<UPFComment> }
   | { type: 'DELETE_COMMENT'; id: string }
   | { type: 'SET_SELECTED_POSITION'; position: UPFComment['position'] | null }
   | { type: 'START_RECORDING' }
@@ -165,7 +34,7 @@ function upfReducer(state: UPFState, action: UPFAction): UPFState {
         ...state, 
         comments: newComments,
         filteredComments: filterComments(newComments, state.filterBy, state.searchQuery),
-        commentContent: '',
+        commentContent: '','
         selectedPosition: null,
         isAddingComment: false,
         voiceBlob: null
@@ -303,7 +172,7 @@ export function UniversalPinpointFeedback({
   currentUser,
   onCommentAdd,
   onCommentUpdate,
-  className = ''
+  className = '
 }: UniversalPinpointFeedbackProps) {
   // Initialize state with Context7 reducer pattern
   const [state, dispatch] = useReducer(upfReducer, {
@@ -314,14 +183,14 @@ export function UniversalPinpointFeedback({
     recordingDuration: 0,
     selectedPosition: null,
     isAddingComment: false,
-    commentContent: '',
+    commentContent: '','
     commentType: 'text',
     commentPriority: 'medium',
     voiceBlob: null,
     isPlayingAudio: {},
     viewMode: 'overlay',
     filterBy: 'all',
-    searchQuery: '',
+    searchQuery: '','
     showAISuggestions: true,
     isProcessingAI: false,
     clientMode: currentUser.role === 'client'
@@ -525,7 +394,7 @@ export function UniversalPinpointFeedback({
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}`
+    return `${mins}:${secs.toString().padStart(2, '0')}`'
   }
 
   const getPriorityColor = (priority: UPFComment['priority']) => {
@@ -550,80 +419,80 @@ export function UniversalPinpointFeedback({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header with Controls */}
-      <div className="flex items-center justify-between">
+      <div className= "flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Target className="h-6 w-6 text-purple-600" />
+          <h2 className= "text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <Target className= "h-6 w-6 text-purple-600" />
             Universal Pinpoint Feedback
           </h2>
-          <p className="text-gray-600">AI-powered collaboration across all media types</p>
+          <p className= "text-gray-600">AI-powered collaboration across all media types</p>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className= "flex items-center gap-2">
           <Button
             onClick={() => dispatch({ type: 'TOGGLE_AI_SUGGESTIONS' })}
             variant={state.showAISuggestions ? "default" : "outline"}
-            size="sm"
-            className="bg-gradient-to-r from-purple-600 to-blue-600"
+            size= "sm"
+            className= "bg-gradient-to-r from-purple-600 to-blue-600"
           >
-            <Sparkles className="h-4 w-4 mr-2" />
+            <Sparkles className= "h-4 w-4 mr-2" />
             AI Insights
           </Button>
           
-          <div className="flex border border-gray-200 rounded-lg">
+          <div className= "flex border border-gray-200 rounded-lg">
             <Button
               onClick={() => dispatch({ type: 'SET_VIEW_MODE', mode: 'overlay' })}
               variant={state.viewMode === 'overlay' ? "default" : "ghost"}
-              size="sm"
-              className="rounded-r-none"
+              size= "sm"
+              className= "rounded-r-none"
             >
-              <Grid className="h-4 w-4" />
+              <Grid className= "h-4 w-4" />
             </Button>
             <Button
               onClick={() => dispatch({ type: 'SET_VIEW_MODE', mode: 'timeline' })}
               variant={state.viewMode === 'timeline' ? "default" : "ghost"}
-              size="sm"
-              className="rounded-none"
+              size= "sm"
+              className= "rounded-none"
             >
-              <Clock className="h-4 w-4" />
+              <Clock className= "h-4 w-4" />
             </Button>
             <Button
               onClick={() => dispatch({ type: 'SET_VIEW_MODE', mode: 'grid' })}
               variant={state.viewMode === 'grid' ? "default" : "ghost"}
-              size="sm"
-              className="rounded-l-none"
+              size= "sm"
+              className= "rounded-l-none"
             >
-              <List className="h-4 w-4" />
+              <List className= "h-4 w-4" />
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className= "grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Media Viewer */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className= "lg:col-span-2 space-y-4">
           {/* File Selector */}
-          <Card className="bg-white/70 backdrop-blur-sm border-slate-200/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                <FileText className="h-5 w-5" />
+          <Card className= "bg-white/70 backdrop-blur-sm border-slate-200/50">
+            <CardHeader className= "pb-3">
+              <CardTitle className= "text-lg font-semibold flex items-center gap-2">
+                <FileText className= "h-5 w-5" />
                 Project Files
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className= "grid grid-cols-2 md:grid-cols-4 gap-3">
                 {files.map((file) => (
                   <Button
                     key={file.id}
                     onClick={() => dispatch({ type: 'SET_ACTIVE_FILE', file })}
                     variant={state.activeFile?.id === file.id ? "default" : "outline"}
-                    className="h-auto p-3 flex flex-col items-center gap-2"
+                    className= "h-auto p-3 flex flex-col items-center gap-2"
                   >
-                    {file.type === 'video' && <Video className="h-6 w-6" />}
-                    {file.type === 'image' && <ImageIcon className="h-6 w-6" />}
-                    {file.type === 'pdf' && <FileText className="h-6 w-6" />}
-                    {file.type === 'code' && <Code className="h-6 w-6" />}
-                    <span className="text-xs text-center">{file.name}</span>
+                    {file.type === 'video' && <Video className= "h-6 w-6" />}
+                    {file.type === 'image' && <ImageIcon className= "h-6 w-6" />}
+                    {file.type === 'pdf' && <FileText className= "h-6 w-6" />}
+                    {file.type === 'code' && <Code className= "h-6 w-6" />}
+                    <span className= "text-xs text-center">{file.name}</span>
                   </Button>
                 ))}
               </div>
@@ -632,18 +501,18 @@ export function UniversalPinpointFeedback({
 
           {/* Active Media Display */}
           {state.activeFile && (
-            <Card className="bg-white/70 backdrop-blur-sm border-slate-200/50">
+            <Card className= "bg-white/70 backdrop-blur-sm border-slate-200/50">
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-semibold">{state.activeFile.name}</CardTitle>
-                  <div className="flex items-center gap-2">
+                <div className= "flex items-center justify-between">
+                  <CardTitle className= "text-lg font-semibold">{state.activeFile.name}</CardTitle>
+                  <div className= "flex items-center gap-2">
                     <Button
                       onClick={() => dispatch({ type: 'TOGGLE_ADDING_COMMENT' })}
                       variant={state.isAddingComment ? "default" : "outline"}
-                      size="sm"
+                      size= "sm"
                       className={state.isAddingComment ? "bg-purple-600" : "border-purple-200 text-purple-600"}
                     >
-                      <Pin className="h-4 w-4 mr-2" />
+                      <Pin className= "h-4 w-4 mr-2" />
                       {state.isAddingComment ? 'Click to Pin' : 'Add Comment'}
                     </Button>
                   </div>
@@ -651,14 +520,14 @@ export function UniversalPinpointFeedback({
               </CardHeader>
               
               <CardContent>
-                <div className="relative">
+                <div className= "relative">
                   {/* Video Player */}
                   {state.activeFile.type === 'video' && (
-                    <div className="relative">
+                    <div className= "relative">
                       <video
                         ref={videoRef}
                         src={state.activeFile.url}
-                        className="w-full rounded-lg cursor-pointer"
+                        className= "w-full rounded-lg cursor-pointer"
                         controls
                         onClick={handleVideoClick}
                       />
@@ -669,13 +538,13 @@ export function UniversalPinpointFeedback({
                         .map((comment) => (
                           <div
                             key={comment.id}
-                            className="absolute bottom-16 bg-purple-500 text-white p-2 rounded-lg cursor-pointer hover:bg-purple-600 transition-colors transform -translate-x-1/2"
+                            className= "absolute bottom-16 bg-purple-500 text-white p-2 rounded-lg cursor-pointer hover:bg-purple-600 transition-colors transform -translate-x-1/2"
                             style={{
                               left: `${((comment.position?.timestamp || 0) / (state.activeFile?.metadata?.duration || 1)) * 100}%`
                             }}
                             title={comment.content}
                           >
-                            <Clock className="h-4 w-4" />
+                            <Clock className= "h-4 w-4" />
                           </div>
                         ))}
                     </div>
@@ -683,41 +552,24 @@ export function UniversalPinpointFeedback({
 
                   {/* Image Viewer */}
                   {state.activeFile.type === 'image' && (
-                    <div className="relative">
-                      <img
-                        src={state.activeFile.url}
-                        alt={state.activeFile.name}
-                        className="w-full rounded-lg cursor-pointer"
-                        onClick={handleImageClick}
-                      />
+                    <div className= "relative">
+                      <img src={state.activeFile.url} alt={state.activeFile.name} onClick={handleImageClick}>
                       
                       {/* Image Position Comments */}
                       {state.viewMode === 'overlay' && state.filteredComments
                         .filter(c => c.type === 'image' && c.position?.x !== undefined)
                         .map((comment) => (
-                          <div
-                            key={comment.id}
-                            className="absolute bg-purple-500 text-white p-2 rounded-lg cursor-pointer hover:bg-purple-600 transition-colors transform -translate-x-1/2 -translate-y-1/2"
-                            style={{
-                              left: `${comment.position?.x}%`,
-                              top: `${comment.position?.y}%`
-                            }}
-                            title={comment.content}
-                          >
-                            <MapPin className="h-4 w-4" />
+                          <div key={comment.id} style={{
+                              left: `${comment.position?.x} title={comment.content}>
+                            <MapPin >
                           </div>
                         ))}
 
                       {/* Selected Position Indicator */}
                       {state.selectedPosition?.x !== undefined && (
-                        <div
-                          className="absolute bg-yellow-400 text-black p-2 rounded-lg transform -translate-x-1/2 -translate-y-1/2 animate-pulse"
-                          style={{
-                            left: `${state.selectedPosition.x}%`,
-                            top: `${state.selectedPosition.y}%`
-                          }}
-                        >
-                          <MapPin className="h-4 w-4" />
+                        <div style={{
+                            left: `${state.selectedPosition.x}>
+                          <MapPin >
                         </div>
                       )}
                     </div>
@@ -725,103 +577,84 @@ export function UniversalPinpointFeedback({
 
                   {/* Document Viewer */}
                   {state.activeFile.type === 'pdf' && (
-                    <div className="w-full h-96">
-                      <DocViewer
-                        documents={[{ uri: state.activeFile.url, fileName: state.activeFile.name }]}
-                        pluginRenderers={DocViewerRenderers}
-                        style={{ height: '100%' }}
-                      />
+                    <div >
+                      <DocViewer documents={[{ uri: state.activeFile.url, fileName: state.activeFile.name } pluginRenderers={DocViewerRenderers} style={{ height: '100%&apos; }>
                     </div>
                   )}
                 </div>
 
                 {/* Comment Input */}
                 {state.isAddingComment && (
-                  <div className="mt-4 p-4 bg-purple-50 rounded-lg space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium text-purple-800">Add Your Feedback</h4>
+                  <div >
+                    <div >
+                      <h4 >Add Your Feedback</h4>
                       {state.selectedPosition && (
-                        <Badge variant="outline" className="bg-purple-100 text-purple-700">
+                        <Badge >
                           Position: {state.selectedPosition.x?.toFixed(1)}%, {state.selectedPosition.y?.toFixed(1)}%
                           {state.selectedPosition.timestamp && ` | Time: ${formatTime(state.selectedPosition.timestamp)}`}
                         </Badge>
                       )}
                     </div>
 
-                    <Textarea
-                      value={state.commentContent}
-                      onChange={(e) => dispatch({ type: 'SET_COMMENT_CONTENT', content: e.target.value })}
-                      placeholder="Share your feedback..."
-                      className="bg-white"
+                    <Textarea value={state.commentContent}> dispatch({ type: 'SET_COMMENT_CONTENT&apos;, content: e.target.value })}
+                      placeholder= "Share your feedback..."
+                      className= "bg-white"
                     />
 
-                    <div className="flex items-center gap-3">
-                      <select 
-                        value={state.commentPriority}
-                        onChange={(e) => dispatch({ type: 'SET_COMMENT_PRIORITY', priority: e.target.value as UPFComment['priority'] })}
-                        className="px-3 py-1 border border-purple-200 rounded-md text-sm"
+                    <div >
+                      <select value={state.commentPriority}> dispatch({ type: &apos;SET_COMMENT_PRIORITY&apos;, priority: e.target.value as UPFComment['priority'] })}
+                        className= "px-3 py-1 border border-purple-200 rounded-md text-sm"
                       >
-                        <option value="low">Low Priority</option>
-                        <option value="medium">Medium Priority</option>
-                        <option value="high">High Priority</option>
-                        <option value="urgent">Urgent</option>
+                        <option >Low Priority</option>
+                        <option >Medium Priority</option>
+                        <option >High Priority</option>
+                        <option >Urgent</option>
                       </select>
 
-                      <Button
-                        onClick={state.isRecording ? stopVoiceRecording : startVoiceRecording}
-                        variant={state.isRecording ? "destructive" : "outline"}
-                        size="sm"
-                        className="min-w-[100px]"
-                      >
+                      <Button onClick={state.isRecording ? stopVoiceRecording : startVoiceRecording} variant={state.isRecording ? "destructive&quot; : &quot;outline&quot;}>
                         {state.isRecording ? (
                           <>
-                            <MicOff className="h-4 w-4 mr-2" />
+                            <MicOff >
                             Stop ({state.recordingDuration}s)
                           </>
                         ) : (
                           <>
-                            <Mic className="h-4 w-4 mr-2" />
+                            <Mic >
                             Voice Note
                           </>
                         )}
                       </Button>
 
                       {state.voiceBlob && (
-                        <Badge variant="outline" className="bg-green-100 text-green-700">
-                          <Volume2 className="h-3 w-3 mr-1" />
+                        <Badge >
+                          <Volume2 >
                           {state.recordingDuration}s recorded
                         </Badge>
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
+                    <div >
+                      <div >
                         {state.showAISuggestions && (
-                          <Badge variant="outline" className="bg-blue-100 text-blue-700">
-                            <Sparkles className="h-3 w-3 mr-1" />
+                          <Badge >
+                            <Sparkles >
                             AI Analysis Enabled
                           </Badge>
                         )}
                       </div>
                       
-                      <div className="flex gap-2">
-                        <Button
-                          onClick={() => {
+                      <div >
+                        <Button > {
                             dispatch({ type: 'TOGGLE_ADDING_COMMENT' })
                             dispatch({ type: 'SET_SELECTED_POSITION', position: null })
                           }}
-                          variant="ghost"
-                          size="sm"
+                          variant= "ghost"
+                          size= "sm"
                         >
                           Cancel
                         </Button>
-                        <Button
-                          onClick={submitComment}
-                          disabled={!state.commentContent.trim() && !state.voiceBlob}
-                          className="bg-purple-600 hover:bg-purple-700"
-                          size="sm"
-                        >
-                          <Send className="h-4 w-4 mr-2" />
+                        <Button onClick={submitComment} disabled={!state.commentContent.trim() && !state.voiceBlob}>
+                          <Send >
                           Submit
                         </Button>
                       </div>
@@ -834,28 +667,24 @@ export function UniversalPinpointFeedback({
         </div>
 
         {/* Comments Panel */}
-        <div className="space-y-4">
+        <div >
           {/* Search and Filter */}
-          <Card className="bg-white/70 backdrop-blur-sm border-slate-200/50">
-            <CardContent className="p-4 space-y-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  value={state.searchQuery}
-                  onChange={(e) => dispatch({ type: 'SET_SEARCH_QUERY', query: e.target.value })}
-                  placeholder="Search comments..."
-                  className="pl-10"
+          <Card >
+            <CardContent >
+              <div >
+                <Search >
+                <Input value={state.searchQuery}> dispatch({ type: &apos;SET_SEARCH_QUERY&apos;, query: e.target.value })}
+                  placeholder= "Search comments..."
+                  className= "pl-10"
                 />
               </div>
               
-              <div className="flex gap-2">
+              <div >
                 {['all', 'open', 'resolved', 'priority'].map((filter) => (
-                  <Button
-                    key={filter}
-                    onClick={() => dispatch({ type: 'SET_FILTER', filter: filter as UPFState['filterBy'] })}
+                  <Button key={filter}> dispatch({ type: &apos;SET_FILTER&apos;, filter: filter as UPFState['filterBy'] })}
                     variant={state.filterBy === filter ? "default" : "outline"}
-                    size="sm"
-                    className="capitalize"
+                    size= "sm"
+                    className= "capitalize"
                   >
                     {filter}
                   </Button>
@@ -865,53 +694,53 @@ export function UniversalPinpointFeedback({
           </Card>
 
           {/* Comments List */}
-          <Card className="bg-white/70 backdrop-blur-sm border-slate-200/50">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <MessageCircle className="h-5 w-5" />
+          <Card >
+            <CardHeader >
+              <CardTitle >
+                <span >
+                  <MessageCircle >
                   Feedback ({state.filteredComments.length})
                 </span>
-                <Badge variant="outline" className="bg-purple-100 text-purple-700">
+                <Badge >
                   {state.filteredComments.filter(c => c.status === 'open').length} Open
                 </Badge>
               </CardTitle>
             </CardHeader>
             
-            <CardContent className="space-y-4 max-h-96 overflow-y-auto">
+            <CardContent >
               {state.filteredComments.map((comment) => (
-                <div key={comment.id} className="border border-gray-200 rounded-lg p-3 space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3 flex-1">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={comment.userAvatar} />
-                        <AvatarFallback className="text-xs">{comment.userName.charAt(0)}</AvatarFallback>
+                <div key={comment.id}>
+                  <div >
+                    <div >
+                      <Avatar >
+                        <AvatarImage src={comment.userAvatar}>
+                        <AvatarFallback >{comment.userName.charAt(0)}</AvatarFallback>
                       </Avatar>
                       
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm font-medium text-gray-900">{comment.userName}</span>
-                          <Badge className={getPriorityColor(comment.priority)} variant="outline">
+                      <div >
+                        <div >
+                          <span >{comment.userName}</span>
+                          <Badge className={getPriorityColor(comment.priority)}>
                             {comment.priority}
                           </Badge>
-                          <Badge className={getStatusColor(comment.status)} variant="outline">
+                          <Badge className={getStatusColor(comment.status)}>
                             {comment.status}
                           </Badge>
                         </div>
                         
-                        <p className="text-sm text-gray-700 mb-2">{comment.content}</p>
+                        <p >{comment.content}</p>
                         
                         {comment.position && (
-                          <div className="text-xs text-purple-600 mb-2">
+                          <div >
                             {comment.type === 'video' && comment.position.timestamp !== undefined && (
-                              <span className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
+                              <span >
+                                <Clock >
                                 Time: {formatTime(comment.position.timestamp)}
                               </span>
                             )}
                             {comment.type === 'image' && comment.position.x !== undefined && (
-                              <span className="flex items-center gap-1">
-                                <MapPin className="h-3 w-3" />
+                              <span >
+                                <MapPin >
                                 Position: {comment.position.x.toFixed(1)}%, {comment.position.y?.toFixed(1)}%
                               </span>
                             )}
@@ -919,62 +748,52 @@ export function UniversalPinpointFeedback({
                         )}
 
                         {comment.voiceNote && (
-                          <div className="flex items-center gap-2 p-2 bg-blue-50 rounded">
-                            <Button
-                              onClick={() => dispatch({ type: 'TOGGLE_AUDIO_PLAYBACK', commentId: comment.id })}
-                              size="sm"
-                              variant="ghost"
+                          <div >
+                            <Button > dispatch({ type: &apos;TOGGLE_AUDIO_PLAYBACK&apos;, commentId: comment.id })}
+                              size= "sm"
+                              variant= "ghost"
                             >
                               {state.isPlayingAudio[comment.id] ? (
-                                <Pause className="h-4 w-4" />
+                                <Pause >
                               ) : (
-                                <Play className="h-4 w-4" />
+                                <Play >
                               )}
                             </Button>
-                            <div className="flex-1 h-8 bg-blue-100 rounded flex items-center px-2">
-                              <div className="flex gap-1">
+                            <div >
+                              <div >
                                 {comment.voiceNote.waveform.slice(0, 20).map((height, i) => (
-                                  <div
-                                    key={i}
-                                    className="w-1 bg-blue-500 rounded"
-                                    style={{ height: `${height/5}px` }}
-                                  />
+                                  <div key={i} style={{ height: `${height/5}>
                                 ))}
                               </div>
                             </div>
-                            <span className="text-xs text-blue-600">{comment.voiceNote.duration}s</span>
+                            <span >{comment.voiceNote.duration}s</span>
                           </div>
                         )}
 
                         {comment.aiSuggestion && state.showAISuggestions && (
-                          <div className="p-2 bg-gradient-to-r from-purple-50 to-blue-50 rounded border-l-4 border-purple-400">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Sparkles className="h-4 w-4 text-purple-600" />
-                              <span className="text-xs font-medium text-purple-800">AI Insight</span>
-                              <Badge 
-                                variant="outline" 
-                                className={
+                          <div >
+                            <div >
+                              <Sparkles >
+                              <span >AI Insight</span>
+                              <Badge className={
                                   comment.aiSuggestion.severity === 'error' ? 'bg-red-100 text-red-700' :
                                   comment.aiSuggestion.severity === 'warning' ? 'bg-yellow-100 text-yellow-700' :
                                   'bg-blue-100 text-blue-700'
-                                }
-                              >
+                                }>
                                 {comment.aiSuggestion.category}
                               </Badge>
                             </div>
-                            <p className="text-xs text-purple-700">{comment.aiSuggestion.summary}</p>
+                            <p >{comment.aiSuggestion.summary}</p>
                           </div>
                         )}
 
-                        <div className="flex items-center justify-between mt-2">
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1">
+                        <div >
+                          <div >
+                            <div >
                               {['thumbs_up', 'heart', 'laugh'].map((reactionType) => {
                                 const count = comment.reactions.filter(r => r.type === reactionType).length
                                 return count > 0 ? (
-                                  <Button
-                                    key={reactionType}
-                                    onClick={() => dispatch({
+                                  <Button key={reactionType}> dispatch({
                                       type: 'ADD_REACTION',
                                       commentId: comment.id,
                                       reaction: {
@@ -983,21 +802,20 @@ export function UniversalPinpointFeedback({
                                         createdAt: new Date().toISOString()
                                       }
                                     })}
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 px-2 text-xs"
+                                    variant= "ghost"
+                                    size= "sm"
+                                    className= "h-6 px-2 text-xs"
                                   >
-                                    {reactionType === 'thumbs_up' && <ThumbsUp className="h-3 w-3" />}
-                                    {reactionType === 'heart' && <Heart className="h-3 w-3" />}
+                                    {reactionType === 'thumbs_up' && <ThumbsUp >}
+                                    {reactionType === 'heart' && <Heart >}
                                     {reactionType === 'laugh' && '😂'}
-                                    <span className="ml-1">{count}</span>
+                                    <span >{count}</span>
                                   </Button>
                                 ) : null
                               })}
                             </div>
                             
-                            <Button
-                              onClick={() => dispatch({
+                            <Button > dispatch({
                                 type: 'ADD_REACTION',
                                 commentId: comment.id,
                                 reaction: {
@@ -1006,27 +824,22 @@ export function UniversalPinpointFeedback({
                                   createdAt: new Date().toISOString()
                                 }
                               })}
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 px-2 text-xs"
+                              variant= "ghost"
+                              size= "sm"
+                              className= "h-6 px-2 text-xs"
                             >
-                              <ThumbsUp className="h-3 w-3" />
+                              <ThumbsUp >
                             </Button>
                             
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 px-2 text-xs"
-                            >
-                              <MessageSquare className="h-3 w-3 mr-1" />
+                            <Button >
+                              <MessageSquare >
                               Reply
                             </Button>
                           </div>
                           
-                          <div className="flex items-center gap-2">
+                          <div >
                             {currentUser.role === 'freelancer' && (
-                              <Button
-                                onClick={() => dispatch({
+                              <Button > dispatch({
                                   type: 'UPDATE_COMMENT',
                                   id: comment.id,
                                   updates: { 
@@ -1034,15 +847,15 @@ export function UniversalPinpointFeedback({
                                     updatedAt: new Date().toISOString()
                                   }
                                 })}
-                                size="sm"
+                                size= "sm"
                                 variant={comment.status === 'resolved' ? "default" : "outline"}
-                                className="h-6 px-2 text-xs"
+                                className= "h-6 px-2 text-xs"
                               >
-                                <CheckCircle className="h-3 w-3 mr-1" />
+                                <CheckCircle >
                                 {comment.status === 'resolved' ? 'Resolved' : 'Mark Resolved'}
                               </Button>
                             )}
-                            <span className="text-xs text-gray-500">
+                            <span >
                               {new Date(comment.createdAt).toLocaleTimeString()}
                             </span>
                           </div>
@@ -1054,10 +867,10 @@ export function UniversalPinpointFeedback({
               ))}
 
               {state.filteredComments.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  <MessageCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                  <p>No comments found</p>
-                  <p className="text-sm">Start by adding feedback to your media files</p>
+                <div >
+                  <MessageCircle >
+                  <p >No comments found</p>
+                  <p >Start by adding feedback to your media files</p>
                 </div>
               )}
             </CardContent>
@@ -1065,32 +878,32 @@ export function UniversalPinpointFeedback({
 
           {/* AI Summary Panel */}
           {state.showAISuggestions && state.filteredComments.length > 0 && (
-            <Card className="bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200/50">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-purple-600" />
+            <Card >
+              <CardHeader >
+                <CardTitle >
+                  <Sparkles >
                   AI Summary
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="text-center p-3 bg-white/60 rounded-lg">
-                    <div className="text-lg font-bold text-purple-600">
+              <CardContent >
+                <div >
+                  <div >
+                    <div >
                       {state.filteredComments.filter(c => c.priority === 'high' || c.priority === 'urgent').length}
                     </div>
-                    <div className="text-xs text-purple-700">High Priority</div>
+                    <div >High Priority</div>
                   </div>
-                  <div className="text-center p-3 bg-white/60 rounded-lg">
-                    <div className="text-lg font-bold text-blue-600">
+                  <div >
+                    <div >
                       {state.filteredComments.filter(c => c.aiSuggestion?.category === 'UX Enhancement').length}
                     </div>
-                    <div className="text-xs text-blue-700">UX Issues</div>
+                    <div >UX Issues</div>
                   </div>
                 </div>
                 
-                <div className="p-3 bg-white/60 rounded-lg">
-                  <p className="text-sm text-gray-700">
-                    <strong>Key Themes:</strong> Design improvements, responsive issues, and timing adjustments are the main focus areas.
+                <div >
+                  <p >
+                    <strong >Key Themes:</strong> Design improvements, responsive issues, and timing adjustments are the main focus areas.
                   </p>
                 </div>
               </CardContent>

@@ -11,7 +11,7 @@ const CONFIG = {
   localUrl: 'http://localhost:3000',
   routes: [
     // Public routes
-    { path: '/', name: 'Landing Page', public: true },
+    { path: '/', name: 'Landing Page', public: true },'
     { path: '/features', name: 'Features Page', public: true },
     { path: '/payment', name: 'Payment Page', public: true },
     { path: '/demo', name: 'Demo Page', public: true },
@@ -31,7 +31,7 @@ const CONFIG = {
 function makeRequest(url) {
   return new Promise((resolve) => {
     const request = http.get(url, (response) => {
-      let data = '';
+      let data = '';'
       response.on('data', chunk => data += chunk);
       response.on('end', () => {
         resolve({
@@ -201,7 +201,7 @@ async function runComprehensiveTest() {
     const overallPassed = authPassed && notificationsPassed && navPassed;
     
     console.log('\n📊 Test Summary:');
-    console.log('================');
+    console.log('================ ');
     console.log(`🔐 Authentication Bypass: ${authPassed ? '✅ PASSED' : '❌ FAILED'}`);
     console.log(`🔔 Notifications System: ${notificationsPassed ? '✅ PASSED' : '❌ FAILED'}`);
     console.log(`🧭 Navigation Integration: ${navPassed ? '✅ PASSED' : '❌ FAILED'}`);

@@ -47,7 +47,7 @@ class SimpleDemoFixer {
       }
       
     } catch (error) {
-      console.error('❌ Error checking demo content:', error.message);
+      console.error('❌ Error checking demo content: ', error.message);
       this.results.errors.push(`Demo Content Check: ${error.message}`);
     }
   }
@@ -86,7 +86,7 @@ DISABLE_S3_UPLOAD=true
       }
       
     } catch (error) {
-      console.error('❌ Error configuring environment:', error.message);
+      console.error('❌ Error configuring environment: ', error.message);
       this.results.errors.push(`Environment Config: ${error.message}`);
     }
   }
@@ -94,13 +94,8 @@ DISABLE_S3_UPLOAD=true
   async verifyDemoFiles() {
     console.log('\n📁 Verifying Demo Files...');
     
-    const filesToCheck = [
-      'app/demo-features/page.tsx',
-      'components/demo/demo-router.tsx',
-      'components/demo/client-presentation-demo.tsx',
-      'components/demo/investor-demo.tsx',
-      'public/enhanced-content/content-summary.json'
-    ];
+    const filesToCheck = ['app/demo-features/page.tsx', 'components/demo/demo-router.tsx', 'components/demo/client-presentation-demo.tsx', 'components/demo/investor-demo.tsx',
+      'public/enhanced-content/content-summary.json'];
 
     for (const file of filesToCheck) {
       try {
@@ -120,7 +115,7 @@ DISABLE_S3_UPLOAD=true
 # Quick Demo Test Script
 
 echo "🎭 TESTING DEMO SYSTEM"
-echo "======================="
+echo "======================= "
 
 echo "1. Testing demo router..."
 curl -s -o /dev/null -w "%{http_code}" http://localhost:3003/demo-features
@@ -134,7 +129,7 @@ echo "3. Testing projects hub..."
 curl -s -o /dev/null -w "%{http_code}" http://localhost:3003/dashboard/projects-hub
 echo " - Projects hub HTTP status: $?"
 
-echo ""
+echo "
 echo "✅ Demo system test complete!"
 echo "🌐 Access demo at: http://localhost:3003/demo-features"
 `;
@@ -161,9 +156,9 @@ echo "🌐 Access demo at: http://localhost:3003/demo-features"
       nextSteps: this.getNextSteps()
     };
 
-    console.log('\n' + '='.repeat(50));
+    console.log('\n' + '='.repeat(50));'
     console.log('🎭 SIMPLE DEMO FIX REPORT');
-    console.log('='.repeat(50));
+    console.log('='.repeat(50));'
     
     console.log(`\n📊 RESULTS:`);
     console.log(`   S3 Issue Fixed: ${report.summary.s3Fixed ? '✅' : '❌'}`);

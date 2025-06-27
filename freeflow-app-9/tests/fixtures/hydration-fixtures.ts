@@ -1,5 +1,5 @@
-import { Page } from '@playwright/test'
-import { Project } from '@/types/projects'
+import { Page } from &apos;@playwright/test&apos;
+import { Project } from &apos;@/types/projects&apos;
 
 export interface HydrationTestData {
   componentName: string
@@ -9,18 +9,18 @@ export interface HydrationTestData {
 
 export const hydrationTestCases: HydrationTestData[] = [
   {
-    componentName: 'ProjectsHub',
+    componentName: &apos;ProjectsHub&apos;,
     expectedContent: [
-      'Projects Hub',
-      'Manage all your freelance projects in one place',
-      'Create Project'
+      &apos;Projects Hub&apos;,
+      &apos;Manage all your freelance projects in one place&apos;,
+      &apos;Create Project&apos;
     ]
   },
   {
-    componentName: 'VideoStudio',
+    componentName: &apos;VideoStudio&apos;,
     expectedContent: [
-      'Video Studio',
-      'Create and edit professional videos'
+      &apos;Video Studio&apos;,
+      &apos;Create and edit professional videos&apos;
     ],
     shouldRefresh: true
   }
@@ -28,15 +28,15 @@ export const hydrationTestCases: HydrationTestData[] = [
 
 export async function setupHydrationTest(page: Page, componentName: string) {
   // Enable console logging
-  page.on('console', msg => {
-    if (msg.type() === 'error' || msg.type() === 'warning') {
+  page.on(&apos;console&apos;, msg => {
+    if (msg.type() === &apos;error&apos; || msg.type() === &apos;warning&apos;) {
       console.log(`[${msg.type()}] ${msg.text()}`)
     }
   })
 
   // Enable uncaught error logging
-  page.on('pageerror', error => {
-    console.error('Uncaught error:', error)
+  page.on(&apos;pageerror&apos;, error => {
+    console.error(&apos;Uncaught error:&apos;, error)
   })
 
   // Add custom attribute to help identify hydration issues
@@ -50,10 +50,10 @@ export async function checkHydrationErrors(page: Page): Promise<string[]> {
     const errors: string[] = []
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
-        if (mutation.type === 'childList' || mutation.type === 'characterData') {
+        if (mutation.type === &apos;childList&apos; || mutation.type === &apos;characterData&apos;) {
           const target = mutation.target as HTMLElement
-          if (target.getAttribute('data-hydration-error')) {
-            errors.push(target.getAttribute('data-hydration-error') || '')
+          if (target.getAttribute(&apos;data-hydration-error&apos;)) {
+            errors.push(target.getAttribute(&apos;data-hydration-error&apos;) || '&apos;)'
           }
         }
       })
@@ -73,7 +73,7 @@ export async function checkHydrationErrors(page: Page): Promise<string[]> {
 
 export async function waitForHydration(page: Page): Promise<void> {
   await page.waitForFunction(() => {
-    return document.documentElement.hasAttribute('data-hydrated')
+    return document.documentElement.hasAttribute(&apos;data-hydrated&apos;)
   }, { timeout: 5000 })
 }
 
@@ -92,50 +92,50 @@ export async function checkComponentRendering(page: Page, expectedContent: strin
 // Mock project data for testing
 export const mockProjects: Project[] = [
   {
-    id: '1',
-    title: 'Test Project 1',
-    description: 'A test project for hydration testing',
-    status: 'active',
-    priority: 'high',
+    id: &apos;1','
+    title: &apos;Test Project 1&apos;,
+    description: &apos;A test project for hydration testing&apos;,
+    status: &apos;active&apos;,
+    priority: &apos;high&apos;,
     budget: 1000,
     spent: 500,
-    client_name: 'Test Client',
-    client_email: 'client@test.com',
-    start_date: '2024-01-01',
-    end_date: '2024-12-31',
+    client_name: &apos;Test Client&apos;,
+    client_email: &apos;client@test.com&apos;,
+    start_date: &apos;2024-01-01&apos;,
+    end_date: &apos;2024-12-31&apos;,
     progress: 50,
     team_members: [
-      { id: '1', name: 'John Doe', avatar: '/avatars/john.jpg' },
-      { id: '2', name: 'Jane Smith', avatar: '/avatars/jane.jpg' }
+      { id: &apos;1', name: &apos;John Doe&apos;, avatar: &apos;/avatars/john.jpg&apos; },'
+      { id: &apos;2', name: &apos;Jane Smith&apos;, avatar: &apos;/avatars/jane.jpg&apos; }'
     ],
     attachments: [
-      { id: '1', name: 'doc.pdf', url: '/files/doc.pdf' }
+      { id: &apos;1', name: &apos;doc.pdf&apos;, url: &apos;/files/doc.pdf&apos; }'
     ],
     comments_count: 5,
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-02T00:00:00Z'
+    created_at: &apos;2024-01-01T00:00:00Z&apos;,
+    updated_at: &apos;2024-01-02T00:00:00Z&apos;
   }
 ]
 
 // Mock user data for testing
 export const mockUser = {
-  id: 'test-user-id',
-  email: 'test@example.com',
-  name: 'Test User'
+  id: &apos;test-user-id&apos;,
+  email: &apos;test@example.com&apos;,
+  name: &apos;Test User&apos;
 }
 
 // Mock state changes for testing hydration
 export const mockStateChanges = {
   projectUpdates: {
-    id: '1',
+    id: &apos;1','
     progress: 75,
-    status: 'completed' as const
+    status: &apos;completed&apos; as const
   },
   newComment: {
-    id: 'comment-1',
-    text: 'Test comment',
-    user_id: 'test-user-id',
-    created_at: '2024-01-03T00:00:00Z'
+    id: &apos;comment-1&apos;,
+    text: &apos;Test comment&apos;,
+    user_id: &apos;test-user-id&apos;,
+    created_at: &apos;2024-01-03T00:00:00Z&apos;
   }
 }
 
@@ -147,17 +147,17 @@ export const mockServerProps = {
 
 // Mock client-side state
 export const mockClientState = {
-  searchQuery: 'test',
-  statusFilter: 'active',
-  priorityFilter: 'high',
-  viewMode: 'grid' as const
+  searchQuery: &apos;test&apos;,
+  statusFilter: &apos;active&apos;,
+  priorityFilter: &apos;high&apos;,
+  viewMode: &apos;grid&apos; as const
 }
 
 // Mock hydration boundary cases
 export const mockHydrationCases = {
   // Case 1: Different server/client timestamps
   timestamps: {
-    server: '2024-01-01T00:00:00Z',
+    server: &apos;2024-01-01T00:00:00Z&apos;,
     client: new Date().toISOString()
   },
   
@@ -166,8 +166,8 @@ export const mockHydrationCases = {
     server: mockProjects,
     client: [...mockProjects, {
       ...mockProjects[0],
-      id: '2',
-      title: 'Client-only Project'
+      id: &apos;2','
+      title: &apos;Client-only Project&apos;
     }]
   },
   
@@ -180,23 +180,23 @@ export const mockHydrationCases = {
   // Case 4: Different filter states
   filterStates: {
     server: mockProjects,
-    client: mockProjects.filter(p => p.status === 'active')
+    client: mockProjects.filter(p => p.status === &apos;active&apos;)
   }
 }
 
 // Mock error scenarios
 export const mockErrorScenarios = {
   // Network errors
-  networkError: new Error('Failed to fetch'),
+  networkError: new Error(&apos;Failed to fetch&apos;),
   
   // Authentication errors
-  authError: new Error('Unauthorized'),
+  authError: new Error(&apos;Unauthorized&apos;),
   
   // Data validation errors
-  validationError: new Error('Invalid data format'),
+  validationError: new Error(&apos;Invalid data format&apos;),
   
   // State synchronization errors
-  syncError: new Error('State synchronization failed')
+  syncError: new Error(&apos;State synchronization failed&apos;)
 }
 
 // Mock event handlers for testing
@@ -211,18 +211,18 @@ export const mockEventHandlers = {
 // Mock DOM elements for testing
 export const mockDOMElements = {
   projectCard: {
-    id: 'project-1',
-    className: 'project-card',
+    id: &apos;project-1&apos;,
+    className: &apos;project-card&apos;,
     dataset: {
-      status: 'active',
-      priority: 'high'
+      status: &apos;active&apos;,
+      priority: &apos;high&apos;
     }
   },
   filterButton: {
-    id: 'filter-btn',
-    className: 'filter-button',
+    id: &apos;filter-btn&apos;,
+    className: &apos;filter-button&apos;,
     dataset: {
-      filter: 'status'
+      filter: &apos;status&apos;
     }
   }
 }
@@ -236,7 +236,7 @@ export const mockComponentStates = {
   },
   error: {
     isLoading: false,
-    error: new Error('Failed to load'),
+    error: new Error(&apos;Failed to load&apos;),
     data: null
   },
   success: {
@@ -247,7 +247,7 @@ export const mockComponentStates = {
 }
 
 // Helper function to simulate state changes
-export const simulateStateChange = (initialState: any, updates: any) => {
+export const simulateStateChange = (initialState: unknown, updates: unknown) => {
   return {
     ...initialState,
     ...updates
@@ -255,7 +255,7 @@ export const simulateStateChange = (initialState: any, updates: any) => {
 }
 
 // Helper function to simulate hydration mismatch
-export const simulateHydrationMismatch = (serverData: any, clientData: any) => {
+export const simulateHydrationMismatch = (serverData: unknown, clientData: unknown) => {
   return {
     server: serverData,
     client: clientData,

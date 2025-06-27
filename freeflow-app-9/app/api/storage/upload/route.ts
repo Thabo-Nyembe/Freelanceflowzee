@@ -27,12 +27,7 @@ export async function POST(request: NextRequest) {
 
     // File validation using Context7 patterns
     const maxSize = 100 * 1024 * 1024 // 100MB
-    const allowedTypes = [
-      'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-      'video/mp4', 'video/avi', 'video/mov', 'video/wmv',
-      'audio/mp3', 'audio/wav', 'audio/ogg',
-      'application/pdf', 'text/plain', 'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/avi', 'video/mov', 'video/wmv', 'audio/mp3', 'audio/wav', 'audio/ogg', 'application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     ]
 
     if (file.size > maxSize) {
@@ -54,7 +49,7 @@ export async function POST(request: NextRequest) {
     // Generate unique filename
     const timestamp = Date.now()
     const randomString = Math.random().toString(36).substring(2, 15)
-    const fileExtension = file.name.split('.').pop()
+    const fileExtension = file.name.split('.').pop()'
     const uniqueFileName = `${timestamp}-${randomString}.${fileExtension}`
     const storagePath = `uploads/${category}/${uniqueFileName}`
 
@@ -180,7 +175,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('file_storage')
-      .select('*')
+      .select('*')'
       .order('created_at', { ascending: false })
       .limit(limit)
 

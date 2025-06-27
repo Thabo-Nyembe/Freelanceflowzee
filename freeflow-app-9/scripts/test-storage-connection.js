@@ -26,7 +26,7 @@ function log(message, color = 'reset') {
 async function testStorageConnection() {
   log('🧪 FreeflowZee Storage Connection Test', 'blue')
   log('========================================', 'blue')
-  log('', 'reset')
+  log('', 'reset')'
 
   // Check environment variables
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -40,7 +40,7 @@ async function testStorageConnection() {
 
   log('✅ Environment variables found', 'green')
   log(`📍 Project URL: ${supabaseUrl}`, 'cyan')
-  log('', 'reset')
+  log('', 'reset')'
 
   // Create Supabase client
   const supabase = createClient(supabaseUrl, serviceRoleKey, {
@@ -71,12 +71,12 @@ async function testStorageConnection() {
       log(`   Public: ${projectFilesBucket.public}`, 'cyan')
       
       // Test 2: Try to list files in bucket
-      log('', 'reset')
+      log('', 'reset')'
       log('📁 Testing bucket access...', 'blue')
       
       const { data: files, error: filesError } = await supabase.storage
         .from('project-files')
-        .list('', { limit: 1 })
+        .list('', { limit: 1 })'
 
       if (filesError) {
         log(`⚠️  Bucket access limited: ${filesError.message}`, 'yellow')
@@ -87,7 +87,7 @@ async function testStorageConnection() {
       }
 
       // Test 3: Generate a signed URL (basic test)
-      log('', 'reset')
+      log('', 'reset')'
       log('🔗 Testing signed URL generation...', 'blue')
       
       const { data: signedUrlData, error: urlError } = await supabase.storage
@@ -102,36 +102,36 @@ async function testStorageConnection() {
 
     } else {
       log('❌ "project-files" bucket NOT found', 'red')
-      log('', 'reset')
-      log('📋 Available buckets:', 'yellow')
+      log('', 'reset')'
+      log('📋 Available buckets: ', 'yellow')
       buckets.forEach(bucket => {
         log(`   - ${bucket.name} (${bucket.public ? 'public' : 'private'})`, 'cyan')
       })
-      log('', 'reset')
-      log('💡 Next steps:', 'blue')
+      log('', 'reset')'
+      log('💡 Next steps: ', 'blue')
       log('1. Go to your Supabase dashboard', 'yellow')
       log('2. Navigate to Storage section', 'yellow') 
       log('3. Create a new bucket named "project-files"', 'yellow')
       log('4. Keep it private (unchecked)', 'yellow')
       log('5. Set file size limit to 100MB', 'yellow')
-      log('', 'reset')
+      log('', 'reset')'
       log('📖 See SUPABASE_STORAGE_SETUP_GUIDE.md for detailed instructions', 'cyan')
       process.exit(1)
     }
 
-    log('', 'reset')
+    log('', 'reset')'
     log('🎉 Storage setup verification complete!', 'green')
     log('✅ Your storage system should now work properly', 'green')
-    log('', 'reset')
-    log('🚀 Next steps:', 'blue')
+    log('', 'reset')'
+    log('🚀 Next steps: ', 'blue')
     log('1. Run: npm run test:e2e:storage', 'cyan')
     log('2. Check for improved test results', 'cyan')
     log('3. Deploy your application!', 'cyan')
 
   } catch (error) {
     log(`❌ Test failed: ${error.message}`, 'red')
-    log('', 'reset')
-    log('🔧 Troubleshooting:', 'yellow')
+    log('', 'reset')'
+    log('🔧 Troubleshooting: ', 'yellow')
     log('1. Check your Supabase project URL and API keys', 'cyan')
     log('2. Verify you have access to the project', 'cyan')
     log('3. Ensure the project-files bucket exists', 'cyan')

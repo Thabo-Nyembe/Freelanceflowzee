@@ -1,4 +1,4 @@
-"use client"
+"use client
 
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
@@ -6,7 +6,7 @@ import * as RechartsPrimitive from "recharts"
 import { cn } from "@/lib/utils"
 
 // Format: { THEME_NAME: CSS_SELECTOR }
-const THEMES = { light: "", dark: ".dark" } as const
+const THEMES = { light: "", dark: ".dark" } as const"
 
 export type ChartConfig = {
   [k in string]: {
@@ -36,7 +36,7 @@ function useChart() {
 
 const ChartContainer = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<"div"> & {
+  React.ComponentProps<&quot;div&quot;> & {
     config: ChartConfig
     children: React.ComponentProps<
       typeof RechartsPrimitive.ResponsiveContainer
@@ -44,7 +44,7 @@ const ChartContainer = React.forwardRef<
   }
 >(({ id, className, children, config, ...props }, ref) => {
   const uniqueId = React.useId()
-  const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
+  const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`"
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -52,7 +52,7 @@ const ChartContainer = React.forwardRef<
         data-chart={chartId}
         ref={ref}
         className={cn(
-          "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
+          "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke= '#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke= '#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke= '#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke= '#ccc']]:stroke-border [&_.recharts-sector[stroke= '#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
           className
         )}
         {...props}
@@ -105,7 +105,7 @@ const ChartTooltip = RechartsPrimitive.Tooltip
 const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
-    React.ComponentProps<"div"> & {
+    React.ComponentProps<"div&quot;> & {
       hideLabel?: boolean
       hideIndicator?: boolean
       indicator?: "line" | "dot" | "dashed"
@@ -184,7 +184,7 @@ const ChartTooltipContent = React.forwardRef<
         )}
       >
         {!nestLabel ? tooltipLabel : null}
-        <div className="grid gap-1.5">
+        <div className= "grid gap-1.5">
           {payload.map((item, index) => {
             const key = `${nameKey || item.name || item.dataKey || "value"}`
             const itemConfig = getPayloadConfigFromPayload(config, item, key)
@@ -210,17 +210,13 @@ const ChartTooltipContent = React.forwardRef<
                           className={cn(
                             "shrink-0 rounded-[2px] border-[--color-border] bg-[--color-bg]",
                             {
-                              "h-2.5 w-2.5": indicator === "dot",
-                              "w-1": indicator === "line",
-                              "w-0 border-[1.5px] border-dashed bg-transparent":
-                                indicator === "dashed",
-                              "my-0.5": nestLabel && indicator === "dashed",
+                              "h-2.5 w-2.5": indicator === "dot", "w-1": indicator === "line", "w-0 border-[1.5px] border-dashed bg-transparent":
+                                indicator === "dashed", "my-0.5": nestLabel && indicator === "dashed",
                             }
                           )}
                           style={
                             {
-                              "--color-bg": indicatorColor,
-                              "--color-border": indicatorColor,
+                              "--color-bg": indicatorColor, "--color-border": indicatorColor,
                             } as React.CSSProperties
                           }
                         />
@@ -232,14 +228,14 @@ const ChartTooltipContent = React.forwardRef<
                         nestLabel ? "items-end" : "items-center"
                       )}
                     >
-                      <div className="grid gap-1.5">
+                      <div className= "grid gap-1.5">
                         {nestLabel ? tooltipLabel : null}
-                        <span className="text-muted-foreground">
+                        <span className= "text-muted-foreground">
                           {itemConfig?.label || item.name}
                         </span>
                       </div>
                       {item.value && (
-                        <span className="font-mono font-medium tabular-nums text-foreground">
+                        <span className= "font-mono font-medium tabular-nums text-foreground">
                           {item.value.toLocaleString()}
                         </span>
                       )}
@@ -260,8 +256,8 @@ const ChartLegend = RechartsPrimitive.Legend
 
 const ChartLegendContent = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<"div"> &
-    Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
+  React.ComponentProps<&quot;div&quot;> &
+    Pick<RechartsPrimitive.LegendProps, "payload" | &quot;verticalAlign&quot;> & {
       hideIcon?: boolean
       nameKey?: string
     }
@@ -300,7 +296,7 @@ const ChartLegendContent = React.forwardRef<
                 <itemConfig.icon />
               ) : (
                 <div
-                  className="h-2 w-2 shrink-0 rounded-[2px]"
+                  className= "h-2 w-2 shrink-0 rounded-[2px]"
                   style={{
                     backgroundColor: item.color,
                   }}
@@ -326,8 +322,7 @@ function getPayloadConfigFromPayload(
     return undefined
   }
 
-  const payloadPayload =
-    "payload" in payload &&
+  const payloadPayload = "payload" in payload &&
     typeof payload.payload === "object" &&
     payload.payload !== null
       ? payload.payload

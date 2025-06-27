@@ -3,12 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies'
 
 // Define protected routes that require authentication
-const protectedRoutes = [
-  '/dashboard',
-  '/projects',
-  '/analytics',
-  '/feedback',
-  '/settings'
+const protectedRoutes = ['/dashboard', '/projects', '/analytics', '/feedback', '/settings'
 ]
 
 // Helper function to check if a route is protected

@@ -49,7 +49,7 @@ const uploadFeatures = [
   { name: 'Context7 useReducer Pattern', pattern: 'const [state, dispatch] = useReducer(uploadReducer' },
   { name: 'Escrow Settings Interface', pattern: 'interface EscrowSettings' },
   { name: 'Escrow State Management', pattern: 'escrowState:' },
-  { name: 'Escrow Protection Overview', pattern: 'data-testid="escrow-overview"' },
+  { name: 'Escrow Protection Overview', pattern: 'data-testid= "escrow-overview"' },
   { name: 'Escrow Amount Configuration', pattern: 'escrowAmount' },
   { name: 'Protection Level Selection', pattern: 'protectionLevel:' },
   { name: 'TypeScript Action Types', pattern: 'type UploadAction' },
@@ -78,10 +78,10 @@ const downloadFeatures = [
 console.log('🚀 Starting Context7 Integration Validation...\n');
 
 const uploadValid = validateComponent(UPLOAD_COMPONENT, 'Enhanced Upload Component', uploadFeatures);
-console.log('');
+console.log('');'
 
 const downloadValid = validateComponent(DOWNLOAD_COMPONENT, 'Enhanced Download Component', downloadFeatures);
-console.log('');
+console.log('');'
 
 // Check for integration consistency
 console.log('📊 Checking Integration Consistency...');
@@ -123,7 +123,7 @@ consistencyChecks.forEach(check => {
 });
 
 // Final results
-console.log('\n================================================================================');
+console.log('\n================================================================================ ');
 console.log('🎯 CONTEXT7 INTEGRATION VALIDATION RESULTS');
 console.log('================================================================================\n');
 

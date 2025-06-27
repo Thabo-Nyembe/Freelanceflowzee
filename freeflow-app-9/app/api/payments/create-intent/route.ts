@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
         currency: currency.toLowerCase(),
         metadata: {
           description: description || 'FreeflowZee Payment',
-          customer_email: customer_email || '',
+          customer_email: customer_email || '','
           created_via: 'freeflowzee-enhanced',
           created_at: new Date().toISOString(),
         },

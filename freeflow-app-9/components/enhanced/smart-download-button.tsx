@@ -3,145 +3,13 @@
 
 import React, { useState, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { 
-  Download,
-  Share2,
-  Copy,
-  Check,
-  ExternalLink,
-  Globe,
-  QrCode,
-  Mail,
-  MessageCircle,
-  Twitter,
-  Facebook,
-  Linkedin,
-  Link2,
-  Eye,
-  Clock,
-  Star,
-  Shield,
-  Zap,
-  Heart,
-  TrendingUp,
-  MousePointer,
-  Smartphone,
-  Target,
-  DollarSign
-} from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
-
-interface DownloadableFile {
-  id: string
-  name: string
-  size: number
-  type: string
-  url: string
-  shareUrl: string
-  isPublic: boolean
-  requiresPayment?: boolean
-  price?: number
-  currency?: string
-  downloadCount?: number
-  viewCount?: number
-  escrowProtected?: boolean
-}
-
-interface ShareMetrics {
-  totalShares: number
-  platformBreakdown: {
-    email: number
-    social: number
-    direct: number
-    qr: number
-  }
-  conversionRate: number
-  revenueGenerated: number
-}
-
-interface SmartDownloadButtonProps {
-  file: DownloadableFile
-  showAnalytics?: boolean
-  enableMonetization?: boolean
-  generateExternalLink?: boolean
-  trackingEnabled?: boolean
-  variant?: 'default' | 'premium' | 'freemium'
-  onDownload?: (fileId: string) => void
-  onShare?: (fileId: string, platform: string) => void
-  onPayment?: (fileId: string, amount: number) => void
-}
-
-export function SmartDownloadButton({
-  file,
-  showAnalytics = true,
-  enableMonetization = true,
-  generateExternalLink = true,
-  trackingEnabled = true,
-  variant = 'default',
-  onDownload,
-  onShare,
-  onPayment
-}: SmartDownloadButtonProps) {
-  const [isDownloading, setIsDownloading] = useState(false)
-  const [downloadProgress, setDownloadProgress] = useState(0)
-  const [shareDialogOpen, setShareDialogOpen] = useState(false)
-  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
-  const [copiedLink, setCopiedLink] = useState(false)
-  const [shareMetrics, setShareMetrics] = useState<ShareMetrics>({
-    totalShares: 156,
-    platformBreakdown: {
-      email: 45,
-      social: 67,
-      direct: 32,
-      qr: 12
-    },
-    conversionRate: 8.4,
-    revenueGenerated: 1280
-  })
-  const { toast } = useToast()
-
-  // WeTransfer-like external link generation
-  const generateExternalShareLink = useCallback(() => {
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://freeflow-app-9.vercel.app'
-    const params = new URLSearchParams({
-      utm_source: 'freeflow',
-      utm_medium: 'share',
-      utm_campaign: 'file_sharing',
-      utm_content: file.id,
-      ref: 'smart_download'
-    })
-    return `${baseUrl}/share/${file.id}?${params.toString()}`
-  }, [file.id])
-
-  // Handle download with progress simulation
-  const handleDownload = async () => {
-    if (file.requiresPayment && !file.escrowProtected) {
-      setPaymentDialogOpen(true)
-      return
-    }
-
-    setIsDownloading(true)
-    
-    // Track download start
-    if (trackingEnabled) {
-      await trackEvent('download_started', { fileId: file.id, fileName: file.name })
-    }
-
-    // Simulate download progress
-    for (let progress = 0; progress <= 100; progress += 10) {
+ progress += 10) {
       await new Promise(resolve => setTimeout(resolve, 200))
       setDownloadProgress(progress)
     }
 
     // Trigger actual download
-    const link = document.createElement('a')
+    const link = document.createElement('a')'
     link.href = file.url
     link.download = file.name
     document.body.appendChild(link)
@@ -200,7 +68,7 @@ export function SmartDownloadButton({
     const link = generateExternalShareLink()
     const text = encodeURIComponent(`Check out this file: ${file.name}`)
     
-    let shareUrl = ''
+    let shareUrl = '
     
     switch (platform) {
       case 'twitter':
@@ -252,7 +120,7 @@ export function SmartDownloadButton({
   }
 
   // Track events for analytics
-  const trackEvent = async (eventName: string, data: any) => {
+  const trackEvent = async (eventName: string, data: unknown) => {
     try {
       await fetch('/api/analytics/track-event', {
         method: 'POST',
@@ -297,7 +165,7 @@ export function SmartDownloadButton({
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     if (bytes === 0) return '0 Bytes'
     const i = Math.floor(Math.log(bytes) / Math.log(1024))
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i]
+    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i]'
   }
 
   // Format currency
@@ -309,39 +177,39 @@ export function SmartDownloadButton({
   }
 
   return (
-    <div className="space-y-4">
+    <div className= "space-y-4">
       {/* Main Download Button */}
-      <div className="flex gap-2">
+      <div className= "flex gap-2">
         <Button
           onClick={handleDownload}
           disabled={isDownloading}
           className={`flex-1 gap-2 ${
             variant === 'premium' ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700' :
             variant === 'freemium' ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700' :
-            ''
+            '
           }`}
         >
           {isDownloading ? (
             <>
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+              <div className= "animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
               Downloading... {downloadProgress}%
             </>
           ) : (
             <>
-              <Download className="h-4 w-4" />
+              <Download className= "h-4 w-4" />
               {file.requiresPayment ? `Download - ${formatCurrency(file.price || 0, file.currency)}` : 'Download'}
-              {variant === 'premium' && <Star className="h-4 w-4" />}
+              {variant === 'premium' && <Star className= "h-4 w-4" />}
             </>
           )}
         </Button>
 
         <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="icon">
-              <Share2 className="h-4 w-4" />
+            <Button variant= "outline" size= "icon">
+              <Share2 className= "h-4 w-4" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className= "sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Share File - WeTransfer Style</DialogTitle>
               <DialogDescription>
@@ -350,62 +218,62 @@ export function SmartDownloadButton({
             </DialogHeader>
             
             {/* External Link */}
-            <div className="space-y-4">
-              <div className="space-y-2">
+            <div className= "space-y-4">
+              <div className= "space-y-2">
                 <Label>External Share Link (SEO Optimized)</Label>
-                <div className="flex gap-2">
+                <div className= "flex gap-2">
                   <Input
                     value={generateExternalShareLink()}
                     readOnly
-                    className="flex-1"
+                    className= "flex-1"
                   />
                   <Button
-                    size="icon"
-                    variant="outline"
+                    size= "icon"
+                    variant= "outline"
                     onClick={copyExternalLink}
                   >
-                    {copiedLink ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    {copiedLink ? <Check className= "h-4 w-4" /> : <Copy className= "h-4 w-4" />}
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className= "text-xs text-muted-foreground">
                   This link includes UTM tracking and works on any device without login
                 </p>
               </div>
 
               {/* Social Sharing */}
-              <div className="space-y-2">
+              <div className= "space-y-2">
                 <Label>Share on Social Media</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className= "grid grid-cols-2 gap-2">
                   <Button
-                    variant="outline"
+                    variant= "outline"
                     onClick={() => shareToSocial('twitter')}
-                    className="gap-2"
+                    className= "gap-2"
                   >
-                    <Twitter className="h-4 w-4" />
+                    <Twitter className= "h-4 w-4" />
                     Twitter
                   </Button>
                   <Button
-                    variant="outline"
+                    variant= "outline"
                     onClick={() => shareToSocial('facebook')}
-                    className="gap-2"
+                    className= "gap-2"
                   >
-                    <Facebook className="h-4 w-4" />
+                    <Facebook className= "h-4 w-4" />
                     Facebook
                   </Button>
                   <Button
-                    variant="outline"
+                    variant= "outline"
                     onClick={() => shareToSocial('linkedin')}
-                    className="gap-2"
+                    className= "gap-2"
                   >
-                    <Linkedin className="h-4 w-4" />
+                    <Linkedin className= "h-4 w-4" />
                     LinkedIn
                   </Button>
                   <Button
-                    variant="outline"
+                    variant= "outline"
                     onClick={() => shareToSocial('email')}
-                    className="gap-2"
+                    className= "gap-2"
                   >
-                    <Mail className="h-4 w-4" />
+                    <Mail className= "h-4 w-4" />
                     Email
                   </Button>
                 </div>
@@ -414,19 +282,19 @@ export function SmartDownloadButton({
               {/* Sharing Analytics */}
               {showAnalytics && (
                 <Card>
-                  <CardContent className="p-4">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between text-sm">
+                  <CardContent className= "p-4">
+                    <div className= "space-y-3">
+                      <div className= "flex items-center justify-between text-sm">
                         <span>Total Shares</span>
-                        <Badge variant="secondary">{shareMetrics.totalShares}</Badge>
+                        <Badge variant= "secondary">{shareMetrics.totalShares}</Badge>
                       </div>
-                      <div className="flex items-center justify-between text-sm">
+                      <div className= "flex items-center justify-between text-sm">
                         <span>Conversion Rate</span>
-                        <Badge variant="outline">{shareMetrics.conversionRate}%</Badge>
+                        <Badge variant= "outline">{shareMetrics.conversionRate}%</Badge>
                       </div>
-                      <div className="flex items-center justify-between text-sm">
+                      <div className= "flex items-center justify-between text-sm">
                         <span>Revenue Generated</span>
-                        <Badge className="bg-green-100 text-green-800">
+                        <Badge className= "bg-green-100 text-green-800">
                           {formatCurrency(shareMetrics.revenueGenerated)}
                         </Badge>
                       </div>
@@ -441,9 +309,9 @@ export function SmartDownloadButton({
 
       {/* Download Progress */}
       {isDownloading && (
-        <div className="space-y-2">
-          <Progress value={downloadProgress} className="h-2" />
-          <div className="flex justify-between text-xs text-muted-foreground">
+        <div className= "space-y-2">
+          <Progress value={downloadProgress} className= "h-2" />
+          <div className= "flex justify-between text-xs text-muted-foreground">
             <span>Downloading {file.name}</span>
             <span>{formatFileSize(file.size)}</span>
           </div>
@@ -451,24 +319,24 @@ export function SmartDownloadButton({
       )}
 
       {/* File Info & Stats */}
-      <Card className="bg-gradient-to-r from-slate-50 to-blue-50/30">
-        <CardContent className="p-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+      <Card className= "bg-gradient-to-r from-slate-50 to-blue-50/30">
+        <CardContent className= "p-4">
+          <div className= "grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div>
-              <div className="text-lg font-bold text-blue-600">{file.downloadCount || 0}</div>
-              <p className="text-xs text-muted-foreground">Downloads</p>
+              <div className= "text-lg font-bold text-blue-600">{file.downloadCount || 0}</div>
+              <p className= "text-xs text-muted-foreground">Downloads</p>
             </div>
             <div>
-              <div className="text-lg font-bold text-green-600">{file.viewCount || 0}</div>
-              <p className="text-xs text-muted-foreground">Views</p>
+              <div className= "text-lg font-bold text-green-600">{file.viewCount || 0}</div>
+              <p className= "text-xs text-muted-foreground">Views</p>
             </div>
             <div>
-              <div className="text-lg font-bold text-purple-600">{shareMetrics.totalShares}</div>
-              <p className="text-xs text-muted-foreground">Shares</p>
+              <div className= "text-lg font-bold text-purple-600">{shareMetrics.totalShares}</div>
+              <p className= "text-xs text-muted-foreground">Shares</p>
             </div>
             <div>
-              <div className="text-lg font-bold text-emerald-600">{formatCurrency(shareMetrics.revenueGenerated)}</div>
-              <p className="text-xs text-muted-foreground">Revenue</p>
+              <div className= "text-lg font-bold text-emerald-600">{formatCurrency(shareMetrics.revenueGenerated)}</div>
+              <p className= "text-xs text-muted-foreground">Revenue</p>
             </div>
           </div>
         </CardContent>
@@ -484,28 +352,28 @@ export function SmartDownloadButton({
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4">
+          <div className= "space-y-4">
             <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+              <CardContent className= "p-4">
+                <div className= "flex items-center justify-between">
                   <div>
-                    <p className="font-medium">{file.name}</p>
-                    <p className="text-sm text-muted-foreground">{formatFileSize(file.size)}</p>
+                    <p className= "font-medium">{file.name}</p>
+                    <p className= "text-sm text-muted-foreground">{formatFileSize(file.size)}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold">{formatCurrency(file.price || 0, file.currency)}</p>
-                    <p className="text-sm text-muted-foreground">One-time payment</p>
+                  <div className= "text-right">
+                    <p className= "text-2xl font-bold">{formatCurrency(file.price || 0, file.currency)}</p>
+                    <p className= "text-sm text-muted-foreground">One-time payment</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <div className="flex gap-2">
-              <Button onClick={handlePayment} className="flex-1">
-                <DollarSign className="h-4 w-4 mr-2" />
+            <div className= "flex gap-2">
+              <Button onClick={handlePayment} className= "flex-1">
+                <DollarSign className= "h-4 w-4 mr-2" />
                 Pay & Download
               </Button>
-              <Button variant="outline" onClick={() => setPaymentDialogOpen(false)}>
+              <Button variant= "outline" onClick={() => setPaymentDialogOpen(false)}>
                 Cancel
               </Button>
             </div>
@@ -515,18 +383,18 @@ export function SmartDownloadButton({
 
       {/* Premium Features Upsell */}
       {enableMonetization && variant === 'freemium' && (
-        <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <Star className="h-8 w-8 text-purple-600" />
-              <div className="flex-1">
-                <p className="font-medium">Upgrade to Premium</p>
-                <p className="text-sm text-muted-foreground">
+        <Card className= "bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+          <CardContent className= "p-4">
+            <div className= "flex items-center gap-3">
+              <Star className= "h-8 w-8 text-purple-600" />
+              <div className= "flex-1">
+                <p className= "font-medium">Upgrade to Premium</p>
+                <p className= "text-sm text-muted-foreground">
                   Get advanced analytics, unlimited downloads, and priority support
                 </p>
               </div>
-              <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
-                <Zap className="h-4 w-4 mr-2" />
+              <Button size= "sm" className= "bg-purple-600 hover:bg-purple-700">
+                <Zap className= "h-4 w-4 mr-2" />
                 Upgrade
               </Button>
             </div>

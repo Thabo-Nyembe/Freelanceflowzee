@@ -1,4 +1,4 @@
-import type { Page, Locator } from '@playwright/test';
+import type { Page, Locator } from &apos;@playwright/test&apos;;
 
 export class AuthPage {
   readonly page: Page;
@@ -52,91 +52,91 @@ export class AuthPage {
     this.page = page;
     
     // Common elements
-    this.logo = page.locator('[data-testid="logo"]');
-    this.backToHomeLink = page.getByRole('link', { name: 'Back to Home' });
-    this.alternativeActionLink = page.locator('[data-testid="alternative-action"]');
-    this.errorMessage = page.locator('[data-testid="error-message"]');
-    this.successMessage = page.locator('[data-testid="success-message"]');
-    this.loadingSpinner = page.locator('[data-testid="loading-spinner"]');
+    this.logo = page.locator(&apos;[data-testid=&quot;logo&quot;]&apos;);
+    this.backToHomeLink = page.getByRole(&apos;link&apos;, { name: &apos;Back to Home&apos; });
+    this.alternativeActionLink = page.locator(&apos;[data-testid=&quot;alternative-action&quot;]&apos;);
+    this.errorMessage = page.locator(&apos;[data-testid=&quot;error-message&quot;]&apos;);
+    this.successMessage = page.locator(&apos;[data-testid=&quot;success-message&quot;]&apos;);
+    this.loadingSpinner = page.locator(&apos;[data-testid=&quot;loading-spinner&quot;]&apos;);
 
     // Login page elements
-    this.loginForm = page.locator('[data-testid="login-form"]');
-    this.emailInput = page.getByLabel('Email');
-    this.passwordInput = page.getByLabel('Password');
-    this.loginButton = page.getByRole('button', { name: 'Sign In' });
-    this.forgotPasswordLink = page.getByRole('link', { name: 'Forgot Password' });
-    this.signupLink = page.getByRole('link', { name: 'Sign Up' });
-    this.rememberMeCheckbox = page.getByLabel('Remember me');
-    this.showPasswordToggle = page.locator('[data-testid="show-password-toggle"]');
+    this.loginForm = page.locator(&apos;[data-testid=&quot;login-form&quot;]&apos;);
+    this.emailInput = page.getByLabel(&apos;Email&apos;);
+    this.passwordInput = page.getByLabel(&apos;Password&apos;);
+    this.loginButton = page.getByRole(&apos;button&apos;, { name: &apos;Sign In&apos; });
+    this.forgotPasswordLink = page.getByRole(&apos;link&apos;, { name: &apos;Forgot Password&apos; });
+    this.signupLink = page.getByRole(&apos;link&apos;, { name: &apos;Sign Up&apos; });
+    this.rememberMeCheckbox = page.getByLabel(&apos;Remember me&apos;);
+    this.showPasswordToggle = page.locator(&apos;[data-testid=&quot;show-password-toggle&quot;]&apos;);
 
     // Signup page elements
-    this.signupForm = page.locator('[data-testid="signup-form"]');
-    this.nameInput = page.getByLabel('Full Name');
-    this.confirmPasswordInput = page.getByLabel('Confirm Password');
-    this.signupButton = page.getByRole('button', { name: 'Create Account' });
-    this.loginLinkFromSignup = page.getByRole('link', { name: 'Login' });
-    this.termsCheckbox = page.getByLabel('I agree to the Terms of Service');
-    this.newsletterCheckbox = page.getByLabel('Subscribe to newsletter');
+    this.signupForm = page.locator(&apos;[data-testid=&quot;signup-form&quot;]&apos;);
+    this.nameInput = page.getByLabel(&apos;Full Name&apos;);
+    this.confirmPasswordInput = page.getByLabel(&apos;Confirm Password&apos;);
+    this.signupButton = page.getByRole(&apos;button&apos;, { name: &apos;Create Account&apos; });
+    this.loginLinkFromSignup = page.getByRole(&apos;link&apos;, { name: &apos;Login&apos; });
+    this.termsCheckbox = page.getByLabel(&apos;I agree to the Terms of Service&apos;);
+    this.newsletterCheckbox = page.getByLabel(&apos;Subscribe to newsletter&apos;);
 
     // Social auth elements
-    this.googleAuthButton = page.getByRole('button', { name: 'Continue with Google' });
-    this.githubAuthButton = page.getByRole('button', { name: 'Continue with GitHub' });
-    this.linkedinAuthButton = page.getByRole('button', { name: 'Continue with LinkedIn' });
-    this.socialAuthSection = page.locator('[data-testid="social-auth"]');
+    this.googleAuthButton = page.getByRole(&apos;button&apos;, { name: &apos;Continue with Google&apos; });
+    this.githubAuthButton = page.getByRole(&apos;button&apos;, { name: &apos;Continue with GitHub&apos; });
+    this.linkedinAuthButton = page.getByRole(&apos;button&apos;, { name: &apos;Continue with LinkedIn&apos; });
+    this.socialAuthSection = page.locator(&apos;[data-testid=&quot;social-auth&quot;]&apos;);
 
     // Password reset elements
-    this.resetPasswordForm = page.locator('[data-testid="reset-password-form"]');
-    this.resetEmailInput = page.getByLabel('Email Address');
-    this.resetPasswordButton = page.getByRole('button', { name: 'Reset Password' });
-    this.backToLoginLink = page.getByRole('link', { name: 'Back to Login' });
+    this.resetPasswordForm = page.locator(&apos;[data-testid=&quot;reset-password-form&quot;]&apos;);
+    this.resetEmailInput = page.getByLabel(&apos;Email Address&apos;);
+    this.resetPasswordButton = page.getByRole(&apos;button&apos;, { name: &apos;Reset Password&apos; });
+    this.backToLoginLink = page.getByRole(&apos;link&apos;, { name: &apos;Back to Login&apos; });
 
     // Two-factor authentication
-    this.twoFactorForm = page.locator('[data-testid="two-factor-form"]');
-    this.verificationCodeInput = page.getByLabel('Verification Code');
-    this.verifyCodeButton = page.getByRole('button', { name: 'Verify Code' });
-    this.resendCodeButton = page.getByRole('button', { name: 'Resend Code' });
+    this.twoFactorForm = page.locator(&apos;[data-testid=&quot;two-factor-form&quot;]&apos;);
+    this.verificationCodeInput = page.getByLabel(&apos;Verification Code&apos;);
+    this.verifyCodeButton = page.getByRole(&apos;button&apos;, { name: &apos;Verify Code&apos; });
+    this.resendCodeButton = page.getByRole(&apos;button&apos;, { name: &apos;Resend Code&apos; });
   }
 
   // Navigation methods
   async gotoLogin() {
-    await this.page.goto('/login');
-    await this.page.waitForLoadState('networkidle');
-    await this.loginForm.waitFor({ state: 'visible' });
+    await this.page.goto(&apos;/login&apos;);
+    await this.page.waitForLoadState(&apos;networkidle&apos;);
+    await this.loginForm.waitFor({ state: &apos;visible&apos; });
   }
 
   async gotoSignup() {
-    await this.page.goto('/signup');
-    await this.page.waitForLoadState('networkidle');
-    await this.signupForm.waitFor({ state: 'visible' });
+    await this.page.goto(&apos;/signup&apos;);
+    await this.page.waitForLoadState(&apos;networkidle&apos;);
+    await this.signupForm.waitFor({ state: &apos;visible&apos; });
   }
 
   async gotoPasswordReset() {
-    await this.page.goto('/reset-password');
-    await this.page.waitForLoadState('networkidle');
-    await this.resetPasswordForm.waitFor({ state: 'visible' });
+    await this.page.goto(&apos;/reset-password&apos;);
+    await this.page.waitForLoadState(&apos;networkidle&apos;);
+    await this.resetPasswordForm.waitFor({ state: &apos;visible&apos; });
   }
 
   async navigateToSignupFromLogin() {
     await this.signupLink.click();
-    await this.page.waitForURL('**/signup');
-    await this.signupForm.waitFor({ state: 'visible' });
+    await this.page.waitForURL(&apos;**/signup&apos;);
+    await this.signupForm.waitFor({ state: &apos;visible&apos; });
   }
 
   async navigateToLoginFromSignup() {
     await this.loginLinkFromSignup.click();
-    await this.page.waitForURL('**/login');
-    await this.loginForm.waitFor({ state: 'visible' });
+    await this.page.waitForURL(&apos;**/login&apos;);
+    await this.loginForm.waitFor({ state: &apos;visible&apos; });
   }
 
   async navigateToPasswordResetFromLogin() {
     await this.forgotPasswordLink.click();
-    await this.page.waitForURL('**/reset-password');
-    await this.resetPasswordForm.waitFor({ state: 'visible' });
+    await this.page.waitForURL(&apos;**/reset-password&apos;);
+    await this.resetPasswordForm.waitFor({ state: &apos;visible&apos; });
   }
 
   async backToHome() {
     await this.backToHomeLink.click();
-    await this.page.waitForURL('/');
+    await this.page.waitForURL(&apos;/');'
   }
 
   // Login methods
@@ -157,9 +157,9 @@ export class AuthPage {
     await this.login(email, password);
     
     if (expectSuccess) {
-      await this.page.waitForURL('**/dashboard', { timeout: 10000 });
+      await this.page.waitForURL(&apos;**/dashboard&apos;, { timeout: 10000 });
     } else {
-      await this.errorMessage.waitFor({ state: 'visible' });
+      await this.errorMessage.waitFor({ state: &apos;visible&apos; });
     }
   }
 
@@ -186,7 +186,7 @@ export class AuthPage {
       // May redirect to email verification or dashboard
       await this.page.waitForURL(/\/(dashboard|verify-email)/, { timeout: 10000 });
     } else {
-      await this.errorMessage.waitFor({ state: 'visible' });
+      await this.errorMessage.waitFor({ state: &apos;visible&apos; });
     }
   }
 
@@ -211,12 +211,12 @@ export class AuthPage {
   async resetPassword(email: string) {
     await this.resetEmailInput.fill(email);
     await this.resetPasswordButton.click();
-    await this.successMessage.waitFor({ state: 'visible' });
+    await this.successMessage.waitFor({ state: &apos;visible&apos; });
   }
 
   async backToLoginFromReset() {
     await this.backToLoginLink.click();
-    await this.page.waitForURL('**/login');
+    await this.page.waitForURL(&apos;**/login&apos;);
   }
 
   // Two-factor authentication methods
@@ -227,7 +227,7 @@ export class AuthPage {
 
   async resendVerificationCode() {
     await this.resendCodeButton.click();
-    await this.successMessage.waitFor({ state: 'visible' });
+    await this.successMessage.waitFor({ state: &apos;visible&apos; });
   }
 
   // Form validation and interaction
@@ -296,12 +296,12 @@ export class AuthPage {
   }
 
   async waitForError() {
-    await this.errorMessage.waitFor({ state: 'visible' });
+    await this.errorMessage.waitFor({ state: &apos;visible&apos; });
     return await this.getErrorMessage();
   }
 
   async waitForSuccess() {
-    await this.successMessage.waitFor({ state: 'visible' });
+    await this.successMessage.waitFor({ state: &apos;visible&apos; });
     return await this.getSuccessMessage();
   }
 
@@ -315,12 +315,12 @@ export class AuthPage {
   }
 
   async areRequiredFieldsFilled() {
-    const emailFilled = await this.emailInput.inputValue() !== '';
-    const passwordFilled = await this.passwordInput.inputValue() !== '';
+    const emailFilled = await this.emailInput.inputValue() !== '&apos;;'
+    const passwordFilled = await this.passwordInput.inputValue() !== '&apos;;'
     
     if (await this.nameInput.isVisible()) {
-      const nameFilled = await this.nameInput.inputValue() !== '';
-      const confirmPasswordFilled = await this.confirmPasswordInput.inputValue() !== '';
+      const nameFilled = await this.nameInput.inputValue() !== '&apos;;'
+      const confirmPasswordFilled = await this.confirmPasswordInput.inputValue() !== '&apos;;'
       const termsAccepted = await this.termsCheckbox.isChecked();
       
       return {
@@ -346,7 +346,7 @@ export class AuthPage {
     await this.passwordInput.blur();
     
     // Look for password strength indicator
-    const strengthIndicator = this.page.locator('[data-testid="password-strength"]');
+    const strengthIndicator = this.page.locator(&apos;[data-testid=&quot;password-strength&quot;]&apos;);
     if (await strengthIndicator.isVisible()) {
       return await strengthIndicator.textContent();
     }
@@ -358,7 +358,7 @@ export class AuthPage {
     await this.emailInput.blur();
     
     // Look for email validation message
-    const validationMessage = this.page.locator('[data-testid="email-validation"]');
+    const validationMessage = this.page.locator(&apos;[data-testid=&quot;email-validation&quot;]&apos;);
     if (await validationMessage.isVisible()) {
       return await validationMessage.textContent();
     }
@@ -375,13 +375,13 @@ export class AuthPage {
 
   async checkFormAccessibility() {
     // Check for proper labels
-    const inputs = await this.page.locator('input').all();
+    const inputs = await this.page.locator(&apos;input&apos;).all();
     const inputsWithoutLabels = [];
     
     for (const input of inputs) {
-      const id = await input.getAttribute('id');
-      const ariaLabel = await input.getAttribute('aria-label');
-      const label = this.page.locator(`label[for="${id}"]`);
+      const id = await input.getAttribute(&apos;id&apos;);
+      const ariaLabel = await input.getAttribute(&apos;aria-label&apos;);
+      const label = this.page.locator(`label[for=&quot;${id}&quot;]`);
       
       if (!ariaLabel && !(await label.isVisible())) {
         inputsWithoutLabels.push(id);
@@ -389,12 +389,12 @@ export class AuthPage {
     }
     
     // Check for proper button roles
-    const buttons = await this.page.locator('button').all();
+    const buttons = await this.page.locator(&apos;button&apos;).all();
     const buttonsWithoutText = [];
     
     for (const button of buttons) {
       const text = await button.textContent();
-      const ariaLabel = await button.getAttribute('aria-label');
+      const ariaLabel = await button.getAttribute(&apos;aria-label&apos;);
       
       if (!text?.trim() && !ariaLabel) {
         buttonsWithoutText.push(await button.innerHTML());
@@ -422,9 +422,9 @@ export class AuthPage {
 
   // Edge cases and security
   async testSQLInjection() {
-    const maliciousInput = "'; DROP TABLE users; --";
+    const maliciousInput = &quot;&apos;; DROP TABLE users; --&quot;;
     await this.emailInput.fill(maliciousInput);
-    await this.passwordInput.fill('password');
+    await this.passwordInput.fill(&apos;password&apos;);
     await this.loginButton.click();
     
     // Should handle gracefully with error message
@@ -432,9 +432,9 @@ export class AuthPage {
   }
 
   async testXSSAttempt() {
-    const xssInput = '<script>alert("XSS")</script>';
+    const xssInput = &apos;<script>alert(&quot;XSS&quot;)</script>&apos;;
     await this.emailInput.fill(xssInput);
-    await this.passwordInput.fill('password');
+    await this.passwordInput.fill(&apos;password&apos;);
     await this.loginButton.click();
     
     return await this.getErrorMessage();
@@ -446,7 +446,7 @@ export class AuthPage {
     // Attempt multiple logins quickly
     for (let i = 0; i < 5; i++) {
       const startTime = Date.now();
-      await this.attemptLogin('test@example.com', 'wrongpassword', false);
+      await this.attemptLogin(&apos;test@example.com&apos;, &apos;wrongpassword&apos;, false);
       const endTime = Date.now();
       attempts.push(endTime - startTime);
       

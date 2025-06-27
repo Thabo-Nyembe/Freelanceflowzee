@@ -28,9 +28,9 @@ const UPLOAD_DOWNLOAD_TESTS = [
   {
     name: 'Files Hub - Main Upload/Download',
     page: '/dashboard/files-hub',
-    uploadBtn: '[data-testid="upload-file-btn"]',
-    downloadBtn: '[data-testid="download-file-btn"]',
-    fileInput: 'input[type="file"]',
+    uploadBtn: '[data-testid= "upload-file-btn"]',
+    downloadBtn: '[data-testid= "download-file-btn"]',
+    fileInput: 'input[type= "file"]',
     priority: 'high'
   },
   {
@@ -81,12 +81,12 @@ class TestReporter {
     const duration = Date.now() - this.startTime;
     const successRate = ((passed / total) * 100).toFixed(1);
 
-    console.log('\n' + '='.repeat(70));
+    console.log('\n' + '='.repeat(70));'
     console.log('🎯 CONTEXT7 UPLOAD/DOWNLOAD TEST RESULTS');
-    console.log('='.repeat(70));
+    console.log('='.repeat(70));'
     console.log(`📊 SUMMARY: ${passed}/${total} tests passed (${successRate}%)`);
     console.log(`⏱️  DURATION: ${(duration / 1000).toFixed(2)}s`);
-    console.log('\n📝 DETAILED RESULTS:');
+    console.log('\n📝 DETAILED RESULTS: ');
     
     this.results.forEach((result, i) => {
       const icon = result.status === 'pass' ? '✅' : '❌';
@@ -96,7 +96,7 @@ class TestReporter {
       if (result.downloadTime) console.log(`   Download: ${result.downloadTime}ms`);
     });
 
-    console.log('='.repeat(70));
+    console.log('='.repeat(70));'
     return { passed, failed, total, successRate, duration };
   }
 }
@@ -123,9 +123,9 @@ async function authenticateUser(page) {
     await page.setExtraHTTPHeaders({ 'X-Test-Mode': 'true' });
     
     // Fill login form
-    await page.fill('input[type="email"]', 'test@freeflowzee.com');
-    await page.fill('input[type="password"]', 'testpassword');
-    await page.click('button[type="submit"]');
+    await page.fill('input[type= "email"]', 'test@freeflowzee.com');
+    await page.fill('input[type= "password"]', 'testpassword');
+    await page.click('button[type= "submit"]');
     
     // Wait for dashboard
     await page.waitForURL('**/dashboard**', { timeout: 10000 });

@@ -1,10 +1,10 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from &apos;@playwright/test&apos;;
 
-test('basic test', async ({ page }) => {
-  await page.goto('http://localhost:3001');
+test(&apos;basic test&apos;, async ({ page }) => {
+  await page.goto(&apos;http://localhost:3001&apos;);
   
   // Wait for the page to be loaded
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState(&apos;networkidle&apos;);
   
   // Check if we can access the page
   const title = await page.title();
@@ -12,17 +12,17 @@ test('basic test', async ({ page }) => {
   
   // Check for console errors
   const errors: string[] = [];
-  page.on('console', msg => {
-    if (msg.type() === 'error') {
+  page.on(&apos;console&apos;, msg => {
+    if (msg.type() === &apos;error&apos;) {
       errors.push(`Console Error: ${msg.text()}`);
     }
   });
   
   // Check for failed requests
   const failedRequests: string[] = [];
-  page.on('requestfailed', request => {
+  page.on(&apos;requestfailed&apos;, request => {
     const failure = request.failure();
-    failedRequests.push(`Failed Request: ${request.url()} - ${failure?.errorText || 'Unknown error'}`);
+    failedRequests.push(`Failed Request: ${request.url()} - ${failure?.errorText || &apos;Unknown error&apos;}`);
   });
   
   // Wait a bit to catch any errors
@@ -30,10 +30,10 @@ test('basic test', async ({ page }) => {
   
   // Log any errors found
   if (errors.length > 0) {
-    console.log('Console Errors:', errors);
+    console.log(&apos;Console Errors:&apos;, errors);
   }
   if (failedRequests.length > 0) {
-    console.log('Failed Requests:', failedRequests);
+    console.log(&apos;Failed Requests:&apos;, failedRequests);
   }
   
   // Assert no errors were found

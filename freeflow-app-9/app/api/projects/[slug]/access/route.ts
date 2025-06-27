@@ -45,8 +45,8 @@ export async function POST(
     const { password, accessCode } = body
 
     // Validate that at least one credential is provided and not empty
-    const hasPassword = password && password.trim() !== ''
-    const hasAccessCode = accessCode && accessCode.trim() !== ''
+    const hasPassword = password && password.trim() !== '
+    const hasAccessCode = accessCode && accessCode.trim() !== '
     
     if (!hasPassword && !hasAccessCode) {
       return NextResponse.json(
@@ -140,7 +140,7 @@ export async function GET(
   try {
     const { slug } = await params
     const url = new URL(request.url)
-    const token = url.searchParams.get('token') || request.headers.get('authorization')?.replace('Bearer ', '')
+    const token = url.searchParams.get('token') || request.headers.get('authorization')?.replace('Bearer ', )'
     
     if (token) {
       // Validate token format

@@ -27,17 +27,17 @@ const ALL_INTERACTIVE_ELEMENTS = {
     name: 'Dashboard',
     url: '/dashboard',
     tabs: [
-      { id: 'overview', name: 'Overview', selector: '[role="tab"][data-value="overview"]' },
-      { id: 'projects', name: 'Projects', selector: '[role="tab"][data-value="projects"]' },
-      { id: 'analytics', name: 'Analytics', selector: '[role="tab"][data-value="analytics"]' },
-      { id: 'clients', name: 'Clients', selector: '[role="tab"][data-value="clients"]' },
-      { id: 'tools', name: 'Tools', selector: '[role="tab"][data-value="tools"]' }
+      { id: 'overview', name: 'Overview', selector: '[role= "tab"][data-value= "overview"]' },
+      { id: 'projects', name: 'Projects', selector: '[role= "tab"][data-value= "projects"]' },
+      { id: 'analytics', name: 'Analytics', selector: '[role= "tab"][data-value= "analytics"]' },
+      { id: 'clients', name: 'Clients', selector: '[role= "tab"][data-value= "clients"]' },
+      { id: 'tools', name: 'Tools', selector: '[role= "tab"][data-value= "tools"]' }
     ],
     buttons: [
-      { id: 'create-project', name: 'Create New Project', selector: '[data-testid="create-project-btn"]' },
-      { id: 'upload-files', name: 'Upload Files', selector: '[data-testid="upload-files-btn"]' },
-      { id: 'generate-assets', name: 'Generate Assets', selector: '[data-testid="generate-assets-btn"]' },
-      { id: 'invite-collaborators', name: 'Invite Collaborators', selector: '[data-testid="invite-btn"]' }
+      { id: 'create-project', name: 'Create New Project', selector: '[data-testid= "create-project-btn"]' },
+      { id: 'upload-files', name: 'Upload Files', selector: '[data-testid= "upload-files-btn"]' },
+      { id: 'generate-assets', name: 'Generate Assets', selector: '[data-testid= "generate-assets-btn"]' },
+      { id: 'invite-collaborators', name: 'Invite Collaborators', selector: '[data-testid= "invite-btn"]' }
     ]
   },
 
@@ -46,17 +46,17 @@ const ALL_INTERACTIVE_ELEMENTS = {
     name: 'Projects Hub',
     url: '/dashboard/projects-hub',
     tabs: [
-      { id: 'overview', name: 'Overview', selector: '[role="tab"][value="overview"]' },
-      { id: 'active', name: 'Active', selector: '[role="tab"][value="active"]' },
-      { id: 'completed', name: 'Completed', selector: '[role="tab"][value="completed"]' },
-      { id: 'analytics', name: 'Analytics', selector: '[role="tab"][value="analytics"]' }
+      { id: 'overview', name: 'Overview', selector: '[role= "tab"][value= "overview"]' },
+      { id: 'active', name: 'Active', selector: '[role= "tab"][value= "active"]' },
+      { id: 'completed', name: 'Completed', selector: '[role= "tab"][value= "completed"]' },
+      { id: 'analytics', name: 'Analytics', selector: '[role= "tab"][value= "analytics"]' }
     ],
     buttons: [
-      { id: 'new-project', name: 'New Project', selector: '[data-testid="create-project-btn"]' },
-      { id: 'view-details', name: 'View Details', selector: '[aria-label="View Details"]' },
-      { id: 'edit-project', name: 'Edit Project', selector: '[aria-label="Edit Project"]' },
-      { id: 'add-feedback', name: 'Add Feedback', selector: '[aria-label="Add Feedback"]' },
-      { id: 'delete-project', name: 'Delete Project', selector: '[aria-label="Delete Project"]' }
+      { id: 'new-project', name: 'New Project', selector: '[data-testid= "create-project-btn"]' },
+      { id: 'view-details', name: 'View Details', selector: '[aria-label= "View Details"]' },
+      { id: 'edit-project', name: 'Edit Project', selector: '[aria-label= "Edit Project"]' },
+      { id: 'add-feedback', name: 'Add Feedback', selector: '[aria-label= "Add Feedback"]' },
+      { id: 'delete-project', name: 'Delete Project', selector: '[aria-label= "Delete Project"]' }
     ]
   },
 
@@ -65,16 +65,16 @@ const ALL_INTERACTIVE_ELEMENTS = {
     name: 'Video Studio',
     url: '/dashboard/video-studio',
     tabs: [
-      { id: 'projects', name: 'Projects', selector: '[role="tab"][data-value="projects"]' },
-      { id: 'templates', name: 'Templates', selector: '[role="tab"][data-value="templates"]' },
-      { id: 'assets', name: 'Assets', selector: '[role="tab"][data-value="assets"]' },
-      { id: 'analytics', name: 'Analytics', selector: '[role="tab"][data-value="analytics"]' }
+      { id: 'projects', name: 'Projects', selector: '[role= "tab"][data-value= "projects"]' },
+      { id: 'templates', name: 'Templates', selector: '[role= "tab"][data-value= "templates"]' },
+      { id: 'assets', name: 'Assets', selector: '[role= "tab"][data-value= "assets"]' },
+      { id: 'analytics', name: 'Analytics', selector: '[role= "tab"][data-value= "analytics"]' }
     ],
     buttons: [
-      { id: 'create-video', name: 'Create Video', selector: '[data-testid="create-video-btn"]' },
-      { id: 'upload-media', name: 'Upload Media', selector: '[data-testid="upload-media-btn"]' },
-      { id: 'export-video', name: 'Export Video', selector: '[data-testid="export-video-btn"]' },
-      { id: 'share-video', name: 'Share Video', selector: '[data-testid="share-video-btn"]' }
+      { id: 'create-video', name: 'Create Video', selector: '[data-testid= "create-video-btn"]' },
+      { id: 'upload-media', name: 'Upload Media', selector: '[data-testid= "upload-media-btn"]' },
+      { id: 'export-video', name: 'Export Video', selector: '[data-testid= "export-video-btn"]' },
+      { id: 'share-video', name: 'Share Video', selector: '[data-testid= "share-video-btn"]' }
     ]
   },
 
@@ -83,16 +83,16 @@ const ALL_INTERACTIVE_ELEMENTS = {
     name: 'Canvas',
     url: '/dashboard/canvas',
     tabs: [
-      { id: 'designs', name: 'Designs', selector: '[role="tab"][data-value="designs"]' },
-      { id: 'templates', name: 'Templates', selector: '[role="tab"][data-value="templates"]' },
-      { id: 'assets', name: 'Assets', selector: '[role="tab"][data-value="assets"]' },
-      { id: 'brand-kit', name: 'Brand Kit', selector: '[role="tab"][data-value="brand-kit"]' }
+      { id: 'designs', name: 'Designs', selector: '[role= "tab"][data-value= "designs"]' },
+      { id: 'templates', name: 'Templates', selector: '[role= "tab"][data-value= "templates"]' },
+      { id: 'assets', name: 'Assets', selector: '[role= "tab"][data-value= "assets"]' },
+      { id: 'brand-kit', name: 'Brand Kit', selector: '[role= "tab"][data-value= "brand-kit"]' }
     ],
     buttons: [
-      { id: 'new-design', name: 'New Design', selector: '[data-testid="new-design-btn"]' },
-      { id: 'upload-asset', name: 'Upload Asset', selector: '[data-testid="upload-asset-btn"]' },
-      { id: 'save-design', name: 'Save Design', selector: '[data-testid="save-design-btn"]' },
-      { id: 'export-design', name: 'Export Design', selector: '[data-testid="export-design-btn"]' }
+      { id: 'new-design', name: 'New Design', selector: '[data-testid= "new-design-btn"]' },
+      { id: 'upload-asset', name: 'Upload Asset', selector: '[data-testid= "upload-asset-btn"]' },
+      { id: 'save-design', name: 'Save Design', selector: '[data-testid= "save-design-btn"]' },
+      { id: 'export-design', name: 'Export Design', selector: '[data-testid= "export-design-btn"]' }
     ]
   },
 
@@ -101,16 +101,16 @@ const ALL_INTERACTIVE_ELEMENTS = {
     name: 'Community Hub',
     url: '/dashboard/community',
     tabs: [
-      { id: 'feed', name: 'Feed', selector: '[role="tab"][data-value="feed"]' },
-      { id: 'creators', name: 'Creators', selector: '[role="tab"][data-value="creators"]' },
-      { id: 'showcase', name: 'Showcase', selector: '[role="tab"][data-value="showcase"]' },
-      { id: 'events', name: 'Events', selector: '[role="tab"][data-value="events"]' }
+      { id: 'feed', name: 'Feed', selector: '[role= "tab"][data-value= "feed"]' },
+      { id: 'creators', name: 'Creators', selector: '[role= "tab"][data-value= "creators"]' },
+      { id: 'showcase', name: 'Showcase', selector: '[role= "tab"][data-value= "showcase"]' },
+      { id: 'events', name: 'Events', selector: '[role= "tab"][data-value= "events"]' }
     ],
     buttons: [
-      { id: 'create-post', name: 'Create Post', selector: '[data-testid="create-post-btn"]' },
-      { id: 'follow-creator', name: 'Follow Creator', selector: '[data-testid="follow-btn"]' },
-      { id: 'like-post', name: 'Like Post', selector: '[data-testid="like-btn"]' },
-      { id: 'share-post', name: 'Share Post', selector: '[data-testid="share-btn"]' }
+      { id: 'create-post', name: 'Create Post', selector: '[data-testid= "create-post-btn"]' },
+      { id: 'follow-creator', name: 'Follow Creator', selector: '[data-testid= "follow-btn"]' },
+      { id: 'like-post', name: 'Like Post', selector: '[data-testid= "like-btn"]' },
+      { id: 'share-post', name: 'Share Post', selector: '[data-testid= "share-btn"]' }
     ]
   },
 
@@ -119,16 +119,16 @@ const ALL_INTERACTIVE_ELEMENTS = {
     name: 'AI Assistant',
     url: '/dashboard/ai-assistant',
     tabs: [
-      { id: 'chat', name: 'Chat', selector: '[role="tab"][data-value="chat"]' },
-      { id: 'templates', name: 'Templates', selector: '[role="tab"][data-value="templates"]' },
-      { id: 'history', name: 'History', selector: '[role="tab"][data-value="history"]' },
-      { id: 'settings', name: 'Settings', selector: '[role="tab"][data-value="settings"]' }
+      { id: 'chat', name: 'Chat', selector: '[role= "tab"][data-value= "chat"]' },
+      { id: 'templates', name: 'Templates', selector: '[role= "tab"][data-value= "templates"]' },
+      { id: 'history', name: 'History', selector: '[role= "tab"][data-value= "history"]' },
+      { id: 'settings', name: 'Settings', selector: '[role= "tab"][data-value= "settings"]' }
     ],
     buttons: [
-      { id: 'new-chat', name: 'New Chat', selector: '[data-testid="new-chat-btn"]' },
-      { id: 'send-message', name: 'Send Message', selector: '[data-testid="send-message-btn"]' },
-      { id: 'clear-history', name: 'Clear History', selector: '[data-testid="clear-history-btn"]' },
-      { id: 'save-template', name: 'Save Template', selector: '[data-testid="save-template-btn"]' }
+      { id: 'new-chat', name: 'New Chat', selector: '[data-testid= "new-chat-btn"]' },
+      { id: 'send-message', name: 'Send Message', selector: '[data-testid= "send-message-btn"]' },
+      { id: 'clear-history', name: 'Clear History', selector: '[data-testid= "clear-history-btn"]' },
+      { id: 'save-template', name: 'Save Template', selector: '[data-testid= "save-template-btn"]' }
     ]
   },
 
@@ -137,16 +137,16 @@ const ALL_INTERACTIVE_ELEMENTS = {
     name: 'My Day',
     url: '/dashboard/my-day',
     tabs: [
-      { id: 'today', name: 'Today', selector: '[role="tab"][data-value="today"]' },
-      { id: 'week', name: 'Week', selector: '[role="tab"][data-value="week"]' },
-      { id: 'calendar', name: 'Calendar', selector: '[role="tab"][data-value="calendar"]' },
-      { id: 'goals', name: 'Goals', selector: '[role="tab"][data-value="goals"]' }
+      { id: 'today', name: 'Today', selector: '[role= "tab"][data-value= "today"]' },
+      { id: 'week', name: 'Week', selector: '[role= "tab"][data-value= "week"]' },
+      { id: 'calendar', name: 'Calendar', selector: '[role= "tab"][data-value= "calendar"]' },
+      { id: 'goals', name: 'Goals', selector: '[role= "tab"][data-value= "goals"]' }
     ],
     buttons: [
-      { id: 'add-task', name: 'Add Task', selector: '[data-testid="add-task-btn"]' },
-      { id: 'complete-task', name: 'Complete Task', selector: '[data-testid="complete-task-btn"]' },
-      { id: 'set-goal', name: 'Set Goal', selector: '[data-testid="set-goal-btn"]' },
-      { id: 'schedule-event', name: 'Schedule Event', selector: '[data-testid="schedule-event-btn"]' }
+      { id: 'add-task', name: 'Add Task', selector: '[data-testid= "add-task-btn"]' },
+      { id: 'complete-task', name: 'Complete Task', selector: '[data-testid= "complete-task-btn"]' },
+      { id: 'set-goal', name: 'Set Goal', selector: '[data-testid= "set-goal-btn"]' },
+      { id: 'schedule-event', name: 'Schedule Event', selector: '[data-testid= "schedule-event-btn"]' }
     ]
   },
 
@@ -155,16 +155,16 @@ const ALL_INTERACTIVE_ELEMENTS = {
     name: 'Escrow',
     url: '/dashboard/escrow',
     tabs: [
-      { id: 'active', name: 'Active', selector: '[role="tab"][data-value="active"]' },
-      { id: 'pending', name: 'Pending', selector: '[role="tab"][data-value="pending"]' },
-      { id: 'completed', name: 'Completed', selector: '[role="tab"][data-value="completed"]' },
-      { id: 'disputes', name: 'Disputes', selector: '[role="tab"][data-value="disputes"]' }
+      { id: 'active', name: 'Active', selector: '[role= "tab"][data-value= "active"]' },
+      { id: 'pending', name: 'Pending', selector: '[role= "tab"][data-value= "pending"]' },
+      { id: 'completed', name: 'Completed', selector: '[role= "tab"][data-value= "completed"]' },
+      { id: 'disputes', name: 'Disputes', selector: '[role= "tab"][data-value= "disputes"]' }
     ],
     buttons: [
-      { id: 'create-escrow', name: 'Create Escrow', selector: '[data-testid="create-escrow-btn"]' },
-      { id: 'release-funds', name: 'Release Funds', selector: '[data-testid="release-funds-btn"]' },
-      { id: 'request-dispute', name: 'Request Dispute', selector: '[data-testid="dispute-btn"]' },
-      { id: 'view-details', name: 'View Details', selector: '[data-testid="view-escrow-btn"]' }
+      { id: 'create-escrow', name: 'Create Escrow', selector: '[data-testid= "create-escrow-btn"]' },
+      { id: 'release-funds', name: 'Release Funds', selector: '[data-testid= "release-funds-btn"]' },
+      { id: 'request-dispute', name: 'Request Dispute', selector: '[data-testid= "dispute-btn"]' },
+      { id: 'view-details', name: 'View Details', selector: '[data-testid= "view-escrow-btn"]' }
     ]
   },
 
@@ -173,17 +173,17 @@ const ALL_INTERACTIVE_ELEMENTS = {
     name: 'Files Hub',
     url: '/dashboard/files-hub',
     tabs: [
-      { id: 'all-files', name: 'All Files', selector: '[role="tab"][data-value="all-files"]' },
-      { id: 'images', name: 'Images', selector: '[role="tab"][data-value="images"]' },
-      { id: 'videos', name: 'Videos', selector: '[role="tab"][data-value="videos"]' },
-      { id: 'documents', name: 'Documents', selector: '[role="tab"][data-value="documents"]' },
-      { id: 'recent', name: 'Recent', selector: '[role="tab"][data-value="recent"]' }
+      { id: 'all-files', name: 'All Files', selector: '[role= "tab"][data-value= "all-files"]' },
+      { id: 'images', name: 'Images', selector: '[role= "tab"][data-value= "images"]' },
+      { id: 'videos', name: 'Videos', selector: '[role= "tab"][data-value= "videos"]' },
+      { id: 'documents', name: 'Documents', selector: '[role= "tab"][data-value= "documents"]' },
+      { id: 'recent', name: 'Recent', selector: '[role= "tab"][data-value= "recent"]' }
     ],
     buttons: [
-      { id: 'upload-file', name: 'Upload File', selector: '[data-testid="upload-file-btn"]' },
-      { id: 'create-folder', name: 'Create Folder', selector: '[data-testid="create-folder-btn"]' },
-      { id: 'share-file', name: 'Share File', selector: '[data-testid="share-file-btn"]' },
-      { id: 'delete-file', name: 'Delete File', selector: '[data-testid="delete-file-btn"]' }
+      { id: 'upload-file', name: 'Upload File', selector: '[data-testid= "upload-file-btn"]' },
+      { id: 'create-folder', name: 'Create Folder', selector: '[data-testid= "create-folder-btn"]' },
+      { id: 'share-file', name: 'Share File', selector: '[data-testid= "share-file-btn"]' },
+      { id: 'delete-file', name: 'Delete File', selector: '[data-testid= "delete-file-btn"]' }
     ]
   },
 
@@ -192,16 +192,16 @@ const ALL_INTERACTIVE_ELEMENTS = {
     name: 'Collaboration',
     url: '/dashboard/collaboration',
     tabs: [
-      { id: 'active-sessions', name: 'Active Sessions', selector: '[role="tab"][data-value="active-sessions"]' },
-      { id: 'team-chat', name: 'Team Chat', selector: '[role="tab"][data-value="team-chat"]' },
-      { id: 'shared-files', name: 'Shared Files', selector: '[role="tab"][data-value="shared-files"]' },
-      { id: 'video-calls', name: 'Video Calls', selector: '[role="tab"][data-value="video-calls"]' }
+      { id: 'active-sessions', name: 'Active Sessions', selector: '[role= "tab"][data-value= "active-sessions"]' },
+      { id: 'team-chat', name: 'Team Chat', selector: '[role= "tab"][data-value= "team-chat"]' },
+      { id: 'shared-files', name: 'Shared Files', selector: '[role= "tab"][data-value= "shared-files"]' },
+      { id: 'video-calls', name: 'Video Calls', selector: '[role= "tab"][data-value= "video-calls"]' }
     ],
     buttons: [
-      { id: 'start-session', name: 'Start Session', selector: '[data-testid="start-session-btn"]' },
-      { id: 'join-call', name: 'Join Call', selector: '[data-testid="join-call-btn"]' },
-      { id: 'send-message', name: 'Send Message', selector: '[data-testid="send-message-btn"]' },
-      { id: 'share-screen', name: 'Share Screen', selector: '[data-testid="share-screen-btn"]' }
+      { id: 'start-session', name: 'Start Session', selector: '[data-testid= "start-session-btn"]' },
+      { id: 'join-call', name: 'Join Call', selector: '[data-testid= "join-call-btn"]' },
+      { id: 'send-message', name: 'Send Message', selector: '[data-testid= "send-message-btn"]' },
+      { id: 'share-screen', name: 'Share Screen', selector: '[data-testid= "share-screen-btn"]' }
     ]
   },
 
@@ -210,16 +210,16 @@ const ALL_INTERACTIVE_ELEMENTS = {
     name: 'Notifications',
     url: '/dashboard/notifications',
     tabs: [
-      { id: 'all', name: 'All', selector: '[role="tab"][data-value="all"]' },
-      { id: 'unread', name: 'Unread', selector: '[role="tab"][data-value="unread"]' },
-      { id: 'projects', name: 'Projects', selector: '[role="tab"][data-value="projects"]' },
-      { id: 'payments', name: 'Payments', selector: '[role="tab"][data-value="payments"]' }
+      { id: 'all', name: 'All', selector: '[role= "tab"][data-value= "all"]' },
+      { id: 'unread', name: 'Unread', selector: '[role= "tab"][data-value= "unread"]' },
+      { id: 'projects', name: 'Projects', selector: '[role= "tab"][data-value= "projects"]' },
+      { id: 'payments', name: 'Payments', selector: '[role= "tab"][data-value= "payments"]' }
     ],
     buttons: [
-      { id: 'mark-read', name: 'Mark as Read', selector: '[data-testid="mark-read-btn"]' },
-      { id: 'mark-all-read', name: 'Mark All Read', selector: '[data-testid="mark-all-read-btn"]' },
-      { id: 'delete-notification', name: 'Delete', selector: '[data-testid="delete-notification-btn"]' },
-      { id: 'notification-settings', name: 'Settings', selector: '[data-testid="notification-settings-btn"]' }
+      { id: 'mark-read', name: 'Mark as Read', selector: '[data-testid= "mark-read-btn"]' },
+      { id: 'mark-all-read', name: 'Mark All Read', selector: '[data-testid= "mark-all-read-btn"]' },
+      { id: 'delete-notification', name: 'Delete', selector: '[data-testid= "delete-notification-btn"]' },
+      { id: 'notification-settings', name: 'Settings', selector: '[data-testid= "notification-settings-btn"]' }
     ]
   }
 };
@@ -229,18 +229,18 @@ const SPECIALIZED_COMPONENTS = {
   // Landing page components
   landingPage: {
     name: 'Landing Page',
-    url: '/',
+    url: '/','
     sections: [
-      { id: 'hero', name: 'Hero Section', selector: '[data-section="hero"]' },
-      { id: 'features', name: 'Features Section', selector: '[data-section="features"]' },
-      { id: 'pricing', name: 'Pricing Section', selector: '[data-section="pricing"]' },
-      { id: 'testimonials', name: 'Testimonials', selector: '[data-section="testimonials"]' }
+      { id: 'hero', name: 'Hero Section', selector: '[data-section= "hero"]' },
+      { id: 'features', name: 'Features Section', selector: '[data-section= "features"]' },
+      { id: 'pricing', name: 'Pricing Section', selector: '[data-section= "pricing"]' },
+      { id: 'testimonials', name: 'Testimonials', selector: '[data-section= "testimonials"]' }
     ],
     buttons: [
-      { id: 'get-started', name: 'Get Started', selector: '[data-testid="get-started-btn"]' },
-      { id: 'watch-demo', name: 'Watch Demo', selector: '[data-testid="watch-demo-btn"]' },
-      { id: 'contact-sales', name: 'Contact Sales', selector: '[data-testid="contact-sales-btn"]' },
-      { id: 'learn-more', name: 'Learn More', selector: '[data-testid="learn-more-btn"]' }
+      { id: 'get-started', name: 'Get Started', selector: '[data-testid= "get-started-btn"]' },
+      { id: 'watch-demo', name: 'Watch Demo', selector: '[data-testid= "watch-demo-btn"]' },
+      { id: 'contact-sales', name: 'Contact Sales', selector: '[data-testid= "contact-sales-btn"]' },
+      { id: 'learn-more', name: 'Learn More', selector: '[data-testid= "learn-more-btn"]' }
     ]
   },
 
@@ -248,10 +248,10 @@ const SPECIALIZED_COMPONENTS = {
   modals: {
     name: 'Modal Components',
     components: [
-      { id: 'create-project-modal', name: 'Create Project Modal', trigger: '[data-testid="create-project-btn"]' },
-      { id: 'upload-modal', name: 'Upload Modal', trigger: '[data-testid="upload-file-btn"]' },
-      { id: 'payment-modal', name: 'Payment Modal', trigger: '[data-testid="payment-btn"]' },
-      { id: 'settings-modal', name: 'Settings Modal', trigger: '[data-testid="settings-btn"]' }
+      { id: 'create-project-modal', name: 'Create Project Modal', trigger: '[data-testid= "create-project-btn"]' },
+      { id: 'upload-modal', name: 'Upload Modal', trigger: '[data-testid= "upload-file-btn"]' },
+      { id: 'payment-modal', name: 'Payment Modal', trigger: '[data-testid= "payment-btn"]' },
+      { id: 'settings-modal', name: 'Settings Modal', trigger: '[data-testid= "settings-btn"]' }
     ]
   },
 
@@ -440,7 +440,7 @@ class ComprehensiveTabTester {
             const urlChanged = currentUrl !== newUrl;
             
             // Check for modal or dialog
-            const modalVisible = await this.page.locator('[role="dialog"], .modal, [data-testid*="modal"]').first().isVisible().catch(() => false);
+            const modalVisible = await this.page.locator('[role= "dialog"], .modal, [data-testid*= "modal"]').first().isVisible().catch(() => false);
             
             if (urlChanged || modalVisible) {
               console.log(`    ✅ Button "${button.name}" triggered navigation or modal`);
@@ -540,7 +540,7 @@ class ComprehensiveTabTester {
           await triggerElement.click();
           await this.page.waitForTimeout(1000);
           
-          const modalElement = await this.page.locator('[role="dialog"], .modal').first();
+          const modalElement = await this.page.locator('[role= "dialog"], .modal').first();
           const modalVisible = await modalElement.isVisible().catch(() => false);
           
           if (modalVisible) {
@@ -585,7 +585,7 @@ class ComprehensiveTabTester {
           console.log(`    📝 Found ${inputs.length} form fields`);
           
           // Test submit button
-          const submitBtn = await this.page.locator('[type="submit"], button[type="submit"]').first();
+          const submitBtn = await this.page.locator('[type= "submit"], button[type= "submit"]').first();
           const submitExists = await submitBtn.isVisible().catch(() => false);
           
           console.log(`    ${submitExists ? '✅' : '❌'} Submit button found`);
@@ -618,9 +618,9 @@ class ComprehensiveTabTester {
     };
 
     // Console output
-    console.log('\n' + '='.repeat(80));
+    console.log('\n' + '='.repeat(80));'
     console.log('🎯 COMPREHENSIVE TAB TESTING COMPLETE');
-    console.log('='.repeat(80));
+    console.log('='.repeat(80));'
     
     console.log(`\n📊 SUMMARY:`);
     console.log(`   Components Tested: ${report.summary.totalComponents}`);
@@ -664,8 +664,7 @@ class ComprehensiveTabTester {
 
   async saveReport(report) {
     try {
-      await fs.writeFile(
-        'comprehensive-tab-test-report.json',
+      await fs.writeFile('comprehensive-tab-test-report.json',
         JSON.stringify(report, null, 2)
       );
       
@@ -675,7 +674,7 @@ class ComprehensiveTabTester {
       
       console.log('📄 Reports saved successfully!');
     } catch (error) {
-      console.error('❌ Error saving reports:', error.message);
+      console.error('❌ Error saving reports: ', error.message);
     }
   }
 
@@ -701,7 +700,7 @@ ${Object.entries(report.componentReports).map(([key, component]) => {
 - **Status**: ${component.status}
 - **Tabs**: ${component.tabsCount || 0}
 - **Buttons**: ${component.buttonsCount || 0}
-${component.error ? `- **Error**: ${component.error}` : ''}
+${component.error ? `- **Error**: ${component.error}` : ''}'
 `;
 }).join('\n')}
 
@@ -710,8 +709,7 @@ ${component.error ? `- **Error**: ${component.error}` : ''}
 ${summary.successRate >= 90 ? 
   '🎉 **Excellent Results!** All components are functioning well.' :
   summary.successRate >= 70 ?
-    '✅ **Good Results!** Minor issues should be addressed.' :
-    '⚠️ **Needs Attention!** Several components require fixes.'
+    '✅ **Good Results!** Minor issues should be addressed.' : '⚠️ **Needs Attention!** Several components require fixes.'
 }
 
 ${report.errors.length > 0 ? `
@@ -720,7 +718,7 @@ ${report.errors.length > 0 ? `
 ${report.errors.map((error, index) => 
   `${index + 1}. **${error.component}**: ${error.error}`
 ).join('\n')}
-` : ''}
+` : ''}'
 
 ---
 *Generated on ${new Date(report.timestamp).toLocaleString()}*

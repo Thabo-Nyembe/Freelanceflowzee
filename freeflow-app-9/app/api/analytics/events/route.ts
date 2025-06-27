@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     // Get client IP address
     const forwardedFor = headersList.get('x-forwarded-for')
     const realIp = headersList.get('x-real-ip')
-    const ipAddress = forwardedFor?.split(',')[0] || realIp || 'unknown'
+    const ipAddress = forwardedFor?.split(',')[0] || realIp || 'unknown
     
     const body = await request.json()
     
@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
       session_id,
       timestamp: new Date().toISOString(),
       properties,
-      page_url: page_url || request.headers.get('referer') || '',
-      user_agent: request.headers.get('user-agent') || '',
+      page_url: page_url || request.headers.get('referer') || ,'
+      user_agent: request.headers.get('user-agent') || ,'
       ip_address: ipAddress,
       performance_metrics: Object.keys(performance_metrics).length > 0 ? performance_metrics : null
     }
@@ -85,10 +85,8 @@ export async function POST(request: NextRequest) {
     
     if (event_type === 'performance' && performance_metrics.page_load_time) {
       await trackBusinessMetric(
-        supabase, 
-        'performance_page_load_time', 
-        performance_metrics.page_load_time, 
-        'ms', 
+        supabase, 'performance_page_load_time', 
+        performance_metrics.page_load_time, 'ms', 
         user?.id
       )
     }
@@ -180,7 +178,7 @@ export async function GET(request: NextRequest) {
     // Build query
     let query = supabase
       .from('analytics_events')
-      .select('*')
+      .select('*')'
       .eq('user_id', user.id)
       .gte('timestamp', startTime.toISOString())
       .lte('timestamp', now.toISOString())
@@ -228,7 +226,7 @@ export async function GET(request: NextRequest) {
 
 // Helper function to track business metrics
 async function trackBusinessMetric(
-  supabase: any,
+  supabase: unknown,
   metricName: string,
   value: number,
   unit: string,
@@ -250,7 +248,7 @@ async function trackBusinessMetric(
 }
 
 // Helper function to calculate events summary
-function calculateEventsSummary(events: any[], metrics: any[]) {
+function calculateEventsSummary(events: unknown[], metrics: unknown[]) {
   const pageViews = events.filter(e => e.event_type === 'page_view').length
   const userActions = events.filter(e => e.event_type === 'user_action').length
   const errors = events.filter(e => e.event_type === 'error').length

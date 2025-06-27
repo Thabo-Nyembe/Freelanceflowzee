@@ -309,22 +309,22 @@ export async function createRefund(params: {
 }
 
 // Mock database operations (replace with actual database calls)
-async function updateProjectAccess(projectId: string, data: any) {
+async function updateProjectAccess(projectId: string, data: Record<string, unknown>) {
   console.log(`Updating project access for ${projectId}:`, data)
   // Implement actual database update
 }
 
-async function createSubscriptionRecord(data: any) {
+async function createSubscriptionRecord(data: Record<string, unknown>) {
   console.log('Creating subscription record:', data)
   // Implement actual database insert
 }
 
-async function updateSubscriptionRecord(subscriptionId: string, data: any) {
+async function updateSubscriptionRecord(subscriptionId: string, data: Record<string, unknown>) {
   console.log(`Updating subscription ${subscriptionId}:`, data)
   // Implement actual database update
 }
 
-async function processInvoicePayment(data: any) {
+async function processInvoicePayment(data: Record<string, unknown>) {
   console.log('Processing invoice payment:', data)
   // Implement actual invoice processing
 }
@@ -349,5 +349,5 @@ export const StripeUtils = {
 
   isTestKey: (key: string) => key.startsWith('sk_test_'),
 
-  getPublishableKey: () => process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
+  getPublishableKey: () => process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '','
 } 

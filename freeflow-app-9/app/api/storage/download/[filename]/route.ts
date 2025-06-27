@@ -103,28 +103,11 @@ export async function GET(
     const fileInfo = fileList[0]
 
     // Determine content type based on file extension
-    const extension = filename.toLowerCase().split('.').pop()
+    const extension = filename.toLowerCase().split('.').pop()'
     let contentType = 'application/octet-stream'
 
     const mimeTypes: Record<string, string> = {
-      'pdf': 'application/pdf',
-      'jpg': 'image/jpeg',
-      'jpeg': 'image/jpeg',
-      'png': 'image/png',
-      'gif': 'image/gif',
-      'webp': 'image/webp',
-      'svg': 'image/svg+xml',
-      'mp3': 'audio/mpeg',
-      'wav': 'audio/wav',
-      'mp4': 'video/mp4',
-      'webm': 'video/webm',
-      'txt': 'text/plain',
-      'css': 'text/css',
-      'html': 'text/html',
-      'js': 'text/javascript',
-      'ts': 'text/typescript',
-      'doc': 'application/msword',
-      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      'pdf': 'application/pdf', 'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'png': 'image/png', 'gif': 'image/gif', 'webp': 'image/webp', 'svg': 'image/svg+xml', 'mp3': 'audio/mpeg', 'wav': 'audio/wav', 'mp4': 'video/mp4', 'webm': 'video/webm', 'txt': 'text/plain', 'css': 'text/css', 'html': 'text/html', 'js': 'text/javascript', 'ts': 'text/typescript', 'doc': 'application/msword', 'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     }
 
     if (extension && mimeTypes[extension]) {
@@ -135,13 +118,7 @@ export async function GET(
     return new NextResponse(fileBuffer, {
       status: 200,
       headers: {
-        'Content-Type': contentType,
-        'Content-Disposition': `attachment; filename="${filename}"`,
-        'Content-Length': fileBuffer.byteLength.toString(),
-        'Cache-Control': 'private, max-age=3600',
-        'X-File-Size': fileInfo.metadata?.size?.toString() || fileBuffer.byteLength.toString(),
-        'X-File-Name': filename,
-        'X-Project-ID': projectId
+        'Content-Type': contentType, 'Content-Disposition': `attachment; filename= "${filename}"`, 'Content-Length': fileBuffer.byteLength.toString(), 'Cache-Control': 'private, max-age=3600', 'X-File-Size': fileInfo.metadata?.size?.toString() || fileBuffer.byteLength.toString(), 'X-File-Name': filename, 'X-Project-ID': projectId
       }
     })
 

@@ -15,7 +15,7 @@ async function testAuth() {
   console.log('Environment Variables:');
   console.log('- SUPABASE_URL:', supabaseUrl ? '✅ Set' : '❌ Missing');
   console.log('- SUPABASE_ANON_KEY:', supabaseAnonKey ? '✅ Set' : '❌ Missing');
-  console.log('');
+  console.log('');'
 
   if (!supabaseUrl || !supabaseAnonKey) {
     console.log('❌ Missing environment variables. Please run: node scripts/setup-env.js');
@@ -31,7 +31,7 @@ async function testAuth() {
     const { data, error } = await supabase.auth.getSession();
     
     if (error) {
-      console.log('⚠️ Auth test error:', error.message);
+      console.log('⚠️ Auth test error: ', error.message);
     } else {
       console.log('✅ Supabase connection successful');
       console.log('- Session status:', data.session ? 'Active' : 'No active session');

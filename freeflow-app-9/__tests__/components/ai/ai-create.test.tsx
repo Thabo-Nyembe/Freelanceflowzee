@@ -1,25 +1,32 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { AICreate } from '@/components/ai/ai-create'
+import AICreate from '@/components/collaboration/ai-create'
 import { createClient } from '@supabase/supabase-js'
-import { vi } from 'vitest'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { createContext } from 'react'
+import { ThemeProvider } from 'next-themes'
+import type { Database } from '@/types/supabase'
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+// Create a test SupabaseContext
+const TestSupabaseContext = createContext<SupabaseClient<Database> | null>(null)
 
 // Mock Supabase client
-vi.mock('@supabase/supabase-js', () => ({
-  createClient: vi.fn(() => ({
+jest.mock('@supabase/supabase-js', () => ({
+  createClient: jest.fn(() => ({
     auth: {
-      getUser: vi.fn().mockResolvedValue({
+      getUser: jest.fn().mockResolvedValue({
         data: { user: { id: 'test-user-id' } },
         error: null
       })
     },
-    from: vi.fn(() => ({
-      insert: vi.fn().mockReturnThis(),
-      update: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-      single: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      mockResolvedValue: vi.fn().mockResolvedValue({
+    from: jest.fn(() => ({
+      insert: jest.fn().mockReturnThis(),
+      update: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      single: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      order: jest.fn().mockReturnThis(),
+      mockResolvedValue: jest.fn().mockResolvedValue({
         data: {
           id: 'test-generation-id',
           user_id: 'test-user-id',
@@ -41,15 +48,26 @@ vi.mock('@supabase/supabase-js', () => ({
   }))
 }))
 
-describe('AICreate', () => {
-  const mockSupabase = createClient('http://localhost:54321', 'test-anon-key')
+const mockSupabase = createClient('http://localhost:54321', 'test-anon-key')
+const queryClient = new QueryClient()
 
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+  <TestSupabaseContext.Provider value={mockSupabase}>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        {children}
+      </ThemeProvider>
+    </QueryClientProvider>
+  </TestSupabaseContext.Provider>
+)
+
+describe('AICreate', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    jest.clearAllMocks()
   })
 
   it('renders all tabs', () => {
-    render(<AICreate supabase={mockSupabase} />)
+    render(<AICreate />, { wrapper: TestWrapper })
     
     expect(screen.getByText('Create')).toBeInTheDocument()
     expect(screen.getByText('Library')).toBeInTheDocument()
@@ -57,7 +75,7 @@ describe('AICreate', () => {
   })
 
   it('renders all asset type buttons', () => {
-    render(<AICreate supabase={mockSupabase} />)
+    render(<AICreate />, { wrapper: TestWrapper })
     
     expect(screen.getByText('Image')).toBeInTheDocument()
     expect(screen.getByText('Code')).toBeInTheDocument()
@@ -67,7 +85,7 @@ describe('AICreate', () => {
   })
 
   it('allows switching between asset types', () => {
-    render(<AICreate supabase={mockSupabase} />)
+    render(<AICreate />, { wrapper: TestWrapper })
     
     const codeButton = screen.getByText('Code')
     fireEvent.click(codeButton)
@@ -76,7 +94,7 @@ describe('AICreate', () => {
   })
 
   it('handles prompt input', () => {
-    render(<AICreate supabase={mockSupabase} />)
+    render(<AICreate />, { wrapper: TestWrapper })
     
     const textarea = screen.getByPlaceholderText('Describe what you want to create...')
     fireEvent.change(textarea, { target: { value: 'Test prompt' } })
@@ -85,14 +103,14 @@ describe('AICreate', () => {
   })
 
   it('disables generate button when prompt is empty', () => {
-    render(<AICreate supabase={mockSupabase} />)
+    render(<AICreate />, { wrapper: TestWrapper })
     
     const generateButton = screen.getByText('Generate')
     expect(generateButton).toBeDisabled()
   })
 
   it('enables generate button when prompt is not empty', () => {
-    render(<AICreate supabase={mockSupabase} />)
+    render(<AICreate />, { wrapper: TestWrapper })
     
     const textarea = screen.getByPlaceholderText('Describe what you want to create...')
     fireEvent.change(textarea, { target: { value: 'Test prompt' } })
@@ -102,7 +120,7 @@ describe('AICreate', () => {
   })
 
   it('shows loading state during generation', async () => {
-    render(<AICreate supabase={mockSupabase} />)
+    render(<AICreate />, { wrapper: TestWrapper })
     
     const textarea = screen.getByPlaceholderText('Describe what you want to create...')
     fireEvent.change(textarea, { target: { value: 'Test prompt' } })
@@ -118,7 +136,7 @@ describe('AICreate', () => {
   })
 
   it('allows changing settings', () => {
-    render(<AICreate supabase={mockSupabase} />)
+    render(<AICreate />, { wrapper: TestWrapper })
     
     // Switch to settings tab
     const settingsTab = screen.getByText('Settings')

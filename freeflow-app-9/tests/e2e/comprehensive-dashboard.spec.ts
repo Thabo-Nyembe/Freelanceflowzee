@@ -1,6 +1,6 @@
-import { test, expect } from '../fixtures/app-fixtures';
+import { test, expect } from &apos;../fixtures/app-fixtures&apos;;
 
-test.describe('🎛️ Comprehensive Dashboard Tests', () => {
+test.describe(&apos;🎛️ Comprehensive Dashboard Tests&apos;, () => {
   test.beforeEach(async ({ dashboardPage, authPage, testUser }) => {
     // Ensure user is logged in before each test
     await authPage.gotoLogin();
@@ -8,8 +8,8 @@ test.describe('🎛️ Comprehensive Dashboard Tests', () => {
     await dashboardPage.waitForDashboardToLoad();
   });
 
-  test.describe('📊 Dashboard Core Elements', () => {
-    test('should display all dashboard elements', async ({ dashboardPage }) => {
+  test.describe(&apos;📊 Dashboard Core Elements&apos;, () => {
+    test(&apos;should display all dashboard elements&apos;, async ({ dashboardPage }) => {
       const elements = await dashboardPage.verifyDashboardLoaded();
       
       expect(elements.sidebar).toBe(true);
@@ -18,7 +18,7 @@ test.describe('🎛️ Comprehensive Dashboard Tests', () => {
       expect(elements.quickActions).toBe(true);
     });
 
-    test('should display stats cards with data', async ({ dashboardPage }) => {
+    test(&apos;should display stats cards with data&apos;, async ({ dashboardPage }) => {
       const stats = await dashboardPage.verifyStatsCards();
       
       expect(stats.count).toBeGreaterThan(0);
@@ -29,7 +29,7 @@ test.describe('🎛️ Comprehensive Dashboard Tests', () => {
       }
     });
 
-    test('should display user profile elements', async ({ dashboardPage }) => {
+    test(&apos;should display user profile elements&apos;, async ({ dashboardPage }) => {
       const profile = await dashboardPage.verifyUserProfile();
       
       expect(profile.avatar).toBe(true);
@@ -37,11 +37,11 @@ test.describe('🎛️ Comprehensive Dashboard Tests', () => {
     });
   });
 
-  test.describe('🧭 Navigation & Routing', () => {
-    test('should navigate to projects hub', async ({ dashboardPage }) => {
+  test.describe(&apos;🧭 Navigation & Routing&apos;, () => {
+    test(&apos;should navigate to projects hub&apos;, async ({ dashboardPage }) => {
       await dashboardPage.navigateToProjects();
       
-      expect(dashboardPage.page.url()).toContain('projects');
+      expect(dashboardPage.page.url()).toContain(&apos;projects&apos;);
       
       const projectsHub = await dashboardPage.verifyProjectsHub();
       expect(projectsHub.hub).toBe(true);
@@ -49,149 +49,149 @@ test.describe('🎛️ Comprehensive Dashboard Tests', () => {
       expect(projectsHub.search).toBe(true);
     });
 
-    test('should navigate to team hub', async ({ dashboardPage }) => {
+    test(&apos;should navigate to team hub&apos;, async ({ dashboardPage }) => {
       await dashboardPage.navigateToTeam();
       
-      expect(dashboardPage.page.url()).toContain('team');
+      expect(dashboardPage.page.url()).toContain(&apos;team&apos;);
       
       const teamHub = await dashboardPage.verifyTeamHub();
       expect(teamHub.hub).toBe(true);
       expect(teamHub.addButton).toBe(true);
     });
 
-    test('should navigate to community tab', async ({ dashboardPage }) => {
+    test(&apos;should navigate to community tab&apos;, async ({ dashboardPage }) => {
       await dashboardPage.navigateToCommunity();
       
-      expect(dashboardPage.page.url()).toContain('community');
+      expect(dashboardPage.page.url()).toContain(&apos;community&apos;);
     });
 
-    test('should navigate to analytics section', async ({ dashboardPage }) => {
+    test(&apos;should navigate to analytics section&apos;, async ({ dashboardPage }) => {
       await dashboardPage.navigateToAnalytics();
       
-      expect(dashboardPage.page.url()).toContain('analytics');
+      expect(dashboardPage.page.url()).toContain(&apos;analytics&apos;);
     });
 
-    test('should navigate to settings', async ({ dashboardPage }) => {
+    test(&apos;should navigate to settings&apos;, async ({ dashboardPage }) => {
       await dashboardPage.navigateToSettings();
       
-      expect(dashboardPage.page.url()).toContain('settings');
+      expect(dashboardPage.page.url()).toContain(&apos;settings&apos;);
     });
   });
 
-  test.describe('🚀 Quick Actions', () => {
-    test('should open new project modal', async ({ dashboardPage }) => {
+  test.describe(&apos;🚀 Quick Actions&apos;, () => {
+    test(&apos;should open new project modal&apos;, async ({ dashboardPage }) => {
       await dashboardPage.createNewProject();
       
       await expect(dashboardPage.modal).toBeVisible();
     });
 
-    test('should open file upload modal', async ({ dashboardPage }) => {
+    test(&apos;should open file upload modal&apos;, async ({ dashboardPage }) => {
       await dashboardPage.uploadFile();
       
       await expect(dashboardPage.modal).toBeVisible();
     });
 
-    test('should open team invite modal', async ({ dashboardPage }) => {
+    test(&apos;should open team invite modal&apos;, async ({ dashboardPage }) => {
       await dashboardPage.inviteTeamMember();
       
       await expect(dashboardPage.modal).toBeVisible();
     });
 
-    test('should navigate to invoice creation', async ({ dashboardPage }) => {
+    test(&apos;should navigate to invoice creation&apos;, async ({ dashboardPage }) => {
       await dashboardPage.createInvoice();
       
-      expect(dashboardPage.page.url()).toContain('invoice');
+      expect(dashboardPage.page.url()).toContain(&apos;invoice&apos;);
     });
   });
 
-  test.describe('📋 Project Management', () => {
-    test('should search projects', async ({ dashboardPage }) => {
+  test.describe(&apos;📋 Project Management&apos;, () => {
+    test(&apos;should search projects&apos;, async ({ dashboardPage }) => {
       await dashboardPage.navigateToProjects();
-      await dashboardPage.searchProjects('test');
+      await dashboardPage.searchProjects(&apos;test&apos;);
       
       // Wait for search results
       await dashboardPage.page.waitForTimeout(1000);
     });
 
-    test('should filter projects by status', async ({ dashboardPage }) => {
+    test(&apos;should filter projects by status&apos;, async ({ dashboardPage }) => {
       await dashboardPage.navigateToProjects();
-      await dashboardPage.filterProjectsByStatus('Active');
+      await dashboardPage.filterProjectsByStatus(&apos;Active&apos;);
       
       await dashboardPage.page.waitForTimeout(500);
     });
 
-    test('should sort projects', async ({ dashboardPage }) => {
+    test(&apos;should sort projects&apos;, async ({ dashboardPage }) => {
       await dashboardPage.navigateToProjects();
-      await dashboardPage.sortProjects('Date Created');
+      await dashboardPage.sortProjects(&apos;Date Created&apos;);
       
       await dashboardPage.page.waitForTimeout(500);
     });
 
-    test('should get project count', async ({ dashboardPage }) => {
+    test(&apos;should get project count&apos;, async ({ dashboardPage }) => {
       const projectCount = await dashboardPage.getProjectCount();
       
       expect(projectCount).toBeGreaterThanOrEqual(0);
     });
 
-    test('should get project names', async ({ dashboardPage }) => {
+    test(&apos;should get project names&apos;, async ({ dashboardPage }) => {
       const projectNames = await dashboardPage.getProjectNames();
       
       expect(Array.isArray(projectNames)).toBe(true);
     });
   });
 
-  test.describe('👥 Team Management', () => {
-    test('should get team member count', async ({ dashboardPage }) => {
+  test.describe(&apos;👥 Team Management&apos;, () => {
+    test(&apos;should get team member count&apos;, async ({ dashboardPage }) => {
       const memberCount = await dashboardPage.getTeamMemberCount();
       
       expect(memberCount).toBeGreaterThanOrEqual(0);
     });
 
-    test('should get team member names', async ({ dashboardPage }) => {
+    test(&apos;should get team member names&apos;, async ({ dashboardPage }) => {
       const memberNames = await dashboardPage.getTeamMemberNames();
       
       expect(Array.isArray(memberNames)).toBe(true);
     });
 
-    test('should add team member', async ({ dashboardPage }) => {
+    test(&apos;should add team member&apos;, async ({ dashboardPage }) => {
       await dashboardPage.navigateToTeam();
-      await dashboardPage.addTeamMember('newmember@example.com', 'Member');
+      await dashboardPage.addTeamMember(&apos;newmember@example.com&apos;, &apos;Member&apos;);
       
       // Should show invite modal and process invitation
       await dashboardPage.page.waitForTimeout(2000);
     });
   });
 
-  test.describe('💬 Community Features', () => {
-    test('should create community post', async ({ dashboardPage }) => {
+  test.describe(&apos;💬 Community Features&apos;, () => {
+    test(&apos;should create community post&apos;, async ({ dashboardPage }) => {
       await dashboardPage.navigateToCommunity();
-      await dashboardPage.createPost('This is a test post');
+      await dashboardPage.createPost(&apos;This is a test post&apos;);
       
       await dashboardPage.page.waitForTimeout(1000);
     });
 
-    test('should like community post', async ({ dashboardPage }) => {
+    test(&apos;should like community post&apos;, async ({ dashboardPage }) => {
       await dashboardPage.navigateToCommunity();
       
-      // Assuming there's a post with ID 'test-post'
-      if (await dashboardPage.page.locator('[data-testid="post-test-post"]').isVisible()) {
-        await dashboardPage.likePost('test-post');
+      // Assuming there&apos;s a post with ID &apos;test-post&apos;
+      if (await dashboardPage.page.locator(&apos;[data-testid=&quot;post-test-post&quot;]&apos;).isVisible()) {
+        await dashboardPage.likePost(&apos;test-post&apos;);
         await dashboardPage.page.waitForTimeout(500);
       }
     });
 
-    test('should comment on community post', async ({ dashboardPage }) => {
+    test(&apos;should comment on community post&apos;, async ({ dashboardPage }) => {
       await dashboardPage.navigateToCommunity();
       
-      if (await dashboardPage.page.locator('[data-testid="post-test-post"]').isVisible()) {
-        await dashboardPage.commentOnPost('test-post', 'Great post!');
+      if (await dashboardPage.page.locator(&apos;[data-testid=&quot;post-test-post&quot;]&apos;).isVisible()) {
+        await dashboardPage.commentOnPost(&apos;test-post&apos;, &apos;Great post!&apos;);
         await dashboardPage.page.waitForTimeout(500);
       }
     });
   });
 
-  test.describe('📱 Responsive Design', () => {
-    test('should be responsive across different viewports', async ({ dashboardPage }) => {
+  test.describe(&apos;📱 Responsive Design&apos;, () => {
+    test(&apos;should be responsive across different viewports&apos;, async ({ dashboardPage }) => {
       const responsiveness = await dashboardPage.checkResponsiveness();
       
       expect(responsiveness.mobile.header).toBe(true);
@@ -206,16 +206,16 @@ test.describe('🎛️ Comprehensive Dashboard Tests', () => {
     });
   });
 
-  test.describe('⚡ Performance', () => {
-    test('should load dashboard within acceptable time', async ({ dashboardPage }) => {
+  test.describe(&apos;⚡ Performance&apos;, () => {
+    test(&apos;should load dashboard within acceptable time&apos;, async ({ dashboardPage }) => {
       const loadTime = await dashboardPage.measureDashboardLoadTime();
       
       expect(loadTime).toBeLessThan(5000); // 5 seconds
     });
   });
 
-  test.describe('🔄 Modal Management', () => {
-    test('should dismiss modals with escape key', async ({ dashboardPage }) => {
+  test.describe(&apos;🔄 Modal Management&apos;, () => {
+    test(&apos;should dismiss modals with escape key&apos;, async ({ dashboardPage }) => {
       await dashboardPage.createNewProject();
       await expect(dashboardPage.modal).toBeVisible();
       
@@ -223,7 +223,7 @@ test.describe('🎛️ Comprehensive Dashboard Tests', () => {
       await expect(dashboardPage.modal).not.toBeVisible();
     });
 
-    test('should handle multiple modal interactions', async ({ dashboardPage }) => {
+    test(&apos;should handle multiple modal interactions&apos;, async ({ dashboardPage }) => {
       // Open and close multiple modals
       await dashboardPage.createNewProject();
       await dashboardPage.dismissModal();
@@ -240,10 +240,10 @@ test.describe('🎛️ Comprehensive Dashboard Tests', () => {
     });
   });
 
-  test.describe('🔍 Search & Filter Functionality', () => {
-    test('should handle empty search results', async ({ dashboardPage }) => {
+  test.describe(&apos;🔍 Search & Filter Functionality&apos;, () => {
+    test(&apos;should handle empty search results&apos;, async ({ dashboardPage }) => {
       await dashboardPage.navigateToProjects();
-      await dashboardPage.searchProjects('nonexistentproject12345');
+      await dashboardPage.searchProjects(&apos;nonexistentproject12345&apos;);
       
       await dashboardPage.page.waitForTimeout(1000);
       
@@ -252,15 +252,15 @@ test.describe('🎛️ Comprehensive Dashboard Tests', () => {
       expect(projectCount).toBeGreaterThanOrEqual(0);
     });
 
-    test('should clear search filters', async ({ dashboardPage }) => {
+    test(&apos;should clear search filters&apos;, async ({ dashboardPage }) => {
       await dashboardPage.navigateToProjects();
       
       // Apply search
-      await dashboardPage.searchProjects('test');
+      await dashboardPage.searchProjects(&apos;test&apos;);
       await dashboardPage.page.waitForTimeout(500);
       
       // Clear search
-      await dashboardPage.searchProjects('');
+      await dashboardPage.searchProjects('&apos;);'
       await dashboardPage.page.waitForTimeout(500);
       
       // Should show all projects again
@@ -269,8 +269,8 @@ test.describe('🎛️ Comprehensive Dashboard Tests', () => {
     });
   });
 
-  test.describe('🔐 Security & Authentication', () => {
-    test('should handle session timeout', async ({ dashboardPage }) => {
+  test.describe(&apos;🔐 Security & Authentication&apos;, () => {
+    test(&apos;should handle session timeout&apos;, async ({ dashboardPage }) => {
       // This would test session timeout scenarios
       // In a real app, you might clear cookies or tokens
       await dashboardPage.page.waitForTimeout(1000);
@@ -279,10 +279,10 @@ test.describe('🎛️ Comprehensive Dashboard Tests', () => {
       expect(elements.mainContent).toBe(true);
     });
 
-    test('should protect against XSS in user content', async ({ dashboardPage }) => {
+    test(&apos;should protect against XSS in user content&apos;, async ({ dashboardPage }) => {
       await dashboardPage.navigateToCommunity();
       
-      const xssAttempt = '<script>alert("XSS")</script>';
+      const xssAttempt = &apos;<script>alert(&quot;XSS&quot;)</script>&apos;;
       await dashboardPage.createPost(xssAttempt);
       
       // Should handle gracefully without executing script
@@ -290,8 +290,8 @@ test.describe('🎛️ Comprehensive Dashboard Tests', () => {
     });
   });
 
-  test.describe('🎯 Edge Cases', () => {
-    test('should handle rapid navigation', async ({ dashboardPage }) => {
+  test.describe(&apos;🎯 Edge Cases&apos;, () => {
+    test(&apos;should handle rapid navigation&apos;, async ({ dashboardPage }) => {
       // Rapidly navigate between sections
       await dashboardPage.navigateToProjects();
       await dashboardPage.navigateToTeam();
@@ -300,10 +300,10 @@ test.describe('🎛️ Comprehensive Dashboard Tests', () => {
       await dashboardPage.navigateToSettings();
       
       // Should end up in settings without errors
-      expect(dashboardPage.page.url()).toContain('settings');
+      expect(dashboardPage.page.url()).toContain(&apos;settings&apos;);
     });
 
-    test('should handle concurrent operations', async ({ dashboardPage }) => {
+    test(&apos;should handle concurrent operations&apos;, async ({ dashboardPage }) => {
       // Open multiple modals in sequence
       await Promise.all([
         dashboardPage.createNewProject(),
@@ -317,9 +317,9 @@ test.describe('🎛️ Comprehensive Dashboard Tests', () => {
       expect(elements.mainContent).toBe(true);
     });
 
-    test('should handle network interruption simulation', async ({ dashboardPage }) => {
+    test(&apos;should handle network interruption simulation&apos;, async ({ dashboardPage }) => {
       // Simulate slow network
-      await dashboardPage.page.route('**/*', route => {
+      await dashboardPage.page.route(&apos;**/*&apos;, route => {
         setTimeout(() => route.continue(), 100);
       });
       
@@ -332,8 +332,8 @@ test.describe('🎛️ Comprehensive Dashboard Tests', () => {
     });
   });
 
-  test.describe('📊 Data Management', () => {
-    test('should handle empty states', async ({ dashboardPage }) => {
+  test.describe(&apos;📊 Data Management&apos;, () => {
+    test(&apos;should handle empty states&apos;, async ({ dashboardPage }) => {
       // Test when user has no projects
       await dashboardPage.navigateToProjects();
       
@@ -344,7 +344,7 @@ test.describe('🎛️ Comprehensive Dashboard Tests', () => {
       }
     });
 
-    test('should handle large datasets', async ({ dashboardPage }) => {
+    test(&apos;should handle large datasets&apos;, async ({ dashboardPage }) => {
       await dashboardPage.navigateToProjects();
       
       // Should handle large number of projects
@@ -357,51 +357,51 @@ test.describe('🎛️ Comprehensive Dashboard Tests', () => {
     });
   });
 
-  test.describe('🔄 User Session Management', () => {
-    test('should maintain state across page refreshes', async ({ dashboardPage }) => {
+  test.describe(&apos;🔄 User Session Management&apos;, () => {
+    test(&apos;should maintain state across page refreshes&apos;, async ({ dashboardPage }) => {
       await dashboardPage.navigateToProjects();
       
       // Refresh page
       await dashboardPage.page.reload();
       
       // Should still be on projects page
-      expect(dashboardPage.page.url()).toContain('projects');
+      expect(dashboardPage.page.url()).toContain(&apos;projects&apos;);
     });
 
-    test('should handle logout properly', async ({ dashboardPage }) => {
+    test(&apos;should handle logout properly&apos;, async ({ dashboardPage }) => {
       await dashboardPage.logout();
       
-      expect(dashboardPage.page.url()).toContain('login');
+      expect(dashboardPage.page.url()).toContain(&apos;login&apos;);
     });
   });
 
-  test.describe('♿ Accessibility', () => {
-    test('should have proper keyboard navigation', async ({ dashboardPage }) => {
+  test.describe(&apos;♿ Accessibility&apos;, () => {
+    test(&apos;should have proper keyboard navigation&apos;, async ({ dashboardPage }) => {
       // Test tab navigation
-      await dashboardPage.page.keyboard.press('Tab');
-      await dashboardPage.page.keyboard.press('Tab');
-      await dashboardPage.page.keyboard.press('Tab');
+      await dashboardPage.page.keyboard.press(&apos;Tab&apos;);
+      await dashboardPage.page.keyboard.press(&apos;Tab&apos;);
+      await dashboardPage.page.keyboard.press(&apos;Tab&apos;);
       
       // Should be able to navigate with keyboard
       const focusedElement = await dashboardPage.page.evaluate(() => 
         document.activeElement?.tagName
       );
       
-      expect(['BUTTON', 'A', 'INPUT']).toContain(focusedElement);
+      expect([&apos;BUTTON&apos;, &apos;A', &apos;INPUT&apos;]).toContain(focusedElement);'
     });
 
-    test('should have proper ARIA labels', async ({ dashboardPage }) => {
+    test(&apos;should have proper ARIA labels&apos;, async ({ dashboardPage }) => {
       // Check for essential ARIA attributes
-      const sidebarAriaLabel = await dashboardPage.sidebar.getAttribute('aria-label');
-      const headerAriaLabel = await dashboardPage.header.getAttribute('aria-label');
+      const sidebarAriaLabel = await dashboardPage.sidebar.getAttribute(&apos;aria-label&apos;);
+      const headerAriaLabel = await dashboardPage.header.getAttribute(&apos;aria-label&apos;);
       
       // At least one should have proper labeling
       expect(sidebarAriaLabel || headerAriaLabel).toBeTruthy();
     });
   });
 
-  test.describe('🎨 UI/UX Quality', () => {
-    test('should have consistent styling', async ({ dashboardPage }) => {
+  test.describe(&apos;🎨 UI/UX Quality&apos;, () => {
+    test(&apos;should have consistent styling&apos;, async ({ dashboardPage }) => {
       const elements = await dashboardPage.verifyDashboardLoaded();
       
       // All major elements should be visible
@@ -410,7 +410,7 @@ test.describe('🎛️ Comprehensive Dashboard Tests', () => {
       expect(elements.mainContent).toBe(true);
     });
 
-    test('should handle loading states', async ({ dashboardPage }) => {
+    test(&apos;should handle loading states&apos;, async ({ dashboardPage }) => {
       // Check if loading spinners are handled properly
       await dashboardPage.navigateToAnalytics();
       

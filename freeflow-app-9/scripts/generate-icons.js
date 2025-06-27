@@ -9,15 +9,15 @@ if (!fs.existsSync(iconsDir)) {
 
 // Simple SVG icon template for FreeflowZee
 const createSVGIcon = (size) => {
-  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+  return `<svg width= "${size}" height= "${size}" viewBox= "0 0 ${size} ${size}" xmlns= "http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    <linearGradient id= "grad" x1= "0%" y1= "0%" x2= "100%" y2= "100%">
+      <stop offset= "0%" style= "stop-color:#6366f1;stop-opacity:1" />
+      <stop offset= "100%" style= "stop-color:#8b5cf6;stop-opacity:1" />
     </linearGradient>
   </defs>
-  <rect width="${size}" height="${size}" fill="url(#grad)" rx="${size * 0.15}"/>
-  <text x="50%" y="50%" text-anchor="middle" dy="0.35em" fill="white" font-family="Arial, sans-serif" font-weight="bold" font-size="${size * 0.4}">F</text>
+  <rect width= "${size}" height= "${size}" fill= "url(#grad)" rx= "${size * 0.15}"/>
+  <text x= "50%" y= "50%" text-anchor= "middle" dy= "0.35em" fill= "white" font-family= "Arial, sans-serif" font-weight= "bold" font-size= "${size * 0.4}">F</text>
 </svg>`;
 };
 
@@ -46,12 +46,8 @@ ${createSVGIcon(size)}`;
 });
 
 // Create shortcut icons
-const shortcutIcons = [
-  'dashboard-icon-96x96.png',
-  'projects-icon-96x96.png', 
-  'payment-icon-96x96.png',
-  'new-project-icon-96x96.png'
-];
+const shortcutIcons = ['dashboard-icon-96x96.png', 'projects-icon-96x96.png', 'payment-icon-96x96.png',
+  'new-project-icon-96x96.png'];
 
 shortcutIcons.forEach(filename => {
   const filepath = path.join(iconsDir, filename);

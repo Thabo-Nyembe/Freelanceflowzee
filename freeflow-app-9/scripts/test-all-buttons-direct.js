@@ -160,10 +160,10 @@ class DirectButtonTester {
       try {
         // Try multiple tab selectors
         const tabSelectors = [
-          `[role="tab"][aria-selected="false"]:has-text("${tab}")`,
-          `[role="tab"]:has-text("${tab}")`,
+          `[role= "tab"][aria-selected= "false"]:has-text("${tab}")`,
+          `[role= "tab"]:has-text("${tab}")`,
           `button:has-text("${tab}")`,
-          `[data-value="${tab}"]`
+          `[data-value= "${tab}"]`
         ];
 
         let tabElement = null;
@@ -194,7 +194,7 @@ class DirectButtonTester {
     
     for (const button of buttons) {
       try {
-        const buttonElement = this.page.locator(`[data-testid="${button.id}"]`).first();
+        const buttonElement = this.page.locator(`[data-testid= "${button.id}"]`).first();
         
         if (await buttonElement.isVisible()) {
           // Test button click based on expected action
@@ -244,17 +244,16 @@ class DirectButtonTester {
         Math.round((this.results.passed / this.results.total) * 100) : 0
     };
 
-    console.log('\n' + '='.repeat(60));
+    console.log('\n' + '='.repeat(60));'
     console.log('📊 DIRECT BUTTON TEST RESULTS');
-    console.log('='.repeat(60));
+    console.log('='.repeat(60));'
     console.log(`📈 Total Tests: ${this.results.total}`);
     console.log(`✅ Passed: ${this.results.passed}`);
     console.log(`❌ Failed: ${this.results.failed}`);
     console.log(`📊 Success Rate: ${report.successRate}%`);
 
     // Save detailed report
-    await fs.writeFile(
-      'test-results/direct-button-test-results.json',
+    await fs.writeFile('test-results/direct-button-test-results.json',
       JSON.stringify(report, null, 2)
     );
     console.log('💾 Report saved to: test-results/direct-button-test-results.json');

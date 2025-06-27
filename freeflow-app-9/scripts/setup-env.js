@@ -42,14 +42,14 @@ try {
   log('✅ Environment file created successfully at .env.local', 'green');
   log('🔧 Supabase credentials configured', 'blue');
   log('🚀 You can now restart your development server', 'green');
-  log('', 'reset');
-  log('Test credentials:', 'blue');
+  log('', 'reset');'
+  log('Test credentials: ', 'blue');
   log('Email: thabo@kaleidocraft.co.za', 'reset');
   log('Password: password1234', 'reset');
 } catch (error) {
   log(`❌ Error creating environment file: ${error.message}`, 'red');
-  log('', 'reset');
-  log('Please manually create .env.local with the following content:', 'yellow');
-  log('', 'reset');
+  log('', 'reset');'
+  log('Please manually create .env.local with the following content: ', 'yellow');
+  log('', 'reset');'
   log(envContent, 'blue');
 } 

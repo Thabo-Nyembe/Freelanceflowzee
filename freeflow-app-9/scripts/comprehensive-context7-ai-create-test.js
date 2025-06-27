@@ -38,14 +38,7 @@ const AI_CREATE_TESTS = [
     name: 'AI Create Tab Layout',
     url: '/dashboard/ai-create',
     tab: 'generate',
-    expectedElements: [
-      'Generate Assets tab button',
-      'Asset Library tab button', 
-      'Advanced Settings tab button',
-      'Creative field selection cards',
-      'AI model selection',
-      'Prompt input area',
-      'Generate button'
+    expectedElements: ['Generate Assets tab button', 'Asset Library tab button', 'Advanced Settings tab button', 'Creative field selection cards', 'AI model selection', 'Prompt input area', 'Generate button'
     ],
     buttons: [
       { testId: 'generate-assets-btn', name: 'Generate Assets' },
@@ -58,11 +51,7 @@ const AI_CREATE_TESTS = [
     name: 'File Upload Functionality',
     url: '/dashboard/ai-create',
     tab: 'generate',
-    expectedElements: [
-      'File upload area',
-      'Upload progress indicator',
-      'File preview cards',
-      'Analysis results'
+    expectedElements: ['File upload area', 'Upload progress indicator', 'File preview cards', 'Analysis results'
     ],
     buttons: [
       { testId: 'upload-asset-btn', name: 'Upload Asset' },
@@ -74,11 +63,7 @@ const AI_CREATE_TESTS = [
     name: 'Asset Generation Process',
     url: '/dashboard/ai-create',
     tab: 'generate',
-    expectedElements: [
-      'Generation progress bar',
-      'Asset preview cards',
-      'Quality scores',
-      'Download buttons'
+    expectedElements: ['Generation progress bar', 'Asset preview cards', 'Quality scores', 'Download buttons'
     ],
     buttons: [
       { testId: 'generate-assets-btn', name: 'Generate Assets' },
@@ -90,12 +75,7 @@ const AI_CREATE_TESTS = [
     name: 'User API Key Support',
     url: '/dashboard/ai-create',
     tab: 'settings',
-    expectedElements: [
-      'Cost Savings Dashboard',
-      'API Provider Selection',
-      'API Key Input Fields',
-      'Validation Status',
-      'Cost Savings Metrics'
+    expectedElements: ['Cost Savings Dashboard', 'API Provider Selection', 'API Key Input Fields', 'Validation Status', 'Cost Savings Metrics'
     ],
     buttons: [
       { testId: 'manage-api-keys-btn', name: 'Manage All API Keys' },
@@ -107,10 +87,7 @@ const AI_CREATE_TESTS = [
   {
     name: 'Tab Navigation',
     url: '/dashboard/ai-create',
-    expectedElements: [
-      'Generate Assets tab content',
-      'Asset Library tab content', 
-      'Advanced Settings tab content'
+    expectedElements: ['Generate Assets tab content', 'Asset Library tab content', 'Advanced Settings tab content'
     ],
     buttons: [
       { testId: 'generate-tab', name: 'Generate Tab' },
@@ -123,10 +100,7 @@ const AI_CREATE_TESTS = [
     name: 'Collaboration Features',
     url: '/dashboard/ai-create',
     tab: 'generate',
-    expectedElements: [
-      'Share asset buttons',
-      'Export options',
-      'Collaboration indicators'
+    expectedElements: ['Share asset buttons', 'Export options', 'Collaboration indicators'
     ],
     buttons: [
       { testId: 'share-asset-btn', name: 'Share Asset' },
@@ -138,10 +112,7 @@ const AI_CREATE_TESTS = [
     name: 'Download System',
     url: '/dashboard/ai-create',
     tab: 'library',
-    expectedElements: [
-      'Asset library grid',
-      'Download progress',
-      'Downloaded files list'
+    expectedElements: ['Asset library grid', 'Download progress', 'Downloaded files list'
     ],
     buttons: [
       { testId: 'download-asset-btn', name: 'Download Asset' },
@@ -152,10 +123,7 @@ const AI_CREATE_TESTS = [
   {
     name: 'Responsive Design Testing',
     url: '/dashboard/ai-create',
-    expectedElements: [
-      'Mobile navigation',
-      'Responsive grid layout',
-      'Touch-friendly buttons'
+    expectedElements: ['Mobile navigation', 'Responsive grid layout', 'Touch-friendly buttons'
     ],
     buttons: [
       { testId: 'mobile-menu-btn', name: 'Mobile Menu' }
@@ -165,10 +133,7 @@ const AI_CREATE_TESTS = [
   {
     name: 'Performance Metrics',
     url: '/dashboard/ai-create',
-    expectedElements: [
-      'Fast loading times',
-      'Smooth animations',
-      'Responsive interactions'
+    expectedElements: ['Fast loading times', 'Smooth animations', 'Responsive interactions'
     ],
     buttons: [],
     actions: ['measure_load_time', 'measure_interaction_time', 'check_memory_usage']
@@ -176,10 +141,7 @@ const AI_CREATE_TESTS = [
   {
     name: 'Error Handling',
     url: '/dashboard/ai-create',
-    expectedElements: [
-      'Error messages',
-      'Fallback UI',
-      'Recovery options'
+    expectedElements: ['Error messages', 'Fallback UI', 'Recovery options'
     ],
     buttons: [
       { testId: 'retry-btn', name: 'Retry' },
@@ -252,21 +214,21 @@ class Context7AICreateTester {
       });
       
       // Wait for main content to load
-      await this.page.waitForSelector('[data-testid="ai-create-main"], .ai-create-container, h1:has-text("AI Create")', { 
+      await this.page.waitForSelector('[data-testid= "ai-create-main"], .ai-create-container, h1:has-text("AI Create")', { 
         timeout: 10000 
       });
       
       console.log('✅ Successfully navigated to AI Create');
       return true;
     } catch (error) {
-      console.error('❌ Failed to navigate to AI Create:', error);
+      console.error('❌ Failed to navigate to AI Create: ', error);
       return false;
     }
   }
 
   async runTest(testName, testFunction) {
     console.log(`\n🧪 Running test: ${testName}`);
-    console.log('─'.repeat(50));
+    console.log('─'.repeat(50));'
     
     try {
       await testFunction();
@@ -284,16 +246,12 @@ class Context7AICreateTester {
   async testTabLayout() {
     await this.runTest('AI Create Tab Layout', async () => {
       // Check for main tabs
-      const tabs = await this.page.locator('[role="tab"], .tab-trigger, button:has-text("Generate"), button:has-text("Library"), button:has-text("Settings")');
+      const tabs = await this.page.locator('[role= "tab"], .tab-trigger, button:has-text("Generate"), button:has-text("Library"), button:has-text("Settings")');
       const tabCount = await tabs.count();
       console.log(`📋 Found ${tabCount} main tabs`);
       
       // Check for essential elements
-      const essentialElements = [
-        'h1:has-text("AI Create")',
-        'button:has-text("Generate")',
-        '[data-testid*="asset"], .asset-type-card',
-        'textarea[placeholder*="prompt"], input[placeholder*="prompt"]'
+      const essentialElements = ['h1:has-text("AI Create")', 'button:has-text("Generate")', '[data-testid*= "asset"], .asset-type-card', 'textarea[placeholder*= "prompt"], input[placeholder*= "prompt"]'
       ];
       
       for (const selector of essentialElements) {
@@ -310,8 +268,8 @@ class Context7AICreateTester {
     await this.runTest('File Upload Functionality', async () => {
       // Look for upload elements
       const uploadElements = await this.page.locator(
-        'input[type="file"], ' +
-        '[data-testid*="upload"], ' +
+        'input[type= "file"], ' +
+        '[data-testid*= "upload"], ' +
         'button:has-text("Upload"), ' +
         '.upload-area, .file-upload'
       ).count();
@@ -319,7 +277,7 @@ class Context7AICreateTester {
       console.log(`📁 Upload elements found: ${uploadElements}`);
       
       // Try to find and interact with upload area
-      const uploadButtons = await this.page.locator('button:has-text("Upload"), [data-testid*="upload"]');
+      const uploadButtons = await this.page.locator('button:has-text("Upload"), [data-testid*= "upload"]');
       if (await uploadButtons.count() > 0) {
         await uploadButtons.first().click();
         await this.page.waitForTimeout(1000);
@@ -333,7 +291,7 @@ class Context7AICreateTester {
   async testAssetGeneration() {
     await this.runTest('Asset Generation Process', async () => {
       // Fill in a test prompt
-      const promptInputs = await this.page.locator('textarea, input[placeholder*="prompt"]');
+      const promptInputs = await this.page.locator('textarea, input[placeholder*= "prompt"]');
       if (await promptInputs.count() > 0) {
         await promptInputs.first().fill('Generate a professional logo design for a tech startup');
         console.log('✅ Successfully filled prompt input');
@@ -341,7 +299,7 @@ class Context7AICreateTester {
       
       // Look for generate button
       const generateButtons = await this.page.locator(
-        '[data-testid*="generate"], ' +
+        '[data-testid*= "generate"], ' +
         'button:has-text("Generate"), ' +
         'button:has-text("Create"), ' +
         '.generate-btn'
@@ -360,7 +318,7 @@ class Context7AICreateTester {
   async testAPIKeyInterface() {
     await this.runTest('User API Key Interface', async () => {
       // Navigate to settings tab
-      const settingsTabs = await this.page.locator('button:has-text("Settings"), [role="tab"]:has-text("Settings")');
+      const settingsTabs = await this.page.locator('button:has-text("Settings"), [role= "tab"]:has-text("Settings")');
       if (await settingsTabs.count() > 0) {
         await settingsTabs.first().click();
         await this.page.waitForTimeout(1000);
@@ -369,9 +327,9 @@ class Context7AICreateTester {
       
       // Look for API key elements
       const apiKeyElements = await this.page.locator(
-        '[data-testid*="api-key"], ' +
-        'input[placeholder*="API"], ' +
-        'input[placeholder*="key"], ' +
+        '[data-testid*= "api-key"], ' +
+        'input[placeholder*= "API"], ' +
+        'input[placeholder*= "key"], ' +
         'button:has-text("API"), ' +
         '.cost-savings, .api-provider'
       ).count();
@@ -404,7 +362,7 @@ class Context7AICreateTester {
       const tabs = ['Generate', 'Library', 'Settings'];
       
       for (const tabName of tabs) {
-        const tabSelector = `button:has-text("${tabName}"), [role="tab"]:has-text("${tabName}")`;
+        const tabSelector = `button:has-text("${tabName}"), [role= "tab"]:has-text("${tabName}")`;
         const tab = await this.page.locator(tabSelector);
         
         if (await tab.count() > 0) {
@@ -413,7 +371,7 @@ class Context7AICreateTester {
           console.log(`✅ Successfully navigated to ${tabName} tab`);
           
           // Verify tab content is visible
-          const content = await this.page.locator('.tab-panel, [role="tabpanel"]').isVisible();
+          const content = await this.page.locator('.tab-panel, [role= "tabpanel"]').isVisible();
           if (content) {
             console.log(`✅ ${tabName} tab content is visible`);
           }
@@ -431,8 +389,8 @@ class Context7AICreateTester {
         'button:has-text("Share"), ' +
         'button:has-text("Export"), ' +
         'button:has-text("Download"), ' +
-        '[data-testid*="share"], ' +
-        '[data-testid*="export"]'
+        '[data-testid*= "share"], ' +
+        '[data-testid*= "export"]'
       ).count();
       
       console.log(`🤝 Collaboration elements found: ${collaborationElements}`);
@@ -444,7 +402,7 @@ class Context7AICreateTester {
   async testDownloadSystem() {
     await this.runTest('Download System', async () => {
       // Navigate to library tab first
-      const libraryTab = await this.page.locator('button:has-text("Library"), [role="tab"]:has-text("Library")');
+      const libraryTab = await this.page.locator('button:has-text("Library"), [role= "tab"]:has-text("Library")');
       if (await libraryTab.count() > 0) {
         await libraryTab.first().click();
         await this.page.waitForTimeout(1000);
@@ -453,7 +411,7 @@ class Context7AICreateTester {
       // Look for download elements
       const downloadElements = await this.page.locator(
         'button:has-text("Download"), ' +
-        '[data-testid*="download"], ' +
+        '[data-testid*= "download"], ' +
         '.download-btn, .asset-download'
       ).count();
       
@@ -537,7 +495,7 @@ class Context7AICreateTester {
       const errorElements = await this.page.locator(
         '.error-boundary, ' +
         '.error-message, ' +
-        '[role="alert"], ' +
+        '[role= "alert"], ' +
         '.toast-error'
       ).count();
       
@@ -589,7 +547,7 @@ class Context7AICreateTester {
     fs.writeFileSync(reportPath, JSON.stringify(reportData, null, 2));
     
     console.log('\n📊 TEST REPORT SUMMARY');
-    console.log('═'.repeat(50));
+    console.log('═'.repeat(50));'
     console.log(`📋 Total Tests: ${reportData.summary.total}`);
     console.log(`✅ Passed: ${reportData.summary.passed}`);
     console.log(`❌ Failed: ${reportData.summary.failed}`);
@@ -627,7 +585,7 @@ class Context7AICreateTester {
   async runAllTests() {
     console.log('🎯 Starting Comprehensive AI Create Testing...');
     console.log(`📅 ${new Date().toLocaleString()}`);
-    console.log('═'.repeat(60));
+    console.log('═'.repeat(60));'
 
     // Initialize browser
     const initialized = await this.initialize();

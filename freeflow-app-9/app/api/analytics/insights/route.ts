@@ -319,10 +319,7 @@ async function generateAIInsights(params: {
         category: 'performance',
         title: 'Address API Performance Degradation',
         description: 'API response times have increased 40% in the last 24 hours',
-        action_items: [
-          'Investigate database query performance',
-          'Check for memory leaks in recent deployments',
-          'Scale API infrastructure if needed'
+        action_items: ['Investigate database query performance', 'Check for memory leaks in recent deployments', 'Scale API infrastructure if needed'
         ],
         expected_impact: 'Prevent user churn and improve satisfaction',
         deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
@@ -332,10 +329,7 @@ async function generateAIInsights(params: {
         category: 'conversion',
         title: 'Optimize Mobile Checkout Experience',
         description: 'Mobile conversion rate is 67% lower than desktop',
-        action_items: [
-          'Simplify mobile checkout form',
-          'Add mobile payment options (Apple Pay, Google Pay)',
-          'Implement progressive form saving'
+        action_items: ['Simplify mobile checkout form', 'Add mobile payment options (Apple Pay, Google Pay)', 'Implement progressive form saving'
         ],
         expected_impact: 'Increase mobile conversions by 25-35%',
         deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
@@ -345,10 +339,7 @@ async function generateAIInsights(params: {
         category: 'engagement',
         title: 'Implement Feature Discovery Tour',
         description: 'Premium features have 23% discovery rate vs 45% industry average',
-        action_items: [
-          'Design interactive feature tour',
-          'Add contextual feature hints',
-          'Create feature spotlight emails'
+        action_items: ['Design interactive feature tour', 'Add contextual feature hints', 'Create feature spotlight emails'
         ],
         expected_impact: 'Increase feature adoption by 40%',
         deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
@@ -369,8 +360,8 @@ async function generateAIInsights(params: {
 
 // Event processing with AI
 async function processEventsWithAI(params: {
-  events: any[]
-  customMetrics?: any
+  events: unknown[]
+  customMetrics?: unknown
   analysisType: string
   aiModel: string
 }) {
@@ -443,12 +434,12 @@ function calculateGrowthTrajectory(): string {
   return trajectories[Math.floor(Math.random() * trajectories.length)]
 }
 
-function extractEventTypes(events: any[]): string[] {
+function extractEventTypes(events: unknown[]): string[] {
   const types = new Set(events.map(e => e.event || 'unknown'))
   return Array.from(types).slice(0, 10) // Limit to 10 types
 }
 
-function calculateTimeRange(events: any[]): { start: string; end: string } {
+function calculateTimeRange(events: unknown[]): { start: string; end: string } {
   const now = new Date()
   const start = new Date(now.getTime() - 24 * 60 * 60 * 1000) // 24 hours ago
   return {
@@ -457,7 +448,7 @@ function calculateTimeRange(events: any[]): { start: string; end: string } {
   }
 }
 
-function detectAnomalies(events: any[]): any[] {
+function detectAnomalies(events: unknown[]): unknown[] {
   return [
     {
       type: 'volume_spike',
@@ -468,15 +459,15 @@ function detectAnomalies(events: any[]): any[] {
   ]
 }
 
-function calculateEngagementScore(events: any[]): number {
+function calculateEngagementScore(events: unknown[]): number {
   return Math.round((Math.random() * 40 + 60) * 10) / 10
 }
 
-function calculateConversionRate(events: any[]): number {
+function calculateConversionRate(events: unknown[]): number {
   return Math.round((Math.random() * 5 + 2) * 100) / 100
 }
 
-function calculateRetentionIndicators(events: any[]): any {
+function calculateRetentionIndicators(events: unknown[]): any {
   return {
     daily_active_users: Math.floor(Math.random() * 1000 + 500),
     weekly_active_users: Math.floor(Math.random() * 5000 + 2000),

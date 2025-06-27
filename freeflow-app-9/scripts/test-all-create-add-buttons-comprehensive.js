@@ -127,11 +127,11 @@ class ComprehensiveButtonTester {
       await this.page.waitForLoadState('networkidle');
       
       // Fill login form
-      await this.page.fill('input[type="email"]', TEST_CREDENTIALS.email);
-      await this.page.fill('input[type="password"]', TEST_CREDENTIALS.password);
+      await this.page.fill('input[type= "email"]', TEST_CREDENTIALS.email);
+      await this.page.fill('input[type= "password"]', TEST_CREDENTIALS.password);
       
       // Submit form
-      await this.page.click('button[type="submit"]');
+      await this.page.click('button[type= "submit"]');
       await this.page.waitForLoadState('networkidle');
       
       // Wait for dashboard
@@ -154,7 +154,7 @@ class ComprehensiveButtonTester {
     
     try {
       // Find the button
-      const buttonElement = await this.page.locator(`[data-testid="${button.testId}"]`);
+      const buttonElement = await this.page.locator(`[data-testid= "${button.testId}"]`);
       
       if (!(await buttonElement.count())) {
         throw new Error(`Button with test ID "${button.testId}" not found`);
@@ -255,7 +255,7 @@ class ComprehensiveButtonTester {
 
   async runAllTests() {
     console.log('🧪 COMPREHENSIVE CREATE/ADD BUTTON TEST');
-    console.log('=' .repeat(60));
+    console.log('=' .repeat(60));'
     
     if (!(await this.login())) {
       return this.results;
@@ -276,9 +276,9 @@ class ComprehensiveButtonTester {
   }
 
   generateReport() {
-    console.log('\\n' + '='.repeat(60));
+    console.log('\\n' + '='.repeat(60));'
     console.log('📊 COMPREHENSIVE BUTTON TEST REPORT');
-    console.log('='.repeat(60));
+    console.log('='.repeat(60));'
     
     const successRate = this.results.total > 0 ? 
       ((this.results.passed / this.results.total) * 100).toFixed(1) : 0;

@@ -1,16 +1,16 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from &apos;@playwright/test&apos;
 import { 
   checkHydrationErrors,
   waitForHydration,
   checkDOMConsistency
-} from '@/tests/utils/hydration-test-utils'
+} from &apos;@/tests/utils/hydration-test-utils&apos;
 
-test.describe('Basic Hydration Tests', () => {
-  test('should hydrate ProjectsHub without errors', async ({ page }) => {
+test.describe(&apos;Basic Hydration Tests&apos;, () => {
+  test(&apos;should hydrate ProjectsHub without errors&apos;, async ({ page }) => {
     const hydrationMonitor = await checkHydrationErrors(page)
     
     // Navigate to projects hub
-    await page.goto('/dashboard/projects-hub')
+    await page.goto(&apos;/dashboard/projects-hub&apos;)
     await waitForHydration(page)
 
     // Check for hydration errors
@@ -21,9 +21,9 @@ test.describe('Basic Hydration Tests', () => {
     expect(domIssues).toHaveLength(0)
   })
 
-  test('should maintain DOM consistency after hydration', async ({ page }) => {
+  test(&apos;should maintain DOM consistency after hydration&apos;, async ({ page }) => {
     // Navigate to projects hub
-    await page.goto('/dashboard/projects-hub')
+    await page.goto(&apos;/dashboard/projects-hub&apos;)
     await waitForHydration(page)
 
     // Get initial DOM snapshot
@@ -38,26 +38,26 @@ test.describe('Basic Hydration Tests', () => {
     // Compare snapshots (excluding dynamic content)
     const cleanSnapshot = (html: string) => {
       return html
-        .replace(/data-reactid="[^"]*"/g, '')
-        .replace(/data-react-checksum="[^"]*"/g, '')
-        .replace(/data-react-server-rendered="[^"]*"/g, '')
+        .replace(/data-reactid=&quot;[^&quot;]*&quot;/g, '&apos;)'
+        .replace(/data-react-checksum=&quot;[^&quot;]*&quot;/g, '&apos;)'
+        .replace(/data-react-server-rendered=&quot;[^&quot;]*&quot;/g, '&apos;)'
     }
 
     expect(cleanSnapshot(initialDOM)).toBe(cleanSnapshot(finalDOM))
   })
 
-  test('should preserve server-rendered content during hydration', async ({ page }) => {
+  test(&apos;should preserve server-rendered content during hydration&apos;, async ({ page }) => {
     // Navigate to projects hub
-    await page.goto('/dashboard/projects-hub')
+    await page.goto(&apos;/dashboard/projects-hub&apos;)
     
     // Capture server-rendered content before hydration
-    const serverContent = await page.textContent('[data-testid="projects-hub"]')
+    const serverContent = await page.textContent(&apos;[data-testid=&quot;projects-hub&quot;]&apos;)
     
     // Wait for hydration
     await waitForHydration(page)
     
     // Capture client-rendered content after hydration
-    const clientContent = await page.textContent('[data-testid="projects-hub"]')
+    const clientContent = await page.textContent(&apos;[data-testid=&quot;projects-hub&quot;]&apos;)
     
     // Compare content (excluding dynamic elements)
     expect(serverContent?.trim()).toBe(clientContent?.trim())

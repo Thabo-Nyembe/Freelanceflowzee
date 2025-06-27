@@ -45,16 +45,16 @@ async function test() {
   // Step 3: Test table structure
   console.log('🔧 Step 3: Testing Table Structure')
   try {
-    const { data, error } = await supabase.from('analytics_events').select('*').limit(1)
+    const { data, error } = await supabase.from('analytics_events').select('*').limit(1)'
     if (error) {
-      console.log('❌ Table query failed:', error.message)
+      console.log('❌ Table query failed: ', error.message)
       return
     }
     console.log('✅ Analytics events table accessible')
     
-    const { data: metricsData, error: metricsError } = await supabase.from('business_metrics').select('*').limit(1)
+    const { data: metricsData, error: metricsError } = await supabase.from('business_metrics').select('*').limit(1)'
     if (metricsError) {
-      console.log('❌ Business metrics table failed:', metricsError.message)
+      console.log('❌ Business metrics table failed: ', metricsError.message)
       return
     }
     console.log('✅ Business metrics table accessible\n')

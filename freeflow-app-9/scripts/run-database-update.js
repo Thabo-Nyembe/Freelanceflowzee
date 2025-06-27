@@ -9,7 +9,7 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ouzcjoxaup
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91emNqb3hhdXBpbWF6cml2eXRhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDA3NzA5NiwiZXhwIjoyMDY1NjUzMDk2fQ.HIHZQ0KuRBIwZwaTPLxD1E5RQfcQ_e0ar-oC93rTGdQ'
 
 console.log('🚀 FreeflowZee Database Update Script')
-console.log('📍 Supabase URL:', SUPABASE_URL)
+console.log('📍 Supabase URL: ', SUPABASE_URL)
 console.log('🔧 Using enhanced database setup with trigger safety\n')
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
@@ -46,11 +46,11 @@ async function runDatabaseUpdate() {
       
       const { data: altData, error: altError } = await supabase
         .from('pg_stat_activity')
-        .select('*')
+        .select('*')'
         .limit(1)
       
       if (altError) {
-        console.error('❌ Database connection failed:', altError.message)
+        console.error('❌ Database connection failed: ', altError.message)
         console.log('\n💡 Manual Setup Required:')
         console.log('1. Open Supabase Dashboard → SQL Editor')
         console.log('2. Copy and paste the contents of scripts/complete-database-setup.sql')
@@ -83,16 +83,8 @@ async function runDatabaseUpdate() {
 async function verifySetup() {
   console.log('\n🔍 Verifying database setup...')
   
-  const requiredTables = [
-    'projects',
-    'user_profiles', 
-    'file_storage',
-    'storage_analytics',
-    'feedback_comments',
-    'upf_comments',
-    'upf_reactions',
-    'upf_attachments'
-  ]
+  const requiredTables = ['projects', 'user_profiles', 'file_storage', 'storage_analytics', 'feedback_comments', 'upf_comments', 'upf_reactions',
+    'upf_attachments']
   
   let successCount = 0
   
@@ -100,7 +92,7 @@ async function verifySetup() {
     try {
       const { data, error } = await supabase
         .from(table)
-        .select('*')
+        .select('*')'
         .limit(1)
       
       if (error) {
@@ -129,16 +121,16 @@ async function verifySetup() {
 }
 
 async function main() {
-  console.log('=' .repeat(60))
+  console.log('=' .repeat(60))'
   console.log('🗄️  FREEFLOWZEE DATABASE UPDATE')
-  console.log('=' .repeat(60))
+  console.log('=' .repeat(60))'
   
   // Test connection first
   try {
     const { data, error } = await supabase.auth.getSession()
     console.log('🔗 Database connection: OK')
   } catch (e) {
-    console.error('❌ Database connection failed:', e.message)
+    console.error('❌ Database connection failed: ', e.message)
     process.exit(1)
   }
   
@@ -148,7 +140,7 @@ async function main() {
   // Verify the setup
   const verifySuccess = await verifySetup()
   
-  console.log('\n' + '=' .repeat(60))
+  console.log('\n' + '=' .repeat(60))'
   if (setupSuccess && verifySuccess) {
     console.log('🎯 SUCCESS: Database fully updated and verified!')
     console.log('🚀 FreeflowZee is ready for production use')
@@ -163,7 +155,7 @@ async function main() {
 // Handle script execution
 if (require.main === module) {
   main().catch(error => {
-    console.error('\n💥 Script execution failed:', error.message)
+    console.error('\n💥 Script execution failed: ', error.message)
     console.log('\n🔧 Fallback: Run SQL script manually in Supabase Dashboard')
     console.log('📁 File: scripts/complete-database-setup.sql')
     process.exit(1)

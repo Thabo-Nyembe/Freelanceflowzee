@@ -55,22 +55,22 @@ async function testVercelAnalytics() {
     }
     
   } catch (error) {
-    console.log('❌ Connection failed:', error.message)
+    console.log('❌ Connection failed: ', error.message)
     console.log('   Make sure the development server is running: npm run dev')
     return
   }
   
   console.log('\n🎉 Vercel Analytics Test Results:')
-  console.log('================================')
+  console.log('================================ ')
   console.log('✅ Vercel Analytics is properly integrated')
   console.log('✅ Automatic tracking enabled for:')
   console.log('   • Page views')
   console.log('   • Core Web Vitals (LCP, FID, CLS)')
   console.log('   • User interactions')
   console.log('   • Performance metrics')
-  console.log('')
+  console.log('')'
   console.log('📊 Analytics will be available in Vercel dashboard once deployed')
-  console.log('🚀 For additional custom tracking, use:')
+  console.log('🚀 For additional custom tracking, use: ')
   console.log('   import { track } from "@vercel/analytics"')
   console.log('   track("custom_event", { property: "value" })')
   
