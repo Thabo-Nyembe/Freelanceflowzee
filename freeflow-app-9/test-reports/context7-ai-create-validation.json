@@ -1,0 +1,95 @@
+{
+  "timestamp": "2025-06-27T10:09:33.123Z",
+  "testSuite": "AI Create Comprehensive Test",
+  "totalTests": 10,
+  "passedTests": 6,
+  "failedTests": 4,
+  "features": {
+    "Server Connection": {
+      "status": "FAILED",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"networkidle\"\u001b[22m\n",
+      "details": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"networkidle\"\u001b[22m\n\n    at /Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:122:40\n    at Context7AICreateTester.runTest (/Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:59:13)\n    at Context7AICreateTester.testServerConnection (/Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:121:16)\n    at Context7AICreateTester.runAllTests (/Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:432:18)\n    at async main (/Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:500:20)"
+    },
+    "Dashboard Navigation": {
+      "status": "FAILED",
+      "error": "locator.count: Execution context was destroyed, most likely because of a navigation",
+      "details": "locator.count: Execution context was destroyed, most likely because of a navigation\n    at /Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:152:121\n    at async Context7AICreateTester.runTest (/Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:59:7)\n    at async Context7AICreateTester.testDashboardNavigation (/Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:139:5)\n    at async Context7AICreateTester.runAllTests (/Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:433:7)\n    at async main (/Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:500:20)"
+    },
+    "AI Create Access": {
+      "status": "FAILED",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/dashboard/ai-create\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/dashboard/ai-create\", waiting until \"networkidle\"\u001b[22m\n",
+      "details": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/dashboard/ai-create\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/dashboard/ai-create\", waiting until \"networkidle\"\u001b[22m\n\n    at /Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:165:23\n    at Context7AICreateTester.runTest (/Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:59:13)\n    at Context7AICreateTester.testAICreateAccess (/Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:163:16)\n    at Context7AICreateTester.runAllTests (/Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:434:18)\n    at async main (/Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:500:20)"
+    },
+    "Tab Layout Functionality": {
+      "status": "FAILED",
+      "error": "locator.all: Execution context was destroyed, most likely because of a navigation",
+      "details": "locator.all: Execution context was destroyed, most likely because of a navigation\n    at /Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:184:60\n    at Context7AICreateTester.runTest (/Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:59:13)\n    at Context7AICreateTester.testTabLayoutFunctionality (/Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:182:16)\n    at Context7AICreateTester.runAllTests (/Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:435:18)\n    at async main (/Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-context7-ai-create-test.js:500:20)"
+    },
+    "File Upload Interface": {
+      "status": "PASSED",
+      "duration": "25ms",
+      "details": "Test completed successfully"
+    },
+    "API Key Interface": {
+      "status": "PASSED",
+      "duration": "3ms",
+      "details": "Test completed successfully"
+    },
+    "Asset Generation": {
+      "status": "PASSED",
+      "duration": "2ms",
+      "details": "Test completed successfully"
+    },
+    "Download Functionality": {
+      "status": "PASSED",
+      "duration": "1ms",
+      "details": "Test completed successfully"
+    },
+    "Responsive Design": {
+      "status": "PASSED",
+      "duration": "3087ms",
+      "details": "Test completed successfully"
+    },
+    "Performance Metrics": {
+      "status": "PASSED",
+      "duration": "4ms",
+      "details": "Test completed successfully"
+    }
+  },
+  "screenshots": [],
+  "errors": [
+    {
+      "test": "Server Connection",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"networkidle\"\u001b[22m\n",
+      "timestamp": "2025-06-27T10:09:35.266Z"
+    },
+    {
+      "test": "Dashboard Navigation",
+      "error": "locator.count: Execution context was destroyed, most likely because of a navigation",
+      "timestamp": "2025-06-27T10:09:35.328Z"
+    },
+    {
+      "test": "AI Create Access",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/dashboard/ai-create\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/dashboard/ai-create\", waiting until \"networkidle\"\u001b[22m\n",
+      "timestamp": "2025-06-27T10:09:35.363Z"
+    },
+    {
+      "test": "Tab Layout Functionality",
+      "error": "locator.all: Execution context was destroyed, most likely because of a navigation",
+      "timestamp": "2025-06-27T10:09:35.366Z"
+    }
+  ],
+  "performance": {
+    "domContentLoaded": 0.699999988079071,
+    "loadComplete": 0,
+    "totalLoadTime": 10.099999964237213
+  },
+  "recommendations": [],
+  "successRate": "60.0%",
+  "summary": {
+    "total": 10,
+    "passed": 6,
+    "failed": 4,
+    "successRate": "60.0%"
+  }
+}

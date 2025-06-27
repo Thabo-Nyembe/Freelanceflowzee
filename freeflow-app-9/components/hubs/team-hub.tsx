@@ -506,7 +506,8 @@ export function TeamHub({ projects, userId }: TeamHubProps) {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+                </div>
+              </TabsContent>
 
           {/* Members Tab */}
           <TabsContent value="members" className="space-y-6">
@@ -604,7 +605,9 @@ export function TeamHub({ projects, userId }: TeamHubProps) {
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
+            </div>
+          </Tabs>
+        </div>
       </CardContent>
     </Card>
   )

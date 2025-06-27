@@ -1,0 +1,64 @@
+{
+  "timestamp": "2025-06-27T10:29:47.722Z",
+  "summary": {
+    "total": 9,
+    "passed": 8,
+    "failed": 1,
+    "successRate": "88.9%"
+  },
+  "details": [
+    {
+      "test": "AI Create Component File Exists",
+      "status": "PASSED",
+      "message": "Test completed successfully"
+    },
+    {
+      "test": "API Key Settings Component File Exists",
+      "status": "PASSED",
+      "message": "Test completed successfully"
+    },
+    {
+      "test": "AI Create Component Structure",
+      "status": "PASSED",
+      "message": "Test completed successfully"
+    },
+    {
+      "test": "API Key Settings Component Structure",
+      "status": "PASSED",
+      "message": "Test completed successfully"
+    },
+    {
+      "test": "Cost Savings Functionality",
+      "status": "PASSED",
+      "message": "Test completed successfully"
+    },
+    {
+      "test": "User API Key Integration",
+      "status": "PASSED",
+      "message": "Test completed successfully"
+    },
+    {
+      "test": "Component Syntax Validation",
+      "status": "PASSED",
+      "message": "Test completed successfully"
+    },
+    {
+      "test": "Import Structure Validation",
+      "status": "FAILED",
+      "message": "Missing imports: import.*lucide-react"
+    },
+    {
+      "test": "Business Logic Implementation",
+      "status": "PASSED",
+      "message": "Test completed successfully"
+    }
+  ],
+  "recommendations": [
+    "🔧 Fix failing component tests to improve reliability.",
+    "📚 Review component documentation and examples.",
+    "🧪 Add more comprehensive error handling tests.",
+    "🚀 Consider adding performance benchmarks.",
+    "📱 Test responsive design across different viewports.",
+    "♿ Ensure accessibility compliance (WCAG 2.1)."
+  ]
+}
