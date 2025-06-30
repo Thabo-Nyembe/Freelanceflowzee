@@ -1,6 +1,6 @@
-'use client
+'use client'
 
-import React, { useState, useEffect, useRef, useReducer, useCallback } from 'react
+import React, { useState, useEffect, useRef, useReducer, useCallback } from 'react'
  position?: number }
   | { type: &apos;UPDATE_BLOCK&apos;; id: string; updates: Partial<ContentBlock> }
   | { type: 'DELETE_BLOCK'; id: string }

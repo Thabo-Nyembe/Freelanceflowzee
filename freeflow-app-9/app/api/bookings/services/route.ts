@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server
-import { BookingService } from '@/types/booking
+import { NextRequest, NextResponse } from 'next/server'
+import { BookingService } from '@/types/booking'
 
 // Mock services data - in production, this would come from a database
 const MOCK_SERVICES: BookingService[] = [
@@ -26,13 +26,13 @@ const MOCK_SERVICES: BookingService[] = [
     }
   },
   {
-    id: 'service-2',
-    title: 'Design Review Session',
-    description: 'Professional review and feedback session for design concepts',
+    id: 'service-2,'
+    title: 'Design Review Session,'
+    description: 'Professional review and feedback session for design concepts,'
     duration: 60,
     price: 12000, // $120.00 in cents
-    category: 'review',
-    freelancerId: 'user1',
+    category: 'review,'
+    freelancerId: 'user1,'
     isActive: true,
     maxAdvanceBooking: 14,
     bufferTime: 10,
@@ -44,17 +44,17 @@ const MOCK_SERVICES: BookingService[] = [
       tuesday: { start: '10:00', end: '16:00' },
       wednesday: { start: '10:00', end: '16:00' },
       thursday: { start: '10:00', end: '16:00' },
-      friday: { start: '10:00', end: '16:00' }
+      friday: { start: '10:00', end: '16:00' }'
     }
   },
   {
-    id: 'service-3',
-    title: 'Development Workshop',
-    description: 'Hands-on development session with technical guidance',
+    id: 'service-3,'
+    title: 'Development Workshop,'
+    description: 'Hands-on development session with technical guidance,'
     duration: 120,
     price: 25000, // $250.00 in cents
-    category: 'workshop',
-    freelancerId: 'user1',
+    category: 'workshop,'
+    freelancerId: 'user1,'
     isActive: true,
     maxAdvanceBooking: 21,
     bufferTime: 30,
@@ -64,17 +64,17 @@ const MOCK_SERVICES: BookingService[] = [
     availability: {
       monday: { start: '09:00', end: '15:00' },
       wednesday: { start: '09:00', end: '15:00' },
-      friday: { start: '09:00', end: '15:00' }
+      friday: { start: '09:00', end: '15:00' }'
     }
   },
   {
-    id: 'service-4',
-    title: 'Technical Audit',
-    description: 'Comprehensive technical audit of your website, application, or codebase. Identify performance issues, security vulnerabilities, and optimization opportunities.',
+    id: 'service-4,'
+    title: 'Technical Audit,'
+    description: 'Comprehensive technical audit of your website, application, or codebase. Identify performance issues, security vulnerabilities, and optimization opportunities.,'
     duration: 90,
     price: 18000, // $180.00 in cents
-    category: 'other',
-    freelancerId: 'user1',
+    category: 'other,'
+    freelancerId: 'user1,'
     isActive: true,
     maxAdvanceBooking: 7,
     bufferTime: 15,
@@ -83,17 +83,17 @@ const MOCK_SERVICES: BookingService[] = [
     deliverables: ['Detailed audit report', 'Priority recommendations', 'Implementation roadmap'],
     availability: {
       tuesday: { start: '09:00', end: '17:00' },
-      thursday: { start: '09:00', end: '17:00' }
+      thursday: { start: '09:00', end: '17:00' }'
     }
   },
   {
-    id: 'service-5',
-    title: 'Quick Q&A Session',
-    description: 'Fast-paced question and answer session for urgent technical questions or quick consultations. Perfect for immediate guidance.',
+    id: 'service-5,'
+    title: 'Quick Q&A Session,'
+    description: 'Fast-paced question and answer session for urgent technical questions or quick consultations. Perfect for immediate guidance.,'
     duration: 30,
     price: 8000, // $80.00 in cents
-    category: 'other',
-    freelancerId: 'user1',
+    category: 'other,'
+    freelancerId: 'user1,'
     isActive: true,
     maxAdvanceBooking: 3,
     bufferTime: 5,
@@ -105,7 +105,7 @@ const MOCK_SERVICES: BookingService[] = [
       tuesday: { start: '09:00', end: '18:00' },
       wednesday: { start: '09:00', end: '18:00' },
       thursday: { start: '09:00', end: '18:00' },
-      friday: { start: '09:00', end: '18:00' }
+      friday: { start: '09:00', end: '18:00' }'
     }
   }
 ]
@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (isActive !== null) {
-      const activeFilter = isActive === 'true
+      const activeFilter = isActive === 'true'
       filteredServices = filteredServices.filter(service => 
         service.isActive === activeFilter
       )
@@ -218,7 +218,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       service: newService,
-      message: 'Service created successfully
+      message: 'Service created successfully'
     }, { status: 201 })
 
   } catch (error) {
@@ -256,14 +256,14 @@ export async function PUT(request: NextRequest) {
     const updatedService = {
       ...MOCK_SERVICES[serviceIndex],
       ...updateData,
-      id: serviceId // Ensure ID doesn't change
+      id: serviceId // Ensure ID doesn't change'
     }
 
     MOCK_SERVICES[serviceIndex] = updatedService
 
     return NextResponse.json({
       service: updatedService,
-      message: 'Service updated successfully
+      message: 'Service updated successfully'
     })
 
   } catch (error) {
@@ -302,7 +302,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({
       service: deletedService,
-      message: 'Service deleted successfully
+      message: 'Service deleted successfully'
     })
 
   } catch (error) {

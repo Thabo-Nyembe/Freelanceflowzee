@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server
-import Stripe from 'stripe
+import { NextRequest, NextResponse } from 'next/server'
+import Stripe from 'stripe'
 
 // Initialize Stripe with latest API version
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
@@ -7,10 +7,10 @@ const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 // Stripe client initialization function
 const getStripe = () => {
   if (!stripeSecretKey) {
-    throw new Error('Stripe secret key not configured')
+    throw new Error('Stripe secret key not configured'
   }
   return new Stripe(stripeSecretKey, {
-    apiVersion: '2025-05-28.basil',
+    apiVersion: '2025-05-28.basil,
     typescript: true,
   })
 }
@@ -24,21 +24,21 @@ export async function GET() {
     const testConnection = await stripe.paymentIntents.list({ limit: 1 })
     
     return new Response(JSON.stringify({
-      status: 'healthy',
-      message: 'Payment system operational',
+      status: 'healthy,
+      message: 'Payment system operational,
       stripeConnected: !!testConnection
     }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' }'
     })
   } catch (error) {
     console.error('Payment system health check failed:', error)
     return new Response(JSON.stringify({
-      status: 'error',
-      message: 'Payment system health check failed
+      status: 'error,
+      message: 'Payment system health check failed'
     }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' }'
     })
   }
 }
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           success: false,
-          error: 'Stripe is not configured properly' 
+          error: 'Stripe is not configured properly' '
         },
         { status: 503 }
       )
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const {
       amount,
-      currency = 'usd',
+      currency = 'usd,
       description,
       customer_email,
       customer_name,
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           success: false,
-          error: 'Valid amount is required' 
+          error: 'Valid amount is required' '
         },
         { status: 400 }
       )
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
             email: customer_email,
             name: customer_name,
             metadata: {
-              created_via: 'freeflowzee-enhanced',
+              created_via: 'freeflowzee-enhanced,
               created_at: new Date().toISOString(),
             },
           })
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           { 
             success: false,
-            error: 'Failed to process customer information' 
+            error: 'Failed to process customer information' '
           },
           { status: 500 }
         )
@@ -123,14 +123,14 @@ export async function POST(request: NextRequest) {
         const subscription = await stripe.subscriptions.create({
           customer: customerId!,
           items: [{ price: subscription_price_id }],
-          payment_behavior: 'default_incomplete',
+          payment_behavior: 'default_incomplete,
           payment_settings: {
-            save_default_payment_method: 'on_subscription',
+            save_default_payment_method: 'on_subscription,
           },
           expand: ['latest_invoice.payment_intent'],
           metadata: {
-            description: description || 'FreeflowZee Subscription',
-            created_via: 'freeflowzee-enhanced',
+            description: description || 'FreeflowZee Subscription,
+            created_via: 'freeflowzee-enhanced,
           },
         })
 
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           { 
             success: false,
-            error: 'Failed to create subscription' 
+            error: 'Failed to create subscription' '
           },
           { status: 500 }
         )
@@ -159,14 +159,14 @@ export async function POST(request: NextRequest) {
         amount,
         currency: currency.toLowerCase(),
         metadata: {
-          description: description || 'FreeflowZee Payment',
+          description: description || 'FreeflowZee Payment,
           customer_email: customer_email || 
-          created_via: 'freeflowzee-enhanced',
+          created_via: 'freeflowzee-enhanced,
           created_at: new Date().toISOString(),
         },
         automatic_payment_methods: {
           enabled: true,
-          allow_redirects: 'always',
+          allow_redirects: 'always,
         },
       }
 
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
 
       // Set up future usage if requested
       if (save_payment_method || setup_future_usage) {
-        paymentIntentData.setup_future_usage = setup_future_usage || 'off_session
+        paymentIntentData.setup_future_usage = setup_future_usage || 'off_session'
       }
 
       const paymentIntent = await stripe.paymentIntents.create(paymentIntentData)
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           success: false,
-          error: error instanceof Error ? error.message : 'Failed to create payment intent' 
+          error: error instanceof Error ? error.message : 'Failed to create payment intent' '
         },
         { status: 500 }
       )
@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { 
         success: false,
-        error: 'Invalid request format' 
+        error: 'Invalid request format' '
       },
       { status: 400 }
     )
@@ -221,7 +221,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Payment intent ID is required
+          error: 'Payment intent ID is required'
         },
         { status: 400 }
       )
@@ -241,7 +241,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to update payment intent
+        error: error instanceof Error ? error.message : 'Failed to update payment intent'
       },
       { status: 500 }
     )

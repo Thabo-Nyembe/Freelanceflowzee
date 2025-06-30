@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef } from 'react
+import React, { useState, useRef } from 'react'
 )
   const [status setStatus] = useState('all')
   const [project setProject] = useState('all')

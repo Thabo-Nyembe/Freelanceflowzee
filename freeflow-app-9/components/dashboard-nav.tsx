@@ -1,6 +1,6 @@
-'use client
+'use client'
 
-import React, { useState, useEffect, useReducer } from 'react
+import React, { useState, useEffect, useReducer } from 'react'
 import Link from 'next/link
  id: string }
   | { type: 'MARK_ALL_READ' }

@@ -1,6 +1,6 @@
-'use client
+'use client'
 
-import React, { useReducer, useState, useRef } from 'react
+import React, { useReducer, useState, useRef } from 'react'
  fileId: string }
   | { type: 'TOGGLE_STAR'; fileId: string }
   | { type: 'TOGGLE_SHARE'; fileId: string }

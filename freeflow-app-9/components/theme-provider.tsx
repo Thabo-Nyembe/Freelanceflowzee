@@ -1,20 +1,20 @@
 "use client"
 
-import React, { createContext, useContext, useEffect, useState } from 'react
+import React, { createContext, useContext, useEffect, useState } from 'react'
 
-type Theme = 'dark' | 'light' | 'system
+type Theme = 'dark' | 'light' | 'system'
 
 type ThemeProviderProps = {
   children: React.ReactNode
   defaultTheme?: Theme
   storageKey?: string
   attribute?: string
-  defaultSystemTheme?: 'dark' | 'light
+  defaultSystemTheme?: 'dark' | 'light'
   value?: {
     theme: Theme
     setTheme: (theme: Theme) => void
-    resolvedTheme: 'dark' | 'light
-    systemTheme: 'dark' | 'light
+    resolvedTheme: 'dark' | 'light'
+    systemTheme: 'dark' | 'light'
     themes: Theme[]
   }
 }
@@ -22,8 +22,8 @@ type ThemeProviderProps = {
 type ThemeProviderState = {
   theme: Theme
   setTheme: (theme: Theme) => void
-  resolvedTheme: 'dark' | 'light
-  systemTheme: 'dark' | 'light
+  resolvedTheme: 'dark' | 'light'
+  systemTheme: 'dark' | 'light'
   themes: Theme[]
 }
 
@@ -104,8 +104,8 @@ export function ThemeProvider({
       metaThemeColor.setAttribute('content', resolvedTheme === 'dark' ? '#1a1a1a' : '#ffffff')
     } else {
       const meta = document.createElement('meta')
-      meta.name = 'theme-color
-      meta.content = resolvedTheme === 'dark' ? '#1a1a1a' : '#ffffff
+      meta.name = 'theme-color'
+      meta.content = resolvedTheme === 'dark' ? '#1a1a1a' : '#ffffff'
       document.head.appendChild(meta)
     }
   }, [resolvedTheme, attribute, mounted])

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server
+import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(
   request: NextRequest,
@@ -25,7 +25,7 @@ export async function GET(
     }
 
     // Check if token is marked as expired (for testing)
-    if (token.includes('expired')) {
+    if (token.includes('expired')) {'
       return NextResponse.json(
         { error: 'Access link has expired', code: 'expired_link' },
         { status: 401 }
@@ -51,14 +51,14 @@ export async function GET(
 
     // Mock project data for testing
     const projectData = {
-      id: 'proj_test_12345',
+      id: 'proj_test_12345,'
       slug: projectSlug,
-      title: 'Premium Brand Identity Package',
-      description: 'Complete brand identity design package with logo, guidelines, and assets',
+      title: 'Premium Brand Identity Package,'
+      description: 'Complete brand identity design package with logo, guidelines, and assets,'
       price: 4999,
-      currency: 'usd',
+      currency: 'usd,'
       isLocked: false, // Unlocked after validation
-      createdBy: 'designer@example.com
+      createdBy: 'designer@example.com'
     }
 
     return NextResponse.json({

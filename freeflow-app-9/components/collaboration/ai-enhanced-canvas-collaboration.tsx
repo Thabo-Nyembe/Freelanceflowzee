@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useReducer } from 'react
+import React, { useRef, useEffect, useReducer } from 'react'
 import { createClient } from '@/lib/supabase/client
 import { TemplateAnalysisService } from '@/lib/services/template-scoring-service
 import { CanvasState, Template } from './canvas-types

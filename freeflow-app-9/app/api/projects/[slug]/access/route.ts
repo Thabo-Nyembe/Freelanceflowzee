@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server
+import { NextRequest, NextResponse } from 'next/server'
 import {
   isRateLimited,
   getRemainingTime,
@@ -6,23 +6,23 @@ import {
   clearRateLimit,
   getAttemptsRemaining,
   LOCKOUT_PERIOD
-} from '@/app/lib/rate-limit-store
+} from '@/app/lib/rate-limit-store'
 
 // Valid test credentials matching the test file
 const VALID_CREDENTIALS = {
   passwords: ['secure-unlock-2024'],
-  accessCodes: ['BRAND2024']
+  accessCodes: ['BRAND2024']'
 }
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1
+  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1'
   console.log(`Request from IP: ${ip}`)
 
   // Check if this is a test environment
-  const testMode = request.headers.get('x-test-mode') === 'true
+  const testMode = request.headers.get('x-test-mode') === 'true'
 
   // Check rate limiting if not in test mode
   if (!testMode && isRateLimited(ip)) {
@@ -32,7 +32,7 @@ export async function POST(
       {
         success: false,
         error: `Too many failed attempts. Please try again in ${remainingTime} seconds.`,
-        code: 'rate_limited',
+        code: 'rate_limited,'
         retryAfter: remainingTime,
       },
       { status: 429 }
@@ -52,8 +52,8 @@ export async function POST(
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Please enter either a password or access code',
-          code: 'validation_error
+          error: 'Please enter either a password or access code,'
+          code: 'validation_error'
         },
         { status: 400 }
       )
@@ -83,7 +83,7 @@ export async function POST(
             {
               success: false,
               error: `Too many failed attempts. Please try again in ${LOCKOUT_PERIOD / 1000} seconds.`,
-              code: 'rate_limited',
+              code: 'rate_limited,'
               retryAfter: LOCKOUT_PERIOD / 1000,
             },
             { status: 429 }
@@ -94,8 +94,8 @@ export async function POST(
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Invalid credentials',
-          code: 'unauthorized',
+          error: 'Invalid credentials,'
+          code: 'unauthorized,'
           attemptsRemaining: testMode ? undefined : getAttemptsRemaining(ip)
         },
         { status: 401 }
@@ -115,7 +115,7 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: 'Access granted successfully',
+      message: 'Access granted successfully,'
       accessToken,
       projectSlug: slug,
       unlockUrl: `/projects/${slug}/unlocked`,
@@ -149,15 +149,15 @@ export async function GET(
           success: true,
           valid: true,
           projectSlug: slug,
-          accessLevel: 'premium',
-          message: 'Token is valid
+          accessLevel: 'premium,'
+          message: 'Token is valid'
         })
       } else {
         return NextResponse.json(
           { 
             success: false, 
-            error: 'Invalid access token',
-            code: 'invalid_token
+            error: 'Invalid access token,'
+            code: 'invalid_token'
           },
           { status: 401 }
         )
@@ -166,8 +166,8 @@ export async function GET(
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Access token required',
-          code: 'missing_token
+          error: 'Access token required,'
+          code: 'missing_token'
         },
         { status: 401 }
       )

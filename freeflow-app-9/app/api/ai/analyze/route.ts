@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server
-import { createClient } from '@/lib/supabase/server
-import { cookies } from 'next/headers
-import OpenAI from 'openai
-import { aiConfig } from '@/app/config/ai
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
+import OpenAI from 'openai'
+import { aiConfig } from '@/app/config/ai'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -18,7 +18,7 @@ Focus on these categories:
 2. Component Structure
 3. State Management
 4. Performance Optimization
-5. Error Handling
+5. Error Handling`
 
 export async function POST(request: NextRequest) {
   try {

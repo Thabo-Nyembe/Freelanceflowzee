@@ -1,57 +1,57 @@
-'use client
+'use client'
 
-import { useState } from 'react
-import Link from 'next/link
+import { useState } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Mail, Phone, MapPin, ExternalLink, HelpCircle, Shield, FileText, Home, Twitter, Github, Linkedin } from 'lucide-react
+import { Mail, Phone, MapPin, ExternalLink, HelpCircle, Shield, FileText, Home, Twitter, Github, Linkedin } from 'lucide-react'
 
 interface SiteFooterProps {
-  variant?: 'default' | 'minimal
+  variant?: 'default' | 'minimal'
 }
 
 const socialLinks = [
-  { label: 'Twitter', href: 'https://twitter.com/freeflowzee', icon: Twitter, handle: '@freeflowzee' },
-  { label: 'GitHub', href: 'https://github.com/freeflowzee', icon: Github, handle: '@freeflowzee' },
-  { label: 'LinkedIn', href: 'https://linkedin.com/company/freeflowzee', icon: Linkedin, handle: 'freeflowzee' }
+  { name: 'Twitter', href: 'https://twitter.com/freeflowzee', icon: Twitter },
+  { name: 'Github', href: 'https://github.com/freeflowzee', icon: Github },
+  { name: 'LinkedIn', href: 'https://linkedin.com/company/freeflowzee', icon: Linkedin }
 ]
 
 export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
   const [email, setEmail] = useState('')
-  const [isSubscribed, setIsSubscribed] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubscribed(true)
+    setIsLoading(true)
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    setIsLoading(false)
+    setEmail('')
   }
 
   const handleEmailClick = () => {
-    window.location.href = 'mailto:hello@freelanceflowzee.com
+    window.location.href = 'mailto:hello@freelanceflowzee.com'
   }
 
   const handlePhoneClick = () => {
-    window.location.href = 'tel:+15551234567
+    window.location.href = 'tel:+15551234567'
   }
 
   const handleAddressClick = () => {
-    window.open('https://maps.google.com/?q=San+Francisco,+CA', '_blank')
+    window.open('https://maps.google.com/?q=San Francisco, CA', '_blank')
   }
 
   if (variant === 'minimal') {
     return (
       <footer className="bg-gray-50 border-t border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+        <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-4">
-              <Link href="/" className="text-gray-500 hover:text-gray-600">
-                Terms
-              </Link>
-              <Link href="/" className="text-gray-500 hover:text-gray-600">
-                Privacy
-              </Link>
+              <Home className="w-6 h-6 text-blue-600" />
+              <span className="text-xl font-bold text-gray-900">FreeflowZee</span>
             </div>
-            <div className="text-gray-400">
-              © {new Date().getFullYear()} FreeflowZee. All rights reserved.
+            <div className="mt-4 md:mt-0 text-sm text-gray-600">
+              © 2024 FreeflowZee. All rights reserved.
             </div>
           </div>
         </div>
@@ -64,223 +64,132 @@ export function SiteFooter({ variant = 'default' }: SiteFooterProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Content */}
         <div className="py-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Company Info */}
-            <div className="space-y-6">
-              <div>
-                <Link href="/" className="text-2xl font-bold text-white hover:text-gray-300 transition-colors">
-                  FreeflowZee
-                </Link>
-                <p className="mt-4 text-gray-400 text-sm leading-6">
-                  Empowering creators to share their work, get paid instantly, and build lasting client relationships.
-                </p>
+            <div className="lg:col-span-1">
+              <div className="flex items-center space-x-2 mb-4">
+                <Home className="w-8 h-8 text-blue-600" />
+                <span className="text-2xl font-bold text-gray-900">FreeflowZee</span>
               </div>
+              <p className="text-gray-600 mb-6">
+                Empowering creative professionals with AI-powered tools for seamless collaboration and exceptional results.
+              </p>
               
               {/* Contact Info */}
               <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-white uppercase tracking-wider">
-                  Contact Us
-                </h4>
-                <Button
-                  variant="ghost
-                  className="w-full justify-start h-auto p-0 text-gray-400 hover:text-white hover:bg-transparent
+                <button 
                   onClick={handleEmailClick}
-                >"
-                  <div className="flex items-center space-x-3">
-                    <Mail className="w-4 h-4" />
-                    <span className="text-sm">hello@freelanceflowzee.com</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </div>
-                </Button>
-                <Button
-                  variant="ghost
-                  className="w-full justify-start h-auto p-0 text-gray-400 hover:text-white hover:bg-transparent
-                  onClick={handlePhoneClick}
-                >"
-                  <div className="flex items-center space-x-3">
-                    <Phone className="w-4 h-4" />
-                    <span className="text-sm">+1 (555) 123-4567</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </div>
-                </Button>
-                <Button
-                  variant="ghost
-                  className="w-full justify-start h-auto p-0 text-gray-400 hover:text-white hover:bg-transparent
-                  onClick={handleAddressClick}"
-                  title="Open in Google Maps
+                  className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
                 >
-                  <div className="flex items-center space-x-3">
-                    <MapPin className="w-4 h-4" />
-                    <span className="text-sm">San Francisco, CA</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </div>
-                </Button>
+                  <Mail className="w-4 h-4 mr-2" />
+                  hello@freelanceflowzee.com
+                </button>
+                <button 
+                  onClick={handlePhoneClick}
+                  className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
+                >
+                  <Phone className="w-4 h-4 mr-2" />
+                  +1 (555) 123-4567
+                </button>
+                <button 
+                  onClick={handleAddressClick}
+                  className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
+                >
+                  <MapPin className="w-4 h-4 mr-2" />
+                  San Francisco, CA
+                </button>
               </div>
             </div>
 
             {/* Product Links */}
             <div>
-              <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">
-                Product
-              </h4>
-              <ul className="space-y-4">
-                {[
-                  { href: '/features', label: 'Features' },
-                  { href: '/how-it-works', label: 'How it Works' },
-                  { href: '/payment', label: 'Pricing' },
-                  { href: '/demo', label: 'Demo Project', icon: ExternalLink },
-                  { href: '/dashboard', label: 'Dashboard', icon: Home },
-                ].map((item) => (
-                  <li key={item.href}>
-                    <Link 
-                      href={item.href}
-                      className="text-gray-400 hover:text-white transition-colors text-sm flex items-center
-                    >
-                      {item.label}"
-                      {item.icon && <item.icon className="w-3 h-3 ml-1" />}
-                    </Link>
-                  </li>
-                ))}
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Product</h3>
+              <ul className="space-y-3">
+                <li><Link href="/features" className="text-gray-600 hover:text-blue-600 transition-colors">Features</Link></li>
+                <li><Link href="/pricing" className="text-gray-600 hover:text-blue-600 transition-colors">Pricing</Link></li>
+                <li><Link href="/demo" className="text-gray-600 hover:text-blue-600 transition-colors">Demo</Link></li>
+                <li><Link href="/integrations" className="text-gray-600 hover:text-blue-600 transition-colors">Integrations</Link></li>
               </ul>
             </div>
 
-            {/* Resources Links */}
+            {/* Resources */}
             <div>
-              <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">
-                Resources
-              </h4>
-              <ul className="space-y-4">
-                {[
-                  { href: '/docs', label: 'Documentation' },
-                  { href: '/tutorials', label: 'Video Tutorials' },
-                  { href: '/api-docs', label: 'API Reference' },
-                  { href: '/community', label: 'Community' },
-                  { href: '/blog', label: 'Blog' },
-                ].map((item) => (
-                  <li key={item.href}>
-                    <Link 
-                      href={item.href}
-                      className="text-gray-400 hover:text-white transition-colors text-sm flex items-center
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Resources</h3>
+              <ul className="space-y-3">
+                <li><Link href="/blog" className="text-gray-600 hover:text-blue-600 transition-colors">Blog</Link></li>
+                <li><Link href="/help" className="text-gray-600 hover:text-blue-600 transition-colors">Help Center</Link></li>
+                <li><Link href="/api-docs" className="text-gray-600 hover:text-blue-600 transition-colors">API Docs</Link></li>
+                <li><Link href="/community" className="text-gray-600 hover:text-blue-600 transition-colors">Community</Link></li>
               </ul>
             </div>
 
-            {/* Company Links */}
-            <div>"
-              <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">
-                Company
-              </h4>
-              <ul className="space-y-4">
-                {[
-                  { href: '/contact', label: 'Contact', icon: Mail },
-                  { href: '/support', label: 'Support', icon: HelpCircle },
-                  { href: '/privacy', label: 'Privacy Policy', icon: Shield },
-                  { href: '/terms', label: 'Terms of Service', icon: FileText },
-                ].map((item) => (
-                  <li key={item.href}>
-                    <Link 
-                      href={item.href}
-                      className="text-gray-400 hover:text-white transition-colors text-sm flex items-center
-                    >"
-                      {item.icon && <item.icon className="w-3 h-3 mr-2" />}
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Newsletter & Social */}
+            {/* Newsletter */}
             <div>
-              <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">
-                Stay Updated
-              </h4>
-              <div className="space-y-6">
-                <p className="text-gray-400 text-sm">
-                  Get the latest updates and tips for maximizing your creative workflow.
-                </p>
-                
-                {/* Newsletter Signup */}
-                {isSubscribed ? (
-                  <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                    <p className="font-medium">🎉 Thanks for subscribing!</p>
-                    <p className="text-sm">You&apos;ll receive our latest content in your inbox.</p>
-                  </div>
-                ) : (
-                  <form onSubmit={handleNewsletterSubmit} className="space-y-3">
-                    <Input
-                      type="email
-                      placeholder="Enter your email
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="bg-white border-purple-300 text-gray-900 placeholder-gray-500 focus:border-purple-500
-                      required
-                      suppressHydrationWarning
-                    />
-                    <Button "
-                      type="submit
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white
-                    >
-                      Subscribe
-                    </Button>
-                  </form>
-                )}
-
-                {/* Social Links */}
-                <div>"
-                  <h5 className="text-sm font-medium text-white mb-3">Follow Us</h5>
-                  <div className="flex space-x-3">
-                    {socialLinks.map((social) => (
-                      <Link
-                        key={social.label}
-                        href={social.href}
-                        target="_blank
-                        rel="noopener noreferrer
-                        className="text-gray-400 hover:text-white transition-colors
-                        title={`Follow us on ${social.label} (${social.handle})`}
-                      >"
-                        <social.icon className="w-5 h-5" />
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Stay Updated</h3>
+              <p className="text-gray-600 mb-4">
+                Get the latest updates and tips delivered to your inbox.
+              </p>
+              <form onSubmit={handleNewsletterSubmit} className="space-y-3">
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+                <Button 
+                  type="submit" 
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Subscribing...' : 'Subscribe'}
+                </Button>
+              </form>
             </div>
           </div>
         </div>
 
-        {/* Bottom Section */}
-        <div className="border-t border-gray-800 py-8">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="flex items-center space-x-6 text-sm text-gray-400">
-              <span>© 2024 FreeflowZee. All rights reserved.</span>
-              <span className="hidden md:block">•</span>
-              <Link href="/privacy" className="hover:text-white transition-colors">
+        {/* Bottom Bar */}
+        <div className="border-t border-gray-200 py-8">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            {/* Legal Links */}
+            <div className="flex items-center space-x-6 mb-4 md:mb-0">
+              <Link href="/privacy" className="text-gray-600 hover:text-blue-600 transition-colors flex items-center">
+                <Shield className="w-4 h-4 mr-1" />
                 Privacy Policy
               </Link>
-              <span className="hidden md:block">•</span>
-              <Link href="/terms" className="hover:text-white transition-colors">
+              <Link href="/terms" className="text-gray-600 hover:text-blue-600 transition-colors flex items-center">
+                <FileText className="w-4 h-4 mr-1" />
                 Terms of Service
               </Link>
+              <Link href="/help" className="text-gray-600 hover:text-blue-600 transition-colors flex items-center">
+                <HelpCircle className="w-4 h-4 mr-1" />
+                Support
+              </Link>
             </div>
-            
-            {/* Quick Actions */}
+
+            {/* Social Links */}
             <div className="flex items-center space-x-4">
-              <Link href="/signup">
-                <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white">
-                  Get Started
-                </Button>
-              </Link>
-              <Link href="/contact">
-                <Button size="sm" variant="outline" className="border-purple-300 text-white hover:bg-purple-50 hover:text-purple-900">
-                  Contact Sales
-                </Button>
-              </Link>
+              {socialLinks.map((link) => (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 hover:text-blue-600 transition-colors"
+                  aria-label={link.name}
+                >
+                  <link.icon className="w-5 h-5" />
+                </a>
+              ))}
             </div>
+          </div>
+
+          {/* Copyright */}
+          <div className="mt-6 pt-6 border-t border-gray-200 text-center">
+            <p className="text-gray-600">
+              © 2024 FreeflowZee. All rights reserved. Made with ❤️ for creative professionals.
+            </p>
           </div>
         </div>
       </div>

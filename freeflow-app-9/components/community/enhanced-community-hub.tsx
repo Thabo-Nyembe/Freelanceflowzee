@@ -1,6 +1,6 @@
-'use client
+'use client'
 
-import React, { useState } from 'react
+import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -20,7 +20,7 @@ import {
   Calendar, 
   Instagram, 
   TrendingUp 
-} from 'lucide-react
+} from 'lucide-react'
 
 interface Post {
   id: string
@@ -103,33 +103,33 @@ export default function EnhancedCommunityHub() {
             <img 
               src={post.mediaUrl} 
               alt={post.title}
-              className="w-full h-48 object-cover
+              className="w-full h-48 object-cover"
             />
           </div>
         )}
-"
+
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button 
-              className="flex items-center gap-2 text-sm text-gray-600 hover:text-red-500 transition-colors
+              className="flex items-center gap-2 text-sm text-gray-600 hover:text-red-500 transition-colors"
               onClick={() => console.log('Like clicked')}
-            >"
+            >
               <Heart className="w-5 h-5" />
               <span>{post.likes}</span>
             </button>
             
             <button 
-              className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-500 transition-colors
+              className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-500 transition-colors"
               onClick={() => console.log('Comments clicked')}
-            >"
+            >
               <MessageCircle className="w-5 h-5" />
               <span>{post.comments}</span>
             </button>
             
             <button 
-              className="flex items-center gap-2 text-sm text-gray-600 hover:text-green-500 transition-colors
+              className="flex items-center gap-2 text-sm text-gray-600 hover:text-green-500 transition-colors"
               onClick={() => console.log('Share clicked')}
-            >"
+            >
               <Share className="w-5 h-5" />
               <span>{post.shares}</span>
             </button>
@@ -137,11 +137,11 @@ export default function EnhancedCommunityHub() {
           
           <button 
             className={`text-gray-600 hover:text-yellow-500 transition-colors ${
-              post.bookmarked ? 'text-yellow-500' : 
+              post.bookmarked ? 'text-yellow-500' : ''
             }`}
             onClick={() => console.log('Bookmark clicked')}
           >
-            <Bookmark className={`w-5 h-5 ${post.bookmarked ? 'fill-current' : '}`} />
+            <Bookmark className={`w-5 h-5 ${post.bookmarked ? 'fill-current' : ''}`} />
           </button>
         </div>
       </CardContent>
@@ -165,29 +165,29 @@ export default function EnhancedCommunityHub() {
           <TabsList className="grid w-full grid-cols-4 mb-8 bg-white/50 backdrop-blur-sm">
             <TabsTrigger 
               value="feed" 
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white
-            >"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
+            >
               <Instagram className="w-4 h-4" />
               Feed
             </TabsTrigger>
             <TabsTrigger 
               value="creators" 
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white
-            >"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
+            >
               <Users className="w-4 h-4" />
               Creators
             </TabsTrigger>
             <TabsTrigger 
               value="showcase" 
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white
-            >"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
+            >
               <Star className="w-4 h-4" />
               Showcase
             </TabsTrigger>
             <TabsTrigger 
               value="events" 
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white
-            >"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
+            >
               <Calendar className="w-4 h-4" />
               Events
             </TabsTrigger>
@@ -209,37 +209,37 @@ export default function EnhancedCommunityHub() {
                         </AvatarFallback>
                       </Avatar>
                       <Input 
-                        placeholder="Share your creative journey...
-                        className="flex-1 bg-white/80
+                        placeholder="Share your creative journey..."
+                        className="flex-1 bg-white/80"
                         onClick={() => setShowCreatePost(true)}
                         readOnly
                       />
-                    </div>"
+                    </div>
                     <div className="flex items-center gap-4">
                       <Button 
-                        variant="default
+                        variant="default"
                         size="sm" 
-                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
                         onClick={() => setShowCreatePost(true)}
-                      >"
+                      >
                         <Plus className="w-4 h-4 mr-2" />
                         Create Post
                       </Button>
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="text-purple-600 hover:text-purple-700
+                        className="text-purple-600 hover:text-purple-700"
                         onClick={() => alert('Photo upload coming soon!')}
-                      >"
+                      >
                         <Image className="w-4 h-4 mr-2" />
                         Photo
                       </Button>
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="text-blue-600 hover:text-blue-700
+                        className="text-blue-600 hover:text-blue-700"
                         onClick={() => alert('Video upload coming soon!')}
-                      >"
+                      >
                         <Video className="w-4 h-4 mr-2" />
                         Video
                       </Button>

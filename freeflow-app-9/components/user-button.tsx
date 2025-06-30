@@ -1,3 +1,3 @@
-'use client
+'use client'
 
-import { Fragment } from 'react
+import { Fragment } from 'react'

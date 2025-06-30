@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react
+import React, { useState, useEffect } from 'react'
   const netIncome = paidAmount - totalExpenses
   const netProfit = totalRevenue - totalExpenses;
   const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;

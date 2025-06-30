@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server
-import { createClient } from '@/lib/supabase/server
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
 interface CommentRequest {
   fileId: string
   content: string
-  type: 'comment' | 'note' | 'suggestion' | 'issue
+  type: 'comment' | 'note' | 'suggestion' | 'issue'
   timestamp?: number
   position?: { x: number; y: number }
   mentions?: string[]
@@ -12,7 +12,7 @@ interface CommentRequest {
 
 interface ApprovalRequest {
   fileId: string
-  status: 'approved' | 'rejected' | 'revision_requested
+  status: 'approved' | 'rejected' | 'revision_requested'
   message?: string
   conditions?: string[]
 }
@@ -23,7 +23,7 @@ interface NotificationRequest {
   title: string
   message: string
   data?: unknown
-  priority?: 'low' | 'medium' | 'high' | 'urgent
+  priority?: 'low' | 'medium' | 'high' | 'urgent'
 }
 
 export async function POST(request: NextRequest) {
@@ -50,16 +50,16 @@ export async function POST(request: NextRequest) {
     const action = body.action
 
     switch (action) {
-      case 'add_comment':
+      case 'add_comment':'
         return handleAddComment(body as CommentRequest, supabase, user)
       
-      case 'add_approval':
+      case 'add_approval':'
         return handleAddApproval(body as ApprovalRequest, supabase, user)
       
-      case 'send_notification':
+      case 'send_notification':'
         return handleSendNotification(body as NotificationRequest, supabase, user)
       
-      case 'update_file_status':
+      case 'update_file_status':'
         return handleUpdateFileStatus(body, supabase, user)
       
       default:
@@ -84,8 +84,8 @@ async function handleAddComment(
   try {
     // Validate file exists
     const { data: file, error: fileError } = await supabase
-      .from('media_files')
-      .select('id, name, project_id')
+      .from('media_files'
+      .select('id, name, project_id'
       .eq('id', commentData.fileId)
       .single()
 
@@ -98,7 +98,7 @@ async function handleAddComment(
 
     // Create comment
     const { data: comment, error: commentError } = await supabase
-      .from('comments')
+      .from('comments'
       .insert({
         file_id: commentData.fileId,
         user_id: user.id,
@@ -123,17 +123,17 @@ async function handleAddComment(
     // Send notifications to mentioned users
     if (commentData.mentions && commentData.mentions.length > 0) {
       for (const mentionedUserId of commentData.mentions) {
-        await supabase.from('notifications').insert({
+        await supabase.from('notifications').insert({'
           user_id: mentionedUserId,
-          type: 'mention',
-          title: 'You were mentioned in a comment',
+          type: 'mention,
+          title: 'You were mentioned in a comment,
           message: `${user.email} mentioned you in a ${commentData.type} on ${file.name}`,
           data: {
             comment_id: comment.id,
             file_id: commentData.fileId,
             project_id: file.project_id
           },
-          priority: commentData.type === 'issue' ? 'high' : 'medium
+          priority: commentData.type === 'issue' ? 'high' : 'medium'
         })
       }
     }
@@ -143,7 +143,7 @@ async function handleAddComment(
       fileId: commentData.fileId,
       projectId: file.project_id,
       userId: user.id,
-      action: 'comment_added',
+      action: 'comment_added,
       details: {
         commentType: commentData.type,
         content: commentData.content.substring(0, 100)
@@ -153,7 +153,7 @@ async function handleAddComment(
     return NextResponse.json({
       success: true,
       comment,
-      message: 'Comment added successfully
+      message: 'Comment added successfully'
     })
   } catch (error) {
     console.error('Add comment error:', error)
@@ -171,8 +171,8 @@ async function handleAddApproval(
   try {
     // Validate file exists
     const { data: file, error: fileError } = await supabase
-      .from('media_files')
-      .select('id, name, project_id, status')
+      .from('media_files'
+      .select('id, name, project_id, status'
       .eq('id', approvalData.fileId)
       .single()
 
@@ -185,7 +185,7 @@ async function handleAddApproval(
 
     // Create approval record
     const { data: approval, error: approvalError } = await supabase
-      .from('approvals')
+      .from('approvals'
       .insert({
         file_id: approvalData.fileId,
         user_id: user.id,
@@ -207,19 +207,19 @@ async function handleAddApproval(
     // Update file status based on approval
     let newFileStatus = file.status
     switch (approvalData.status) {
-      case 'approved':
-        newFileStatus = 'approved
+      case 'approved':'
+        newFileStatus = 'approved'
         break
-      case 'rejected':
-        newFileStatus = 'rejected
+      case 'rejected':'
+        newFileStatus = 'rejected'
         break
-      case 'revision_requested':
-        newFileStatus = 'revision_requested
+      case 'revision_requested':'
+        newFileStatus = 'revision_requested'
         break
     }
 
     await supabase
-      .from('media_files')
+      .from('media_files'
       .update({ status: newFileStatus })
       .eq('id', approvalData.fileId)
 
@@ -239,7 +239,7 @@ async function handleAddApproval(
       success: true,
       approval,
       newFileStatus,
-      message: `File ${approvalData.status.replace('_', ' ')} successfully
+      message: `File ${approvalData.status.replace('_', ' ')} successfully'
     })
   } catch (error) {
     console.error('Add approval error:', error)
@@ -256,14 +256,14 @@ async function handleSendNotification(
   user: unknown) {
   try {
     const { data: notification, error } = await supabase
-      .from('notifications')
+      .from('notifications'
       .insert({
         user_id: notificationData.userId,
         type: notificationData.type,
         title: notificationData.title,
         message: notificationData.message,
         data: notificationData.data || {},
-        priority: notificationData.priority || 'medium',
+        priority: notificationData.priority || 'medium,
         is_read: false,
         created_at: new Date().toISOString(),
         sent_by: user.id
@@ -284,7 +284,7 @@ async function handleSendNotification(
     return NextResponse.json({
       success: true,
       notification,
-      message: 'Notification sent successfully
+      message: 'Notification sent successfully'
     })
   } catch (error) {
     console.error('Send notification error:', error)
@@ -303,7 +303,7 @@ async function handleUpdateFileStatus(
     const { fileId, status, metadata } = statusData
 
     const { data: updatedFile, error } = await supabase
-      .from('media_files')
+      .from('media_files'
       .update({
         status,
         metadata: metadata || {},
@@ -323,7 +323,7 @@ async function handleUpdateFileStatus(
     return NextResponse.json({
       success: true,
       file: updatedFile,
-      message: 'File status updated successfully
+      message: 'File status updated successfully'
     })
   } catch (error) {
     console.error('Update file status error:', error)
@@ -339,8 +339,8 @@ async function createFileActivityNotification(supabase: unknown, data: unknown) 
   try {
     // Get project collaborators
     const { data: project } = await supabase
-      .from('projects')
-      .select('id, name, collaborators, created_by')
+      .from('projects'
+      .select('id, name, collaborators, created_by'
       .eq('id', data.projectId)
       .single()
 
@@ -352,10 +352,10 @@ async function createFileActivityNotification(supabase: unknown, data: unknown) 
 
       // Create notifications for all project members except the actor
       for (const userId of allUsers) {
-        await supabase.from('notifications').insert({
+        await supabase.from('notifications').insert({'
           user_id: userId,
-          type: 'file_activity',
-          title: 'New file activity',
+          type: 'file_activity,
+          title: 'New file activity,
           message: `New ${data.action.replace('_', ' ')} in project "${project.name}"`,
           data: {
             file_id: data.fileId,
@@ -363,7 +363,7 @@ async function createFileActivityNotification(supabase: unknown, data: unknown) 
             action: data.action,
             details: data.details
           },
-          priority: 'medium
+          priority: 'medium'
         })
       }
     }
@@ -376,8 +376,8 @@ async function createApprovalNotification(supabase: unknown, data: unknown) {
   try {
     // Get project owner and file uploader
     const { data: file } = await supabase
-      .from('media_files')
-      .select('uploaded_by, projects(created_by, name)')
+      .from('media_files'
+      .select('uploaded_by, projects(created_by, name)'
       .eq('id', data.fileId)
       .single()
 
@@ -387,9 +387,9 @@ async function createApprovalNotification(supabase: unknown, data: unknown) {
       )
 
       for (const userId of usersToNotify) {
-        await supabase.from('notifications').insert({
+        await supabase.from('notifications').insert({'
           user_id: userId,
-          type: 'approval_status',
+          type: 'approval_status,
           title: `File ${data.status.replace('_', ' ')}`,
           message: data.message || `Your file has been ${data.status.replace('_', ' ')}`,
           data: {
@@ -398,7 +398,7 @@ async function createApprovalNotification(supabase: unknown, data: unknown) {
             approval_status: data.status,
             approver_id: data.approverId
           },
-          priority: data.status === 'rejected' ? 'high' : 'medium
+          priority: data.status === 'rejected' ? 'high' : 'medium'
         })
       }
     }
@@ -409,21 +409,21 @@ async function createApprovalNotification(supabase: unknown, data: unknown) {
 
 async function checkWorkflowProgression(supabase: unknown, projectId: string, approvalStatus: string) {
   try {
-    if (approvalStatus === 'approved') {
+    if (approvalStatus === 'approved') {'
       // Check if this approval completes a workflow step
       const { data: workflow } = await supabase
-        .from('workflow_steps')
-        .select('*')
+        .from('workflow_steps'
+        .select('*'
         .eq('project_id', projectId)
         .eq('is_completed', false)
-        .order('order')
+        .order('order'
         .limit(1)
         .single()
 
       if (workflow && workflow.auto_advance) {
         // Mark step as completed
         await supabase
-          .from('workflow_steps')
+          .from('workflow_steps'
           .update({
             is_completed: true,
             completed_at: new Date().toISOString()
@@ -431,16 +431,16 @@ async function checkWorkflowProgression(supabase: unknown, projectId: string, ap
           .eq('id', workflow.id)
 
         // Notify about workflow progression
-        await supabase.from('notifications').insert({
+        await supabase.from('notifications').insert({'
           user_id: workflow.assignee_id,
-          type: 'workflow_progress',
-          title: 'Workflow step completed',
+          type: 'workflow_progress,
+          title: 'Workflow step completed,
           message: `"${workflow.name}" has been completed and workflow has progressed`,
           data: {
             project_id: projectId,
             workflow_step_id: workflow.id
           },
-          priority: 'medium
+          priority: 'medium'
         })
       }
     }
@@ -451,8 +451,8 @@ async function checkWorkflowProgression(supabase: unknown, projectId: string, ap
 
 async function triggerRealTimeNotification(notification: unknown) {
   // In a real application, this would trigger WebSocket or server-sent events
-  // For now, we'll just log it
-  console.log('Real-time notification triggered:', {
+  // For now, we'll just log it'
+  console.log('Real-time notification triggered:', {'
     userId: notification.user_id,
     type: notification.type,
     title: notification.title,
@@ -463,10 +463,10 @@ async function triggerRealTimeNotification(notification: unknown) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const action = searchParams.get('action')
-    const fileId = searchParams.get('fileId')
-    const projectId = searchParams.get('projectId')
-    const userId = searchParams.get('userId')
+    const action = searchParams.get('action'
+    const fileId = searchParams.get('fileId'
+    const projectId = searchParams.get('projectId'
+    const userId = searchParams.get('userId'
 
     const supabase = await createClient()
     
@@ -487,16 +487,16 @@ export async function GET(request: NextRequest) {
     }
 
     switch (action) {
-      case 'comments':
+      case 'comments':'
         return getComments(supabase, fileId, user)
       
-      case 'approvals':
+      case 'approvals':'
         return getApprovals(supabase, fileId, user)
       
-      case 'notifications':
+      case 'notifications':'
         return getNotifications(supabase, userId || user.id, user)
       
-      case 'activity':
+      case 'activity':'
         return getProjectActivity(supabase, projectId, user)
       
       default:
@@ -523,7 +523,7 @@ async function getComments(supabase: unknown, fileId: string | null, user: unkno
   }
 
   const { data: comments, error } = await supabase
-    .from('comments')
+    .from('comments'
     .select(
       *,
       user:users(id, email, full_name, avatar_url),
@@ -556,7 +556,7 @@ async function getApprovals(supabase: unknown, fileId: string | null, user: unkn
   }
 
   const { data: approvals, error } = await supabase
-    .from('approvals')
+    .from('approvals'
     .select(
       *,
       user:users(id, email, full_name, avatar_url)
@@ -579,8 +579,8 @@ async function getApprovals(supabase: unknown, fileId: string | null, user: unkn
 
 async function getNotifications(supabase: unknown, userId: string, user: unknown) {
   const { data: notifications, error } = await supabase
-    .from('notifications')
-    .select('*')
+    .from('notifications'
+    .select('*'
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(50)
@@ -610,7 +610,7 @@ async function getProjectActivity(supabase: unknown, projectId: string | null, u
   }
 
   const { data: activity, error } = await supabase
-    .from('project_activity')
+    .from('project_activity'
     .select(
       *,
       user:users(id, email, full_name, avatar_url)

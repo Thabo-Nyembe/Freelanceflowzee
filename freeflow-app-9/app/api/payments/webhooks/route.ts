@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server
-import Stripe from 'stripe
-import { headers } from 'next/headers
+import { NextRequest, NextResponse } from 'next/server'
+import Stripe from 'stripe'
+import { headers } from 'next/headers'
 
 // Stripe MCP Best Practice: Initialize with proper error handling and environment validation
 let stripe: Stripe | null = null
@@ -9,7 +9,7 @@ let endpointSecret: string | null = null
 // Initialize Stripe only if properly configured
 if (process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET) {
   stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2025-05-28.basil',
+    apiVersion: '2025-05-28.basil,
     typescript: true,
   })
   endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
@@ -18,7 +18,7 @@ if (process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET) {
 export async function POST(request: NextRequest) {
   // Check if Stripe is properly configured
   if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
-    console.warn('Stripe not configured - webhook endpoint disabled')
+    console.warn('Stripe not configured - webhook endpoint disabled'
     return NextResponse.json(
       { error: 'Payment system not configured' },
       { status: 503 }
@@ -27,10 +27,10 @@ export async function POST(request: NextRequest) {
 
   const body = await request.text()
   const headersList = await headers()
-  const sig = headersList.get('stripe-signature')
+  const sig = headersList.get('stripe-signature'
 
   if (!sig) {
-    console.error('No Stripe signature found')
+    console.error('No Stripe signature found'
     return NextResponse.json(
       { error: 'No signature found' },
       { status: 400 }
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (!stripe || !endpointSecret) {
-    console.error('Stripe not properly initialized')
+    console.error('Stripe not properly initialized'
     return NextResponse.json(
       { error: 'Payment system not initialized' },
       { status: 500 }
@@ -61,43 +61,43 @@ export async function POST(request: NextRequest) {
 
   try {
     switch (event.type) {
-      case 'payment_intent.succeeded':
+      case 'payment_intent.succeeded':'
         await handlePaymentSucceeded(event.data.object as Stripe.PaymentIntent)
         break
 
-      case 'payment_intent.payment_failed':
+      case 'payment_intent.payment_failed':'
         await handlePaymentFailed(event.data.object as Stripe.PaymentIntent)
         break
 
-      case 'invoice.payment_succeeded':
+      case 'invoice.payment_succeeded':'
         await handleInvoicePaymentSucceeded(event.data.object as Stripe.Invoice)
         break
 
-      case 'invoice.payment_failed':
+      case 'invoice.payment_failed':'
         await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice)
         break
 
-      case 'customer.subscription.created':
+      case 'customer.subscription.created':'
         await handleSubscriptionCreated(event.data.object as Stripe.Subscription)
         break
 
-      case 'customer.subscription.updated':
+      case 'customer.subscription.updated':'
         await handleSubscriptionUpdated(event.data.object as Stripe.Subscription)
         break
 
-      case 'customer.subscription.deleted':
+      case 'customer.subscription.deleted':'
         await handleSubscriptionDeleted(event.data.object as Stripe.Subscription)
         break
 
-      case 'customer.created':
+      case 'customer.created':'
         await handleCustomerCreated(event.data.object as Stripe.Customer)
         break
 
-      case 'payment_method.attached':
+      case 'payment_method.attached':'
         await handlePaymentMethodAttached(event.data.object as Stripe.PaymentMethod)
         break
 
-      case 'checkout.session.completed':
+      case 'checkout.session.completed':'
         await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session)
         break
 
@@ -123,14 +123,14 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   // 1. Update your database to mark the payment as successful
   // 2. Send confirmation email to customer
   // 3. Fulfill the order/service
-  // 4. Update user's account status
+  // 4. Update user's account status'
   
   const metadata = paymentIntent.metadata
   
   try {
     // Log payment success for analytics
     await logPaymentEvent({
-      type: 'payment_succeeded',
+      type: 'payment_succeeded,
       payment_intent_id: paymentIntent.id,
       amount: paymentIntent.amount,
       currency: paymentIntent.currency,
@@ -150,7 +150,7 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
         email: metadata.customer_email,
         amount: paymentIntent.amount,
         currency: paymentIntent.currency,
-        description: metadata.description || 'FreeflowZee Payment',
+        description: metadata.description || 'FreeflowZee Payment,
       })
     }
   } catch (error) {
@@ -166,12 +166,12 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
   try {
     // Log payment failure
     await logPaymentEvent({
-      type: 'payment_failed',
+      type: 'payment_failed,
       payment_intent_id: paymentIntent.id,
       amount: paymentIntent.amount,
       currency: paymentIntent.currency,
       customer_id: paymentIntent.customer as string,
-      error_message: paymentIntent.last_payment_error?.message || 'Unknown error',
+      error_message: paymentIntent.last_payment_error?.message || 'Unknown error,
       timestamp: new Date().toISOString(),
     })
 
@@ -181,7 +181,7 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
         email: metadata.customer_email,
         amount: paymentIntent.amount,
         currency: paymentIntent.currency,
-        error_message: paymentIntent.last_payment_error?.message || 'Payment failed',
+        error_message: paymentIntent.last_payment_error?.message || 'Payment failed,
       })
     }
   } catch (error) {
@@ -195,12 +195,12 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   try {
     // Update subscription status if applicable
     if ((invoice as any).subscription) {
-      await updateSubscriptionStatus((invoice as any).subscription as string, 'active')
+      await updateSubscriptionStatus((invoice as any).subscription as string, 'active'
     }
 
     // Log invoice payment
     await logPaymentEvent({
-      type: 'invoice_payment_succeeded',
+      type: 'invoice_payment_succeeded,
       invoice_id: invoice.id,
       amount: invoice.amount_paid,
       currency: invoice.currency,
@@ -219,12 +219,12 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   try {
     // Update subscription status if applicable
     if ((invoice as any).subscription) {
-      await updateSubscriptionStatus((invoice as any).subscription as string, 'past_due')
+      await updateSubscriptionStatus((invoice as any).subscription as string, 'past_due'
     }
 
     // Log invoice payment failure
     await logPaymentEvent({
-      type: 'invoice_payment_failed',
+      type: 'invoice_payment_failed,
       invoice_id: invoice.id,
       amount: invoice.amount_due,
       currency: invoice.currency,
@@ -276,7 +276,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   try {
     // Mark subscription as cancelled in your database
     await updateSubscriptionRecord(subscription.id, {
-      status: 'cancelled',
+      status: 'cancelled,
       cancelled_at: new Date(),
     })
   } catch (error) {
@@ -306,7 +306,7 @@ async function handlePaymentMethodAttached(paymentMethod: Stripe.PaymentMethod) 
   try {
     // Log payment method attachment for analytics
     await logPaymentEvent({
-      type: 'payment_method_attached',
+      type: 'payment_method_attached,
       payment_method_id: paymentMethod.id,
       customer_id: paymentMethod.customer as string,
       payment_method_type: paymentMethod.type,
@@ -322,10 +322,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   
   try {
     // Handle checkout completion
-    if (session.mode === 'subscription') {
+    if (session.mode === 'subscription') {'
       // Handle subscription checkout
       await handleSubscriptionCheckout(session)
-    } else if (session.mode === 'payment') {
+    } else if (session.mode === 'payment') {'
       // Handle one-time payment checkout
       await handlePaymentCheckout(session)
     }

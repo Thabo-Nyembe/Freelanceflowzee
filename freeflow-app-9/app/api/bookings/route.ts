@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server
-import { BookingService, Booking } from '@/types/booking
-import { stripeEnhanced } from '@/lib/stripe-enhanced-v2
-import { createClient } from '@/lib/supabase/server
+import { NextRequest, NextResponse } from 'next/server'
+import { BookingService, Booking } from '@/types/booking'
+import { stripeEnhanced } from '@/lib/stripe-enhanced-v2'
+import { createClient } from '@/lib/supabase/server'
 
 // Use the exported instance
 const stripeService = stripeEnhanced
@@ -30,13 +30,13 @@ const MOCK_SERVICES: BookingService[] = [
     }
   },
   {
-    id: 'service-2',
-    title: 'Design Review',
-    description: 'Review and feedback session for design deliverables',
+    id: 'service-2,'
+    title: 'Design Review,'
+    description: 'Review and feedback session for design deliverables,'
     duration: 60,
     price: 12000, // $120.00 in cents
-    category: 'review',
-    freelancerId: 'user1',
+    category: 'review,'
+    freelancerId: 'user1,'
     isActive: true,
     maxAdvanceBooking: 14,
     bufferTime: 10,
@@ -47,17 +47,17 @@ const MOCK_SERVICES: BookingService[] = [
       tuesday: { start: '10:00', end: '16:00' },
       wednesday: { start: '10:00', end: '16:00' },
       thursday: { start: '10:00', end: '16:00' },
-      friday: { start: '10:00', end: '16:00' }
+      friday: { start: '10:00', end: '16:00' }'
     }
   },
   {
-    id: 'service-3',
-    title: 'Development Workshop',
-    description: 'Hands-on development session and technical guidance',
+    id: 'service-3,'
+    title: 'Development Workshop,'
+    description: 'Hands-on development session and technical guidance,'
     duration: 120,
     price: 25000, // $250.00 in cents
-    category: 'workshop',
-    freelancerId: 'user1',
+    category: 'workshop,'
+    freelancerId: 'user1,'
     isActive: true,
     maxAdvanceBooking: 21,
     bufferTime: 20,
@@ -66,7 +66,7 @@ const MOCK_SERVICES: BookingService[] = [
     availability: {
       monday: { start: '09:00', end: '15:00' },
       wednesday: { start: '09:00', end: '15:00' },
-      friday: { start: '09:00', end: '15:00' }
+      friday: { start: '09:00', end: '15:00' }'
     }
   }
 ]
@@ -74,21 +74,21 @@ const MOCK_SERVICES: BookingService[] = [
 // Mock bookings storage - in production, this would be a database
 const MOCK_BOOKINGS: Booking[] = [
   {
-    id: 'booking-1',
-    clientId: 'client1',
-    clientEmail: 'john@example.com',
-    clientName: 'John Smith',
-    clientPhone: '+1 (555) 123-4567',
-    freelancerId: 'user1',
-    serviceId: 'service-1',
-    timeSlotId: 'slot-1',
-    status: 'confirmed',
-    paymentStatus: 'paid',
-    paymentIntentId: 'pi_1234567890',
+    id: 'booking-1,'
+    clientId: 'client1,'
+    clientEmail: 'john@example.com,'
+    clientName: 'John Smith,'
+    clientPhone: '+1 (555) 123-4567,'
+    freelancerId: 'user1,'
+    serviceId: 'service-1,'
+    timeSlotId: 'slot-1,'
+    status: 'confirmed,'
+    paymentStatus: 'paid,'
+    paymentIntentId: 'pi_1234567890,'
     startTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
     endTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 90 * 60 * 1000).toISOString(),
     totalAmount: 15000,
-    notes: 'Looking forward to discussing the new e-commerce project',
+    notes: 'Looking forward to discussing the new e-commerce project,'
     requirements: ['Project brief', 'Business goals document'],
     createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date().toISOString()
@@ -96,8 +96,8 @@ const MOCK_BOOKINGS: Booking[] = [
 ]
 
 // Use inline type definitions
-type BookingStatus = 'pending' | 'confirmed' | 'paid' | 'in-progress' | 'completed' | 'cancelled' | 'no-show
-type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded
+type BookingStatus = 'pending' | 'confirmed' | 'paid' | 'in-progress' | 'completed' | 'cancelled' | 'no-show'
+type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded'
 
 // POST: Create a new booking with Stripe payment
 export async function POST(request: NextRequest) {
@@ -140,13 +140,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create Stripe customer if doesn't exist
+    // Create Stripe customer if doesn't exist'
     const customerResult = await stripeService.createEnhancedCustomer({
       email: clientEmail,
       name: clientName,
       phone: clientPhone,
       metadata: {
-        source: 'booking_system',
+        source: 'booking_system,'
         service_id: serviceId,
         service_title: service.title
       }
@@ -163,9 +163,9 @@ export async function POST(request: NextRequest) {
     // Create Stripe Payment Intent
     const paymentResult = await stripeService.createEnhancedPaymentIntent({
       amount: service.price,
-      currency: 'usd',
+      currency: 'usd,'
       metadata: {
-        booking_type: 'service_booking',
+        booking_type: 'service_booking,'
         service_id: serviceId,
         service_title: service.title,
         client_name: clientName,
@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
         selected_time: selectedTime || 
       },
       paymentMethods: ['card', 'apple_pay', 'google_pay', 'link'],
-      setupFutureUsage: 'off_session' // Save payment method for future bookings
+      setupFutureUsage: 'off_session' // Save payment method for future bookings'
     })
 
     if (!paymentResult.success) {
@@ -197,15 +197,15 @@ export async function POST(request: NextRequest) {
     const bookingId = `booking-${Date.now()}
     const newBooking: Booking = {
       id: bookingId,
-      clientId: customerResult.customer?.id || 'unknown-client',
+      clientId: customerResult.customer?.id || 'unknown-client,'
       serviceId,
       freelancerId: service.freelancerId,
       clientName,
       clientEmail,
       clientPhone,
       timeSlotId,
-      status: 'pending',
-      paymentStatus: 'pending',
+      status: 'pending,'
+      paymentStatus: 'pending,'
       startTime,
       endTime,
       totalAmount: service.price,
@@ -224,7 +224,7 @@ export async function POST(request: NextRequest) {
       booking: newBooking,
       clientSecret: paymentResult.clientSecret,
       publishableKey: paymentResult.publishableKey,
-      message: 'Booking created successfully. Complete payment to confirm.
+      message: 'Booking created successfully. Complete payment to confirm.'
     })
 
   } catch (error) {
@@ -328,7 +328,7 @@ export async function PUT(request: NextRequest) {
       booking.status = status
       
       // Auto-confirm if payment is successful
-      if (status === 'confirmed' && booking.paymentStatus === 'paid') {
+      if (status === 'confirmed' && booking.paymentStatus === 'paid') {'
         // In a real app, you might send confirmation emails here
         console.log(`Booking ${bookingId} confirmed for ${booking.clientEmail}`)
       }
@@ -338,8 +338,8 @@ export async function PUT(request: NextRequest) {
       booking.paymentStatus = paymentStatus
       
       // Auto-confirm booking if payment succeeds
-      if (paymentStatus === 'paid' && booking.status === 'pending') {
-        booking.status = 'confirmed
+      if (paymentStatus === 'paid' && booking.status === 'pending') {'
+        booking.status = 'confirmed'
       }
     }
     
@@ -351,7 +351,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       booking,
-      message: 'Booking updated successfully
+      message: 'Booking updated successfully'
     })
 
   } catch (error) {

@@ -1,10 +1,10 @@
-'use client
+'use client'
 
-import { useState, useRef, useCallback } from 'react
+import { useState, useRef, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { Upload, CheckCircle, AlertCircle } from 'lucide-react
-import { cn } from '@/lib/utils
+import { Upload, CheckCircle, AlertCircle } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface FileUploadProps {
   onUpload: (files: File[]) => Promise<void>

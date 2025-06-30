@@ -1,6 +1,6 @@
-'use client
+'use client'
 
-import { useReducer, useState } from 'react
+import { useReducer, useState } from 'react'
  event: CalendarEvent }
   | { type: 'DELETE_EVENT'; eventId: string }
   | { type: 'SET_SELECTED_EVENT'; event: CalendarEvent | null }

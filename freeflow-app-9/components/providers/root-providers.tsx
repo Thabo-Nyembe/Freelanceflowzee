@@ -1,9 +1,9 @@
-'use client
+'use client'
 
-import React from 'react
+import React from 'react'
 import { createBrowserClient } from '@supabase/ssr
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query
-import { useState } from 'react
+import { useState } from 'react'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
 

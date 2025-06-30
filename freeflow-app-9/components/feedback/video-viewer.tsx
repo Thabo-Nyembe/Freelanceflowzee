@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from 'react
+import React, { useState, useRef, useEffect } from 'react'
  y?: number; timestamp?: number } | null>(null)
   const [editingComment, setEditingComment] = useState<Comment | null>(null)
   const [newComment, setNewComment] = useState('')

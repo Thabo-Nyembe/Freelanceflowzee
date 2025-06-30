@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: startupAnalytics,
       timestamp: new Date().toISOString(),
-      startup_mode: process.env.STARTUP_MODE === 'true
+      startup_mode: process.env.STARTUP_MODE === 'true'
     });
     
   } catch (error) {
@@ -24,8 +24,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { 
         success: false, 
-        error: 'Failed to fetch startup analytics',
-        details: error instanceof Error ? error.message : 'Unknown error
+        error: 'Failed to fetch startup analytics,'
+        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     );
@@ -36,12 +36,12 @@ export async function POST(request: NextRequest) {
   try {
     const { action } = await request.json();
     
-    if (action === 'optimize') {
-      // Run startup optimization - mock implementation since the method doesn't exist
+    if (action === 'optimize') {'
+      // Run startup optimization - mock implementation since the method doesn't exist'
       const optimization = {
         moved: 0,
         saved: 0,
-        message: 'Optimization functionality coming soon
+        message: 'Optimization functionality coming soon'
       };
       
       // Calculate cost impact
@@ -53,10 +53,10 @@ export async function POST(request: NextRequest) {
           ...optimization,
           cost_impact: costImpact
         },
-        message: 'Startup optimization completed successfully
+        message: 'Startup optimization completed successfully'
       });
       
-    } else if (action === 'budget_check') {
+    } else if (action === 'budget_check') {'
       // Check budget status
       const budgetStatus = await checkStartupBudget();
       
@@ -77,8 +77,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { 
         success: false, 
-        error: 'Action failed',
-        details: error instanceof Error ? error.message : 'Unknown error
+        error: 'Action failed,'
+        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     );
@@ -190,7 +190,7 @@ function calculateOptimizationImpact(optimization: unknown) {
     files_moved: optimization.moved,
     roi_description: monthlySavings > 1 
       ? `Saves ${budgetPercentageSaved.toFixed(1)}% of your monthly budget!
-      : 'Meaningful cost reduction for your startup budget
+      : 'Meaningful cost reduction for your startup budget'
   };
 }
 
@@ -201,10 +201,10 @@ async function checkStartupBudget() {
   
   const alerts: string[] = [];
   
-  if (startupMetrics.status === 'over_budget') {
+  if (startupMetrics.status === 'over_budget') {'
     alerts.push('🚨 URGENT: Over budget! Immediate optimization needed');
     alerts.push('💡 Move large files to Wasabi for instant 72% savings');
-  } else if (startupMetrics.status === 'warning') {
+  } else if (startupMetrics.status === 'warning') {'
     alerts.push('⚠️ Approaching budget limit - run optimization soon');
     alerts.push('📊 Consider increasing Wasabi usage to stay within budget');
   } else {
@@ -225,9 +225,9 @@ async function checkStartupBudget() {
     budget_remaining: startupMetrics.budget_remaining,
     current_spend: startupMetrics.current_spend,
     alerts,
-    next_action: startupMetrics.status === 'safe' 
-      ? 'Continue monitoring - optimization on track
-      : 'Run storage optimization to reduce costs
+    next_action: startupMetrics.status === 'safe' '
+      ? 'Continue monitoring - optimization on track'
+      : 'Run storage optimization to reduce costs'
   };
 }
 
@@ -236,10 +236,10 @@ function generateStartupRecommendations(metrics: unknown): string[] {
   const recommendations: string[] = [];
   
   // Budget-based recommendations
-  if (metrics.status === 'over_budget') {
+  if (metrics.status === 'over_budget') {'
     recommendations.push('🚨 URGENT: Over budget! Move all possible files to Wasabi immediately');
     recommendations.push('💡 Consider upgrading to Wasabi-only mode for maximum savings');
-  } else if (metrics.status === 'warning') {
+  } else if (metrics.status === 'warning') {'
     recommendations.push('⚠️ Approaching budget limit - optimize storage now');
     recommendations.push('📊 Run daily optimization to stay within budget');
   } else {

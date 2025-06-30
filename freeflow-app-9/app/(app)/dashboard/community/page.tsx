@@ -104,8 +104,8 @@ export default function CommunityPage() {
           <div className="flex items-center gap-4">
             <Button
               onClick={() => dispatch({ type: 'TOGGLE_NEW_POST' })}
-              className="bg-gradient-to-r from-rose-500 to-violet-600 text-white hover:from-rose-600 hover:to-violet-700
-            >"
+              className="bg-gradient-to-r from-rose-500 to-violet-600 text-white hover:from-rose-600 hover:to-violet-700"
+            >
               <Camera className="w-4 h-4 mr-2" />
               Create Post
             </Button>
@@ -119,9 +119,9 @@ export default function CommunityPage() {
               variant={state.activeTab === 'marketplace' ? 'default' : 'ghost'}
               onClick={() => dispatch({ type: 'SET_TAB', payload: 'marketplace' })}
               className={`rounded-xl transition-all duration-300 ${
-                state.activeTab === 'marketplace
-                  ? 'bg-white shadow-md text-slate-800
-                  : 'text-slate-600 hover:text-slate-800
+                state.activeTab === 'marketplace'
+                  ? 'bg-white shadow-md text-slate-800'
+                  : 'text-slate-600 hover:text-slate-800'
               }`}
             >
               <Users className="w-4 h-4 mr-2" />
@@ -131,9 +131,9 @@ export default function CommunityPage() {
               variant={state.activeTab === 'wall' ? 'default' : 'ghost'}
               onClick={() => dispatch({ type: 'SET_TAB', payload: 'wall' })}
               className={`rounded-xl transition-all duration-300 ${
-                state.activeTab === 'wall
-                  ? 'bg-white shadow-md text-slate-800
-                  : 'text-slate-600 hover:text-slate-800
+                state.activeTab === 'wall'
+                  ? 'bg-white shadow-md text-slate-800'
+                  : 'text-slate-600 hover:text-slate-800'
               }`}
             >
               <Hash className="w-4 h-4 mr-2" />
@@ -148,13 +148,13 @@ export default function CommunityPage() {
               placeholder={state.activeTab === 'marketplace' ? 'Search creators...' : 'Search posts...'}
               value={state.searchQuery}
               onChange={(e) => dispatch({ type: 'SET_SEARCH', payload: e.target.value })}
-              className="pl-10 w-80 bg-white/80 border-white/20 focus:bg-white
+              className="pl-10 w-80 bg-white/80 border-white/20 focus:bg-white"
             />
           </div>
         </div>
 
         {/* Marketplace Tab */}
-        {state.activeTab === 'marketplace' && ("
+        {state.activeTab === 'marketplace' && (
           <div className="space-y-6">
             
             {/* Category Filter */}
@@ -163,12 +163,12 @@ export default function CommunityPage() {
                 <Button
                   key={category}
                   variant={state.selectedCategory === category ? 'default' : 'outline'}
-                  size= "sm
+                  size="sm"
                   onClick={() => dispatch({ type: 'SET_CATEGORY', payload: category })}
                   className={`whitespace-nowrap rounded-full transition-all duration-300 ${
                     state.selectedCategory === category
-                      ? 'bg-gradient-to-r from-rose-500 to-violet-600 text-white border-0
-                      : 'bg-white/60 border-white/20 text-slate-600 hover:bg-white hover:text-slate-800
+                      ? 'bg-gradient-to-r from-rose-500 to-violet-600 text-white border-0'
+                      : 'bg-white/60 border-white/20 text-slate-600 hover:bg-white hover:text-slate-800'
                   }`}
                 >
                   {category}
@@ -239,7 +239,7 @@ export default function CommunityPage() {
                         <div className="relative">
                           <Avatar className="w-12 h-12">
                             <AvatarImage src={creator.avatar} alt={creator.name} />
-                            <AvatarFallback>{creator.name.split(' ').map(n => n[0]).join(')}</AvatarFallback>
+                            <AvatarFallback>{creator.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                           </Avatar>
                           {creator.isOnline && (
                             <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white"></div>
@@ -256,17 +256,17 @@ export default function CommunityPage() {
                         </div>
                       </div>
                       <Button
-                        size= "sm
-                        variant= "outline
-                        className="bg-white/80 border-white/20 text-slate-600 hover:bg-white hover:text-slate-800
+                        size="sm"
+                        variant="outline"
+                        className="bg-white/80 border-white/20 text-slate-600 hover:bg-white hover:text-slate-800"
                       >
                         View Profile
                       </Button>
                     </div>
 
-                    {/* Category & Rating */}"
+                    {/* Category & Rating */}
                     <div className="flex items-center justify-between mb-3">
-                      <Badge variant= "outline" className="bg-gradient-to-r from-rose-50 to-violet-50 border-rose-200 text-rose-700">
+                      <Badge variant="outline" className="bg-gradient-to-r from-rose-50 to-violet-50 border-rose-200 text-rose-700">
                         {creator.category}
                       </Badge>
                       <div className="flex items-center gap-1">
@@ -291,12 +291,12 @@ export default function CommunityPage() {
                     {/* Skills */}
                     <div className="flex flex-wrap gap-1 mb-4">
                       {creator.skills.slice(0, 3).map((skill) => (
-                        <Badge key={skill} variant= "outline" className="text-xs bg-white/50 border-white/30 text-slate-600">
+                        <Badge key={skill} variant="outline" className="text-xs bg-white/50 border-white/30 text-slate-600">
                           {skill}
                         </Badge>
                       ))}
                       {creator.skills.length > 3 && (
-                        <Badge variant= "outline" className="text-xs bg-white/50 border-white/30 text-slate-600">
+                        <Badge variant="outline" className="text-xs bg-white/50 border-white/30 text-slate-600">
                           +{creator.skills.length - 3}
                         </Badge>
                       )}
@@ -319,16 +319,16 @@ export default function CommunityPage() {
                       
                       <div className="flex gap-2">
                         <Button 
-                          size= "sm" 
-                          className="flex-1 bg-gradient-to-r from-rose-500 to-violet-600 text-white hover:from-rose-600 hover:to-violet-700
+                          size="sm" 
+                          className="flex-1 bg-gradient-to-r from-rose-500 to-violet-600 text-white hover:from-rose-600 hover:to-violet-700"
                         >
                           Hire Now
                         </Button>
-                        <Button "
-                          size= "sm" 
-                          variant= "outline
-                          className="bg-white/80 border-white/20 text-slate-600 hover:bg-white hover:text-slate-800
-                        >"
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="bg-white/80 border-white/20 text-slate-600 hover:bg-white hover:text-slate-800"
+                        >
                           <Heart className="w-4 h-4" />
                         </Button>
                       </div>
@@ -356,7 +356,7 @@ export default function CommunityPage() {
                         <div className="flex items-center gap-3">
                           <Avatar className="w-10 h-10">
                             <AvatarImage src={post.creator.avatar} alt={post.creator.name} />
-                            <AvatarFallback>{post.creator.name.split(' ').map(n => n[0]).join(')}</AvatarFallback>
+                            <AvatarFallback>{post.creator.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                           </Avatar>
                           <div>
                             <div className="flex items-center gap-2">
@@ -377,7 +377,7 @@ export default function CommunityPage() {
                             </div>
                           </div>
                         </div>
-                        <Button size= "sm" variant= "ghost">
+                        <Button size="sm" variant="ghost">
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </div>
@@ -411,7 +411,7 @@ export default function CommunityPage() {
                             <div className="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 relative">
                               <div className="w-full h-full bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100"></div>
                               <div className="absolute inset-0 flex items-center justify-center">
-                                <Button size= "lg" className="rounded-full bg-white/90 text-slate-800 hover:bg-white">
+                                <Button size="lg" className="rounded-full bg-white/90 text-slate-800 hover:bg-white">
                                   <Play className="w-6 h-6" />
                                 </Button>
                               </div>
@@ -426,7 +426,7 @@ export default function CommunityPage() {
                           {media.type === 'audio' && (
                             <div className="bg-gradient-to-r from-rose-50 to-violet-50 p-6 rounded-lg border border-white/20">
                               <div className="flex items-center gap-4">
-                                <Button size= "sm" className="rounded-full bg-gradient-to-r from-rose-500 to-violet-600 text-white">
+                                <Button size="sm" className="rounded-full bg-gradient-to-r from-rose-500 to-violet-600 text-white">
                                   <Play className="w-4 h-4" />
                                 </Button>
                                 <div className="flex-1">
@@ -434,14 +434,14 @@ export default function CommunityPage() {
                                     {media.waveform?.map((height, i) => (
                                       <div
                                         key={i}
-                                        className="bg-gradient-to-t from-rose-400 to-violet-500 rounded-full
+                                        className="bg-gradient-to-t from-rose-400 to-violet-500 rounded-full"
                                         style={{
                                           height: `${height * 30}px`,
-                                          width: '3px
+                                          width: '3px'
                                         }}
                                       />
                                     ))}
-                                  </div>"
+                                  </div>
                                   <div className="flex items-center justify-between text-sm text-slate-600">
                                     <span>0:00</span>
                                     <Mic className="w-4 h-4" />
@@ -461,40 +461,40 @@ export default function CommunityPage() {
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-6">
                           <Button
-                            variant= "ghost
-                            size= "sm
+                            variant="ghost"
+                            size="sm"
                             onClick={() => dispatch({ type: 'LIKE_POST', payload: post.id })}
                             className={`flex items-center gap-2 ${
-                              post.isLiked ? 'text-red-500' : 'text-slate-600
+                              post.isLiked ? 'text-red-500' : 'text-slate-600'
                             }`}
                           >
-                            <Heart className={`w-5 h-5 ${post.isLiked ? 'fill-current' : '}`} />
+                            <Heart className={`w-5 h-5 ${post.isLiked ? 'fill-current' : ''}`} />
                             <span>{post.likes.toLocaleString()}</span>
                           </Button>
                           
                           <Button
-                            variant= "ghost
-                            size= "sm
+                            variant="ghost"
+                            size="sm"
                             onClick={() => dispatch({ type: 'TOGGLE_COMMENTS', payload: post.id })}
-                            className="flex items-center gap-2 text-slate-600
-                          >"
+                            className="flex items-center gap-2 text-slate-600"
+                          >
                             <MessageCircle className="w-5 h-5" />
                             <span>{post.comments}</span>
                           </Button>
                           
-                          <Button variant= "ghost" size= "sm" className="flex items-center gap-2 text-slate-600">
+                          <Button variant="ghost" size="sm" className="flex items-center gap-2 text-slate-600">
                             <Share2 className="w-5 h-5" />
                             <span>{post.shares}</span>
                           </Button>
                         </div>
                         
                         <Button
-                          variant= "ghost
-                          size= "sm
+                          variant="ghost"
+                          size="sm"
                           onClick={() => dispatch({ type: 'BOOKMARK_POST', payload: post.id })}
                           className={`${post.isBookmarked ? 'text-blue-500' : 'text-slate-600'}`}
                         >
-                          <Bookmark className={`w-5 h-5 ${post.isBookmarked ? 'fill-current' : '}`} />
+                          <Bookmark className={`w-5 h-5 ${post.isBookmarked ? 'fill-current' : ''}`} />
                         </Button>
                       </div>
 
@@ -506,8 +506,8 @@ export default function CommunityPage() {
                               <AvatarFallback>YU</AvatarFallback>
                             </Avatar>
                             <div className="flex-1 flex gap-2">
-                              <Input placeholder= "Add a comment..." className="bg-white/80 border-white/20" />
-                              <Button size= "sm" className="bg-gradient-to-r from-rose-500 to-violet-600 text-white">
+                              <Input placeholder="Add a comment..." className="bg-white/80 border-white/20" />
+                              <Button size="sm" className="bg-gradient-to-r from-rose-500 to-violet-600 text-white">
                                 <Send className="w-4 h-4" />
                               </Button>
                             </div>
@@ -582,7 +582,7 @@ export default function CommunityPage() {
                       <div key={creator.id} className="flex items-center gap-3">
                         <Avatar className="w-10 h-10">
                           <AvatarImage src={creator.avatar} alt={creator.name} />
-                          <AvatarFallback>{creator.name.split(' ').map(n => n[0]).join(')}</AvatarFallback>
+                          <AvatarFallback>{creator.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <div className="flex items-center gap-1">
@@ -593,7 +593,7 @@ export default function CommunityPage() {
                           </div>
                           <p className="text-xs text-slate-500">{creator.category}</p>
                         </div>
-                        <Button size= "sm" variant= "outline" className="text-xs">
+                        <Button size="sm" variant="outline" className="text-xs">
                           Follow
                         </Button>
                       </div>

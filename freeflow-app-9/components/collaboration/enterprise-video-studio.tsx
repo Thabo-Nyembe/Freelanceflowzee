@@ -1,10 +1,12 @@
-'use client
+'use client'
 
-import React, { useState, useReducer, useRef, useEffect } from 'react
+import React, { useState, useReducer, useRef, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Slider } from '@/components/ui/slider'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   Play, 
@@ -18,8 +20,129 @@ import {
   Share2,
   Users,
   MessageSquare,
-  TrendingUp
-} from 'lucide-react
+  TrendingUp,
+  RotateCcw,
+  VolumeX,
+  Maximize,
+  Video,
+  Mic,
+  Eye,
+  Brain,
+  Sparkles,
+  Edit3,
+  StopCircle,
+  Upload,
+  Clock,
+  Zap,
+  Subtitles
+} from 'lucide-react'
+
+// Type definitions
+interface VideoStudioState {
+  isRecording: boolean
+  isPaused: boolean
+  recordingMode: string
+  audioEnabled: boolean
+  videoEnabled: boolean
+  currentTime: number
+  duration: number
+  zoom: number
+  isPlaying: boolean
+  selectedClip: unknown
+  recordings: VideoRecording[]
+  liveViewers: LiveViewer[]
+  comments: VideoComment[]
+  transcription: TranscriptionSegment[]
+  aiAnalysis: AIAnalysis
+  collaborators: unknown[]
+  isLiveSession: boolean
+  qualitySettings: QualitySettings
+  annotations: VideoAnnotation[]
+  chapters: VideoChapter[]
+  isEditing: boolean
+  editingTool: unknown
+  exportProgress: number
+  viewerAnalytics: ViewerAnalytics
+}
+
+interface LiveViewer {
+  id: string
+  name: string
+  avatar: string
+  timestamp: number
+  isActive: boolean
+  cursor: { x: number; y: number }
+  isWatching: boolean
+}
+
+interface VideoComment {
+  id: string
+  userId: string
+  userName: string
+  userAvatar: string
+  content: string
+  timestamp: number
+  videoTimestamp: number
+  replies: unknown[]
+  reactions: unknown[]
+  createdAt: string
+  isResolved: boolean
+  aiSentiment: string
+}
+
+interface TranscriptionSegment {
+  id: string
+  text: string
+  startTime: number
+  endTime: number
+  confidence: number
+  aiGenerated: boolean
+  isEdited: boolean
+}
+
+interface AIAnalysis {
+  summary: string
+  keyTopics: string[]
+  sentiment: string
+  engagementScore: number
+  suggestedTags: string[]
+  optimizationTips: string[]
+  accessibilityScore: number
+  qualityScore: number
+  contentType: string
+  difficulty: string
+  estimatedWatchTime: number
+}
+
+interface QualitySettings {
+  resolution: string
+  frameRate: number
+  bitrate: number
+  audioQuality: string
+  compression: string
+}
+
+interface VideoRecording {
+  id: string
+  title: string
+  duration: number
+  size: number
+  format: string
+  quality: string
+  thumbnail: string
+  createdAt: string
+  views: number
+  comments: number
+  likes: number
+  shares: number
+  url: string
+  transcriptUrl: string
+  aiSummary: string
+  tags: string[]
+  isPublic: boolean
+  downloadEnabled: boolean
+  passwordProtected: boolean
+}
 
 interface VideoAnnotation {
   id: string
@@ -53,7 +176,7 @@ interface ViewerAnalytics {
 }
 
 // Enhanced Context7 Reducer
-const videoStudioReducer = (state: VideoStudioState, action: unknown): VideoStudioState => {
+const videoStudioReducer = (state: VideoStudioState, action: any): VideoStudioState => {
   switch (action.type) {
     case 'START_RECORDING':
       return { ...state, isRecording: true, isPaused: false }
@@ -81,21 +204,29 @@ const videoStudioReducer = (state: VideoStudioState, action: unknown): VideoStud
       return { ...state, transcription: action.transcription }
     case 'UPDATE_AI_ANALYSIS':
       return { ...state, aiAnalysis: action.analysis }
-    case 'UPDATE_LIVE_VIEWERS':
-      return { ...state, liveViewers: action.viewers }
-    case 'SET_EDITING_TOOL':
-      return { ...state, editingTool: action.tool, isEditing: action.tool !== null }
-    case 'UPDATE_EXPORT_PROGRESS':
-      return { ...state, exportProgress: action.progress }
+    case 'ADD_LIVE_VIEWER':
+      return { ...state, liveViewers: [...state.liveViewers, action.viewer] }
+    case 'REMOVE_LIVE_VIEWER':
+      return { ...state, liveViewers: state.liveViewers.filter(v => v.id !== action.viewerId) }
+    case 'UPDATE_VIEWER_CURSOR':
+      return {
+        ...state,
+        liveViewers: state.liveViewers.map(v =>
+          v.id === action.viewerId ? { ...v, cursor: action.cursor } : v
+        )
+      }
+    case 'SET_QUALITY_SETTINGS':
+      return { ...state, qualitySettings: { ...state.qualitySettings, ...action.settings } }
     case 'ADD_ANNOTATION':
       return { ...state, annotations: [...state.annotations, action.annotation] }
-    case 'ADD_CHAPTER':
-      return { ...state, chapters: [...state.chapters, action.chapter] }
+    case 'UPDATE_VIEWER_ANALYTICS':
+      return { ...state, viewerAnalytics: { ...state.viewerAnalytics, ...action.analytics } }
     default:
       return state
   }
 }
 
+// Initial state with Context7 enhancements
 const initialState: VideoStudioState = {
   isRecording: false,
   isPaused: false,
@@ -107,31 +238,63 @@ const initialState: VideoStudioState = {
   zoom: 100,
   isPlaying: false,
   selectedClip: null,
-  recordings: [],
-  liveViewers: [],
+  recordings: [
+    {
+      id: '1',
+      title: 'Project Overview Presentation',
+      duration: 1845,
+      size: 250,
+      format: 'MP4',
+      quality: '1080p',
+      thumbnail: '/images/video-thumb-1.jpg',
+      createdAt: '2024-01-15T10:30:00Z',
+      views: 124,
+      comments: 8,
+      likes: 23,
+      shares: 5,
+      url: '/videos/project-overview.mp4',
+      transcriptUrl: '/transcripts/project-overview.txt',
+      aiSummary: 'Comprehensive overview of Q1 project goals and team responsibilities.',
+      tags: ['presentation', 'overview', 'project'],
+      isPublic: true,
+      downloadEnabled: true,
+      passwordProtected: false
+    }
+  ],
+  liveViewers: [
+    {
+      id: 'viewer-1',
+      name: 'Sarah Chen',
+      avatar: 'SC',
+      timestamp: Date.now(),
+      isActive: true,
+      cursor: { x: 250, y: 150 },
+      isWatching: true
+    }
+  ],
   comments: [],
   transcription: [],
   aiAnalysis: {
-    summary: '',
-    keyTopics: [],
-    sentiment: 'neutral',
-    engagementScore: 0,
-    suggestedTags: [],
-    optimizationTips: [],
-    accessibilityScore: 0,
-    qualityScore: 0,
-    contentType: '',
-    difficulty: 'beginner',
-    estimatedWatchTime: 0
+    summary: 'Professional video recording with clear audio and engaging presentation style.',
+    keyTopics: ['project management', 'team collaboration', 'quarterly goals'],
+    sentiment: 'positive',
+    engagementScore: 85,
+    suggestedTags: ['business', 'presentation', 'quarterly'],
+    optimizationTips: ['Consider adding captions', 'Optimize for mobile viewing'],
+    accessibilityScore: 78,
+    qualityScore: 92,
+    contentType: 'presentation',
+    difficulty: 'intermediate',
+    estimatedWatchTime: 1680
   },
   collaborators: [],
   isLiveSession: false,
   qualitySettings: {
     resolution: '1080p',
-    frameRate: 60,
+    frameRate: 30,
     bitrate: 5000,
     audioQuality: 'high',
-    compression: 'balanced
+    compression: 'medium'
   },
   annotations: [],
   chapters: [],
@@ -139,15 +302,15 @@ const initialState: VideoStudioState = {
   editingTool: null,
   exportProgress: 0,
   viewerAnalytics: {
-    totalViews: 0,
-    averageWatchTime: 0,
-    engagementRate: 0,
+    totalViews: 1250,
+    averageWatchTime: 420,
+    engagementRate: 78,
     dropOffPoints: [],
     audienceRetention: [],
-    peakViewers: 0,
-    comments: 0,
-    shares: 0,
-    likes: 0
+    peakViewers: 45,
+    comments: 23,
+    shares: 12,
+    likes: 89
   }
 }
 
@@ -164,150 +327,95 @@ export function EnterpriseVideoStudio({
   currentUser,
   onRecordingComplete,
   onShare,
-  className = 
+  className = ''
 }: EnterpriseVideoStudioProps) {
   const [state, dispatch] = useReducer(videoStudioReducer, initialState)
+  const [volume, setVolume] = useState(80)
+  const [playbackSpeed, setPlaybackSpeed] = useState(1)
+  const [showTranscript, setShowTranscript] = useState(false)
+  const [selectedViewer, setSelectedViewer] = useState<string | null>(null)
+  const [commentText, setCommentText] = useState('')
   const videoRef = useRef<HTMLVideoElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const streamRef = useRef<MediaStream | null>(null)
 
-  // Simulated real-time data
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Simulate live viewers
-      dispatch({
-        type: 'UPDATE_LIVE_VIEWERS',
-        viewers: [
-          { id: '1', name: 'Sarah Chen', avatar: '/avatars/sarah-chen.jpg', timestamp: Date.now(), isActive: true, cursor: { x: 120, y: 80 }, isWatching: true },
-          { id: '2', name: 'Mike Johnson', avatar: '/avatars/mike.jpg', timestamp: Date.now(), isActive: true, cursor: { x: 200, y: 150 }, isWatching: true },
-          { id: '3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', timestamp: Date.now(), isActive: false, cursor: { x: 0, y: 0 }, isWatching: true }
-        ]
-      })
-
-      // Simulate real-time transcription
-      if (state.isRecording && !state.isPaused) {
-        const newSegment: TranscriptionSegment = {
-          id: `seg-${Date.now()}`,
-          text: "This is an AI-generated transcription segment...",
-          startTime: state.currentTime,
-          endTime: state.currentTime + 5,
-          confidence: 0.95,
-          aiGenerated: true,
-          isEdited: false
-        }
-        dispatch({ type: 'UPDATE_TRANSCRIPTION', transcription: [...state.transcription, newSegment] })
-      }
-    }, 3000)
-
-    return () => clearInterval(interval)
-  }, [state.isRecording, state.isPaused, state.currentTime, state.transcription])
-
+  // Context7 enhanced recording functions
   const startRecording = async () => {
     try {
-      let stream: MediaStream
-
-      if (state.recordingMode === 'screen') {
-        stream = await navigator.mediaDevices.getDisplayMedia({ 
-          video: { 
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
-            frameRate: { ideal: state.qualitySettings.frameRate }
-          }, 
-          audio: state.audioEnabled 
-        })
-      } else if (state.recordingMode === 'camera') {
-        stream = await navigator.mediaDevices.getUserMedia({ 
-          video: state.videoEnabled, 
-          audio: state.audioEnabled 
-        })
-      } else {
-        // Both - screen + camera overlay
-        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
-        const cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-        
-        // Combine streams (simplified - would need more complex implementation)
-        stream = screenStream
-      }
-
-      streamRef.current = stream
-      
-      const mediaRecorder = new MediaRecorder(stream, { 
-        mimeType: 'video/webm;codecs=vp9,opus',
-        videoBitsPerSecond: state.qualitySettings.bitrate * 1000
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: { mediaSource: 'screen' },
+        audio: state.audioEnabled
       })
       
-      mediaRecorderRef.current = mediaRecorder
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+      }
       
-      mediaRecorder.start()
       dispatch({ type: 'START_RECORDING' })
-
-      // Simulate AI analysis
+      
+      // Simulate AI transcription start
       setTimeout(() => {
         dispatch({
-          type: 'UPDATE_AI_ANALYSIS',
-          analysis: {
-            summary: "Product demo video showcasing key features with excellent visual clarity",
-            keyTopics: ["Product Features", "User Interface", "Demo Flow"],
-            sentiment: 'positive',
-            engagementScore: 87,
-            suggestedTags: ["product-demo", "tutorial", "interface"],
-            optimizationTips: ["Add captions for accessibility", "Include call-to-action at end"],
-            accessibilityScore: 78,
-            qualityScore: 94,
-            contentType: "Product Demo",
-            difficulty: 'intermediate',
-            estimatedWatchTime: 45
-          }
+          type: 'UPDATE_TRANSCRIPTION',
+          transcription: [
+            {
+              id: '1',
+              text: 'Hello everyone, welcome to today\'s presentation.',
+              startTime: 0,
+              endTime: 3,
+              confidence: 0.95,
+              aiGenerated: true,
+              isEdited: false
+            }
+          ]
         })
-      }, 5000)
-
+      }, 3000)
+      
     } catch (error) {
       console.error('Error starting recording:', error)
     }
   }
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && streamRef.current) {
-      mediaRecorderRef.current.stop()
-      streamRef.current.getTracks().forEach(track => track.stop())
-      
-      dispatch({ type: 'STOP_RECORDING' })
-      
-      // Simulate adding recording to list
-      const newRecording: VideoRecording = {
-        id: `rec-${Date.now()}`,
-        title: `Screen Recording ${new Date().toLocaleTimeString()}`,
-        duration: 45,
-        size: 15.6,
-        format: 'MP4',
-        quality: state.qualitySettings.resolution,
-        thumbnail: '/placeholder.jpg',
-        createdAt: new Date().toISOString(),
-        views: 0,
-        comments: 3,
-        likes: 7,
-        shares: 2,
-        url: '/placeholder.mp4',
-        transcriptUrl: '/transcript.txt',
-        aiSummary: "Professional product demonstration with clear navigation flow",
-        tags: ["demo", "tutorial", "product"],
-        isPublic: false,
-        downloadEnabled: true,
-        passwordProtected: false
-      }
-      
-      dispatch({ type: 'ADD_RECORDING', recording: newRecording })
-      onRecordingComplete?.(newRecording)
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream
+      stream.getTracks().forEach(track => track.stop())
+      videoRef.current.srcObject = null
     }
+    
+    dispatch({ type: 'STOP_RECORDING' })
+    
+    // Simulate recording completion with AI analysis
+    const newRecording: VideoRecording = {
+      id: Date.now().toString(),
+      title: `Recording ${new Date().toLocaleDateString()}`,
+      duration: state.currentTime,
+      size: Math.round(state.currentTime / 60 * 25), // Estimate MB
+      format: 'MP4',
+      quality: state.qualitySettings.resolution,
+      thumbnail: '/images/recording-thumb.jpg',
+      createdAt: new Date().toISOString(),
+      views: 0,
+      comments: 0,
+      likes: 0,
+      shares: 0,
+      url: `/videos/recording-${Date.now()}.mp4`,
+      transcriptUrl: `/transcripts/recording-${Date.now()}.txt`,
+      aiSummary: 'AI-generated summary will be available shortly...',
+      tags: [],
+      isPublic: false,
+      downloadEnabled: true,
+      passwordProtected: false
+    }
+    
+    dispatch({ type: 'ADD_RECORDING', recording: newRecording })
+    onRecordingComplete?.(newRecording)
   }
 
   const addComment = (content: string, timestamp: number) => {
-    const newComment: VideoComment = {
-      id: `comment-${Date.now()}`,
-      userId: currentUser.id,
-      userName: currentUser.name,
-      userAvatar: currentUser.avatar,
+    const comment: VideoComment = {
+      id: Date.now().toString(),
+      userId: 'current-user',
+      userName: 'Current User',
+      userAvatar: 'CU',
       content,
       timestamp: Date.now(),
       videoTimestamp: timestamp,
@@ -315,106 +423,105 @@ export function EnterpriseVideoStudio({
       reactions: [],
       createdAt: new Date().toISOString(),
       isResolved: false,
-      aiSentiment: 'positive
+      aiSentiment: 'neutral'
     }
-    
-    dispatch({ type: 'ADD_COMMENT', comment: newComment })
+    dispatch({ type: 'ADD_COMMENT', comment })
   }
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
   const formatFileSize = (bytes: number) => {
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
   }
 
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
-      <div className= "flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className= "text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <div className= "p-2 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl">
-              <Video className= "h-8 w-8 text-white" />
+          <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl">
+              <Video className="h-8 w-8 text-white" />
             </div>
             Enterprise Video Studio
           </h2>
-          <p className= "text-gray-600 mt-1">
+          <p className="text-gray-600 mt-1">
             Loom-level video recording with AI transcription, real-time collaboration & advanced editing
           </p>
         </div>
         
-        <div className= "flex items-center gap-3">
-          <Badge variant= "outline" className= "bg-green-50 text-green-700 border-green-200">
-            <Eye className= "h-3 w-3 mr-1" />
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            <Eye className="h-3 w-3 mr-1" />
             {state.liveViewers.filter(v => v.isWatching).length} watching
           </Badge>
-          <Badge variant= "outline" className= "bg-blue-50 text-blue-700 border-blue-200">
-            <Brain className= "h-3 w-3 mr-1" />
+          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+            <Brain className="h-3 w-3 mr-1" />
             AI Enhanced
           </Badge>
-          <Badge variant= "outline" className= "bg-purple-50 text-purple-700 border-purple-200">
-            <Sparkles className= "h-3 w-3 mr-1" />
+          <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+            <Sparkles className="h-3 w-3 mr-1" />
             Enterprise
           </Badge>
         </div>
       </div>
 
-      <Tabs defaultValue= "record" className= "w-full">
-        <TabsList className= "grid grid-cols-5 w-full max-w-2xl">
-          <TabsTrigger value= "record" className= "flex items-center gap-2">
-            <Video className= "h-4 w-4" />
+      <Tabs defaultValue="record" className="w-full">
+        <TabsList className="grid grid-cols-5 w-full max-w-2xl">
+          <TabsTrigger value="record" className="flex items-center gap-2">
+            <Video className="h-4 w-4" />
             Record
           </TabsTrigger>
-          <TabsTrigger value= "edit" className= "flex items-center gap-2">
-            <Edit3 className= "h-4 w-4" />
+          <TabsTrigger value="edit" className="flex items-center gap-2">
+            <Edit3 className="h-4 w-4" />
             Edit
           </TabsTrigger>
-          <TabsTrigger value= "library" className= "flex items-center gap-2">
-            <Square className= "h-4 w-4" />
+          <TabsTrigger value="library" className="flex items-center gap-2">
+            <Square className="h-4 w-4" />
             Library
           </TabsTrigger>
-          <TabsTrigger value= "analytics" className= "flex items-center gap-2">
-            <TrendingUp className= "h-4 w-4" />
+          <TabsTrigger value="analytics" className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
             Analytics
           </TabsTrigger>
-          <TabsTrigger value= "collaborate" className= "flex items-center gap-2">
-            <Users className= "h-4 w-4" />
+          <TabsTrigger value="collaborate" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
             Live Session
           </TabsTrigger>
         </TabsList>
 
         {/* Record Tab */}
-        <TabsContent value= "record" className= "space-y-6">
-          <div className= "grid grid-cols-12 gap-6">
+        <TabsContent value="record" className="space-y-6">
+          <div className="grid grid-cols-12 gap-6">
             {/* Recording Interface */}
-            <div className= "col-span-8">
-              <Card className= "bg-gradient-to-br from-slate-50 to-white border-slate-200/50">
+            <div className="col-span-8">
+              <Card className="bg-gradient-to-br from-slate-50 to-white border-slate-200/50">
                 <CardHeader>
-                  <div className= "flex items-center justify-between">
-                    <CardTitle className= "flex items-center gap-2">
-                      <Camera className= "h-5 w-5 text-blue-600" />
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <Camera className="h-5 w-5 text-blue-600" />
                       Recording Studio
                     </CardTitle>
-                    <div className= "flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       {state.isRecording && (
-                        <Badge variant= "destructive" className= "animate-pulse">
-                          <div className= "w-2 h-2 bg-white rounded-full mr-2"></div>
+                        <Badge variant="destructive" className="animate-pulse">
+                          <div className="w-2 h-2 bg-white rounded-full mr-2"></div>
                           REC {formatTime(state.currentTime)}
                         </Badge>
                       )}
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className= "space-y-4">
+                <CardContent className="space-y-4">
                   {/* Recording Preview */}
-                  <div className= "relative bg-black rounded-lg aspect-video overflow-hidden">
+                  <div className="relative bg-black rounded-lg aspect-video overflow-hidden">
                     <video
                       ref={videoRef}
-                      className= "w-full h-full object-cover
+                      className="w-full h-full object-cover"
                       autoPlay
                       muted
                       playsInline
@@ -424,111 +531,72 @@ export function EnterpriseVideoStudio({
                     {state.liveViewers.map((viewer) => (
                       <div
                         key={viewer.id}
-                        className= "absolute pointer-events-none transition-all duration-200
+                        className="absolute pointer-events-none transition-all duration-200"
                         style={{
                           left: `${viewer.cursor.x}px`,
                           top: `${viewer.cursor.y}px`,
-                          transform: 'translate(-50%, -50%)
+                          transform: 'translate(-50%, -50%)'
                         }}
                       >
-                        <div className= "flex items-center gap-1">
-                          <div className= "w-3 h-3 bg-blue-500 rounded-full"></div>
-                          <span className= "text-xs bg-blue-500 text-white px-2 py-1 rounded">
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                          <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded">
                             {viewer.name}
                           </span>
                         </div>
                       </div>
                     ))}
-                    
-                    {/* Recording Controls Overlay */}
-                    {state.isRecording && (
-                      <div className= "absolute bottom-4 left-1/2 transform -translate-x-1/2">
-                        <div className= "flex items-center gap-3 bg-black/70 backdrop-blur-sm rounded-full px-4 py-2">
-                          <Button
-                            size= "sm
-                            variant={state.isPaused ? "default" : "outline"}
-                            onClick={() => dispatch({ type: 'PAUSE_RECORDING' })}
-                            className= "rounded-full
-                          >
-                            {state.isPaused ? <Play className= "h-4 w-4" /> : <Pause className= "h-4 w-4" />}
-                          </Button>
-                          <Button
-                            size= "sm
-                            variant= "destructive
-                            onClick={stopRecording}
-                            className= "rounded-full
-                          >
-                            <StopCircle className= "h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    )}
                   </div>
 
                   {/* Recording Controls */}
-                  <div className= "flex items-center justify-between">
-                    <div className= "flex items-center gap-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
                       <Select
                         value={state.recordingMode}
-                        onValueChange={(mode: unknown) => dispatch({ type: 'SET_RECORDING_MODE', mode })}
+                        onValueChange={(mode) => dispatch({ type: 'SET_RECORDING_MODE', mode })}
                       >
-                        <SelectTrigger className= "w-40">
+                        <SelectTrigger className="w-40">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value= "screen">
-                            <div className= "flex items-center gap-2">
-                              <Monitor className= "h-4 w-4" />
-                              Screen Only
-                            </div>
-                          </SelectItem>
-                          <SelectItem value= "camera">
-                            <div className= "flex items-center gap-2">
-                              <Camera className= "h-4 w-4" />
-                              Camera Only
-                            </div>
-                          </SelectItem>
-                          <SelectItem value= "both">
-                            <div className= "flex items-center gap-2">
-                              <Video className= "h-4 w-4" />
-                              Screen + Camera
-                            </div>
-                          </SelectItem>
+                          <SelectItem value="screen">Screen Only</SelectItem>
+                          <SelectItem value="camera">Camera Only</SelectItem>
+                          <SelectItem value="both">Screen + Camera</SelectItem>
                         </SelectContent>
                       </Select>
 
                       <Button
                         variant={state.audioEnabled ? "default" : "outline"}
-                        size= "sm
+                        size="sm"
                         onClick={() => dispatch({ type: 'TOGGLE_AUDIO' })}
                       >
-                        <Mic className= "h-4 w-4" />
+                        <Mic className="h-4 w-4" />
                       </Button>
 
                       <Button
                         variant={state.videoEnabled ? "default" : "outline"}
-                        size= "sm
+                        size="sm"
                         onClick={() => dispatch({ type: 'TOGGLE_VIDEO' })}
                       >
-                        <Camera className= "h-4 w-4" />
+                        <Camera className="h-4 w-4" />
                       </Button>
                     </div>
 
-                    <div className= "flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       {!state.isRecording ? (
                         <Button
                           onClick={startRecording}
-                          className= "bg-red-600 hover:bg-red-700 text-white
+                          className="bg-red-600 hover:bg-red-700 text-white"
                         >
-                          <Video className= "h-4 w-4 mr-2" />
+                          <Video className="h-4 w-4 mr-2" />
                           Start Recording
                         </Button>
                       ) : (
                         <Button
                           onClick={stopRecording}
-                          variant= "destructive
+                          variant="destructive"
                         >
-                          <StopCircle className= "h-4 w-4 mr-2" />
+                          <StopCircle className="h-4 w-4 mr-2" />
                           Stop Recording
                         </Button>
                       )}
@@ -538,78 +606,29 @@ export function EnterpriseVideoStudio({
               </Card>
             </div>
 
-            {/* Live Collaboration Panel */}
-            <div className= "col-span-4">
-              <Card className= "bg-gradient-to-br from-purple-50 to-white border-purple-200/50">
+            {/* Sidebar */}
+            <div className="col-span-4 space-y-4">
+              {/* Live Viewers */}
+              <Card>
                 <CardHeader>
-                  <CardTitle className= "flex items-center gap-2">
-                    <Users className= "h-5 w-5 text-purple-600" />
-                    Live Collaboration
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Users className="h-4 w-4 text-green-600" />
+                    Live Viewers ({state.liveViewers.length})
                   </CardTitle>
-                  <CardDescription>
-                    Real-time viewers and AI assistance
-                  </CardDescription>
                 </CardHeader>
-                <CardContent className= "space-y-4">
-                  {/* Live Viewers */}
-                  <div className= "space-y-3">
-                    <h4 className= "font-medium text-sm text-gray-700">Live Viewers ({state.liveViewers.length})</h4>
+                <CardContent className="space-y-3">
+                  <div className="space-y-2">
                     {state.liveViewers.map((viewer) => (
-                      <div key={viewer.id} className= "flex items-center gap-3">
-                        <Avatar className= "h-8 w-8">
-                          <AvatarImage src={viewer.avatar} />
-                          <AvatarFallback>{viewer.name[0]}</AvatarFallback>
-                        </Avatar>
-                        <div className= "flex-1">
-                          <p className= "text-sm font-medium">{viewer.name}</p>
-                          <p className= "text-xs text-gray-500">
-                            {viewer.isWatching ? 'Watching' : 'Idle'}
-                          </p>
+                      <div key={viewer.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs">
+                            {viewer.avatar}
+                          </div>
+                          <span className="text-sm font-medium">{viewer.name}</span>
                         </div>
-                        <div className={`w-2 h-2 rounded-full ${viewer.isActive ? &apos;bg-green-500&apos; : &apos;bg-gray-300&apos;}`}></div>
+                        <div className={`w-2 h-2 rounded-full ${viewer.isActive ? 'bg-green-500' : 'bg-gray-300'}`}></div>
                       </div>
                     ))}
-                  </div>
-
-                  {/* AI Insights */}
-                  {state.aiAnalysis.summary && (
-                    <div className= "bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-                      <h4 className= "font-medium text-sm text-blue-900 mb-2 flex items-center gap-2">
-                        <Brain className= "h-4 w-4" />
-                        AI Insights
-                      </h4>
-                      <p className= "text-sm text-blue-800 mb-2">{state.aiAnalysis.summary}</p>
-                      <div className= "flex flex-wrap gap-1">
-                        {state.aiAnalysis.keyTopics.map((topic, index) => (
-                          <Badge key={index} variant= "outline" className= "text-xs bg-blue-100 text-blue-700 border-blue-300">
-                            {topic}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Quick Actions */}
-                  <div className= "space-y-2">
-                    <h4 className= "font-medium text-sm text-gray-700">Quick Actions</h4>
-                    <div className= "grid grid-cols-2 gap-2">
-                      <Button size= "sm" variant= "outline" className= "text-xs">
-                        <Share2 className= "h-3 w-3 mr-1" />
-                        Share
-                      </Button>
-                      <Button size= "sm" variant= "outline" className= "text-xs">
-                        <Download className= "h-3 w-3 mr-1" />
-                        Export
-                      </Button>
-                      <Button size= "sm" variant= "outline" className= "text-xs">
-                        <Subtitles className= "h-3 w-3 mr-1" />
-                        Captions
-                      </Button>
-                      <Button size= "sm" variant= "outline" className= "text-xs">
-                        <Settings className= "h-3 w-3 mr-1" />
-                        Settings
-                      </Button>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -618,59 +637,59 @@ export function EnterpriseVideoStudio({
         </TabsContent>
 
         {/* Library Tab */}
-        <TabsContent value= "library" className= "space-y-6">
-          <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <TabsContent value="library" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {state.recordings.map((recording) => (
-              <Card key={recording.id} className= "group hover:shadow-lg transition-all duration-200">
-                <CardContent className= "p-0">
-                  <div className= "relative">
-                    <img src={recording.thumbnail} alt={recording.title}>
-                    <div >
-                      <Button >
-                        <Play >
+              <Card key={recording.id} className="group hover:shadow-lg transition-all duration-200">
+                <CardContent className="p-0">
+                  <div className="relative">
+                    <img src={recording.thumbnail} alt={recording.title} className="w-full h-40 object-cover" />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Button size="sm" className="bg-white/20 hover:bg-white/30 text-white">
+                        <Play className="h-4 w-4" />
                       </Button>
                     </div>
-                    <Badge >
+                    <Badge className="absolute bottom-2 right-2 bg-black/70 text-white text-xs">
                       {formatTime(recording.duration)}
                     </Badge>
                   </div>
                   
-                  <div >
-                    <h3 >{recording.title}</h3>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{recording.title}</h3>
                     
-                    <div >
-                      <span >{recording.quality}</span>
-                      <span >{formatFileSize(recording.size * 1024 * 1024)}</span>
+                    <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
+                      <span className="bg-gray-100 px-2 py-1 rounded">{recording.quality}</span>
+                      <span>{formatFileSize(recording.size * 1024 * 1024)}</span>
                     </div>
                     
-                    <div >
-                      <span >
-                        <Eye >
+                    <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
+                      <span className="flex items-center gap-1">
+                        <Eye className="h-3 w-3" />
                         {recording.views}
                       </span>
-                      <span >
-                        <MessageSquare >
+                      <span className="flex items-center gap-1">
+                        <MessageSquare className="h-3 w-3" />
                         {recording.comments}
                       </span>
-                      <span >
-                        <Share2 >
+                      <span className="flex items-center gap-1">
+                        <Share2 className="h-3 w-3" />
                         {recording.shares}
                       </span>
                     </div>
                     
                     {recording.aiSummary && (
-                      <p >
+                      <p className="text-xs text-gray-600 mb-3 line-clamp-2">
                         {recording.aiSummary}
                       </p>
                     )}
                     
-                    <div >
-                      <Button >
-                        <Edit3 >
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" className="flex-1 text-xs">
+                        <Edit3 className="h-3 w-3 mr-1" />
                         Edit
                       </Button>
-                      <Button >
-                        <Share2 >
+                      <Button size="sm" variant="outline" className="flex-1 text-xs">
+                        <Share2 className="h-3 w-3 mr-1" />
                         Share
                       </Button>
                     </div>
@@ -682,52 +701,52 @@ export function EnterpriseVideoStudio({
         </TabsContent>
 
         {/* Analytics Tab */}
-        <TabsContent >
-          <div >
-            <Card >
-              <CardContent >
-                <div >
-                  <div >
-                    <p >Total Views</p>
-                    <p >{state.viewerAnalytics.totalViews.toLocaleString()}</p>
+        <TabsContent value="analytics" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-blue-700 text-sm font-medium">Total Views</p>
+                    <p className="text-2xl font-bold text-blue-900">{state.viewerAnalytics.totalViews.toLocaleString()}</p>
                   </div>
-                  <Eye >
+                  <Eye className="h-8 w-8 text-blue-600" />
                 </div>
               </CardContent>
             </Card>
             
-            <Card >
-              <CardContent >
-                <div >
-                  <div >
-                    <p >Avg. Watch Time</p>
-                    <p >{formatTime(state.viewerAnalytics.averageWatchTime)}</p>
+            <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-green-700 text-sm font-medium">Avg. Watch Time</p>
+                    <p className="text-2xl font-bold text-green-900">{formatTime(state.viewerAnalytics.averageWatchTime)}</p>
                   </div>
-                  <Clock >
+                  <Clock className="h-8 w-8 text-green-600" />
                 </div>
               </CardContent>
             </Card>
             
-            <Card >
-              <CardContent >
-                <div >
-                  <div >
-                    <p >Engagement Rate</p>
-                    <p >{state.viewerAnalytics.engagementRate}%</p>
+            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-purple-700 text-sm font-medium">Engagement Rate</p>
+                    <p className="text-2xl font-bold text-purple-900">{state.viewerAnalytics.engagementRate}%</p>
                   </div>
-                  <TrendingUp >
+                  <TrendingUp className="h-8 w-8 text-purple-600" />
                 </div>
               </CardContent>
             </Card>
             
-            <Card >
-              <CardContent >
-                <div >
-                  <div >
-                    <p >Peak Viewers</p>
-                    <p >{state.viewerAnalytics.peakViewers}</p>
+            <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-orange-700 text-sm font-medium">Peak Viewers</p>
+                    <p className="text-2xl font-bold text-orange-900">{state.viewerAnalytics.peakViewers}</p>
                   </div>
-                  <Users >
+                  <Users className="h-8 w-8 text-orange-600" />
                 </div>
               </CardContent>
             </Card>
@@ -735,26 +754,26 @@ export function EnterpriseVideoStudio({
         </TabsContent>
 
         {/* Live Session Tab */}
-        <TabsContent >
-          <Card >
-            <CardHeader >
-              <CardTitle >
-                <Sparkles >
+        <TabsContent value="collaborate" className="space-y-6">
+          <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200">
+            <CardHeader className="text-center">
+              <CardTitle className="flex items-center justify-center gap-2 text-indigo-900">
+                <Sparkles className="h-6 w-6 text-indigo-600" />
                 Enterprise Live Collaboration
               </CardTitle>
-              <CardDescription >
+              <CardDescription className="text-indigo-700">
                 Real-time co-viewing, commenting, and AI-powered insights
               </CardDescription>
             </CardHeader>
-            <CardContent >
-              <div >
-                <Zap >
-                <h3 >Start Live Session</h3>
-                <p >
+            <CardContent className="text-center space-y-6">
+              <div className="bg-white rounded-xl p-8 shadow-sm border border-indigo-100">
+                <Zap className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Start Live Session</h3>
+                <p className="text-gray-600 mb-6">
                   Invite team members for real-time collaboration with AI transcription and smart annotations
                 </p>
-                <Button >
-                  <Users >
+                <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                  <Users className="h-5 w-5 mr-2" />
                   Create Live Session
                 </Button>
               </div>

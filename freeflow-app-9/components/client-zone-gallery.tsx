@@ -1,6 +1,6 @@
-'use client
+'use client'
 
-import React, { useReducer, useState, useEffect } from 'react
+import React, { useReducer, useState, useEffect } from 'react'
  payload: 'grid' | 'list' }
   | { type: 'SET_FILTER_STATUS'; payload: 'all' | 'locked' | 'unlocked' | 'pending' }
   | { type: 'SET_SEARCH_QUERY'; payload: string }

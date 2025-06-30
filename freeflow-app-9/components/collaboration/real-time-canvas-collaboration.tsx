@@ -1,6 +1,6 @@
-'use client
+'use client'
 
-import React, { useState, useEffect, useRef, useReducer, useCallback } from 'react
+import React, { useState, useEffect, useRef, useReducer, useCallback } from 'react'
  id: string; updates: Partial<CanvasObject> }
   | { type: 'DELETE_OBJECTS'; ids: string[] }
   | { type: 'SELECT_OBJECTS'; ids: string[] }

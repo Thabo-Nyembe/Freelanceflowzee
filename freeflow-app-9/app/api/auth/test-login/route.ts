@@ -1,9 +1,9 @@
-import { createClient } from '@supabase/supabase-js
-import { cookies } from 'next/headers
-import { NextResponse } from 'next/server
+import { createClient } from '@supabase/supabase-js'
+import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
 
 // Only enable in test environment
-const isTestEnv = process.env.NODE_ENV === 'test
+const isTestEnv = process.env.NODE_ENV === 'test'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,7 +22,7 @@ export async function POST() {
     // Sign in test user
     const { data: { session }, error: signInError } = await supabase.auth.signInWithPassword({
       email: 'test@freeflowzee.com',
-      password: 'TestUser123!
+      password: 'TestUser123!'
     })
 
     if (signInError) throw signInError
@@ -30,11 +30,11 @@ export async function POST() {
     // Set auth cookie
     const response = NextResponse.json({ 
       success: true,
-      message: 'Test user logged in successfully
+      message: 'Test user logged in successfully'
     })
 
     // Set cookies in response
-    response.cookies.set('sb-access-token', session?.access_token || , {
+    response.cookies.set('sb-access-token', session?.access_token || '', {
       path: '/',
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -42,7 +42,7 @@ export async function POST() {
       maxAge: 60 * 60 * 24 * 7 // 1 week
     })
 
-    response.cookies.set('sb-refresh-token', session?.refresh_token || , {
+    response.cookies.set('sb-refresh-token', session?.refresh_token || '', {
       path: '/',
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -63,7 +63,7 @@ export async function POST() {
 export async function DELETE() {
   const response = NextResponse.json({
     success: true,
-    message: 'Test mode disabled
+    message: 'Test mode disabled'
   })
 
   response.cookies.delete('sb-access-token')

@@ -1,16 +1,16 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation
-import { createClient } from '@/lib/supabase/client
+import { useRouter, useSearchParams } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { SiteHeader } from '@/components/site-header'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, AlertCircle, CheckCircle, Mail, Lock, ArrowLeft } from 'lucide-react
-import Link from 'next/link
+import { Loader2, AlertCircle, CheckCircle, Mail, Lock, ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
 
 interface LoginProps {}
 
@@ -23,7 +23,7 @@ export default function Login({}: LoginProps) {
   const [authError, setAuthError] = useState<string | null>(null)
 
   // Get URL parameters
-  const redirectTo = searchParams.get('redirect') || '/dashboard
+  const redirectTo = searchParams.get('redirect') || '/dashboard'
   const urlError = searchParams.get('error')
   const urlMessage = searchParams.get('message')
 
@@ -48,7 +48,7 @@ export default function Login({}: LoginProps) {
           document.cookie.split(";").forEach(cookie => {
             const [name] = cookie.split("=")
             if (name.trim().startsWith('sb-')) {
-              document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;
+              document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
             }
           })
           
@@ -144,7 +144,7 @@ export default function Login({}: LoginProps) {
       document.cookie.split(";").forEach(cookie => {
         const [name] = cookie.split("=")
         if (name.trim().startsWith('sb-')) {
-          document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;
+          document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
         }
       })
 
@@ -206,8 +206,8 @@ export default function Login({}: LoginProps) {
                   setIsCheckingAuth(false)
                   setAuthError(null)
                 }}
-                variant="outline
-                className="mt-4
+                variant="outline"
+                className="mt-4"
               >
                 Continue to Login
               </Button>
@@ -218,7 +218,7 @@ export default function Login({}: LoginProps) {
     )
   }
 
-  return ("
+  return (
     <div className="min-h-screen">
       <SiteHeader variant="minimal" />
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
@@ -256,17 +256,16 @@ export default function Login({}: LoginProps) {
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  id="email
-                  name="email
-                  type="email
-                  placeholder="Enter your email
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="Enter your email"
                   required
-                  className="pl-10 bg-white/50 border-gray-200 focus:bg-white transition-colors
+                  className="pl-10 bg-white/50 border-gray-200 focus:bg-white transition-colors"
                   suppressHydrationWarning
                 />
               </div>
             </div>
-            "
             <div className="space-y-2">
               <Label htmlFor="password" className="text-sm font-medium">
                 Password
@@ -274,22 +273,22 @@ export default function Login({}: LoginProps) {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  id="password
-                  name="password
-                  type="password
-                  placeholder="Enter your password
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="Enter your password"
                   required
-                  className="pl-10 bg-white/50 border-gray-200 focus:bg-white transition-colors
+                  className="pl-10 bg-white/50 border-gray-200 focus:bg-white transition-colors"
                   suppressHydrationWarning
                 />
               </div>
             </div>
 
-            <Button "
-              type="submit" 
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white
-              disabled={isPending}"
-              data-testid="login-button
+            <Button
+              type="submit"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+              disabled={isPending}
+              data-testid="login-button"
             >
               {isPending ? (
                 <>
@@ -297,7 +296,7 @@ export default function Login({}: LoginProps) {
                   Signing in...
                 </>
               ) : (
-                'Sign In
+                'Sign In'
               )}
             </Button>
           </form>
@@ -306,13 +305,13 @@ export default function Login({}: LoginProps) {
             <div className="text-center">
               <Link 
                 href="/signup" 
-                className="text-sm text-indigo-600 hover:text-indigo-700 underline
+                className="text-sm text-indigo-600 hover:text-indigo-700 underline"
               >
                 Don&apos;t have an account? Sign up
               </Link>
             </div>
             
-            {redirectTo !== '/dashboard' && ("
+            {redirectTo !== '/dashboard' && (
               <div className="text-center">
                 <p className="text-sm text-muted-foreground mb-2">
                   You&apos;ll be redirected to {redirectTo} after login

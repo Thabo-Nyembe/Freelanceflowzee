@@ -1,6 +1,6 @@
-'use client
+'use client'
 
-import React, { useReducer, useState, useCallback, useEffect } from 'react
+import React, { useReducer, useState, useCallback, useEffect } from 'react'
  end: string } | null
   }
   sortBy: 'name' | 'date' | 'size' | 'views' | 'likes' | 'rating

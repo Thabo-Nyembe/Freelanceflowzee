@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server
-import { TimeSlot } from '@/types/booking
-import { format, addDays, addMinutes, startOfDay, isAfter, isBefore, parseISO } from 'date-fns
+import { NextRequest, NextResponse } from 'next/server'
+import { TimeSlot } from '@/types/booking'
+import { format, addDays, addMinutes, startOfDay, isAfter, isBefore, parseISO } from 'date-fns'
 
 // Mock existing bookings to check for conflicts
 const EXISTING_BOOKINGS = [
@@ -8,13 +8,13 @@ const EXISTING_BOOKINGS = [
     id: 'booking-1',
     serviceId: 'service-1',
     startTime: '2024-06-15T10:00:00.000Z',
-    endTime: '2024-06-15T11:30:00.000Z
+    endTime: '2024-06-15T11:30:00.000Z'
   },
   {
-    id: 'booking-2', 
+    id: 'booking-2',
     serviceId: 'service-2',
     startTime: '2024-06-15T14:00:00.000Z',
-    endTime: '2024-06-15T15:00:00.000Z
+    endTime: '2024-06-15T15:00:00.000Z'
   }
 ]
 
@@ -26,13 +26,15 @@ const SERVICE_AVAILABILITY = {
     wednesday: { start: '09:00', end: '17:00' },
     thursday: { start: '09:00', end: '17:00' },
     friday: { start: '09:00', end: '17:00' }
-  }, 'service-2': {
+  },
+  'service-2': {
     monday: { start: '10:00', end: '16:00' },
     tuesday: { start: '10:00', end: '16:00' },
     wednesday: { start: '10:00', end: '16:00' },
     thursday: { start: '10:00', end: '16:00' },
     friday: { start: '10:00', end: '16:00' }
-  }, 'service-3': {
+  },
+  'service-3': {
     monday: { start: '09:00', end: '15:00' },
     wednesday: { start: '09:00', end: '15:00' },
     friday: { start: '09:00', end: '15:00' }
@@ -57,7 +59,7 @@ function timeStringToMinutes(timeString: string): number {
 function minutesToTimeString(minutes: number): string {
   const hours = Math.floor(minutes / 60)
   const mins = minutes % 60
-  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}
+  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`
 }
 
 function isTimeSlotAvailable(
@@ -117,7 +119,7 @@ export async function GET(request: NextRequest) {
           endTime: endTime.toISOString(),
           isAvailable: true,
           serviceId,
-          freelancerId: 'user1
+          freelancerId: 'user1'
         })
       }
     }
@@ -154,7 +156,7 @@ export async function POST(request: NextRequest) {
       slotId,
       action,
       success: true,
-      reason: reason || `Time slot ${action}ed by admin
+      reason: reason || `Time slot ${action}ed by admin`
     }))
 
     return NextResponse.json({
@@ -189,12 +191,12 @@ export async function PUT(request: NextRequest) {
       id: timeSlotId,
       isAvailable: isAvailable !== undefined ? isAvailable : true,
       updatedAt: new Date().toISOString(),
-      reason: reason || 'Availability updated
+      reason: reason || 'Availability updated'
     }
 
     return NextResponse.json({
       timeSlot: updatedSlot,
-      message: 'Time slot availability updated successfully
+      message: 'Time slot availability updated successfully'
     })
 
   } catch (error) {

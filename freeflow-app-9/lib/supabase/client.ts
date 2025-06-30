@@ -1,7 +1,7 @@
-"use client
+"use client";
 
-import { createBrowserClient } from '@supabase/ssr
-import type { Database as SupabaseDatabase } from '@/types/supabase
+import { createBrowserClient } from '@supabase/ssr';
+import type { Database as SupabaseDatabase } from '@/types/supabase';
 
 export const createClient = () => {
   return createBrowserClient<SupabaseDatabase>(

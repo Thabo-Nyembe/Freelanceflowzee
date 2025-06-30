@@ -1,6 +1,6 @@
-'use client
+'use client'
 
-import React, { useReducer, useState, useCallback } from 'react
+import React, { useReducer, useState, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
  project: Project }

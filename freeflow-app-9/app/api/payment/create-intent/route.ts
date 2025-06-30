@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server
-import Stripe from 'stripe
+import { NextRequest, NextResponse } from 'next/server'
+import Stripe from 'stripe'
 
 // Use environment variable for Stripe secret key
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY
@@ -16,15 +16,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if we're in test mode (for testing environments)
-    const isTestMode = process.env.NODE_ENV === 'test' ||
-                       request.headers.get('x-test-mode') === 'true' ||
-                       request.headers.get('x-payment-test') === 'true' ||
-                       request.headers.get('user-agent')?.includes('Playwright') ||
-                       (!STRIPE_SECRET_KEY || !STRIPE_SECRET_KEY.startsWith('sk_')) // No Stripe key = demo mode
+    const isTestMode = process.env.NODE_ENV === 'test' ||'
+                       request.headers.get('x-test-mode') === 'true' ||'
+                       request.headers.get('x-payment-test') === 'true' ||'
+                       request.headers.get('user-agent')?.includes('Playwright') ||'
+                       (!STRIPE_SECRET_KEY || !STRIPE_SECRET_KEY.startsWith('sk_')) // No Stripe key = demo mode'
 
-    console.log('🔍 Payment Intent Request:', {
+    console.log('🔍 Payment Intent Request:', {'
       isTestMode,
-      userAgent: request.headers.get('user-agent'),
+      userAgent: request.headers.get('user-agent'),'
       testHeaders: {
         'x-test-mode': request.headers.get('x-test-mode'), 'x-payment-test': request.headers.get('x-payment-test')
       },
@@ -48,12 +48,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Only initialize Stripe for non-test environments
-    if (!STRIPE_SECRET_KEY || !STRIPE_SECRET_KEY.startsWith('sk_')) {
+    if (!STRIPE_SECRET_KEY || !STRIPE_SECRET_KEY.startsWith('sk_')) {'
       throw new Error('Valid STRIPE_SECRET_KEY environment variable is required for production')
     }
 
     const stripe = new Stripe(STRIPE_SECRET_KEY, {
-      apiVersion: '2025-05-28.basil',
+      apiVersion: '2025-05-28.basil,'
     })
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -61,8 +61,8 @@ export async function POST(request: NextRequest) {
       currency,
       metadata: {
         projectId,
-        testMode: 'false',
-        environment: process.env.NODE_ENV || 'development',
+        testMode: 'false,'
+        environment: process.env.NODE_ENV || 'development,'
         ...metadata
       },
       automatic_payment_methods: {
@@ -81,12 +81,12 @@ export async function POST(request: NextRequest) {
     console.error('Payment intent creation failed:', error)
     
     // Provide more detailed error information in development
-    const isDevelopment = process.env.NODE_ENV === 'development
+    const isDevelopment = process.env.NODE_ENV === 'development'
     
     return NextResponse.json(
       { 
-        error: 'Failed to create payment intent',
-        details: isDevelopment ? (error instanceof Error ? error.message : 'Unknown error') : undefined
+        error: 'Failed to create payment intent,'
+        details: isDevelopment ? (error instanceof Error ? error.message : 'Unknown error') : undefined'
       },
       { status: 500 }
     )

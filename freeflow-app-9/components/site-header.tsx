@@ -1,6 +1,6 @@
-'use client
+'use client'
 
-import Link from 'next/link
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
 const navigation = [
@@ -24,12 +24,12 @@ export function SiteHeader() {
               key={item.href}
               href={item.href}
               data-testid={`nav-${item.href.slice(1)}`}
-              className="text-sm font-medium transition-colors hover:text-primary
+              className="text-sm font-medium transition-colors hover:text-primary"
             >
               {item.name}
             </Link>
           ))}
-        </div>"
+        </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
           <Link href="/login" data-testid="nav-login" className="text-sm font-medium transition-colors hover:text-primary">
             Creator Login

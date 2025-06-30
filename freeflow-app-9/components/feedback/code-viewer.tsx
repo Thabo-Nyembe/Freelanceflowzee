@@ -10,5 +10,5 @@ interface CodeViewerProps {
   onAddComment: (comments: Record<string, unknown>[]) => void
 }
 
-const sampleCode = `import React, { useState } from 'react
+const sampleCode = `import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'

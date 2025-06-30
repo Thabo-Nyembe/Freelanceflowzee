@@ -1,6 +1,6 @@
 'use client'
 
-import { Inter } from 'next/font/google
+import { Inter } from 'next/font/google'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ErrorBoundary } from '@/components/error-handling/error-boundary'
 import { NetworkErrorHandler } from '@/components/error-handling/network-error'
@@ -8,8 +8,8 @@ import { JavaScriptDisabledFallback } from '@/components/error-handling/js-disab
 import { SiteHeader } from '@/components/site-header'
 import { TailwindIndicator } from '@/components/tailwind-indicator'
 import { Toaster } from '@/components/ui/toaster'
-import { cn } from '@/lib/utils
-import '@/styles/globals.css
+import { cn } from '@/lib/utils'
+import '@/styles/globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
 

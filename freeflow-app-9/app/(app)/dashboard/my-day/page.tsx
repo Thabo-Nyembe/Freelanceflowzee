@@ -267,7 +267,8 @@ export default function MyDayPage() {
     timerStartTime: null,
     elapsedTime: 0,
     totalFocusTime: 210, // 3.5 hours in minutes
-    completedTasks: 2
+    completedTasks: 2,
+    insights: mockAIInsights
   }
 
   const [state, dispatch] = useReducer(taskReducer, initialState)
@@ -374,20 +375,20 @@ export default function MyDayPage() {
             
             <div className="flex items-center gap-4">
               <Button 
-                variant= "outline" 
-                size= "sm" 
-                className="gap-2
+                variant="outline" 
+                size="sm" 
+                className="gap-2"
                 onClick={() => router.push('/dashboard')}
-              >"
+              >
                 <ArrowRight className="h-4 w-4 rotate-180" />
                 Back to Dashboard
               </Button>
               
               <Button 
-                size= "sm" 
-                className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700
+                size="sm" 
+                className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                 onClick={() => setIsAddingTask(true)}
-              >"
+              >
                 <Plus className="h-4 w-4" />
                 Add Task
               </Button>
@@ -480,10 +481,10 @@ export default function MyDayPage() {
                     <div className="text-purple-100 text-sm">Elapsed time</div>
                   </div>
                   <Button 
-                    variant= "outline" 
-                    className="bg-white/20 border-white/30 text-white hover:bg-white/30
+                    variant="outline" 
+                    className="bg-white/20 border-white/30 text-white hover:bg-white/30"
                     onClick={stopTimer}
-                  >"
+                  >
                     <Pause className="h-4 w-4 mr-2" />
                     Stop
                   </Button>
@@ -496,29 +497,29 @@ export default function MyDayPage() {
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <TabsList className="grid w-full grid-cols-4 bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl p-2 shadow-xl">
-            <TabsTrigger value= "today" className="flex items-center gap-2 rounded-2xl">
+            <TabsTrigger value="today" className="flex items-center gap-2 rounded-2xl">
               <Calendar className="h-4 w-4" />
               Today's Tasks
             </TabsTrigger>
-            <TabsTrigger value= "schedule" className="flex items-center gap-2 rounded-2xl">
+            <TabsTrigger value="schedule" className="flex items-center gap-2 rounded-2xl">
               <Clock className="h-4 w-4" />
               Time Blocks
             </TabsTrigger>
-            <TabsTrigger value= "insights" className="flex items-center gap-2 rounded-2xl">
+            <TabsTrigger value="insights" className="flex items-center gap-2 rounded-2xl">
               <Brain className="h-4 w-4" />
               AI Insights
-              <Badge variant= "secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs">
                 {mockAIInsights.filter(i => i.priority === 'high').length}
               </Badge>
             </TabsTrigger>
-            <TabsTrigger value= "analytics" className="flex items-center gap-2 rounded-2xl">
+            <TabsTrigger value="analytics" className="flex items-center gap-2 rounded-2xl">
               <BarChart3 className="h-4 w-4" />
               Analytics
             </TabsTrigger>
           </TabsList>
 
           {/* Today's Tasks Tab */}
-          <TabsContent value= "today" className="space-y-6">
+          <TabsContent value="today" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Tasks List */}
               <div className="lg:col-span-2 space-y-6">
@@ -530,15 +531,15 @@ export default function MyDayPage() {
                         Today's Tasks
                       </span>
                       <div className="flex items-center gap-2">
-                        <Badge variant= "outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs">
                           {state.tasks.filter(t => !t.completed).length} remaining
                         </Badge>
                         <Button 
-                          data-testid= "add-task-btn
-                          size= "sm" 
+                          data-testid="add-task-btn"
+                          size="sm" 
                           onClick={addTask}
-                          className="gap-2
-                        >"
+                          className="gap-2"
+                        >
                           <Plus className="h-3 w-3" />
                           Add Task
                         </Button>
@@ -553,21 +554,18 @@ export default function MyDayPage() {
                           "p-4 rounded-xl border transition-all duration-200 hover:shadow-md",
                           task.completed 
                             ? "bg-gray-50 border-gray-200 opacity-75" 
-                            : "bg-white border-gray-200 hover:border-gray-300
+                            : "bg-white border-gray-200 hover:border-gray-300"
                         )}
                       >
                         <div className="flex items-start gap-4">
                           <Button
-                            variant= "ghost
-                            size= "sm
-                            className="p-0 h-auto
+                            variant="ghost"
+                            size="sm"
+                            className="p-0 h-auto"
                             onClick={() => dispatch({ type: 'TOGGLE_TASK', id: task.id })}
                           >
                             <CheckCircle 
-                              className={cn("
-                                "h-5 w-5",
-                                task.completed ? "text-green-600 fill-green-100" : "text-gray-400
-                              )} 
+                              className={cn("h-5 w-5", task.completed ? "text-green-600 fill-green-100" : "text-gray-400")} 
                             />
                           </Button>
                           
@@ -576,8 +574,7 @@ export default function MyDayPage() {
                               <div className="flex-1">
                                 <h4 className={cn(
                                   "font-medium",
-                                  task.completed ? "line-through text-gray-500" : "text-gray-900
-                                )}>
+                                  task.completed ? "line-through text-gray-500" : "text-gray-900")}>
                                   {task.title}
                                 </h4>
                                 {task.description && (
@@ -586,19 +583,19 @@ export default function MyDayPage() {
                                 
                                 <div className="flex items-center gap-2 mt-2">
                                   <Badge 
-                                    variant= "outline" 
+                                    variant="outline" 
                                     className={cn("text-xs", getPriorityColor(task.priority))}
                                   >
                                     {task.priority}
                                   </Badge>
                                   
-                                  <Badge variant= "outline" className="text-xs">
+                                  <Badge variant="outline" className="text-xs">
                                     <Timer className="h-3 w-3 mr-1" />
                                     {formatDuration(task.estimatedTime)}
                                   </Badge>
                                   
                                   {task.category === 'meeting' && task.startTime && (
-                                    <Badge variant= "outline" className="text-xs">
+                                    <Badge variant="outline" className="text-xs">
                                       <Clock className="h-3 w-3 mr-1" />
                                       {task.startTime}
                                     </Badge>
@@ -610,27 +607,25 @@ export default function MyDayPage() {
                                     {task.tags.map(tag => (
                                       <span 
                                         key={tag}
-                                        className="px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-xs
-                                      >
+                                        className="px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-xs">
                                         {tag}
                                       </span>
                                     ))}
                                   </div>
                                 )}
                               </div>
-                              "
                               <div className="flex items-center gap-2">
                                 {!task.completed && (
                                   <Button
-                                    data-testid= "start-timer-btn
-                                    variant= "outline
-                                    size= "sm
-                                    className="gap-2
+                                    data-testid="start-timer-btn"
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-2"
                                     onClick={() => startTimer(task.id)}
                                     disabled={state.currentTimer === task.id}
                                   >
                                     {state.currentTimer === task.id ? (
-                                      <>"
+                                      <>
                                         <Pause className="h-3 w-3" />
                                         Active
                                       </>
@@ -644,8 +639,8 @@ export default function MyDayPage() {
                                 )}
                                 
                                 <Button
-                                  variant= "ghost
-                                  size= "sm
+                                  variant="ghost"
+                                  size="sm"
                                   onClick={() => dispatch({ type: 'DELETE_TASK', id: task.id })}
                                 >
                                   <Trash2 className="h-3 w-3" />
@@ -672,9 +667,9 @@ export default function MyDayPage() {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <Button 
-                      data-testid= "view-calendar-btn
+                      data-testid="view-calendar-btn"
                       className="w-full justify-start gap-2"
-                      variant= "outline
+                      variant="outline"
                       onClick={() => {
                         console.log('View calendar clicked');
                         router.push('/dashboard/calendar');
@@ -685,9 +680,9 @@ export default function MyDayPage() {
                     </Button>
                     
                     <Button 
-                      data-testid= "generate-schedule-btn
+                      data-testid="generate-schedule-btn"
                       className="w-full justify-start gap-2"
-                      variant= "outline
+                      variant="outline"
                       onClick={() => {
                         console.log('Generate schedule clicked');
                         alert('AI-powered schedule generation started!');
@@ -699,7 +694,7 @@ export default function MyDayPage() {
                     
                     <Button 
                       className="w-full justify-start gap-2"
-                      variant= "outline
+                      variant="outline"
                       onClick={() => router.push('/dashboard/collaboration')}
                     >
                       <MessageSquare className="h-4 w-4" />
@@ -708,7 +703,7 @@ export default function MyDayPage() {
                     
                     <Button 
                       className="w-full justify-start gap-2"
-                      variant= "outline
+                      variant="outline"
                       onClick={() => router.push('/dashboard/projects-hub')}
                     >
                       <Briefcase className="h-4 w-4" />
@@ -717,7 +712,7 @@ export default function MyDayPage() {
                     
                     <Button 
                       className="w-full justify-start gap-2"
-                      variant= "outline
+                      variant="outline"
                       onClick={() => router.push('/dashboard/time-tracking')}
                     >
                       <Clock className="h-4 w-4" />
@@ -726,7 +721,7 @@ export default function MyDayPage() {
                     
                     <Button 
                       className="w-full justify-start gap-2"
-                      variant= "outline
+                      variant="outline"
                       onClick={() => router.push('/dashboard/escrow')}
                     >
                       <Target className="h-4 w-4" />
@@ -768,7 +763,7 @@ export default function MyDayPage() {
           </TabsContent>
 
           {/* Time Blocks Tab */}
-          <TabsContent value= "schedule" className="space-y-6">
+          <TabsContent value="schedule" className="space-y-6">
             <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -785,7 +780,7 @@ export default function MyDayPage() {
                           <h4 className="font-medium">{block.title}</h4>
                           <p className="text-sm opacity-75">{block.start} - {block.end}</p>
                         </div>
-                        <Badge variant= "outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs">
                           {block.type}
                         </Badge>
                       </div>
@@ -809,7 +804,7 @@ export default function MyDayPage() {
           </TabsContent>
 
           {/* AI Insights Tab */}
-          <TabsContent value= "insights" className="space-y-6">
+          <TabsContent value="insights" className="space-y-6">
             <div className="grid gap-6">
               {mockAIInsights.map(insight => (
                 <Card key={insight.id} className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
@@ -819,7 +814,7 @@ export default function MyDayPage() {
                         "p-3 rounded-xl",
                         insight.type === 'productivity' ? 'bg-purple-100' :
                         insight.type === 'schedule' ? 'bg-blue-100' :
-                        insight.type === 'health' ? 'bg-green-100' : 'bg-orange-100
+                        insight.type === 'health' ? 'bg-green-100' : 'bg-orange-100'
                       )}>
                         {insight.type === 'productivity' && <TrendingUp className="h-6 w-6 text-purple-600" />}
                         {insight.type === 'schedule' && <Calendar className="h-6 w-6 text-blue-600" />}
@@ -831,12 +826,12 @@ export default function MyDayPage() {
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="font-semibold text-gray-900">{insight.title}</h3>
                           <Badge 
-                            variant= "outline" 
+                            variant="outline" 
                             className={cn(
                               "text-xs",
                               insight.priority === 'high' ? 'border-red-300 text-red-700' :
                               insight.priority === 'medium' ? 'border-yellow-300 text-yellow-700' :
-                              'border-green-300 text-green-700
+                              'border-green-300 text-green-700'
                             )}
                           >
                             {insight.priority} priority
@@ -845,7 +840,7 @@ export default function MyDayPage() {
                         <p className="text-gray-600 mb-3">{insight.description}</p>
                         
                         {insight.actionable && (
-                          <Button variant= "outline" size= "sm" className="gap-2">
+                          <Button variant="outline" size="sm" className="gap-2">
                             <CheckCircle className="h-3 w-3" />
                             Apply Suggestion
                           </Button>
@@ -859,7 +854,7 @@ export default function MyDayPage() {
           </TabsContent>
 
           {/* Analytics Tab */}
-          <TabsContent value= "analytics" className="space-y-6">
+          <TabsContent value="analytics" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
                 <CardHeader>
@@ -940,51 +935,51 @@ export default function MyDayPage() {
                   <Input
                     value={newTaskTitle}
                     onChange={(e) => setNewTaskTitle(e.target.value)}
-                    placeholder= "Enter task title..."
-                    className="w-full
+                    placeholder="Enter task title..."
+                    className="w-full"
                   />
                 </div>
                 
-                <div>"
+                <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">
                     Description (Optional)
                   </label>
                   <Textarea
                     value={newTaskDescription}
                     onChange={(e) => setNewTaskDescription(e.target.value)}
-                    placeholder= "Add task description..."
-                    className="w-full
+                    placeholder="Add task description..."
+                    className="w-full"
                     rows={3}
                   />
                 </div>
                 
-                <div>"
+                <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">
                     Priority
                   </label>
                   <select
                     value={newTaskPriority}
                     onChange={(e) => setNewTaskPriority(e.target.value as any)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500
-                  >"
-                    <option value= "low">Low</option>
-                    <option value= "medium">Medium</option>
-                    <option value= "high">High</option>
-                    <option value= "urgent">Urgent</option>
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
                   </select>
                 </div>
                 
                 <div className="flex gap-3 pt-4">
                   <Button
-                    className="flex-1
+                    className="flex-1"
                     onClick={addTask}
                     disabled={!newTaskTitle.trim()}
                   >
                     Add Task
                   </Button>
-                  <Button"
-                    variant= "outline
-                    className="flex-1
+                  <Button
+                    variant="outline"
+                    className="flex-1"
                     onClick={() => setIsAddingTask(false)}
                   >
                     Cancel
@@ -1001,4 +996,4 @@ export default function MyDayPage() {
 
 function cn(...classes: (string | undefined | boolean)[]): string {
   return classes.filter(Boolean).join(' ')
-} "
+}

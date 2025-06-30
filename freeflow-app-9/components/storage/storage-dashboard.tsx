@@ -1,9 +1,23 @@
-'use client
+'use client'
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Activity, 
+  Upload, 
+  HardDrive, 
+  DollarSign, 
+  TrendingDown, 
+  Server, 
+  Cloud, 
+  Image, 
+  Video, 
+  FileText 
+} from 'lucide-react';
 
 interface StorageAnalytics {
   totalFiles: number;
@@ -140,9 +154,9 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
   if (loading) {
     return (
       <div className={`p-6 ${className}`}>
-        <div className= "flex items-center justify-center h-64">
-          <div className= "animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className= "ml-3 text-gray-600">Loading storage analytics...</span>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-3 text-gray-600">Loading storage analytics...</span>
         </div>
       </div>
     );
@@ -155,31 +169,31 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
-      <div className= "flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className= "text-2xl font-bold text-gray-900">Multi-Cloud Storage</h2>
-          <p className= "text-gray-600">Wasabi + Supabase Integration with 80% Cost Savings</p>
+          <h2 className="text-2xl font-bold text-gray-900">Multi-Cloud Storage</h2>
+          <p className="text-gray-600">Wasabi + Supabase Integration with 80% Cost Savings</p>
         </div>
         
-        <div className= "flex items-center space-x-3">
+        <div className="flex items-center space-x-3">
           {/* Health Status */}
           {healthCheck && (
-            <Badge variant={healthCheck.overall ? &quot;default&quot; : &quot;destructive&quot;} className= "flex items-center space-x-1">
-              <Activity className= "w-3 h-3" />
-              <span>{healthCheck.overall ? &apos;Healthy&apos; : &apos;Degraded&apos;}</span>
+            <Badge variant={healthCheck.overall ? "default" : "destructive"} className="flex items-center space-x-1">
+              <Activity className="w-3 h-3" />
+              <span>{healthCheck.overall ? "Healthy" : "Degraded"}</span>
             </Badge>
           )}
           
           {/* Upload Button */}
-          <div className= "relative">
+          <div className="relative">
             <input
-              type= "file
+              type="file"
               onChange={handleFileUpload}
-              className= "absolute inset-0 w-full h-full opacity-0 cursor-pointer
-              accept= "image/*,video/*,audio/*,.pdf,.zip,.txt,.json
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              accept="image/*,video/*,audio/*,.pdf,.zip,.txt,.json"
             />
-            <Button className= "flex items-center space-x-2">
-              <Upload className= "w-4 h-4" />
+            <Button className="flex items-center space-x-2">
+              <Upload className="w-4 h-4" />
               <span>Upload File</span>
             </Button>
           </div>
@@ -187,16 +201,16 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
       </div>
 
       {/* Overview Cards */}
-      <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Total Storage */}
         <Card>
-          <CardHeader className= "flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className= "text-sm font-medium">Total Storage</CardTitle>
-            <HardDrive className= "h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Storage</CardTitle>
+            <HardDrive className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className= "text-2xl font-bold">{formatBytes(analytics?.totalSize || 0)}</div>
-            <p className= "text-xs text-muted-foreground">
+            <div className="text-2xl font-bold">{formatBytes(analytics?.totalSize || 0)}</div>
+            <p className="text-xs text-muted-foreground">
               {analytics?.totalFiles || 0} files across providers
             </p>
           </CardContent>
@@ -204,13 +218,13 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
 
         {/* Monthly Cost */}
         <Card>
-          <CardHeader className= "flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className= "text-sm font-medium">Monthly Cost</CardTitle>
-            <DollarSign className= "h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Monthly Cost</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className= "text-2xl font-bold">${(analytics?.monthlyCost || 0).toFixed(2)}</div>
-            <p className= "text-xs text-muted-foreground">
+            <div className="text-2xl font-bold">${(analytics?.monthlyCost || 0).toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">
               Multi-cloud optimization active
             </p>
           </CardContent>
@@ -218,13 +232,13 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
 
         {/* Potential Savings */}
         <Card>
-          <CardHeader className= "flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className= "text-sm font-medium">Monthly Savings</CardTitle>
-            <TrendingDown className= "h-4 w-4 text-green-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Monthly Savings</CardTitle>
+            <TrendingDown className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className= "text-2xl font-bold text-green-600">${monthlySavings.toFixed(2)}</div>
-            <p className= "text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-green-600">${monthlySavings.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">
               {monthlySavings > 0 ? 'With Wasabi optimization' : 'Enable optimization'}
             </p>
           </CardContent>
@@ -232,20 +246,20 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
 
         {/* Health Status */}
         <Card>
-          <CardHeader className= "flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className= "text-sm font-medium">System Health</CardTitle>
-            <Server className= "h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">System Health</CardTitle>
+            <Server className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className= "flex items-center space-x-2">
-              <Badge variant={healthCheck?.supabase ? &quot;default&quot; : &quot;destructive&quot;}>
+            <div className="flex items-center space-x-2">
+              <Badge variant={healthCheck?.supabase ? "default" : "destructive"}>
                 Supabase
               </Badge>
-              <Badge variant={healthCheck?.wasabi ? &quot;default&quot; : &quot;destructive&quot;}>
+              <Badge variant={healthCheck?.wasabi ? "default" : "destructive"}>
                 Wasabi
               </Badge>
             </div>
-            <p className= "text-xs text-muted-foreground mt-2">
+            <p className="text-xs text-muted-foreground mt-2">
               Provider connectivity status
             </p>
           </CardContent>
@@ -253,41 +267,41 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
       </div>
 
       {/* Detailed Analytics */}
-      <Tabs defaultValue= "overview" className= "space-y-4">
+      <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
-          <TabsTrigger value= "overview">Overview</TabsTrigger>
-          <TabsTrigger value= "files">Files</TabsTrigger>
-          <TabsTrigger value= "optimization">Optimization</TabsTrigger>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="files">Files</TabsTrigger>
+          <TabsTrigger value="optimization">Optimization</TabsTrigger>
         </TabsList>
 
-        <TabsContent value= "overview" className= "space-y-4">
-          <div className= "grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Storage Distribution */}
             <Card>
               <CardHeader>
                 <CardTitle>Storage Distribution</CardTitle>
               </CardHeader>
-              <CardContent className= "space-y-4">
-                <div className= "space-y-2">
-                  <div className= "flex justify-between text-sm">
-                    <span className= "flex items-center space-x-2">
-                      <Cloud className= "w-4 h-4 text-blue-600" />
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="flex items-center space-x-2">
+                      <Cloud className="w-4 h-4 text-blue-600" />
                       <span>Supabase ({analytics?.supabaseFiles || 0} files)</span>
                     </span>
                     <span>{formatBytes(analytics?.supabaseSize || 0)}</span>
                   </div>
-                  <Progress value={supabaseUsage} className= "h-2" />
+                  <Progress value={supabaseUsage} className="h-2" />
                 </div>
                 
-                <div className= "space-y-2">
-                  <div className= "flex justify-between text-sm">
-                    <span className= "flex items-center space-x-2">
-                      <HardDrive className= "w-4 h-4 text-green-600" />
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="flex items-center space-x-2">
+                      <HardDrive className="w-4 h-4 text-green-600" />
                       <span>Wasabi ({analytics?.wasabiFiles || 0} files)</span>
                     </span>
                     <span>{formatBytes(analytics?.wasabiSize || 0)}</span>
                   </div>
-                  <Progress value={wasabiUsage} className= "h-2" />
+                  <Progress value={wasabiUsage} className="h-2" />
                 </div>
               </CardContent>
             </Card>
@@ -297,26 +311,26 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
               <CardHeader>
                 <CardTitle>Cost Breakdown</CardTitle>
               </CardHeader>
-              <CardContent className= "space-y-4">
-                <div className= "space-y-3">
-                  <div className= "flex justify-between">
-                    <span className= "text-sm">Supabase Storage</span>
-                    <span className= "font-medium">${(analytics?.costBreakdown.supabaseCost || 0).toFixed(2)}</span>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-sm">Supabase Storage</span>
+                    <span className="font-medium">${(analytics?.costBreakdown.supabaseCost || 0).toFixed(2)}</span>
                   </div>
                   
-                  <div className= "flex justify-between">
-                    <span className= "text-sm">Wasabi Storage</span>
-                    <span className= "font-medium text-green-600">${(analytics?.costBreakdown.wasabiCost || 0).toFixed(2)}</span>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Wasabi Storage</span>
+                    <span className="font-medium text-green-600">${(analytics?.costBreakdown.wasabiCost || 0).toFixed(2)}</span>
                   </div>
                   
-                  <div className= "flex justify-between">
-                    <span className= "text-sm">Transfer Costs</span>
-                    <span className= "font-medium">${(analytics?.costBreakdown.transferCost || 0).toFixed(2)}</span>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Transfer Costs</span>
+                    <span className="font-medium">${(analytics?.costBreakdown.transferCost || 0).toFixed(2)}</span>
                   </div>
                   
                   <hr />
                   
-                  <div className= "flex justify-between text-lg font-bold">
+                  <div className="flex justify-between text-lg font-bold">
                     <span>Total Monthly</span>
                     <span>${(analytics?.monthlyCost || 0).toFixed(2)}</span>
                   </div>
@@ -326,32 +340,32 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
           </div>
         </TabsContent>
 
-        <TabsContent value= "files" className= "space-y-4">
+        <TabsContent value="files" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Recent Files</CardTitle>
             </CardHeader>
             <CardContent>
               {files.length > 0 ? (
-                <div className= "space-y-3">
+                <div className="space-y-3">
                   {files.slice(0, 10).map((file, index) => (
-                    <div key={index} className= "flex items-center justify-between p-3 border rounded-lg">
-                      <div className= "flex items-center space-x-3">
-                        <div className= "p-2 rounded-md bg-gray-100">
-                          {file.mimeType?.startsWith('image/') && <Image className= "w-4 h-4" />}
-                          {file.mimeType?.startsWith('video/') && <Video className= "w-4 h-4" />}
-                          {!file.mimeType?.startsWith('image/') && !file.mimeType?.startsWith('video/') && <FileText className= "w-4 h-4" />}
+                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 rounded-md bg-gray-100">
+                          {file.mimeType?.startsWith('image/') && <Image className="w-4 h-4" />}
+                          {file.mimeType?.startsWith('video/') && <Video className="w-4 h-4" />}
+                          {!file.mimeType?.startsWith('image/') && !file.mimeType?.startsWith('video/') && <FileText className="w-4 h-4" />}
                         </div>
                         <div>
-                          <p className= "font-medium">{file.filename}</p>
-                          <p className= "text-sm text-gray-500">{formatBytes(file.size)}</p>
+                          <p className="font-medium">{file.filename}</p>
+                          <p className="text-sm text-gray-500">{formatBytes(file.size)}</p>
                         </div>
                       </div>
-                      <div className= "text-right">
-                        <Badge variant={file.provider === 'wasabi' ? &apos;default&apos; : &apos;secondary&apos;}>
+                      <div className="text-right">
+                        <Badge variant={file.provider === 'wasabi' ? "default" : "secondary"}>
                           {file.provider}
                         </Badge>
-                        <p className= "text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-500 mt-1">
                           {new Date(file.uploadedAt).toLocaleDateString()}
                         </p>
                       </div>
@@ -359,28 +373,28 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
                   ))}
                 </div>
               ) : (
-                <div className= "text-center py-8 text-gray-500">
-                  <FileText className= "w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <div className="text-center py-8 text-gray-500">
+                  <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                   <p>No files uploaded yet</p>
-                  <p className= "text-sm">Upload your first file to see it here</p>
+                  <p className="text-sm">Upload your first file to see it here</p>
                 </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value= "optimization" className= "space-y-4">
+        <TabsContent value="optimization" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Storage Optimization</CardTitle>
             </CardHeader>
-            <CardContent className= "space-y-4">
-              <div className= "p-4 bg-blue-50 rounded-lg">
-                <h4 className= "font-medium text-blue-900 mb-2">Automatic Cost Optimization</h4>
-                <p className= "text-sm text-blue-700 mb-4">
+            <CardContent className="space-y-4">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <h4 className="font-medium text-blue-900 mb-2">Automatic Cost Optimization</h4>
+                <p className="text-sm text-blue-700 mb-4">
                   Our intelligent system automatically routes files to the most cost-effective storage provider:
                 </p>
-                <ul className= "text-sm text-blue-700 space-y-1">
+                <ul className="text-sm text-blue-700 space-y-1">
                   <li>• Large files (&gt;10MB) → Wasabi (80% cost savings)</li>
                   <li>• Videos and archives → Wasabi (long-term storage)</li>
                   <li>• Small frequently accessed files → Supabase (fast access)</li>
@@ -391,12 +405,12 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
               <Button 
                 onClick={optimizeStorage}
                 disabled={optimizing}
-                className= "w-full
+                className="w-full"
               >
                 {optimizing ? 'Optimizing...' : 'Run Storage Optimization'}
               </Button>
 
-              <div className= "text-sm text-gray-600 space-y-2">
+              <div className="text-sm text-gray-600 space-y-2">
                 <p><strong>Potential Monthly Savings:</strong> ${monthlySavings.toFixed(2)}</p>
                 <p><strong>Next optimization:</strong> Runs automatically daily at 2 AM UTC</p>
               </div>

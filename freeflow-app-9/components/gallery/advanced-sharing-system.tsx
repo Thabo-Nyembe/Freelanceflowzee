@@ -1,6 +1,6 @@
-'use client
+'use client'
 
-import React, { useState, useEffect } from 'react
+import React, { useState, useEffect } from 'react'
  percentage: number }>
   popularItems: Array<{ id: string; name: string; views: number }>
 }

@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server
-import { uploadFile, getUploadPresignedUrl, testConnection } from '@/lib/s3-client
+import { NextRequest, NextResponse } from 'next/server'
+import { uploadFile, getUploadPresignedUrl, testConnection } from '@/lib/s3-client'
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     const formData = await request.formData()
-    const file = formData.get('file') as File
+    const file = formData.get('file') as File'
     
     if (!file) {
       return NextResponse.json(
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'application/pdf', 'text/plain', 'application/json
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'application/pdf', 'text/plain', 'application/json'
     ]
     
     if (!allowedTypes.includes(file.type)) {
@@ -51,11 +51,11 @@ export async function POST(request: NextRequest) {
     const filename = `${timestamp}-${sanitizedName}
     
     // Determine folder based on file type
-    let folder = 'general
-    if (file.type.startsWith('image/')) {
-      folder = 'images
-    } else if (file.type === 'application/pdf') {
-      folder = 'documents
+    let folder = 'general'
+    if (file.type.startsWith('image/')) {'
+      folder = 'images'
+    } else if (file.type === 'application/pdf') {'
+      folder = 'documents'
     }
 
     // Upload file to S3
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'File uploaded successfully',
+      message: 'File uploaded successfully,'
       data: {
         key: result.key,
         url: result.url,
@@ -97,7 +97,7 @@ export async function GET() {
     const isConnected = await testConnection()
     
     return NextResponse.json({
-      status: 'ok',
+      status: 'ok,'
       s3Connected: isConnected,
       timestamp: new Date().toISOString(),
       endpoint: process.env.S3_ENDPOINT,
@@ -117,8 +117,8 @@ export async function PUT(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const filename = searchParams.get('filename')
-    const contentType = searchParams.get('contentType') || 'application/octet-stream
-    const folder = searchParams.get('folder') || 'uploads
+    const contentType = searchParams.get('contentType') || 'application/octet-stream'
+    const folder = searchParams.get('folder') || 'uploads'
     
     if (!filename) {
       return NextResponse.json(

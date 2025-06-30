@@ -1,6 +1,6 @@
-'use client
+'use client'
 
-import React, { useReducer, useState, useCallback, useEffect } from 'react
+import React, { useReducer, useState, useCallback, useEffect } from 'react'
  max: number } | null
   }
   showBookingDialog: boolean

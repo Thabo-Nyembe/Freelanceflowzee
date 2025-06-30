@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useReducer, useCallback, useRef } from 'react
+import React, { useState, useReducer, useCallback, useRef } from 'react'
  payload: string }
   | { type: 'SELECT_ITEM'; payload: string }
   | { type: 'DESELECT_ITEM'; payload: string }

@@ -1,16 +1,16 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation
-import { createClient } from '@/lib/supabase/client
+import { useRouter, useSearchParams } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { SiteHeader } from '@/components/site-header'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, UserPlus, User, Mail, Lock, ArrowLeft } from 'lucide-react
-import Link from 'next/link
+import { Loader2, UserPlus, User, Mail, Lock, ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
 
 interface SignUpProps {}
 
@@ -23,7 +23,7 @@ export default function SignUp({}: SignUpProps) {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
   // Get URL parameters
-  const redirectTo = searchParams?.get('redirect') || '/dashboard
+  const redirectTo = searchParams?.get('redirect') || '/dashboard'
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -46,7 +46,7 @@ export default function SignUp({}: SignUpProps) {
           document.cookie.split(";").forEach(cookie => {
             const [name] = cookie.split("=")
             if (name.trim().startsWith('sb-')) {
-              document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;
+              document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
             }
           })
           
@@ -129,7 +129,7 @@ export default function SignUp({}: SignUpProps) {
       document.cookie.split(";").forEach(cookie => {
         const [name] = cookie.split("=")
         if (name.trim().startsWith('sb-')) {
-          document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;
+          document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
         }
       })
 
@@ -225,17 +225,16 @@ export default function SignUp({}: SignUpProps) {
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  id="fullName
-                  name="fullName
-                  type="text
-                  placeholder="Enter your full name
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  placeholder="Enter your full name"
                   required
-                  className="pl-10 bg-white/50 border-gray-200 focus:bg-white transition-colors
+                  className="pl-10 bg-white/50 border-gray-200 focus:bg-white transition-colors"
                   suppressHydrationWarning
                 />
               </div>
             </div>
-            "
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">
                 Email
@@ -243,17 +242,16 @@ export default function SignUp({}: SignUpProps) {
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  id="email
-                  name="email
-                  type="email
-                  placeholder="Enter your email
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="Enter your email"
                   required
-                  className="pl-10 bg-white/50 border-gray-200 focus:bg-white transition-colors
+                  className="pl-10 bg-white/50 border-gray-200 focus:bg-white transition-colors"
                   suppressHydrationWarning
                 />
               </div>
             </div>
-            "
             <div className="space-y-2">
               <Label htmlFor="password" className="text-sm font-medium">
                 Password
@@ -261,17 +259,16 @@ export default function SignUp({}: SignUpProps) {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  id="password
-                  name="password
-                  type="password
-                  placeholder="Enter your password
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="Enter your password"
                   required
-                  className="pl-10 bg-white/50 border-gray-200 focus:bg-white transition-colors
+                  className="pl-10 bg-white/50 border-gray-200 focus:bg-white transition-colors"
                   suppressHydrationWarning
                 />
               </div>
             </div>
-            "
             <div className="space-y-2">
               <Label htmlFor="confirmPassword" className="text-sm font-medium">
                 Confirm Password
@@ -279,19 +276,19 @@ export default function SignUp({}: SignUpProps) {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  id="confirmPassword
-                  name="confirmPassword
-                  type="password
-                  placeholder="Confirm your password
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  placeholder="Confirm your password"
                   required
-                  className="pl-10 bg-white/50 border-gray-200 focus:bg-white transition-colors
+                  className="pl-10 bg-white/50 border-gray-200 focus:bg-white transition-colors"
                   suppressHydrationWarning
                 />
               </div>
             </div>
 
             {error && (
-              <Alert>"
+              <Alert>
                 <AlertDescription className="text-red-600 text-sm">
                   {error}
                 </AlertDescription>
@@ -308,16 +305,16 @@ export default function SignUp({}: SignUpProps) {
 
             <Button 
               type="submit" 
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
               disabled={isLoading}
             >
               {isLoading ? (
-                <>"
+                <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Creating Account...
                 </>
               ) : (
-                'Create Account
+                'Create Account'
               )}
             </Button>
           </form>

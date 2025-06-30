@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react
+import React, { useState, useEffect } from 'react'
       case &apos;on-hold&apos;: return <PauseCircle className= "h-4 w-4" />;
       case &apos;completed&apos;: return <CheckCircle className= "h-4 w-4" />;
       case &apos;cancelled&apos;: return <AlertCircle className= "h-4 w-4" />;

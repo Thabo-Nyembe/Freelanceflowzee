@@ -13,9 +13,6 @@ export async function GET(request: NextRequest) {
       )
     }
     
-    const { searchParams } = new URL(request.url)
-    
-    // Get user (required for analytics dashboard)
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
@@ -25,104 +22,135 @@ export async function GET(request: NextRequest) {
       )
     }
     
-    const timeRange = searchParams.get('range') || 'day'
+    const url = new URL(request.url)
+    const userId = user.id
+    const timeRange = url.searchParams.get('timeRange') || 'week'
+    const metric = url.searchParams.get('metric')
     
-    // Get analytics summary using the database function
-    const { data: summaryData, error: summaryError } = await supabase
-      .rpc('get_analytics_summary')
-    
-    if (summaryError) {
-      console.error('Failed to get analytics summary:', summaryError)
-    }
-    
-    // Get real-time metrics
-    const { data: realtimeData, error: realtimeError } = await supabase
-      .rpc('get_realtime_metrics')
-    
-    if (realtimeError) {
-      console.error('Failed to get realtime metrics:', realtimeError)
-    }
-    
-    // Get detailed metrics for charts
-    const chartData = await getChartData(supabase, user.id, timeRange)
-    
-    // Get top pages
-    const topPages = await getTopPages(supabase, user.id, timeRange)
-    
-    // Get user activity
-    const userActivity = await getUserActivity(supabase, user.id, timeRange)
-    
-    // Get performance metrics
-    const performanceMetrics = await getPerformanceMetrics(supabase, user.id, timeRange)
-    
-    return NextResponse.json({
-      success: true,
-      data: {
-        summary: summaryData?.[0] || getDefaultSummary(),
-        realtime: realtimeData?.[0] || getDefaultRealtime(),
-        charts: chartData,
-        topPages,
-        userActivity,
-        performance: performanceMetrics,
-        timeRange
+    try {
+      // Get dashboard summary data
+      const summary = await getDashboardSummary(supabase, userId, timeRange)
+      const chartData = await getChartData(supabase, userId, timeRange)
+      const topPages = await getTopPages(supabase, userId, timeRange)
+      const userActivity = await getUserActivity(supabase, userId, timeRange)
+      const performance = await getPerformanceMetrics(supabase, userId, timeRange)
+      const realtimeData = await getRealtimeData(supabase, userId)
+      
+      // Return specific metric if requested
+      if (metric) {
+        const metrics = {
+          summary,
+          chartData,
+          topPages,
+          userActivity,
+          performance,
+          realtime: realtimeData
+        }
+        
+        return NextResponse.json({
+          success: true,
+          data: metrics[metric as keyof typeof metrics] || null,
+          timestamp: new Date().toISOString()
+        })
       }
-    })
+      
+      // Return complete dashboard data
+      return NextResponse.json({
+        success: true,
+        data: {
+          summary,
+          chartData,
+          topPages,
+          userActivity,
+          performance,
+          realtime: realtimeData
+        },
+        timestamp: new Date().toISOString()
+      })
+      
+    } catch (error) {
+      console.error('Analytics error:', error)
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Failed to fetch analytics data',
+          details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        },
+        { status: 500 }
+      )
+    }
     
   } catch (error) {
-    console.error('Analytics dashboard error:', error)
+    console.error('Database connection error:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch analytics data' },
+      { success: false, error: 'Database connection failed' },
       { status: 500 }
     )
   }
 }
 
-async function getChartData(supabase: unknown, userId: string, timeRange: string) {
+async function getDashboardSummary(supabase: any, userId: string, timeRange: string) {
   const { startDate, endDate } = getDateRange(timeRange)
   
   try {
-    // Get daily event counts
-    const { data: dailyEvents } = await supabase
-      .from('hourly_events')
+    const { data } = await supabase
+      .from('analytics_summary')
       .select('*')
-      .gte('hour', startDate)
-      .lte('hour', endDate)
-      .order('hour')
-    
-    // Get daily revenue
-    const { data: dailyRevenue } = await supabase
-      .from('revenue_summary')
-      .select('*')
+      .eq('user_id', userId)
       .gte('date', startDate.split('T')[0])
       .lte('date', endDate.split('T')[0])
-      .order('date')
+      .single()
     
-    // Process data for charts
-    const eventsByDay = processEventsByDay(dailyEvents || [])
-    const revenueByDay = processDailyRevenue(dailyRevenue || [])
+    return data || getDefaultSummary()
+  } catch (error) {
+    console.error('Failed to get summary:', error)
+    return getDefaultSummary()
+  }
+}
+
+async function getChartData(supabase: any, userId: string, timeRange: string) {
+  const { startDate, endDate } = getDateRange(timeRange)
+  
+  try {
+    const { data: events } = await supabase
+      .from('hourly_analytics')
+      .select('hour, event_count, event_type')
+      .eq('user_id', userId)
+      .gte('hour', startDate)
+      .lte('hour', endDate)
+      .order('hour', { ascending: true })
+    
+    const { data: revenue } = await supabase
+      .from('daily_revenue')
+      .select('date, daily_revenue, payments_count, avg_payment_amount')
+      .eq('user_id', userId)
+      .gte('date', startDate.split('T')[0])
+      .lte('date', endDate.split('T')[0])
+      .order('date', { ascending: true })
     
     return {
-      events: eventsByDay,
-      revenue: revenueByDay,
-      eventTypes: getEventTypeBreakdown(dailyEvents || [])
+      events: events ? processEventsByDay(events) : [],
+      revenue: revenue ? processDailyRevenue(revenue) : [],
+      breakdown: events ? getEventTypeBreakdown(events) : []
     }
   } catch (error) {
     console.error('Failed to get chart data:', error)
     return {
       events: [],
       revenue: [],
-      eventTypes: []
+      breakdown: []
     }
   }
 }
 
-async function getTopPages(supabase: unknown, userId: string, timeRange: string) {
+async function getTopPages(supabase: any, userId: string, timeRange: string) {
   const { startDate, endDate } = getDateRange(timeRange)
   
   try {
     const { data } = await supabase
       .from('analytics_events')
-      .select('page_url, properties')
+      .select('properties, page_url')
+      .eq('user_id', userId)
       .eq('event_type', 'page_view')
       .gte('timestamp', startDate)
       .lte('timestamp', endDate)
@@ -131,8 +159,8 @@ async function getTopPages(supabase: unknown, userId: string, timeRange: string)
     
     // Count page visits
     const pageMap = new Map()
-    data.forEach((event: unknown) => {
-      const path = event.properties?.path || new URL(event.page_url || '').pathname || '/
+    data.forEach((event: any) => {
+      const path = event.properties?.path || new URL(event.page_url || '').pathname || '/'
       pageMap.set(path, (pageMap.get(path) || 0) + 1)
     })
     
@@ -146,7 +174,7 @@ async function getTopPages(supabase: unknown, userId: string, timeRange: string)
   }
 }
 
-async function getUserActivity(supabase: unknown, userId: string, timeRange: string) {
+async function getUserActivity(supabase: any, userId: string, timeRange: string) {
   const { startDate, endDate } = getDateRange(timeRange)
   
   try {
@@ -172,7 +200,7 @@ async function getUserActivity(supabase: unknown, userId: string, timeRange: str
   }
 }
 
-async function getPerformanceMetrics(supabase: unknown, userId: string, timeRange: string) {
+async function getPerformanceMetrics(supabase: any, userId: string, timeRange: string) {
   const { startDate, endDate } = getDateRange(timeRange)
   
   try {
@@ -205,6 +233,21 @@ async function getPerformanceMetrics(supabase: unknown, userId: string, timeRang
   }
 }
 
+async function getRealtimeData(supabase: any, userId: string) {
+  try {
+    const { data } = await supabase
+      .from('realtime_analytics')
+      .select('*')
+      .eq('user_id', userId)
+      .single()
+    
+    return data || getDefaultRealtime()
+  } catch (error) {
+    console.error('Failed to get realtime data:', error)
+    return getDefaultRealtime()
+  }
+}
+
 function getDateRange(timeRange: string) {
   const now = new Date()
   const startDate = new Date()
@@ -232,10 +275,10 @@ function getDateRange(timeRange: string) {
   }
 }
 
-function processEventsByDay(events: unknown[]) {
+function processEventsByDay(events: any[]) {
   const eventMap = new Map()
   
-  events.forEach((event: unknown) => {
+  events.forEach((event: any) => {
     const date = event.hour.split('T')[0]
     const current = eventMap.get(date) || 0
     eventMap.set(date, current + event.event_count)
@@ -246,8 +289,8 @@ function processEventsByDay(events: unknown[]) {
     .sort((a, b) => a.date.localeCompare(b.date))
 }
 
-function processDailyRevenue(revenue: unknown[]) {
-  return revenue.map((item: unknown) => ({
+function processDailyRevenue(revenue: any[]) {
+  return revenue.map((item: any) => ({
     date: item.date,
     revenue: item.daily_revenue || 0,
     payments: item.payments_count || 0,
@@ -255,10 +298,10 @@ function processDailyRevenue(revenue: unknown[]) {
   }))
 }
 
-function getEventTypeBreakdown(events: unknown[]) {
+function getEventTypeBreakdown(events: any[]) {
   const typeMap = new Map()
   
-  events.forEach((event: unknown) => {
+  events.forEach((event: any) => {
     const current = typeMap.get(event.event_type) || 0
     typeMap.set(event.event_type, current + event.event_count)
   })
@@ -315,40 +358,39 @@ export async function POST(request: NextRequest) {
     
     // Define allowed custom queries for security
     const allowedQueries = {
-      'user_funnel': 
+      'user_funnel': `
         SELECT 
           event_name,
           COUNT(*) as count,
           COUNT(DISTINCT session_id) as unique_sessions
         FROM analytics_events 
         WHERE user_id = $1 
-          AND event_type = 'user_action
+          AND event_type = 'user_action'
           AND timestamp >= $2
         GROUP BY event_name
         ORDER BY count DESC
-      `, 'page_performance': 
+      `,
+      'page_performance': `
         SELECT 
-          properties->>'path' as page,
-          AVG((performance_metrics->>'page_load_time')::numeric) as avg_load_time,
-          COUNT(*) as measurements
-        FROM analytics_events
-        WHERE user_id = $1
-          AND event_type = 'performance
+          page_url,
+          AVG(page_load_time) as avg_load_time,
+          COUNT(*) as total_loads
+        FROM performance_events 
+        WHERE user_id = $1 
           AND timestamp >= $2
-        GROUP BY properties->>'path
+        GROUP BY page_url
         ORDER BY avg_load_time DESC
-      `, 'error_analysis': 
+      `,
+      'conversion_funnel': `
         SELECT 
-          properties->>'error_message' as error,
-          COUNT(*) as occurrences,
-          MAX(timestamp) as last_occurrence
-        FROM analytics_events
-        WHERE user_id = $1
-          AND event_type = 'error
-          AND timestamp >= $2
-        GROUP BY properties->>'error_message
-        ORDER BY occurrences DESC
-      
+          step_name,
+          COUNT(DISTINCT user_id) as users,
+          step_order
+        FROM conversion_events 
+        WHERE timestamp >= $1
+        GROUP BY step_name, step_order
+        ORDER BY step_order
+      `
     }
     
     if (!allowedQueries[query as keyof typeof allowedQueries]) {
@@ -358,15 +400,14 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    const { data, error } = await supabase
-      .rpc('execute_analytics_query', {
-        query_name: query,
-        user_id: user.id,
-        start_date: parameters.startDate || new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-      })
+    const sqlQuery = allowedQueries[query as keyof typeof allowedQueries]
+    const { data, error } = await supabase.rpc('execute_analytics_query', {
+      query: sqlQuery,
+      params: Object.values(parameters)
+    })
     
     if (error) {
-      console.error('Custom analytics query error:', error)
+      console.error('Query execution error:', error)
       return NextResponse.json(
         { success: false, error: 'Query execution failed' },
         { status: 500 }
@@ -375,14 +416,15 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      data: data || [],
-      query
+      data,
+      query,
+      timestamp: new Date().toISOString()
     })
     
   } catch (error) {
-    console.error('Analytics POST API error:', error)
+    console.error('Analytics POST error:', error)
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: 'Failed to execute query' },
       { status: 500 }
     )
   }

@@ -1,6 +1,6 @@
-'use client
+'use client'
 
-import { useState, useReducer } from 'react
+import { useState, useReducer } from 'react'
  invoice: Invoice | null }
   | { type: 'SET_CREATE_MODAL'; show: boolean }
   | { type: 'SET_TEMPLATE_MODAL'; show: boolean }

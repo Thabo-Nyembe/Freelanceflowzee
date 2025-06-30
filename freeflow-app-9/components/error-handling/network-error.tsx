@@ -1,7 +1,7 @@
-'use client
+'use client'
 
-import { useEffect, useState } from 'react
-import { AlertCircle, RefreshCw, Wifi, WifiOff } from 'lucide-react
+import { useEffect, useState } from 'react'
+import { AlertCircle, RefreshCw, Wifi, WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
@@ -42,11 +42,11 @@ export function NetworkErrorHandler() {
             </AlertDescription>
           </div>
           <Button
-            variant="outline
-            size="icon
-            className="ml-2
-            onClick={handleRetry}"
-            data-testid="network-retry-button
+            variant="outline"
+            size="icon"
+            className="ml-2"
+            onClick={handleRetry}
+            data-testid="network-retry-button"
           >
             <RefreshCw className="h-4 w-4" />
           </Button>

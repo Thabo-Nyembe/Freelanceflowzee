@@ -37,16 +37,16 @@ export async function GET(request: NextRequest) {
         hasMore: Array.isArray(data) && (offset + limit) < data.length
       },
       metadata: {
-        source: 'enhanced-api',
+        source: 'enhanced-api,'
         lastUpdated: new Date().toISOString(),
-        apiVersion: '2.0
+        apiVersion: '2.0'
       }
     });
   } catch (error) {
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch users data',
-      message: error instanceof Error ? error.message : 'Unknown error occurred
+      error: 'Failed to fetch users data,'
+      message: error instanceof Error ? error.message : 'Unknown error occurred'
     }, { status: 500 });
   }
 }
@@ -66,13 +66,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: newItem,
-      message: 'Item created successfully
+      message: 'Item created successfully'
     }, { status: 201 });
   } catch (error) {
     return NextResponse.json({
       success: false,
-      error: 'Failed to create users item',
-      message: error instanceof Error ? error.message : 'Unknown error occurred
+      error: 'Failed to create users item,'
+      message: error instanceof Error ? error.message : 'Unknown error occurred'
     }, { status: 500 });
   }
 }

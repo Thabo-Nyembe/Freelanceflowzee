@@ -1,6 +1,6 @@
-'use client
+'use client'
 
-import React, { useReducer, useState, useCallback, useEffect, useRef } from 'react
+import React, { useReducer, useState, useCallback, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
  payload: Category }
   | { type: 'SET_MODEL'; payload: AIModel }

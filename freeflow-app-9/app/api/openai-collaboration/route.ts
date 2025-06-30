@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server
+import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,9 +22,9 @@ export async function POST(request: NextRequest) {
     console.log('🤖 OpenAI Collaboration API called:', { action, hasRequestData: !!requestData })
 
     const response = await fetch(edgeFunctionUrl, {
-      method: 'POST',
+      method: 'POST,'
       headers: {
-        'Content-Type': 'application/json', 'Authorization': authHeader, 'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 
+        'Content-Type': 'application/json', 'Authorization': authHeader, 'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '
       },
       body: JSON.stringify({
         action,
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           data: fallbackResponse,
-          source: 'fallback',
+          source: 'fallback,'
           timestamp: new Date().toISOString()
         })
       }
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: fallbackResponse,
-        source: 'fallback_error',
+        source: 'fallback_error,'
         timestamp: new Date().toISOString()
       })
     }
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error,'
         timestamp: new Date().toISOString()
       },
       { status: 500 }
@@ -91,9 +91,9 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   return NextResponse.json({
     success: true,
-    message: 'OpenAI Collaboration API is running',
+    message: 'OpenAI Collaboration API is running,'
     timestamp: new Date().toISOString(),
-    available_actions: ['analyze_comment', 'generate_feedback_summary', 'analyze_file', 'generate_project_insights', 'smart_categorization', 'generate_client_report
+    available_actions: ['analyze_comment', 'generate_feedback_summary', 'analyze_file', 'generate_project_insights', 'smart_categorization', 'generate_client_report'
     ]
   })
 }
@@ -101,28 +101,28 @@ export async function GET(request: NextRequest) {
 // Fallback responses for demo purposes when edge function is not available
 function generateFallbackResponse(action: string, requestData: unknown) {
   switch (action) {
-    case 'analyze_comment':
+    case 'analyze_comment':'
       return {
-        category: 'layout_design',
-        priority: 'medium',
-        sentiment: 'constructive',
-        effort_estimate: '30 minutes',
-        suggested_actions: ['Review design alignment with brand guidelines', 'Test accessibility compliance', 'Get stakeholder approval before implementation
+        category: 'layout_design,'
+        priority: 'medium,'
+        sentiment: 'constructive,'
+        effort_estimate: '30 minutes,'
+        suggested_actions: ['Review design alignment with brand guidelines', 'Test accessibility compliance', 'Get stakeholder approval before implementation'
         ],
         key_themes: ['design improvement', 'user experience'],
-        client_satisfaction_impact: 'medium',
+        client_satisfaction_impact: 'medium,'
         confidence_score: 0.85,
-        ai_reasoning: 'Analysis based on content semantics and creative industry best practices
+        ai_reasoning: 'Analysis based on content semantics and creative industry best practices'
       }
 
-    case 'generate_feedback_summary':
+    case 'generate_feedback_summary':'
       return {
-        summary: 'The project feedback indicates strong positive reception of the overall design direction and typography choices. Key areas for improvement include accessibility (contrast ratios), mobile responsiveness (touch targets), and spacing refinements. The feedback suggests the project is on track with minor adjustments needed for optimal user experience.',
-        recommendations: ['Prioritize accessibility improvements for better compliance', 'Optimize mobile layout for better touch interaction', 'Refine spacing consistency across all design elements', 'Consider user testing for validation of design decisions
+        summary: 'The project feedback indicates strong positive reception of the overall design direction and typography choices. Key areas for improvement include accessibility (contrast ratios), mobile responsiveness (touch targets), and spacing refinements. The feedback suggests the project is on track with minor adjustments needed for optimal user experience.,'
+        recommendations: ['Prioritize accessibility improvements for better compliance', 'Optimize mobile layout for better touch interaction', 'Refine spacing consistency across all design elements', 'Consider user testing for validation of design decisions'
         ],
         feedback_metrics: {
           total_comments: requestData.comments?.length || 4,
-          estimated_revision_time: '2-3 hours',
+          estimated_revision_time: '2-3 hours,'
           priority_distribution: {
             high_priority: 1,
             medium_priority: 2,
@@ -131,13 +131,13 @@ function generateFallbackResponse(action: string, requestData: unknown) {
         }
       }
 
-    case 'analyze_file':
+    case 'analyze_file':'
       return {
         quality_score: 87,
-        analysis: 'The file demonstrates strong visual hierarchy and brand consistency. Technical quality is high with proper resolution and format. Minor improvements suggested for accessibility and mobile optimization.',
-        detected_issues: ['Contrast ratio below WCAG AA standards in some areas', 'Small touch targets for mobile devices', 'Missing alt text for accessibility
+        analysis: 'The file demonstrates strong visual hierarchy and brand consistency. Technical quality is high with proper resolution and format. Minor improvements suggested for accessibility and mobile optimization.,'
+        detected_issues: ['Contrast ratio below WCAG AA standards in some areas', 'Small touch targets for mobile devices', 'Missing alt text for accessibility'
         ],
-        suggestions: ['Increase color contrast for better readability', 'Enlarge interactive elements for mobile', 'Add descriptive alt text for screen readers
+        suggestions: ['Increase color contrast for better readability', 'Enlarge interactive elements for mobile', 'Add descriptive alt text for screen readers'
         ],
         technical_metrics: {
           accessibility_score: 78,
@@ -146,26 +146,26 @@ function generateFallbackResponse(action: string, requestData: unknown) {
         }
       }
 
-    case 'generate_project_insights':
+    case 'generate_project_insights':'
       return {
-        insights: 'Project collaboration is showing healthy engagement patterns with consistent feedback frequency. Team communication is effective with constructive comments and timely responses. Client satisfaction indicators are positive with minor adjustments needed.',
+        insights: 'Project collaboration is showing healthy engagement patterns with consistent feedback frequency. Team communication is effective with constructive comments and timely responses. Client satisfaction indicators are positive with minor adjustments needed.,'
         project_health_score: 82,
         collaboration_effectiveness: 88,
-        recommendations: ['Maintain current feedback frequency for optimal collaboration', 'Consider scheduling weekly alignment calls', 'Document decisions for future reference
+        recommendations: ['Maintain current feedback frequency for optimal collaboration', 'Consider scheduling weekly alignment calls', 'Document decisions for future reference'
         ]
       }
 
-    case 'smart_categorization':
+    case 'smart_categorization':'
       return {
         categories: ['Design', 'Feedback', 'Technical'],
         tags: ['constructive', 'minor', 'enhancement'],
         confidence: 0.9
       }
 
-    case 'generate_client_report':
+    case 'generate_client_report':'
       return {
-        report: '## Project Progress Report\n\n**Executive Summary**\nYour project is progressing excellently with 85% completion. All major milestones have been achieved on schedule.\n\n**Completed Deliverables**\n- Brand identity design\n- Homepage mockups\n- Mobile responsive layouts\n\n**Feedback Integration**\nAll client feedback has been reviewed and prioritized. High-priority items are being addressed in the current sprint.\n\n**Next Steps**\n- Final accessibility review\n- Mobile optimization\n- Client approval for production',
-        report_type: 'weekly_progress',
+        report: '## Project Progress Report\n\n**Executive Summary**\nYour project is progressing excellently with 85% completion. All major milestones have been achieved on schedule.\n\n**Completed Deliverables**\n- Brand identity design\n- Homepage mockups\n- Mobile responsive layouts\n\n**Feedback Integration**\nAll client feedback has been reviewed and prioritized. High-priority items are being addressed in the current sprint.\n\n**Next Steps**\n- Final accessibility review\n- Mobile optimization\n- Client approval for production,'
+        report_type: 'weekly_progress,'
         generated_at: new Date().toISOString(),
         includes_metrics: true
       }

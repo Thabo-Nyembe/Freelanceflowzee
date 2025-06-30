@@ -1,6 +1,6 @@
-'use client
+'use client'
 
-import React, { useReducer, useEffect, useCallback } from 'react
+import React, { useReducer, useEffect, useCallback } from 'react'
 // Context7 MCP Integration for Enhanced Interactive Patterns
  payload: string }
   | { type: 'SET_LOADING'; payload: boolean }

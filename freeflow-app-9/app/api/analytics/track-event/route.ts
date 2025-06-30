@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server
-import { createClient } from '@/lib/supabase/server
-import { headers } from 'next/headers
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { headers } from 'next/headers'
 
 // Context7 Enhanced Analytics Tracking for Monetization
 export async function POST(request: NextRequest) {
@@ -70,17 +70,17 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     // Properly type the error and provide structured error details
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
     const errorDetails = error instanceof Error && error.cause ? error.cause : undefined
     
-    console.error('Analytics tracking error:', {
+    console.error('Analytics tracking error:', {'
       message: errorMessage,
       details: errorDetails
     })
     
     return NextResponse.json({ 
       success: false,
-      error: 'Failed to track event',
+      error: 'Failed to track event,'
       message: errorMessage,
       details: errorDetails
     }, { 
@@ -99,7 +99,7 @@ function generateSessionId(userAgent: string | undefined, ip: string | undefined
 // Calculate revenue potential based on event type
 function calculateRevenuePotential(event: string, data: unknown): number {
   const eventValues = {
-    'download_started': 2.50, 'download_completed': 5.00, 'link_copied': 1.00, 'social_share': 3.00, 'payment_initiated': 25.00, 'premium_upgrade': 50.00, 'file_view': 0.50, 'external_link_click': 1.50
+    'download_started': 2.50, 'download_completed': 5.00, 'link_copied': 1.00, 'social_share': 3.00, 'payment_initiated': 25.00, 'premium_upgrade': 50.00, 'file_view': 0.50, 'external_link_click': 1.50'
   }
 
   const baseValue = eventValues[event] || 0
@@ -111,11 +111,11 @@ function calculateRevenuePotential(event: string, data: unknown): number {
 
 // Calculate conversion value
 function calculateConversionValue(event: string, data: unknown): number {
-  if (event === 'payment_initiated' || event === 'premium_upgrade') {
+  if (event === 'payment_initiated' || event === 'premium_upgrade') {'
     return data.amount || data.revenue || 0
   }
   
-  if (event === 'download_completed' && data.revenue) {
+  if (event === 'download_completed' && data.revenue) {'
     return data.revenue
   }
 
@@ -124,23 +124,23 @@ function calculateConversionValue(event: string, data: unknown): number {
 
 // Extract traffic source from referrer
 function getTrafficSource(referrer: string): string {
-  if (!referrer) return 'direct
+  if (!referrer) return 'direct'
   
-  if (referrer.includes('google.com')) return 'google
-  if (referrer.includes('facebook.com')) return 'facebook
-  if (referrer.includes('twitter.com') || referrer.includes('t.co')) return 'twitter
-  if (referrer.includes('linkedin.com')) return 'linkedin
-  if (referrer.includes('youtube.com')) return 'youtube
-  if (referrer.includes('instagram.com')) return 'instagram
+  if (referrer.includes('google.com')) return 'google'
+  if (referrer.includes('facebook.com')) return 'facebook'
+  if (referrer.includes('twitter.com') || referrer.includes('t.co')) return 'twitter'
+  if (referrer.includes('linkedin.com')) return 'linkedin'
+  if (referrer.includes('youtube.com')) return 'youtube'
+  if (referrer.includes('instagram.com')) return 'instagram'
   
-  return 'referral
+  return 'referral'
 }
 
 // Detect device type from user agent
 function getDeviceType(userAgent: string): string {
-  if (/mobile/i.test(userAgent)) return 'mobile
-  if (/tablet|ipad/i.test(userAgent)) return 'tablet
-  return 'desktop
+  if (/mobile/i.test(userAgent)) return 'mobile'
+  if (/tablet|ipad/i.test(userAgent)) return 'tablet'
+  return 'desktop'
 }
 
 // Extract UTM parameters
@@ -150,10 +150,10 @@ function extractUTMParams(referrer: string) {
   try {
     const url = new URL(referrer)
     return {
-      utm_source: url.searchParams.get('utm_source'),
-      utm_medium: url.searchParams.get('utm_medium'),
-      utm_campaign: url.searchParams.get('utm_campaign'),
-      utm_content: url.searchParams.get('utm_content'),
+      utm_source: url.searchParams.get('utm_source'),'
+      utm_medium: url.searchParams.get('utm_medium'),'
+      utm_campaign: url.searchParams.get('utm_campaign'),'
+      utm_content: url.searchParams.get('utm_content'),'
       utm_term: url.searchParams.get('utm_term')
     }
   } catch {
@@ -163,7 +163,7 @@ function extractUTMParams(referrer: string) {
 
 // Check if event generates revenue
 function isRevenueEvent(event: string): boolean {
-  return ['payment_initiated', 'premium_upgrade', 'subscription_started', 'download_completed
+  return ['payment_initiated', 'premium_upgrade', 'subscription_started', 'download_completed'
   ].includes(event)
 }
 
@@ -174,9 +174,9 @@ async function trackRevenueEvent(supabase: unknown, event: string, data: unknown
     user_id: userId || null,
     file_id: data.fileId,
     amount: data.amount || data.revenue || 0,
-    currency: data.currency || 'USD',
-    payment_method: data.paymentMethod || 'unknown',
-    conversion_source: data.conversionSource || 'organic',
+    currency: data.currency || 'USD,'
+    payment_method: data.paymentMethod || 'unknown,'
+    conversion_source: data.conversionSource || 'organic,'
     timestamp: new Date().toISOString()
   }
 
@@ -187,7 +187,7 @@ async function trackRevenueEvent(supabase: unknown, event: string, data: unknown
 
 // Update aggregated metrics for real-time dashboards
 async function updateAggregatedMetrics(supabase: unknown, event: string, data: unknown, userId: string | undefined | null) {
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toISOString().split('T')[0]'
   
   // Update daily aggregates
   const { data: existing } = await supabase
@@ -233,7 +233,7 @@ async function updateFileAnalytics(supabase: unknown, fileId: string, event: str
     .single()
 
   const eventMap = {
-    'file_view': 'view_count', 'download_started': 'download_count', 'download_completed': 'download_count', 'link_copied': 'share_count', 'social_share': 'share_count
+    'file_view': 'view_count', 'download_started': 'download_count', 'download_completed': 'download_count', 'link_copied': 'share_count', 'social_share': 'share_count'
   }
 
   const field = eventMap[event]
@@ -272,7 +272,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const eventType = searchParams.get('event')
     const fileId = searchParams.get('fileId')
-    const timeRange = searchParams.get('timeRange') || '7d
+    const timeRange = searchParams.get('timeRange') || '7d'
 
     const supabase = await createClient()
 
@@ -294,7 +294,7 @@ export async function GET(request: NextRequest) {
 
     // Filter by time range
     const timeRangeMap = {
-      '1d': 1, '7d': 7, '30d': 30, '90d': 90
+      '1d': 1, '7d': 7, '30d': 30, '90d': 90'
     }
     
     const days = timeRangeMap[timeRange] || 7
@@ -324,8 +324,8 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Analytics retrieval error:', error)
     return NextResponse.json({ 
-      error: 'Failed to retrieve analytics',
-      details: error instanceof Error ? error.message : 'Unknown error
+      error: 'Failed to retrieve analytics,'
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
 } 

@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
-    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined;
+    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined;'
     const status = searchParams.get('status');
     const category = searchParams.get('category');
 
@@ -15,59 +15,59 @@ export async function GET(request: NextRequest) {
     let data;
 
     switch (type) {
-      case 'users':
+      case 'users':'
         data = await demoContent.getDemoUsers(limit);
         break;
       
-      case 'projects':
+      case 'projects':'
         data = await demoContent.getDemoProjects(limit, status || undefined);
         break;
       
-      case 'posts':
+      case 'posts':'
         data = await demoContent.getDemoPosts(limit, category || undefined);
         break;
       
-      case 'files':
+      case 'files':'
         data = await demoContent.getDemoFiles(limit, category || undefined);
         break;
       
-      case 'transactions':
+      case 'transactions':'
         data = await demoContent.getDemoTransactions(limit, status || undefined);
         break;
       
-      case 'analytics':
+      case 'analytics':'
         data = await demoContent.getDemoAnalytics();
         break;
       
-      case 'images':
+      case 'images':'
         data = await demoContent.getDemoImages(limit);
         break;
       
-      case 'dashboard':
+      case 'dashboard':'
         data = await demoContent.generateDashboardData();
         break;
       
-      case 'community':
+      case 'community':'
         data = await demoContent.generateCommunityData();
         break;
       
-      case 'files-hub':
+      case 'files-hub':'
         data = await demoContent.generateFilesHubData();
         break;
       
-      case 'escrow':
+      case 'escrow':'
         data = await demoContent.generateEscrowData();
         break;
       
-      case 'trending-posts':
+      case 'trending-posts':'
         data = await demoContent.getTrendingPosts(limit || 20);
         break;
       
-      case 'top-creators':
+      case 'top-creators':'
         data = await demoContent.getTopCreators(limit || 10);
         break;
       
-      case 'recent-files':
+      case 'recent-files':'
         data = await demoContent.getRecentFiles(limit || 10);
         break;
       
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
             files: files.slice(0, 3),
             transactions: transactions.slice(0, 3)
           },
-          availableTypes: ['users', 'projects', 'posts', 'files', 'transactions', 'analytics', 'images', 'dashboard', 'community', 'files-hub', 'escrow', 'trending-posts', 'top-creators', 'recent-files
+          availableTypes: ['users', 'projects', 'posts', 'files', 'transactions', 'analytics', 'images', 'dashboard', 'community', 'files-hub', 'escrow', 'trending-posts', 'top-creators', 'recent-files'
           ]
         };
     }
@@ -113,8 +113,8 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to load demo content',
-      details: error instanceof Error ? error.message : 'Unknown error
+      error: 'Failed to load demo content,
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
@@ -127,15 +127,15 @@ export async function POST(request: NextRequest) {
     await demoContent.initialize();
 
     switch (action) {
-      case 'refresh':
+      case 'refresh':'
         demoContent.clearCache();
         await demoContent.initialize();
         return NextResponse.json({
           success: true,
-          message: 'Demo content cache refreshed
+          message: 'Demo content cache refreshed'
         });
       
-      case 'stats':
+      case 'stats':'
         const [users, projects, posts, files, transactions, analytics] = await Promise.all([
           demoContent.getDemoUsers(),
           demoContent.getDemoProjects(),
@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
       default:
         return NextResponse.json({
           success: false,
-          error: 'Invalid action
+          error: 'Invalid action'
         }, { status: 400 });
     }
 
@@ -169,8 +169,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to process demo content request',
-      details: error instanceof Error ? error.message : 'Unknown error
+      error: 'Failed to process demo content request,
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 } 

@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server
-import { clearAllRateLimits, rateLimitStore } from '@/app/lib/rate-limit-store
+import { NextRequest, NextResponse } from 'next/server'
+import { clearAllRateLimits, rateLimitStore } from '@/app/lib/rate-limit-store'
 
 export async function POST(request: NextRequest) {
   // Only allow clearing rate limits with admin key
   const adminKey = request.headers.get('x-admin-key')
-  if (adminKey !== 'test-admin-key') {
+  if (adminKey !== 'test-admin-key') {'
     console.log('Unauthorized attempt to clear rate limits')
     return NextResponse.json(
       { success: false, error: 'Unauthorized' },

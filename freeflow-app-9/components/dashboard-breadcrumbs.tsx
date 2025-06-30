@@ -1,8 +1,8 @@
-'use client
+'use client'
 
 import Link from 'next/link
 import { usePathname } from 'next/navigation
-import { ChevronRight } from 'lucide-react
+import { ChevronRight } from 'lucide-react'
 
 export function DashboardBreadcrumbs() {
   const pathname = usePathname()

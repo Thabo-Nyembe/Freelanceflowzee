@@ -1,6 +1,6 @@
-'use client
+'use client'
 
-import React, { useReducer, useState, useCallback } from 'react
+import React, { useReducer, useState, useCallback } from 'react'
  payload: FileItem }
   | { type: 'DELETE_FILE'; payload: string }
   | { type: 'TOGGLE_SELECTION'; payload: string }

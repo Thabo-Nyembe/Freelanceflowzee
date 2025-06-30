@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server
-import { createClient } from '@/lib/supabase/server
-import { cookies } from 'next/headers
-import OpenAI from 'openai
-import { aiConfig } from '@/app/config/ai
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
+import OpenAI from 'openai'
+import { aiConfig } from '@/app/config/ai'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -61,8 +61,8 @@ export async function POST(request: NextRequest) {
         messages: [
           {
             role: 'system',
-            content: type === 'code
-              ? 'You are a code generator. Provide only the code without any explanation.
+            content: type === 'code'
+              ? 'You are a code generator. Provide only the code without any explanation.'
               : 'You are a creative content generator. Generate high-quality content based on the prompt.',
           },
           { role: 'user', content: prompt },

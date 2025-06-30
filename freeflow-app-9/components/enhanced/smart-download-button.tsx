@@ -1,7 +1,7 @@
 // Context7 Enhanced Smart Download Button with External Links & Monetization
-'use client
+'use client'
 
-import React, { useState, useCallback } from 'react
+import React, { useState, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
  progress += 10) {
       await new Promise(resolve => setTimeout(resolve, 200))

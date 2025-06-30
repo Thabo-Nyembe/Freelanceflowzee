@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { Input } from '@/components/ui/input'
-import { DollarSign, CheckCircle, CreditCard, Shield, Clock, AlertCircle } from 'lucide-react'
+import { DollarSign, CheckCircle, CreditCard, Shield, Clock, AlertCircle, User, Calendar, Unlock, Lock, Download, FileText } from 'lucide-react'
 
 
 // Types
@@ -517,7 +517,8 @@ export default function EscrowPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Cross-Feature Navigation */}
+      {/* Cross-Feature Navigation - Temporarily commented out */}
+      {/*
       <div className="mt-12 pt-8 border-t border-gray-200">
         <FeatureNavigation 
           currentFeature="escrow"
@@ -526,6 +527,7 @@ export default function EscrowPage() {
           subtitle="Navigate to other platform features"
         />
       </div>
+      */}
     </div>
   )
 } 

@@ -1,6 +1,6 @@
-'use client
+'use client'
 
-import React, { useState } from 'react
+import React, { useState } from 'react'
 import ImageViewer from './image-viewer
 import VideoViewer from './video-viewer
 import AudioViewer from './audio-viewer

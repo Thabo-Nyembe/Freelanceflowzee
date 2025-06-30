@@ -1,49 +1,41 @@
-import { NextRequest, NextResponse } from 'next/server
-import { track } from '@vercel/analytics
+import { NextRequest, NextResponse } from 'next/server'
+import { track } from '@vercel/analytics'
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { event_type, event_name, properties = {} } = body
+    const { event_type, event_name, event_data } = await request.json()
 
-    // Validate required fields
     if (!event_type || !event_name) {
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Missing required fields: event_type, event_name' 
+          error: 'Missing required fields: event_type, event_name'
         },
         { status: 400 }
       )
     }
 
-    // Track with Vercel Analytics
-    track(event_name, {
+    // Simulate analytics tracking for demo
+    const analyticsEvent = {
+      id: `demo_${Date.now()}`,
       event_type,
-      ...properties,
+      event_name,
+      event_data: event_data || {},
       timestamp: new Date().toISOString(),
-      source: 'custom_api
-    })
-
-    // Generate mock analytics data for demo
-    const mockData = {
-      event_id: `demo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      tracked_with: 'vercel_analytics',
-      timestamp: new Date().toISOString(),
-      status: 'recorded
+      user_agent: request.headers.get('user-agent'),
+      ip_address: request.headers.get('x-forwarded-for') || 'demo'
     }
 
     return NextResponse.json({
       success: true,
-      data: mockData,
-      message: 'Event tracked with Vercel Analytics',
-      note: 'This is a demo endpoint. Data will appear in Vercel Analytics dashboard.
+      event: analyticsEvent,
+      message: 'Demo event tracked successfully'
     })
 
   } catch (error) {
-    console.error('Analytics demo API error:', error)
+    console.error('Demo analytics error:', error)
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: 'Failed to track demo event' },
       { status: 500 }
     )
   }
@@ -103,7 +95,7 @@ export async function GET() {
       }
     },
     message: 'Demo analytics data - Vercel Analytics is tracking real data',
-    note: 'Real analytics available in Vercel dashboard after deployment
+    note: 'Real analytics available in Vercel dashboard after deployment'
   }
 
   return NextResponse.json(mockAnalytics)

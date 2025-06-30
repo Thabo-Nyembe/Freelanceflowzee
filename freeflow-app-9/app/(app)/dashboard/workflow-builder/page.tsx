@@ -23,11 +23,11 @@ import {
   Plus,
   Settings,
   TrendingUp
-} from 'lucide-react
+} from 'lucide-react'
 
 interface WorkflowNode {
   id: string
-  type: 'trigger' | 'action' | 'condition' | 'delay
+  type: 'trigger' | 'action' | 'condition' | 'delay'
   title: string
   description: string
   icon: any
@@ -41,7 +41,7 @@ interface WorkflowTemplate {
   name: string
   description: string
   category: string
-  complexity: 'simple' | 'moderate' | 'advanced
+  complexity: 'simple' | 'moderate' | 'advanced'
   estimatedSavings: string
   nodes: WorkflowNode[]
   connections: Array<{ from: string; to: string }>
@@ -84,7 +84,7 @@ export default function WorkflowBuilderPage() {
           id: 'trigger-1',
           type: 'trigger',
           title: 'Project Status Changed',
-          description: 'Triggers when project status becomes "completed",
+          description: 'Triggers when project status becomes "completed"',
           icon: Target,
           position: { x: 100, y: 100 },
           data: { event: 'project.status.completed' },
@@ -506,7 +506,7 @@ export default function WorkflowBuilderPage() {
             <Badge className={
               template.complexity === 'simple' ? 'bg-green-100 text-green-800' :
               template.complexity === 'moderate' ? 'bg-yellow-100 text-yellow-800' :
-              'bg-red-100 text-red-800
+              'bg-red-100 text-red-800'
             }>
               {template.complexity}
             </Badge>
@@ -527,8 +527,8 @@ export default function WorkflowBuilderPage() {
         
         <Button 
           onClick={() => createFromTemplate(template)}
-          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white
-        >"
+          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Use Template
         </Button>
@@ -537,47 +537,47 @@ export default function WorkflowBuilderPage() {
   )
 
   const WorkflowBuilder = () => (
-    <div className= "fixed inset-0 bg-white/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className= "bg-white rounded-xl shadow-xl w-full max-w-6xl h-[80vh] flex flex-col">
-        <div className= "flex items-center justify-between p-6 border-b border-gray-200">
-          <div className= "flex items-center space-x-3">
-            <div className= "p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-              <Wand2 className= "h-5 w-5" />
+    <div className="fixed inset-0 bg-white/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-6xl h-[80vh] flex flex-col">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+              <Wand2 className="h-5 w-5" />
             </div>
             <div>
-              <h2 className= "text-xl font-bold text-gray-900">Workflow Builder</h2>
-              <p className= "text-sm text-gray-600">Create custom automation workflows</p>
+              <h2 className="text-xl font-bold text-gray-900">Workflow Builder</h2>
+              <p className="text-sm text-gray-600">Create custom automation workflows</p>
             </div>
           </div>
-          <div className= "flex items-center space-x-3">
-            <Button variant= "outline">
-              <Save className= "h-4 w-4 mr-2" />
+          <div className="flex items-center space-x-3">
+            <Button variant="outline">
+              <Save className="h-4 w-4 mr-2" />
               Save
             </Button>
             <Button 
-              variant= "ghost" 
+              variant="ghost" 
               onClick={() => setIsBuilderOpen(false)}
-              className= "text-gray-500
+              className="text-gray-500"
             >
               ✕
             </Button>
           </div>
         </div>
         
-        <div className= "flex-1 flex">
+        <div className="flex-1 flex">
           {/* Sidebar with components */}
-          <div className= "w-64 border-r border-gray-200 p-4 overflow-y-auto">
-            <div className= "space-y-4">
+          <div className="w-64 border-r border-gray-200 p-4 overflow-y-auto">
+            <div className="space-y-4">
               <div>
-                <h3 className= "font-semibold text-gray-900 mb-2">Triggers</h3>
-                <div className= "space-y-2">
+                <h3 className="font-semibold text-gray-900 mb-2">Triggers</h3>
+                <div className="space-y-2">
                   {availableTriggers.map((trigger) => (
-                    <div key={trigger.id} className= "p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                      <div className= "flex items-center space-x-2">
-                        <trigger.icon className= "h-4 w-4 text-blue-600" />
+                    <div key={trigger.id} className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                      <div className="flex items-center space-x-2">
+                        <trigger.icon className="h-4 w-4 text-blue-600" />
                         <div>
-                          <p className= "text-sm font-medium">{trigger.name}</p>
-                          <p className= "text-xs text-gray-600">{trigger.description}</p>
+                          <p className="text-sm font-medium">{trigger.name}</p>
+                          <p className="text-xs text-gray-600">{trigger.description}</p>
                         </div>
                       </div>
                     </div>
@@ -586,15 +586,15 @@ export default function WorkflowBuilderPage() {
               </div>
               
               <div>
-                <h3 className= "font-semibold text-gray-900 mb-2">Actions</h3>
-                <div className= "space-y-2">
+                <h3 className="font-semibold text-gray-900 mb-2">Actions</h3>
+                <div className="space-y-2">
                   {availableActions.map((action) => (
-                    <div key={action.id} className= "p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                      <div className= "flex items-center space-x-2">
-                        <action.icon className= "h-4 w-4 text-green-600" />
+                    <div key={action.id} className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                      <div className="flex items-center space-x-2">
+                        <action.icon className="h-4 w-4 text-green-600" />
                         <div>
-                          <p className= "text-sm font-medium">{action.name}</p>
-                          <p className= "text-xs text-gray-600">{action.description}</p>
+                          <p className="text-sm font-medium">{action.name}</p>
+                          <p className="text-xs text-gray-600">{action.description}</p>
                         </div>
                       </div>
                     </div>
@@ -605,12 +605,12 @@ export default function WorkflowBuilderPage() {
           </div>
           
           {/* Canvas area */}
-          <div className= "flex-1 bg-gray-50 relative">
-            <div className= "absolute inset-4 bg-white border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-              <div className= "text-center">
-                <Wand2 className= "h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className= "text-lg font-semibold text-gray-700 mb-2">Drag & Drop to Build</h3>
-                <p className= "text-gray-500">Drag triggers and actions from the sidebar to create your workflow</p>
+          <div className="flex-1 bg-gray-50 relative">
+            <div className="absolute inset-4 bg-white border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+              <div className="text-center">
+                <Wand2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Drag & Drop to Build</h3>
+                <p className="text-gray-500">Drag triggers and actions from the sidebar to create your workflow</p>
               </div>
             </div>
           </div>
@@ -627,136 +627,136 @@ export default function WorkflowBuilderPage() {
   })
 
   return (
-    <div className= "min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-      <div className= "container mx-auto p-6 space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+      <div className="container mx-auto p-6 space-y-8">
         {/* Header */}
-        <div className= "flex items-center justify-between">
-          <div className= "flex items-center space-x-4">
-            <div className= "p-3 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 text-white">
-              <Workflow className= "h-8 w-8" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+              <Workflow className="h-8 w-8" />
             </div>
             <div>
-              <h1 className= "text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Workflow Builder
               </h1>
-              <p className= "text-gray-600 mt-2 text-lg">
+              <p className="text-gray-600 mt-2 text-lg">
                 Create powerful automations to streamline your freelance business
               </p>
             </div>
           </div>
-          <div className= "flex items-center space-x-4">
+          <div className="flex items-center space-x-4">
             <Button
               onClick={() => setIsBuilderOpen(true)}
-              className= "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
             >
-              <Plus className= "h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 mr-2" />
               Create Workflow
             </Button>
-            <Button variant= "outline" className= "border-gray-300">
-              <Download className= "h-4 w-4 mr-2" />
+            <Button variant="outline" className="border-gray-300">
+              <Download className="h-4 w-4 mr-2" />
               Import
             </Button>
           </div>
         </div>
 
         {/* Stats Cards */}
-        <div className= "grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className= "bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-shadow">
-            <CardContent className= "p-4">
-              <div className= "flex items-center justify-between">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className= "text-blue-700 text-sm font-medium">Active Workflows</p>
-                  <p className= "text-2xl font-bold text-blue-900">8</p>
+                  <p className="text-blue-700 text-sm font-medium">Active Workflows</p>
+                  <p className="text-2xl font-bold text-blue-900">8</p>
                 </div>
-                <Play className= "h-8 w-8 text-blue-600" />
+                <Play className="h-8 w-8 text-blue-600" />
               </div>
             </CardContent>
           </Card>
           
-          <Card className= "bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-lg transition-shadow">
-            <CardContent className= "p-4">
-              <div className= "flex items-center justify-between">
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-lg transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className= "text-green-700 text-sm font-medium">Time Saved</p>
-                  <p className= "text-2xl font-bold text-green-900">24.5h</p>
+                  <p className="text-green-700 text-sm font-medium">Time Saved</p>
+                  <p className="text-2xl font-bold text-green-900">24.5h</p>
                 </div>
-                <Clock className= "h-8 w-8 text-green-600" />
+                <Clock className="h-8 w-8 text-green-600" />
               </div>
             </CardContent>
           </Card>
           
-          <Card className= "bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:shadow-lg transition-shadow">
-            <CardContent className= "p-4">
-              <div className= "flex items-center justify-between">
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:shadow-lg transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className= "text-purple-700 text-sm font-medium">Success Rate</p>
-                  <p className= "text-2xl font-bold text-purple-900">94.8%</p>
+                  <p className="text-purple-700 text-sm font-medium">Success Rate</p>
+                  <p className="text-2xl font-bold text-purple-900">94.8%</p>
                 </div>
-                <CheckCircle2 className= "h-8 w-8 text-purple-600" />
+                <CheckCircle2 className="h-8 w-8 text-purple-600" />
               </div>
             </CardContent>
           </Card>
           
-          <Card className= "bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 hover:shadow-lg transition-shadow">
-            <CardContent className= "p-4">
-              <div className= "flex items-center justify-between">
+          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 hover:shadow-lg transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className= "text-orange-700 text-sm font-medium">Total Executions</p>
-                  <p className= "text-2xl font-bold text-orange-900">1,247</p>
+                  <p className="text-orange-700 text-sm font-medium">Total Executions</p>
+                  <p className="text-2xl font-bold text-orange-900">1,247</p>
                 </div>
-                <BarChart3 className= "h-8 w-8 text-orange-600" />
+                <BarChart3 className="h-8 w-8 text-orange-600" />
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className= "w-full">
-          <TabsList className= "grid w-full grid-cols-3 bg-white shadow-sm">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 bg-white shadow-sm">
             <TabsTrigger 
-              value= "workflows" 
-              className= "data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white
+              value="workflows" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white"
             >
-              <Workflow className= "h-4 w-4 mr-2" />
+              <Workflow className="h-4 w-4 mr-2" />
               My Workflows
             </TabsTrigger>
             <TabsTrigger 
-              value= "templates" 
-              className= "data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white
+              value="templates" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white"
             >
-              <Sparkles className= "h-4 w-4 mr-2" />
+              <Sparkles className="h-4 w-4 mr-2" />
               Templates
             </TabsTrigger>
             <TabsTrigger 
-              value= "analytics" 
-              className= "data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white
+              value="analytics" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white"
             >
-              <BarChart3 className= "h-4 w-4 mr-2" />
+              <BarChart3 className="h-4 w-4 mr-2" />
               Analytics
             </TabsTrigger>
           </TabsList>
 
           {/* My Workflows Tab */}
-          <TabsContent value= "workflows" className= "space-y-6 mt-6">
-            <div className= "flex items-center justify-between">
-              <div className= "flex items-center space-x-4">
-                <div className= "relative">
-                  <Search className= "h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <TabsContent value="workflows" className="space-y-6 mt-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <Input
-                    placeholder= "Search workflows...
+                    placeholder="Search workflows..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className= "pl-10 w-64
+                    className="pl-10 w-64"
                   />
                 </div>
-                <Button variant= "outline">
-                  <Filter className= "h-4 w-4 mr-2" />
+                <Button variant="outline">
+                  <Filter className="h-4 w-4 mr-2" />
                   Filter
                 </Button>
               </div>
             </div>
             
-            <div className= "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {myWorkflows.map((workflow) => (
                 <WorkflowCard key={workflow.id} workflow={workflow} />
               ))}
@@ -764,34 +764,34 @@ export default function WorkflowBuilderPage() {
           </TabsContent>
 
           {/* Templates Tab */}
-          <TabsContent value= "templates" className= "space-y-6 mt-6">
-            <div className= "flex items-center justify-between">
-              <div className= "flex items-center space-x-4">
-                <div className= "relative">
-                  <Search className= "h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <TabsContent value="templates" className="space-y-6 mt-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <Input
-                    placeholder= "Search templates...
+                    placeholder="Search templates..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className= "pl-10 w-64
+                    className="pl-10 w-64"
                   />
                 </div>
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className= "w-48">
-                    <SelectValue placeholder= "All Categories" />
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="All Categories" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value= "all">All Categories</SelectItem>
-                    <SelectItem value= "invoicing">Invoicing</SelectItem>
-                    <SelectItem value= "client-management">Client Management</SelectItem>
-                    <SelectItem value= "project-tracking">Project Tracking</SelectItem>
-                    <SelectItem value= "time-management">Time Management</SelectItem>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    <SelectItem value="invoicing">Invoicing</SelectItem>
+                    <SelectItem value="client-management">Client Management</SelectItem>
+                    <SelectItem value="project-tracking">Project Tracking</SelectItem>
+                    <SelectItem value="time-management">Time Management</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             
-            <div className= "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredTemplates.map((template) => (
                 <TemplateCard key={template.id} template={template} />
               ))}
@@ -799,44 +799,44 @@ export default function WorkflowBuilderPage() {
           </TabsContent>
 
           {/* Analytics Tab */}
-          <TabsContent value= "analytics" className= "space-y-6 mt-6">
-            <div className= "grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className= "p-6">
-                <h3 className= "font-semibold text-gray-900 mb-4">Workflow Performance</h3>
-                <div className= "space-y-4">
+          <TabsContent value="analytics" className="space-y-6 mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="p-6">
+                <h3 className="font-semibold text-gray-900 mb-4">Workflow Performance</h3>
+                <div className="space-y-4">
                   {myWorkflows.map((workflow) => (
-                    <div key={workflow.id} className= "flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div key={workflow.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div>
-                        <h4 className= "font-medium">{workflow.name}</h4>
-                        <p className= "text-sm text-gray-600">{workflow.totalRuns} executions</p>
+                        <h4 className="font-medium">{workflow.name}</h4>
+                        <p className="text-sm text-gray-600">{workflow.totalRuns} executions</p>
                       </div>
-                      <div className= "text-right">
-                        <p className= "font-semibold text-green-600">{workflow.successRate}%</p>
-                        <p className= "text-sm text-gray-600">success rate</p>
+                      <div className="text-right">
+                        <p className="font-semibold text-green-600">{workflow.successRate}%</p>
+                        <p className="text-sm text-gray-600">success rate</p>
                       </div>
                     </div>
                   ))}
                 </div>
               </Card>
               
-              <Card className= "p-6">
-                <h3 className= "font-semibold text-gray-900 mb-4">Time & Cost Savings</h3>
-                <div className= "space-y-4">
-                  <div className= "flex justify-between items-center">
-                    <span className= "text-gray-600">Total Time Saved</span>
-                    <span className= "text-2xl font-bold text-green-600">24.5 hours</span>
+              <Card className="p-6">
+                <h3 className="font-semibold text-gray-900 mb-4">Time & Cost Savings</h3>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Total Time Saved</span>
+                    <span className="text-2xl font-bold text-green-600">24.5 hours</span>
                   </div>
-                  <div className= "flex justify-between items-center">
-                    <span className= "text-gray-600">Estimated Cost Savings</span>
-                    <span className= "text-2xl font-bold text-green-600">$3,062</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Estimated Cost Savings</span>
+                    <span className="text-2xl font-bold text-green-600">$3,062</span>
                   </div>
-                  <div className= "flex justify-between items-center">
-                    <span className= "text-gray-600">Tasks Automated</span>
-                    <span className= "text-2xl font-bold text-blue-600">1,247</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Tasks Automated</span>
+                    <span className="text-2xl font-bold text-blue-600">1,247</span>
                   </div>
-                  <div className= "flex justify-between items-center">
-                    <span className= "text-gray-600">ROI</span>
-                    <span className= "text-2xl font-bold text-purple-600">2,840%</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">ROI</span>
+                    <span className="text-2xl font-bold text-purple-600">2,840%</span>
                   </div>
                 </div>
               </Card>

@@ -1,8 +1,8 @@
-'use client
+'use client'
 
-import React, { useState, useEffect, useRef, memo } from 'react
+import React, { useState, useEffect, useRef, memo } from 'react'
 import Image from 'next/image
-import { cn } from '@/lib/utils
+import { cn } from '@/lib/utils'
 
 // Enhanced Optimized Image Component for Phase 9
 interface OptimizedImageProps {

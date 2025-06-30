@@ -1,7 +1,7 @@
 // Context7 Enhanced Revenue Analytics with Monetization Tracking
-'use client
+'use client'
 
-import React, { useReducer, useCallback, useEffect } from 'react
+import React, { useReducer, useCallback, useEffect } from 'react'
  payload: Partial<RevenueState['engagement']> }
   | { type: &apos;UPDATE_MONETIZATION&apos;; payload: Partial<RevenueState['monetization']> }
   | { type: &apos;UPDATE_ANALYTICS&apos;; payload: Partial<RevenueState['analytics']> }

@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server
-import { createClient } from '@/lib/supabase/server
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET() {
   try {
@@ -67,8 +67,8 @@ export async function POST(request: NextRequest) {
     // Basic validation
     if (!body.title || !body.description) {
       return NextResponse.json({ 
-        error: 'Title and description are required',
-        details: 'Both title and description must be provided
+        error: 'Title and description are required,'
+        details: 'Both title and description must be provided'
       }, { status: 400 })
     }
 
@@ -79,10 +79,10 @@ export async function POST(request: NextRequest) {
       client_name: body.client_name || null,
       client_email: body.client_email || null,
       budget: body.budget || 0,
-      priority: body.priority || 'medium',
+      priority: body.priority || 'medium,'
       start_date: body.start_date || null,
       end_date: body.end_date || null,
-      status: 'active',
+      status: 'active,'
       progress: 0,
       spent: 0,
       user_id: user.id,

@@ -17,11 +17,11 @@ export async function GET() {
       potentialSavings: 0
     };
 
-    // Mock health check since the function doesn't return anything useful
+    // Mock health check since the function doesn't return anything useful'
     const healthCheck = { 
-      status: 'healthy',
+      status: 'healthy,'
       supabase: { status: 'connected' },
-      wasabi: { status: 'connected' }
+      wasabi: { status: 'connected' }'
     };
 
     // Calculate cost savings insights using the correct properties
@@ -32,9 +32,9 @@ export async function GET() {
         ? Math.round((mockAnalytics.potentialSavings / supabaseCost) * 100)
         : 0,
       recommendedActions: [
-        mockAnalytics.totalFiles > 50 ? 'Consider moving large files to Wasabi for cost savings' : null,
-        mockAnalytics.wasabiSize > 0 ? 'Excellent cost optimization with Wasabi usage!' : null,
-        mockAnalytics.totalSize > 1e10 ? 'Large storage usage - Wasabi can save up to 80%' : null
+        mockAnalytics.totalFiles > 50 ? 'Consider moving large files to Wasabi for cost savings' : null,'
+        mockAnalytics.wasabiSize > 0 ? 'Excellent cost optimization with Wasabi usage!' : null,'
+        mockAnalytics.totalSize > 1e10 ? 'Large storage usage - Wasabi can save up to 80%' : null'
       ].filter(Boolean)
     };
 
@@ -44,10 +44,10 @@ export async function GET() {
       healthCheck,
       insights,
       status: {
-        overall: 'healthy',
+        overall: 'healthy,'
         providers: {
-          supabase: 'connected',
-          wasabi: 'connected
+          supabase: 'connected,'
+          wasabi: 'connected'
         }
       }
     });
@@ -55,18 +55,18 @@ export async function GET() {
   } catch (error) {
     console.error('Analytics error:', error);
     return NextResponse.json({
-      error: error instanceof Error ? error.message : 'Failed to fetch analytics
+      error: error instanceof Error ? error.message : 'Failed to fetch analytics'
     }, { status: 500 });
   }
 }
 
 export async function POST() {
   try {
-    // Mock optimization since the method doesn't exist
+    // Mock optimization since the method doesn't exist'
     const optimization = {
       moved: 0,
       saved: 0,
-      message: 'Storage optimization functionality coming soon
+      message: 'Storage optimization functionality coming soon'
     };
     
     return NextResponse.json({
@@ -78,7 +78,7 @@ export async function POST() {
   } catch (error) {
     console.error('Optimization error:', error);
     return NextResponse.json({
-      error: error instanceof Error ? error.message : 'Optimization failed
+      error: error instanceof Error ? error.message : 'Optimization failed'
     }, { status: 500 });
   }
 } 

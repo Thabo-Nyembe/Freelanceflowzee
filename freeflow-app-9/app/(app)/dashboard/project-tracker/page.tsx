@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 
 interface ProjectUpdate {
   id: string
-  type: 'milestone' | 'comment' | 'file' | 'status
+  type: 'milestone' | 'comment' | 'file' | 'status'
   title: string
   content: string
   timestamp: string
@@ -24,10 +24,12 @@ interface ProjectMilestone {
 interface Project {
   id: string
   title: string
-  status: 'active' | 'completed' | 'paused
+  status: 'active' | 'completed' | 'paused'
   progress: number
   milestones: ProjectMilestone[]
   updates: ProjectUpdate[]
+  client: string
+  deadline: string
 }
 
 export default function ProjectTrackerPage() {
@@ -43,7 +45,7 @@ export default function ProjectTrackerPage() {
           title: 'Initial Concepts',
           description: 'Create initial design concepts',
           completed: true,
-          dueDate: '2024-01-15
+          dueDate: '2024-01-15'
         }
       ],
       updates: [
@@ -52,9 +54,11 @@ export default function ProjectTrackerPage() {
           type: 'milestone',
           title: 'Milestone Completed',
           content: 'Initial concepts completed',
-          timestamp: '2024-01-16T10:00:00Z
+          timestamp: '2024-01-16T10:00:00Z'
         }
-      ]
+      ],
+      client: 'ABC Corp',
+      deadline: '2024-03-31'
     }
   ])
 
@@ -70,12 +74,12 @@ export default function ProjectTrackerPage() {
                 <Badge variant="default">{project.status}</Badge>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
-                    className="bg-blue-600 h-2 rounded-full
+                    className="bg-blue-600 h-2 rounded-full"
                     style={{ width: project.progress + '%' }}
                   ></div>
                 </div>
               </CardHeader>
-              <CardContent>"
+              <CardContent>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <h3 className="font-semibold mb-3">Milestones</h3>

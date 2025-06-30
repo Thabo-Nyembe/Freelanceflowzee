@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useCallback } from 'react
+import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { Upload, X, CheckCircle, AlertCircle } from 'lucide-react
+import { Upload, X, CheckCircle, AlertCircle } from 'lucide-react'
 import { createBrowserClient } from '@supabase/ssr
 
 interface FileUploadDialogProps {
