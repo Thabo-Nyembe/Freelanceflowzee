@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { MobileMenu } from '@/components/mobile-menu'
 
 const navigation = [
   { name: 'Features', href: '/features', testId: 'nav-features' },
@@ -17,6 +18,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" data-testid="site-header">
       <nav className="container flex h-14 items-center justify-between" data-testid="navigation">
         <div className="flex items-center gap-6">
+          <MobileMenu />
           <Link href="/" data-testid="nav-logo">
             <span className="text-xl font-bold">FreeflowZee</span>
           </Link>
@@ -35,7 +37,7 @@ export function SiteHeader() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-2">
           <Button asChild variant="ghost" size="sm" data-testid="nav-login">
             <Link href="/login">Log in</Link>
           </Button>
