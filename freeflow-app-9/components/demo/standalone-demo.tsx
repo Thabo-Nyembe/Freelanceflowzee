@@ -1,7 +1,7 @@
-'use client'
+'use client''
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';'
+import { Button } from '@/components/ui/button';'
 
 // Built-in demo data
 const demoData = {
@@ -70,12 +70,12 @@ export function StandaloneDemo() {
     {
       id: "client",
       title: "Client Presentation",
-      description: "Showcase our platform's capabilities to potential clients",
+      description: "Showcase our platform's capabilities to potential clients",'
       icon: Users,
       color: "bg-blue-500",
       audience: "Business clients, decision makers",
       duration: "10-15 minutes",
-      type: "client
+      type: 'client'
     },
     {
       id: "investor",
@@ -85,7 +85,7 @@ export function StandaloneDemo() {
       color: "bg-green-500",
       audience: "Investors, stakeholders",
       duration: "15-20 minutes",
-      type: "investor
+      type: 'investor'
     },
     {
       id: "features",
@@ -95,76 +95,76 @@ export function StandaloneDemo() {
       color: "bg-purple-500",
       audience: "Product evaluators, new users",
       duration: "12-18 minutes",
-      type: "features
+      type: 'features'
     }
   ];
 
   const clientSlides = [
     {
       title: "FreeflowZee: Your Complete Freelance Solution",
-      content: "overview
+      content: 'overview'
     },
     {
       title: "Proven Results & Success Metrics", 
-      content: "metrics
+      content: 'metrics'
     },
     {
       title: "Project Portfolio Showcase",
-      content: "portfolio
+      content: 'portfolio'
     },
     {
       title: "Client Success Stories",
-      content: "testimonials
+      content: 'testimonials'
     },
     {
       title: "Ready to Get Started?",
-      content: "cta
+      content: 'cta'
     }
   ];
 
   const investorSlides = [
     {
       title: "Market Opportunity & Growth",
-      content: "market
+      content: 'market'
     },
     {
       title: "Platform Metrics & Traction",
-      content: "traction
+      content: 'traction'
     },
     {
       title: "Revenue Model & Projections",
-      content: "revenue
+      content: 'revenue'
     },
     {
       title: "Competitive Advantage",
-      content: "advantage
+      content: 'advantage'
     },
     {
       title: "Growth Strategy & Roadmap",
-      content: "roadmap
+      content: 'roadmap'
     }
   ];
 
   const featureSlides = [
     {
       title: "Project Management Hub",
-      content: "projects
+      content: 'projects'
     },
     {
       title: "Secure Escrow System",
-      content: "escrow
+      content: 'escrow'
     },
     {
       title: "AI-Powered Tools",
-      content: "ai
+      content: 'ai'
     },
     {
       title: "Community & Collaboration",
-      content: "community
+      content: 'community'
     },
     {
       title: "Analytics & Reporting",
-      content: "analytics
+      content: 'analytics'
     }
   ];
 
@@ -172,8 +172,8 @@ export function StandaloneDemo() {
     const slide = clientSlides[currentSlide];
     
     switch (slide.content) {
-      case 'overview':
-        return (
+      case 'overview': "
+        return ("
           <div className= "text-center space-y-6">
             <div className= "bg-gradient-to-r from-blue-500 to-purple-600 text-white p-8 rounded-xl">
               <h2 className= "text-3xl font-bold mb-4">Welcome to FreeflowZee</h2>
@@ -205,8 +205,8 @@ export function StandaloneDemo() {
           </div>
         );
 
-      case 'metrics':
-        return (
+      case 'metrics': "
+        return ("
           <div className= "space-y-6">
             <h2 className= "text-2xl font-bold text-center mb-6">Platform Performance</h2>
             <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -246,8 +246,8 @@ export function StandaloneDemo() {
           </div>
         );
 
-      case 'portfolio':
-        return (
+      case 'portfolio': "
+        return ("
           <div className= "space-y-6">
             <h2 className= "text-2xl font-bold text-center mb-6">Featured Projects</h2>
             <div className= "grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -279,8 +279,8 @@ export function StandaloneDemo() {
           </div>
         );
 
-      case 'testimonials':
-        return (
+      case 'testimonials': "
+        return ("
           <div className= "space-y-6">
             <h2 className= "text-2xl font-bold text-center mb-6">What Our Clients Say</h2>
             <div className= "grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -301,8 +301,8 @@ export function StandaloneDemo() {
           </div>
         );
 
-      case 'cta':
-        return (
+      case 'cta': "
+        return ("
           <div className= "text-center space-y-6">
             <div className= "bg-gradient-to-r from-purple-500 to-blue-600 text-white p-8 rounded-xl">
               <h2 className= "text-3xl font-bold mb-4">Ready to Start Your Next Project?</h2>
@@ -329,8 +329,8 @@ export function StandaloneDemo() {
     const slide = investorSlides[currentSlide];
     
     switch (slide.content) {
-      case 'market':
-        return (
+      case 'market': "
+        return ("
           <div className= "space-y-6">
             <h2 className= "text-2xl font-bold text-center mb-6">Global Freelance Market Opportunity</h2>
             <div className= "grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -372,8 +372,8 @@ export function StandaloneDemo() {
           </div>
         );
 
-      case 'traction':
-        return (
+      case 'traction': "
+        return ("
           <div className= "space-y-6">
             <h2 className= "text-2xl font-bold text-center mb-6">Platform Growth & Metrics</h2>
             <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -427,8 +427,8 @@ export function StandaloneDemo() {
           </div>
         );
 
-      case 'revenue':
-        return (
+      case 'revenue': "
+        return ("
           <div className= "space-y-6">
             <h2 className= "text-2xl font-bold text-center mb-6">Revenue Model & Projections</h2>
             <div className= "grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -489,8 +489,8 @@ export function StandaloneDemo() {
           </div>
         );
 
-      case 'advantage':
-        return (
+      case 'advantage': "
+        return ("
           <div className= "space-y-6">
             <h2 className= "text-2xl font-bold text-center mb-6">Competitive Advantages</h2>
             <div className= "grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -538,8 +538,8 @@ export function StandaloneDemo() {
           </div>
         );
 
-      case 'roadmap':
-        return (
+      case 'roadmap': "
+        return ("
           <div className= "space-y-6">
             <h2 className= "text-2xl font-bold text-center mb-6">Growth Strategy & Roadmap</h2>
             <div className= "space-y-4">
@@ -601,8 +601,8 @@ export function StandaloneDemo() {
     const slide = featureSlides[currentSlide];
     
     switch (slide.content) {
-      case 'projects':
-        return (
+      case 'projects': "
+        return ("
           <div className= "space-y-6">
             <h2 className= "text-2xl font-bold text-center mb-6">Project Management Hub</h2>
             <div className= "grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -644,8 +644,8 @@ export function StandaloneDemo() {
           </div>
         );
 
-      case 'escrow':
-        return (
+      case 'escrow': "
+        return ("
           <div className= "space-y-6">
             <h2 className= "text-2xl font-bold text-center mb-6">Secure Escrow System</h2>
             <Card>
@@ -672,8 +672,8 @@ export function StandaloneDemo() {
           </div>
         );
 
-      case 'ai':
-        return (
+      case 'ai': "
+        return ("
           <div className= "space-y-6">
             <h2 className= "text-2xl font-bold text-center mb-6">AI-Powered Tools</h2>
             <div className= "grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -701,8 +701,8 @@ export function StandaloneDemo() {
           </div>
         );
 
-      case 'community':
-        return (
+      case 'community': "
+        return ("
           <div className= "space-y-6">
             <h2 className= "text-2xl font-bold text-center mb-6">Community Features</h2>
             <div className= "grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -731,8 +731,8 @@ export function StandaloneDemo() {
           </div>
         );
 
-      case 'analytics':
-        return (
+      case 'analytics': "
+        return ("
           <div className= "space-y-6">
             <h2 className= "text-2xl font-bold text-center mb-6">Analytics & Reporting</h2>
             <div className= "grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -781,24 +781,24 @@ export function StandaloneDemo() {
 
   const renderCurrentDemo = () => {
     switch (currentDemo) {
-      case 'client':
-        return renderClientSlide();
-      case 'investor':
-        return renderInvestorSlide();
-      case 'features':
+      case 'client': "
+        return renderClientSlide();"
+      case 'investor': "
+        return renderInvestorSlide();"
+      case 'features': "
         return renderFeatureSlide();
       default:
-        return (
+        return ("
           <div className= "grid grid-cols-1 md:grid-cols-3 gap-6">
             {demoTypes.map((demo) => (
               <Card 
                 key={demo.id}
-                className= "hover:shadow-lg transition-shadow cursor-pointer
+                className="hover:shadow-lg transition-shadow cursor-pointer
                 onClick={() => {
                   setCurrentDemo(demo.id);
                   setCurrentSlide(0);
                 }}
-              >
+              >"
                 <CardContent className= "p-6">
                   <demo.icon className={`h-12 w-12 mb-4 ${demo.color} text-white rounded-lg p-2`} />
                   <h3 className= "text-xl font-bold mb-2">{demo.title}</h3>
@@ -821,7 +821,7 @@ export function StandaloneDemo() {
     }
   };
 
-  if (currentDemo === 'client') {
+  if (currentDemo === 'client') {'
     return (
       <div className= "min-h-screen bg-gray-50">
         <div className= "p-4 bg-white border-b shadow-sm">

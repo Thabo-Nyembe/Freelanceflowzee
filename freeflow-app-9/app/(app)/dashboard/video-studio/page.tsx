@@ -22,11 +22,11 @@ export default function VideoStudioPage() {
   const currentUser = { id: '1', name: 'User', email: 'user@example.com' }
   
   const handleRecordingComplete = (data: any) => {
-    console.log('Recording completed:', data)
+    console.log('Recording completed: ', data)
   }
   
   const handleShare = (data: any) => {
-    console.log('Sharing:', data)
+    console.log('Sharing: ', data)
   }
 
   return (
@@ -49,7 +49,7 @@ export default function VideoStudioPage() {
             console.log('Opening recording interface');
             alert('Recording interface opened!');
           }}
-        >
+        >"
           <CardContent className="p-6 text-center">
             <div className="w-12 h-12 bg-red-500 text-white rounded-xl flex items-center justify-center mx-auto mb-3">
               <Monitor className="h-6 w-6" />
@@ -66,7 +66,7 @@ export default function VideoStudioPage() {
             console.log('Opening video editor');
             alert('Video editor opened!');
           }}
-        >
+        >"
           <CardContent className="p-6 text-center">
             <div className="w-12 h-12 bg-blue-500 text-white rounded-xl flex items-center justify-center mx-auto mb-3">
               <Camera className="h-6 w-6" />
@@ -83,7 +83,7 @@ export default function VideoStudioPage() {
             console.log('Opening upload dialog');
             alert('Upload dialog opened!');
           }}
-        >
+        >"
           <CardContent className="p-6 text-center">
             <div className="w-12 h-12 bg-purple-500 text-white rounded-xl flex items-center justify-center mx-auto mb-3">
               <Video className="h-6 w-6" />
@@ -100,7 +100,7 @@ export default function VideoStudioPage() {
             console.log('Opening share options');
             alert('Share options opened!');
           }}
-        >
+        >"
           <CardContent className="p-6 text-center">
             <div className="w-12 h-12 bg-emerald-500 text-white rounded-xl flex items-center justify-center mx-auto mb-3">
               <Users className="h-6 w-6" />
@@ -133,7 +133,7 @@ export default function VideoStudioPage() {
                   console.log('Opening export dialog');
                   alert('Export dialog opened!');
                 }}
-              >
+              >"
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
@@ -165,7 +165,7 @@ export default function VideoStudioPage() {
 
         <TabsContent value="projects" className="mt-6">
           <EnterpriseVideoStudio
-            projectId="current-project"
+            projectId="current-project
             currentUser={currentUser}
             onRecordingComplete={handleRecordingComplete}
             onShare={handleShare}
@@ -176,9 +176,9 @@ export default function VideoStudioPage() {
           <div className="space-y-6">
             {/* AI Recording System */}
             <AIVideoRecordingSystem
-              projectId="current-project"
+              projectId="current-project
               currentUser={currentUser}
-              onSave={(data) => console.log('Saved:', data)}
+              onSave={(data) => console.log('Saved: ', data)}'
               onShare={handleShare}
             />
 

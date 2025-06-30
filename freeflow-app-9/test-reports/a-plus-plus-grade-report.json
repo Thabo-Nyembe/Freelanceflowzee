@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-06-27T12:32:13.823Z",
+  "timestamp": "2025-06-30T21:00:25.786Z",
   "summary": {
     "total": 18,
     "passed": 12,
@@ -100,11 +100,11 @@
     }
   ],
   "testUrls": {
-    "landing": "http://localhost:3001",
-    "dashboard": "http://localhost:3001/dashboard",
-    "features": "http://localhost:3001/demo-features",
-    "payment": "http://localhost:3001/payment",
-    "apiDocs": "http://localhost:3001/api-docs",
-    "community": "http://localhost:3001/community"
+    "landing": "http://localhost:3000",
+    "dashboard": "http://localhost:3000/dashboard",
+    "features": "http://localhost:3000/demo-features",
+    "payment": "http://localhost:3000/payment",
+    "apiDocs": "http://localhost:3000/api-docs",
+    "community": "http://localhost:3000/community"
   }
 }

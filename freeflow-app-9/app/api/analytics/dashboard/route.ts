@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     
     const url = new URL(request.url)
     const userId = user.id
-    const timeRange = url.searchParams.get('timeRange') || 'week'
+    const timeRange = url.searchParams.get('timeRange') || 'week
     const metric = url.searchParams.get('metric')
     
     try {
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
       })
       
     } catch (error) {
-      console.error('Analytics error:', error)
+      console.error('Analytics error: ', error)'
       return NextResponse.json(
         { 
           success: false, 
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
     }
     
   } catch (error) {
-    console.error('Database connection error:', error)
+    console.error('Database connection error: ', error)'
     return NextResponse.json(
       { success: false, error: 'Database connection failed' },
       { status: 500 }
@@ -103,7 +103,7 @@ async function getDashboardSummary(supabase: any, userId: string, timeRange: str
     
     return data || getDefaultSummary()
   } catch (error) {
-    console.error('Failed to get summary:', error)
+    console.error('Failed to get summary: ', error)'
     return getDefaultSummary()
   }
 }
@@ -134,7 +134,7 @@ async function getChartData(supabase: any, userId: string, timeRange: string) {
       breakdown: events ? getEventTypeBreakdown(events) : []
     }
   } catch (error) {
-    console.error('Failed to get chart data:', error)
+    console.error('Failed to get chart data: ', error)'
     return {
       events: [],
       revenue: [],
@@ -160,7 +160,7 @@ async function getTopPages(supabase: any, userId: string, timeRange: string) {
     // Count page visits
     const pageMap = new Map()
     data.forEach((event: any) => {
-      const path = event.properties?.path || new URL(event.page_url || '').pathname || '/'
+      const path = event.properties?.path || new URL(event.page_url || '').pathname || '/
       pageMap.set(path, (pageMap.get(path) || 0) + 1)
     })
     
@@ -169,7 +169,7 @@ async function getTopPages(supabase: any, userId: string, timeRange: string) {
       .sort((a, b) => b.visits - a.visits)
       .slice(0, 10)
   } catch (error) {
-    console.error('Failed to get top pages:', error)
+    console.error('Failed to get top pages: ', error)'
     return []
   }
 }
@@ -190,7 +190,7 @@ async function getUserActivity(supabase: any, userId: string, timeRange: string)
       hours_active: 0
     }
   } catch (error) {
-    console.error('Failed to get user activity:', error)
+    console.error('Failed to get user activity: ', error)'
     return {
       sessions: 0,
       page_views: 0,
@@ -221,7 +221,7 @@ async function getPerformanceMetrics(supabase: any, userId: string, timeRange: s
       total_measurements: 0
     }
   } catch (error) {
-    console.error('Failed to get performance metrics:', error)
+    console.error('Failed to get performance metrics: ', error)'
     return {
       avg_page_load_time: 0,
       avg_dom_load_time: 0,
@@ -243,7 +243,7 @@ async function getRealtimeData(supabase: any, userId: string) {
     
     return data || getDefaultRealtime()
   } catch (error) {
-    console.error('Failed to get realtime data:', error)
+    console.error('Failed to get realtime data: ', error)'
     return getDefaultRealtime()
   }
 }
@@ -365,7 +365,7 @@ export async function POST(request: NextRequest) {
           COUNT(DISTINCT session_id) as unique_sessions
         FROM analytics_events 
         WHERE user_id = $1 
-          AND event_type = 'user_action'
+          AND event_type = 'user_action
           AND timestamp >= $2
         GROUP BY event_name
         ORDER BY count DESC
@@ -407,7 +407,7 @@ export async function POST(request: NextRequest) {
     })
     
     if (error) {
-      console.error('Query execution error:', error)
+      console.error('Query execution error: ', error)'
       return NextResponse.json(
         { success: false, error: 'Query execution failed' },
         { status: 500 }
@@ -422,7 +422,7 @@ export async function POST(request: NextRequest) {
     })
     
   } catch (error) {
-    console.error('Analytics POST error:', error)
+    console.error('Analytics POST error: ', error)'
     return NextResponse.json(
       { success: false, error: 'Failed to execute query' },
       { status: 500 }

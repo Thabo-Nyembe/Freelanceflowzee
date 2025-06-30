@@ -1,8 +1,8 @@
-'use client'
+'use client''
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { useDashboardMetrics, useDemoContent } from '@/components/dashboard/demo-content-provider';
+import React, { useState } from 'react';'
+import { Button } from '@/components/ui/button';'
+import { useDashboardMetrics, useDemoContent } from '@/components/dashboard/demo-content-provider';'
 
 export function ClientPresentationDemo() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -13,27 +13,27 @@ export function ClientPresentationDemo() {
     {
       title: "FreeflowZee: Your Complete Freelance Solution",
       content: "overview",
-      description: "Comprehensive platform for project management and collaboration
+      description: 'Comprehensive platform for project management and collaboration'
     },
     {
       title: "Proven Results & Success Metrics", 
       content: "metrics",
-      description: "Real performance data from our thriving community
+      description: 'Real performance data from our thriving community'
     },
     {
       title: "Project Portfolio Showcase",
       content: "portfolio", 
-      description: "Successful projects delivered through our platform
+      description: 'Successful projects delivered through our platform'
     },
     {
       title: "Client Success Stories",
       content: "testimonials",
-      description: "What our clients say about working with our freelancers
+      description: 'What our clients say about working with our freelancers'
     },
     {
       title: "Ready to Get Started?",
       content: "cta",
-      description: "Join thousands of satisfied clients and freelancers
+      description: 'Join thousands of satisfied clients and freelancers'
     }
   ];
 
@@ -41,8 +41,8 @@ export function ClientPresentationDemo() {
     const slide = slides[currentSlide];
     
     switch (slide.content) {
-      case 'overview':
-        return (
+      case 'overview': "
+        return ("
           <div className= "text-center space-y-6">
             <div className= "bg-gradient-to-r from-blue-500 to-purple-600 text-white p-8 rounded-xl">
               <h2 className= "text-3xl font-bold mb-4">Welcome to FreeflowZee</h2>
@@ -74,8 +74,8 @@ export function ClientPresentationDemo() {
           </div>
         );
 
-      case 'metrics':
-        return (
+      case 'metrics': "
+        return ("
           <div className= "space-y-6">
             <h2 className= "text-2xl font-bold text-center mb-6">Platform Performance</h2>
             <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -115,8 +115,8 @@ export function ClientPresentationDemo() {
           </div>
         );
 
-      case 'portfolio':
-        return (
+      case 'portfolio': "
+        return ("
           <div className= "space-y-6">
             <h2 className= "text-2xl font-bold text-center mb-6">Featured Projects</h2>
             <div className= "grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -141,8 +141,8 @@ export function ClientPresentationDemo() {
           </div>
         );
 
-      case 'testimonials':
-        return (
+      case 'testimonials': "
+        return ("
           <div className= "space-y-6">
             <h2 className= "text-2xl font-bold text-center mb-6">What Our Clients Say</h2>
             <div className= "grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -172,8 +172,8 @@ export function ClientPresentationDemo() {
           </div>
         );
 
-      case 'cta':
-        return (
+      case 'cta': "
+        return ("
           <div className= "text-center space-y-6">
             <div className= "bg-gradient-to-r from-purple-500 to-blue-600 text-white p-8 rounded-xl">
               <h2 className= "text-3xl font-bold mb-4">Ready to Start Your Next Project?</h2>
@@ -218,13 +218,13 @@ export function ClientPresentationDemo() {
           </div>
           <div className= "w-full bg-gray-200 rounded-full h-2">
             <div 
-              className= "bg-blue-500 h-2 rounded-full transition-all duration-300
+              className="bg-blue-500 h-2 rounded-full transition-all duration-300
               style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
             ></div>
           </div>
         </div>
 
-        {/* Slide Content */}
+        {/* Slide Content */}"
         <div className= "bg-white rounded-xl shadow-lg p-8 mb-8 min-h-[500px]">
           {renderSlideContent()}
         </div>
@@ -244,7 +244,7 @@ export function ClientPresentationDemo() {
               <button
                 key={index}
                 className={`w-3 h-3 rounded-full transition-colors ${
-                  index === currentSlide ? 'bg-blue-500' : 'bg-gray-300
+                  index === currentSlide ? 'bg-blue-500' : 'bg-gray-300'
                 }`}
                 onClick={() => setCurrentSlide(index)}
               />

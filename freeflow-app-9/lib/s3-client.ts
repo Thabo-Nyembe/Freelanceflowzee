@@ -1,5 +1,5 @@
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 // S3 Client Configuration for Supabase Storage
 const s3Client = new S3Client({
@@ -60,7 +60,7 @@ export async function uploadFile(
       bucket: BUCKET_NAME,
     }
   } catch (error) {
-    console.error('Failed to upload file:', error)
+    console.error('Failed to upload file: ', error)'
     throw new Error('File upload failed')
   }
 }
@@ -82,7 +82,7 @@ export async function getUploadPresignedUrl(
 
     return await getSignedUrl(s3Client, command, { expiresIn })
   } catch (error) {
-    console.error('Failed to generate upload presigned URL:', error)
+    console.error('Failed to generate upload presigned URL: ', error)'
     throw new Error('Presigned URL generation failed')
   }
 }
@@ -102,7 +102,7 @@ export async function getDownloadPresignedUrl(
 
     return await getSignedUrl(s3Client, command, { expiresIn })
   } catch (error) {
-    console.error('Failed to generate download presigned URL:', error)
+    console.error('Failed to generate download presigned URL: ', error)'
     throw new Error('Presigned URL generation failed')
   }
 }
@@ -120,7 +120,7 @@ export async function deleteFile(key: string): Promise<boolean> {
     await s3Client.send(command)
     return true
   } catch (error) {
-    console.error('Failed to delete file:', error)
+    console.error('Failed to delete file: ', error)'
     return false
   }
 }
@@ -147,7 +147,7 @@ export async function listFiles(
       lastModified: object.LastModified || new Date(),
     }))
   } catch (error) {
-    console.error('Failed to list files:', error)
+    console.error('Failed to list files: ', error)'
     throw new Error('File listing failed')
   }
 }
@@ -165,7 +165,7 @@ export async function testConnection(): Promise<boolean> {
     await s3Client.send(command)
     return true
   } catch (error) {
-    console.error('S3 connection test failed:', error)
+    console.error('S3 connection test failed: ', error)'
     return false
   }
 }

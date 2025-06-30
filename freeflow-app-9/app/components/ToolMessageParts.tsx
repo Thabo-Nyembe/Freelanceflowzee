@@ -1,7 +1,7 @@
 // Define the tool types
 interface WeatherToolInput {
   location: string
-  units?: 'metric' | 'imperial'
+  units?: 'metric' | 'imperial
 }
 
 interface ConfirmationToolInput {
@@ -28,7 +28,7 @@ export function ToolMessageParts({ tool, onResponse }: ToolMessagePartsProps) {
       }
       onResponse(`Weather in ${location}: ${mockWeather.temperature}°${units === 'metric' ? 'C' : 'F'}, ${mockWeather.condition}`)
     } catch (error) {
-      console.error('Weather request error:', error)
+      console.error('Weather request error: ', error)'
       onResponse('Failed to get weather information')
     }
   }
@@ -67,7 +67,7 @@ export function ToolMessageParts({ tool, onResponse }: ToolMessagePartsProps) {
 
     case 'askForConfirmation':
       const confirmInput = tool.input as ConfirmationToolInput
-      return (
+      return ("
         <div className="space-y-2">
           <p>{confirmInput.message}</p>
           <div className="flex space-x-2">
@@ -92,7 +92,7 @@ export function ToolMessageParts({ tool, onResponse }: ToolMessagePartsProps) {
                   confirmInput.confirmButtonText,
                   confirmInput.cancelButtonText
                 )
-              }
+              }"
               className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
             >
               {confirmInput.cancelButtonText || 'Cancel'}
@@ -104,4 +104,4 @@ export function ToolMessageParts({ tool, onResponse }: ToolMessagePartsProps) {
     default:
       return <p>Unknown tool: {tool.name}</p>
   }
-}
+}"

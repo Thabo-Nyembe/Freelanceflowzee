@@ -19,7 +19,7 @@ interface AIResponse {
   actionItems?: Array<{
     title: string
     action: string
-    priority: 'high' | 'medium' | 'low'
+    priority: 'high' | 'medium' | 'low
     estimatedTime?: string
     impact?: string
   }>
@@ -130,10 +130,10 @@ Based on similar freelancers, these changes typically result in 35-50% revenue g
 
 🚀 **Getting Started:**
 Ask me specific questions about any of these areas, or try commands like:
-• "How can I increase my revenue?"
-• "Help me manage my current projects better"
-• "What automation should I implement?"
-• "How do I improve client relationships?"
+• "How can I increase my revenue?
+• "Help me manage my current projects better
+• "What automation should I implement?
+• "How do I improve client relationships?
 
 What would you like to focus on first?`,
     suggestions: ['Show me revenue optimization tips', 'Analyze my business performance', 'Suggest workflow improvements', 'Help me plan this week priorities'],
@@ -171,10 +171,10 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json({
-      message: response.choices[0]?.message?.content || 'No response generated'
+      message: response.choices[0]?.message?.content || 'No response generated
     })
   } catch (error) {
-    console.error('Chat error:', error)
+    console.error('Chat error: ', error)'
     return new NextResponse('Internal Server Error', { status: 500 })
   }
 }
@@ -192,7 +192,7 @@ export async function GET() {
       message: 'AI chat service is ready',
     })
   } catch (error) {
-    console.error('Chat service check error:', error)
+    console.error('Chat service check error: ', error)'
     return new NextResponse('Internal Server Error', { status: 500 })
   }
 } 

@@ -22,14 +22,14 @@ import React, { useState, useEffect } from 'react'
       paused: 'bg-yellow-100 text-yellow-800',
       completed: 'bg-blue-100 text-blue-800',
       cancelled: 'bg-red-100 text-red-800',
-      draft: 'bg-gray-100 text-gray-800
+      draft: 'bg-gray-100 text-gray-800'
     }
 
     const priorityColors = {
       low: 'bg-blue-100 text-blue-800',
       medium: 'bg-yellow-100 text-yellow-800',
       high: 'bg-orange-100 text-orange-800',
-      urgent: 'bg-red-100 text-red-800
+      urgent: 'bg-red-100 text-red-800'
     }
 
     const daysLeft = getDaysUntilDeadline(project.end_date);
@@ -77,12 +77,12 @@ import React, { useState, useEffect } from 'react'
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    className= "text-red-600
+                    className="text-red-600
                     onClick={() => {
                       setSelectedProject(project)
                       setIsDeleteDialogOpen(true)
                     }}
-                  >
+                  >"
                     <Trash2 className= "mr-2 h-4 w-4" />
                     Delete Project
                   </DropdownMenuItem>
@@ -103,13 +103,13 @@ import React, { useState, useEffect } from 'react'
             </div>
             <div className= "h-2 rounded-full bg-secondary">
               <div 
-                className= "h-full rounded-full bg-primary transition-all duration-300
+                className="h-full rounded-full bg-primary transition-all duration-300
                 style={{ width: `${project.progress}%` }}
               />
             </div>
           </div>
 
-          {/* Client and Budget */}
+          {/* Client and Budget */}"
           <div className= "grid grid-cols-2 gap-4 text-sm">
             <div>
               <p className= "text-muted-foreground">Client</p>
@@ -161,11 +161,11 @@ import React, { useState, useEffect } from 'react'
             </div>
             <Progress 
               value={(project.spent / project.budget) * 100} 
-              className= "h-2
+              className="h-2
             />
           </div>
 
-          {/* Deadline */}
+          {/* Deadline */}"
           <div className= "flex items-center justify-between">
             <div className= "flex items-center gap-2 text-sm">
               <Calendar className= "h-4 w-4 text-muted-foreground" />
@@ -225,25 +225,25 @@ import React, { useState, useEffect } from 'react'
             </div>
             <div className= "flex gap-2">
               <Button
-                variant= "outline
-                onClick={() => setIsImportDialogOpen(true)}
-                data-testid= "import-project-btn
-              >
+                variant="outline
+                onClick={() => setIsImportDialogOpen(true)}"
+                data-testid="import-project-btn
+              >"
                 <Upload className= "h-4 w-4 mr-2" />
                 Import Project
               </Button>
               <Button
-                variant= "outline
-                onClick={() => setIsQuickStartDialogOpen(true)}
-                data-testid= "quick-start-btn
-              >
+                variant="outline
+                onClick={() => setIsQuickStartDialogOpen(true)}"
+                data-testid="quick-start-btn
+              >"
                 <Rocket className= "h-4 w-4 mr-2" />
                 Quick Start
               </Button>
               <Button
                 onClick={() => setIsCreateDialogOpen(true)}
-                data-testid= "create-project-btn
-              >
+                data-testid="create-project-btn
+              >"
                 <Plus className= "h-4 w-4 mr-2" />
                 Create Project
               </Button>
@@ -318,18 +318,18 @@ import React, { useState, useEffect } from 'react'
                   <div className= "relative">
                     <Search className= "absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                     <Input
-                      placeholder= "Search projects...
+                      placeholder="Search projects...
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className= "pl-10
+                      onChange={(e) => setSearchQuery(e.target.value)}"
+                      className="pl-10
                     />
                   </div>
                 </div>
                 <select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className= "px-3 py-2 border rounded-md bg-background
-                >
+                  onChange={(e) => setStatusFilter(e.target.value)}"
+                  className="px-3 py-2 border rounded-md bg-background
+                >"
                   <option value= "all">All Status</option>
                   <option value= "active">Active</option>
                   <option value= "completed">Completed</option>
@@ -339,8 +339,8 @@ import React, { useState, useEffect } from 'react'
                 <select
                   value={priorityFilter}
                   onChange={(e) => setPriorityFilter(e.target.value)}
-                  className= "px-3 py-2 border rounded-md bg-background
-                >
+                  className="px-3 py-2 border rounded-md bg-background
+                >"
                   <option value= "all">All Priority</option>
                   <option value= "urgent">Urgent</option>
                   <option value= "high">High</option>

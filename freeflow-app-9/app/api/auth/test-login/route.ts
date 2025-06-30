@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 // Only enable in test environment
-const isTestEnv = process.env.NODE_ENV === 'test'
+const isTestEnv = process.env.NODE_ENV === 'test
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

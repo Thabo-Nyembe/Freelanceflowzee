@@ -1,178 +1,120 @@
 "use client"
 
-import { useState, useReducer } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import APIKeySettings from '../collaboration/simple-api-key-settings
 
-interface AssetGenerationState {
-  userApiKeys: Record<string, string>
-  selectedApiProvider: string
-  showApiKeySettings: boolean
-  userApiKeysValid: Record<string, boolean>
-  costSavings: {
-    monthly: number
-    total: number
-    freeCreditsUsed: number
-    requestsThisMonth: number
-  }
+const AI_PROVIDERS = {
+  'openai': 'OpenAI',
+  'anthropic': 'Anthropic',
+  'google-ai': 'Google AI',
+  'openrouter': 'OpenRouter'
+} as const
+
+type AIProvider = keyof typeof AI_PROVIDERS
+
+interface AICreateProps {
+  onSaveKeys?: (keys: Record<AIProvider, string>) => void
 }
 
-type Action =
-  | { type: 'SET_USER_API_KEY'; payload: { provider: string; apiKey: string } }
-  | { type: 'SET_API_PROVIDER'; payload: string }
-  | { type: 'SET_API_KEY_VALID'; payload: { provider: string; isValid: boolean } }
-  | { type: 'TOGGLE_API_KEY_SETTINGS'; payload: boolean }
-  | { type: 'UPDATE_COST_SAVINGS'; payload: { monthly: number; freeCreditsUsed: number } }
+export function AICreate({ onSaveKeys }: AICreateProps) {
+  const [apiKeys, setApiKeys] = useState<Partial<Record<AIProvider, string>>>({})
+  const [selectedProvider, setSelectedProvider] = useState<AIProvider>('openai')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-const initialState: AssetGenerationState = {
-  userApiKeys: {},
-  selectedApiProvider: 'platform',
-  showApiKeySettings: false,
-  userApiKeysValid: {},
-  costSavings: {
-    monthly: 0,
-    total: 0,
-    freeCreditsUsed: 0,
-    requestsThisMonth: 0
+  const handleSave = async () => {
+    try {
+      setSaving(true)
+      setError(null)
+
+      // Validate API key format
+      if (!apiKeys[selectedProvider]?.trim()) {
+        setError('Please enter a valid API key')
+        return
+      }
+
+      // Simulate API key validation
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      if (onSaveKeys) {
+        onSaveKeys(apiKeys as Record<AIProvider, string>)
+      }
+
+    } catch (err) {
+      setError('Failed to save API key. Please try again.')
+    } finally {
+      setSaving(false)
+    }
   }
-}
-
-function reducer(state: AssetGenerationState, action: Action): AssetGenerationState {
-  switch (action.type) {
-    case 'SET_USER_API_KEY':
-      return {
-        ...state,
-        userApiKeys: {
-          ...state.userApiKeys,
-          [action.payload.provider]: action.payload.apiKey
-        }
-      }
-    case 'SET_API_PROVIDER':
-      return {
-        ...state,
-        selectedApiProvider: action.payload
-      }
-    case 'SET_API_KEY_VALID':
-      return {
-        ...state,
-        userApiKeysValid: {
-          ...state.userApiKeysValid,
-          [action.payload.provider]: action.payload.isValid
-        }
-      }
-    case 'TOGGLE_API_KEY_SETTINGS':
-      return {
-        ...state,
-        showApiKeySettings: action.payload
-      }
-    case 'UPDATE_COST_SAVINGS':
-      return {
-        ...state,
-        costSavings: {
-          ...state.costSavings,
-          monthly: action.payload.monthly,
-          total: state.costSavings.total + action.payload.monthly,
-          freeCreditsUsed: action.payload.freeCreditsUsed,
-          requestsThisMonth: state.costSavings.requestsThisMonth + 1
-        }
-      }
-    default:
-      return state
-  }
-}
-
-export default function AICreate() {
-  const [state, dispatch] = useReducer(reducer, initialState)
 
   return (
-    <div data-testid="ai-create" className="container mx-auto px-4 py-8">
-      <Tabs defaultValue="generate">
-        <TabsList>
-          <TabsTrigger value="generate">Generate Assets</TabsTrigger>
-          <TabsTrigger value="library">Asset Library</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-        </TabsList>
+    <div className="space-y-4" data-testid="ai-create">
+      <Card>
+        <CardHeader>
+          <CardTitle>AI Provider Settings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs 
+            defaultValue={selectedProvider} 
+            onValueChange={(value) => setSelectedProvider(value as AIProvider)}
+          >
+            <TabsList className="grid w-full grid-cols-4">
+              {Object.entries(AI_PROVIDERS).map(([key, label]) => (
+                <TabsTrigger 
+                  key={key} 
+                  value={key}
+                  data-testid={`provider-${key}`}
+                >
+                  {label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-        <TabsContent value="generate">
-          <Card>
-            <CardHeader>
-              <CardTitle>Generate AI Assets</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {/* Generation form will go here */}
-            </CardContent>
-          </Card>
-        </TabsContent>
+            {Object.keys(AI_PROVIDERS).map((provider) => (
+              <TabsContent key={provider} value={provider}>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor={`${provider}-api-key`}>
+                      {AI_PROVIDERS[provider as AIProvider]} API Key
+                    </Label>
+                    <Input
+                      id={`${provider}-api-key`}
+                      type="password"
+                      placeholder="Enter your API key"
+                      value={apiKeys[provider as AIProvider] || ''}
+                      onChange={(e) => setApiKeys(prev => ({
+                        ...prev,
+                        [provider]: e.target.value
+                      }))}
+                      disabled={saving}
+                      data-testid={`${provider}-api-key-input`}
+                    />
+                  </div>
 
-        <TabsContent value="library">
-          <Card>
-            <CardHeader>
-              <CardTitle>Asset Library</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {/* Asset library will go here */}
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  <Button
+                    onClick={handleSave}
+                    disabled={saving || !apiKeys[provider as AIProvider]?.trim()}
+                    className="w-full"
+                    data-testid={`${provider}-save-button`}
+                  >
+                    {saving ? 'Saving...' : 'Save API Key'}
+                  </Button>
 
-        <TabsContent value="settings">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Cost Savings Dashboard</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-500">Monthly Savings</p>
-                    <p className="text-2xl font-bold">${state.costSavings.monthly}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Total Savings</p>
-                    <p className="text-2xl font-bold">${state.costSavings.total}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Free Credits Used</p>
-                    <p className="text-2xl font-bold">${state.costSavings.freeCreditsUsed}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Requests This Month</p>
-                    <p className="text-2xl font-bold">{state.costSavings.requestsThisMonth}</p>
-                  </div>
+                  {error && (
+                    <p className="text-sm text-red-500" data-testid="api-key-error">
+                      {error}
+                    </p>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
-
-            <APIKeySettings
-              onApiKeyUpdate={(provider, apiKey, isValid) => {
-                dispatch({ type: 'SET_USER_API_KEY', payload: { provider, apiKey } })
-                dispatch({ type: 'SET_API_KEY_VALID', payload: { provider, isValid } })
-                
-                // Update cost savings based on provider
-                const providerSavings = {
-                  'openai': 12,
-                  'anthropic': 15,
-                  'google': 25,
-                  'huggingface': 35
-                }
-                const newSavings = providerSavings[provider as keyof typeof providerSavings] || 10
-                dispatch({
-                  type: 'UPDATE_COST_SAVINGS',
-                  payload: {
-                    monthly: state.costSavings.monthly + newSavings,
-                    freeCreditsUsed: state.costSavings.freeCreditsUsed + (isValid ? 5 : 0)
-                  }
-                })
-              }}
-              onProviderChange={(provider) => {
-                dispatch({ type: 'SET_API_PROVIDER', payload: provider })
-              }}
-            />
-          </div>
-        </TabsContent>
-      </Tabs>
+              </TabsContent>
+            ))}
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   )
 }

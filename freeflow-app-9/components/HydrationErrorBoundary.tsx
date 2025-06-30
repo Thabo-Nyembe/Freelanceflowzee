@@ -23,7 +23,7 @@ class HydrationErrorBoundary extends React.Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log the error to your error reporting service
-    console.error('Hydration error:', {
+    console.error('Hydration error: ', {'
       error,
       componentStack: errorInfo.componentStack,
     });

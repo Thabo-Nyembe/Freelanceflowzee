@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Download error:', error)
+    console.error('Download error: ', error)'
     return NextResponse.json({
       error: error instanceof Error ? error.message : 'Download failed'
     }, { status: 500 })
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Signed URL generation error:', error)
+    console.error('Signed URL generation error: ', error)'
     return NextResponse.json({
       error: error instanceof Error ? error.message : 'Failed to generate signed URL'
     }, { status: 500 })

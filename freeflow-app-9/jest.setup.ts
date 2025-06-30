@@ -168,7 +168,7 @@ jest.mock('next/navigation', () => ({
     back: jest.fn(),
     pathname: '/',
     query: {},
-    asPath: '/
+    asPath: '/'
   }),
   usePathname: () => '/',
   useSearchParams: () => new URLSearchParams()

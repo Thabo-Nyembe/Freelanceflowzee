@@ -6,23 +6,23 @@ import {
   clearRateLimit,
   getAttemptsRemaining,
   LOCKOUT_PERIOD
-} from '@/app/lib/rate-limit-store'
+} from '@/app/lib/rate-limit-store
 
 // Valid test credentials matching the test file
 const VALID_CREDENTIALS = {
   passwords: ['secure-unlock-2024'],
-  accessCodes: ['BRAND2024']'
+  accessCodes: ['BRAND2024']
 }
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1
   console.log(`Request from IP: ${ip}`)
 
   // Check if this is a test environment
-  const testMode = request.headers.get('x-test-mode') === 'true'
+  const testMode = request.headers.get('x-test-mode') === 'true
 
   // Check rate limiting if not in test mode
   if (!testMode && isRateLimited(ip)) {
@@ -125,7 +125,7 @@ export async function POST(
     })
 
   } catch (error) {
-    console.error('Access API error:', error)
+    console.error('Access API error: ', error)'
     return NextResponse.json(
       { success: false, error: 'Internal server error', code: 'server_error' },
       { status: 500 }
@@ -173,7 +173,7 @@ export async function GET(
       )
     }
   } catch (error) {
-    console.error('Access GET API error:', error)
+    console.error('Access GET API error: ', error)'
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

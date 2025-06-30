@@ -53,7 +53,7 @@ export function EnterpriseDashboard() {
           total: 75,
           used: 58.50,
           remaining: 16.50,
-          status: 'efficient
+          status: 'efficient'
         },
         services: {
           vercel: {
@@ -91,7 +91,7 @@ export function EnterpriseDashboard() {
       
       setLoading(false);
     } catch (error) {
-      console.error('Failed to fetch enterprise metrics:', error);
+      console.error('Failed to fetch enterprise metrics: ', error);'
       setLoading(false);
     }
   };
@@ -133,7 +133,7 @@ export function EnterpriseDashboard() {
       } : null);
       
     } catch (error) {
-      console.error('Optimization failed:', error);
+      console.error('Optimization failed: ', error);'
     } finally {
       setOptimizing(false);
     }
@@ -185,8 +185,8 @@ export function EnterpriseDashboard() {
         <div className= "flex items-center gap-4">
           <Badge 
             variant={metrics.budget.status === 'optimal' || metrics.budget.status === 'efficient' ? 'default' : 'destructive'}
-            className= "text-sm
-          >
+            className="text-sm
+          >"
             {metrics.budget.status === 'optimal' ? '🎯 Optimal' :
              metrics.budget.status === 'efficient' ? '✅ Efficient' :
              metrics.budget.status === 'warning' ? '⚠️ Warning' : '🚨 Critical'}
@@ -194,8 +194,8 @@ export function EnterpriseDashboard() {
           <Button 
             onClick={runEnterpriseOptimization} 
             disabled={optimizing}
-            className= "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700
-          >
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700
+          >"
             {optimizing ? 'Optimizing...' : 'Optimize Now'}
           </Button>
         </div>
@@ -336,8 +336,8 @@ export function EnterpriseDashboard() {
                   {metrics.recommendations.map((recommendation, index) => (
                     <div 
                       key={index}
-                      className= "flex items-start gap-3 p-3 rounded-lg bg-muted/50
-                    >
+                      className="flex items-start gap-3 p-3 rounded-lg bg-muted/50
+                    >"
                       <div className= "text-sm flex-1">
                         {recommendation}
                       </div>

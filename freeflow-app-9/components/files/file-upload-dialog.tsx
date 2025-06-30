@@ -1,12 +1,12 @@
 "use client"
 
 import { useState, useCallback } from 'react'
-import { useDropzone } from 'react-dropzone
+import { useDropzone } from 'react-dropzone'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Upload, X, CheckCircle, AlertCircle } from 'lucide-react'
-import { createBrowserClient } from '@supabase/ssr
+import { createBrowserClient } from '@supabase/ssr'
 
 interface FileUploadDialogProps {
   isOpen: boolean
@@ -96,7 +96,7 @@ export function FileUploadDialog({ isOpen, onClose, onUploadComplete }: FileUplo
 
       onUploadComplete(uploadedFiles)
     } catch (error) {
-      console.error('Upload error:', error)
+      console.error('Upload error: ', error)'
     } finally {
       setUploading(false)
     }
@@ -136,7 +136,7 @@ export function FileUploadDialog({ isOpen, onClose, onUploadComplete }: FileUplo
                   <div className= "flex items-center justify-between">
                     <p className= "text-sm font-medium">{file.name}</p>
                     <Button
-                      variant= "ghost
+                      variant="ghost"
                       size= "sm
                       onClick={() => removeFile(file)}
                     >
@@ -169,8 +169,8 @@ export function FileUploadDialog({ isOpen, onClose, onUploadComplete }: FileUplo
           <Button
             onClick={uploadFiles}
             disabled={files.length === 0 || uploading}
-            className= "bg-gradient-to-r from-purple-600 to-blue-600 text-white
-          >
+            className="bg-gradient-to-r from-purple-600 to-blue-600 text-white
+          >"
             {uploading ? 'Uploading...' : 'Upload Files'}
           </Button>
         </div>

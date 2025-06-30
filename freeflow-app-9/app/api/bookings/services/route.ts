@@ -44,7 +44,7 @@ const MOCK_SERVICES: BookingService[] = [
       tuesday: { start: '10:00', end: '16:00' },
       wednesday: { start: '10:00', end: '16:00' },
       thursday: { start: '10:00', end: '16:00' },
-      friday: { start: '10:00', end: '16:00' }'
+      friday: { start: '10:00', end: '16:00' }
     }
   },
   {
@@ -64,7 +64,7 @@ const MOCK_SERVICES: BookingService[] = [
     availability: {
       monday: { start: '09:00', end: '15:00' },
       wednesday: { start: '09:00', end: '15:00' },
-      friday: { start: '09:00', end: '15:00' }'
+      friday: { start: '09:00', end: '15:00' }
     }
   },
   {
@@ -83,7 +83,7 @@ const MOCK_SERVICES: BookingService[] = [
     deliverables: ['Detailed audit report', 'Priority recommendations', 'Implementation roadmap'],
     availability: {
       tuesday: { start: '09:00', end: '17:00' },
-      thursday: { start: '09:00', end: '17:00' }'
+      thursday: { start: '09:00', end: '17:00' }
     }
   },
   {
@@ -105,7 +105,7 @@ const MOCK_SERVICES: BookingService[] = [
       tuesday: { start: '09:00', end: '18:00' },
       wednesday: { start: '09:00', end: '18:00' },
       thursday: { start: '09:00', end: '18:00' },
-      friday: { start: '09:00', end: '18:00' }'
+      friday: { start: '09:00', end: '18:00' }
     }
   }
 ]
@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (isActive !== null) {
-      const activeFilter = isActive === 'true'
+      const activeFilter = isActive === 'true
       filteredServices = filteredServices.filter(service => 
         service.isActive === activeFilter
       )
@@ -146,7 +146,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Services fetch error:', error)
+    console.error('Services fetch error: ', error)'
     return NextResponse.json(
       { error: 'Failed to fetch services' },
       { status: 500 }
@@ -222,7 +222,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 })
 
   } catch (error) {
-    console.error('Service creation error:', error)
+    console.error('Service creation error: ', error)'
     return NextResponse.json(
       { error: 'Failed to create service' },
       { status: 500 }
@@ -256,7 +256,7 @@ export async function PUT(request: NextRequest) {
     const updatedService = {
       ...MOCK_SERVICES[serviceIndex],
       ...updateData,
-      id: serviceId // Ensure ID doesn't change'
+      id: serviceId // Ensure ID doesn't change
     }
 
     MOCK_SERVICES[serviceIndex] = updatedService
@@ -267,7 +267,7 @@ export async function PUT(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Service update error:', error)
+    console.error('Service update error: ', error)'
     return NextResponse.json(
       { error: 'Failed to update service' },
       { status: 500 }
@@ -306,7 +306,7 @@ export async function DELETE(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Service deletion error:', error)
+    console.error('Service deletion error: ', error)'
     return NextResponse.json(
       { error: 'Failed to delete service' },
       { status: 500 }

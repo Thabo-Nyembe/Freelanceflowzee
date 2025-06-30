@@ -40,7 +40,7 @@ export default function SignUp({}: SignUpProps) {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
         if (sessionError) {
-          console.error('Session error:', sessionError)
+          console.error('Session error: ', sessionError)
           
           // Clear potentially corrupted cookies
           document.cookie.split(";").forEach(cookie => {
@@ -59,7 +59,7 @@ export default function SignUp({}: SignUpProps) {
         const { data: { user }, error: userError } = await supabase.auth.getUser()
         
         if (userError) {
-          console.error('User data error:', userError)
+          console.error('User data error: ', userError)'
           setError('Failed to get user data. Please try signing up again.')
           setIsCheckingAuth(false)
           return
@@ -74,7 +74,7 @@ export default function SignUp({}: SignUpProps) {
 
         setIsCheckingAuth(false)
       } catch (error) {
-        console.error('Auth check failed:', error)
+        console.error('Auth check failed: ', error)'
         setError('Authentication check failed. Please try again.')
         setIsCheckingAuth(false)
       }
@@ -122,7 +122,7 @@ export default function SignUp({}: SignUpProps) {
       try {
         await supabase.auth.signOut()
       } catch (signOutError) {
-        console.error('Error clearing existing session:', signOutError)
+        console.error('Error clearing existing session: ', signOutError)'
       }
 
       // Clear any existing cookies
@@ -146,7 +146,7 @@ export default function SignUp({}: SignUpProps) {
       })
 
       if (signUpError) {
-        console.error('Sign up error:', signUpError)
+        console.error('Sign up error: ', signUpError)'
         if (signUpError.message.includes('already registered')) {
           setError('This email is already registered. Please sign in instead.')
         } else if (signUpError.message.includes('valid email')) {
@@ -160,7 +160,7 @@ export default function SignUp({}: SignUpProps) {
 
       setSuccess('Account created successfully! Please check your email to confirm your account.')
     } catch (err) {
-      console.error('Unexpected error:', err)
+      console.error('Unexpected error: ', err)'
       setError('An unexpected error occurred. Please try again.')
       setIsLoading(false)
     }
@@ -225,8 +225,8 @@ export default function SignUp({}: SignUpProps) {
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  id="fullName"
-                  name="fullName"
+                  id="fullName
+                  name="fullName
                   type="text"
                   placeholder="Enter your full name"
                   required
@@ -234,7 +234,7 @@ export default function SignUp({}: SignUpProps) {
                   suppressHydrationWarning
                 />
               </div>
-            </div>
+            </div>"
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">
                 Email
@@ -242,8 +242,8 @@ export default function SignUp({}: SignUpProps) {
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  id="email"
-                  name="email"
+                  id="email
+                  name="email
                   type="email"
                   placeholder="Enter your email"
                   required
@@ -251,7 +251,7 @@ export default function SignUp({}: SignUpProps) {
                   suppressHydrationWarning
                 />
               </div>
-            </div>
+            </div>"
             <div className="space-y-2">
               <Label htmlFor="password" className="text-sm font-medium">
                 Password
@@ -259,8 +259,8 @@ export default function SignUp({}: SignUpProps) {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  id="password"
-                  name="password"
+                  id="password
+                  name="password
                   type="password"
                   placeholder="Enter your password"
                   required
@@ -268,7 +268,7 @@ export default function SignUp({}: SignUpProps) {
                   suppressHydrationWarning
                 />
               </div>
-            </div>
+            </div>"
             <div className="space-y-2">
               <Label htmlFor="confirmPassword" className="text-sm font-medium">
                 Confirm Password
@@ -276,8 +276,8 @@ export default function SignUp({}: SignUpProps) {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
+                  id="confirmPassword
+                  name="confirmPassword
                   type="password"
                   placeholder="Confirm your password"
                   required
@@ -288,7 +288,7 @@ export default function SignUp({}: SignUpProps) {
             </div>
 
             {error && (
-              <Alert>
+              <Alert>"
                 <AlertDescription className="text-red-600 text-sm">
                   {error}
                 </AlertDescription>
@@ -309,12 +309,12 @@ export default function SignUp({}: SignUpProps) {
               disabled={isLoading}
             >
               {isLoading ? (
-                <>
+                <>"
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Creating Account...
                 </>
               ) : (
-                'Create Account'
+                'Create Account
               )}
             </Button>
           </form>

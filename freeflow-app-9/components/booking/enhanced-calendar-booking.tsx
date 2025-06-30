@@ -214,7 +214,7 @@ const generateMockSlots = (date: Date): BookingSlot[] => {
   const timeSlots = ['09:00', '10:30', '14:00', '15:30', '17:00']
   
   timeSlots.forEach((time, index) => {
-    const [hours, minutes] = time.split(':').map(Number)
+    const [hours, minutes] = time.split(': ').map(Number)'
     const endTime = `${hours + 1}:${minutes.toString().padStart(2, '0')}
     
     slots.push({
@@ -229,7 +229,7 @@ const generateMockSlots = (date: Date): BookingSlot[] => {
       location: ['online', 'office', 'client'][Math.floor(Math.random() * 3)] as any,
       maxAttendees: 1,
       currentAttendees: 0,
-      timezone: 'UTC+2
+      timezone: 'UTC+2'
     })
   })
   
@@ -361,11 +361,11 @@ export function EnhancedCalendarBooking({
 
   const getStatusColor = (status: BookingRequest['status']) => {
     switch (status) {
-      case 'pending': return 'bg-amber-100 text-amber-800 border-amber-200
-      case 'confirmed': return 'bg-green-100 text-green-800 border-green-200
-      case 'cancelled': return 'bg-red-100 text-red-800 border-red-200
-      case 'completed': return 'bg-blue-100 text-blue-800 border-blue-200
-      default: return 'bg-gray-100 text-gray-800 border-gray-200
+      case 'pending': return 'bg-amber-100 text-amber-800 border-amber-200'
+      case 'confirmed': return 'bg-green-100 text-green-800 border-green-200'
+      case 'cancelled': return 'bg-red-100 text-red-800 border-red-200'
+      case 'completed': return 'bg-blue-100 text-blue-800 border-blue-200'
+      default: return 'bg-gray-100 text-gray-800 border-gray-200'
     }
   }
 
@@ -420,11 +420,11 @@ export function EnhancedCalendarBooking({
             {monthlyBookings} This Month
           </Badge>
           <Button
-            variant= "outline
+            variant="outline"
             size= "sm
             onClick={() => dispatch({ type: 'TOGGLE_ANALYTICS' })}
-            className= "bg-white/60 border-white/20
-          >
+            className="bg-white/60 border-white/20
+          >"
             <BarChart className= "w-4 h-4 mr-2" />
             Analytics
           </Button>
@@ -544,7 +544,7 @@ export function EnhancedCalendarBooking({
             {state.services.map((service) => (
               <Card 
                 key={service.id} 
-                className= "group bg-white/60 backdrop-blur-xl border-white/20 shadow-luxury hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden
+                className="group bg-white/60 backdrop-blur-xl border-white/20 shadow-luxury hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
                 onClick={() => dispatch({ type: 'SELECT_SERVICE', payload: service })}
               >
                 {/* Service Header */}
@@ -603,9 +603,9 @@ export function EnhancedCalendarBooking({
                   <div className= "flex gap-2 mt-4">
                     <Button 
                       size= "sm" 
-                      className= "flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700
+                      className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700
                       onClick={(e) => {
-                        e.stopPropagation()
+                        e.stopPropagation()"
                         dispatch({ type: 'SELECT_SERVICE', payload: service })
                         dispatch({ type: 'TOGGLE_BOOKING_DIALOG', payload: true })
                       }}
@@ -616,12 +616,12 @@ export function EnhancedCalendarBooking({
                     <Button 
                       size= "sm" 
                       variant= "outline" 
-                      className= "bg-white/60 border-white/20
+                      className="bg-white/60 border-white/20
                       onClick={(e) => {
                         e.stopPropagation()
                         // Copy booking link
                       }}
-                    >
+                    >"
                       <Share2 className= "w-4 h-4" />
                     </Button>
                   </div>
@@ -639,7 +639,7 @@ export function EnhancedCalendarBooking({
               <h3 className= "text-lg font-medium text-slate-800 mb-2">Add New Service</h3>
               <p className= "text-slate-600 mb-6">Create a new booking service with custom duration and pricing</p>
               <Button 
-                className= "bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
                 onClick={() => dispatch({ type: 'TOGGLE_SERVICE_DIALOG', payload: true })}
               >
                 <Plus className= "w-4 h-4 mr-2" />
@@ -660,10 +660,10 @@ export function EnhancedCalendarBooking({
                 </CardTitle>
                 <div className= "flex items-center gap-2">
                   <select 
-                    className= "px-3 py-1.5 text-sm border rounded-md bg-white/60 border-white/20 focus:bg-white
+                    className="px-3 py-1.5 text-sm border rounded-md bg-white/60 border-white/20 focus:bg-white
                     onChange={(e) => {
                       const status = e.target.value
-                      dispatch({ 
+                      dispatch({ "
                         type: 'SET_FILTERS', 
                         payload: { status: status ? [status] : [] } 
                       })
@@ -736,8 +736,8 @@ export function EnhancedCalendarBooking({
                         <div className= "flex gap-2">
                           <Button 
                             size= "sm" 
-                            className= "bg-green-600 hover:bg-green-700 text-white
-                            onClick={() => dispatch({ 
+                            className="bg-green-600 hover:bg-green-700 text-white
+                            onClick={() => dispatch({ "
                               type: 'UPDATE_REQUEST_STATUS', 
                               payload: { id: request.id, status: 'confirmed' } 
                             })}
@@ -748,8 +748,8 @@ export function EnhancedCalendarBooking({
                           <Button 
                             size= "sm" 
                             variant= "outline" 
-                            className= "text-red-600 border-red-200 hover:bg-red-50
-                            onClick={() => dispatch({ 
+                            className="text-red-600 border-red-200 hover:bg-red-50
+                            onClick={() => dispatch({ "
                               type: 'UPDATE_REQUEST_STATUS', 
                               payload: { id: request.id, status: 'cancelled' } 
                             })}
@@ -765,16 +765,16 @@ export function EnhancedCalendarBooking({
                           <Button 
                             size= "sm" 
                             variant= "outline" 
-                            className= "bg-blue-50 text-blue-600 border-blue-200
-                          >
+                            className="bg-blue-50 text-blue-600 border-blue-200
+                          >"
                             <Video className= "w-4 h-4 mr-2" />
                             Join Meeting
                           </Button>
                           <Button 
                             size= "sm" 
                             variant= "outline" 
-                            className= "bg-white/60 border-white/20
-                          >
+                            className="bg-white/60 border-white/20
+                          >"
                             <Copy className= "w-4 h-4" />
                           </Button>
                         </div>
@@ -830,26 +830,26 @@ export function EnhancedCalendarBooking({
                   type: 'UPDATE_BOOKING_FORM', 
                   payload: { clientName: e.target.value } 
                 })}
-                placeholder= "Enter your full name
-                className= "mt-1
+                placeholder="Enter your full name"
+                className="mt-1
               />
             </div>
             
-            <div>
+            <div>"
               <label className= "text-sm font-medium text-slate-700">Email Address</label>
               <Input
-                type= "email
+                type="email
                 value={state.bookingForm.clientEmail}
-                onChange={(e) => dispatch({ 
+                onChange={(e) => dispatch({ "
                   type: 'UPDATE_BOOKING_FORM', 
                   payload: { clientEmail: e.target.value } 
                 })}
-                placeholder= "Enter your email
-                className= "mt-1
+                placeholder="Enter your email"
+                className="mt-1
               />
             </div>
             
-            <div>
+            <div>"
               <label className= "text-sm font-medium text-slate-700">Phone Number (Optional)</label>
               <Input
                 value={state.bookingForm.clientPhone}
@@ -857,12 +857,12 @@ export function EnhancedCalendarBooking({
                   type: 'UPDATE_BOOKING_FORM', 
                   payload: { clientPhone: e.target.value } 
                 })}
-                placeholder= "Enter your phone number
-                className= "mt-1
+                placeholder="Enter your phone number"
+                className="mt-1
               />
             </div>
             
-            <div>
+            <div>"
               <label className= "text-sm font-medium text-slate-700">Project Details</label>
               <Textarea
                 value={state.bookingForm.message}
@@ -870,19 +870,19 @@ export function EnhancedCalendarBooking({
                   type: 'UPDATE_BOOKING_FORM', 
                   payload: { message: e.target.value } 
                 })}
-                placeholder= "Tell us about your project requirements...
-                rows={3}
-                className= "mt-1
+                placeholder="Tell us about your project requirements...
+                rows={3}"
+                className="mt-1
               />
             </div>
-            
+            "
             <div className= "flex gap-2">
               <Button 
                 onClick={handleBookingSubmit}
                 disabled={state.loading}
-                className= "flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700
+                className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700
               >
-                {state.loading ? (
+                {state.loading ? ("
                   <RefreshCw className= "w-4 h-4 mr-2 animate-spin" />
                 ) : (
                   <Send className= "w-4 h-4 mr-2" />
@@ -892,7 +892,7 @@ export function EnhancedCalendarBooking({
               <Button 
                 variant= "outline" 
                 onClick={() => dispatch({ type: 'TOGGLE_BOOKING_DIALOG', payload: false })}
-                className= "bg-white/60 border-white/20
+                className="bg-white/60 border-white/20
               >
                 Cancel
               </Button>
@@ -902,4 +902,4 @@ export function EnhancedCalendarBooking({
       </Dialog>
     </div>
   )
-} 
+} "

@@ -29,7 +29,7 @@ const initialState:State = {
       shared: true,
       starred: true,
       icon:Text,
-      color: 'text-red-500
+      color: 'text-red-500'
     },
     {
       id: '2',
@@ -41,7 +41,7 @@ const initialState:State = {
       shared: false,
       starred: false,
       icon: Image,
-      color: 'text-purple-500
+      color: 'text-purple-500'
     },
     {
       id: '3',
@@ -53,7 +53,7 @@ const initialState:State = {
       shared: true,
       starred: false,
       icon: Video,
-      color: 'text-blue-500
+      color: 'text-blue-500'
     },
     {
       id: '4',
@@ -65,7 +65,7 @@ const initialState:State = {
       shared: false,
       starred: true,
       icon: Archive,
-      color: 'text-orange-500
+      color: 'text-orange-500'
     },
     {
       id: '5',
@@ -77,7 +77,7 @@ const initialState:State = {
       shared: true,
       starred: false,
       icon: Music,
-      color: 'text-green-500
+      color: 'text-green-500'
     }
   ],
   folders: [
@@ -87,7 +87,7 @@ const initialState:State = {
       filesCount: 23,
       modified: '1 day ago',
       shared: true,
-      color: 'text-purple-600
+      color: 'text-purple-600'
     },
     {
       id: 'f2',
@@ -95,7 +95,7 @@ const initialState:State = {
       filesCount: 8,
       modified: '3 days ago',
       shared: false,
-      color: 'text-blue-600
+      color: 'text-blue-600'
     },
     {
       id: 'f3',
@@ -103,7 +103,7 @@ const initialState:State = {
       filesCount: 12,
       modified: '1 week ago',
       shared: true,
-      color: 'text-green-600
+      color: 'text-green-600'
     },
     {
       id: 'f4',
@@ -111,7 +111,7 @@ const initialState:State = {
       filesCount: 34,
       modified: '2 hours ago',
       shared: false,
-      color: 'text-orange-600
+      color: 'text-orange-600'
     }
   ],
   selectedItems: [],
@@ -249,7 +249,7 @@ export functionsHub({ projects, userId }:sHubProps) {
         payload: { files: uploadeds }
       })
     } catch (error) {
-      console.error('Upload error:', error)
+      console.error('Upload error: ', error)'
       dispatch({ 
         type: 'UPLOAD_ERROR',
         payload: { error: error instanceof Error ? error.message : 'Upload failed' }
@@ -284,7 +284,7 @@ export functionsHub({ projects, userId }:sHubProps) {
       setIsNewFolderDialogOpen(false)
       setNewFolderName('')
     } catch (error) {
-      console.error('Error creating folder:', error)
+      console.error('Error creating folder: ', error)'
       alert('Failed to create folder. Please try again.')
     } finally {
       setLoading(false)
@@ -318,7 +318,7 @@ export functionsHub({ projects, userId }:sHubProps) {
         payload: { fileId: file.id }
       })
     } catch (error) {
-      console.error('Download error:', error)
+      console.error('Download error: ', error)'
       dispatch({ 
         type: 'DOWNLOAD_ERROR',
         payload: { 
@@ -385,25 +385,25 @@ export functionsHub({ projects, userId }:sHubProps) {
             variant= "outline" 
             size= "sm
             onClick={() => setIsNewFolderDialogOpen(true)}
-            data-testid= "new-folder-btn
-          >
+            data-testid="new-folder-btn
+          >"
             <Folder className= "w-4 h-4 mr-2" />
             New Folder
           </Button>
           <Button 
             onClick={() => setIsUploadDialogOpen(true)}
             disabled={state.isUploading}
-            className= "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700
-            data-testid= "upload-file-btn
-          >
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            data-testid="upload-file-btn
+          >"
             <Upload className= "w-4 h-4 mr-2" />
             {state.isUploading ? `Uploading ${state.uploadProgress}%` : 'Uploads'}
           </Button>
           <input
             ref={fileInputRef}
-            type= "file
-            onChange={handleChange}
-            className= "hidden
+            type="file
+            onChange={handleChange}"
+            className="hidden"
             accept= "image/*,video/*,audio/*,.pdf,.zip,.txt,.json,.doc,.docx,.xls,.xlsx,.ppt,.pptx
             multiple={true}
           />
@@ -469,12 +469,12 @@ export functionsHub({ projects, userId }:sHubProps) {
               <div className= "relative flex-1 max-w-md">
                 <Search className= "absolute left-3 top-3 w-4 h-4 text-gray-400" />
                 <Input
-                  placeholder= "Search files and folders...
-                  value={state.searchQuery}
+                  placeholder="Search files and folders...
+                  value={state.searchQuery}"
                   onChange={(e) => dispatch({ type: 'SET_SEARCH_QUERY', payload: e.target.value })}
-                  className= "pl-10 bg-white/80
+                  className="pl-10 bg-white/80
                 />
-              </div>
+              </div>"
               <Button variant= "outline" size= "sm">
                 <Filter className= "w-4 h-4 mr-2" />
                 Filter
@@ -498,7 +498,7 @@ export functionsHub({ projects, userId }:sHubProps) {
                 <Button
                   variant={state.viewMode === 'grid' ? 'default' : 'ghost'}
                   size= "sm
-                  className= "rounded-none
+                  className="rounded-none"
                   onClick={() => dispatch({ type: 'SET_VIEW_MODE', payload: 'grid' })}
                 >
                   <Grid className= "w-4 h-4" />
@@ -506,7 +506,7 @@ export functionsHub({ projects, userId }:sHubProps) {
                 <Button
                   variant={state.viewMode === 'list' ? 'default' : 'ghost'}
                   size= "sm
-                  className= "rounded-none
+                  className="rounded-none"
                   onClick={() => dispatch({ type: 'SET_VIEW_MODE', payload: 'list' })}
                 >
                   <List className= "w-4 h-4" />
@@ -601,25 +601,25 @@ export functionsHub({ projects, userId }:sHubProps) {
                           <Button 
                             variant= "ghost" 
                             size= "sm" 
-                            className= "p-1
+                            className="p-1
                             onClick={(e) => {
                               e.stopPropagation()
                               handleDownload(file)
-                            }}
-                            data-testid= "download-file-btn
-                          >
+                            }}"
+                            data-testid="download-file-btn
+                          >"
                             <Download className= "w-4 h-4" />
                           </Button>
                           <Button 
                             variant= "ghost" 
                             size= "sm" 
-                            className= "p-1
+                            className="p-1
                             onClick={(e) => {
                               e.stopPropagation()
                               handleShare(file)
-                            }}
-                            data-testid= "share-file-btn
-                          >
+                            }}"
+                            data-testid="share-file-btn
+                          >"
                             <Share className= "w-4 h-4" />
                           </Button>
                           <Button variant= "ghost" size= "sm" className= "p-1">
@@ -685,11 +685,11 @@ export functionsHub({ projects, userId }:sHubProps) {
             <Input
               value={newFolderName}
               onChange={(e) => setNewFolderName(e.target.value)}
-              placeholder= "Folder name
-            />
+              placeholder="Folder name
+            />"
             <div className= "flex justify-end gap-4">
               <Button
-                variant= "outline
+                variant="outline
                 onClick={() => setIsNewFolderDialogOpen(false)}
               >
                 Cancel
@@ -697,7 +697,7 @@ export functionsHub({ projects, userId }:sHubProps) {
               <Button
                 onClick={handleCreateFolder}
                 disabled={!newFolderName.trim() || loading}
-              >
+              >"
                 {loading ? 'Creating...' : 'Create Folder'}
               </Button>
             </div>

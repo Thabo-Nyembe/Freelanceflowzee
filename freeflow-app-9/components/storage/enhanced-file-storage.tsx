@@ -86,7 +86,7 @@ const initialState: FileStorageState = {
       size: 25165824, // 24MB
       dateModified: new Date('2024-01-15'),
       isShared: true,
-      permissions: 'view
+      permissions: 'view'
     },
     {
       id: 'f2',
@@ -96,7 +96,7 @@ const initialState: FileStorageState = {
       size: 73400320, // 70MB
       dateModified: new Date('2024-01-14'),
       isShared: true,
-      permissions: 'edit
+      permissions: 'edit'
     }
   ],
   selectedItems: [],
@@ -119,21 +119,21 @@ const initialState: FileStorageState = {
         action: 'upload',
         fileName: 'Brand_Guidelines_Final.pdf',
         timestamp: new Date('2024-01-15T10:30:00'),
-        user: 'John Doe
+        user: 'John Doe'
       },
       {
         id: 'a2',
         action: 'share',
         fileName: 'Hero_Animation_v3.mp4',
         timestamp: new Date('2024-01-14T14:22:00'),
-        user: 'Sarah Wilson
+        user: 'Sarah Wilson'
       },
       {
         id: 'a3',
         action: 'download',
         fileName: 'Logo_Variations.zip',
         timestamp: new Date('2024-01-13T09:15:00'),
-        user: 'Mike Chen
+        user: 'Mike Chen'
       }
     ]
   }
@@ -251,7 +251,7 @@ export function EnhancedFileStorage({
 
   // Format file size
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes
+    if (bytes === 0) return '0 Bytes'
     const k = 1024
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
@@ -357,11 +357,11 @@ export function EnhancedFileStorage({
           </div>
           <Progress 
             value={(state.analytics.usedStorage / state.analytics.totalStorage) * 100} 
-            className= "h-2 bg-white/20
+            className="h-2 bg-white/20
           />
         </div>
       </div>
-
+"
       <div className= "p-6">
         <Tabs defaultValue= "files" className= "space-y-6">
           <TabsList className= "grid w-full grid-cols-4">
@@ -390,7 +390,7 @@ export function EnhancedFileStorage({
                 className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
                   dragOver 
                     ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-300 hover:border-gray-400
+                    : 'border-gray-300 hover:border-gray-400'
                 }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -416,21 +416,21 @@ export function EnhancedFileStorage({
                 <div className= "relative flex-1 max-w-md">
                   <Search className= "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input
-                    placeholder= "Search files, tags, or content...
-                    value={state.searchQuery}
+                    placeholder="Search files, tags, or content...
+                    value={state.searchQuery}"
                     onChange={(e) => dispatch({ type: 'SET_SEARCH_QUERY', payload: e.target.value })}
-                    className= "pl-10
+                    className="pl-10
                   />
                 </div>
                 
                 <select 
                   value={state.filterType}
-                  onChange={(e) => dispatch({ 
+                  onChange={(e) => dispatch({ "
                     type: 'SET_FILTER_TYPE', 
                     payload: e.target.value as FileStorageState['filterType'] 
                   })}
-                  className= "px-3 py-2 border rounded-lg
-                >
+                  className="px-3 py-2 border rounded-lg
+                >"
                   <option value= "all">All Files</option>
                   <option value= "images">Images</option>
                   <option value= "videos">Videos</option>
@@ -615,7 +615,7 @@ export function EnhancedFileStorage({
             </Button>
             <Button 
               size= "sm" 
-              variant= "outline
+              variant="outline"
               onClick={() => dispatch({ type: 'CLEAR_SELECTION' })}
             >
               <Trash2 className= "w-4 h-4 mr-1" />

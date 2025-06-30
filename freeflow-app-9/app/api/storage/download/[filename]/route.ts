@@ -82,7 +82,7 @@ export async function GET(
       })
 
     if (signedUrlError || !signedUrlData) {
-      console.error('Signed URL error:', signedUrlError)
+      console.error('Signed URL error: ', signedUrlError)'
       return NextResponse.json({
         success: false,
         error: 'Failed to generate download link'
@@ -104,7 +104,7 @@ export async function GET(
 
     // Determine content type based on file extension
     const extension = filename.toLowerCase().split('.').pop()
-    let contentType = 'application/octet-stream'
+    let contentType = 'application/octet-stream
 
     const mimeTypes: Record<string, string> = {
       'pdf': 'application/pdf', 'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'png': 'image/png', 'gif': 'image/gif', 'webp': 'image/webp', 'svg': 'image/svg+xml', 'mp3': 'audio/mpeg', 'wav': 'audio/wav', 'mp4': 'video/mp4', 'webm': 'video/webm', 'txt': 'text/plain', 'css': 'text/css', 'html': 'text/html', 'js': 'text/javascript', 'ts': 'text/typescript', 'doc': 'application/msword', 'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
@@ -118,12 +118,12 @@ export async function GET(
     return new NextResponse(fileBuffer, {
       status: 200,
       headers: {
-        'Content-Type': contentType, 'Content-Disposition': `attachment; filename= "${filename}"`, 'Content-Length': fileBuffer.byteLength.toString(), 'Cache-Control': 'private, max-age=3600', 'X-File-Size': fileInfo.metadata?.size?.toString() || fileBuffer.byteLength.toString(), 'X-File-Name': filename, 'X-Project-ID': projectId'
+        'Content-Type': contentType, 'Content-Disposition': `attachment; filename= "${filename}"`, 'Content-Length': fileBuffer.byteLength.toString(), 'Cache-Control': 'private, max-age=3600', 'X-File-Size': fileInfo.metadata?.size?.toString() || fileBuffer.byteLength.toString(), 'X-File-Name': filename, 'X-Project-ID': projectId
       }
     })
 
   } catch (error) {
-    console.error('Storage download error:', error)
+    console.error('Storage download error: ', error)'
     return NextResponse.json({
       success: false,
       error: 'Internal server error'
@@ -166,7 +166,7 @@ export async function POST(
       })
 
     if (signedUrlError) {
-      console.error('Signed URL generation error:', signedUrlError)
+      console.error('Signed URL generation error: ', signedUrlError)'
       return NextResponse.json({
         success: false,
         error: 'Failed to generate signed URL'
@@ -189,7 +189,7 @@ export async function POST(
     })
 
   } catch (error) {
-    console.error('Signed URL generation error:', error)
+    console.error('Signed URL generation error: ', error)'
     return NextResponse.json({
       success: false,
       error: 'Internal server error'

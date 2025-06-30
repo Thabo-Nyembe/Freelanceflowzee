@@ -1,7 +1,7 @@
 import 'server-only
-import { cache } from 'react
-import { createClient } from '@/lib/supabase/server
-import { redirect } from 'next/navigation
+import { cache } from 'react'
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 
 export const verifySession = cache(async () => {
   try {
@@ -15,7 +15,7 @@ export const verifySession = cache(async () => {
     const { data: { user }, error } = await supabase.auth.getUser()
 
     if (error) {
-      console.log('🔧 Auth error:', error.message)
+      console.log('🔧 Auth error: ', error.message)'
       return null
     }
 
@@ -35,7 +35,7 @@ export const verifySession = cache(async () => {
       }
     }
   } catch (error) {
-    console.error('🔧 Session verification error:', error)
+    console.error('🔧 Session verification error: ', error)'
     return null
   }
 })
@@ -59,7 +59,7 @@ export const getUser = cache(async () => {
       role: session.user.role
     }
   } catch (error) {
-    console.error('🔧 Failed to fetch user:', error)
+    console.error('🔧 Failed to fetch user: ', error)'
     return null
   }
 })

@@ -28,7 +28,7 @@ export default async function FeedbackPage({ searchParams }: FeedbackPageProps) 
         redirect('/login')
       }
     } catch (error) {
-      console.error('Authentication check failed:', error)
+      console.error('Authentication check failed: ', error)
       redirect('/login')
     }
   }

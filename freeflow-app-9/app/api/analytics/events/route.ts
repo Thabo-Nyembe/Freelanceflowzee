@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     // Get client IP address
     const forwardedFor = headersList.get('x-forwarded-for')
     const realIp = headersList.get('x-real-ip')
-    const ipAddress = forwardedFor?.split(',')[0] || realIp || 'unknown'
+    const ipAddress = forwardedFor?.split(',')[0] || realIp || 'unknown
     
     const body = await request.json()
     
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       .select()
     
     if (error) {
-      console.error('Failed to insert analytics event:', error)
+      console.error('Failed to insert analytics event: ', error)'
       throw new Error(`Failed to track event: ${error.message}`)
     }
     
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
     const errorDetails = error instanceof Error && error.cause ? error.cause : undefined
     
-    console.error('Analytics API error:', {
+    console.error('Analytics API error: ', {'
       message: errorMessage,
       details: errorDetails
     })
@@ -148,7 +148,7 @@ export async function GET(request: NextRequest) {
       )
     }
     
-    const timeRange = searchParams.get('range') || 'day'
+    const timeRange = searchParams.get('range') || 'day
     const eventType = searchParams.get('type')
     const limit = parseInt(searchParams.get('limit') || '100')
     
@@ -190,7 +190,7 @@ export async function GET(request: NextRequest) {
     const { data: events, error } = await query
     
     if (error) {
-      console.error('Failed to fetch analytics events:', error)
+      console.error('Failed to fetch analytics events: ', error)'
       throw new Error(`Failed to fetch events: ${error.message}`)
     }
     
@@ -205,7 +205,7 @@ export async function GET(request: NextRequest) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
     const errorDetails = error instanceof Error && error.cause ? error.cause : undefined
     
-    console.error('Analytics API error:', {
+    console.error('Analytics API error: ', {'
       message: errorMessage,
       details: errorDetails
     })
@@ -241,7 +241,7 @@ async function trackBusinessMetric(
         timestamp: new Date().toISOString()
       })
   } catch (error) {
-    console.error('Failed to track business metric:', error)
+    console.error('Failed to track business metric: ', error)'
   }
 }
 

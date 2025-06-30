@@ -1,16 +1,16 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react
-import AICreate from '@/components/collaboration/ai-create'
-import { createClient } from '@supabase/supabase-js
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query
-import { createContext } from 'react
-import { ThemeProvider } from 'next-themes
-import type { Database } from '@/types/supabase
-import type { SupabaseClient } from '@supabase/supabase-js
+import { render, screen, fireEvent, waitFor } from '@testing-library/react"
+import AICreate from '@/components/collaboration/ai-create"
+import { createClient } from '@supabase/supabase-js"
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query"
+import { createContext } from 'react'
+import { ThemeProvider } from 'next-themes"
+import type { Database } from '@/types/supabase"
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 // Create a test SupabaseContext
 const TestSupabaseContext = createContext<SupabaseClient<Database> | null>(null)
-
-// Mock Supabase client
+'
+// Mock Supabase client"
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({
     auth: {
@@ -35,7 +35,7 @@ jest.mock('@supabase/supabase-js', () => ({
           settings: {
             creativity: 0.7,
             quality: 'standard',
-            model: 'default
+            model: 'default'
           },
           status: 'complete',
           output: 'Generated content',
@@ -53,7 +53,9 @@ const queryClient = new QueryClient()
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <TestSupabaseContext.Provider value={mockSupabase}>
+  <
     <QueryClientProvider client={queryClient}>
+  <
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         {children}
       </ThemeProvider>

@@ -164,7 +164,7 @@ function storageReducer(state: StorageState, action: StorageAction): StorageStat
 
 // Utility functions
 const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 Bytes
+  if (bytes === 0) return '0 Bytes'
   const k = 1024
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
@@ -337,13 +337,13 @@ export function CloudStorageSystem() {
                 <div className= "relative">
                   <Search className= "absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                   <Input
-                    placeholder= "Search files...
-                    value={state.searchQuery}
+                    placeholder="Search files...
+                    value={state.searchQuery}"
                     onChange={(e) => dispatch({ type: 'SET_SEARCH', query: e.target.value })}
-                    className= "pl-10 bg-white/50
+                    className="pl-10 bg-white/50
                   />
                 </div>
-                <Select value={state.filterType} onValueChange={(value) => dispatch({ type: &apos;SET_FILTER&apos;, filter: value })}>
+                <Select value={state.filterType} onValueChange={(value) => dispatch({ type: &apos;SET_FILTER&apos;, filter: value })}>"
                   <SelectTrigger className= "w-32">
                     <SelectValue />
                   </SelectTrigger>
@@ -379,35 +379,35 @@ export function CloudStorageSystem() {
                 {filteredFiles.map((file) => (
                   <div
                     key={file.id}
-                    className= "group bg-white/50 rounded-xl p-4 border border-white/20 hover:shadow-lg transition-all duration-300 hover:scale-105
-                  >
+                    className="group bg-white/50 rounded-xl p-4 border border-white/20 hover:shadow-lg transition-all duration-300 hover:scale-105
+                  >"
                     <div className= "flex items-start justify-between mb-3">
                       {getFileIcon(file.type)}
                       <div className= "flex items-center gap-1">
                         <Button
-                          variant= "ghost
+                          variant="ghost"
                           size= "sm
                           onClick={() => dispatch({ type: 'TOGGLE_STAR', fileId: file.id })}
-                          className= "opacity-0 group-hover:opacity-100 transition-opacity
-                        >
-                          <Star className={`w-4 h-4 ${file.starred ? 'fill-yellow-400 text-yellow-400&apos; : '&apos;}`} />
+                          className="opacity-0 group-hover:opacity-100 transition-opacity
+                        >"
+                          <Star className={`w-4 h-4 ${file.starred ? 'fill-yellow-400 text-yellow-400&apos; : '&apos;}`} />'
                         </Button>
                         {canShareFile(file, state.currentPlan) ? (
                           <Button
-                            variant= "ghost
+                            variant="ghost"
                             size= "sm
                             onClick={() => handleShare(file)}
-                            className= "opacity-0 group-hover:opacity-100 transition-opacity
-                          >
-                            <Share2 className={`w-4 h-4 ${file.shared ? 'text-green-500&apos; : '&apos;}`} />
+                            className="opacity-0 group-hover:opacity-100 transition-opacity
+                          >"
+                            <Share2 className={`w-4 h-4 ${file.shared ? 'text-green-500&apos; : '&apos;}`} />'
                           </Button>
                         ) : (
                           <Button
-                            variant= "ghost
+                            variant="ghost"
                             size= "sm
                             onClick={() => setShowSubscription(true)}
-                            className= "opacity-0 group-hover:opacity-100 transition-opacity
-                          >
+                            className="opacity-0 group-hover:opacity-100 transition-opacity
+                          >"
                             <Lock className= "w-4 h-4 text-red-500" />
                           </Button>
                         )}
@@ -438,8 +438,8 @@ export function CloudStorageSystem() {
                 {filteredFiles.map((file) => (
                   <div
                     key={file.id}
-                    className= "flex items-center justify-between p-4 bg-white/50 rounded-lg border border-white/20 hover:shadow-md transition-all
-                  >
+                    className="flex items-center justify-between p-4 bg-white/50 rounded-lg border border-white/20 hover:shadow-md transition-all
+                  >"
                     <div className= "flex items-center gap-4">
                       {getFileIcon(file.type)}
                       <div>
@@ -476,9 +476,9 @@ export function CloudStorageSystem() {
             </DialogHeader>
             <div className= "space-y-4">
               <div 
-                className= "border-2 border-dashed border-slate-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 transition-colors
+                className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 transition-colors
                 onClick={() => fileInputRef.current?.click()}
-              >
+              >"
                 <Upload className= "w-12 h-12 mx-auto text-slate-400 mb-4" />
                 <h3 className= "text-lg font-medium text-slate-800 mb-2">Drag & drop files here</h3>
                 <p className= "text-slate-600 mb-4">or click to browse</p>
@@ -486,12 +486,12 @@ export function CloudStorageSystem() {
               </div>
               <input
                 ref={fileInputRef}
-                type= "file
-                multiple
-                className= "hidden
+                type="file
+                multiple"
+                className="hidden
                 onChange={handleFileUpload}
               />
-              {state.isUploading && (
+              {state.isUploading && ("
                 <div className= "text-center">
                   <div className= "animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
                   <p className= "text-sm text-slate-600">Uploading files...</p>
@@ -509,7 +509,7 @@ export function CloudStorageSystem() {
             </DialogHeader>
             <div className= "grid grid-cols-1 md:grid-cols-3 gap-6">
               {Object.entries(SUBSCRIPTION_PLANS).map(([key, plan]) => (
-                <Card key={key} className={`relative ${state.currentPlan === key ? 'ring-2 ring-blue-500&apos; : '&apos;}`}>
+                <Card key={key} className={`relative ${state.currentPlan === key ? 'ring-2 ring-blue-500&apos; : '&apos;}`}>'
                   {key === 'pro' && (
                     <div className= "absolute -top-3 left-1/2 transform -translate-x-1/2">
                       <Badge className= "bg-gradient-to-r from-blue-600 to-indigo-600 text-white">Most Popular</Badge>
@@ -536,7 +536,7 @@ export function CloudStorageSystem() {
                       ))}
                     </ul>
                     <Button
-                      className= "w-full
+                      className="w-full"
                       variant={state.currentPlan === key ? "outline" : "default"}
                       onClick={() => {
                         if (state.currentPlan !== key) {

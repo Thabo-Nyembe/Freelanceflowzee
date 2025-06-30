@@ -24,7 +24,7 @@ const initialState: EditorState = {
       properties: { alignment: 'left', fontSize: 'xl' },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      userId: 'user-1
+      userId: 'user-1'
     },
     {
       id: 'block-2',
@@ -34,7 +34,7 @@ const initialState: EditorState = {
       properties: { alignment: 'left', fontSize: 'normal' },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      userId: 'user-1
+      userId: 'user-1'
     },
     {
       id: 'block-3',
@@ -51,7 +51,7 @@ const initialState: EditorState = {
       properties: { alignment: 'left' },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      userId: 'user-1
+      userId: 'user-1'
     }
   ],
   selectedBlockId: null,
@@ -382,12 +382,12 @@ export function BlockBasedContentEditor({
                 updates: { content: { ...block.content, text: e.target.value } }
               })}
               onBlur={() => dispatch({ type: 'SET_EDITING', editing: false })}
-              className= "border-none p-0 resize-none focus:ring-0
+              className="border-none p-0 resize-none focus:ring-0
               autoFocus
             />
           ) : (
-            <p 
-              className= "cursor-text
+            <p "
+              className="cursor-text"
               onClick={() => dispatch({ type: 'SET_EDITING', editing: true })}
             >
               {block.content.text || 'Type something...'}
@@ -405,17 +405,17 @@ export function BlockBasedContentEditor({
                 updates: { content: { ...block.content, text: e.target.value } }
               })}
               onBlur={() => dispatch({ type: 'SET_EDITING', editing: false })}
-              className= "border-none p-0 text-2xl font-bold focus:ring-0
+              className="border-none p-0 text-2xl font-bold focus:ring-0
               autoFocus
             />
           ) : (
-            <div 
-              className= "cursor-text text-2xl font-bold
+            <div "
+              className="cursor-text text-2xl font-bold"
               onClick={() => dispatch({ type: 'SET_EDITING', editing: true })}
               style={{
                 fontSize: headingLevel === 1 ? '2rem' : 
                          headingLevel === 2 ? '1.75rem' : 
-                         headingLevel === 3 ? '1.5rem' : '1.25rem
+                         headingLevel === 3 ? '1.5rem' : '1.25rem'
               }}
             >
               {block.content.text || 'Heading'}
@@ -428,20 +428,20 @@ export function BlockBasedContentEditor({
               {block.content.items?.map((item: unknown, index: number) => (
                 <div key={item.id || index} className= "flex items-center gap-2">
                   <input
-                    type= "checkbox
+                    type="checkbox
                     checked={item.checked || false}
                     onChange={(e) => {
                       const updatedItems = [...block.content.items]
                       updatedItems[index] = { ...item, checked: e.target.checked }
-                      dispatch({
+                      dispatch({"
                         type: 'UPDATE_BLOCK',
                         id: block.id,
                         updates: { content: { ...block.content, items: updatedItems } }
                       })
                     }}
-                    className= "rounded
+                    className="rounded
                   />
-                  <Input
+                  <Input"
                     value={item.text || ''}
                     onChange={(e) => {
                       const updatedItems = [...block.content.items]
@@ -452,14 +452,14 @@ export function BlockBasedContentEditor({
                         updates: { content: { ...block.content, items: updatedItems } }
                       })
                     }}
-                    className= "border-none p-0 focus:ring-0
-                    placeholder= "To-do item
+                    className="border-none p-0 focus:ring-0"
+                    placeholder="To-do item
                   />
                 </div>
               ))}
             </div>
           )
-
+"
         case 'code':
           return (
             <div className= "bg-gray-900 text-gray-100 p-4 rounded-lg">
@@ -471,8 +471,8 @@ export function BlockBasedContentEditor({
                     id: block.id,
                     updates: { content: { ...block.content, language: e.target.value } }
                   })}
-                  className= "bg-gray-800 text-gray-200 text-sm border-gray-700 rounded px-2 py-1
-                >
+                  className="bg-gray-800 text-gray-200 text-sm border-gray-700 rounded px-2 py-1
+                >"
                   <option value= "javascript">JavaScript</option>
                   <option value= "typescript">TypeScript</option>
                   <option value= "python">Python</option>
@@ -490,13 +490,13 @@ export function BlockBasedContentEditor({
                   id: block.id,
                   updates: { content: { ...block.content, code: e.target.value } }
                 })}
-                className= "bg-transparent border-none text-gray-100 font-mono text-sm resize-none focus:ring-0
-                placeholder= "// Enter your code here
+                className="bg-transparent border-none text-gray-100 font-mono text-sm resize-none focus:ring-0"
+                placeholder="// Enter your code here
                 rows={6}
               />
             </div>
           )
-
+"
         case 'quote':
           return (
             <blockquote className= "border-l-4 border-purple-500 pl-4 italic text-gray-700">
@@ -507,10 +507,10 @@ export function BlockBasedContentEditor({
                   id: block.id,
                   updates: { content: { ...block.content, text: e.target.value } }
                 })}
-                className= "border-none p-0 italic resize-none focus:ring-0
-                placeholder= "Enter quote...
+                className="border-none p-0 italic resize-none focus:ring-0"
+                placeholder="Enter quote...
               />
-              {block.content.author && (
+              {block.content.author && ("
                 <footer className= "text-sm text-gray-500 mt-2">
                   — {block.content.author}
                 </footer>
@@ -540,7 +540,7 @@ export function BlockBasedContentEditor({
                               updates: { content: { ...block.content, headers: updatedHeaders } }
                             })
                           }}
-                          className= "border-none p-0 font-medium focus:ring-0
+                          className="border-none p-0 font-medium focus:ring-0
                         />
                       </th>
                     ))}
@@ -549,7 +549,7 @@ export function BlockBasedContentEditor({
                 <tbody>
                   {block.content.rows?.map((row: string[], rowIndex: number) => (
                     <tr key={rowIndex}>
-                      {row.map((cell: string, cellIndex: number) => (
+                      {row.map((cell: string, cellIndex: number) => ("
                         <td key={cellIndex} className= "border border-gray-300 p-2">
                           <Input
                             value={cell}
@@ -562,7 +562,7 @@ export function BlockBasedContentEditor({
                                 updates: { content: { ...block.content, rows: updatedRows } }
                               })
                             }}
-                            className= "border-none p-0 focus:ring-0
+                            className="border-none p-0 focus:ring-0
                           />
                         </td>
                       ))}
@@ -572,7 +572,7 @@ export function BlockBasedContentEditor({
               </table>
             </div>
           )
-
+"
         case 'database':
           const database = state.databases.find(db => db.id === block.content.databaseId)
           const table = database?.tables.find(t => t.id === block.content.tableId)
@@ -634,8 +634,8 @@ export function BlockBasedContentEditor({
                     <p>Select a database to display</p>
                     <Button
                       size= "sm
-                      variant= "outline
-                      className= "mt-2
+                      variant="outline"
+                      className="mt-2"
                       onClick={() => dispatch({ type: 'TOGGLE_DATABASE' })}
                     >
                       Choose Database
@@ -655,7 +655,7 @@ export function BlockBasedContentEditor({
       <div
         key={block.id}
         className={`group relative p-2 rounded-lg transition-colors ${
-          isSelected ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50
+          isSelected ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'
         }`}
         onClick={(e) => handleBlockClick(block.id, e)}
         draggable
@@ -683,7 +683,7 @@ export function BlockBasedContentEditor({
             <Button 
               size= "sm" 
               variant= "ghost" 
-              className= "h-6 w-6 p-0
+              className="h-6 w-6 p-0"
               onClick={() => dispatch({ type: 'DELETE_BLOCK', id: block.id })}
             >
               <Trash2 className= "h-3 w-3" />
@@ -719,7 +719,7 @@ export function BlockBasedContentEditor({
 
           <Button
             size= "sm
-            variant= "outline
+            variant="outline"
             onClick={() => dispatch({ type: 'TOGGLE_TEMPLATES' })}
           >
             <Template className= "h-4 w-4 mr-2" />
@@ -728,7 +728,7 @@ export function BlockBasedContentEditor({
 
           <Button
             size= "sm
-            variant= "outline
+            variant="outline"
             onClick={() => dispatch({ type: 'TOGGLE_DATABASE' })}
           >
             <Database className= "h-4 w-4 mr-2" />
@@ -770,10 +770,10 @@ export function BlockBasedContentEditor({
                 {/* Add Block Button */}
                 <div className= "flex items-center justify-center py-4">
                   <Button
-                    variant= "ghost
-                    onClick={handleAddBlockClick}
-                    className= "text-gray-400 hover:text-gray-600
-                  >
+                    variant="ghost
+                    onClick={handleAddBlockClick}"
+                    className="text-gray-400 hover:text-gray-600
+                  >"
                     <Plus className= "h-4 w-4 mr-2" />
                     Add a block
                   </Button>
@@ -795,7 +795,7 @@ export function BlockBasedContentEditor({
                 {state.templates.map(template => (
                   <div
                     key={template.id}
-                    className= "p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors
+                    className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
                     onClick={() => dispatch({ type: 'APPLY_TEMPLATE', template })}
                   >
                     <div className= "font-medium text-sm">{template.name}</div>
@@ -830,8 +830,8 @@ export function BlockBasedContentEditor({
                       {database.tables.map(table => (
                         <div
                           key={table.id}
-                          className= "text-xs p-1 bg-gray-50 rounded cursor-pointer hover:bg-gray-100
-                          onClick={() => {
+                          className="text-xs p-1 bg-gray-50 rounded cursor-pointer hover:bg-gray-100
+                          onClick={() => {"
                             const block = createBlock('database', {
                               databaseId: database.id,
                               tableId: table.id
@@ -858,9 +858,9 @@ export function BlockBasedContentEditor({
               {blockTypes.map(blockType => (
                 <Button
                   key={blockType.type}
-                  variant= "ghost
+                  variant="ghost"
                   size= "sm
-                  className= "w-full justify-start h-auto p-2
+                  className="w-full justify-start h-auto p-2"
                   onClick={() => addBlock(blockType.type as ContentBlock['type'])}
                 >
                   <blockType.icon className= "h-4 w-4 mr-3 text-gray-400" />
@@ -920,9 +920,9 @@ export function BlockBasedContentEditor({
               {blockTypes.map(blockType => (
                 <Button
                   key={blockType.type}
-                  variant= "ghost
+                  variant="ghost"
                   size= "sm
-                  className= "w-full justify-start h-auto p-3
+                  className="w-full justify-start h-auto p-3"
                   onClick={() => addBlock(blockType.type as ContentBlock['type'])}
                 >
                   <blockType.icon className= "h-5 w-5 mr-3 text-gray-400" />

@@ -1,4 +1,4 @@
-import { CanvasObject } from '@/components/collaboration/types
+import { CanvasObject } from '@/components/collaboration/types'
 
 export interface TemplateAnalysis {
   overallScore: number

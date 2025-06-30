@@ -1,4 +1,4 @@
-import Stripe from 'stripe
+import Stripe from 'stripe'
 
 interface PaymentIntentData {
   amount: number
@@ -42,7 +42,7 @@ export class StripeService {
       })
     }
 
-    console.log('🔧 StripeService initialized:', {
+    console.log('🔧 StripeService initialized: ', {'
       testMode: this.isTestMode,
       hasKey: !!stripeKey,
       nodeEnv: process.env.NODE_ENV
@@ -64,7 +64,7 @@ export class StripeService {
       const mockPaymentIntentId = `pi_3QdGhJ2eZvKYlo2C${Date.now()}
       const mockClientSecret = `${mockPaymentIntentId}_secret_${Math.random().toString(36).substring(2, 15)}
       
-      console.log('✅ Mock payment intent created:', mockPaymentIntentId)
+      console.log('✅ Mock payment intent created: ', mockPaymentIntentId)'
       return {
         clientSecret: mockClientSecret,
         paymentIntentId: mockPaymentIntentId,
@@ -113,7 +113,7 @@ export class StripeService {
     if (this.isTestMode) {
       const mockCustomerId = `cus_${Math.random().toString(36).substring(2, 15)}
       
-      console.log('✅ Mock customer created:', mockCustomerId)
+      console.log('✅ Mock customer created: ', mockCustomerId)'
       return {
         id: mockCustomerId,
         name,
@@ -148,19 +148,19 @@ export class StripeService {
         amount: 2900, // $29.00
         currency: 'usd',
         name: 'Single Project Access',
-        description: 'Unlock one premium design project
+        description: 'Unlock one premium design project'
       },
       monthly_unlimited: {
         amount: 9900, // $99.00
         currency: 'usd',
         name: 'Monthly Unlimited Access',
-        description: 'Unlimited access to all premium projects for 30 days
+        description: 'Unlimited access to all premium projects for 30 days'
       },
       annual_unlimited: {
         amount: 99900, // $999.00
         currency: 'usd',
         name: 'Annual Unlimited Access',
-        description: 'Unlimited access to all premium projects for 12 months
+        description: 'Unlimited access to all premium projects for 12 months'
       }
     }
   }
@@ -177,7 +177,7 @@ export class StripeService {
       const mockLinkId = `plink_${Math.random().toString(36).substring(2, 15)}
       const mockUrl = `https://checkout.stripe.com/c/pay/${mockLinkId}#fidkdWxOYHwnPyd1blpxYHZxWjA0
       
-      console.log('✅ Mock payment link created:', mockLinkId)
+      console.log('✅ Mock payment link created: ', mockLinkId)'
       return {
         url: mockUrl,
         id: mockLinkId,
@@ -220,7 +220,7 @@ export class StripeService {
         status: 'succeeded',
         paid: true,
         amount: 2900,
-        currency: 'usd
+        currency: 'usd'
       }
     }
 
@@ -247,7 +247,7 @@ export class StripeService {
     message: string
   }> {
     // This is always test mode for alternative access
-    console.log('🔐 Validating alternative access:', { method, projectId })
+    console.log('🔐 Validating alternative access: ', { method, projectId })'
 
     // Mock validation - in production, this would check against a database
     const validPasswords = ['demo2024', 'preview', 'freelancer']

@@ -37,77 +37,77 @@ export function ProjectCreationForm({ onSubmit, loading = false }: ProjectCreati
         <Input
           id= "title
           name= "title
-          placeholder= "Enter project title
-          required
-          data-testid= "project-title-input
+          placeholder="Enter project title
+          required"
+          data-testid="project-title-input
         />
       </div>
 
-      <div>
+      <div>"
         <Label htmlFor= "description">Project Description *</Label>
         <Textarea
           id= "description
           name= "description
-          placeholder= "Enter project description
-          required
-          data-testid= "project-description-input
+          placeholder="Enter project description
+          required"
+          data-testid="project-description-input
         />
       </div>
 
-      <div>
+      <div>"
         <Label htmlFor= "client_name">Client Name</Label>
         <Input
           id= "client_name
           name= "client_name
-          placeholder= "Enter client name
-          data-testid= "project-client-name-input
+          placeholder="Enter client name"
+          data-testid="project-client-name-input
         />
       </div>
 
-      <div>
+      <div>"
         <Label htmlFor= "client_email">Client Email</Label>
         <Input
           id= "client_email
           name= "client_email
-          type= "email
-          placeholder= "Enter client email
-          data-testid= "project-client-email-input
+          type="email"
+          placeholder="Enter client email"
+          data-testid="project-client-email-input
         />
       </div>
 
-      <div>
+      <div>"
         <Label htmlFor= "budget">Budget</Label>
         <Input
           id= "budget
           name= "budget
-          type= "number
+          type="number"
           min="0
-          placeholder= "Enter project budget
-          data-testid= "project-budget-input
+          placeholder="Enter project budget"
+          data-testid="project-budget-input
         />
       </div>
 
-      <div>
+      <div>"
         <Label htmlFor= "start_date">Start Date</Label>
         <Input
           id= "start_date
           name= "start_date
-          type= "date
-          data-testid= "project-start-date-input
+          type="date"
+          data-testid="project-start-date-input
         />
       </div>
 
-      <div>
+      <div>"
         <Label htmlFor= "end_date">End Date</Label>
         <Input
           id= "end_date
           name= "end_date
-          type= "date
-          data-testid= "project-end-date-input
+          type="date"
+          data-testid="project-end-date-input
         />
       </div>
 
-      <div>
+      <div>"
         <Label htmlFor= "priority">Priority</Label>
         <Select name= "priority" defaultValue= "medium">
           <SelectTrigger id= "priority" data-testid= "project-priority-select">

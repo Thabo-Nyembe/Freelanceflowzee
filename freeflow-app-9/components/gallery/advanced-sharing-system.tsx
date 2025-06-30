@@ -151,7 +151,7 @@ export function AdvancedGallerySharingSystem({
         })
       })
     } catch (error) {
-      console.error('Failed to track event:', error)
+      console.error('Failed to track event: ', error)'
     }
   }
 
@@ -170,13 +170,13 @@ export function AdvancedGallerySharingSystem({
         setSettings(prev => ({ ...prev, ...newSettings }))
       }
     } catch (error) {
-      console.error('Failed to update settings:', error)
+      console.error('Failed to update settings: ', error)'
     }
   }
 
   const formatFileSize = (bytes: number): string => {
     const sizes = ['B', 'KB', 'MB', 'GB']
-    if (bytes === 0) return '0 B
+    if (bytes === 0) return '0 B'
     const i = Math.floor(Math.log(bytes) / Math.log(1024))
     return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}
   }
@@ -215,19 +215,19 @@ export function AdvancedGallerySharingSystem({
           {isOwnerView && (
             <>
               <Button
-                variant= "outline
-                onClick={() => setAnalyticsDialog(true)}
-                className= "space-x-2
-              >
+                variant="outline
+                onClick={() => setAnalyticsDialog(true)}"
+                className="space-x-2
+              >"
                 <BarChart3 className= "h-4 w-4" />
                 <span>Analytics</span>
               </Button>
               
               <Button
-                variant= "outline
-                onClick={() => setSettingsDialog(true)}
-                className= "space-x-2
-              >
+                variant="outline
+                onClick={() => setSettingsDialog(true)}"
+                className="space-x-2
+              >"
                 <Settings className= "h-4 w-4" />
                 <span>Settings</span>
               </Button>
@@ -236,8 +236,8 @@ export function AdvancedGallerySharingSystem({
 
           <Button
             onClick={() => setShareDialog(true)}
-            className= "space-x-2
-          >
+            className="space-x-2
+          >"
             <Share2 className= "h-4 w-4" />
             <span>Share Gallery</span>
           </Button>
@@ -272,14 +272,14 @@ export function AdvancedGallerySharingSystem({
           <div className= "relative">
             <Search className= "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder= "Search items...
+              placeholder="Search items...
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className= "pl-10 w-64
+              onChange={(e) => setSearchQuery(e.target.value)}"
+              className="pl-10 w-64
             />
           </div>
 
-          <Select value={filterTag} onValueChange={setFilterTag}>
+          <Select value={filterTag} onValueChange={setFilterTag}>"
             <SelectTrigger className= "w-40">
               <SelectValue placeholder= "Filter by tag" />
             </SelectTrigger>
@@ -520,34 +520,34 @@ export function AdvancedGallerySharingSystem({
             <div >
               <label >Custom Message (Optional)</label>
               <Textarea value={customMessage}> setCustomMessage(e.target.value)}
-                className= "mt-1
+                className="mt-1
               />
             </div>
 
-            <div >
+            <div >"
               <Button > handleShare('facebook')}
-                className= "space-x-2
+                className="space-x-2
               >
                 <Facebook >
                 <span >Facebook</span>
               </Button>
-              
+              "
               <Button > handleShare('twitter')}
-                className= "space-x-2
+                className="space-x-2
               >
                 <Twitter >
                 <span >Twitter</span>
               </Button>
-              
+              "
               <Button > handleShare('linkedin')}
-                className= "space-x-2
+                className="space-x-2
               >
                 <Linkedin >
                 <span >LinkedIn</span>
               </Button>
-              
+              "
               <Button > handleShare('email')}
-                className= "space-x-2
+                className="space-x-2
               >
                 <Mail >
                 <span >Email</span>
@@ -555,15 +555,15 @@ export function AdvancedGallerySharingSystem({
             </div>
 
             <div >
-              <Button > setQrCodeDialog(true)}
-                className= "flex-1 space-x-2
+              <Button > setQrCodeDialog(true)}"
+                className="flex-1 space-x-2
               >
                 <QrCode >
                 <span >QR Code</span>
               </Button>
               
-              <Button > navigator.clipboard.writeText(embedCode)}
-                className= "flex-1 space-x-2
+              <Button > navigator.clipboard.writeText(embedCode)}"
+                className="flex-1 space-x-2
               >
                 <Code >
                 <span >Embed</span>
@@ -577,7 +577,7 @@ export function AdvancedGallerySharingSystem({
       {lightboxItem && (
         <Dialog open={!!lightboxItem}> setLightboxItem(null)}>
           <DialogContent >
-            <div >
+            <div >"
               {lightboxItem.type === 'video' ? (
                 <video src={lightboxItem.url}>
               ) : (
@@ -585,7 +585,7 @@ export function AdvancedGallerySharingSystem({
               )}
               
               <Button > setLightboxItem(null)}
-                className= "absolute top-2 right-2 bg-purple-600/90 text-white hover:bg-purple-700/90 backdrop-blur-sm
+                className="absolute top-2 right-2 bg-purple-600/90 text-white hover:bg-purple-700/90 backdrop-blur-sm
               >
                 <X >
               </Button>
@@ -611,7 +611,7 @@ export function AdvancedGallerySharingSystem({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent >
                         {settings.showPricing ? (
-                          <>
+                          <>"
                             <DropdownMenuItem > handleDownload(lightboxItem, 'digital')}>
                               Digital License (${lightboxItem.pricing.digital})
                             </DropdownMenuItem>

@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     const { data: { session }, error } = await supabase.auth.getSession()
 
     if (error) {
-      console.error('Auth error:', error)
+      console.error('Auth error: ', error)'
       return new NextResponse('Authentication error', { status: 401 })
     }
 
@@ -61,8 +61,8 @@ export async function POST(request: NextRequest) {
         messages: [
           {
             role: 'system',
-            content: type === 'code'
-              ? 'You are a code generator. Provide only the code without any explanation.'
+            content: type === 'code
+              ? 'You are a code generator. Provide only the code without any explanation.
               : 'You are a creative content generator. Generate high-quality content based on the prompt.',
           },
           { role: 'user', content: prompt },
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       })
     }
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error: ', error)'
     return new NextResponse('Internal Server Error', { status: 500 })
   }
 } 

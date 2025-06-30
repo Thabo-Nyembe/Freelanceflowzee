@@ -1,10 +1,10 @@
 "use client"
 
-import React from "react"
+import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button'"
 import { Badge } from "@/components/ui/badge"
-import { Activity, DollarSign, Users, TrendingUp } from "lucide-react"
+import { Activity, DollarSign, Users, TrendingUp } from 'lucide-react'
 
 export default function DashboardPage() {
   const stats = [
@@ -14,7 +14,7 @@ export default function DashboardPage() {
       change: "+2.1%",
       icon: Activity,
       color: "text-blue-600",
-      bgColor: "bg-blue-100"
+      bgColor: 'bg-blue-100'
     },
     {
       title: "Revenue",
@@ -22,7 +22,7 @@ export default function DashboardPage() {
       change: "+12.5%",
       icon: DollarSign,
       color: "text-green-600",
-      bgColor: "bg-green-100"
+      bgColor: 'bg-green-100'
     },
     {
       title: "Clients",
@@ -30,7 +30,7 @@ export default function DashboardPage() {
       change: "+3.2%",
       icon: Users,
       color: "text-purple-600",
-      bgColor: "bg-purple-100"
+      bgColor: 'bg-purple-100'
     },
     {
       title: "Growth",
@@ -38,7 +38,7 @@ export default function DashboardPage() {
       change: "+4.3%",
       icon: TrendingUp,
       color: "text-orange-600",
-      bgColor: "bg-orange-100"
+      bgColor: 'bg-orange-100'
     }
   ]
 

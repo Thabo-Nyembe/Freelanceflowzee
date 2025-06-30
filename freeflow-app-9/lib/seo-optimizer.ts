@@ -1,4 +1,4 @@
-import { Metadata } from 'next
+import { Metadata } from 'next'
 
 // Context7 Pattern: Centralized SEO Configuration
 export const SEO_CONFIG = {
@@ -12,7 +12,7 @@ export const SEO_CONFIG = {
     publisher: 'FreeflowZee Inc.',
     locale: 'en_US',
     alternateLocales: ['es_ES', 'fr_FR', 'de_DE'],
-    type: 'website
+    type: 'website'
   },
   contact: {
     email: 'hello@freeflowzee.com',
@@ -22,7 +22,7 @@ export const SEO_CONFIG = {
       twitter: 'https://twitter.com/freeflowzee',
       linkedin: 'https://linkedin.com/company/freeflowzee',
       github: 'https://github.com/freeflowzee',
-      instagram: 'https://instagram.com/freeflowzee
+      instagram: 'https://instagram.com/freeflowzee'
     }
   },
   features: {
@@ -34,7 +34,7 @@ export const SEO_CONFIG = {
   keywords: {
     primary: 'freelance management, project collaboration, client portal, payment processing',
     secondary: 'creative workflow, team collaboration, invoice automation, file sharing, time tracking',
-    longTail: 'best freelance management software 2024, client collaboration platform for designers, automated invoicing for freelancers
+    longTail: 'best freelance management software 2024, client collaboration platform for designers, automated invoicing for freelancers'
   }
 }
 
@@ -44,37 +44,37 @@ export const SEO_TEMPLATES = {
     title: `${SEO_CONFIG.site.name} - ${SEO_CONFIG.site.tagline}`,
     description: SEO_CONFIG.site.description,
     keywords: `${SEO_CONFIG.keywords.primary}, ${SEO_CONFIG.keywords.secondary}`,
-    schema: 'Organization
+    schema: 'Organization'
   },
   features: {
     title: `Features - ${SEO_CONFIG.site.name}`,
     description: 'Discover powerful features that make FreeflowZee the best freelance management platform. From project tracking to client collaboration, we have everything you need.',
     keywords: `${SEO_CONFIG.keywords.primary}, feature list, platform capabilities`,
-    schema: 'Product
+    schema: 'Product'
   },
   pricing: {
     title: `Pricing Plans - ${SEO_CONFIG.site.name}`,
     description: 'Choose the perfect plan for your freelance business. Transparent pricing, no hidden fees. Start free and scale as you grow.',
     keywords: 'freelance software pricing, subscription plans, free trial',
-    schema: 'Offer
+    schema: 'Offer'
   },
   blog: {
     title: `Blog - ${SEO_CONFIG.site.name}`,
     description: 'Expert insights on freelance management, client relationships, and business growth. Stay updated with the latest trends and best practices.',
     keywords: 'freelance tips, business growth, client management, productivity',
-    schema: 'Blog
+    schema: 'Blog'
   },
   contact: {
     title: `Contact Us - ${SEO_CONFIG.site.name}`,
     description: 'Get in touch with our team. We\'re here to help you succeed with your freelance business. Multiple ways to reach us.',
     keywords: 'contact freeflowzee, customer support, sales inquiry',
-    schema: 'ContactPage
+    schema: 'ContactPage'
   },
   demo: {
     title: `Live Demo - ${SEO_CONFIG.site.name}`,
     description: 'Experience FreeflowZee in action. See how our platform can transform your freelance workflow with this interactive demo.',
     keywords: 'product demo, live preview, interactive tour',
-    schema: 'SoftwareApplication
+    schema: 'SoftwareApplication'
   }
 }
 
@@ -239,7 +239,7 @@ export function generatePageSEO(
       yandex: 'your-yandex-verification-code',
       yahoo: 'your-yahoo-verification-code',
       other: {
-        'facebook-domain-verification': 'your-facebook-verification-code
+        'facebook-domain-verification': 'your-facebook-verification-code'
       }
     }
   }
@@ -257,7 +257,7 @@ export function generateStructuredData(
     "@context": "https://schema.org", "@type": "Organization", "name": SEO_CONFIG.site.name, "description": SEO_CONFIG.site.description, "url": SEO_CONFIG.site.url, "logo": `${SEO_CONFIG.site.url}/images/logo.png`, "contactPoint": {
       "@type": "ContactPoint", "telephone": SEO_CONFIG.contact.phone, "contactType": "customer service", "email": SEO_CONFIG.contact.email
     }, "address": {
-      "@type": "PostalAddress", "streetAddress": "123 Creative Street", "addressLocality": "San Francisco", "addressRegion": "CA", "postalCode": "94103", "addressCountry": "US
+      "@type": "PostalAddress", "streetAddress": "123 Creative Street", "addressLocality": "San Francisco", "addressRegion": "CA", "postalCode": "94103", "addressCountry": 'US'
     }, "sameAs": Object.values(SEO_CONFIG.contact.social)
   }
 
@@ -269,7 +269,7 @@ export function generateStructuredData(
       return {
         "@context": "https://schema.org", "@type": "SoftwareApplication", "name": SEO_CONFIG.site.name, "description": SEO_CONFIG.site.description, "url": SEO_CONFIG.site.url, "applicationCategory": "BusinessApplication", "operatingSystem": "Web Browser", "offers": {
           "@type": "Offer", "price": "0",
-          "priceCurrency": "USD", "availability": "https://schema.org/InStock
+          "priceCurrency": "USD", "availability": 'https://schema.org/InStock'
         }, "provider": baseOrganization, "screenshot": `${SEO_CONFIG.site.url}/images/app-screenshot.jpg`, "featureList": SEO_CONFIG.features.primary
       }
 
@@ -300,7 +300,7 @@ export function generateStructuredData(
       return {
         "@context": "https://schema.org", "@type": "SoftwareApplication", "name": SEO_CONFIG.site.name, "description": SEO_CONFIG.site.description, "url": SEO_CONFIG.site.url, "applicationCategory": "BusinessApplication", "operatingSystem": "Web Browser", "offers": {
           "@type": "Offer", "price": "0",
-          "priceCurrency": "USD
+          "priceCurrency": 'USD'
         }, "provider": baseOrganization
       }
 

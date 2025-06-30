@@ -19,14 +19,14 @@ const LuxuryCard = React.forwardRef<HTMLDivElement, LuxuryCardProps>(
       default: "bg-white/60 backdrop-blur-xl border-white/30 shadow-xl shadow-black/5",
       glass: "bg-white/40 backdrop-blur-2xl border-white/20 shadow-2xl shadow-black/10",
       premium: "bg-gradient-to-br from-white/70 to-white/50 backdrop-blur-xl border-white/40 shadow-2xl shadow-black/8",
-      minimal: "bg-white/80 backdrop-blur-md border-slate-200/50 shadow-lg shadow-black/3
+      minimal: 'bg-white/80 backdrop-blur-md border-slate-200/50 shadow-lg shadow-black/3'
     }
 
     const sizeClasses = {
       sm: "p-4",
       md: "p-6", 
       lg: "p-8",
-      xl: "p-12
+      xl: 'p-12'
     }
 
     const gradientClasses = gradient ? {
@@ -35,7 +35,7 @@ const LuxuryCard = React.forwardRef<HTMLDivElement, LuxuryCardProps>(
       blue: "bg-gradient-to-br from-blue-50/80 to-indigo-50/60",
       emerald: "bg-gradient-to-br from-emerald-50/80 to-teal-50/60",
       amber: "bg-gradient-to-br from-amber-50/80 to-orange-50/60",
-      slate: "bg-gradient-to-br from-slate-50/80 to-gray-50/60
+      slate: 'bg-gradient-to-br from-slate-50/80 to-gray-50/60'
     }[gradient] : 
 
     const hoverClasses = hover ? "hover:shadow-3xl hover:scale-[1.02] hover:border-white/50" : 

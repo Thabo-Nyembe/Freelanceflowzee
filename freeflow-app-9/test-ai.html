@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreeflowZee AI Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .chat-container { border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .message { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .user { background-color: #e3f2fd; text-align: right; }
+        .assistant { background-color: #f5f5f5; }
+        .tools { display: flex; gap: 10px; margin: 20px 0; }
+        button { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; }
+        .tool-btn { background-color: #2196F3; color: white; }
+        textarea { width: 100%; height: 100px; margin: 10px 0; padding: 10px; }
+        .send-btn { background-color: #4CAF50; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🤖 FreeflowZee AI Test</h1>
+    <div class="chat-container">
+        <div id="messages"></div>
+        <div class="tools">
+            <button class="tool-btn" onclick="testProjectAnalysis()">📊 Project Analysis</button>
+            <button class="tool-btn" onclick="testCreativeAssets()">🎨 Creative Assets</button>
+            <button class="tool-btn" onclick="testClientComms()">💬 Client Comms</button>
+            <button class="tool-btn" onclick="testTimeOptimization()">⏰ Time Optimization</button>
+        </div>
+        <textarea id="messageInput" placeholder="Type your message here..."></textarea>
+        <button class="send-btn" onclick="sendMessage()">Send Message</button>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000';
+        
+        function addMessage(content, isUser = false) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+            messageDiv.textContent = content;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        async function testAPI(endpoint, data) {
+            try {
+                addMessage(`Testing ${endpoint}...`, true);
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                addMessage(JSON.stringify(result, null, 2));
+            } catch (error) {
+                addMessage(`Error: ${error.message}`);
+            }
+        }
+
+        function testProjectAnalysis() {
+            testAPI('/api/ai/enhanced-stream', {
+                messages: [{ role: 'user', content: 'Analyze this project: Build a modern e-commerce website for a fashion brand' }],
+                tool: 'project_analysis'
+            });
+        }
+
+        function testCreativeAssets() {
+            testAPI('/api/ai/enhanced-stream', {
+                messages: [{ role: 'user', content: 'Generate creative assets for a tech startup' }],
+                tool: 'creative_assets'
+            });
+        }
+
+        function testClientComms() {
+            testAPI('/api/ai/enhanced-stream', {
+                messages: [{ role: 'user', content: 'Create a professional email template for project delivery' }],
+                tool: 'client_communication'
+            });
+        }
+
+        function testTimeOptimization() {
+            testAPI('/api/ai/enhanced-stream', {
+                messages: [{ role: 'user', content: 'Optimize time allocation for a 3-month web development project' }],
+                tool: 'time_optimization'
+            });
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            testAPI('/api/ai/enhanced-stream', {
+                messages: [{ role: 'user', content: message }]
+            });
+            
+            input.value = '';
+        }
+
+        // Test basic connectivity
+        addMessage('🚀 FreeflowZee AI Test Suite Ready!');
+        addMessage('Click the buttons above to test different AI tools or type a custom message.');
+    </script>
+</body>
+</html> 

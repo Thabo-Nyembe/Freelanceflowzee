@@ -7,9 +7,9 @@ interface VideoAnnotation {
   userId: string
   content: string
   timestamp: number
-  type: 'comment' | 'note' | 'suggestion' | 'issue' | 'approval_required'
+  type: 'comment' | 'note' | 'suggestion' | 'issue' | 'approval_required
   isResolved: boolean
-  priority: 'low' | 'medium' | 'high' | 'urgent'
+  priority: 'low' | 'medium' | 'high' | 'urgent
   mentions: string[]
   reactions: Reaction[]
   createdAt: string
@@ -21,9 +21,9 @@ interface ImageAnnotation {
   userId: string
   content: string
   position: { x: number; y: number }
-  type: 'comment' | 'note' | 'suggestion' | 'issue' | 'approval_required'
+  type: 'comment' | 'note' | 'suggestion' | 'issue' | 'approval_required
   isResolved: boolean
-  priority: 'low' | 'medium' | 'high' | 'urgent'
+  priority: 'low' | 'medium' | 'high' | 'urgent
   mentions: string[]
   reactions: Reaction[]
   createdAt: string
@@ -31,14 +31,14 @@ interface ImageAnnotation {
 
 interface Reaction {
   userId: string
-  type: 'like' | 'love' | 'laugh' | 'wow' | 'sad' | 'angry' | 'approve' | 'reject'
+  type: 'like' | 'love' | 'laugh' | 'wow' | 'sad' | 'angry' | 'approve' | 'reject
   createdAt: string
 }
 
 interface ProjectCollaboration {
   id: string
   projectId: string
-  escrowStatus: 'pending' | 'funded' | 'milestone_released' | 'fully_released'
+  escrowStatus: 'pending' | 'funded' | 'milestone_released' | 'fully_released
   downloadPassword?: string
   videoAnnotations: VideoAnnotation[]
   imageAnnotations: ImageAnnotation[]
@@ -51,7 +51,7 @@ interface ApprovalStep {
   id: string
   name: string
   description: string
-  status: 'pending' | 'in_progress' | 'approved' | 'rejected' | 'revision_requested'
+  status: 'pending' | 'in_progress' | 'approved' | 'rejected' | 'revision_requested
   requiredApprovers: string[]
   completedApprovers: string[]
   dueDate?: string
@@ -61,19 +61,19 @@ interface ApprovalStep {
 
 interface ActivityEvent {
   id: string
-  type: 'annotation_added' | 'approval_given' | 'file_uploaded' | 'escrow_updated' | 'download_unlocked'
+  type: 'annotation_added' | 'approval_given' | 'file_uploaded' | 'escrow_updated' | 'download_unlocked
   userId: string
   data: unknown
   timestamp: string
   isRead: boolean
-  priority: 'low' | 'medium' | 'high' | 'urgent'
+  priority: 'low' | 'medium' | 'high' | 'urgent
 }
 
 interface ClientPreference {
   id: string
   fileId: string
   userId: string
-  type: 'favorite' | 'like' | 'dislike' | 'selected_for_final'
+  type: 'favorite' | 'like' | 'dislike' | 'selected_for_final
   notes?: string
   createdAt: string
 }
@@ -102,22 +102,22 @@ export async function POST(request: NextRequest) {
     const action = body.action
 
     switch (action) {
-      case 'add_video_annotation':'
+      case 'add_video_annotation':
         return handleAddVideoAnnotation(body, supabase, user)
       
-      case 'add_image_annotation':'
+      case 'add_image_annotation':
         return handleAddImageAnnotation(body, supabase, user)
       
-      case 'update_client_preference':'
+      case 'update_client_preference':
         return handleUpdateClientPreference(body, supabase, user)
       
-      case 'submit_approval':'
+      case 'submit_approval':
         return handleSubmitApproval(body, supabase, user)
       
-      case 'trigger_escrow_release':'
+      case 'trigger_escrow_release':
         return handleEscrowRelease(body, supabase, user)
       
-      case 'generate_download_access':'
+      case 'generate_download_access':
         return handleGenerateDownloadAccess(body, supabase, user)
       
       default:
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('Enhanced collaboration API error:', error)
+    console.error('Enhanced collaboration API error: ', error)'
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -141,10 +141,10 @@ async function handleAddVideoAnnotation(data: unknown, supabase: unknown, user: 
 
     // Validate file access
     const { data: file, error: fileError } = await supabase
-      .from('media_files'
-      .select('id, name, project_id, type'
+      .from('media_files
+      .select('id, name, project_id, type
       .eq('id', fileId)
-      .eq('type', 'video'
+      .eq('type', 'video
       .single()
 
     if (fileError || !file) {
@@ -171,7 +171,7 @@ async function handleAddVideoAnnotation(data: unknown, supabase: unknown, user: 
 
     // Save to database
     const { data: savedAnnotation, error: saveError } = await supabase
-      .from('video_annotations'
+      .from('video_annotations
       .insert(annotation)
       .select()
       .single()
@@ -186,10 +186,10 @@ async function handleAddVideoAnnotation(data: unknown, supabase: unknown, user: 
     // Create real-time activity event
     await createActivityEvent(supabase, {
       projectId: file.project_id,
-      type: 'annotation_added,
+      type: 'annotation_added,'
       userId: user.id,
       data: {
-        annotationType: 'video,
+        annotationType: 'video,'
         fileId,
         filename: file.name,
         timestamp,
@@ -203,7 +203,7 @@ async function handleAddVideoAnnotation(data: unknown, supabase: unknown, user: 
     if (mentions && mentions.length > 0) {
       await sendMentionNotifications(supabase, {
         mentions,
-        annotationType: 'video,
+        annotationType: 'video,'
         fileId,
         filename: file.name,
         content,
@@ -214,9 +214,9 @@ async function handleAddVideoAnnotation(data: unknown, supabase: unknown, user: 
     }
 
     // Check if this triggers approval workflow
-    if (type === 'approval_required') {'
+    if (type === 'approval_required') {
       await checkApprovalWorkflow(supabase, file.project_id, {
-        type: 'annotation_approval,
+        type: 'annotation_approval,'
         annotationId: annotation.id,
         fileId,
         priority
@@ -229,7 +229,7 @@ async function handleAddVideoAnnotation(data: unknown, supabase: unknown, user: 
       message: 'Video annotation added successfully'
     })
   } catch (error) {
-    console.error('Add video annotation error:', error)
+    console.error('Add video annotation error: ', error)'
     return NextResponse.json(
       { error: 'Failed to add video annotation' },
       { status: 500 }
@@ -243,10 +243,10 @@ async function handleAddImageAnnotation(data: unknown, supabase: unknown, user: 
 
     // Validate file access
     const { data: file, error: fileError } = await supabase
-      .from('media_files'
-      .select('id, name, project_id, type'
+      .from('media_files
+      .select('id, name, project_id, type
       .eq('id', fileId)
-      .eq('type', 'image'
+      .eq('type', 'image
       .single()
 
     if (fileError || !file) {
@@ -273,7 +273,7 @@ async function handleAddImageAnnotation(data: unknown, supabase: unknown, user: 
 
     // Save to database
     const { data: savedAnnotation, error: saveError } = await supabase
-      .from('image_annotations'
+      .from('image_annotations
       .insert(annotation)
       .select()
       .single()
@@ -288,10 +288,10 @@ async function handleAddImageAnnotation(data: unknown, supabase: unknown, user: 
     // Create real-time activity event
     await createActivityEvent(supabase, {
       projectId: file.project_id,
-      type: 'annotation_added,
+      type: 'annotation_added,'
       userId: user.id,
       data: {
-        annotationType: 'image,
+        annotationType: 'image,'
         fileId,
         filename: file.name,
         position,
@@ -305,7 +305,7 @@ async function handleAddImageAnnotation(data: unknown, supabase: unknown, user: 
     if (mentions && mentions.length > 0) {
       await sendMentionNotifications(supabase, {
         mentions,
-        annotationType: 'image,
+        annotationType: 'image,'
         fileId,
         filename: file.name,
         content,
@@ -321,7 +321,7 @@ async function handleAddImageAnnotation(data: unknown, supabase: unknown, user: 
       message: 'Image annotation added successfully'
     })
   } catch (error) {
-    console.error('Add image annotation error:', error)
+    console.error('Add image annotation error: ', error)'
     return NextResponse.json(
       { error: 'Failed to add image annotation' },
       { status: 500 }
@@ -335,8 +335,8 @@ async function handleUpdateClientPreference(data: unknown, supabase: unknown, us
 
     // Validate file access
     const { data: file, error: fileError } = await supabase
-      .from('media_files'
-      .select('id, name, project_id'
+      .from('media_files
+      .select('id, name, project_id
       .eq('id', fileId)
       .single()
 
@@ -349,8 +349,8 @@ async function handleUpdateClientPreference(data: unknown, supabase: unknown, us
 
     // Check if preference already exists
     const { data: existingPreference } = await supabase
-      .from('client_preferences'
-      .select('id'
+      .from('client_preferences
+      .select('id
       .eq('file_id', fileId)
       .eq('user_id', user.id)
       .single()
@@ -359,7 +359,7 @@ async function handleUpdateClientPreference(data: unknown, supabase: unknown, us
     if (existingPreference) {
       // Update existing preference
       const { data: updatedPreference, error: updateError } = await supabase
-        .from('client_preferences'
+        .from('client_preferences
         .update({
           type,
           notes,
@@ -379,7 +379,7 @@ async function handleUpdateClientPreference(data: unknown, supabase: unknown, us
     } else {
       // Create new preference
       const { data: newPreference, error: createError } = await supabase
-        .from('client_preferences'
+        .from('client_preferences
         .insert({
           file_id: fileId,
           user_id: user.id,
@@ -402,7 +402,7 @@ async function handleUpdateClientPreference(data: unknown, supabase: unknown, us
     // Create real-time activity event
     await createActivityEvent(supabase, {
       projectId: file.project_id,
-      type: 'preference_updated,
+      type: 'preference_updated,'
       userId: user.id,
       data: {
         fileId,
@@ -416,10 +416,10 @@ async function handleUpdateClientPreference(data: unknown, supabase: unknown, us
     return NextResponse.json({
       success: true,
       preference,
-      message: `File ${type.replace('_', ' ')} successfully'
+      message: `File ${type.replace('_', ' ')} successfully
     })
   } catch (error) {
-    console.error('Update client preference error:', error)
+    console.error('Update client preference error: ', error)'
     return NextResponse.json(
       { error: 'Failed to update preference' },
       { status: 500 }
@@ -433,8 +433,8 @@ async function handleSubmitApproval(data: unknown, supabase: unknown, user: unkn
 
     // Validate project access
     const { data: project, error: projectError } = await supabase
-      .from('projects'
-      .select('id, name, escrow_status'
+      .from('projects
+      .select('id, name, escrow_status
       .eq('id', projectId)
       .single()
 
@@ -447,7 +447,7 @@ async function handleSubmitApproval(data: unknown, supabase: unknown, user: unkn
 
     // Update approval step
     const { data: updatedStep, error: stepError } = await supabase
-      .from('approval_steps'
+      .from('approval_steps
       .update({
         status,
         [`${user.id}_approved_at`]: new Date().toISOString(),
@@ -469,12 +469,12 @@ async function handleSubmitApproval(data: unknown, supabase: unknown, user: unkn
     // Check if all required approvers have approved
     const allApproved = await checkAllApproversCompleted(supabase, stepId)
 
-    if (allApproved && status === 'approved') {'
+    if (allApproved && status === 'approved') {
       // Mark step as completed
       await supabase
-        .from('approval_steps'
+        .from('approval_steps
         .update({
-          status: 'approved,
+          status: 'approved,'
           completed_at: new Date().toISOString()
         })
         .eq('id', stepId)
@@ -493,7 +493,7 @@ async function handleSubmitApproval(data: unknown, supabase: unknown, user: unkn
     // Create real-time activity event
     await createActivityEvent(supabase, {
       projectId,
-      type: 'approval_given,
+      type: 'approval_given,'
       userId: user.id,
       data: {
         stepId,
@@ -512,7 +512,7 @@ async function handleSubmitApproval(data: unknown, supabase: unknown, user: unkn
       message: `Approval ${status} successfully
     })
   } catch (error) {
-    console.error('Submit approval error:', error)
+    console.error('Submit approval error: ', error)'
     return NextResponse.json(
       { error: 'Failed to submit approval' },
       { status: 500 }
@@ -526,8 +526,8 @@ async function handleEscrowRelease(data: unknown, supabase: unknown, user: unkno
 
     // Validate project and escrow status
     const { data: project, error: projectError } = await supabase
-      .from('projects'
-      .select('id, name, escrow_status, escrow_amount, download_password'
+      .from('projects
+      .select('id, name, escrow_status, escrow_amount, download_password
       .eq('id', projectId)
       .single()
 
@@ -538,7 +538,7 @@ async function handleEscrowRelease(data: unknown, supabase: unknown, user: unkno
       )
     }
 
-    if (project.escrow_status === 'fully_released') {'
+    if (project.escrow_status === 'fully_released') {
       return NextResponse.json(
         { error: 'Escrow already fully released' },
         { status: 400 }
@@ -552,7 +552,7 @@ async function handleEscrowRelease(data: unknown, supabase: unknown, user: unkno
 
     // Update project escrow status
     const { data: updatedProject, error: updateError } = await supabase
-      .from('projects'
+      .from('projects
       .update({
         escrow_status: newEscrowStatus,
         [`escrow_released_${Date.now()}`]: {
@@ -579,7 +579,7 @@ async function handleEscrowRelease(data: unknown, supabase: unknown, user: unkno
       downloadPassword = generateSecurePassword()
       
       await supabase
-        .from('projects'
+        .from('projects
         .update({ download_password: downloadPassword })
         .eq('id', projectId)
     }
@@ -587,23 +587,23 @@ async function handleEscrowRelease(data: unknown, supabase: unknown, user: unkno
     // Unlock project deliverables if full release
     if (isFullRelease) {
       await supabase
-        .from('deliverables'
+        .from('deliverables
         .update({
-          status: 'unlocked,
+          status: 'unlocked,'
           unlocked_at: new Date().toISOString(),
           unlock_method: 'escrow_release'
         })
         .eq('project_id', projectId)
-        .eq('status', 'locked'
+        .eq('status', 'locked
     }
 
     // Create real-time activity event
     await createActivityEvent(supabase, {
       projectId,
-      type: 'escrow_updated,
+      type: 'escrow_updated,'
       userId: user.id,
       data: {
-        releaseType: isFullRelease ? 'full_release' : 'milestone_release,
+        releaseType: isFullRelease ? 'full_release' : 'milestone_release,'
         amount: releaseAmount,
         newStatus: newEscrowStatus,
         downloadPassword: isFullRelease ? downloadPassword : null
@@ -626,10 +626,10 @@ async function handleEscrowRelease(data: unknown, supabase: unknown, user: unkno
       escrowStatus: newEscrowStatus,
       downloadPassword: isFullRelease ? downloadPassword : null,
       unlockedDeliverables: isFullRelease,
-      message: `Escrow ${isFullRelease ? 'fully' : 'partially'} released successfully'
+      message: `Escrow ${isFullRelease ? 'fully' : 'partially'} released successfully
     })
   } catch (error) {
-    console.error('Escrow release error:', error)
+    console.error('Escrow release error: ', error)'
     return NextResponse.json(
       { error: 'Failed to release escrow' },
       { status: 500 }
@@ -643,8 +643,8 @@ async function handleGenerateDownloadAccess(data: unknown, supabase: unknown, us
 
     // Validate project and password
     const { data: project, error: projectError } = await supabase
-      .from('projects'
-      .select('id, name, download_password, escrow_status'
+      .from('projects
+      .select('id, name, download_password, escrow_status
       .eq('id', projectId)
       .single()
 
@@ -656,7 +656,7 @@ async function handleGenerateDownloadAccess(data: unknown, supabase: unknown, us
     }
 
     // Check if escrow is released
-    if (project.escrow_status !== 'fully_released') {'
+    if (project.escrow_status !== 'fully_released') {
       return NextResponse.json(
         { error: 'Project downloads not yet available - escrow not fully released' },
         { status: 403 }
@@ -673,10 +673,10 @@ async function handleGenerateDownloadAccess(data: unknown, supabase: unknown, us
 
     // Generate secure download tokens for all deliverables
     const { data: deliverables, error: deliverablesError } = await supabase
-      .from('deliverables'
-      .select('id, name, file_url, status'
+      .from('deliverables
+      .select('id, name, file_url, status
       .eq('project_id', projectId)
-      .eq('status', 'unlocked'
+      .eq('status', 'unlocked
 
     if (deliverablesError) {
       return NextResponse.json(
@@ -705,7 +705,7 @@ async function handleGenerateDownloadAccess(data: unknown, supabase: unknown, us
     )
 
     // Log download access
-    await supabase.from('download_logs').insert({'
+    await supabase.from('download_logs').insert({
       project_id: projectId,
       user_id: user.id,
       access_granted_at: new Date().toISOString(),
@@ -715,7 +715,7 @@ async function handleGenerateDownloadAccess(data: unknown, supabase: unknown, us
     // Create real-time activity event
     await createActivityEvent(supabase, {
       projectId,
-      type: 'download_unlocked,
+      type: 'download_unlocked,'
       userId: user.id,
       data: {
         deliverableCount: downloadTokens.length,
@@ -727,11 +727,11 @@ async function handleGenerateDownloadAccess(data: unknown, supabase: unknown, us
     return NextResponse.json({
       success: true,
       downloadTokens,
-      expiresIn: '24 hours,
+      expiresIn: '24 hours,'
       message: 'Download access granted successfully'
     })
   } catch (error) {
-    console.error('Generate download access error:', error)
+    console.error('Generate download access error: ', error)'
     return NextResponse.json(
       { error: 'Failed to generate download access' },
       { status: 500 }
@@ -742,7 +742,7 @@ async function handleGenerateDownloadAccess(data: unknown, supabase: unknown, us
 // Helper functions
 async function createActivityEvent(supabase: unknown, eventData: unknown) {
   try {
-    await supabase.from('real_time_activity').insert({'
+    await supabase.from('real_time_activity').insert({
       id: `act_${Date.now()}`,
       project_id: eventData.projectId,
       type: eventData.type,
@@ -750,23 +750,23 @@ async function createActivityEvent(supabase: unknown, eventData: unknown) {
       data: eventData.data,
       timestamp: new Date().toISOString(),
       is_read: false,
-      priority: eventData.priority || 'medium'
+      priority: eventData.priority || 'medium
     })
 
     // Trigger real-time notification (WebSocket/SSE)
     // In production, this would trigger actual real-time updates
-    console.log('Real-time activity created:', eventData)
+    console.log('Real-time activity created: ', eventData)'
   } catch (error) {
-    console.error('Failed to create activity event:', error)
+    console.error('Failed to create activity event: ', error)'
   }
 }
 
 async function sendMentionNotifications(supabase: unknown, data: unknown) {
   try {
     for (const mentionedUserId of data.mentions) {
-      await supabase.from('notifications').insert({'
+      await supabase.from('notifications').insert({
         user_id: mentionedUserId,
-        type: 'mention,
+        type: 'mention,'
         title: `You were mentioned in ${data.annotationType} annotation`,
         message: `${data.mentionedBy} mentioned you in ${data.filename}`,
         data: {
@@ -778,13 +778,13 @@ async function sendMentionNotifications(supabase: unknown, data: unknown) {
           position: data.position,
           project_id: data.projectId
         },
-        priority: 'medium,
+        priority: 'medium,'
         is_read: false,
         created_at: new Date().toISOString()
       })
     }
   } catch (error) {
-    console.error('Failed to send mention notifications:', error)
+    console.error('Failed to send mention notifications: ', error)'
   }
 }
 
@@ -792,31 +792,31 @@ async function checkApprovalWorkflow(supabase: unknown, projectId: string, data:
   try {
     // Check if there are pending approval steps that need attention
     const { data: pendingSteps } = await supabase
-      .from('approval_steps'
-      .select('*'
+      .from('approval_steps
+      .select('*
       .eq('project_id', projectId)
-      .eq('status', 'pending'
-      .order('order'
+      .eq('status', 'pending
+      .order('order
 
     if (pendingSteps && pendingSteps.length > 0) {
       // Auto-advance to the first pending step if annotation requires approval
-      if (data.priority === 'urgent' || data.type === 'annotation_approval') {'
+      if (data.priority === 'urgent' || data.type === 'annotation_approval') {
         await supabase
-          .from('approval_steps'
+          .from('approval_steps
           .update({ status: 'in_progress' })
           .eq('id', pendingSteps[0].id)
       }
     }
   } catch (error) {
-    console.error('Failed to check approval workflow:', error)
+    console.error('Failed to check approval workflow: ', error)'
   }
 }
 
 async function checkAllApproversCompleted(supabase: unknown, stepId: string): Promise<boolean> {
   try {
     const { data: step } = await supabase
-      .from('approval_steps'
-      .select('required_approvers, *'
+      .from('approval_steps
+      .select('required_approvers, *
       .eq('id', stepId)
       .single()
 
@@ -829,7 +829,7 @@ async function checkAllApproversCompleted(supabase: unknown, stepId: string): Pr
 
     return approvalFields.every((field: string) => step[field] !== null)
   } catch (error) {
-    console.error('Failed to check approvers:', error)
+    console.error('Failed to check approvers: ', error)'
     return false
   }
 }
@@ -837,30 +837,30 @@ async function checkAllApproversCompleted(supabase: unknown, stepId: string): Pr
 async function advanceToNextApprovalStep(supabase: unknown, projectId: string, currentStepId: string) {
   try {
     const { data: nextStep } = await supabase
-      .from('approval_steps'
-      .select('*'
+      .from('approval_steps
+      .select('*
       .eq('project_id', projectId)
-      .eq('status', 'pending'
-      .order('order'
+      .eq('status', 'pending
+      .order('order
       .limit(1)
       .single()
 
     if (nextStep) {
       await supabase
-        .from('approval_steps'
+        .from('approval_steps
         .update({
-          status: 'in_progress,
+          status: 'in_progress,'
           started_at: new Date().toISOString()
         })
         .eq('id', nextStep.id)
     }
   } catch (error) {
-    console.error('Failed to advance approval step:', error)
+    console.error('Failed to advance approval step: ', error)'
   }
 }
 
 function generateSecurePassword(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789
   let password = 
   for (let i = 0; i < 12; i++) {
     password += chars.charAt(Math.floor(Math.random() * chars.length))
@@ -871,7 +871,7 @@ function generateSecurePassword(): string {
 async function generateDownloadToken(supabase: unknown, data: unknown): Promise<string> {
   const token = `dt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}
   
-  await supabase.from('download_tokens').insert({'
+  await supabase.from('download_tokens').insert({
     token,
     project_id: data.projectId,
     deliverable_id: data.deliverableId,
@@ -885,30 +885,30 @@ async function generateDownloadToken(supabase: unknown, data: unknown): Promise<
 
 async function sendDownloadReadyNotification(supabase: unknown, data: unknown) {
   try {
-    await supabase.from('notifications').insert({'
+    await supabase.from('notifications').insert({
       user_id: data.clientId,
-      type: 'download_ready,
-      title: 'Project Downloads Ready!,
+      type: 'download_ready,'
+      title: 'Project Downloads Ready!,'
       message: `Your project "${data.projectName}" is complete and ready for download`,
       data: {
         project_id: data.projectId,
         download_password: data.downloadPassword
       },
-      priority: 'high,
+      priority: 'high,'
       is_read: false,
       created_at: new Date().toISOString()
     })
   } catch (error) {
-    console.error('Failed to send download ready notification:', error)
+    console.error('Failed to send download ready notification: ', error)'
   }
 }
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const action = searchParams.get('action'
-    const projectId = searchParams.get('projectId'
-    const fileId = searchParams.get('fileId'
+    const action = searchParams.get('action
+    const projectId = searchParams.get('projectId
+    const fileId = searchParams.get('fileId
 
     const supabase = await createClient()
     
@@ -929,16 +929,16 @@ export async function GET(request: NextRequest) {
     }
 
     switch (action) {
-      case 'get_annotations':'
+      case 'get_annotations':
         return getFileAnnotations(supabase, fileId, user)
       
-      case 'get_preferences':'
+      case 'get_preferences':
         return getClientPreferences(supabase, projectId, user)
       
-      case 'get_activity':'
+      case 'get_activity':
         return getRealTimeActivity(supabase, projectId, user)
       
-      case 'get_approval_status':'
+      case 'get_approval_status':
         return getApprovalStatus(supabase, projectId, user)
       
       default:
@@ -948,7 +948,7 @@ export async function GET(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('Enhanced collaboration GET error:', error)
+    console.error('Enhanced collaboration GET error: ', error)'
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -966,16 +966,16 @@ async function getFileAnnotations(supabase: unknown, fileId: string | null, user
 
   const [videoAnnotations, imageAnnotations] = await Promise.all([
     supabase
-      .from('video_annotations'
-      .select('*, user:users(id, email, full_name)'
+      .from('video_annotations
+      .select('*, user:users(id, email, full_name)
       .eq('file_id', fileId)
-      .order('timestamp'
+      .order('timestamp
     
     supabase
-      .from('image_annotations'
-      .select('*, user:users(id, email, full_name)'
+      .from('image_annotations
+      .select('*, user:users(id, email, full_name)
       .eq('file_id', fileId)
-      .order('created_at'
+      .order('created_at
   ])
 
   return NextResponse.json({
@@ -994,7 +994,7 @@ async function getClientPreferences(supabase: unknown, projectId: string | null,
   }
 
   const { data: preferences, error } = await supabase
-    .from('client_preferences'
+    .from('client_preferences
     .select(
       *,
       media_file:media_files(id, name, type, thumbnail_url)
@@ -1014,7 +1014,7 @@ async function getClientPreferences(supabase: unknown, projectId: string | null,
     summary: {
       favorites: preferences?.filter((p: unknown) => p.type === 'favorite').length || 0,
       likes: preferences?.filter((p: unknown) => p.type === 'like').length || 0,
-      selected: preferences?.filter((p: unknown) => p.type === 'selected_for_final').length || 0'
+      selected: preferences?.filter((p: unknown) => p.type === 'selected_for_final').length || 0
     }
   })
 }
@@ -1028,7 +1028,7 @@ async function getRealTimeActivity(supabase: unknown, projectId: string | null, 
   }
 
   const { data: activity, error } = await supabase
-    .from('real_time_activity'
+    .from('real_time_activity
     .select(
       *,
       user:users(id, email, full_name, avatar_url)
@@ -1059,10 +1059,10 @@ async function getApprovalStatus(supabase: unknown, projectId: string | null, us
   }
 
   const { data: steps, error } = await supabase
-    .from('approval_steps'
-    .select('*'
+    .from('approval_steps
+    .select('*
     .eq('project_id', projectId)
-    .order('order'
+    .order('order
 
   if (error) {
     return NextResponse.json(
@@ -1071,12 +1071,12 @@ async function getApprovalStatus(supabase: unknown, projectId: string | null, us
     )
   }
 
-  const currentStep = steps?.find((step: unknown) => step.status === 'in_progress') || '
-                     steps?.find((step: unknown) => step.status === 'pending'
+  const currentStep = steps?.find((step: unknown) => step.status === 'in_progress') || 
+                     steps?.find((step: unknown) => step.status === 'pending
 
   return NextResponse.json({
     steps: steps || [],
     currentStep,
-    overallProgress: steps ? (steps.filter((s: unknown) => s.status === 'approved').length / steps.length) * 100 : 0'
+    overallProgress: steps ? (steps.filter((s: unknown) => s.status === 'approved').length / steps.length) * 100 : 0
   })
 } 

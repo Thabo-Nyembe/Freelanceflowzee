@@ -20,7 +20,7 @@ const mockTeamMembers: TeamMember[] = [
     status: 'available',
     timezone: 'EST',
     availableUntil: '6:00 PM',
-    currentActivity: 'Working on brand identity
+    currentActivity: 'Working on brand identity'
   },
   {
     id: '2',
@@ -29,7 +29,7 @@ const mockTeamMembers: TeamMember[] = [
     status: 'busy',
     timezone: 'PST',
     availableUntil: '4:30 PM',
-    currentActivity: 'Client presentation
+    currentActivity: 'Client presentation'
   },
   {
     id: '3',
@@ -38,7 +38,7 @@ const mockTeamMembers: TeamMember[] = [
     status: 'available',
     timezone: 'EST',
     availableUntil: '5:30 PM',
-    currentActivity: 'Code review
+    currentActivity: 'Code review'
   },
   {
     id: '4',
@@ -47,7 +47,7 @@ const mockTeamMembers: TeamMember[] = [
     status: 'away',
     timezone: 'CST',
     availableUntil: '3:00 PM',
-    currentActivity: 'Lunch break
+    currentActivity: 'Lunch break'
   },
   {
     id: '5',
@@ -56,7 +56,7 @@ const mockTeamMembers: TeamMember[] = [
     status: 'available',
     timezone: 'EST',
     availableUntil: '7:00 PM',
-    currentActivity: 'Design wireframes
+    currentActivity: 'Design wireframes'
   }
 ]
 
@@ -82,7 +82,7 @@ const mockEvents: CalendarEvent[] = [
     duration: 60,
     attendees: ['1', '2'],
     description: 'Present final brand identity designs to client',
-    location: 'Virtual (Zoom)
+    location: 'Virtual (Zoom)'
   },
   {
     id: '3',
@@ -93,7 +93,7 @@ const mockEvents: CalendarEvent[] = [
     duration: 0,
     attendees: ['3', '4'],
     description: 'Final submission for mobile app development',
-    location: 'N/A
+    location: 'N/A'
   },
   {
     id: '4',
@@ -104,7 +104,7 @@ const mockEvents: CalendarEvent[] = [
     duration: 120,
     attendees: ['1', '2', '5'],
     description: 'Advanced Figma techniques workshop',
-    location: 'Design Studio
+    location: 'Design Studio'
   }
 ]
 
@@ -259,33 +259,33 @@ export function SharedTeamCalendar() {
 
   const getEventTypeColor = (type: string) => {
     switch (type) {
-      case 'meeting': return 'bg-blue-500
-      case 'presentation': return 'bg-purple-500
-      case 'deadline': return 'bg-red-500
-      case 'standup': return 'bg-green-500
-      case 'workshop': return 'bg-orange-500
-      default: return 'bg-gray-500
+      case 'meeting': return 'bg-blue-500'
+      case 'presentation': return 'bg-purple-500'
+      case 'deadline': return 'bg-red-500'
+      case 'standup': return 'bg-green-500'
+      case 'workshop': return 'bg-orange-500'
+      default: return 'bg-gray-500'
     }
   }
 
   const getEventTypeBadge = (type: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
     switch (type) {
-      case 'meeting': return 'default
-      case 'presentation': return 'secondary
-      case 'deadline': return 'destructive
-      case 'standup': return 'default
-      case 'workshop': return 'outline
-      default: return 'secondary
+      case 'meeting': return 'default'
+      case 'presentation': return 'secondary'
+      case 'deadline': return 'destructive'
+      case 'standup': return 'default'
+      case 'workshop': return 'outline'
+      default: return 'secondary'
     }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'available': return 'bg-green-500
-      case 'busy': return 'bg-red-500
-      case 'away': return 'bg-yellow-500
-      case 'offline': return 'bg-gray-400
-      default: return 'bg-gray-400
+      case 'available': return 'bg-green-500'
+      case 'busy': return 'bg-red-500'
+      case 'away': return 'bg-yellow-500'
+      case 'offline': return 'bg-gray-400'
+      default: return 'bg-gray-400'
     }
   }
 
@@ -306,13 +306,13 @@ export function SharedTeamCalendar() {
           <div className= "relative">
             <Search className= "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              placeholder= "Search events...
-              value={state.searchQuery}
+              placeholder="Search events...
+              value={state.searchQuery}"
               onChange={(e) => dispatch({ type: 'SET_SEARCH_QUERY', query: e.target.value })}
-              className= "pl-9 w-64
+              className="pl-9 w-64
             />
           </div>
-          <Select value={state.filterType} onValueChange={(value: Record<string, unknown>) => dispatch({ type: &apos;SET_FILTER_TYPE&apos;, filterType: value })}>
+          <Select value={state.filterType} onValueChange={(value: Record<string, unknown>) => dispatch({ type: &apos;SET_FILTER_TYPE&apos;, filterType: value })}>"
             <SelectTrigger className= "w-32">
               <Filter className= "w-4 h-4 mr-2" />
               <SelectValue />
@@ -347,9 +347,9 @@ export function SharedTeamCalendar() {
                     id= "event-title
                     value={newEvent.title}
                     onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
-                    placeholder= "e.g., Weekly Team Meeting
+                    placeholder="e.g., Weekly Team Meeting
                   />
-                </div>
+                </div>"
                 <div className= "grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor= "event-type">Type</Label>
@@ -370,9 +370,9 @@ export function SharedTeamCalendar() {
                     <Label htmlFor= "event-duration">Duration (min)</Label>
                     <Input
                       id= "event-duration
-                      type= "number
+                      type="number
                       value={newEvent.duration}
-                      onChange={(e) => setNewEvent({...newEvent, duration: parseInt(e.target.value)})}
+                      onChange={(e) => setNewEvent({...newEvent, duration: parseInt(e.target.value)})}"
                       min= "15
                       step= "15
                     />
@@ -383,42 +383,42 @@ export function SharedTeamCalendar() {
                     <Label htmlFor= "event-date">Date</Label>
                     <Input
                       id= "event-date
-                      type= "date
+                      type="date
                       value={newEvent.date}
                       onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
                     />
                   </div>
-                  <div>
+                  <div>"
                     <Label htmlFor= "event-time">Time</Label>
                     <Input
                       id= "event-time
-                      type= "time
+                      type="time
                       value={newEvent.time}
                       onChange={(e) => setNewEvent({...newEvent, time: e.target.value})}
                     />
                   </div>
                 </div>
-                <div>
+                <div>"
                   <Label htmlFor= "event-location">Location (Optional)</Label>
                   <Input
                     id= "event-location
                     value={newEvent.location}
                     onChange={(e) => setNewEvent({...newEvent, location: e.target.value})}
-                    placeholder= "e.g., Conference Room A or Zoom
+                    placeholder="e.g., Conference Room A or Zoom
                   />
                 </div>
-                <div>
+                <div>"
                   <Label htmlFor= "event-description">Description</Label>
                   <Textarea
                     id= "event-description
                     value={newEvent.description}
                     onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
-                    placeholder= "Event details and agenda...
+                    placeholder="Event details and agenda...
                     rows={3}
                   />
                 </div>
               </div>
-              <DialogFooter>
+              <DialogFooter>"
                 <Button variant= "outline" onClick={() => dispatch({ type: &apos;TOGGLE_CREATE_EVENT_MODAL&apos; })}>
                   Cancel
                 </Button>
@@ -439,7 +439,7 @@ export function SharedTeamCalendar() {
               <div className= "flex items-center justify-between">
                 <div className= "flex items-center space-x-4">
                   <Button
-                    variant= "ghost
+                    variant="ghost"
                     size= "sm
                     onClick={() => navigateMonth('prev')}
                   >
@@ -449,7 +449,7 @@ export function SharedTeamCalendar() {
                     {monthNames[state.currentDate.getMonth()]} {state.currentDate.getFullYear()}
                   </h3>
                   <Button
-                    variant= "ghost
+                    variant="ghost"
                     size= "sm
                     onClick={() => navigateMonth('next')}
                   >
@@ -595,8 +595,8 @@ export function SharedTeamCalendar() {
                   .map(event => (
                     <div 
                       key={event.id} 
-                      className= "p-3 rounded-lg border border-gray-100 hover:shadow-sm transition-shadow cursor-pointer
-                      onClick={() => {
+                      className="p-3 rounded-lg border border-gray-100 hover:shadow-sm transition-shadow cursor-pointer
+                      onClick={() => {"
                         dispatch({ type: 'SET_SELECTED_EVENT', event })
                         dispatch({ type: 'TOGGLE_EVENT_MODAL' })
                       }}
@@ -653,8 +653,8 @@ export function SharedTeamCalendar() {
             <CardContent>
               <div className= "space-y-3">
                 <Button 
-                  className= "w-full justify-start
-                  variant= "outline
+                  className="w-full justify-start"
+                  variant="outline"
                   onClick={() => dispatch({ type: 'TOGGLE_CREATE_EVENT_MODAL' })}
                 >
                   <Plus className= "w-4 h-4 mr-2" />

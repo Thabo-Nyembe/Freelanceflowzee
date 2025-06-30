@@ -95,7 +95,7 @@ export function EnhancedCollaborationChat({
     isCameraOn: true,
     isScreenSharing: false,
     volume: 50,
-    status: 'idle
+    status: 'idle'
   })
 
   // Timer for call duration
@@ -213,7 +213,7 @@ export function EnhancedCollaborationChat({
                   <p className= "text-sm text-green-600">
                     {callState.status === 'connected' 
                       ? formatCallDuration(callState.duration)
-                      : 'Establishing connection...
+                      : 'Establishing connection...'
                     }
                   </p>
                 </div>
@@ -242,7 +242,7 @@ export function EnhancedCollaborationChat({
                 onClick={toggleMute}
                 size= "sm
                 variant={callState.isMuted ? "destructive" : "outline"}
-                className= "rounded-full w-10 h-10 p-0
+                className="rounded-full w-10 h-10 p-0"
                 title={callState.isMuted ? "Unmute" : "Mute"}
               >
                 {callState.isMuted ? <MicOff className= "h-4 w-4" /> : <Mic className= "h-4 w-4" />}
@@ -253,7 +253,7 @@ export function EnhancedCollaborationChat({
                   onClick={toggleCamera}
                   size= "sm
                   variant={!callState.isCameraOn ? "destructive" : "outline"}
-                  className= "rounded-full w-10 h-10 p-0
+                  className="rounded-full w-10 h-10 p-0"
                   title={callState.isCameraOn ? "Turn off camera" : "Turn on camera"}
                 >
                   {!callState.isCameraOn ? <CameraOff className= "h-4 w-4" /> : <Camera className= "h-4 w-4" />}
@@ -264,7 +264,7 @@ export function EnhancedCollaborationChat({
                 onClick={toggleScreenShare}
                 size= "sm
                 variant={callState.isScreenSharing ? "default" : "outline"}
-                className= "rounded-full w-10 h-10 p-0
+                className="rounded-full w-10 h-10 p-0"
                 title={callState.isScreenSharing ? "Stop sharing" : "Share screen"}
               >
                 {callState.isScreenSharing ? <MonitorOff className= "h-4 w-4" /> : <Monitor className= "h-4 w-4" />}
@@ -273,21 +273,21 @@ export function EnhancedCollaborationChat({
               <div className= "flex items-center gap-2 px-3">
                 <VolumeX className= "h-4 w-4 text-gray-500" />
                 <input
-                  type= "range
+                  type="range"
                   min="0
                   max= "100
                   value={callState.volume}
                   onChange={(e) => dispatchCall({ type: 'SET_VOLUME', volume: parseInt(e.target.value) })}
-                  className= "w-16
-                />
+                  className="w-16
+                />"
                 <Volume2 className= "h-4 w-4 text-gray-500" />
               </div>
               
               <Button
                 onClick={endCall}
                 size= "sm
-                variant= "destructive
-                className= "rounded-full w-10 h-10 p-0
+                variant="destructive"
+                className="rounded-full w-10 h-10 p-0"
                 title= "End call
               >
                 <PhoneOff className= "h-4 w-4" />
@@ -320,21 +320,21 @@ export function EnhancedCollaborationChat({
               <img
                 src={selectedImage}
                 alt= "Design preview
-                className= "w-full rounded-lg cursor-pointer
-                onClick={handleImageClick}
+                className="w-full rounded-lg cursor-pointer
+                onClick={handleImageClick}"
               / alt="">
               
               {/* Image Comments Overlay */}
               {imageComments.map((comment) => (
                 <div
                   key={comment.id}
-                  className= "absolute bg-purple-500 text-white p-2 rounded-lg cursor-pointer transform -translate-x-1/2 -translate-y-1/2 hover:bg-purple-600 transition-colors
+                  className="absolute bg-purple-500 text-white p-2 rounded-lg cursor-pointer transform -translate-x-1/2 -translate-y-1/2 hover:bg-purple-600 transition-colors
                   style={{
                     left: `${comment.position?.x}%`,
                     top: `${comment.position?.y}%
                   }}
                   title={comment.content}
-                >
+                >"
                   <MapPin className= "h-4 w-4" />
                 </div>
               ))}
@@ -342,12 +342,12 @@ export function EnhancedCollaborationChat({
               {/* Selected Position Indicator */}
               {selectedPosition && (
                 <div
-                  className= "absolute bg-yellow-400 text-black p-2 rounded-lg transform -translate-x-1/2 -translate-y-1/2 animate-pulse
+                  className="absolute bg-yellow-400 text-black p-2 rounded-lg transform -translate-x-1/2 -translate-y-1/2 animate-pulse
                   style={{
                     left: `${selectedPosition.x}%`,
                     top: `${selectedPosition.y}%
                   }}
-                >
+                >"
                   <MapPin className= "h-4 w-4" />
                 </div>
               )}
@@ -358,7 +358,7 @@ export function EnhancedCollaborationChat({
                 <p className= "text-sm text-purple-700 mb-2">
                   {selectedPosition 
                     ? `Comment position selected at ${selectedPosition.x.toFixed(1)}%, ${selectedPosition.y.toFixed(1)}%` 
-                    : 'Click on the image to select a position for your comment
+                    : 'Click on the image to select a position for your comment'
                   }
                 </p>
               </div>
@@ -382,8 +382,8 @@ export function EnhancedCollaborationChat({
                   <Button
                     onClick={() => startCall('audio')}
                     size= "sm
-                    variant= "outline
-                    className= "border-green-200 text-green-600 hover:bg-green-50
+                    variant="outline"
+                    className="border-green-200 text-green-600 hover:bg-green-50"
                     disabled={callState.status === 'connecting'}
                   >
                     <Phone className= "h-4 w-4 mr-2" />
@@ -392,8 +392,8 @@ export function EnhancedCollaborationChat({
                   <Button
                     onClick={() => startCall('video')}
                     size= "sm
-                    variant= "outline
-                    className= "border-blue-200 text-blue-600 hover:bg-blue-50
+                    variant="outline"
+                    className="border-blue-200 text-blue-600 hover:bg-blue-50"
                     disabled={callState.status === 'connecting'}
                   >
                     <Video className= "h-4 w-4 mr-2" />
@@ -452,16 +452,16 @@ export function EnhancedCollaborationChat({
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder={selectedPosition 
                 ? "Add your comment for the selected position..." 
-                : "Type your message...
+                : 'Type your message...'
               }
-              className= "flex-1 bg-white border-slate-200
+              className="flex-1 bg-white border-slate-200"
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             />
             <Button 
               onClick={handleSendMessage}
               disabled={!newMessage.trim()}
-              className= "bg-blue-600 hover:bg-blue-700
-            >
+              className="bg-blue-600 hover:bg-blue-700
+            >"
               <Send className= "h-4 w-4" />
             </Button>
           </div>
@@ -475,9 +475,9 @@ export function EnhancedCollaborationChat({
                   setIsAddingImageComment(false)
                 }}
                 size= "sm
-                variant= "ghost
-                className= "h-6 px-2
-              >
+                variant="ghost"
+                className="h-6 px-2
+              >"
                 <X className= "h-3 w-3" />
               </Button>
             </div>

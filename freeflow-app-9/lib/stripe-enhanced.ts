@@ -1,4 +1,4 @@
-import Stripe from 'stripe
+import Stripe from 'stripe'
 
 // Initialize Stripe with enhanced configuration
 export const stripe = new Stripe(
@@ -80,7 +80,7 @@ export async function createAdvancedPaymentIntent(params: {
       currency: paymentIntent.currency,
     }
   } catch (error) {
-    console.error('Enhanced payment intent creation failed:', error)
+    console.error('Enhanced payment intent creation failed: ', error)'
     throw new Error('Failed to create payment intent')
   }
 }
@@ -123,7 +123,7 @@ export async function processWebhookEvent(
 
     return { received: true, processed: event.type }
   } catch (error) {
-    console.error('Webhook processing error:', error)
+    console.error('Webhook processing error: ', error)'
     throw error
   }
 }
@@ -239,7 +239,7 @@ export async function createEnhancedCustomer(params: {
 
     return customer
   } catch (error) {
-    console.error('Enhanced customer creation failed:', error)
+    console.error('Enhanced customer creation failed: ', error)'
     throw error
   }
 }
@@ -264,7 +264,7 @@ export async function createSubscription(params: {
 
     return subscription
   } catch (error) {
-    console.error('Subscription creation failed:', error)
+    console.error('Subscription creation failed: ', error)'
     throw error
   }
 }
@@ -281,7 +281,7 @@ export async function getPaymentStatus(paymentIntentId: string) {
       lastError: paymentIntent.last_payment_error,
     }
   } catch (error) {
-    console.error('Payment status retrieval failed:', error)
+    console.error('Payment status retrieval failed: ', error)'
     throw error
   }
 }
@@ -303,7 +303,7 @@ export async function createRefund(params: {
 
     return refund
   } catch (error) {
-    console.error('Refund creation failed:', error)
+    console.error('Refund creation failed: ', error)'
     throw error
   }
 }
@@ -315,7 +315,7 @@ async function updateProjectAccess(projectId: string, data: Record<string, unkno
 }
 
 async function createSubscriptionRecord(data: Record<string, unknown>) {
-  console.log('Creating subscription record:', data)
+  console.log('Creating subscription record: ', data)'
   // Implement actual database insert
 }
 
@@ -325,7 +325,7 @@ async function updateSubscriptionRecord(subscriptionId: string, data: Record<str
 }
 
 async function processInvoicePayment(data: Record<string, unknown>) {
-  console.log('Processing invoice payment:', data)
+  console.log('Processing invoice payment: ', data)'
   // Implement actual invoice processing
 }
 

@@ -1,157 +1,37 @@
-import { Suspense } from 'react'
-import { Metadata } from 'next/types'
-import PaymentClient from './payment-client'
+'use client'
 
-// Ensure this page is dynamically rendered
-export const dynamic = 'force-dynamic'
+import { useState } from 'react'
+import { Elements } from '@stripe/react-stripe-js'
+import { loadStripe } from '@stripe/stripe-js'
+import { PaymentForm } from '@/components/payment/payment-form'
 
-// Enhanced SEO metadata for payment page
-export const metadata: Metadata = {
-  title: 'Secure Payment & Pricing Plans | FreeflowZee AI-Powered Creative Platform',
-  description: 'Choose from Creator Free, Pro Creator, or Agency Enterprise plans. Access premium AI models (GPT-4o, Claude, DALL-E) with secure escrow payment protection. Start your free trial today.',
-  keywords: ['AI creative platform pricing', 'premium AI model access', 'secure payment processing', 'escrow payment protection', 'GPT-4o subscription', 'Claude AI pricing', 'DALL-E access plans', 'creative asset generation', 'AI studio subscription', 'professional creative tools'],
-  openGraph: {
-    title: 'Secure Payment & Pricing Plans | FreeflowZee AI-Powered Creative Platform',
-    description: 'Choose from Creator Free, Pro Creator, or Agency Enterprise plans. Access premium AI models (GPT-4o, Claude, DALL-E) with secure escrow payment protection.',
-    type: 'website',
-    url: 'https://freeflowzee.com/payment',
-    images: [
-      {
-        url: 'https://freeflowzee.com/og-payment-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'FreeflowZee Payment Plans',
-      },
-    ],
-    siteName: 'FreeflowZee',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Secure Payment & Pricing Plans | FreeflowZee AI-Powered Creative Platform',
-    description: 'Choose from Creator Free, Pro Creator, or Agency Enterprise plans. Access premium AI models with secure escrow payment protection.',
-    images: ['https://freeflowzee.com/twitter-payment-image.jpg'],
-    creator: '@freeflowzee',
-    site: '@freeflowzee',
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
-  verification: {
-    google: 'google-site-verification-key',
-    yandex: 'yandex-verification-key',
-    yahoo: 'yahoo-site-verification-key',
-  },
-  alternates: {
-    canonical: 'https://freeflowzee.com/payment',
-  },
-  other: {
-    'stripe:publishable_key': process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
-  },
-}
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
-// Fallback component for Suspense boundary
-function PaymentFallback() {
+export default function PaymentPage() {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
   return (
-    <div className= "container mx-auto p-6 max-w-md" data-testid= "payment-container">
-      <div className= "border rounded-lg shadow-sm bg-white">
-        <div className= "p-6 pb-0">
-          <div className= "h-6 bg-gray-200 rounded animate-pulse mb-2"></div>
-          <div className= "h-4 bg-gray-100 rounded animate-pulse"></div>
-        </div>
-        
-        <div className= "p-6 space-y-6">
-          <div className= "space-y-3">
-            <div className= "h-4 bg-gray-200 rounded animate-pulse"></div>
-            <div className= "space-y-2">
-              <div className= "h-10 bg-gray-100 rounded animate-pulse"></div>
-              <div className= "h-10 bg-gray-100 rounded animate-pulse"></div>
-              <div className= "h-10 bg-gray-100 rounded animate-pulse"></div>
-            </div>
-          </div>
-          <div className= "space-y-4">
-            <div className= "h-10 bg-gray-100 rounded animate-pulse"></div>
-            <div className= "h-10 bg-gray-100 rounded animate-pulse"></div>
-            <div className= "h-10 bg-gray-100 rounded animate-pulse"></div>
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900" data-testid="project-title">
+            Premium Brand Identity Package
+          </h1>
+          <p className="text-gray-600 mt-2" data-testid="project-description">
+            Complete brand identity design package with logo, guidelines, and assets
+          </p>
+          
+          <div className="bg-yellow-100 border border-yellow-400 rounded-lg p-4 mt-6 max-w-md mx-auto" data-testid="locked-notice">
+            <h3 className="font-semibold text-yellow-800">🔒 Premium Content Locked</h3>
+            <p className="text-yellow-700 mt-1">This project contains premium content. Complete payment to unlock full access.</p>
           </div>
         </div>
+
+        <Elements stripe={stripePromise}>
+          <PaymentForm />
+        </Elements>
       </div>
     </div>
   )
-}
-
-// Structured data for payment page
-const paymentStructuredData = {
-  "@context": "https://schema.org",
-  "@type": "Product",
-  "name": "FreeflowZee AI-Powered Creative Platform",
-  "description": "Revolutionary AI-powered creative platform with premium model access and secure payment processing",
-  "category": "SoftwareApplication",
-  "applicationCategory": "CreativeApplication",
-  "offers": [
-    {
-      "@type": "Offer",
-      "name": "Creator Free",
-      "price": "0",
-      "priceCurrency": "USD",
-      "availability": "https://schema.org/InStock",
-      "url": "/payment?plan=free",
-      "description": "AI Create Studio with free models, basic file sharing, and community access"
-    },
-    {
-      "@type": "Offer",
-      "name": "Pro Creator",
-      "price": "29",
-      "priceCurrency": "USD",
-      "availability": "https://schema.org/InStock",
-      "url": "/payment?plan=pro",
-      "description": "Premium AI models (GPT-4o, Claude, DALL-E), escrow payments, and professional features"
-    },
-    {
-      "@type": "Offer",
-      "name": "Agency Enterprise",
-      "price": "79",
-      "priceCurrency": "USD",
-      "availability": "https://schema.org/InStock",
-      "url": "/payment?plan=enterprise",
-      "description": "White-label solution with custom AI training and enterprise features"
-    }
-  ],
-  "provider": {
-    "@type": "Organization",
-    "name": "FreeflowZee",
-    "url": "https://freeflowzee.com"
-  },
-  "paymentAccepted": ["Visa", "MasterCard", "American Express", "Apple Pay", "Google Pay"],
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "4.9",
-    "ratingCount": "2547",
-    "bestRating": "5"
-  }
-}
-
-export default function PaymentPage() {
-  return (
-    <>
-      {/* Structured Data for SEO */}
-      <script
-        type= "application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(paymentStructuredData)
-        }}
-      />
-      
-      <Suspense fallback={<PaymentFallback />}>
-        <PaymentClient />
-      </Suspense>
-    </>
-  )
-}
+} 

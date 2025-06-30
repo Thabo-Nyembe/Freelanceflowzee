@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freeflow-app-9-6egesbwif-thabo-5265s-projects.vercel.app'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freeflow-app-9-6egesbwif-thabo-5265s-projects.vercel.app
   
   const robots = `User-agent: *
 Allow: /
@@ -77,7 +77,7 @@ Disallow: /
 
   return new NextResponse(robots, {
     headers: {
-      'Content-Type': 'text/plain', 'Cache-Control': 'public, max-age=86400, s-maxage=86400', // 24 hours'
+      'Content-Type': 'text/plain', 'Cache-Control': 'public, max-age=86400, s-maxage=86400', // 24 hours
     },
   })
 } 

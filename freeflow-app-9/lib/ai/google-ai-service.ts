@@ -82,7 +82,7 @@ export class GoogleAIService {
         return this.parseDesignResponse(text, request.style);
       }
     } catch (error) {
-      console.error('Design generation error:', error);
+      console.error('Design generation error: ', error);'
       return this.getFallbackDesignConcept(request);
     }
   }
@@ -167,7 +167,7 @@ export class GoogleAIService {
         return this.parseAnalysisResponse(text, request.type);
       }
     } catch (error) {
-      console.error('Design analysis error:', error);
+      console.error('Design analysis error: ', error);'
       return this.getFallbackAnalysis(request.type);
     }
   }
@@ -216,7 +216,7 @@ export class GoogleAIService {
         return this.getFallbackComponents();
       }
     } catch (error) {
-      console.error('Component generation error:', error);
+      console.error('Component generation error: ', error);'
       return this.getFallbackComponents();
     }
   }
@@ -267,7 +267,7 @@ export class GoogleAIService {
         return this.getFallbackInsights();
       }
     } catch (error) {
-      console.error('Insights generation error:', error);
+      console.error('Insights generation error: ', error);'
       return this.getFallbackInsights();
     }
   }

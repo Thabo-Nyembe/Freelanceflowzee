@@ -60,7 +60,7 @@ export function DemoContentProvider({ children }: { children: React.ReactNode })
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load demo content');
-      console.error('Demo content loading error:', err);
+      console.error('Demo content loading error: ', err);'
     } finally {
       setLoading(false);
     }

@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { ZoomIn, ZoomOut, MessageSquare, FileText } from "lucide-react"
-import { CommentDialog } from "./comment-dialog
+import { useState } from 'react'
+import { Button } from "@/components/ui/button'"
+import { ZoomIn, ZoomOut, MessageSquare, FileText } from 'lucide-react'
+import { CommentDialog } from './comment-dialog'
 
 interface DocumentViewerProps {
   file: Record<string, unknown>
@@ -88,10 +88,10 @@ export function DocumentViewer({ file, comments, onAddComment }: DocumentViewerP
           </div>
 
           <div
-            className= "prose max-w-none
+            className="prose max-w-none
             onMouseUp={handleTextSelection}
             dangerouslySetInnerHTML={{
-              __html: sampleText
+              __html: sampleText"
                 .split("\n")
                 .map((line) => {
                   if (line.startsWith("# ")) {
@@ -105,7 +105,7 @@ export function DocumentViewer({ file, comments, onAddComment }: DocumentViewerP
                   } else if (line.trim()) {
                     return `<p class= "mb-4 text-gray-600">${line}</p>
                   }
-                  return "<br>&quot;
+                  return '<br>&quot;'
                 })
                 .join(""),
             }}

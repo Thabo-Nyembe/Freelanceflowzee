@@ -37,7 +37,7 @@ const mockGalleries: ClientGallery[] = [
       totalDownloads: 45,
       totalFavorites: 67,
       uniqueVisitors: 23,
-      lastAccessed: '2024-02-15T14:30:00Z
+      lastAccessed: '2024-02-15T14:30:00Z'
     },
     unlockMethods: [
       { type: 'escrow_release', isEnabled: true },
@@ -57,7 +57,7 @@ const mockGalleries: ClientGallery[] = [
         isFavorited: true,
         downloadCount: 8,
         viewCount: 45,
-        uploadedAt: '2024-02-01T14:30:00Z
+        uploadedAt: '2024-02-01T14:30:00Z'
       }
     ],
     videos: [
@@ -73,7 +73,7 @@ const mockGalleries: ClientGallery[] = [
         isFavorited: false,
         downloadCount: 5,
         viewCount: 89,
-        uploadedAt: '2024-02-01T21:00:00Z
+        uploadedAt: '2024-02-01T21:00:00Z'
       }
     ]
   },
@@ -118,7 +118,7 @@ const mockGalleries: ClientGallery[] = [
         isFavorited: false,
         downloadCount: 0,
         viewCount: 23,
-        uploadedAt: '2024-02-10T10:00:00Z
+        uploadedAt: '2024-02-10T10:00:00Z'
       }
     ],
     videos: []
@@ -312,13 +312,13 @@ export function ClientZoneGallery() {
                 <div className= "relative flex-1 max-w-md">
                   <Search className= "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <Input
-                    placeholder= "Search galleries...
-                    value={state.searchQuery}
+                    placeholder="Search galleries...
+                    value={state.searchQuery}"
                     onChange={(e) => dispatch({ type: 'SET_SEARCH_QUERY', payload: e.target.value })}
-                    className= "pl-10 bg-white/70 border-slate-200
+                    className="pl-10 bg-white/70 border-slate-200
                   />
                 </div>
-                
+                "
                 <div className= "flex gap-2">
                   {['all', 'unlocked', 'locked', 'pending'].map((status) => (
                     <Button
@@ -326,14 +326,14 @@ export function ClientZoneGallery() {
                       size= "sm
                       variant={state.filterStatus === status ? 'default' : 'outline'}
                       onClick={() => dispatch({ type: 'SET_FILTER_STATUS', payload: status as any })}
-                      className= "capitalize
+                      className="capitalize
                     >
                       {status}
                     </Button>
                   ))}
                 </div>
               </div>
-
+"
               <div className= "flex items-center gap-2">
                 <Button
                   size= "sm
@@ -357,21 +357,21 @@ export function ClientZoneGallery() {
         {/* Galleries Grid/List */}
         <div className={state.viewMode === 'grid' 
           ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8' 
-          : 'space-y-6
+          : 'space-y-6'
         }>
           {filteredGalleries.map((gallery) => (
             <Card 
               key={gallery.id} 
-              className= "group bg-white/70 backdrop-blur-sm border-slate-200/50 hover:shadow-xl transition-all duration-300 overflow-hidden
+              className="group bg-white/70 backdrop-blur-sm border-slate-200/50 hover:shadow-xl transition-all duration-300 overflow-hidden
             >
-              {/* Gallery Cover */}
+              {/* Gallery Cover */}"
               <div className= "relative aspect-video overflow-hidden">
                 <div 
-                  className= "absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 bg-cover bg-center
+                  className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 bg-cover bg-center
                   style={{ backgroundImage: `url(${gallery.coverImage})` }}
                 />
                 
-                {/* Lock Overlay for Locked Galleries */}
+                {/* Lock Overlay for Locked Galleries */}"
                 {gallery.status === 'locked' && (
                   <div className= "absolute inset-0 bg-purple-100/80 flex items-center justify-center">
                     <div className= "text-center text-white">
@@ -429,14 +429,14 @@ export function ClientZoneGallery() {
                         </div>
                         <Progress 
                           value={(gallery.paidAmount / gallery.totalAmount) * 100} 
-                          className= "h-2
+                          className="h-2
                         />
                       </div>
-                      
+                      "
                       <div className= "flex gap-2">
                         {gallery.unlockMethods.find(m => m.type === 'payment')?.isEnabled && (
                           <Button 
-                            className= "flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600
+                            className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
                             onClick={() => handleUnlockGallery(gallery.id, 'payment')}
                           >
                             <CreditCard className= "h-4 w-4 mr-2" />
@@ -457,11 +457,11 @@ export function ClientZoneGallery() {
                               </DialogHeader>
                               <div className= "space-y-4">
                                 <Input
-                                  type= "password
-                                  placeholder= "Enter password
+                                  type="password"
+                                  placeholder="Enter password
                                   value={passwordInput}
                                   onChange={(e) => setPasswordInput(e.target.value)}
-                                />
+                                />"
                                 <div className= "flex justify-end gap-2">
                                   <Button 
                                     onClick={() => handleUnlockGallery(gallery.id, 'password')}
@@ -482,7 +482,7 @@ export function ClientZoneGallery() {
                   {gallery.status === 'unlocked' && (
                     <div className= "flex gap-2">
                       <Button 
-                        className= "flex-1
+                        className="flex-1"
                         onClick={() => dispatch({ type: 'SELECT_GALLERY', payload: gallery.id })}
                       >
                         <Eye className= "h-4 w-4 mr-2" />
@@ -552,7 +552,7 @@ export function ClientZoneGallery() {
                         {allItems.map((item, index) => (
                           <div 
                             key={item.id}
-                            className= "group relative aspect-square bg-white border-2 border-purple-200 rounded-lg overflow-hidden cursor-pointer
+                            className="group relative aspect-square bg-white border-2 border-purple-200 rounded-lg overflow-hidden cursor-pointer"
                             onClick={() => dispatch({ type: 'TOGGLE_LIGHTBOX', payload: { open: true, index } })}
                           >
                             <img src={item.thumbnailUrl} alt={item.name}>
@@ -578,7 +578,7 @@ export function ClientZoneGallery() {
                                       {item.viewCount}
                                     </span>
                                     <span >
-                                      <Heart className={`h-3 w-3 ${item.isFavorited ? &apos;fill-red-500 text-red-500&apos; : '&apos;}>
+                                      <Heart className={`h-3 w-3 ${item.isFavorited ? &apos;fill-red-500 text-red-500&apos; : '&apos;}>'
                                       {item.isFavorited ? '1' : '0'}
                                     </span>
                                   </div>

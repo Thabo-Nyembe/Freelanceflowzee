@@ -17,9 +17,9 @@ export async function POST(request: NextRequest) {
 
     // Parse multipart form data
     const formData = await request.formData()
-    const file = formData.get('file') as File'
-    const projectId = formData.get('projectId') as string'
-    const category = formData.get('category') as string || 'general'
+    const file = formData.get('file') as File
+    const projectId = formData.get('projectId') as string
+    const category = formData.get('category') as string || 'general
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
@@ -27,12 +27,12 @@ export async function POST(request: NextRequest) {
 
     // File validation using Context7 patterns
     const maxSize = 100 * 1024 * 1024 // 100MB
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/avi', 'video/mov', 'video/wmv', 'audio/mp3', 'audio/wav', 'audio/ogg', 'application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/avi', 'video/mov', 'video/wmv', 'audio/mp3', 'audio/wav', 'audio/ogg', 'application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document
     ]
 
     if (file.size > maxSize) {
       return NextResponse.json({ 
-        error: 'File too large', '
+        error: 'File too large', 
         maxSize: maxSize,
         receivedSize: file.size 
       }, { status: 400 })
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json({ 
-        error: 'File type not allowed', '
+        error: 'File type not allowed', 
         allowedTypes,
         receivedType: file.type 
       }, { status: 400 })
@@ -62,9 +62,9 @@ export async function POST(request: NextRequest) {
       })
 
     if (uploadError) {
-      console.error('Upload error:', uploadError)
+      console.error('Upload error: ', uploadError)'
       return NextResponse.json({ 
-        error: 'Upload failed', '
+        error: 'Upload failed', 
         details: uploadError.message 
       }, { status: 500 })
     }
@@ -98,14 +98,14 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (dbError) {
-      console.error('Database error:', dbError)
+      console.error('Database error: ', dbError)'
       // Try to clean up uploaded file
       await supabase.storage
         .from('project-attachments')
         .remove([storagePath])
       
       return NextResponse.json({ 
-        error: 'Database save failed', '
+        error: 'Database save failed', 
         details: dbError.message 
       }, { status: 500 })
     }
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
         file_size: file.size,
         file_type: file.type,
         provider: 'supabase,'
-        cost_estimate: calculateStorageCost(file.size, 'supabase'),'
+        cost_estimate: calculateStorageCost(file.size, 'supabase'),
         user_id: (await supabase.auth.getUser()).data.user?.id
       })
 
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Upload endpoint error:', error)
+    console.error('Upload endpoint error: ', error)'
     return NextResponse.json({ 
       error: 'Internal server error,'
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -154,9 +154,9 @@ function calculateStorageCost(fileSize: number, provider: string): number {
   const sizeInGB = fileSize / (1024 * 1024 * 1024)
   
   switch (provider) {
-    case 'supabase':'
+    case 'supabase':
       return sizeInGB * 0.021 // $0.021 per GB/month
-    case 'wasabi':'
+    case 'wasabi':
       return sizeInGB * 0.0059 // $0.0059 per GB/month
     default:
       return sizeInGB * 0.023 // AWS S3 standard pricing
@@ -200,7 +200,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('File listing error:', error)
+    console.error('File listing error: ', error)'
     return NextResponse.json({ 
       error: 'Failed to list files,'
       details: error instanceof Error ? error.message : 'Unknown error'

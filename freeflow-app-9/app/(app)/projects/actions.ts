@@ -1,8 +1,8 @@
 'use server
 
-import { createClient } from '@/lib/supabase/server
-import { redirect } from 'next/navigation
-import { z } from 'zod
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import { z } from 'zod'
 
 // Validation schema for project creation
 const createProjectSchema = z.object({
@@ -99,7 +99,7 @@ export async function createProject(formData: FormData): Promise<CreateProjectRe
       .single()
 
     if (insertError) {
-      console.error('Project creation error:', insertError)
+      console.error('Project creation error: ', insertError)'
       return { error: 'Failed to create project. Please try again.' }
     }
 
@@ -115,11 +115,11 @@ export async function createProject(formData: FormData): Promise<CreateProjectRe
           .upload(fileName, file)
 
         if (uploadError) {
-          console.error('File upload error:', uploadError)
+          console.error('File upload error: ', uploadError)'
           // Don't fail the entire project creation for file upload issues
         }
       } catch (fileError) {
-        console.error('File handling error:', fileError)
+        console.error('File handling error: ', fileError)'
         // Don't fail the entire project creation for file issues
       }
     }
@@ -127,7 +127,7 @@ export async function createProject(formData: FormData): Promise<CreateProjectRe
     return { success: true, project }
 
   } catch (error) {
-    console.error('Unexpected error in createProject:', error)
+    console.error('Unexpected error in createProject: ', error)'
     return { error: 'An unexpected error occurred. Please try again.' }
   }
 } 

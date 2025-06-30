@@ -30,13 +30,13 @@ export async function GET() {
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('Projects fetch error:', error)
+      console.error('Projects fetch error: ', error)'
       return NextResponse.json({ error: 'Failed to fetch projects' }, { status: 500 })
     }
 
     return NextResponse.json(projects)
   } catch (error) {
-    console.error('Projects API error:', error)
+    console.error('Projects API error: ', error)'
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
       client_name: body.client_name || null,
       client_email: body.client_email || null,
       budget: body.budget || 0,
-      priority: body.priority || 'medium,'
+      priority: body.priority || 'medium,
       start_date: body.start_date || null,
       end_date: body.end_date || null,
       status: 'active,'
@@ -98,13 +98,13 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Project creation error:', error)
+      console.error('Project creation error: ', error)'
       return NextResponse.json({ error: 'Failed to create project' }, { status: 500 })
     }
 
     return NextResponse.json(project, { status: 201 })
   } catch (error) {
-    console.error('Projects API POST error:', error)
+    console.error('Projects API POST error: ', error)'
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 } 

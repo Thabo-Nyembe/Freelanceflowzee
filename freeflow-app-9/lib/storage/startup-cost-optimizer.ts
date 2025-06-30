@@ -242,7 +242,7 @@ export async function dailyStartupOptimization() {
     console.log('✅ Daily startup optimization complete');
     
   } catch (error) {
-    console.error('❌ Daily optimization failed:', error);
+    console.error('❌ Daily optimization failed: ', error);'
   }
 }
 

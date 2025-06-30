@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { ProjectCreationForm } from "@/components/forms/project-creation-form"
+import { ProjectCreationForm } from '@/components/forms/project-creation-form'
 
 interface CreateProjectDialogProps {
   open: boolean

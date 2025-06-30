@@ -108,7 +108,7 @@ export function RevenueAnalytics({
   const formatCurrency = useCallback((amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD
+      currency: 'USD'
     }).format(amount)
   }, [])
 

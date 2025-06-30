@@ -401,11 +401,11 @@ export default function WorkflowBuilderPage() {
   ]
 
   const toggleWorkflow = (id: string) => {
-    console.log('Toggling workflow:', id)
+    console.log('Toggling workflow: ', id)
   }
 
   const createFromTemplate = (template: WorkflowTemplate) => {
-    console.log('Creating workflow from template:', template)
+    console.log('Creating workflow from template: ', template)
   }
 
   const WorkflowCard = ({ workflow }: { workflow: Workflow }) => (
@@ -505,8 +505,7 @@ export default function WorkflowBuilderPage() {
           <div className="flex items-center space-x-4">
             <Badge className={
               template.complexity === 'simple' ? 'bg-green-100 text-green-800' :
-              template.complexity === 'moderate' ? 'bg-yellow-100 text-yellow-800' :
-              'bg-red-100 text-red-800'
+              template.complexity === 'moderate' ? 'bg-yellow-100 text-yellow-800' : "bg-red-100 text-red-800"
             }>
               {template.complexity}
             </Badge>
@@ -563,7 +562,6 @@ export default function WorkflowBuilderPage() {
             </Button>
           </div>
         </div>
-        
         <div className="flex-1 flex">
           {/* Sidebar with components */}
           <div className="w-64 border-r border-gray-200 p-4 overflow-y-auto">

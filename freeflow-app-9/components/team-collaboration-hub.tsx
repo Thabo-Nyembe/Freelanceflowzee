@@ -2,7 +2,7 @@
 
 import React, { useState, useReducer } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button'"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -37,13 +37,7 @@ import {
   ExternalLink,
   Cloud
 } from 'lucide-react'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import {} from "@/components/ui/select"
 
 // Type definitions
 interface TeamMember {
@@ -107,7 +101,7 @@ interface Collaboration {
   status: 'active' | 'pending' | 'completed'
   adobeSession?: {
     app: string
-    status: 'active' | 'inactive'
+    status: 'active' | 'inactive
     active: boolean
   }
 }
@@ -170,7 +164,7 @@ const sampleMembers: TeamMember[] = [
     timezone: "PST",
     skills: ["UI/UX", "Branding", "Motion Design"],
     projects: ["Brand Refresh", "Mobile App"],
-    availability: "available"
+    availability: 'available'
   },
   {
     id: "2",
@@ -183,7 +177,7 @@ const sampleMembers: TeamMember[] = [
     timezone: "EST",
     skills: ["React", "TypeScript", "Tailwind CSS"],
     projects: ["Web Platform", "Client Portal"],
-    availability: "busy"
+    availability: 'busy'
   }
 ]
 
@@ -196,7 +190,7 @@ const sampleProjects: Project[] = [
     members: ["1", "2"],
     tasks: 24,
     progress: 65,
-    dueDate: "2024-03-15"
+    dueDate: '2024-03-15'
   },
   {
     id: "2",
@@ -206,7 +200,7 @@ const sampleProjects: Project[] = [
     members: ["1"],
     tasks: 18,
     progress: 40,
-    dueDate: "2024-04-01"
+    dueDate: '2024-04-01'
   }
 ]
 
@@ -341,7 +335,7 @@ export function TeamCollaborationHub() {
     return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i]
   }
 
-  return (
+  return ("
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-start">
@@ -354,7 +348,7 @@ export function TeamCollaborationHub() {
             variant="outline"
             className="border-indigo-200 text-indigo-600 hover:bg-indigo-50"
             onClick={() => dispatch({ type: 'SET_FILE_MODAL', show: true })}
-          >
+          >"
             <Upload className="h-4 w-4 mr-2" />
             Upload File
           </Button>
@@ -362,14 +356,14 @@ export function TeamCollaborationHub() {
             variant="outline"
             className="border-purple-200 text-purple-600 hover:bg-purple-50"
             onClick={() => dispatch({ type: 'SET_COLLABORATION_MODAL', show: true })}
-          >
+          >"
             <Video className="h-4 w-4 mr-2" />
             Start Session
           </Button>
           <Button 
             className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
             onClick={() => dispatch({ type: 'SET_MEMBER_MODAL', show: true })}
-          >
+          >"
             <Plus className="h-4 w-4 mr-2" />
             Invite Member
           </Button>
@@ -463,7 +457,7 @@ export function TeamCollaborationHub() {
                       onChange={(e) => dispatch({ type: 'SET_SEARCH', search: e.target.value })}
                     />
                   </div>
-                  <Select value={state.filter} onValueChange={(value) => dispatch({ type: 'SET_FILTER', filter: value })}>
+                  <Select value={state.filter} onValueChange={(value) => dispatch({ type: 'SET_FILTER', filter: value })}>"
                     <SelectTrigger className="w-32">
                       <SelectValue placeholder="Skills" />
                     </SelectTrigger>
@@ -605,12 +599,11 @@ export function TeamCollaborationHub() {
                           <p className="font-semibold text-slate-800">{file.name}</p>
                           <Badge className={`text-xs ${
                             file.status === 'latest' ? 'bg-green-100 text-green-700' :
-                            file.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-gray-100 text-gray-700'
+                            file.status === 'draft' ? 'bg-yellow-100 text-yellow-700' : "bg-gray-100 text-gray-700
                           }`}>
                             v{file.version} • {file.status}
                           </Badge>
-                          {file.adobeIntegration && (
+                          {file.adobeIntegration && ("
                             <Badge className="text-xs bg-blue-100 text-blue-700">
                               <Zap className="h-3 w-3 mr-1" />
                               Adobe Sync

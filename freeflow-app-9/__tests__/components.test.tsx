@@ -1,10 +1,10 @@
-import React from 'react
-import { render, screen, fireEvent, waitFor } from '@testing-library/react
-import { FileUpload } from '@/components/file-upload'
-import { DownloadButton } from '@/components/download-button'
-import { SiteHeader } from '@/components/site-header'
-import AICreatePage from '@/app/dashboard/ai-create/page
-import PaymentPage from '@/app/payment/page
+import React from 'react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react"
+import { FileUpload } from '@/components/file-upload"
+import { DownloadButton } from '@/components/download-button"
+import { SiteHeader } from '@/components/site-header"
+import AICreatePage from '@/app/dashboard/ai-create/page"
+import PaymentPage from '@/app/payment/page'
 
 // Mock fetch for download tests
 global.fetch = jest.fn(() =>
@@ -12,9 +12,9 @@ global.fetch = jest.fn(() =>
     ok: true,
     blob: () => Promise.resolve(new Blob())
   })
-) as jest.Mock
-
-// Mock URL.createObjectURL
+) as jest.Mock'
+'
+// Mock URL.createObjectURL"
 global.URL.createObjectURL = jest.fn(() => 'mock-url')
 global.URL.revokeObjectURL = jest.fn()
 

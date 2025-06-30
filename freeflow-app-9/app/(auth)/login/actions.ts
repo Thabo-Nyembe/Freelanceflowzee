@@ -1,8 +1,8 @@
 'use server
 
-import { createClient } from '@/lib/supabase/server
-import { cookies } from 'next/headers
-import { redirect } from 'next/navigation
+import { createClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 
 const attempts = new Map()
 const MAX_ATTEMPTS = 5
@@ -62,7 +62,7 @@ export async function login(formData: FormData) {
 
     return { error: 'Login failed. Please try again.' }
   } catch (error: unknown) {
-    console.error('Login error:', error)
+    console.error('Login error: ', error)'
     return { error: 'An unexpected error occurred. Please try again.' }
   }
 }
@@ -92,7 +92,7 @@ export async function signup(formData: FormData) {
 
     return { success: true }
   } catch (error: unknown) {
-    console.error('Signup error:', error)
+    console.error('Signup error: ', error)'
     return { error: 'An unexpected error occurred. Please try again.' }
   }
 }
@@ -111,7 +111,7 @@ export async function resendVerification(email: string) {
 
     return { success: true }
   } catch (error: unknown) {
-    console.error('Resend verification error:', error)
+    console.error('Resend verification error: ', error)'
     return { error: 'An unexpected error occurred. Please try again.' }
   }
 } 

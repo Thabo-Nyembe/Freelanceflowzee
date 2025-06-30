@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const analysisResult = await googleAIService.analyzeDesign({
       type,
       designDescription,
-      context: context || 'FreeflowZee freelance platform'
+      context: context || 'FreeflowZee freelance platform
     });
 
     return NextResponse.json({
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('AI Design Analysis Error:', error);
+    console.error('AI Design Analysis Error: ', error);'
     
     // Return fallback analysis if AI service fails
     return NextResponse.json({

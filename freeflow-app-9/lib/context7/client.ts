@@ -44,7 +44,7 @@ class Context7Client {
       // This would call the actual Context7 MCP resolve-library-id tool
       // For now, we'll implement a basic mapping
       const libraryMappings: Record<string, string> = {
-        'next.js': '/vercel/next.js', 'react': '/facebook/react', 'typescript': '/microsoft/typescript', 'tailwindcss': '/tailwindlabs/tailwindcss', 'supabase': '/supabase/supabase', '@radix-ui/react-accordion': '/radix-ui/primitives', '@radix-ui/react-dialog': '/radix-ui/primitives', '@radix-ui/react-dropdown-menu': '/radix-ui/primitives', '@radix-ui/react-tabs': '/radix-ui/primitives', '@radix-ui/react-toast': '/radix-ui/primitives', 'lucide-react': '/lucide-icons/lucide', 'react-hook-form': '/react-hook-form/react-hook-form', 'zod': '/colinhacks/zod', 'class-variance-authority': '/joe-bell/cva', 'clsx': '/lukeed/clsx', 'tailwind-merge': '/dcastil/tailwind-merge', 'date-fns': '/date-fns/date-fns', 'recharts': '/recharts/recharts
+        'next.js': '/vercel/next.js', 'react': '/facebook/react', 'typescript': '/microsoft/typescript', 'tailwindcss': '/tailwindlabs/tailwindcss', 'supabase': '/supabase/supabase', '@radix-ui/react-accordion': '/radix-ui/primitives', '@radix-ui/react-dialog': '/radix-ui/primitives', '@radix-ui/react-dropdown-menu': '/radix-ui/primitives', '@radix-ui/react-tabs': '/radix-ui/primitives', '@radix-ui/react-toast': '/radix-ui/primitives', 'lucide-react': '/lucide-icons/lucide', 'react-hook-form': '/react-hook-form/react-hook-form', 'zod': '/colinhacks/zod', 'class-variance-authority': '/joe-bell/cva', 'clsx': '/lukeed/clsx', 'tailwind-merge': '/dcastil/tailwind-merge', 'date-fns': '/date-fns/date-fns', 'recharts': '/recharts/recharts'
       };
 
       return libraryMappings[libraryName] || libraryName;
@@ -215,7 +215,7 @@ export default async function Page() {
         {
           title: 'Supabase Client Setup',
           description: 'Initialize Supabase client for Next.js',
-          code: `import { createClient } from '@supabase/supabase-js
+          code: `import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -227,18 +227,18 @@ export const supabase = createClient(supabaseUrl, supabaseKey)`,
         {
           title: 'Authentication with Supabase',
           description: 'Implement user authentication',
-          code: `import { supabase } from '@/lib/supabase
+          code: `import { supabase } from '@/lib/supabase'
 
 // Sign up
 const { data, error } = await supabase.auth.signUp({
   email: 'user@example.com',
-  password: 'password
+  password: 'password'
 })
 
 // Sign in
 const { data, error } = await supabase.auth.signInWithPassword({
   email: 'user@example.com',
-  password: 'password
+  password: 'password'
 })
 
 // Sign out

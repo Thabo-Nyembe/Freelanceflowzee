@@ -13,7 +13,7 @@ import React, { useState, useEffect } from 'react'
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD
+      currency: 'USD'
     }).format(amount)
   }
 
@@ -21,23 +21,23 @@ import React, { useState, useEffect } from 'react'
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric
+      year: 'numeric'
     }).format(new Date(date))
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'paid': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300
-      case 'sent': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300
-      case 'overdue': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300
-      case 'draft': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300
-      case 'cancelled': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300
-      case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300
-      case 'held': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300
-      case 'released': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300
-      case 'disputed': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300
-      case 'refunded': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300
+      case 'paid': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+      case 'sent': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
+      case 'overdue': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
+      case 'draft': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
+      case 'cancelled': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
+      case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300'
+      case 'held': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
+      case 'released': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+      case 'disputed': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
+      case 'refunded': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300'
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
     }
   }
 
@@ -287,11 +287,11 @@ import React, { useState, useEffect } from 'react'
                   <Label htmlFor= "description">Description</Label>
                   <Textarea 
                     id= "description" 
-                    placeholder= "Invoice description...
+                    placeholder="Invoice description...
                     rows={3}
                   />
                 </div>
-              </div>
+              </div>"
               <div className= "flex justify-end gap-2">
                 <Button variant= "outline" onClick={() => setIsInvoiceDialogOpen(false)}>
                   Cancel
@@ -347,11 +347,11 @@ import React, { useState, useEffect } from 'react'
                   <Label htmlFor= "escrow-terms">Terms & Conditions</Label>
                   <Textarea 
                     id= "escrow-terms" 
-                    placeholder= "Define the conditions for payment release...
+                    placeholder="Define the conditions for payment release...
                     rows={4}
                   />
                 </div>
-              </div>
+              </div>"
               <div className= "flex justify-end gap-2">
                 <Button variant= "outline" onClick={() => setIsEscrowDialogOpen(false)}>
                   Cancel
@@ -515,13 +515,13 @@ import React, { useState, useEffect } from 'react'
             <div className= "relative flex-1">
               <Search className= "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder= "Search invoices...
+                placeholder="Search invoices...
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className= "pl-10
+                onChange={(e) => setSearchQuery(e.target.value)}"
+                className="pl-10
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>"
               <SelectTrigger className= "w-[140px]">
                 <SelectValue placeholder= "Status" />
               </SelectTrigger>

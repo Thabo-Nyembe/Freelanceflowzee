@@ -5,7 +5,7 @@ import crypto from 'crypto'
 
 interface UnlockRequest {
   projectId: string
-  method: 'password' | 'milestone' | 'escrow' | 'time_based'
+  method: 'password' | 'milestone' | 'escrow' | 'time_based
   credentials?: {
     password?: string
     milestoneIds?: string[]
@@ -19,7 +19,7 @@ interface DownloadTokenRequest {
   projectId: string
   deliverableId: string
   clientEmail: string
-  accessLevel: 'preview' | 'full'
+  accessLevel: 'preview' | 'full
 }
 
 // Generate secure download token
@@ -30,8 +30,8 @@ function generateDownloadToken(data: unknown): string {
       issued: Date.now(),
       expires: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
     },
-    process.env.JWT_SECRET || 'fallback-secret,'
-    { expiresIn: '24h' }'
+    process.env.JWT_SECRET || 'fallback-secret,
+    { expiresIn: '24h' }
   )
 }
 
@@ -54,16 +54,16 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
 
     const body = await request.json()
-    const action = body.action || 'unlock'
+    const action = body.action || 'unlock
 
     switch (action) {
-      case 'unlock':'
+      case 'unlock':
         return handleUnlockRequest(body as UnlockRequest, supabase, user)
       
-      case 'generate_token':'
+      case 'generate_token':
         return handleGenerateToken(body as DownloadTokenRequest, supabase, user)
       
-      case 'validate_access':'
+      case 'validate_access':
         return handleValidateAccess(body, supabase, user)
       
       default:
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('Enhanced unlock API error:', error)
+    console.error('Enhanced unlock API error: ', error)'
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -117,10 +117,10 @@ async function handleUnlockRequest(
     let unlockedItems: string[] = []
 
     switch (unlockData.method) {
-      case 'password':'
+      case 'password':
         if (unlockData.credentials?.password === unlockMethod.conditions?.password) {
           unlockSuccess = true
-          unlockMessage = 'Project unlocked with password authentication'
+          unlockMessage = 'Project unlocked with password authentication
           unlockedItems = await unlockAllDeliverables(supabase, unlockData.projectId)
         } else {
           return NextResponse.json(
@@ -130,9 +130,9 @@ async function handleUnlockRequest(
         }
         break
 
-      case 'milestone':'
+      case 'milestone':
         const completedMilestones = project.milestones?.filter(
-          (m: unknown) => m.status === 'completed'
+          (m: unknown) => m.status === 'completed
         ) || []
         
         const requiredMilestones = unlockMethod.conditions?.required_milestones || []
@@ -142,7 +142,7 @@ async function handleUnlockRequest(
 
         if (hasRequiredMilestones) {
           unlockSuccess = true
-          unlockMessage = 'Project unlocked via milestone completion'
+          unlockMessage = 'Project unlocked via milestone completion
           unlockedItems = await unlockDeliverablesByMilestone(
             supabase, 
             unlockData.projectId, 
@@ -156,10 +156,10 @@ async function handleUnlockRequest(
         }
         break
 
-      case 'escrow':'
-        if (project.escrow_status === 'released') {'
+      case 'escrow':
+        if (project.escrow_status === 'released') {
           unlockSuccess = true
-          unlockMessage = 'Project unlocked via escrow release'
+          unlockMessage = 'Project unlocked via escrow release
           unlockedItems = await unlockAllDeliverables(supabase, unlockData.projectId)
         } else {
           return NextResponse.json(
@@ -178,7 +178,7 @@ async function handleUnlockRequest(
 
     if (unlockSuccess) {
       // Log unlock activity
-      await supabase.from('project_activity').insert({'
+      await supabase.from('project_activity').insert({
         project_id: unlockData.projectId,
         user_id: user?.id,
         action: 'unlock,'
@@ -211,7 +211,7 @@ async function handleUnlockRequest(
       { status: 400 }
     )
   } catch (error) {
-    console.error('Unlock request error:', error)
+    console.error('Unlock request error: ', error)'
     return NextResponse.json(
       { error: 'Failed to process unlock request' },
       { status: 500 }
@@ -240,7 +240,7 @@ async function handleGenerateToken(
     }
 
     // Check access permissions
-    if (deliverable.status === 'locked' && tokenData.accessLevel === 'full') {'
+    if (deliverable.status === 'locked' && tokenData.accessLevel === 'full') {
       return NextResponse.json(
         { error: 'Deliverable is locked' },
         { status: 403 }
@@ -253,7 +253,7 @@ async function handleGenerateToken(
       deliverableId: tokenData.deliverableId,
       clientEmail: tokenData.clientEmail,
       accessLevel: tokenData.accessLevel,
-      fileHash: generateFileHash(deliverable.file_url || '),'
+      fileHash: generateFileHash(deliverable.file_url || '),
       downloadLimit: deliverable.download_limit || 10,
       validUntil: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
     }
@@ -264,7 +264,7 @@ async function handleGenerateToken(
     const downloadUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/secure-download/${downloadToken}
 
     // Log token generation
-    await supabase.from('download_tokens').insert({'
+    await supabase.from('download_tokens').insert({
       token: downloadToken,
       project_id: tokenData.projectId,
       deliverable_id: tokenData.deliverableId,
@@ -281,7 +281,7 @@ async function handleGenerateToken(
       downloadLimit: tokenPayload.downloadLimit
     })
   } catch (error) {
-    console.error('Token generation error:', error)
+    console.error('Token generation error: ', error)'
     return NextResponse.json(
       { error: 'Failed to generate download token' },
       { status: 500 }
@@ -338,12 +338,12 @@ async function handleValidateAccess(
       success: true,
       hasAccess: true,
       projectStatus: project.status,
-      securityLevel: project.security_settings?.level || 'standard,'
+      securityLevel: project.security_settings?.level || 'standard,
       deliverableStatus,
       accessLevel: project.client_access?.includes(clientEmail) ? 'client' : 'owner'
     })
   } catch (error) {
-    console.error('Access validation error:', error)
+    console.error('Access validation error: ', error)'
     return NextResponse.json(
       { error: 'Failed to validate access' },
       { status: 500 }
@@ -436,11 +436,11 @@ async function sendUnlockNotifications(supabase: unknown, data: unknown) {
 
     if (project) {
       // Create notification for project owner
-      await supabase.from('notifications').insert({'
+      await supabase.from('notifications').insert({
         user_id: project.created_by,
         type: 'project_unlocked,'
         title: 'Project Unlocked,'
-        message: `Project "${project.name}" was unlocked using ${data.method} method`,'
+        message: `Project "${project.name}" was unlocked using ${data.method} method`,
         data: {
           project_id: data.projectId,
           method: data.method,
@@ -450,11 +450,11 @@ async function sendUnlockNotifications(supabase: unknown, data: unknown) {
 
       // Create notification for client if email provided
       if (data.clientEmail) {
-        await supabase.from('client_notifications').insert({'
+        await supabase.from('client_notifications').insert({
           email: data.clientEmail,
           type: 'download_ready,'
           title: 'Files Ready for Download,'
-          message: `Your files for "${project.name}" are now ready for download`,'
+          message: `Your files for "${project.name}" are now ready for download`,
           data: {
             project_id: data.projectId,
             unlocked_items: data.unlockedItems
@@ -463,7 +463,7 @@ async function sendUnlockNotifications(supabase: unknown, data: unknown) {
       }
     }
   } catch (error) {
-    console.error('Failed to send unlock notifications:', error)
+    console.error('Failed to send unlock notifications: ', error)'
   }
 }
 
@@ -471,7 +471,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const projectId = searchParams.get('projectId')
-    const action = searchParams.get('action') || 'status'
+    const action = searchParams.get('action') || 'status
 
     if (!projectId) {
       return NextResponse.json(
@@ -492,13 +492,13 @@ export async function GET(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
 
     switch (action) {
-      case 'status':'
+      case 'status':
         return getUnlockStatus(supabase, projectId, user)
       
-      case 'methods':'
+      case 'methods':
         return getAvailableUnlockMethods(supabase, projectId, user)
       
-      case 'history':'
+      case 'history':
         return getUnlockHistory(supabase, projectId, user)
       
       default:
@@ -508,7 +508,7 @@ export async function GET(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('Enhanced unlock GET error:', error)
+    console.error('Enhanced unlock GET error: ', error)'
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -536,7 +536,7 @@ async function getUnlockStatus(supabase: unknown, projectId: string, user: unkno
   }
 
   const unlockedDeliverables = project.deliverables?.filter(
-    (d: unknown) => d.status === 'unlocked'
+    (d: unknown) => d.status === 'unlocked
   ).length || 0
   
   const totalDeliverables = project.deliverables?.length || 0

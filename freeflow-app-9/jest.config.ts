@@ -1,9 +1,9 @@
-import type { Config } from "jest"
-import nextJest from "next/jest"
+import type { Config } from 'jest'
+import nextJest from 'next/jest'
 
 const createJestConfig = nextJest({
   // Provide the path to your Next.js app to load next.config.js and .env files in your test environment
-  dir: "./"
+  dir: './'
 })
 
 // Add any custom config to be passed to Jest
@@ -13,7 +13,7 @@ const customJestConfig: Config = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
     "\\.(css|less|sass|scss)$": "identity-obj-proxy",
-    "\\.(gif|ttf|eot|svg|png|jpg|jpeg)$": "<rootDir>/__mocks__/fileMock.js"
+    "\\.(gif|ttf|eot|svg|png|jpg|jpeg)$": '<rootDir>/__mocks__/fileMock.js'
   },
   testPathIgnorePatterns: [
     "<rootDir>/.next/",
@@ -42,7 +42,7 @@ const customJestConfig: Config = {
   globals: {
     "ts-jest": {
       tsconfig: {
-        jsx: "react"
+        jsx: 'react'
       }
     }
   }

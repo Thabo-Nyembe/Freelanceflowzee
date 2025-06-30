@@ -1,4 +1,4 @@
-import { headers } from 'next/headers
+import { headers } from 'next/headers'
 
 /**
  * Checks if the current request is in test mode
@@ -28,7 +28,7 @@ export async function isTestMode(): Promise<boolean> {
     return false
   } catch (error) {
     // If headers() fails (e.g., not in a request context), assume not test mode
-    console.warn('Failed to check test mode headers:', error)
+    console.warn('Failed to check test mode headers: ', error)'
     return false
   }
 }
@@ -43,5 +43,5 @@ export const mockTestUser = {
   last_sign_in_at: new Date().toISOString(),
   app_metadata: {},
   user_metadata: {},
-  aud: 'authenticated
+  aud: 'authenticated'
 } 

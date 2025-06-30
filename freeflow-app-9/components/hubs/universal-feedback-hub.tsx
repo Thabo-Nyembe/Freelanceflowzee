@@ -35,7 +35,7 @@ import React, { useState, useRef } from 'react'
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit
+      minute: '2-digit'
     })
   }
 
@@ -70,7 +70,7 @@ import React, { useState, useRef } from 'react'
       <div className= "relative">
         <div 
           ref={mediaViewerRef}
-          className= "relative bg-gray-100 rounded-lg overflow-hidden cursor-crosshair
+          className="relative bg-gray-100 rounded-lg overflow-hidden cursor-crosshair"
           style={{ aspectRatio: '16/9' }}
           onClick={(e) => handleMediaClick(e, feedback)}
         >
@@ -117,8 +117,8 @@ import React, { useState, useRef } from 'react'
           <div >
             <Label >Add feedback comment:</Label>
             <Textarea value={newComment}> setNewComment(e.target.value)}
-              placeholder= "Enter your feedback...
-              className= "mt-2
+              placeholder="Enter your feedback..."
+              className="mt-2
               rows={3}
             />
             <div >
@@ -126,7 +126,7 @@ import React, { useState, useRef } from 'react'
                 Add Comment
               </Button>
               <Button > {
-                  setCurrentPosition(null)
+                  setCurrentPosition(null)"
                   setNewComment('')
                 }}
               >
@@ -341,7 +341,7 @@ import React, { useState, useRef } from 'react'
         <div >
           <Search >
           <Input value={searchQuery}> setSearchQuery(e.target.value)}
-            className= "pl-10
+            className="pl-10
           />
         </div>
         <div >
@@ -384,7 +384,7 @@ import React, { useState, useRef } from 'react'
         <div >
           <MessageSquare >
           <h3 >No feedback items found</h3>
-          <p >
+          <p >"
             {searchQuery || mediaType !== 'all' || status !== 'all
               ? 'Try adjusting your search or filters.
               : 'Get started by uploading your first media file.'}

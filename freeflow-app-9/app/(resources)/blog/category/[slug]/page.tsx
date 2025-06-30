@@ -108,7 +108,7 @@ export default function BlogCategoryPage({ params }: BlogCategoryPageProps) {
             <Link 
               href="/blog" 
               className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-4"
-            >
+            >"
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Blog
             </Link>
@@ -143,7 +143,7 @@ export default function BlogCategoryPage({ params }: BlogCategoryPageProps) {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-
+"
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setViewMode('grid')}
@@ -189,7 +189,7 @@ export default function BlogCategoryPage({ params }: BlogCategoryPageProps) {
                         >
                           {post.title}
                         </Link>
-                      </h3>
+                      </h3>"
                       <p className="text-gray-600 text-sm mb-4">{post.excerpt}</p>
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <div className="flex items-center">
@@ -237,7 +237,7 @@ export default function BlogCategoryPage({ params }: BlogCategoryPageProps) {
               size="lg" 
               className="bg-white text-blue-600 hover:bg-gray-100"
               onClick={() => setShowDemoModal(true)}
-            >
+            >"
               <BookOpen className="w-5 h-5 mr-2" />
               Try Free Demo
             </Button>

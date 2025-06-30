@@ -52,7 +52,7 @@ function getDayName(date: Date): keyof typeof SERVICE_AVAILABILITY['service-1'] 
 }
 
 function timeStringToMinutes(timeString: string): number {
-  const [hours, minutes] = timeString.split(':').map(Number)
+  const [hours, minutes] = timeString.split(': ').map(Number)'
   return hours * 60 + minutes
 }
 
@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Time slots error:', error)
+    console.error('Time slots error: ', error)'
     return NextResponse.json(
       { error: 'Failed to generate time slots' },
       { status: 500 }
@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Time slot management error:', error)
+    console.error('Time slot management error: ', error)'
     return NextResponse.json(
       { error: 'Failed to manage time slots' },
       { status: 500 }
@@ -191,7 +191,7 @@ export async function PUT(request: NextRequest) {
       id: timeSlotId,
       isAvailable: isAvailable !== undefined ? isAvailable : true,
       updatedAt: new Date().toISOString(),
-      reason: reason || 'Availability updated'
+      reason: reason || 'Availability updated
     }
 
     return NextResponse.json({
@@ -200,7 +200,7 @@ export async function PUT(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Time slot update error:', error)
+    console.error('Time slot update error: ', error)'
     return NextResponse.json(
       { error: 'Failed to update time slot' },
       { status: 500 }

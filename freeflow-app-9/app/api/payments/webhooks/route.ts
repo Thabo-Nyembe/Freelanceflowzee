@@ -9,7 +9,7 @@ let endpointSecret: string | null = null
 // Initialize Stripe only if properly configured
 if (process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET) {
   stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2025-05-28.basil,
+    apiVersion: '2025-05-28.basil,'
     typescript: true,
   })
   endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
@@ -18,7 +18,7 @@ if (process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET) {
 export async function POST(request: NextRequest) {
   // Check if Stripe is properly configured
   if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
-    console.warn('Stripe not configured - webhook endpoint disabled'
+    console.warn('Stripe not configured - webhook endpoint disabled
     return NextResponse.json(
       { error: 'Payment system not configured' },
       { status: 503 }
@@ -27,10 +27,10 @@ export async function POST(request: NextRequest) {
 
   const body = await request.text()
   const headersList = await headers()
-  const sig = headersList.get('stripe-signature'
+  const sig = headersList.get('stripe-signature
 
   if (!sig) {
-    console.error('No Stripe signature found'
+    console.error('No Stripe signature found
     return NextResponse.json(
       { error: 'No signature found' },
       { status: 400 }
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (!stripe || !endpointSecret) {
-    console.error('Stripe not properly initialized'
+    console.error('Stripe not properly initialized
     return NextResponse.json(
       { error: 'Payment system not initialized' },
       { status: 500 }
@@ -61,43 +61,43 @@ export async function POST(request: NextRequest) {
 
   try {
     switch (event.type) {
-      case 'payment_intent.succeeded':'
+      case 'payment_intent.succeeded':
         await handlePaymentSucceeded(event.data.object as Stripe.PaymentIntent)
         break
 
-      case 'payment_intent.payment_failed':'
+      case 'payment_intent.payment_failed':
         await handlePaymentFailed(event.data.object as Stripe.PaymentIntent)
         break
 
-      case 'invoice.payment_succeeded':'
+      case 'invoice.payment_succeeded':
         await handleInvoicePaymentSucceeded(event.data.object as Stripe.Invoice)
         break
 
-      case 'invoice.payment_failed':'
+      case 'invoice.payment_failed':
         await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice)
         break
 
-      case 'customer.subscription.created':'
+      case 'customer.subscription.created':
         await handleSubscriptionCreated(event.data.object as Stripe.Subscription)
         break
 
-      case 'customer.subscription.updated':'
+      case 'customer.subscription.updated':
         await handleSubscriptionUpdated(event.data.object as Stripe.Subscription)
         break
 
-      case 'customer.subscription.deleted':'
+      case 'customer.subscription.deleted':
         await handleSubscriptionDeleted(event.data.object as Stripe.Subscription)
         break
 
-      case 'customer.created':'
+      case 'customer.created':
         await handleCustomerCreated(event.data.object as Stripe.Customer)
         break
 
-      case 'payment_method.attached':'
+      case 'payment_method.attached':
         await handlePaymentMethodAttached(event.data.object as Stripe.PaymentMethod)
         break
 
-      case 'checkout.session.completed':'
+      case 'checkout.session.completed':
         await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session)
         break
 
@@ -117,20 +117,20 @@ export async function POST(request: NextRequest) {
 
 // Webhook event handlers
 async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
-  console.log('💰 Payment succeeded:', paymentIntent.id)
+  console.log('💰 Payment succeeded: ', paymentIntent.id)'
   
   // Here you would typically:
   // 1. Update your database to mark the payment as successful
   // 2. Send confirmation email to customer
   // 3. Fulfill the order/service
-  // 4. Update user's account status'
+  // 4. Update user's account status
   
   const metadata = paymentIntent.metadata
   
   try {
     // Log payment success for analytics
     await logPaymentEvent({
-      type: 'payment_succeeded,
+      type: 'payment_succeeded,'
       payment_intent_id: paymentIntent.id,
       amount: paymentIntent.amount,
       currency: paymentIntent.currency,
@@ -154,19 +154,19 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
       })
     }
   } catch (error) {
-    console.error('Error handling payment success:', error)
+    console.error('Error handling payment success: ', error)'
   }
 }
 
 async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
-  console.log('❌ Payment failed:', paymentIntent.id)
+  console.log('❌ Payment failed: ', paymentIntent.id)'
   
   const metadata = paymentIntent.metadata
   
   try {
     // Log payment failure
     await logPaymentEvent({
-      type: 'payment_failed,
+      type: 'payment_failed,'
       payment_intent_id: paymentIntent.id,
       amount: paymentIntent.amount,
       currency: paymentIntent.currency,
@@ -185,22 +185,22 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
       })
     }
   } catch (error) {
-    console.error('Error handling payment failure:', error)
+    console.error('Error handling payment failure: ', error)'
   }
 }
 
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-  console.log('📄 Invoice payment succeeded:', invoice.id)
+  console.log('📄 Invoice payment succeeded: ', invoice.id)'
   
   try {
     // Update subscription status if applicable
     if ((invoice as any).subscription) {
-      await updateSubscriptionStatus((invoice as any).subscription as string, 'active'
+      await updateSubscriptionStatus((invoice as any).subscription as string, 'active
     }
 
     // Log invoice payment
     await logPaymentEvent({
-      type: 'invoice_payment_succeeded,
+      type: 'invoice_payment_succeeded,'
       invoice_id: invoice.id,
       amount: invoice.amount_paid,
       currency: invoice.currency,
@@ -209,22 +209,22 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Error handling invoice payment success:', error)
+    console.error('Error handling invoice payment success: ', error)'
   }
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-  console.log('❌ Invoice payment failed:', invoice.id)
+  console.log('❌ Invoice payment failed: ', invoice.id)'
   
   try {
     // Update subscription status if applicable
     if ((invoice as any).subscription) {
-      await updateSubscriptionStatus((invoice as any).subscription as string, 'past_due'
+      await updateSubscriptionStatus((invoice as any).subscription as string, 'past_due
     }
 
     // Log invoice payment failure
     await logPaymentEvent({
-      type: 'invoice_payment_failed,
+      type: 'invoice_payment_failed,'
       invoice_id: invoice.id,
       amount: invoice.amount_due,
       currency: invoice.currency,
@@ -233,12 +233,12 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Error handling invoice payment failure:', error)
+    console.error('Error handling invoice payment failure: ', error)'
   }
 }
 
 async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
-  console.log('🎯 Subscription created:', subscription.id)
+  console.log('🎯 Subscription created: ', subscription.id)'
   
   try {
     // Create subscription record in your database
@@ -251,12 +251,12 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       trial_end: (subscription as any).trial_end ? new Date((subscription as any).trial_end * 1000) : null,
     })
   } catch (error) {
-    console.error('Error handling subscription creation:', error)
+    console.error('Error handling subscription creation: ', error)'
   }
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  console.log('🔄 Subscription updated:', subscription.id)
+  console.log('🔄 Subscription updated: ', subscription.id)'
   
   try {
     // Update subscription record in your database
@@ -266,26 +266,26 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       current_period_end: new Date((subscription as any).current_period_end * 1000),
     })
   } catch (error) {
-    console.error('Error handling subscription update:', error)
+    console.error('Error handling subscription update: ', error)'
   }
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  console.log('🗑️ Subscription deleted:', subscription.id)
+  console.log('🗑️ Subscription deleted: ', subscription.id)'
   
   try {
     // Mark subscription as cancelled in your database
     await updateSubscriptionRecord(subscription.id, {
-      status: 'cancelled,
+      status: 'cancelled,'
       cancelled_at: new Date(),
     })
   } catch (error) {
-    console.error('Error handling subscription deletion:', error)
+    console.error('Error handling subscription deletion: ', error)'
   }
 }
 
 async function handleCustomerCreated(customer: Stripe.Customer) {
-  console.log('👤 Customer created:', customer.id)
+  console.log('👤 Customer created: ', customer.id)'
   
   try {
     // Create customer record in your database
@@ -296,91 +296,91 @@ async function handleCustomerCreated(customer: Stripe.Customer) {
       created_at: new Date(customer.created * 1000),
     })
   } catch (error) {
-    console.error('Error handling customer creation:', error)
+    console.error('Error handling customer creation: ', error)'
   }
 }
 
 async function handlePaymentMethodAttached(paymentMethod: Stripe.PaymentMethod) {
-  console.log('💳 Payment method attached:', paymentMethod.id)
+  console.log('💳 Payment method attached: ', paymentMethod.id)'
   
   try {
     // Log payment method attachment for analytics
     await logPaymentEvent({
-      type: 'payment_method_attached,
+      type: 'payment_method_attached,'
       payment_method_id: paymentMethod.id,
       customer_id: paymentMethod.customer as string,
       payment_method_type: paymentMethod.type,
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Error handling payment method attachment:', error)
+    console.error('Error handling payment method attachment: ', error)'
   }
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  console.log('✅ Checkout session completed:', session.id)
+  console.log('✅ Checkout session completed: ', session.id)'
   
   try {
     // Handle checkout completion
-    if (session.mode === 'subscription') {'
+    if (session.mode === 'subscription') {
       // Handle subscription checkout
       await handleSubscriptionCheckout(session)
-    } else if (session.mode === 'payment') {'
+    } else if (session.mode === 'payment') {
       // Handle one-time payment checkout
       await handlePaymentCheckout(session)
     }
   } catch (error) {
-    console.error('Error handling checkout completion:', error)
+    console.error('Error handling checkout completion: ', error)'
   }
 }
 
 // Helper functions (these would connect to your actual database)
 async function logPaymentEvent(event: unknown) {
   // In a real app, this would save to your database
-  console.log('📊 Payment event logged:', event)
+  console.log('📊 Payment event logged: ', event)'
 }
 
 async function activateProject(projectId: string) {
   // In a real app, this would update project status in your database
-  console.log('✅ Project activated:', projectId)
+  console.log('✅ Project activated: ', projectId)'
 }
 
 async function sendPaymentConfirmationEmail(data: unknown) {
   // In a real app, this would send an email via your email service
-  console.log('📧 Payment confirmation email queued:', data.email)
+  console.log('📧 Payment confirmation email queued: ', data.email)'
 }
 
 async function sendPaymentFailureEmail(data: unknown) {
   // In a real app, this would send a failure notification email
-  console.log('📧 Payment failure email queued:', data.email)
+  console.log('📧 Payment failure email queued: ', data.email)'
 }
 
 async function updateSubscriptionStatus(subscriptionId: string, status: string) {
   // In a real app, this would update subscription status in your database
-  console.log('🔄 Subscription status updated:', subscriptionId, status)
+  console.log('🔄 Subscription status updated: ', subscriptionId, status)'
 }
 
 async function createSubscriptionRecord(data: unknown) {
   // In a real app, this would create a subscription record in your database
-  console.log('💾 Subscription record created:', data.subscription_id)
+  console.log('💾 Subscription record created: ', data.subscription_id)'
 }
 
 async function updateSubscriptionRecord(subscriptionId: string, updates: unknown) {
   // In a real app, this would update subscription record in your database
-  console.log('💾 Subscription record updated:', subscriptionId)
+  console.log('💾 Subscription record updated: ', subscriptionId)'
 }
 
 async function createCustomerRecord(data: unknown) {
   // In a real app, this would create a customer record in your database
-  console.log('💾 Customer record created:', data.stripe_customer_id)
+  console.log('💾 Customer record created: ', data.stripe_customer_id)'
 }
 
 async function handleSubscriptionCheckout(session: Stripe.Checkout.Session) {
   // Handle subscription-specific checkout completion
-  console.log('🎯 Subscription checkout handled:', session.subscription)
+  console.log('🎯 Subscription checkout handled: ', session.subscription)'
 }
 
 async function handlePaymentCheckout(session: Stripe.Checkout.Session) {
   // Handle one-time payment checkout completion
-  console.log('💰 Payment checkout handled:', session.payment_intent)
+  console.log('💰 Payment checkout handled: ', session.payment_intent)'
 } 

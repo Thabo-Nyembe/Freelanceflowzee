@@ -1,9 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
-import ImageViewer from './image-viewer
-import VideoViewer from './video-viewer
-import AudioViewer from './audio-viewer
+import ImageViewer from './image-viewer'
+import VideoViewer from './video-viewer'
+import AudioViewer from './audio-viewer'
 
 export interface Comment {
   id: string
@@ -45,7 +45,7 @@ export default function FeedbackWrapper({
       created_at: new Date().toISOString(),
     }
     setComments(prev => [...prev, newComment])
-    console.log('Adding comment:', newComment)
+    console.log('Adding comment: ', newComment)'
   }
 
   const handleCommentEdit = (id: string, content: string) => {
@@ -56,12 +56,12 @@ export default function FeedbackWrapper({
           : comment
       )
     )
-    console.log('Editing comment:', id, content)
+    console.log('Editing comment: ', id, content)'
   }
 
   const handleCommentDelete = (id: string) => {
     setComments(prev => prev.filter(comment => comment.id !== id))
-    console.log('Deleting comment:', id)
+    console.log('Deleting comment: ', id)'
   }
 
   const commonProps = {

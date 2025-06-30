@@ -14,21 +14,21 @@ const testimonials = [
     company: "TechFlow Inc",
     avatar: "SC",
     rating: 5,
-    content: "FreeflowZee has completely transformed how I collaborate with clients. The feedback system is amazing!"
+    content: 'FreeflowZee has completely transformed how I collaborate with clients. The feedback system is amazing!'
   },
   {
     name: "Mike Johnson",
     company: "Independent",
     avatar: "MJ", 
     rating: 5,
-    content: "The AI-powered features save me hours of work every week. Highly recommended!"
+    content: 'The AI-powered features save me hours of work every week. Highly recommended!'
   },
   {
     name: "Emily Chen",
     company: "Design Studios Pro",
     avatar: "EC",
     rating: 5,
-    content: "The real-time collaboration features are game-changing for our remote team."
+    content: 'The real-time collaboration features are game-changing for our remote team.'
   }
 ]
 

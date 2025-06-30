@@ -6,7 +6,7 @@ interface UPFComment {
   userName: string
   userAvatar?: string
   content: string
-  type: 'image' | 'video' | 'code' | 'audio' | 'doc'
+  type: 'image' | 'video' | 'code' | 'audio' | 'doc
   position: {
     x?: number
     y?: number
@@ -20,8 +20,8 @@ interface UPFComment {
     }
     elementId?: string
   }
-  status: 'open' | 'resolved' | 'needs_revision' | 'approved'
-  priority: 'low' | 'medium' | 'high' | 'urgent'
+  status: 'open' | 'resolved' | 'needs_revision' | 'approved
+  priority: 'low' | 'medium' | 'high' | 'urgent
   createdAt: string
   updatedAt?: string
   resolvedAt?: string
@@ -30,7 +30,7 @@ interface UPFComment {
   mentions: string[]
   reactions: {
     userId: string
-    type: 'like' | 'love' | 'approve' | 'reject'
+    type: 'like' | 'love' | 'approve' | 'reject
     createdAt: string
   }[]
   metadata?: {
@@ -55,7 +55,7 @@ interface UPFComment {
 interface MediaFile {
   id: string
   name: string
-  type: 'image' | 'video' | 'code' | 'audio' | 'doc'
+  type: 'image' | 'video' | 'code' | 'audio' | 'doc
   url: string
   thumbnail?: string
   metadata: {
@@ -66,34 +66,34 @@ interface MediaFile {
     lines?: number
   }
   comments: UPFComment[]
-  status: 'draft' | 'review' | 'approved' | 'changes_required'
+  status: 'draft' | 'review' | 'approved' | 'changes_required
 }
 
 // Mock data store (in production, this would be a database)
 let mockProjects: { [key: string]: MediaFile[] } = {
-  'current-project': ['
+  'current-project': [
     {
-      id: 'img_1,
-      name: 'Homepage_Mockup_v3.jpg,
-      type: 'image,
-      url: '/images/homepage-mockup.jpg,
-      thumbnail: '/images/homepage-thumb.jpg,
+      id: 'img_1,'
+      name: 'Homepage_Mockup_v3.jpg,'
+      type: 'image,'
+      url: '/images/homepage-mockup.jpg,'
+      thumbnail: '/images/homepage-thumb.jpg,'
       metadata: {
         dimensions: { width: 1920, height: 1080 }
       },
-      status: 'review,
+      status: 'review,'
       comments: [
         {
-          id: 'comment_1,
-          userId: 'client_1,
-          userName: 'Sarah Johnson,
-          userAvatar: '/avatars/sarah.jpg,
-          content: 'The hero section needs more contrast. Hard to read the text.,
-          type: 'image,
+          id: 'comment_1,'
+          userId: 'client_1,'
+          userName: 'Sarah Johnson,'
+          userAvatar: '/avatars/sarah.jpg,'
+          content: 'The hero section needs more contrast. Hard to read the text.,'
+          type: 'image,'
           position: { x: 45, y: 25, elementId: 'hero_section' },
-          status: 'open,
-          priority: 'high,
-          createdAt: '2024-01-15T10:30:00Z,
+          status: 'open,'
+          priority: 'high,'
+          createdAt: '2024-01-15T10:30:00Z,'
           replies: [],
           mentions: ['designer_1'],
           reactions: []
@@ -105,22 +105,22 @@ let mockProjects: { [key: string]: MediaFile[] } = {
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const action = searchParams.get('action'
-  const projectId = searchParams.get('projectId') || 'current-project'
-  const fileId = searchParams.get('fileId'
-  const commentId = searchParams.get('commentId'
+  const action = searchParams.get('action
+  const projectId = searchParams.get('projectId') || 'current-project
+  const fileId = searchParams.get('fileId
+  const commentId = searchParams.get('commentId
 
-  console.log('🎯 UPF API called:', { action, projectId, fileId, commentId })
+  console.log('🎯 UPF API called: ', { action, projectId, fileId, commentId })'
 
   try {
     switch (action) {
-      case 'get_files':'
+      case 'get_files':
         return NextResponse.json({
           success: true,
           files: mockProjects[projectId] || []
         })
 
-      case 'get_comments':'
+      case 'get_comments':
         if (!fileId) {
           return NextResponse.json({ success: false, error: 'File ID required' }, { status: 400 })
         }
@@ -137,7 +137,7 @@ export async function GET(request: NextRequest) {
           comments: file.comments
         })
 
-      case 'get_comment':'
+      case 'get_comment':
         if (!commentId) {
           return NextResponse.json({ success: false, error: 'Comment ID required' }, { status: 400 })
         }
@@ -163,7 +163,7 @@ export async function GET(request: NextRequest) {
           comment: foundComment
         })
 
-      case 'get_analytics':'
+      case 'get_analytics':
         const projectFiles = mockProjects[projectId] || []
         const allComments = projectFiles.flatMap(f => f.comments)
         
@@ -178,16 +178,16 @@ export async function GET(request: NextRequest) {
             video: allComments.filter(c => c.type === 'video').length,
             code: allComments.filter(c => c.type === 'code').length,
             doc: allComments.filter(c => c.type === 'doc').length,
-            audio: allComments.filter(c => c.type === 'audio').length'
+            audio: allComments.filter(c => c.type === 'audio').length
           },
           byPriority: {
             urgent: allComments.filter(c => c.priority === 'urgent').length,
             high: allComments.filter(c => c.priority === 'high').length,
             medium: allComments.filter(c => c.priority === 'medium').length,
-            low: allComments.filter(c => c.priority === 'low').length'
+            low: allComments.filter(c => c.priority === 'low').length
           },
-          averageResolutionTime: '2.3 hours,
-          mostActiveUser: 'Sarah Johnson,
+          averageResolutionTime: '2.3 hours,'
+          mostActiveUser: 'Sarah Johnson,'
           busyFiles: projectFiles.map(f => ({
             id: f.id,
             name: f.name,
@@ -204,8 +204,8 @@ export async function GET(request: NextRequest) {
       default:
         return NextResponse.json({
           success: true,
-          message: 'Universal Pinpoint Feedback API,
-          supportedActions: ['get_files', 'get_comments', 'get_comment', 'get_analytics'
+          message: 'Universal Pinpoint Feedback API,'
+          supportedActions: ['get_files', 'get_comments', 'get_comment', 'get_analytics
           ],
           endpoints: {
             'GET': 'Retrieve files, comments, or analytics', 'POST': 'Create comments or reactions', 'PUT': 'Update comments or file status', 'DELETE': 'Delete comments'
@@ -213,7 +213,7 @@ export async function GET(request: NextRequest) {
         })
     }
   } catch (error) {
-    console.error('UPF API error:', error)
+    console.error('UPF API error: ', error)'
     return NextResponse.json({
       success: false,
       error: 'Internal server error'
@@ -223,20 +223,20 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const action = searchParams.get('action'
-  const projectId = searchParams.get('projectId') || 'current-project'
+  const action = searchParams.get('action
+  const projectId = searchParams.get('projectId') || 'current-project
 
   try {
     const body = await request.json()
 
     switch (action) {
-      case 'add_comment':'
+      case 'add_comment':
         const { fileId, comment } = body
         
         if (!fileId || !comment) {
           return NextResponse.json({ 
             success: false, 
-            error: 'File ID and comment required' '
+            error: 'File ID and comment required' 
           }, { status: 400 })
         }
 
@@ -246,7 +246,7 @@ export async function POST(request: NextRequest) {
         if (fileIndex === -1) {
           return NextResponse.json({ 
             success: false, 
-            error: 'File not found' '
+            error: 'File not found' 
           }, { status: 404 })
         }
 
@@ -258,7 +258,7 @@ export async function POST(request: NextRequest) {
           content: comment.content,
           type: comment.type,
           position: comment.position,
-          status: 'open,
+          status: 'open,'
           priority: comment.priority || 'medium,
           createdAt: new Date().toISOString(),
           replies: [],
@@ -275,13 +275,13 @@ export async function POST(request: NextRequest) {
           message: 'Comment added successfully'
         })
 
-      case 'add_reaction':'
+      case 'add_reaction':
         const { commentId, reaction } = body
         
         if (!commentId || !reaction) {
           return NextResponse.json({ 
             success: false, 
-            error: 'Comment ID and reaction required' '
+            error: 'Comment ID and reaction required' 
           }, { status: 400 })
         }
 
@@ -310,7 +310,7 @@ export async function POST(request: NextRequest) {
         if (!updated) {
           return NextResponse.json({ 
             success: false, 
-            error: 'Comment not found' '
+            error: 'Comment not found' 
           }, { status: 404 })
         }
 
@@ -319,13 +319,13 @@ export async function POST(request: NextRequest) {
           message: 'Reaction added successfully'
         })
 
-      case 'add_reply':'
+      case 'add_reply':
         const { parentCommentId, reply } = body
         
         if (!parentCommentId || !reply) {
           return NextResponse.json({ 
             success: false, 
-            error: 'Parent comment ID and reply required' '
+            error: 'Parent comment ID and reply required' 
           }, { status: 400 })
         }
 
@@ -344,8 +344,8 @@ export async function POST(request: NextRequest) {
               content: reply.content,
               type: parentComment.type,
               position: parentComment.position,
-              status: 'open,
-              priority: 'low,
+              status: 'open,'
+              priority: 'low,'
               createdAt: new Date().toISOString(),
               replies: [],
               mentions: reply.mentions || [],
@@ -361,7 +361,7 @@ export async function POST(request: NextRequest) {
         if (!replyAdded) {
           return NextResponse.json({ 
             success: false, 
-            error: 'Parent comment not found' '
+            error: 'Parent comment not found' 
           }, { status: 404 })
         }
 
@@ -373,11 +373,11 @@ export async function POST(request: NextRequest) {
       default:
         return NextResponse.json({ 
           success: false, 
-          error: 'Unknown action' '
+          error: 'Unknown action' 
         }, { status: 400 })
     }
   } catch (error) {
-    console.error('UPF POST error:', error)
+    console.error('UPF POST error: ', error)'
     return NextResponse.json({
       success: false,
       error: 'Internal server error'
@@ -387,20 +387,20 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const action = searchParams.get('action'
-  const projectId = searchParams.get('projectId') || 'current-project'
+  const action = searchParams.get('action
+  const projectId = searchParams.get('projectId') || 'current-project
 
   try {
     const body = await request.json()
 
     switch (action) {
-      case 'update_comment_status':'
+      case 'update_comment_status':
         const { commentId, status, resolvedBy } = body
         
         if (!commentId || !status) {
           return NextResponse.json({ 
             success: false, 
-            error: 'Comment ID and status required' '
+            error: 'Comment ID and status required' 
           }, { status: 400 })
         }
 
@@ -414,7 +414,7 @@ export async function PUT(request: NextRequest) {
             comment.status = status
             comment.updatedAt = new Date().toISOString()
             
-            if (status === 'resolved') {'
+            if (status === 'resolved') {
               comment.resolvedAt = new Date().toISOString()
               comment.resolvedBy = resolvedBy
             }
@@ -427,7 +427,7 @@ export async function PUT(request: NextRequest) {
         if (!updated) {
           return NextResponse.json({ 
             success: false, 
-            error: 'Comment not found' '
+            error: 'Comment not found' 
           }, { status: 404 })
         }
 
@@ -436,13 +436,13 @@ export async function PUT(request: NextRequest) {
           message: 'Comment status updated successfully'
         })
 
-      case 'update_file_status':'
+      case 'update_file_status':
         const { fileId, fileStatus } = body
         
         if (!fileId || !fileStatus) {
           return NextResponse.json({ 
             success: false, 
-            error: 'File ID and status required' '
+            error: 'File ID and status required' 
           }, { status: 400 })
         }
 
@@ -452,7 +452,7 @@ export async function PUT(request: NextRequest) {
         if (fileIndex === -1) {
           return NextResponse.json({ 
             success: false, 
-            error: 'File not found' '
+            error: 'File not found' 
           }, { status: 404 })
         }
 
@@ -466,11 +466,11 @@ export async function PUT(request: NextRequest) {
       default:
         return NextResponse.json({ 
           success: false, 
-          error: 'Unknown action' '
+          error: 'Unknown action' 
         }, { status: 400 })
     }
   } catch (error) {
-    console.error('UPF PUT error:', error)
+    console.error('UPF PUT error: ', error)'
     return NextResponse.json({
       success: false,
       error: 'Internal server error'
@@ -480,17 +480,17 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const action = searchParams.get('action'
-  const projectId = searchParams.get('projectId') || 'current-project'
-  const commentId = searchParams.get('commentId'
+  const action = searchParams.get('action
+  const projectId = searchParams.get('projectId') || 'current-project
+  const commentId = searchParams.get('commentId
 
   try {
     switch (action) {
-      case 'delete_comment':'
+      case 'delete_comment':
         if (!commentId) {
           return NextResponse.json({ 
             success: false, 
-            error: 'Comment ID required' '
+            error: 'Comment ID required' 
           }, { status: 400 })
         }
 
@@ -510,7 +510,7 @@ export async function DELETE(request: NextRequest) {
         if (!deleted) {
           return NextResponse.json({ 
             success: false, 
-            error: 'Comment not found' '
+            error: 'Comment not found' 
           }, { status: 404 })
         }
 
@@ -522,11 +522,11 @@ export async function DELETE(request: NextRequest) {
       default:
         return NextResponse.json({ 
           success: false, 
-          error: 'Unknown action' '
+          error: 'Unknown action' 
         }, { status: 400 })
     }
   } catch (error) {
-    console.error('UPF DELETE error:', error)
+    console.error('UPF DELETE error: ', error)'
     return NextResponse.json({
       success: false,
       error: 'Internal server error'

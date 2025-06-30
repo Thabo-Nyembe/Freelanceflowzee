@@ -101,7 +101,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             <Link 
               href="/blog" 
               className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-8"
-            >
+            >"
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Blog
             </Link>
@@ -175,12 +175,12 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             )}
 
             {/* Article Content */}
-            <div 
+            <div "
               className="prose prose-lg max-w-none mb-12"
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
 
-            {/* Tags */}
+            {/* Tags */}"
             <div className="border-t pt-6 mb-8">
               <h3 className="text-sm font-semibold text-gray-900 mb-3">Tags</h3>
               <div className="flex flex-wrap gap-2">
@@ -202,7 +202,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
                 size="lg" 
                 className="bg-white text-blue-600 hover:bg-gray-100"
                 onClick={() => setShowDemoModal(true)}
-              >
+              >"
                 <BookOpen className="w-5 h-5 mr-2" />
                 Try Free Demo
               </Button>
@@ -229,7 +229,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
                         >
                           {relatedPost.title}
                         </Link>
-                      </h3>
+                      </h3>"
                       <p className="text-gray-600 text-sm mb-4">{relatedPost.excerpt}</p>
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <div className="flex items-center">

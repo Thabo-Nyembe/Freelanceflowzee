@@ -66,7 +66,7 @@ export async function downloadFile(file: DownloadableFile): Promise<void> {
     throw new Error('No valid download method available')
 
   } catch (error) {
-    console.error('Download failed:', error)
+    console.error('Download failed: ', error)'
     throw error
   }
 }
@@ -126,7 +126,7 @@ export async function downloadDocument(type: string, data: Record<string, unknow
       throw new Error(errorData.error || 'Document generation failed')
     }
   } catch (error) {
-    console.error('Document download failed:', error)
+    console.error('Document download failed: ', error)'
     throw error
   }
 }
@@ -150,7 +150,7 @@ export async function downloadReport(
       throw new Error(errorData.error || 'Report generation failed')
     }
   } catch (error) {
-    console.error('Report download failed:', error)
+    console.error('Report download failed: ', error)'
     throw error
   }
 }
@@ -179,7 +179,7 @@ export async function downloadInvoice(invoiceId: string, invoiceData: Record<str
       throw new Error('Invoice PDF generation failed')
     }
   } catch (error) {
-    console.error('Invoice download failed:', error)
+    console.error('Invoice download failed: ', error)'
     throw error
   }
 }
@@ -218,7 +218,7 @@ export async function downloadGalleryItem(
       throw new Error(errorData.error || 'Gallery item download failed')
     }
   } catch (error) {
-    console.error('Gallery download failed:', error)
+    console.error('Gallery download failed: ', error)'
     throw error
   }
 }
@@ -267,7 +267,7 @@ export async function copyDownloadLink(file: DownloadableFile): Promise<string> 
       throw new Error('No download link available')
     }
   } catch (error) {
-    console.error('Copy link failed:', error)
+    console.error('Copy link failed: ', error)'
     throw error
   }
 }
@@ -305,7 +305,7 @@ export async function shareFile(file: DownloadableFile, method: &apos;link&apos;
         break
     }
   } catch (error) {
-    console.error('Share failed:', error)
+    console.error('Share failed: ', error)'
     throw error
   }
 }
@@ -347,7 +347,7 @@ export async function downloadAsZip(files: DownloadableFile[], zipName: string =
       throw new Error('ZIP generation failed')
     }
   } catch (error) {
-    console.error('ZIP download failed:', error)
+    console.error('ZIP download failed: ', error)'
     // Fallback to individual downloads
     await downloadFiles(files)
   }
@@ -379,7 +379,7 @@ export async function downloadWithPassword(fileId: string, password: string): Pr
       throw new Error(errorData.error || 'Access denied')
     }
   } catch (error) {
-    console.error('Protected download failed:', error)
+    console.error('Protected download failed: ', error)'
     throw error
   }
 }
@@ -388,7 +388,7 @@ export async function downloadWithPassword(fileId: string, password: string): Pr
  * Format file size for display
  */
 export function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes
+  if (bytes === 0) return '0 Bytes'
   const k = 1024
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
@@ -399,18 +399,18 @@ export function formatFileSize(bytes: number): string {
  * Get file type icon component name
  */
 export function getFileTypeIcon(mimeType: string | undefined): string {
-  if (!mimeType) return 'FileText
+  if (!mimeType) return 'FileText'
   
-  if (mimeType.startsWith('image/')) return 'Image
-  if (mimeType.startsWith('video/')) return 'Video
-  if (mimeType.startsWith('audio/')) return 'Music
-  if (mimeType.includes('pdf')) return 'FileText
-  if (mimeType.includes('zip') || mimeType.includes('archive')) return 'Archive
-  if (mimeType.includes('doc') || mimeType.includes('word')) return 'FileText
-  if (mimeType.includes('sheet') || mimeType.includes('excel')) return 'Grid
-  if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return 'Presentation
+  if (mimeType.startsWith('image/')) return 'Image'
+  if (mimeType.startsWith('video/')) return 'Video'
+  if (mimeType.startsWith('audio/')) return 'Music'
+  if (mimeType.includes('pdf')) return 'FileText'
+  if (mimeType.includes('zip') || mimeType.includes('archive')) return 'Archive'
+  if (mimeType.includes('doc') || mimeType.includes('word')) return 'FileText'
+  if (mimeType.includes('sheet') || mimeType.includes('excel')) return 'Grid'
+  if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return 'Presentation'
   
-  return 'FileText
+  return 'FileText'
 }
 
 /**

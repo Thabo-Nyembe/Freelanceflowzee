@@ -61,7 +61,7 @@ class OpenRouterService {
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`, 'Content-Type': 'application/json', 'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000', 'X-Title': 'FreeflowZee AI Assistant
+          'Authorization': `Bearer ${this.apiKey}`, 'Content-Type': 'application/json', 'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000', 'X-Title': 'FreeflowZee AI Assistant'
         },
         body: JSON.stringify({
           model: model || this.defaultModel,
@@ -86,7 +86,7 @@ class OpenRouterService {
       return data.choices[0].message.content
 
     } catch (error) {
-      console.error('OpenRouter service error:', error)
+      console.error('OpenRouter service error: ', error)'
       throw error
     }
   }
@@ -151,7 +151,7 @@ class OpenRouterService {
       const response = await this.generateResponse('Hello, please respond with "Connection successful")
       return response.toLowerCase().includes('connection successful')
     } catch (error) {
-      console.error('OpenRouter connection test failed:', error)
+      console.error('OpenRouter connection test failed: ', error)'
       return false
     }
   }
@@ -161,7 +161,7 @@ class OpenRouterService {
     try {
       const response = await fetch(`${this.baseUrl}/models`, {
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`, 'Content-Type': 'application/json
+          'Authorization': `Bearer ${this.apiKey}`, 'Content-Type': 'application/json'
         }
       })
 
@@ -172,7 +172,7 @@ class OpenRouterService {
       const data = await response.json()
       return data.data || []
     } catch (error) {
-      console.error('Failed to get OpenRouter models:', error)
+      console.error('Failed to get OpenRouter models: ', error)'
       return []
     }
   }
@@ -187,7 +187,7 @@ export function useOpenRouter() {
     try {
       return await openRouterService.generateResponse(prompt, context)
     } catch (error) {
-      console.error('OpenRouter hook error:', error)
+      console.error('OpenRouter hook error: ', error)'
       throw error
     }
   }
@@ -196,7 +196,7 @@ export function useOpenRouter() {
     try {
       return await openRouterService.generateBusinessInsights(businessData)
     } catch (error) {
-      console.error('Business insights error:', error)
+      console.error('Business insights error: ', error)'
       throw error
     }
   }

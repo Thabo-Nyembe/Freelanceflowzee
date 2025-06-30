@@ -1,7 +1,7 @@
-'use client
+'use client'
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query
-import { toast } from 'sonner
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 interface AIGenerationParams {
   prompt: string
@@ -38,7 +38,7 @@ export function useAIOperations() {
       toast.success('Generation completed successfully')
     },
     onError: (error) => {
-      toast.error('Generation failed: ' + error.message)
+      toast.error('Generation failed: ' + error.message)'
     }
   })
 
@@ -62,7 +62,7 @@ export function useAIOperations() {
       toast.success('Analysis completed successfully')
     },
     onError: (error) => {
-      toast.error('Analysis failed: ' + error.message)
+      toast.error('Analysis failed: ' + error.message)'
     }
   })
 

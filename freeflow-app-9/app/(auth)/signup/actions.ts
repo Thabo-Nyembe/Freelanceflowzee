@@ -1,8 +1,8 @@
 'use server
 
-import { revalidatePath } from 'next/cache
-import { redirect } from 'next/navigation
-import { createClient } from '@/lib/supabase/server
+import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 
 export async function signup(formData: FormData) {
   const supabase = await createClient()
@@ -50,7 +50,7 @@ export async function signup(formData: FormData) {
     const { error, data: authData } = await supabase.auth.signUp(data)
 
     if (error) {
-      console.error('Signup error:', error)
+      console.error('Signup error: ', error)'
       return { error: error.message || 'Failed to create account' }
     }
 
@@ -63,7 +63,7 @@ export async function signup(formData: FormData) {
       })
 
       if (signInError && signInError.code !== 'email_not_confirmed') {
-        console.error('Auto sign-in error:', signInError)
+        console.error('Auto sign-in error: ', signInError)'
         return { error: 'Account created but failed to sign in. Please try logging in manually.' }
       }
     }
@@ -75,7 +75,7 @@ export async function signup(formData: FormData) {
     if (error?.digest?.startsWith('NEXT_REDIRECT')) {
       throw error
     }
-    console.error('Unexpected signup error:', error)
+    console.error('Unexpected signup error: ', error)'
     return { error: 'An unexpected error occurred. Please try again.' }
   }
 } 

@@ -47,7 +47,7 @@ const MOCK_SERVICES: BookingService[] = [
       tuesday: { start: '10:00', end: '16:00' },
       wednesday: { start: '10:00', end: '16:00' },
       thursday: { start: '10:00', end: '16:00' },
-      friday: { start: '10:00', end: '16:00' }'
+      friday: { start: '10:00', end: '16:00' }
     }
   },
   {
@@ -66,7 +66,7 @@ const MOCK_SERVICES: BookingService[] = [
     availability: {
       monday: { start: '09:00', end: '15:00' },
       wednesday: { start: '09:00', end: '15:00' },
-      friday: { start: '09:00', end: '15:00' }'
+      friday: { start: '09:00', end: '15:00' }
     }
   }
 ]
@@ -96,8 +96,8 @@ const MOCK_BOOKINGS: Booking[] = [
 ]
 
 // Use inline type definitions
-type BookingStatus = 'pending' | 'confirmed' | 'paid' | 'in-progress' | 'completed' | 'cancelled' | 'no-show'
-type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded'
+type BookingStatus = 'pending' | 'confirmed' | 'paid' | 'in-progress' | 'completed' | 'cancelled' | 'no-show
+type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded
 
 // POST: Create a new booking with Stripe payment
 export async function POST(request: NextRequest) {
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create Stripe customer if doesn't exist'
+    // Create Stripe customer if doesn't exist
     const customerResult = await stripeService.createEnhancedCustomer({
       email: clientEmail,
       name: clientName,
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!customerResult.success) {
-      console.error('Failed to create customer:', customerResult.error)
+      console.error('Failed to create customer: ', customerResult.error)'
       return NextResponse.json(
         { error: 'Failed to process payment setup' },
         { status: 500 }
@@ -175,11 +175,11 @@ export async function POST(request: NextRequest) {
         selected_time: selectedTime || 
       },
       paymentMethods: ['card', 'apple_pay', 'google_pay', 'link'],
-      setupFutureUsage: 'off_session' // Save payment method for future bookings'
+      setupFutureUsage: 'off_session' // Save payment method for future bookings
     })
 
     if (!paymentResult.success) {
-      console.error('Failed to create payment intent:', paymentResult.error)
+      console.error('Failed to create payment intent: ', paymentResult.error)'
       return NextResponse.json(
         { error: 'Failed to create payment intent' },
         { status: 500 }
@@ -197,7 +197,7 @@ export async function POST(request: NextRequest) {
     const bookingId = `booking-${Date.now()}
     const newBooking: Booking = {
       id: bookingId,
-      clientId: customerResult.customer?.id || 'unknown-client,'
+      clientId: customerResult.customer?.id || 'unknown-client,
       serviceId,
       freelancerId: service.freelancerId,
       clientName,
@@ -228,7 +228,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Booking creation error:', error)
+    console.error('Booking creation error: ', error)'
     return NextResponse.json(
       { error: 'Failed to create booking' },
       { status: 500 }
@@ -291,7 +291,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Booking fetch error:', error)
+    console.error('Booking fetch error: ', error)'
     return NextResponse.json(
       { error: 'Failed to fetch bookings' },
       { status: 500 }
@@ -328,7 +328,7 @@ export async function PUT(request: NextRequest) {
       booking.status = status
       
       // Auto-confirm if payment is successful
-      if (status === 'confirmed' && booking.paymentStatus === 'paid') {'
+      if (status === 'confirmed' && booking.paymentStatus === 'paid') {
         // In a real app, you might send confirmation emails here
         console.log(`Booking ${bookingId} confirmed for ${booking.clientEmail}`)
       }
@@ -338,8 +338,8 @@ export async function PUT(request: NextRequest) {
       booking.paymentStatus = paymentStatus
       
       // Auto-confirm booking if payment succeeds
-      if (paymentStatus === 'paid' && booking.status === 'pending') {'
-        booking.status = 'confirmed'
+      if (paymentStatus === 'paid' && booking.status === 'pending') {
+        booking.status = 'confirmed
       }
     }
     
@@ -355,7 +355,7 @@ export async function PUT(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Booking update error:', error)
+    console.error('Booking update error: ', error)'
     return NextResponse.json(
       { error: 'Failed to update booking' },
       { status: 500 }

@@ -48,8 +48,8 @@ export function Chat() {
           >
             <div
               className={`rounded-lg px-4 py-2 max-w-[80%] ${
-                message.role === 'assistant'
-                  ? 'bg-gray-100'
+                message.role === 'assistant
+                  ? 'bg-gray-100
                   : 'bg-blue-500 text-white'
               }`}
             >
@@ -106,10 +106,10 @@ export function Chat() {
         className="flex gap-2 mt-4"
       >
         <input
-          ref={inputRef}
+          ref={inputRef}"
           className="flex-1 border rounded px-3 py-2"
           value={input}
-          onChange={handleInputChange}
+          onChange={handleInputChange}"
           placeholder="Type your message..."
           disabled={isLoading}
         />
@@ -120,7 +120,7 @@ export function Chat() {
         >
           Send
         </button>
-      </form>
+      </form>"
       {error && <div className="text-red-500 text-sm">{error.message}</div>}
     </div>
   )

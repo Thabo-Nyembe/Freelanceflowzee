@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import * as RechartsPrimitive from "recharts
+import * as RechartsPrimitive from 'recharts'
 
 import { cn } from "@/lib/utils"
 
@@ -225,7 +225,7 @@ const ChartTooltipContent = React.forwardRef<
                     <div
                       className={cn(
                         "flex flex-1 justify-between leading-none",
-                        nestLabel ? "items-end" : "items-center
+                        nestLabel ? "items-end" : 'items-center'
                       )}
                     >
                       <div className= "grid gap-1.5">
@@ -296,7 +296,7 @@ const ChartLegendContent = React.forwardRef<
                 <itemConfig.icon />
               ) : (
                 <div
-                  className= "h-2 w-2 shrink-0 rounded-[2px]
+                  className="h-2 w-2 shrink-0 rounded-[2px]
                   style={{
                     backgroundColor: item.color,
                   }}
@@ -309,7 +309,7 @@ const ChartLegendContent = React.forwardRef<
       </div>
     )
   }
-)
+)"
 ChartLegendContent.displayName = "ChartLegend
 
 // Helper to extract item config from a payload.

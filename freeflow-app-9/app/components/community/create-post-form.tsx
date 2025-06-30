@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Image as ImageIcon, Link as LinkIcon, Video, Loader2 } from 'lucide-react
+import { Image as ImageIcon, Link as LinkIcon, Video, Loader2 } from 'lucide-react'
 
 interface CreatePostFormProps {
   onSubmit: (data: {
@@ -88,7 +88,7 @@ export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
       <div className= "space-y-2">
         <div className= "flex gap-2">
           <Button
-            type= "button"
+            type= "button
             variant={mediaType === 'image' ? 'default' : 'outline'}
             onClick={() => setMediaType('image')}
             size= "sm
@@ -97,7 +97,7 @@ export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
             Image
           </Button>
           <Button
-            type= "button"
+            type= "button
             variant={mediaType === 'video' ? 'default' : 'outline'}
             onClick={() => setMediaType('video')}
             size= "sm
@@ -106,7 +106,7 @@ export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
             Video
           </Button>
           <Button
-            type= "button"
+            type= "button
             variant={mediaType === 'link' ? 'default' : 'outline'}
             onClick={() => setMediaType('link')}
             size= "sm
@@ -124,7 +124,7 @@ export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
             type= "url
           />
           <Button
-            type= "button"
+            type= "button
             onClick={handleAddMedia}
             disabled={!mediaUrl}
             size= "sm

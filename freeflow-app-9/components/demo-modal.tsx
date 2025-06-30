@@ -8,24 +8,24 @@ import { Card, CardContent } from '@/components/ui/card'
 interface DemoModalProps {
   isOpen: boolean
   onClose: () => void
-  title?: string
-  description?: string
+  title: string
+  description: string
   videoUrl?: string
 }
 
-export function DemoModal({ 
-  isOpen, 
-  onClose, 
-  title = "Demo Video", 
-  description = "Watch this demonstration video",
-  videoUrl = "/videos/demo.mp4" 
-}: DemoModalProps) {
+export function DemoModal({ isOpen, onClose, title, description, videoUrl }: DemoModalProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [volume, setVolume] = useState(50)
 
   if (!isOpen) return null
 
-  const handlePlay = () => {
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose()
+    }
+  }
+
+  const togglePlayback = () => {
     setIsPlaying(!isPlaying)
   }
 
@@ -40,75 +40,47 @@ export function DemoModal({
                 <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
                 <p className="text-gray-600 mt-1">{description}</p>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClose}
-                className="h-8 w-8 p-0"
-              >
-                <X className="h-4 w-4" />
+              <Button variant="ghost" size="sm" onClick={onClose}>
+                <X className="w-5 h-5" />
               </Button>
             </div>
 
-            {/* Video Player */}
-            <div className="relative bg-black">
+            {/* Demo Content */}
+            <div className="aspect-video bg-gray-100 relative overflow-hidden">
+              {videoUrl ? (
               <video
-                className="w-full aspect-video"
-                src={videoUrl}
-                poster="/images/video-poster.jpg"
+                  className="w-full h-full object-cover"
                 controls
-                preload="metadata"
+                  poster="/images/demo-placeholder.jpg"
               >
+                  <source src={videoUrl} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
-              
-              {/* Custom Controls Overlay */}
-              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between bg-black/70 backdrop-blur-sm rounded-lg p-3">
-                <div className="flex items-center gap-3">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handlePlay}
-                    className="text-white hover:bg-white/20"
-                  >
-                    {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                  </Button>
-                  
-                  <div className="flex items-center gap-2">
-                    <Volume2 className="h-4 w-4 text-white" />
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={volume}
-                      onChange={(e) => setVolume(Number(e.target.value))}
-                      className="slider w-20"
-                    />
+              ) : (
+                <div className="flex items-center justify-center h-full bg-gradient-to-br from-blue-50 to-purple-50">
+                  <div className="text-center">
+                    <Play className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Demo Coming Soon</h3>
+                    <p className="text-gray-600">
+                      Interactive demo for {title} will be available soon.
+                    </p>
                   </div>
                 </div>
-                
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-white hover:bg-white/20"
-                >
-                  <Maximize2 className="h-4 w-4" />
-                </Button>
-              </div>
+              )}
             </div>
 
             {/* Footer */}
             <div className="p-6 bg-gray-50 border-t">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-600">
-                  Duration: 2:30 • Quality: HD
+                  This is a preview of the {title} feature in action.
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    Download
+                  <Button variant="outline" onClick={onClose}>
+                    Close
                   </Button>
-                  <Button size="sm">
-                    Watch Full Tutorial
+                  <Button>
+                    Try It Now
                   </Button>
                 </div>
               </div>

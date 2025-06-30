@@ -42,7 +42,7 @@ export default function Login({}: LoginProps) {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
         if (sessionError) {
-          console.error('Session error:', sessionError)
+          console.error('Session error: ', sessionError)
           
           // Clear potentially corrupted cookies
           document.cookie.split(";").forEach(cookie => {
@@ -61,7 +61,7 @@ export default function Login({}: LoginProps) {
         const { data: { user }, error: userError } = await supabase.auth.getUser()
         
         if (userError) {
-          console.error('User data error:', userError)
+          console.error('User data error: ', userError)'
           setAuthError('Failed to get user data. Please try logging in again.')
           setIsCheckingAuth(false)
           return
@@ -75,7 +75,7 @@ export default function Login({}: LoginProps) {
 
         setIsCheckingAuth(false)
       } catch (error) {
-        console.error('Auth check failed:', error)
+        console.error('Auth check failed: ', error)'
         setAuthError('Authentication check failed. Please try again.')
         setIsCheckingAuth(false)
       }
@@ -137,7 +137,7 @@ export default function Login({}: LoginProps) {
       try {
         await supabase.auth.signOut()
       } catch (signOutError) {
-        console.error('Error clearing existing session:', signOutError)
+        console.error('Error clearing existing session: ', signOutError)'
       }
 
       // Clear any existing cookies
@@ -155,7 +155,7 @@ export default function Login({}: LoginProps) {
       })
 
       if (signInError) {
-        console.error('Sign in error:', signInError)
+        console.error('Sign in error: ', signInError)'
         if (signInError.message.includes('Invalid login credentials')) {
           setError('Invalid email or password')
         } else if (signInError.message.includes('Email not confirmed')) {
@@ -171,7 +171,7 @@ export default function Login({}: LoginProps) {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession()
       
       if (sessionError || !session) {
-        console.error('Session verification error:', sessionError)
+        console.error('Session verification error: ', sessionError)
         setError('Failed to establish session. Please try again.')
         setIsPending(false)
         return
@@ -180,7 +180,7 @@ export default function Login({}: LoginProps) {
       router.push(redirectTo)
       router.refresh()
     } catch (error) {
-      console.error('Unexpected error:', error)
+      console.error('Unexpected error: ', error)'
       setError('An unexpected error occurred. Please try again.')
       setIsPending(false)
     }
@@ -218,7 +218,7 @@ export default function Login({}: LoginProps) {
     )
   }
 
-  return (
+  return ("
     <div className="min-h-screen">
       <SiteHeader variant="minimal" />
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
@@ -256,8 +256,8 @@ export default function Login({}: LoginProps) {
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  id="email"
-                  name="email"
+                  id="email
+                  name="email
                   type="email"
                   placeholder="Enter your email"
                   required
@@ -265,7 +265,7 @@ export default function Login({}: LoginProps) {
                   suppressHydrationWarning
                 />
               </div>
-            </div>
+            </div>"
             <div className="space-y-2">
               <Label htmlFor="password" className="text-sm font-medium">
                 Password
@@ -273,8 +273,8 @@ export default function Login({}: LoginProps) {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  id="password"
-                  name="password"
+                  id="password
+                  name="password
                   type="password"
                   placeholder="Enter your password"
                   required
@@ -284,10 +284,10 @@ export default function Login({}: LoginProps) {
               </div>
             </div>
 
-            <Button
+            <Button"
               type="submit"
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
-              disabled={isPending}
+              disabled={isPending}"
               data-testid="login-button"
             >
               {isPending ? (
@@ -296,7 +296,7 @@ export default function Login({}: LoginProps) {
                   Signing in...
                 </>
               ) : (
-                'Sign In'
+                'Sign In
               )}
             </Button>
           </form>
@@ -311,7 +311,7 @@ export default function Login({}: LoginProps) {
               </Link>
             </div>
             
-            {redirectTo !== '/dashboard' && (
+            {redirectTo !== '/dashboard' && ("
               <div className="text-center">
                 <p className="text-sm text-muted-foreground mb-2">
                   You&apos;ll be redirected to {redirectTo} after login

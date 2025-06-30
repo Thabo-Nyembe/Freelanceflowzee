@@ -9,11 +9,8 @@ import { Progress } from '@/components/ui/progress'
 import { Input } from '@/components/ui/input'
 import { DollarSign, CheckCircle, CreditCard, Shield, Clock, AlertCircle, User, Calendar, Unlock, Lock, Download, FileText } from 'lucide-react'
 
-
 // Types
-interface EscrowDeposit {
-  id: string
-  clientName: string
+interface EscrowProject {
   clientEmail: string
   amount: number
   currency: string
@@ -21,13 +18,9 @@ interface EscrowDeposit {
   projectTitle: string
   projectId?: string
   createdAt: string
-  releasedAt?: string
-  completionPassword?: string
-  progressPercentage: number
-  milestones: EscrowMilestone[]
 }
 
-interface EscrowMilestone {
+interface EscrowDeposit {
   id: string
   title: string
   description: string
@@ -423,11 +416,11 @@ export default function EscrowPage() {
                               onChange={(e) => setReleasePassword(e.target.value)}
                               className="px-3 py-2 border rounded-md flex-1"
                             />
-                            <Button 
+                            <Button
                               data-testid="release-funds-btn"
                               onClick={() => handleReleaseFunds(deposit.id)}
                               className="bg-green-600 hover:bg-green-700"
-                            >
+                            >"
                               <Unlock className="mr-2 h-4 w-4" />
                               Release
                             </Button>
@@ -443,7 +436,7 @@ export default function EscrowPage() {
                             data-testid="release-funds-btn"
                             onClick={() => setShowPasswordForm(deposit.id)}
                             className="bg-green-600 hover:bg-green-700"
-                          >
+                          >"
                             <Lock className="mr-2 h-4 w-4" />
                             Release Funds
                           </Button>
@@ -460,7 +453,7 @@ export default function EscrowPage() {
                           console.log('Download receipt clicked');
                           alert('Receipt downloaded!');
                         }}
-                      >
+                      >"
                         <Download className="mr-2 h-4 w-4" />
                         Download Receipt
                       </Button>
@@ -521,10 +514,10 @@ export default function EscrowPage() {
       {/*
       <div className="mt-12 pt-8 border-t border-gray-200">
         <FeatureNavigation 
-          currentFeature="escrow"
+          currentFeature="escrow
           variant="compact"
-          title="Access Other Features"
-          subtitle="Navigate to other platform features"
+          title="Access Other Features
+          subtitle="Navigate to other platform features
         />
       </div>
       */}

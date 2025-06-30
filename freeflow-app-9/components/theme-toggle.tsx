@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Moon, Sun, Monitor, Check } from "lucide-react"
 import { useTheme } from "@/components/theme-provider"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button'"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,21 +46,25 @@ export function ThemeToggle() {
 
   return (
     <DropdownMenu>
+  <
       <DropdownMenuTrigger asChild>
+  <
         <Button
-          variant= "ghost
+          variant="ghost"
           size= "sm
-          className= "relative h-9 w-9 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors
+          className="relative h-9 w-9 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           aria-label= "Toggle theme
         >
+  <
           <CurrentIcon className= "h-4 w-4 transition-all" />
           <span className= "sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
+  <
       <DropdownMenuContent 
         align= "end" 
-        className= "w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg
-      >
+        className="w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg
+      >"
         <div className= "p-1">
           {themes.map((themeOption) => {
             const Icon = themeOption.icon
@@ -75,6 +79,7 @@ export function ThemeToggle() {
                   isSelected && "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300
                 )}
               >
+  <
                 <Icon className= "h-4 w-4" />
                 <div className= "flex flex-col flex-1">
                   <span className= "font-medium">{themeOption.name}</span>
@@ -104,10 +109,10 @@ export function ThemeToggleSimple() {
 
   return (
     <Button
-      variant= "ghost
+      variant="ghost"
       size= "sm
       onClick={toggleTheme}
-      className= "h-9 w-9 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors
+      className="h-9 w-9 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
       aria-label= "Toggle theme
     >
       {resolvedTheme === 'dark' ? (

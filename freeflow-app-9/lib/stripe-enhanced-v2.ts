@@ -1,4 +1,4 @@
-import Stripe from 'stripe
+import Stripe from 'stripe'
 
 // Enhanced Stripe service with Apple Pay, Google Pay, and advanced features
 class StripeEnhancedService {
@@ -36,13 +36,13 @@ class StripeEnhancedService {
         metadata: {
           ...metadata,
           created_at: new Date().toISOString(),
-          service: 'freeflowzee-enhanced
+          service: 'freeflowzee-enhanced'
         },
         setup_future_usage: setupFutureUsage,
         return_url: returnUrl,
         automatic_payment_methods: {
           enabled: true,
-          allow_redirects: 'always
+          allow_redirects: 'always'
         }
       })
 
@@ -53,7 +53,7 @@ class StripeEnhancedService {
         publishableKey: this.publishableKey
       }
     } catch (error) {
-      console.error('Enhanced payment intent creation failed:', error)
+      console.error('Enhanced payment intent creation failed: ', error)'
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Payment intent creation failed',
@@ -68,10 +68,10 @@ class StripeEnhancedService {
       await this.stripe.applePayDomains.create({ domain_name: domain })
       return { success: true, domain }
     } catch (error) {
-      console.error('Apple Pay domain verification failed:', error)
+      console.error('Apple Pay domain verification failed: ', error)'
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Domain verification failed
+        error: error instanceof Error ? error.message : 'Domain verification failed'
       }
     }
   }
@@ -111,10 +111,10 @@ class StripeEnhancedService {
         customerId: customer.id
       }
     } catch (error) {
-      console.error('Enhanced customer creation failed:', error)
+      console.error('Enhanced customer creation failed: ', error)'
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Customer creation failed
+        error: error instanceof Error ? error.message : 'Customer creation failed'
       }
     }
   }
@@ -135,12 +135,12 @@ class StripeEnhancedService {
         items: [{ price: priceId }],
         payment_behavior: 'default_incomplete',
         payment_settings: {
-          save_default_payment_method: 'on_subscription
+          save_default_payment_method: 'on_subscription'
         },
         expand: ['latest_invoice.payment_intent'],
         metadata: {
           ...metadata,
-          created_via: 'freeflowzee-enhanced
+          created_via: 'freeflowzee-enhanced'
         }
       }
 
@@ -162,10 +162,10 @@ class StripeEnhancedService {
           : null
       }
     } catch (error) {
-      console.error('Subscription creation failed:', error)
+      console.error('Subscription creation failed: ', error)'
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Subscription creation failed
+        error: error instanceof Error ? error.message : 'Subscription creation failed'
       }
     }
   }
@@ -218,10 +218,10 @@ class StripeEnhancedService {
         invoicePdf: finalizedInvoice.invoice_pdf
       }
     } catch (error) {
-      console.error('Invoice creation failed:', error)
+      console.error('Invoice creation failed: ', error)'
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Invoice creation failed
+        error: error instanceof Error ? error.message : 'Invoice creation failed'
       }
     }
   }
@@ -255,10 +255,10 @@ class StripeEnhancedService {
         customerId
       }
     } catch (error) {
-      console.error('Payment method save failed:', error)
+      console.error('Payment method save failed: ', error)'
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Payment method save failed
+        error: error instanceof Error ? error.message : 'Payment method save failed'
       }
     }
   }
@@ -293,10 +293,10 @@ class StripeEnhancedService {
           return { success: true, handled: false }
       }
     } catch (error) {
-      console.error('Webhook processing failed:', error)
+      console.error('Webhook processing failed: ', error)'
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Webhook processing failed
+        error: error instanceof Error ? error.message : 'Webhook processing failed'
       }
     }
   }
@@ -335,35 +335,35 @@ class StripeEnhancedService {
         }
       }
     } catch (error) {
-      console.error('Payment analytics failed:', error)
+      console.error('Payment analytics failed: ', error)'
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Analytics retrieval failed
+        error: error instanceof Error ? error.message : 'Analytics retrieval failed'
       }
     }
   }
 
   // Private helper methods for webhook processing
   private async handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
-    console.log('Payment succeeded:', paymentIntent.id)
+    console.log('Payment succeeded: ', paymentIntent.id)'
     // Add your business logic here
     return { success: true, event: 'payment_succeeded', paymentIntentId: paymentIntent.id }
   }
 
   private async handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
-    console.log('Payment failed:', paymentIntent.id)
+    console.log('Payment failed: ', paymentIntent.id)'
     // Add your business logic here
     return { success: true, event: 'payment_failed', paymentIntentId: paymentIntent.id }
   }
 
   private async handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-    console.log('Invoice payment succeeded:', invoice.id)
+    console.log('Invoice payment succeeded: ', invoice.id)'
     // Add your business logic here
     return { success: true, event: 'invoice_payment_succeeded', invoiceId: invoice.id }
   }
 
   private async handleSubscriptionChanged(subscription: Stripe.Subscription) {
-    console.log('Subscription changed:', subscription.id, subscription.status)
+    console.log('Subscription changed: ', subscription.id, subscription.status)'
     // Add your business logic here
     return { success: true, event: 'subscription_changed', subscriptionId: subscription.id }
   }
@@ -380,7 +380,7 @@ class StripeEnhancedService {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Connection test failed
+        error: error instanceof Error ? error.message : 'Connection test failed'
       }
     }
   }

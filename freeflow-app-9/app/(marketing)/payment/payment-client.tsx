@@ -31,7 +31,7 @@ export default function PaymentClient({ plans }: PaymentClientProps) {
           <Card 
             key={plan.id} 
             className={`cursor-pointer transition-all ${
-              selectedPlan === plan.id ? 'ring-2 ring-blue-500' : ''
+              selectedPlan === plan.id ? 'ring-2 ring-blue-500' : '
             }`}
             onClick={() => setSelectedPlan(plan.id)}
           >

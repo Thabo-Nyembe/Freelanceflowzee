@@ -1,6 +1,6 @@
-'use client
+'use client'
 
-import { track } from '@vercel/analytics
+import { track } from '@vercel/analytics'
 
 interface AnalyticsEvent {
   event_type: string
@@ -98,7 +98,7 @@ class IntegratedAnalyticsClient {
       try {
         track(eventName, enrichedProperties)
       } catch (error) {
-        console.warn('Vercel Analytics tracking failed:', error)
+        console.warn('Vercel Analytics tracking failed: ', error)'
       }
     }
   }
@@ -151,7 +151,7 @@ class IntegratedAnalyticsClient {
       this.trackEvent('error', errorData)
     } catch (error) {
       // Log error but don't throw to prevent error tracking from breaking the app
-      console.error('Failed to track error:', {
+      console.error('Failed to track error: ', {'
         error_type: 'analytics_error',
         message: error instanceof Error ? error.message : 'Unknown error occurred',
         context: {
@@ -181,7 +181,7 @@ class IntegratedAnalyticsClient {
         })
       })
     } catch (error) {
-      console.warn('Internal analytics tracking failed:', error)
+      console.warn('Internal analytics tracking failed: ', error)'
     }
   }
 }

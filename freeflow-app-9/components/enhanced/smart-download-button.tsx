@@ -58,7 +58,7 @@ import { Button } from '@/components/ui/button'
       toast({
         title: "Copy Failed",
         description: "Could not copy link to clipboard.",
-        variant: "destructive
+        variant: 'destructive'
       })
     }
   }
@@ -95,7 +95,7 @@ import { Button } from '@/components/ui/button'
         await trackEvent('social_share', { 
           fileId: file.id, 
           platform,
-          linkType: 'external_share
+          linkType: 'external_share'
         })
         
         // Update metrics
@@ -134,7 +134,7 @@ import { Button } from '@/components/ui/button'
         })
       })
     } catch (error) {
-      console.error('Analytics tracking failed:', error)
+      console.error('Analytics tracking failed: ', error)'
     }
   }
 
@@ -163,7 +163,7 @@ import { Button } from '@/components/ui/button'
   // Format file size
   const formatFileSize = (bytes: number) => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    if (bytes === 0) return '0 Bytes
+    if (bytes === 0) return '0 Bytes'
     const i = Math.floor(Math.log(bytes) / Math.log(1024))
     return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i]
   }
@@ -225,13 +225,13 @@ import { Button } from '@/components/ui/button'
                   <Input
                     value={generateExternalShareLink()}
                     readOnly
-                    className= "flex-1
+                    className="flex-1
                   />
-                  <Button
+                  <Button"
                     size= "icon
-                    variant= "outline
+                    variant="outline
                     onClick={copyExternalLink}
-                  >
+                  >"
                     {copiedLink ? <Check className= "h-4 w-4" /> : <Copy className= "h-4 w-4" />}
                   </Button>
                 </div>
@@ -245,34 +245,34 @@ import { Button } from '@/components/ui/button'
                 <Label>Share on Social Media</Label>
                 <div className= "grid grid-cols-2 gap-2">
                   <Button
-                    variant= "outline
+                    variant="outline"
                     onClick={() => shareToSocial('twitter')}
-                    className= "gap-2
-                  >
+                    className="gap-2
+                  >"
                     <Twitter className= "h-4 w-4" />
                     Twitter
                   </Button>
                   <Button
-                    variant= "outline
+                    variant="outline"
                     onClick={() => shareToSocial('facebook')}
-                    className= "gap-2
-                  >
+                    className="gap-2
+                  >"
                     <Facebook className= "h-4 w-4" />
                     Facebook
                   </Button>
                   <Button
-                    variant= "outline
+                    variant="outline"
                     onClick={() => shareToSocial('linkedin')}
-                    className= "gap-2
-                  >
+                    className="gap-2
+                  >"
                     <Linkedin className= "h-4 w-4" />
                     LinkedIn
                   </Button>
                   <Button
-                    variant= "outline
+                    variant="outline"
                     onClick={() => shareToSocial('email')}
-                    className= "gap-2
-                  >
+                    className="gap-2
+                  >"
                     <Mail className= "h-4 w-4" />
                     Email
                   </Button>

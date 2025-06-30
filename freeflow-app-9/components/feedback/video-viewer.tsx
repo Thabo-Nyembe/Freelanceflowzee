@@ -148,18 +148,18 @@ import React, { useState, useRef, useEffect } from 'react'
       {/* Video Container */}
       <div 
         ref={containerRef}
-        className= "relative w-full h-96 bg-white border-2 border-purple-200 cursor-pointer
-        onClick={handleVideoClick}
-        data-testid= "video-viewer
+        className="relative w-full h-96 bg-white border-2 border-purple-200 cursor-pointer
+        onClick={handleVideoClick}"
+        data-testid="video-viewer
       >
         <video
           ref={videoRef}
-          src={src}
-          className= "w-full h-full object-cover
+          src={src}"
+          className="w-full h-full object-cover
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
           onError={() => {
-            // Show placeholder on error
+            // Show placeholder on error"
             const placeholder = containerRef.current?.querySelector('[data-testid= "video-placeholder"]') as HTMLElement
             if (placeholder) {
               placeholder.style.display = 'flex
@@ -169,9 +169,9 @@ import React, { useState, useRef, useEffect } from 'react'
         
         {/* Fallback placeholder */}
         <div 
-          className= "absolute inset-0 bg-white border-2 border-purple-200 flex items-center justify-center text-gray-900 hidden
-          data-testid= "video-placeholder
-        >
+          className="absolute inset-0 bg-white border-2 border-purple-200 flex items-center justify-center text-gray-900 hidden"
+          data-testid="video-placeholder
+        >"
           <div className= "text-center">
             <div className= "text-4xl mb-2">🎥</div>
             <div>Video: {title}</div>
@@ -185,7 +185,7 @@ import React, { useState, useRef, useEffect } from 'react'
         {positionComments.map((comment, index) => (
           <div
             key={comment.id}
-            className= "absolute w-6 h-6 bg-red-500 border-2 border-white rounded-full flex items-center justify-center text-white text-xs font-bold cursor-pointer hover:bg-red-600 transform -translate-x-1/2 -translate-y-1/2
+            className="absolute w-6 h-6 bg-red-500 border-2 border-white rounded-full flex items-center justify-center text-white text-xs font-bold cursor-pointer hover:bg-red-600 transform -translate-x-1/2 -translate-y-1/2
             style={{
               left: `${comment.position!.x}%`,
               top: `${comment.position!.y}%
@@ -197,7 +197,7 @@ import React, { useState, useRef, useEffect } from 'react'
           </div>
         ))}
 
-        {/* Video Controls Overlay */}
+        {/* Video Controls Overlay */}"
         <div className= "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white/90 to-transparent p-4 border-t border-purple-200">
           <div className= "flex items-center gap-3 text-white">
             <button
@@ -205,8 +205,8 @@ import React, { useState, useRef, useEffect } from 'react'
                 e.stopPropagation()
                 handlePlayPause()
               }}
-              className= "p-2 hover:bg-white/20 rounded-full
-            >
+              className="p-2 hover:bg-white/20 rounded-full
+            >"
               {isPlaying ? <Pause className= "w-5 h-5" /> : <Play className= "w-5 h-5" />}
             </button>
 
@@ -215,8 +215,8 @@ import React, { useState, useRef, useEffect } from 'react'
                 e.stopPropagation()
                 handleMuteToggle()
               }}
-              className= "p-2 hover:bg-white/20 rounded-full
-            >
+              className="p-2 hover:bg-white/20 rounded-full
+            >"
               {isMuted ? <VolumeX className= "w-5 h-5" /> : <Volume2 className= "w-5 h-5" />}
             </button>
 
@@ -230,25 +230,25 @@ import React, { useState, useRef, useEffect } from 'react'
       {/* Timeline */}
       <div className= "p-4">
         <div 
-          className= "relative h-3 bg-gray-300 rounded-full cursor-pointer
-          onClick={handleTimelineClick}
-          data-testid= "timeline
+          className="relative h-3 bg-gray-300 rounded-full cursor-pointer
+          onClick={handleTimelineClick}"
+          data-testid="timeline
         >
           {/* Progress Bar */}
-          <div
-            className= "absolute top-0 left-0 h-full bg-blue-500 rounded-full
-            style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
-            data-testid= "timeline-progress
+          <div"
+            className="absolute top-0 left-0 h-full bg-blue-500 rounded-full
+            style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}"
+            data-testid="timeline-progress
           />
 
           {/* Timeline Markers */}
           {timelineComments.map((comment) => (
             <div
-              key={comment.id}
-              className= "absolute w-3 h-3 bg-red-500 border border-white rounded-full transform -translate-x-1/2 -translate-y-0
+              key={comment.id}"
+              className="absolute w-3 h-3 bg-red-500 border border-white rounded-full transform -translate-x-1/2 -translate-y-0
               style={{
-                left: `${duration > 0 ? (comment.position!.timestamp! / duration) * 100 : 0}%`,
-                top: '0px
+                left: `${duration > 0 ? (comment.position!.timestamp! / duration) * 100 : 0}%`,"
+                top: '0px'
               }}
               data-testid={`timeline-marker-${comment.id}`}
               title={`${formatTime(comment.position!.timestamp!)} - ${comment.content}`}
@@ -268,9 +268,9 @@ import React, { useState, useRef, useEffect } from 'react'
           {validComments.map((comment) => (
             <div 
               key={comment.id} 
-              className= "comment-item bg-white p-3 rounded-lg border border-gray-200
+              className="comment-item bg-white p-3 rounded-lg border border-gray-200
               data-testid={`comment-${comment.id}`}
-            >
+            >"
               <div className= "flex justify-between items-start mb-2">
                 <div className= "flex-1">
                   <div className= "font-medium text-sm text-gray-900">{comment.author}</div>
@@ -289,16 +289,16 @@ import React, { useState, useRef, useEffect } from 'react'
                       setNewComment(comment.content)
                       setShowCommentDialog(false)
                     }}
-                    className= "p-1 text-gray-400 hover:text-blue-500
+                    className="p-1 text-gray-400 hover:text-blue-500
                     data-testid={`edit-comment-${comment.id}`}
-                  >
+                  >"
                     <Edit className= "w-3 h-3" />
                   </button>
                   <button
                     onClick={() => handleDelete(comment.id)}
-                    className= "p-1 text-gray-400 hover:text-red-500
+                    className="p-1 text-gray-400 hover:text-red-500
                     data-testid={`delete-comment-${comment.id}`}
-                  >
+                  >"
                     <Trash2 className= "w-3 h-3" />
                   </button>
                 </div>
@@ -311,13 +311,12 @@ import React, { useState, useRef, useEffect } from 'react'
                   {comment.priority !== 'medium' && (
                     <span className={`px-2 py-1 rounded-full ${
                       comment.priority === 'critical' ? 'bg-red-100 text-red-700' :
-                      comment.priority === 'high' ? 'bg-orange-100 text-orange-700' :
-                      'bg-green-100 text-green-700
+                      comment.priority === 'high' ? 'bg-orange-100 text-orange-700' : "bg-green-100 text-green-700
                     }`}>
                       {comment.priority}
                     </span>
                   )}
-                  {comment.tags?.map(tag => (
+                  {comment.tags?.map(tag => ("
                     <span key={tag} className= "px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
                       {tag}
                     </span>
@@ -361,8 +360,8 @@ import React, { useState, useRef, useEffect } from 'react'
               <textarea
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                placeholder= "Share your feedback...
-                className= "w-full p-3 border border-gray-300 rounded-md resize-vertical min-h-[80px] focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                placeholder="Share your feedback..."
+                className="w-full p-3 border border-gray-300 rounded-md resize-vertical min-h-[80px] focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 data-testid={editingComment ? "edit-content" : "comment-content"}
               />
             </div>
@@ -376,9 +375,9 @@ import React, { useState, useRef, useEffect } from 'react'
                 <select
                   value={selectedPriority}
                   onChange={(e) => setSelectedPriority(e.target.value as any)}
-                  className= "w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                  data-testid= "comment-priority
-                >
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  data-testid="comment-priority
+                >"
                   <option value= "low">Low</option>
                   <option value= "medium">Medium</option>
                   <option value= "high">High</option>
@@ -397,12 +396,12 @@ import React, { useState, useRef, useEffect } from 'react'
                   {availableTags.map(tag => (
                     <button
                       key={tag}
-                      type= "button"
+                      type="button
                       onClick={() => toggleTag(tag)}
                       className={`px-3 py-1 rounded-full text-sm border ${
-                        selectedTags.includes(tag)
+                        selectedTags.includes(tag)"
                           ? 'bg-blue-500 text-white border-blue-500
-                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                       }`}
                       data-testid={`tag-${tag.toLowerCase()}`}
                     >
@@ -421,17 +420,17 @@ import React, { useState, useRef, useEffect } from 'react'
                     setEditingComment(null)
                     setNewComment('')
                   }}
-                  className= "flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50
-                  data-testid= "edit-cancel-btn
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                  data-testid="edit-cancel-btn
                 >
                   Cancel
                 </button>
               )}
               <button
                 onClick={editingComment ? handleEditSubmit : handleCommentSubmit}
-                disabled={!newComment.trim()}
-                className= "flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed
-                type= "submit
+                disabled={!newComment.trim()}"
+                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                type="submit"
                 data-testid={editingComment ? "edit-submit-btn" : "submit-btn"}
               >
                 {editingComment ? 'Update Comment' : 'Add Comment'}
@@ -451,15 +450,15 @@ import React, { useState, useRef, useEffect } from 'react'
       {(showCommentDialog || editingComment) && (
         <>
           <div 
-            className= "fixed inset-0 bg-white/95 backdrop-blur-sm z-40
+            className="fixed inset-0 bg-white/95 backdrop-blur-sm z-40
             onClick={() => {
               setShowCommentDialog(false)
-              setEditingComment(null)
+              setEditingComment(null)"
               setNewComment('')
             }}
           />
           <div 
-            className= "fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-6 w-96 max-w-[90vw] z-50 shadow-lg
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-6 w-96 max-w-[90vw] z-50 shadow-lg"
             data-testid={editingComment ? "edit-dialog" : "comment-dialog"}
           >
             <div className= "flex justify-between items-center mb-4">
@@ -472,8 +471,8 @@ import React, { useState, useRef, useEffect } from 'react'
                   setEditingComment(null)
                   setNewComment('')
                 }}
-                className= "text-gray-400 hover:text-gray-600
-              >
+                className="text-gray-400 hover:text-gray-600
+              >"
                 <X className= "w-5 h-5" />
               </button>
             </div>
@@ -499,8 +498,8 @@ import React, { useState, useRef, useEffect } from 'react'
                 <textarea
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  placeholder= "Share your feedback...
-                  className= "w-full p-3 border border-gray-300 rounded-md resize-vertical min-h-[80px] focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                  placeholder="Share your feedback..."
+                  className="w-full p-3 border border-gray-300 rounded-md resize-vertical min-h-[80px] focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   data-testid={editingComment ? "edit-content" : "comment-content"}
                 />
               </div>
@@ -514,9 +513,9 @@ import React, { useState, useRef, useEffect } from 'react'
                   <select
                     value={selectedPriority}
                     onChange={(e) => setSelectedPriority(e.target.value as any)}
-                    className= "w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                    data-testid= "comment-priority
-                  >
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    data-testid="comment-priority
+                  >"
                     <option value= "low">Low</option>
                     <option value= "medium">Medium</option>
                     <option value= "high">High</option>
@@ -535,12 +534,12 @@ import React, { useState, useRef, useEffect } from 'react'
                     {availableTags.map(tag => (
                       <button
                         key={tag}
-                        type= "button"
+                        type="button
                         onClick={() => toggleTag(tag)}
                         className={`px-3 py-1 rounded-full text-sm border ${
-                          selectedTags.includes(tag)
+                          selectedTags.includes(tag)"
                             ? 'bg-blue-500 text-white border-blue-500
-                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50
+                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                         }`}
                         data-testid={`tag-${tag.toLowerCase()}`}
                       >
@@ -559,7 +558,7 @@ import React, { useState, useRef, useEffect } from 'react'
                     setEditingComment(null)
                     setNewComment('')
                   }}
-                  className= "flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
                   data-testid={editingComment ? "edit-cancel-btn" : "cancel-btn"}
                 >
                   Cancel
@@ -567,7 +566,7 @@ import React, { useState, useRef, useEffect } from 'react'
                 <button
                   onClick={editingComment ? handleEditSubmit : handleCommentSubmit}
                   disabled={!newComment.trim()}
-                  className= "flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed
+                  className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                   data-testid={editingComment ? "edit-submit-btn" : "submit-btn"}
                 >
                   {editingComment ? 'Update Comment' : 'Add Comment'}

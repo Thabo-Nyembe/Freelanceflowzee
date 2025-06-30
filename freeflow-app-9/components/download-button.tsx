@@ -53,9 +53,9 @@ export function DownloadButton({
     <Button
       onClick={handleDownload}
       disabled={isDownloading}
-      data-testid="download-button
+      data-testid="download-button"
       aria-label={`Download ${filename || 'file'}`}
-      className="flex items-center space-x-2
+      className="flex items-center space-x-2"
     >"
       <Download className="h-4 w-4" aria-hidden="true" />
       <span>{isDownloading ? 'Downloading...' : 'Download'}</span>

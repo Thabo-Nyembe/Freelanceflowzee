@@ -72,7 +72,7 @@ const benefits = [
   "Industry trends and expert interviews",
   "Community spotlights and success stories",
   "Free resources and downloadable templates",
-  "Early access to webinars and events"
+  "Early access to webinars and events
 ]
 
 export default function NewsletterPage() {
@@ -120,7 +120,7 @@ export default function NewsletterPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     className="flex-1 bg-white text-gray-900 border-0"
                     required
-                  />
+                  />"
                   <Button type="submit" size="lg" className="bg-orange-500 hover:bg-orange-600 text-white">
                     <Send className="w-4 h-4 mr-2" />
                     Subscribe
@@ -255,7 +255,7 @@ export default function NewsletterPage() {
                   </div>
                   <blockquote className="text-gray-700 mb-4">
                     "The FreeflowZee newsletter has become an essential part of my weekly reading. 
-                    The insights and tips have significantly improved my creative workflow."
+                    The insights and tips have significantly improved my creative workflow.
                   </blockquote>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
@@ -320,7 +320,7 @@ export default function NewsletterPage() {
                     variant="outline" 
                     className="w-full"
                     onClick={() => setShowDemoModal(true)}
-                  >
+                  >"
                     <Eye className="w-4 h-4 mr-2" />
                     Browse Archive
                   </Button>
@@ -341,7 +341,7 @@ export default function NewsletterPage() {
                 size="lg" 
                 className="bg-white text-purple-600 hover:bg-gray-100"
                 onClick={() => setShowDemoModal(true)}
-              >
+              >"
                 <Mail className="w-5 h-5 mr-2" />
                 Subscribe for Free
               </Button>
@@ -350,7 +350,7 @@ export default function NewsletterPage() {
                 size="lg" 
                 className="bg-white text-purple-600 hover:bg-gray-100"
                 onClick={() => setShowDemoModal(true)}
-              >
+              >"
                 <Eye className="w-5 h-5 mr-2" />
                 Read Latest Issue
               </Button>
@@ -363,8 +363,8 @@ export default function NewsletterPage() {
       <DemoModal 
         isOpen={showDemoModal} 
         onClose={() => setShowDemoModal(false)} 
-        title="Newsletter Archive"
-        description="Browse our complete collection of creative insights and industry updates"
+        title="Newsletter Archive
+        description="Browse our complete collection of creative insights and industry updates
       />
     </div>
   )

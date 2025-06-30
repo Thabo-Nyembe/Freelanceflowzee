@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { AlertCircle, RefreshCw, Wifi, WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export function NetworkErrorHandler() {
   const [isOnline, setIsOnline] = useState(true)
@@ -33,24 +33,26 @@ export function NetworkErrorHandler() {
   if (!isOnline) {
     return (
       <div className="fixed bottom-4 right-4 max-w-sm" data-testid="network-error">
-        <Alert variant="destructive" className="flex items-center">
-          <WifiOff className="h-4 w-4 mr-2" />
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="flex items-center p-4">
+            <WifiOff className="h-4 w-4 mr-2 text-red-600" />
           <div className="flex-1">
-            <AlertTitle>Network Error</AlertTitle>
-            <AlertDescription>
+              <CardTitle className="text-sm text-red-800">Network Error</CardTitle>
+              <CardDescription className="text-xs text-red-700">
               You are currently offline. Please check your internet connection.
-            </AlertDescription>
+              </CardDescription>
           </div>
           <Button
-            variant="outline"
-            size="icon"
-            className="ml-2"
-            onClick={handleRetry}
-            data-testid="network-retry-button"
+              variant="outline"
+              size="sm"
+              className="ml-2"
+              onClick={handleRetry}
+              data-testid="network-retry-button"
           >
             <RefreshCw className="h-4 w-4" />
           </Button>
-        </Alert>
+          </CardContent>
+        </Card>
       </div>
     )
   }

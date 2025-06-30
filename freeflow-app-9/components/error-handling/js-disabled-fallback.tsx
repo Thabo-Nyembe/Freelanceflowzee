@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { AlertCircle } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export function JavaScriptDisabledFallback() {
   const [hasJavaScript, setHasJavaScript] = useState(true)

@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog"
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input"
+import { Textarea } from '@/components/ui/textarea"
+import { Label } from '@/components/ui/label"
 import { Image, Video, X } from 'lucide-react'
 
 interface CreatePostDialogProps {
@@ -39,7 +39,7 @@ export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDia
       setSelectedFiles([])
       onOpenChange(false)
     } catch (error) {
-      console.error('Error creating post:', error)
+      console.error('Error creating post: ', error)'
     } finally {
       setIsSubmitting(false)
     }
@@ -56,22 +56,29 @@ export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDia
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
+  <
       <DialogContent className= "sm:max-w-[500px]">
+  <
         <DialogHeader>
+  <
           <DialogTitle>Create Post</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className= "space-y-4">
           <div className= "space-y-2">
+  <
             <Label htmlFor= "title">Title</Label>
+  <
             <Input
               id= "title
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder= "Give your post a title...
+              placeholder="Give your post a title...
             />
-          </div>
+          </div>"
           <div className= "space-y-2">
+  <
             <Label htmlFor= "content">Content</Label>
+  <
             <Textarea
               id= "content
               value={content}
@@ -83,6 +90,7 @@ export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDia
           
           {selectedFiles.length > 0 && (
             <div className= "space-y-2">
+  <
               <Label>Selected Files</Label>
               <div className= "grid grid-cols-2 gap-2">
                 {selectedFiles.map((file, index) => (
@@ -93,11 +101,13 @@ export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDia
                       </div>
                     ) : (
                       <div >
+  <
                         <Video >
                       </div>
                     )}
                     <Button > removeFile(index)}
                     >
+  <
                       <X >
                     </Button>
                   </div>
@@ -107,21 +117,27 @@ export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDia
           )}
 
           <div >
+  <
             <Button > document.getElementById('image-upload')?.click()}
             >
+  <
               <Image >
               Add Image
             </Button>
+  <
             <Button > document.getElementById('video-upload')?.click()}
             >
+  <
               <Video >
               Add Video
             </Button>
             <input onChange={handleFileSelect}>
             <input onChange={handleFileSelect}>
           </div>
+  <
 
           <DialogFooter >
+  <
             <Button disabled={isSubmitting || !content.trim()}>
               {isSubmitting ? 'Creating...' : 'Create Post'}
             </Button>

@@ -46,7 +46,7 @@ export default function CommunityPage() {
                   size="lg" 
                   className="bg-white text-blue-600 hover:bg-gray-100"
                   onClick={() => setShowDemoModal(true)}
-                >
+                >"
                   <Plus className="w-5 h-5 mr-2" />
                   Join Community
                 </Button>
@@ -54,7 +54,7 @@ export default function CommunityPage() {
                   size="lg" 
                   variant="outline" 
                   className="border-white text-white hover:bg-white hover:text-blue-600"
-                >
+                >"
                   <MessageSquare className="w-5 h-5 mr-2" />
                   Start Discussion
                 </Button>
@@ -275,8 +275,8 @@ export default function CommunityPage() {
       <DemoModal 
         isOpen={showDemoModal} 
         onClose={() => setShowDemoModal(false)} 
-        title="Join the Community"
-        description="Connect with fellow creators and start collaborating"
+        title="Join the Community
+        description="Connect with fellow creators and start collaborating
       />
     </div>
   )

@@ -1,4 +1,4 @@
-import { AIAnalysisResult } from '@/components/collaboration/types
+import { AIAnalysisResult } from '@/components/collaboration/types'
 
 export interface TemplateAnalysis {
   overallScore: number

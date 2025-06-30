@@ -25,7 +25,7 @@ export async function GET(
     }
 
     // Check if token is marked as expired (for testing)
-    if (token.includes('expired')) {'
+    if (token.includes('expired')) {
       return NextResponse.json(
         { error: 'Access link has expired', code: 'expired_link' },
         { status: 401 }
@@ -69,7 +69,7 @@ export async function GET(
     })
 
   } catch (error) {
-    console.error('URL validation failed:', error)
+    console.error('URL validation failed: ', error)'
     return NextResponse.json(
       { error: 'URL validation failed' },
       { status: 500 }

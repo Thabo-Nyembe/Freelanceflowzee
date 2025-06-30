@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Input } from '@/components/ui/input"
 import { Upload } from 'lucide-react'
 
 interface FileUploadProps {
@@ -56,9 +56,9 @@ export function FileUpload({
 
   return (
     <div
-      data-testid="file-upload
-      className={`p-6 border-2 border-dashed rounded-lg ${
-        isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300
+      data-testid="file-upload"
+      className={`p-6 border-2 border-dashed rounded-lg ${"
+        isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'
       }`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -67,6 +67,7 @@ export function FileUpload({
       aria-label="File upload area
     >
       <div className="text-center">
+  <
         <Upload className="mx-auto h-12 w-12 text-gray-400" aria-hidden="true" />
         <div className="mt-4">
           <label htmlFor="file-upload" className="cursor-pointer">
@@ -74,14 +75,15 @@ export function FileUpload({
               Drop a file here, or{' '}
               <span className="text-indigo-600 hover:text-indigo-500">browse</span>
             </span>
+  <
             <Input
               id="file-upload
               name="file-upload
-              type="file
-              className="sr-only
-              accept={accept}
+              type="file"
+              className="sr-only"
+              accept={accept}"
               onChange={handleFileInput}"
-              data-testid="file-input
+              data-testid="file-input"
               aria-label="File input
             />
           </label>

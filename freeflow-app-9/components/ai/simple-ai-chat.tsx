@@ -1,52 +1,74 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useFreeflowAI, ProjectAnalysisInput, CreativeAssetInput, ClientCommunicationInput, TimeBudgetInput } from '@/hooks/use-freeflow-ai';
+import { Send, Loader2, Bot, User, Zap, Brain, Palette, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Brain, 
-  Palette, 
-  MessageSquare, 
-  Clock, 
-  Send,
-  Bot,
-  User,
-  Loader2,
-  Target,
-  TrendingUp,
-  RefreshCw,
-  BarChart3,
-} from 'lucide-react';
-import { UIMessage } from '@ai-sdk/react';
 
 interface Message {
-  role: 'user' | 'assistant' | 'system';
+  role: 'user' | 'assistant';
   content: string;
   id: string;
-  timestamp?: Date;
-  toolInvocations?: any[];
+  timestamp: Date;
+  metadata?: {
+    duration?: number;
+    toolsUsed?: string[];
+    model?: string;
+  };
 }
+
+interface PerformanceMetrics {
+  sessionDuration: number;
+  messageCount: number;
+  toolsUsed: number;
+  uniqueTools: number;
+  errorRate: number;
+  avgResponseTime: number;
+}
+
+const quickActions = [
+  {
+    icon: Zap,
+    label: '🎯 Project Analysis',
+    prompt: 'Analyze my website redesign project with a $5000 budget and 8-week timeline. The client wants a modern e-commerce platform.',
+    color: 'bg-blue-50 hover:bg-blue-100 border-blue-200'
+  },
+  {
+    icon: Palette,
+    label: '🎨 Creative Assets',
+    prompt: 'Generate a modern color palette and typography suggestions for a technology startup targeting young professionals.',
+    color: 'bg-purple-50 hover:bg-purple-100 border-purple-200'
+  },
+  {
+    icon: Brain,
+    label: '📧 Client Communication',
+    prompt: 'Create a professional project update email for client Sarah about her branding project progress.',
+    color: 'bg-green-50 hover:bg-green-100 border-green-200'
+  },
+  {
+    icon: Clock,
+    label: '⏰ Time Optimization',
+    prompt: 'Help me optimize my 40-hour work week across 3 projects with different priorities and deadlines.',
+    color: 'bg-orange-50 hover:bg-orange-100 border-orange-200'
+  }
+];
 
 export default function SimpleAIChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [isStreaming, setIsStreaming] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [metrics, setMetrics] = useState<PerformanceMetrics>({
+    sessionDuration: 0,
+    messageCount: 0,
+    toolsUsed: 0,
+    uniqueTools: 0,
+    errorRate: 0,
+    avgResponseTime: 0
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const {
-    isLoading,
-    error,
-    analyzeProject,
-    generateCreativeAssets,
-    generateClientCommunication,
-    optimizeTimeBudget,
-    chatWithContext,
-    resetConversation,
-    performanceMetrics,
-    generateText,
-    streamText,
-  } = useFreeflowAI();
+  const sessionStartTime = useRef<Date>(new Date());
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -56,312 +78,303 @@ export default function SimpleAIChat() {
     scrollToBottom();
   }, [messages]);
 
-  const createMessage = (role: Message['role'], content: string): Message => ({
-    id: Math.random().toString(36).substring(7),
-    role,
-    content,
-    timestamp: new Date(),
-  });
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const duration = Math.floor((Date.now() - sessionStartTime.current.getTime()) / 1000);
+      setMetrics(prev => ({ ...prev, sessionDuration: duration }));
+    }, 1000);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    return () => clearInterval(interval);
+  }, []);
 
-    const userMessage = createMessage('user', input);
+  const sendMessage = async (messageContent: string) => {
+    if (!messageContent.trim() || isLoading) return;
+
+    const userMessage: Message = {
+      role: 'user',
+      content: messageContent,
+      id: Date.now().toString(),
+      timestamp: new Date()
+    };
+
     setMessages(prev => [...prev, userMessage]);
     setInput('');
+    setIsLoading(true);
+
+    const requestStartTime = Date.now();
 
     try {
-      if (isStreaming) {
-        // Streaming mode
-        let streamedContent = '';
-        const assistantMessage = createMessage('assistant', '');
-        setMessages(prev => [...prev, assistantMessage]);
+      const response = await fetch('/api/ai/enhanced-stream', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [...messages, userMessage].map(m => ({
+            role: m.role,
+            content: m.content
+          }))
+        }),
+      });
 
-        await streamText(
-          input,
-          {
-            system: 'You are a helpful AI assistant.',
-            temperature: 0.7,
-          },
-          (chunk) => {
-            streamedContent += chunk;
-            setMessages(prev => [
-              ...prev.slice(0, -1),
-              { ...assistantMessage, content: streamedContent }
-            ]);
-          }
-        );
-      } else {
-        // Non-streaming mode
-        const response = await generateText(input, {
-          system: 'You are a helpful AI assistant.',
-          temperature: 0.7,
-        });
-
-        setMessages(prev => [...prev, createMessage('assistant', response.text)]);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    } catch (err) {
-      console.error('Error:', err);
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('No response body');
+
+      let assistantMessage = '';
+      let toolsUsed: string[] = [];
+      let model = '';
+
+      const assistantMessageId = (Date.now() + 1).toString();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = new TextDecoder().decode(value);
+        const lines = chunk.split('\n').filter(line => line.trim());
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              
+              if (data.type === 'text-delta') {
+                assistantMessage += data.textDelta;
+                setMessages(prev => {
+                  const updated = [...prev];
+                  const lastMessage = updated[updated.length - 1];
+                  if (lastMessage && lastMessage.role === 'assistant') {
+                    lastMessage.content = assistantMessage;
+                  } else {
+                    updated.push({
+                      role: 'assistant',
+                      content: assistantMessage,
+                      id: assistantMessageId,
+                      timestamp: new Date()
+                    });
+                  }
+                  return updated;
+                });
+              }
+
+              if (data.type === 'tool-call') {
+                toolsUsed.push(data.toolName);
+              }
+
+              if (data.type === 'finish') {
+                model = data.model || 'gpt-4o';
+                const responseTime = Date.now() - requestStartTime;
+                
+                setMessages(prev => {
+                  const updated = [...prev];
+                  const lastMessage = updated[updated.length - 1];
+                  if (lastMessage && lastMessage.role === 'assistant') {
+                    lastMessage.metadata = {
+                      duration: responseTime,
+                      toolsUsed,
+                      model
+                    };
+                  }
+                  return updated;
+                });
+
+                // Update metrics
+                setMetrics(prev => ({
+                  sessionDuration: prev.sessionDuration,
+                  messageCount: prev.messageCount + 2,
+                  toolsUsed: prev.toolsUsed + toolsUsed.length,
+                  uniqueTools: new Set([...Array.from({length: prev.uniqueTools}), ...toolsUsed]).size,
+                  errorRate: prev.errorRate,
+                  avgResponseTime: Math.round((prev.avgResponseTime * (prev.messageCount / 2) + responseTime) / ((prev.messageCount / 2) + 1))
+                }));
+              }
+            } catch (e) {
+              console.log('Failed to parse JSON: ', line);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error: ', error);
+      const errorMessage: Message = {
+        role: 'assistant',
+        content: 'Sorry, I encountered an error. Please try again.',
+        id: (Date.now() + 1).toString(),
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+
+      setMetrics(prev => ({
+        ...prev,
+        errorRate: (prev.errorRate * prev.messageCount + 1) / (prev.messageCount + 1)
+      }));
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleQuickAction = (actionType: string) => {
-    switch (actionType) {
-      case 'project-analysis':
-        const projectInput: ProjectAnalysisInput = {
-          projectType: 'website',
-          budget: 5000,
-          timeline: '6 weeks',
-          clientRequirements: 'Modern e-commerce website with payment integration and mobile responsiveness',
-        };
-        analyzeProject(projectInput);
-        break;
-
-      case 'creative-assets':
-        const creativeInput: CreativeAssetInput = {
-          assetType: 'color-palette',
-          style: 'modern minimalist',
-          industry: 'technology',
-          targetAudience: 'young professionals',
-        };
-        generateCreativeAssets(creativeInput);
-        break;
-
-      case 'client-communication':
-        const communicationInput: ClientCommunicationInput = {
-          communicationType: 'proposal',
-          projectContext: 'Brand redesign project',
-          clientName: 'Tech Startup Inc.',
-          urgency: 'medium',
-        };
-        generateClientCommunication(communicationInput);
-        break;
-
-      case 'time-budget':
-        const timeBudgetInput: TimeBudgetInput = {
-          availableHours: 40,
-          projectCount: 3,
-          deadlines: ['2024-02-15', '2024-03-01', '2024-03-15'],
-          priorities: ['high', 'medium', 'urgent'],
-        };
-        optimizeTimeBudget(timeBudgetInput);
-        break;
-
-      default:
-        chatWithContext('Hello! Can you help me with my freelance work?');
-    }
+  const handleQuickAction = (prompt: string) => {
+    sendMessage(prompt);
   };
 
-  const quickActions = [
-    {
-      id: 'project-analysis',
-      icon: Brain,
-      label: 'Analyze Project',
-      description: 'Get comprehensive project analysis',
-      gradient: 'from-blue-500 to-purple-600',
-    },
-    {
-      id: 'creative-assets',
-      icon: Palette,
-      label: 'Generate Assets',
-      description: 'Create design suggestions',
-      gradient: 'from-purple-500 to-pink-600',
-    },
-    {
-      id: 'client-communication',
-      icon: MessageSquare,
-      label: 'Draft Communication',
-      description: 'Professional client emails',
-      gradient: 'from-green-500 to-blue-600',
-    },
-    {
-      id: 'time-budget',
-      icon: Clock,
-      label: 'Optimize Timeline',
-      description: 'Smart resource allocation',
-      gradient: 'from-orange-500 to-red-600',
-    },
-  ];
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
-    <div className="flex flex-col h-full max-h-[800px] bg-gradient-to-br from-blue-50 via-purple-50 to-green-50 rounded-lg border">
+    <div className="h-full flex flex-col bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40">
       {/* Header */}
-      <div className="border-b bg-white/80 backdrop-blur-sm p-4 rounded-t-lg">
+      <div className="border-b bg-white/80 backdrop-blur-xl px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <Brain className="w-6 h-6 text-white" />
+            <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg">
+              <Bot className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">FreeflowZee AI Assistant</h2>
-              <p className="text-sm text-gray-600">Enhanced with streaming AI SDK 5.0</p>
+              <h1 className="text-xl font-semibold text-gray-900">FreeFlowZee AI Assistant</h1>
+              <p className="text-sm text-gray-600">AI-powered freelance workflow optimization</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={resetConversation}
-              className="text-gray-600 hover:text-gray-800"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </Button>
-            <Badge variant="outline" className="text-xs">
-              <BarChart3 className="w-3 h-3 mr-1" />
-              {performanceMetrics.messageCount} msgs
-            </Badge>
+          
+          {/* Performance Metrics */}
+          <div className="flex gap-4 text-sm">
+            <div className="text-center">
+              <div className="font-semibold text-blue-600">{formatTime(metrics.sessionDuration)}</div>
+              <div className="text-gray-500">Session</div>
+            </div>
+            <div className="text-center">
+              <div className="font-semibold text-purple-600">{metrics.messageCount}</div>
+              <div className="text-gray-500">Messages</div>
+            </div>
+            <div className="text-center">
+              <div className="font-semibold text-green-600">{metrics.uniqueTools}</div>
+              <div className="text-gray-500">Tools Used</div>
+            </div>
+            <div className="text-center">
+              <div className="font-semibold text-orange-600">{metrics.avgResponseTime}ms</div>
+              <div className="text-gray-500">Avg Response</div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Performance Metrics */}
-      {performanceMetrics.messageCount > 0 && (
-        <div className="px-4 py-2 bg-white/50 border-b text-xs text-gray-600">
-          <div className="flex justify-between items-center">
-            <span>Session: {performanceMetrics.sessionDuration}s</span>
-            <span>Tools used: {performanceMetrics.uniqueTools}</span>
-            <span>Avg response: {performanceMetrics.avgResponseTime}s</span>
-          </div>
-        </div>
-      )}
-
       {/* Quick Actions */}
       {messages.length === 0 && (
-        <div className="p-4 border-b bg-white/50">
-          <div className="grid grid-cols-2 gap-3">
-            {quickActions.map((action) => (
-              <Button
-                key={action.id}
-                variant="outline"
-                onClick={() => handleQuickAction(action.id)}
-                disabled={isLoading}
-                className={`h-auto p-4 flex flex-col items-center gap-2 hover:bg-gradient-to-r hover:${action.gradient} hover:text-white transition-all duration-200`}
+        <div className="p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions for Freelancers</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {quickActions.map((action, index) => (
+              <Card 
+                key={index} 
+                className={`cursor-pointer transition-all duration-200 border ${action.color}`}
+                onClick={() => handleQuickAction(action.prompt)}
               >
-                <action.icon className="w-5 h-5" />
-                <div className="text-center">
-                  <div className="font-medium text-sm">{action.label}</div>
-                  <div className="text-xs opacity-70">{action.description}</div>
-                </div>
-              </Button>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <action.icon className="w-5 h-5 text-gray-700" />
+                    <span className="font-medium text-gray-900">{action.label}</span>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 && (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Target className="w-8 h-8 text-blue-600" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Ready to enhance your workflow?</h3>
-            <p className="text-gray-600 mb-4">
-              Use the quick actions above or start a conversation below. I can help with project analysis, 
-              creative assets, client communication, and time management.
-            </p>
-            <div className="flex flex-wrap justify-center gap-2 mt-4">
-              <Badge variant="secondary" className="text-xs">🚀 AI SDK 5.0</Badge>
-              <Badge variant="secondary" className="text-xs">⚡ Streaming</Badge>
-              <Badge variant="secondary" className="text-xs">🔧 Tools Ready</Badge>
-            </div>
-          </div>
-        )}
-
+      <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages.map((message) => (
           <div
             key={message.id}
             className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            <div className={`max-w-[80%] ${message.role === 'user' ? 'order-2' : 'order-1'}`}>
-              {message.role === 'user' ? (
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 rounded-lg shadow-sm">
-                  <p className="text-sm">{message.content}</p>
-                  <div className="text-xs opacity-75 mt-1">
-                    {message.timestamp?.toLocaleTimeString()}
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-white border p-4 rounded-lg shadow-sm">
-                  <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
-                    {message.content}
-                  </p>
-                  <div className="text-xs text-gray-500 mt-2 flex items-center justify-between">
-                    <span>{message.timestamp?.toLocaleTimeString()}</span>
-                    {message.toolInvocations && (
-                      <Badge variant="outline" className="text-xs">
-                        <TrendingUp className="w-3 h-3 mr-1" />
-                        Tool used
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+            {message.role === 'assistant' && (
+              <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg w-8 h-8 flex items-center justify-center flex-shrink-0">
+                <Bot className="w-4 h-4" />
+              </div>
+            )}
             
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-              message.role === 'user' 
-                ? 'order-1 bg-gradient-to-br from-blue-600 to-purple-600' 
-                : 'order-2 bg-gradient-to-br from-green-600 to-blue-600'
-            }`}>
-              {message.role === 'user' ? (
-                <User className="w-4 h-4 text-white" />
-              ) : (
-                <Bot className="w-4 h-4 text-white" />
-              )}
+            <div className={`max-w-3xl ${message.role === 'user' ? 'order-first' : ''}`}>
+              <div
+                className={`p-4 rounded-2xl ${
+                  message.role === 'user'
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
+                    : 'bg-white shadow-sm border'
+                }`}
+              >
+                <div className="whitespace-pre-wrap">{message.content}</div>
+                
+                {message.metadata && (
+                  <div className="mt-3 pt-3 border-t border-gray-200 flex flex-wrap gap-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {message.metadata.model}
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {message.metadata.duration}ms
+                    </Badge>
+                    {message.metadata.toolsUsed?.map((tool, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        🛠️ {tool}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              <div className="text-xs text-gray-500 mt-1">
+                {message.timestamp.toLocaleTimeString()}
+              </div>
             </div>
+
+            {message.role === 'user' && (
+              <div className="p-2 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-lg w-8 h-8 flex items-center justify-center flex-shrink-0">
+                <User className="w-4 h-4" />
+              </div>
+            )}
           </div>
         ))}
-
+        
         {isLoading && (
           <div className="flex gap-3 justify-start">
-            <div className="w-8 h-8 bg-gradient-to-br from-green-600 to-blue-600 rounded-full flex items-center justify-center">
-              <Bot className="w-4 h-4 text-white" />
+            <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg w-8 h-8 flex items-center justify-center flex-shrink-0">
+              <Bot className="w-4 h-4" />
             </div>
-            <div className="bg-white border p-3 rounded-lg shadow-sm">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="bg-white shadow-sm border p-4 rounded-2xl">
+              <div className="flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                AI is thinking...
+                <span className="text-gray-600">AI is thinking...</span>
               </div>
             </div>
           </div>
         )}
-
-        {error && (
-          <div className="flex gap-3 justify-start">
-            <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-              <Bot className="w-4 h-4 text-white" />
-            </div>
-            <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
-              <div className="text-sm text-red-600">
-                Error: {error}
-              </div>
-            </div>
-          </div>
-        )}
+        
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
-      <div className="border-t bg-white/80 backdrop-blur-sm p-4 rounded-b-lg">
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <input
+      <div className="border-t bg-white/80 backdrop-blur-xl p-6">
+        <div className="flex gap-3">
+          <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask me anything about your projects, clients, or creative workflow..."
-            className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            placeholder="Ask me about project analysis, creative assets, client communication, or time optimization..."
+            className="flex-1"
+            onKeyPress={(e) => e.key === 'Enter' && sendMessage(input)}
             disabled={isLoading}
           />
-          <Button 
-            type="submit" 
+          <Button
+            onClick={() => sendMessage(input)}
             disabled={isLoading || !input.trim()}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-4"
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
           >
             <Send className="w-4 h-4" />
           </Button>
-        </form>
-        <div className="text-xs text-gray-500 mt-2 text-center">
-          Powered by AI SDK 5.0 • Enhanced streaming • Advanced tool integration
         </div>
       </div>
     </div>

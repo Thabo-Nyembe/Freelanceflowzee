@@ -17,28 +17,28 @@ export function DemoEnhancedOverview() {
       value: dashboardMetrics?.totalRevenue || '$45,630',
       change: '+12.5%',
       icon: DollarSign,
-      color: 'text-green-600
+      color: 'text-green-600'
     },
     {
       title: 'Active Projects',
       value: dashboardMetrics?.activeProjects || '12',
       change: '+3',
       icon: FileText,
-      color: 'text-blue-600
+      color: 'text-blue-600'
     },
     {
       title: 'Community Engagement',
       value: communityMetrics?.totalEngagement || '1,247',
       change: '+8.2%',
       icon: Users,
-      color: 'text-purple-600
+      color: 'text-purple-600'
     },
     {
       title: 'Completion Rate',
       value: dashboardMetrics?.completionRate || '94.2%',
       change: '+2.1%',
       icon: TrendingUp,
-      color: 'text-emerald-600
+      color: 'text-emerald-600'
     }
   ];
 

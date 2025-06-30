@@ -77,7 +77,7 @@ export function ThemeProvider({
         setTheme(storedTheme)
       }
     } catch (error) {
-      console.warn('Failed to load theme from localStorage:', error)
+      console.warn('Failed to load theme from localStorage: ', error)
     }
     setMounted(true)
   }, [storageKey])
@@ -115,7 +115,7 @@ export function ThemeProvider({
     try {
       localStorage.setItem(storageKey, newTheme)
     } catch (error) {
-      console.warn('Failed to save theme to localStorage:', error)
+      console.warn('Failed to save theme to localStorage: ', error)
     }
     setTheme(newTheme)
   }

@@ -1,8 +1,8 @@
-import { SupabaseClient } from '@supabase/supabase-js
-import OpenAI from 'openai
-import Anthropic from '@anthropic-ai/sdk
-import Replicate from 'replicate
-import { GoogleGenerativeAI } from '@google/generative-ai
+import { SupabaseClient } from '@supabase/supabase-js'
+import OpenAI from 'openai'
+import Anthropic from '@anthropic-ai/sdk'
+import Replicate from 'replicate'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
 export interface AIGenerationSettings {
   creativity: number
@@ -186,7 +186,7 @@ export class AIService {
         type,
         prompt,
         settings,
-        status: 'generating
+        status: 'generating'
       })
       .select()
       .single()
@@ -216,7 +216,7 @@ export class AIService {
                 n: 1,
                 size: settings.quality === 'premium' ? "1024x1024" : "512x512",
                 quality: settings.quality === 'draft' ? "standard" : "hd",
-                style: settings.creativity > 0.7 ? "vivid" : "natural
+                style: settings.creativity > 0.7 ? "vivid" : 'natural'
               })
               const imageUrl = response.data?.[0]?.url
               if (!imageUrl) {
@@ -391,10 +391,10 @@ export class AIService {
       }
       return updatedGeneration
     } catch (error) {
-      console.error('Error in AI generation:', error)
+      console.error('Error in AI generation: ', error)'
       
       // Update record with error status
-      const errorMessage = error instanceof AIServiceError ? error.message : 'Unknown error occurred
+      const errorMessage = error instanceof AIServiceError ? error.message : 'Unknown error occurred'
       await this.supabase
         .from('ai_generations')
         .update({
@@ -677,7 +677,7 @@ Provide general analysis including:
         user_id: user.id,
         file_id: fileId,
         type,
-        status: 'analyzing
+        status: 'analyzing'
       })
       .select()
       .single()
@@ -733,7 +733,7 @@ Provide general analysis including:
         .from('ai_analysis')
         .update({
           results,
-          status: 'complete
+          status: 'complete'
         })
         .eq('id', analysis.id)
         .select()
@@ -746,10 +746,10 @@ Provide general analysis including:
       }
       return updatedAnalysis
     } catch (error) {
-      console.error('Error in file analysis:', error)
+      console.error('Error in file analysis: ', error)'
       
       // Update record with error status
-      const errorMessage = error instanceof AIServiceError ? error.message : 'Unknown error occurred
+      const errorMessage = error instanceof AIServiceError ? error.message : 'Unknown error occurred'
       await this.supabase
         .from('ai_analysis')
         .update({

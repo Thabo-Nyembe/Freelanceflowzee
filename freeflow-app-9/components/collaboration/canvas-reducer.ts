@@ -1,38 +1,38 @@
-import { CanvasState, CanvasObject, CursorPosition } from './canvas-types
+import { CanvasState, CanvasObject, CursorPosition } from './canvas-types'
 
 // Action types
 interface AddObjectAction {
-  type: 'ADD_OBJECT
+  type: 'ADD_OBJECT'
   object: CanvasObject
 }
 
 interface UpdateObjectAction {
-  type: 'UPDATE_OBJECT
+  type: 'UPDATE_OBJECT'
   object: CanvasObject
 }
 
 interface DeleteObjectAction {
-  type: 'DELETE_OBJECT
+  type: 'DELETE_OBJECT'
   objectId: string
 }
 
 interface SelectObjectAction {
-  type: 'SELECT_OBJECT
+  type: 'SELECT_OBJECT'
   objectId: string
 }
 
 interface UpdateCursorAction {
-  type: 'UPDATE_CURSOR
+  type: 'UPDATE_CURSOR'
   cursor: CursorPosition
 }
 
 interface SetTemplateAction {
-  type: 'SET_TEMPLATE
+  type: 'SET_TEMPLATE'
   template: CanvasState['selectedTemplate']
 }
 
 interface SetTemplateAnalysisAction {
-  type: 'SET_TEMPLATE_ANALYSIS
+  type: 'SET_TEMPLATE_ANALYSIS'
   analysis: CanvasState['templateAnalysis']
 }
 

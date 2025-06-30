@@ -37,7 +37,7 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
       const doc = await context7Client.getLibraryDocs(library, topic);
       setLibraryDoc(doc);
     } catch (error) {
-      console.error('Failed to load library docs:', error);
+      console.error('Failed to load library docs: ', error);'
     } finally {
       setLoading(false);
     }
@@ -49,7 +49,7 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
       const snippets = await context7Client.getQuickHelp(task);
       setQuickHelp(snippets);
     } catch (error) {
-      console.error('Failed to get quick help:', error);
+      console.error('Failed to get quick help: ', error);'
     } finally {
       setLoading(false);
     }
@@ -64,7 +64,7 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
     return (
       <Button
         onClick={onToggle}
-        className= "fixed bottom-4 right-4 z-50 shadow-lg
+        className="fixed bottom-4 right-4 z-50 shadow-lg"
         size= "sm
       >
         <Book className= "h-4 w-4 mr-2" />
@@ -104,7 +104,7 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
                 <select
                   value={selectedLibrary}
                   onChange={(e) => setSelectedLibrary(e.target.value)}
-                  className= "w-full p-2 border rounded-md
+                  className="w-full p-2 border rounded-md
                 >
                   {libraries.map((lib) => (
                     <option key={lib} value={lib}>
@@ -114,15 +114,15 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
                 </select>
               </div>
 
-              {/* Topic Input */}
+              {/* Topic Input */}"
               <div className= "space-y-2">
                 <label className= "text-sm font-medium">Topic (optional):</label>
                 <div className= "flex gap-2">
                   <Input
-                    placeholder= "e.g. authentication, routing...
+                    placeholder="e.g. authentication, routing...
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyPress={(e) => {
+                    onKeyPress={(e) => {"
                       if (e.key === 'Enter') {
                         loadLibraryDocs(selectedLibrary, searchQuery);
                       }
@@ -177,9 +177,9 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
                                       <CardTitle className= "text-sm">{snippet.title}</CardTitle>
                                       <Button
                                         size= "sm
-                                        variant= "ghost
+                                        variant="ghost
                                         onClick={() => copyToClipboard(snippet.code)}
-                                      >
+                                      >"
                                         <Copy className= "h-3 w-3" />
                                       </Button>
                                     </div>
@@ -217,10 +217,10 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
             <div className= "space-y-4">
               <div className= "flex gap-2">
                 <Input
-                  placeholder= "Search across all libraries...
+                  placeholder="Search across all libraries...
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                />
+                />"
                 <Button size= "sm" disabled={loading}>
                   <Search className= "h-4 w-4" />
                 </Button>
@@ -240,11 +240,11 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
                   {quickHelpTasks.map((task) => (
                     <Button
                       key={task}
-                      variant= "outline
+                      variant="outline"
                       size= "sm
                       onClick={() => handleQuickHelp(task)}
                       disabled={loading}
-                      className= "justify-start
+                      className="justify-start
                     >
                       {task}
                     </Button>
@@ -252,7 +252,7 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
                 </div>
               </div>
 
-              {quickHelp.length > 0 && (
+              {quickHelp.length > 0 && ("
                 <div className= "flex-1 overflow-hidden">
                   <ScrollArea className= "h-full">
                     <div className= "space-y-3">
@@ -263,9 +263,9 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
                               <CardTitle className= "text-sm">{snippet.title}</CardTitle>
                               <Button
                                 size= "sm
-                                variant= "ghost
+                                variant="ghost
                                 onClick={() => copyToClipboard(snippet.code)}
-                              >
+                              >"
                                 <Copy className= "h-3 w-3" />
                               </Button>
                             </div>

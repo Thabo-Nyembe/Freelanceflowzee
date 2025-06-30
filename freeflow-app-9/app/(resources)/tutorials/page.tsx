@@ -131,13 +131,13 @@ export default function TutorialsPage() {
               className="pl-10"
             />
           </div>
-          
+          "
           <div className="flex flex-wrap justify-center gap-4">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="px-4 py-2 border rounded-lg bg-white"
-            >
+            >"
               <option value="all">All Categories</option>
               {tutorialCategories.map(category => (
                 <option key={category.id} value={category.id}>
@@ -150,7 +150,7 @@ export default function TutorialsPage() {
               value={selectedLevel}
               onChange={(e) => setSelectedLevel(e.target.value)}
               className="px-4 py-2 border rounded-lg bg-white"
-            >
+            >"
               <option value="all">All Levels</option>
               <option value="beginner">Beginner</option>
               <option value="intermediate">Intermediate</option>

@@ -1,6 +1,6 @@
 'use client'
 
-import Image from 'next/image
+import Image from 'next/image'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 
@@ -157,7 +157,7 @@ export function OptimizedAvatar({
       height={size}
       quality={90}
       priority={false}
-      placeholder= "blur
+      placeholder="blur"
       className={cn("rounded-full object-cover", className)}
       {...props}
     />

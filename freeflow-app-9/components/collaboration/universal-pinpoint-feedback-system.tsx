@@ -1,6 +1,13 @@
-'use client'
+'use client';
 
-import React, { useState, useRef, useCallback, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+// Universal pinpoint feedback system
+// export { UniversalPinpointFeedback } from './universal-pinpoint-feedback';
+
+export function UniversalPinpointFeedbackSystem() {
+  return (
+    <div className="p-6">
+      <h2 className="text-xl font-bold mb-4">Universal Pinpoint Feedback</h2>
+      <p>Advanced feedback system coming soon...</p>
+    </div>
+  );
+}

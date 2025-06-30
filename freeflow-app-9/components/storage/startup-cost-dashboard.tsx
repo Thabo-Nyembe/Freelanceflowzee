@@ -58,7 +58,7 @@ export function StartupCostDashboard() {
       
       setLoading(false);
     } catch (error) {
-      console.error('Failed to fetch cost data:', error);
+      console.error('Failed to fetch cost data: ', error);'
       setLoading(false);
     }
   };
@@ -81,7 +81,7 @@ export function StartupCostDashboard() {
       } : null);
       
     } catch (error) {
-      console.error('Optimization failed:', error);
+      console.error('Optimization failed: ', error);'
     } finally {
       setOptimizing(false);
     }
@@ -131,8 +131,8 @@ export function StartupCostDashboard() {
         </div>
         <Badge 
           variant={budgetStatus === 'safe' ? 'default' : budgetStatus === 'warning' ? 'secondary' : 'destructive'}
-          className= "text-sm
-        >
+          className="text-sm
+        >"
           {budgetStatus === 'safe' ? '✅ Budget Healthy' : 
            budgetStatus === 'warning' ? '⚠️ Approaching Limit' : 
            '🚨 Over Budget'}
@@ -199,10 +199,10 @@ export function StartupCostDashboard() {
               <Button 
                 size= "sm" 
                 variant= "outline" 
-                className= "mt-2 text-xs
+                className="mt-2 text-xs
                 onClick={runOptimization}
                 disabled={optimizing}
-              >
+              >"
                 {optimizing ? 'Optimizing...' : 'Optimize Now'}
               </Button>
             )}
@@ -271,8 +271,8 @@ export function StartupCostDashboard() {
               {costData.recommendations.map((recommendation, index) => (
                 <div 
                   key={index}
-                  className= "flex items-start gap-3 p-3 rounded-lg bg-muted/50
-                >
+                  className="flex items-start gap-3 p-3 rounded-lg bg-muted/50
+                >"
                   <div className= "text-sm flex-1">
                     {recommendation}
                   </div>

@@ -38,8 +38,8 @@ export function DynamicSEO({
     // Add structured data if provided
     if (structuredData) {
       const script = document.createElement('script')
-      script.type = 'application/ld+json
-      script.textContent = JSON.stringify(structuredData)
+      script.type="application/ld+json
+      script.textContent = JSON.stringify(structuredData)"
       script.id = 'dynamic-structured-data
       
       // Remove existing dynamic structured data
@@ -153,7 +153,7 @@ export function generateProductStructuredData(product: {
   
   return {
     "@context": "https://schema.org", "@type": "Product", "name": product.name, "description": product.description, "image": product.image || `${baseUrl}/images/homepage-mockup.jpg`, "brand": {
-      "@type": "Brand", "name": "FreeflowZee
+      "@type": "Brand", "name": 'FreeflowZee'
     }, "offers": {
       "@type": "Offer", "price": product.price || "0",
       "priceCurrency": product.currency || "USD", "availability": `https://schema.org/${product.availability || 'InStock'}

@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import { MessageSquare } from "lucide-react"
-import { CommentDialog } from "./comment-dialog
+import { useState } from 'react'
+import { MessageSquare } from 'lucide-react'
+import { CommentDialog } from './comment-dialog'
 
 interface CodeViewerProps {
   file: Record<string, unknown>

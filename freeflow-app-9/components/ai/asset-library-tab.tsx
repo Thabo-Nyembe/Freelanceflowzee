@@ -10,34 +10,34 @@ import { useState } from 'react'
         <div className= "relative flex-1 max-w-md">
           <Search className= "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder= "Search assets...
+            placeholder="Search assets...
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className= "pl-10
-            data-testid= "asset-search-input
+            onChange={(e) => setSearchQuery(e.target.value)}"
+            className="pl-10"
+            data-testid="asset-search-input
           />
-        </div>
+        </div>"
         <div className= "flex space-x-2">
           <div>
             <input
-              type= "file
+              type="file"
               id= "asset-upload
-              className= "hidden
-              onChange={handleFileChange}
-              data-testid= "asset-upload-input
+              className="hidden
+              onChange={handleFileChange}"
+              data-testid="asset-upload-input
             />
-            <Button
+            <Button"
               onClick={() => document.getElementById('asset-upload')?.click()}
-              data-testid= "upload-asset-btn
-            >
+              data-testid="upload-asset-btn
+            >"
               <Upload className= "h-4 w-4 mr-2" />
               Upload Asset
             </Button>
           </div>
           <Button
             onClick={onExportAll}
-            data-testid= "export-all-btn
-          >
+            data-testid="export-all-btn
+          >"
             <Download className= "h-4 w-4 mr-2" />
             Export All
           </Button>
@@ -55,12 +55,12 @@ import { useState } from 'react'
                     <Icon className= "h-12 w-12 text-gray-400" />
                   </div>
                   <Button
-                    variant= "ghost
+                    variant="ghost"
                     size= "icon
-                    className= "absolute top-2 right-2
+                    className="absolute top-2 right-2
                     data-testid={`favorite-${asset.id}-btn`}
                   >
-                    {asset.favorite ? (
+                    {asset.favorite ? ("
                       <Star className= "h-5 w-5 text-yellow-400 fill-yellow-400" />
                     ) : (
                       <StarOff className= "h-5 w-5 text-gray-400" />
@@ -82,11 +82,11 @@ import { useState } from 'react'
                       {asset.type}
                     </Badge>
                     <Button
-                      variant= "ghost
+                      variant="ghost"
                       size= "sm
-                      className= "text-blue-600 hover:text-blue-800
+                      className="text-blue-600 hover:text-blue-800
                       data-testid={`download-${asset.id}-btn`}
-                    >
+                    >"
                       <Download className= "h-4 w-4" />
                     </Button>
                   </div>

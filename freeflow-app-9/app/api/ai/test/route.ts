@@ -15,7 +15,7 @@ export async function GET() {
       timestamp: new Date().toISOString()
     })
   } catch (error) {
-    console.error('AI test error:', error)
+    console.error('AI test error: ', error)'
     return NextResponse.json(
       { error: 'AI service test failed' },
       { status: 500 }

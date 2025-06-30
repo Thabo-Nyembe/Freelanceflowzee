@@ -1,54 +1,54 @@
-'use client'
+'use client''
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { ClientPresentationDemo } from './client-presentation-demo';
-import { InvestorDemo } from './investor-demo';
-import { FreelancerOnboardingDemo } from './freelancer-onboarding-demo';
-import { FeatureWalkthroughDemo } from './feature-walkthrough-demo';
+import React, { useState } from 'react';'
+import { Button } from '@/components/ui/button';'
+import { ClientPresentationDemo } from './client-presentation-demo';'
+import { InvestorDemo } from './investor-demo';'
+import { FreelancerOnboardingDemo } from './freelancer-onboarding-demo';'
+import { FeatureWalkthroughDemo } from './feature-walkthrough-demo';'
 
 export function DemoRouter() {
   const [activeDemo, setActiveDemo] = useState<any>(null);
 
   const demoScenarios = [
     {
-      id: 'client',
-      title: 'Client Presentation',
-      description: 'Professional demo for potential clients',
+      id: 'client','
+      title: 'Client Presentation','
+      description: 'Professional demo for potential clients','
       icon: Users,
-      color: 'bg-blue-500',
-      audience: 'Business clients, decision makers',
-      duration: '10-15 minutes',
+      color: 'bg-blue-500','
+      audience: 'Business clients, decision makers','
+      duration: '10-15 minutes','
       component: ClientPresentationDemo
     },
     {
-      id: 'investor', 
-      title: 'Investor Pitch',
-      description: 'Growth metrics and market opportunity',
+      id: 'investor', '
+      title: 'Investor Pitch','
+      description: 'Growth metrics and market opportunity','
       icon: TrendingUp,
-      color: 'bg-green-500',
-      audience: 'Investors, stakeholders',
-      duration: '15-20 minutes',
+      color: 'bg-green-500','
+      audience: 'Investors, stakeholders','
+      duration: '15-20 minutes','
       component: InvestorDemo
     },
     {
-      id: 'freelancer',
-      title: 'Freelancer Onboarding',
-      description: 'Platform walkthrough for new freelancers',
+      id: 'freelancer','
+      title: 'Freelancer Onboarding','
+      description: 'Platform walkthrough for new freelancers','
       icon: Briefcase,
-      color: 'bg-purple-500',
-      audience: 'Freelancers, service providers',
-      duration: '8-12 minutes',
+      color: 'bg-purple-500','
+      audience: 'Freelancers, service providers','
+      duration: '8-12 minutes','
       component: FreelancerOnboardingDemo
     },
     {
-      id: 'walkthrough',
-      title: 'Feature Walkthrough',
-      description: 'Interactive tour of key features',
+      id: 'walkthrough','
+      title: 'Feature Walkthrough','
+      description: 'Interactive tour of key features','
       icon: Map,
-      color: 'bg-orange-500',
-      audience: 'Product evaluators, new users',
-      duration: '12-18 minutes',
+      color: 'bg-orange-500','
+      audience: 'Product evaluators, new users','
+      duration: '12-18 minutes','
       component: FeatureWalkthroughDemo
     }
   ];
@@ -103,8 +103,8 @@ export function DemoRouter() {
                     <div className= "text-sm text-gray-600">{scenario.duration}</div>
                   </div>
                   <Button 
-                    className= "w-full group-hover:bg-primary group-hover:text-white transition-colors
-                    variant= "outline
+                    className="w-full group-hover:bg-primary group-hover:text-white transition-colors"
+                    variant="outline
                     onClick={() => setActiveDemo(scenario)}
                   >
                     Start Demo
@@ -114,7 +114,7 @@ export function DemoRouter() {
             </Card>
           ))}
         </div>
-
+"
         <div className= "mt-12 text-center">
           <Card className= "bg-blue-50 border-blue-200">
             <CardContent className= "p-6">

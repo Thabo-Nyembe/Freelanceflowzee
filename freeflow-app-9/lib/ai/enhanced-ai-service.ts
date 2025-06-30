@@ -1,4 +1,4 @@
-'use client
+'use client'
 
 interface AIContext {
   userId: string
@@ -292,7 +292,7 @@ Ready to get started? Let's schedule a call to discuss next steps!
         timeSaved: '2-3 hours/week',
         difficulty: 'easy',
         enabled: false,
-        category: 'invoicing
+        category: 'invoicing'
       },
       {
         id: 'client-communication',
@@ -302,7 +302,7 @@ Ready to get started? Let's schedule a call to discuss next steps!
         timeSaved: '1-2 hours/week', 
         difficulty: 'medium',
         enabled: false,
-        category: 'communication
+        category: 'communication'
       },
       {
         id: 'task-prioritization',
@@ -312,7 +312,7 @@ Ready to get started? Let's schedule a call to discuss next steps!
         timeSaved: '30 minutes/day',
         difficulty: 'medium',
         enabled: true,
-        category: 'productivity
+        category: 'productivity'
       },
       {
         id: 'time-tracking',
@@ -322,7 +322,7 @@ Ready to get started? Let's schedule a call to discuss next steps!
         timeSaved: '30 minutes/day',
         difficulty: 'simple',
         enabled: false,
-        category: 'time-management
+        category: 'time-management'
       }
     ]
   }
@@ -634,13 +634,13 @@ What would you like to focus on first?`,
   private async callOpenAI(prompt: string, context: Record<string, unknown>): Promise<AIResponse | null> { return null }
   private async callAnthropic(prompt: string, context: Record<string, unknown>): Promise<AIResponse | null> { return null }
   
-  private buildClientEmailPrompt(context: Record<string, unknown>): string { return '&apos; }
-  private buildProposalPrompt(context: Record<string, unknown>): string { return '&apos; }
-  private buildInvoicePrompt(context: Record<string, unknown>): string { return '&apos; }
-  private buildProgressReportPrompt(context: Record<string, unknown>): string { return '&apos; }
-  private buildMarketingPrompt(context: Record<string, unknown>): string { return '&apos; }
-  private buildTestimonialPrompt(context: Record<string, unknown>): string { return '&apos; }
-  private generateFallbackContent(type: string, context: Record<string, unknown>): string { return '&apos; }
+  private buildClientEmailPrompt(context: Record<string, unknown>): string { return '&apos; }'
+  private buildProposalPrompt(context: Record<string, unknown>): string { return '&apos; }'
+  private buildInvoicePrompt(context: Record<string, unknown>): string { return '&apos; }'
+  private buildProgressReportPrompt(context: Record<string, unknown>): string { return '&apos; }'
+  private buildMarketingPrompt(context: Record<string, unknown>): string { return '&apos; }'
+  private buildTestimonialPrompt(context: Record<string, unknown>): string { return '&apos; }'
+  private generateFallbackContent(type: string, context: Record<string, unknown>): string { return '&apos; }'
 }
 
 // Create and export singleton instance

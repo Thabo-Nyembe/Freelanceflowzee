@@ -15,7 +15,7 @@ export function DashboardTestWrapper({ children }: DashboardTestWrapperProps) {
       <div role= "tablist" data-testid= "dashboard-tabs">
         <button 
           role= "tab" 
-          data-testid= "projects-tab
+          data-testid="projects-tab"
           data-tab= "projects
           aria-selected= "true
         >
@@ -23,7 +23,7 @@ export function DashboardTestWrapper({ children }: DashboardTestWrapperProps) {
         </button>
         <button 
           role= "tab" 
-          data-testid= "team-tab
+          data-testid="team-tab"
           data-tab= "team
           aria-selected= "false
         >

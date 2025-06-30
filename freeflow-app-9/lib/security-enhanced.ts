@@ -1,4 +1,4 @@
-'use client
+'use client'
 
 // Enhanced Security System for FreeflowZee
 class SecurityService {
@@ -26,7 +26,7 @@ class SecurityService {
       this.isInitialized = true
       console.log('🔒 Enhanced security system initialized')
     } catch (error) {
-      console.error('❌ Security initialization failed:', error)
+      console.error('❌ Security initialization failed: ', error)'
     }
   }
 
@@ -501,7 +501,7 @@ class SecurityService {
   }
 
   private async executeSecurityAction(event: SecurityEvent, analysis: SecurityEventAnalysis): Promise<void> {
-    console.log('Executing security action for event:', event.type)
+    console.log('Executing security action for event: ', event.type)'
   }
 
   // Compliance methods
@@ -560,21 +560,21 @@ class VulnerabilityScanner {
 
 class SecurityLogger {
   async logThreat(assessment: ThreatAssessment, request: SecurityRequest): Promise<void> {
-    console.log('Logging threat assessment:', assessment.threatLevel)
+    console.log('Logging threat assessment: ', assessment.threatLevel)'
   }
 
   async logVulnerabilityReport(report: VulnerabilityReport): Promise<void> {
-    console.log('Logging vulnerability report:', report.scanId)
+    console.log('Logging vulnerability report: ', report.scanId)'
   }
 
   async logAccess(request: AccessRequest, validation: AccessValidation): Promise<void> {
-    console.log('Logging access:', request.resource, validation.granted)
+    console.log('Logging access: ', request.resource, validation.granted)'
   }
 }
 
 class SecurityAlertSystem {
   async sendAlert(assessment: ThreatAssessment, request: SecurityRequest): Promise<void> {
-    console.log('Sending security alert:', assessment.threatLevel)
+    console.log('Sending security alert: ', assessment.threatLevel)'
   }
 
   async sendAccessAlert(request: AccessRequest, pattern: AccessPattern): Promise<void> {
@@ -582,7 +582,7 @@ class SecurityAlertSystem {
   }
 
   async sendSecurityAlert(event: SecurityEvent, analysis: SecurityEventAnalysis): Promise<void> {
-    console.log('Sending security event alert:', event.type)
+    console.log('Sending security event alert: ', event.type)'
   }
 }
 

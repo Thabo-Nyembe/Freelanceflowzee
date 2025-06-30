@@ -1,9 +1,9 @@
-"use client
+"use client"
 
-import { createClient } from '@/lib/supabase/client
-import { FileType } from '@/types/files
-import type { Database } from '@/types/supabase
-import { SupabaseClient } from '@supabase/supabase-js
+import { createClient } from '@/lib/supabase/client'
+import { FileType } from '@/types/files'
+import type { Database } from '@/types/supabase'
+import { SupabaseClient } from '@supabase/supabase-js'
 
 export interface AIAnalysisResult {
   id: string
@@ -71,7 +71,7 @@ export class AIService {
           .from('ai_analysis')
           .update({
             status: 'complete',
-            result: 'Analysis completed successfully
+            result: 'Analysis completed successfully'
           })
           .eq('id', data.id)
       }, 3000)
@@ -84,7 +84,7 @@ export class AIService {
         result: data.result
       }
     } catch (error) {
-      console.error('Error analyzing file:', error)
+      console.error('Error analyzing file: ', error)'
       throw error
     }
   }
@@ -110,7 +110,7 @@ export class AIService {
         result: item.result || 
       }))
     } catch (error) {
-      console.error('Error fetching analysis history:', error)
+      console.error('Error fetching analysis history: ', error)'
       throw error
     }
   }
@@ -150,7 +150,7 @@ export class AIService {
           .from('ai_generations')
           .update({
             status: 'complete',
-            result: 'Generation completed successfully
+            result: 'Generation completed successfully'
           })
           .eq('id', data.id)
       }, 5000)
@@ -163,7 +163,7 @@ export class AIService {
         result: data.result
       }
     } catch (error) {
-      console.error('Error generating asset:', error)
+      console.error('Error generating asset: ', error)'
       throw error
     }
   }
@@ -189,7 +189,7 @@ export class AIService {
         result: item.result || 
       }))
     } catch (error) {
-      console.error('Error fetching generation library:', error)
+      console.error('Error fetching generation library: ', error)'
       throw error
     }
   }

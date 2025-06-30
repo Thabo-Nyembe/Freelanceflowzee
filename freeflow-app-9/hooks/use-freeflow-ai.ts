@@ -160,7 +160,7 @@ export function useFreeflowAI() {
         const lines = chunk.split('\n');
         
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
+          if (line.startsWith('data: ')) {'
             const data = line.slice(5).trim();
             if (data === '[DONE]') break;
             
@@ -170,7 +170,7 @@ export function useFreeflowAI() {
                 onChunk(parsed.text);
               }
             } catch (e) {
-              console.warn('Failed to parse chunk:', e);
+              console.warn('Failed to parse chunk: ', e);'
             }
           }
         }

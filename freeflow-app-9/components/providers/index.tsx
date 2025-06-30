@@ -1,13 +1,13 @@
 'use client'
 
 import React, { createContext, useContext, useState } from 'react'
-import { createBrowserClient } from '@supabase/ssr
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query
-import { ThemeProvider } from '../theme-provider
-import { Toaster } from '../ui/toaster
-import { ThemeProvider as NextThemeProvider } from 'next-themes
-import type { SupabaseClient } from '@supabase/supabase-js
-import type { Database } from '@/types/supabase
+import { createBrowserClient } from '@supabase/ssr'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ThemeProvider } from '../theme-provider'
+import { Toaster } from '../ui/toaster'
+import { ThemeProvider as NextThemeProvider } from 'next-themes'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/types/supabase'
 
 const SupabaseContext = createContext<SupabaseClient<Database> | null>(null)
 

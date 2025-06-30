@@ -1,4 +1,4 @@
-'use client
+'use client'
 
 // AI Automation System for FreeflowZee
 class AIAutomationService {
@@ -23,7 +23,7 @@ class AIAutomationService {
       this.isInitialized = true
       console.log('🤖 AI Automation system initialized successfully')
     } catch (error) {
-      console.error('❌ AI Automation initialization failed:', error)
+      console.error('❌ AI Automation initialization failed: ', error)'
     }
   }
 
@@ -310,7 +310,7 @@ class AIAutomationService {
   private async identifyAutomatableTasks(tasks: Task[]) { return [] }
   private async analyzeClientBehavior(clientId: string) { return {} }
   private async optimizeCommunicationTiming(context: Record<string, unknown>, insights: Record<string, unknown>) { return {} }
-  private async generatePersonalizedContent(context: Record<string, unknown>, insights: Record<string, unknown>) { return '&apos; }
+  private async generatePersonalizedContent(context: Record<string, unknown>, insights: Record<string, unknown>) { return '&apos; }'
   private async selectOptimalChannel(context: Record<string, unknown>, insights: Record<string, unknown>) { return &apos;email&apos; }
   private async scheduleIntelligentFollowUp(context: Record<string, unknown>) { return {} }
   private async createDynamicTemplates(context: Record<string, unknown>) { return [] }
@@ -344,9 +344,9 @@ class AIAutomationService {
   private async predictPerformanceTrends(data: Record<string, unknown>) { return {} }
   private async establishPerformanceBenchmarks(data: Record<string, unknown>) { return {} }
   private async buildContentContext(request: Record<string, unknown>) { return {} }
-  private async generateText(request: Record<string, unknown>, context: Record<string, unknown>) { return '&apos; }
+  private async generateText(request: Record<string, unknown>, context: Record<string, unknown>) { return '&apos; }'
   private async generateImages(request: Record<string, unknown>, context: Record<string, unknown>) { return [] }
-  private async generateCode(request: Record<string, unknown>, context: Record<string, unknown>) { return '&apos; }
+  private async generateCode(request: Record<string, unknown>, context: Record<string, unknown>) { return '&apos; }'
   private async generatePresentations(request: Record<string, unknown>, context: Record<string, unknown>) { return {} }
   private async optimizeContent(request: Record<string, unknown>, context: Record<string, unknown>) { return {} }
   private async predictUserBehavior(data: Record<string, unknown>) { return {} }

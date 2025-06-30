@@ -103,7 +103,7 @@ export const DASHBOARD_ROUTES = [
     icon: Home, 
     description: 'Dashboard overview and key metrics',
     category: 'Core',
-    testId: 'nav-dashboard
+    testId: 'nav-dashboard'
   },
   { 
     href: '/dashboard/projects-hub', 
@@ -111,7 +111,7 @@ export const DASHBOARD_ROUTES = [
     icon: FolderOpen, 
     description: 'Manage all your projects in one place',
     category: 'Core',
-    testId: 'nav-projects-hub
+    testId: 'nav-projects-hub'
   },
   { 
     href: '/dashboard/my-day', 
@@ -119,7 +119,7 @@ export const DASHBOARD_ROUTES = [
     icon: Calendar, 
     description: 'AI-powered daily planning and tasks',
     category: 'Productivity',
-    testId: 'nav-my-day
+    testId: 'nav-my-day'
   },
   { 
     href: '/dashboard/collaboration', 
@@ -127,7 +127,7 @@ export const DASHBOARD_ROUTES = [
     icon: MessageSquare, 
     description: 'Real-time client collaboration tools',
     category: 'Client',
-    testId: 'nav-collaboration
+    testId: 'nav-collaboration'
   },
   { 
     href: '/dashboard/escrow', 
@@ -135,7 +135,7 @@ export const DASHBOARD_ROUTES = [
     icon: Shield, 
     description: 'Secure payment protection',
     category: 'Financial',
-    testId: 'nav-escrow
+    testId: 'nav-escrow'
   },
   { 
     href: '/dashboard/files-hub', 
@@ -143,7 +143,7 @@ export const DASHBOARD_ROUTES = [
     icon: FolderOpen, 
     description: 'Organize and share project files',
     category: 'Storage',
-    testId: 'nav-files-hub
+    testId: 'nav-files-hub'
   },
   { 
     href: '/dashboard/storage', 
@@ -151,7 +151,7 @@ export const DASHBOARD_ROUTES = [
     icon: Cloud, 
     description: 'Enterprise storage management',
     category: 'Storage',
-    testId: 'nav-storage
+    testId: 'nav-storage'
   },
   { 
     href: '/dashboard/community', 
@@ -159,7 +159,7 @@ export const DASHBOARD_ROUTES = [
     icon: Users, 
     description: 'Connect with other creators',
     category: 'Social',
-    testId: 'nav-community
+    testId: 'nav-community'
   },
   { 
     href: '/dashboard/ai-design', 
@@ -167,7 +167,7 @@ export const DASHBOARD_ROUTES = [
     icon: Cpu, 
     description: 'AI-powered design analysis',
     category: 'AI',
-    testId: 'nav-ai-design
+    testId: 'nav-ai-design'
   },
   { 
     href: '/dashboard/ai-create', 
@@ -175,7 +175,7 @@ export const DASHBOARD_ROUTES = [
     icon: Sparkles, 
     description: 'Generate assets with AI',
     category: 'AI',
-    testId: 'nav-ai-create
+    testId: 'nav-ai-create'
   },
   { 
     href: '/dashboard/client-zone', 
@@ -183,7 +183,7 @@ export const DASHBOARD_ROUTES = [
     icon: UserCheck, 
     description: 'Client access and project sharing',
     category: 'Client',
-    testId: 'nav-client-zone
+    testId: 'nav-client-zone'
   },
   { 
     href: '/dashboard/analytics', 
@@ -191,7 +191,7 @@ export const DASHBOARD_ROUTES = [
     icon: BarChart3, 
     description: 'Business insights and metrics',
     category: 'Analytics',
-    testId: 'nav-analytics
+    testId: 'nav-analytics'
   }
 ] as const
 
@@ -334,7 +334,7 @@ export function EnhancedButton({
         target={external ? '_blank' : undefined}
         rel={external ? 'noopener noreferrer' : undefined}
         download={download}
-        className= "inline-block
+        className="inline-block
       >
         <Button {...buttonProps}>
           {content}
@@ -364,7 +364,7 @@ type RouteType = {
 }
 
 interface EnhancedNavigationProps {
-  routes: RouteType[]
+  routes: RouteType[]"
   variant?: 'sidebar' | 'header' | 'mobile' | 'breadcrumb
   activeRoute?: string
   onRouteChange?: (route: string) => void
@@ -418,7 +418,7 @@ export function EnhancedNavigation({
         <EnhancedButton
           key={route.href}
           id={`nav-${route.testId}`}
-          variant= "ghost
+          variant="ghost"
           size= "sm
           className={`gap-2 ${isActive ? 'bg-accent text-accent-foreground' : }`}
           href={route.href}
@@ -435,7 +435,7 @@ export function EnhancedNavigation({
         <EnhancedButton
           key={route.href}
           id={`nav-mobile-${route.testId}`}
-          variant= "ghost
+          variant="ghost"
           className={`flex-col gap-1 h-auto py-2 ${isActive ? 'text-primary bg-primary/10' : }`}
           href={route.href}
           testId={`mobile-${route.testId}`}
@@ -560,7 +560,7 @@ export function EnhancedCard({
                 variant={
                   status === 'complete' ? 'default' :
                   status === 'active' ? 'secondary' :
-                  status === 'pending' ? 'outline' : 'destructive
+                  status === 'pending' ? 'outline' : 'destructive'
                 }
               >
                 {status}
@@ -658,8 +658,8 @@ export function EnhancedInteractiveSystem({
                 <span>{toast.message}</span>
                 <button
                   onClick={() => dispatch({ type: 'REMOVE_TOAST', payload: toast.id })}
-                  className= "ml-2 text-white hover:text-gray-200
-                >
+                  className="ml-2 text-white hover:text-gray-200
+                >"
                   <X className= "h-4 w-4" />
                 </button>
               </div>

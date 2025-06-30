@@ -1,8 +1,8 @@
-import { createClient } from '@supabase/supabase-js
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command, GetObjectCommandOutput } from '@aws-sdk/client-s3
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner
-import { NodeHttpHandler } from '@smithy/node-http-handler
-import { Agent } from 'https
+import { createClient } from '@supabase/supabase-js'
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command, GetObjectCommandOutput } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { NodeHttpHandler } from '@smithy/node-http-handler'
+import { Agent } from 'https'
 
 // STARTUP MODE: Aggressive cost optimization
 const STARTUP_MODE = process.env.STARTUP_MODE === 'true';
@@ -109,7 +109,7 @@ class MultiCloudStorage {
       supabase: {
         url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
         serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        bucket: 'uploads
+        bucket: 'uploads'
       },
       wasabi: {
         accessKeyId: process.env.WASABI_ACCESS_KEY_ID!,
@@ -300,7 +300,7 @@ class MultiCloudStorage {
         };
       }
     } catch (error) {
-      console.error('Upload failed:', error);
+      console.error('Upload failed: ', error);'
       return {
         success: false,
         provider: useWasabi ? 'wasabi' : 'supabase',
@@ -338,7 +338,7 @@ class MultiCloudStorage {
       .single();
 
     if (error) {
-      console.error('Database insert error:', error);
+      console.error('Database insert error: ', error);'
       throw new Error(`Failed to store file metadata: ${error.message}`);
     }
 
@@ -601,7 +601,7 @@ class MultiCloudStorage {
       .limit(30);
 
     if (error) {
-      console.error('Analytics fetch error:', error);
+      console.error('Analytics fetch error: ', error);'
       return null;
     }
 

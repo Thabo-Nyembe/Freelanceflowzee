@@ -136,7 +136,7 @@ const ToolVisualization: React.FC<ToolVisualizationProps> = ({ toolName, input, 
                         <a 
                           href={suggestion.url} 
                           target="_blank" 
-                          rel="noopener noreferrer"
+                          rel="noopener noreferrer
                           className="text-xs text-purple-600 hover:underline"
                         >
                           View Resource →
@@ -144,7 +144,7 @@ const ToolVisualization: React.FC<ToolVisualizationProps> = ({ toolName, input, 
                       )}
                     </div>
                   ))}
-                </div>
+                </div>"
                 <p className="text-sm text-purple-700 bg-white p-2 rounded">
                   {result.rationale}
                 </p>
@@ -303,7 +303,7 @@ export default function EnhancedAIChat() {
           </div>
           <Button
             variant="ghost"
-            size="sm"
+            size="sm
             onClick={() => setIsExpanded(!isExpanded)}
           >
             {isExpanded ? 'Collapse' : 'Expand'}
@@ -319,10 +319,10 @@ export default function EnhancedAIChat() {
               <Button
                 key={idx}
                 variant="outline"
-                size="sm"
+                size="sm
                 className="flex items-center gap-2 h-auto p-3 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50"
                 onClick={() => handleQuickPrompt(prompt.prompt)}
-              >
+              >"
                 <prompt.icon className="w-4 h-4" />
                 <span className="text-xs">{prompt.label}</span>
               </Button>
@@ -345,7 +345,7 @@ export default function EnhancedAIChat() {
                 <Button
                   key={idx}
                   variant="outline"
-                  size="sm"
+                  size="sm
                   onClick={() => handleQuickPrompt(prompt.prompt)}
                   className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50"
                 >
@@ -359,7 +359,7 @@ export default function EnhancedAIChat() {
         {messages.map((message) => (
           <div key={message.id} className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[80%] ${message.role === 'user' ? 'order-2' : 'order-1'}`}>
-              {message.role === 'user' ? (
+              {message.role === 'user' ? ("
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 rounded-lg">
                   <p className="text-sm">{message.content}</p>
                 </div>
@@ -417,11 +417,11 @@ export default function EnhancedAIChat() {
             className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             disabled={isLoading}
           />
-          <Button 
+          <Button "
             type="submit" 
             disabled={isLoading || !input.trim()}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-          >
+          >"
             <Send className="w-4 h-4" />
           </Button>
         </form>

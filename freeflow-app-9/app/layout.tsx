@@ -25,7 +25,7 @@ export default function RootLayout({
         <meta name="description" content="Generate creative assets with AI, share files like WeTransfer, manage projects with escrow payments, and build your creative business - all in one revolutionary platform." />
       </head>
       <body className={cn('min-h-screen bg-background font-sans antialiased', inter.className)}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="system">
           <ErrorBoundary>
             <div className="relative flex min-h-screen flex-col">
               <SiteHeader />

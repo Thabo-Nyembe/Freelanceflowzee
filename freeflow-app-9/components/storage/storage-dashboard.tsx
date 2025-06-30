@@ -73,7 +73,7 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
         setHealthCheck(data.healthCheck);
       }
     } catch (error) {
-      console.error('Failed to load analytics:', error);
+      console.error('Failed to load analytics: ', error);
     } finally {
       setLoading(false);
     }
@@ -82,36 +82,35 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
   // Load files list
   const loadFiles = useCallback(async () => {
     try {
-      const response = await fetch('/api/storage/upload');
+      const response = await fetch('/api/storage/files');
+      if (response.ok) {
       const data = await response.json();
-      
-      if (data.success) {
         setFiles(data.files);
       }
     } catch (error) {
-      console.error('Failed to load files:', error);
+      console.error('Failed to load files: ', error);
     }
   }, []);
 
   // Optimize storage
-  const optimizeStorage = useCallback(async () => {
-    try {
+  const optimizeStorage = async () => {
       setOptimizing(true);
-      const response = await fetch('/api/storage/analytics', { method: 'POST' });
-      const data = await response.json();
+    try {
+      const response = await fetch('/api/storage/optimize', {
+        method: 'POST',
+      });
       
-      if (data.success) {
-        // Show success message
-        alert(data.message);
+      if (response.ok) {
+        alert('Storage optimization completed successfully!');
         await loadAnalytics(); // Refresh analytics
       }
     } catch (error) {
-      console.error('Optimization failed:', error);
+      console.error('Optimization failed: ', error);
       alert('Storage optimization failed. Please try again.');
     } finally {
       setOptimizing(false);
     }
-  }, [loadAnalytics]);
+  };
 
   // File upload handler
   const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,7 +137,7 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
         alert(`Upload failed: ${data.error}`);
       }
     } catch (error) {
-      console.error('Upload failed:', error);
+      console.error('Upload failed: ', error);
       alert('Upload failed. Please try again.');
     }
 

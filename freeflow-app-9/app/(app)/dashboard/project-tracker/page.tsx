@@ -79,7 +79,7 @@ export default function ProjectTrackerPage() {
                   ></div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent>"
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <h3 className="font-semibold mb-3">Milestones</h3>

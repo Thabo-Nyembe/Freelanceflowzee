@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
       event_data: event_data || {},
       timestamp: new Date().toISOString(),
       user_agent: request.headers.get('user-agent'),
-      ip_address: request.headers.get('x-forwarded-for') || 'demo'
+      ip_address: request.headers.get('x-forwarded-for') || 'demo
     }
 
     return NextResponse.json({
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Demo analytics error:', error)
+    console.error('Demo analytics error: ', error)'
     return NextResponse.json(
       { success: false, error: 'Failed to track demo event' },
       { status: 500 }

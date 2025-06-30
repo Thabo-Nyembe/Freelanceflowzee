@@ -1,6 +1,6 @@
-import { createServerClient } from '@supabase/ssr
-import { NextResponse, type NextRequest } from 'next/server
-import { ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
+import { ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies'
 
 // Define protected routes that require authentication
 const protectedRoutes = ['/dashboard', '/projects', '/analytics', '/feedback', '/settings
@@ -90,7 +90,7 @@ export async function updateSession(request: NextRequest) {
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()
     
     if (sessionError) {
-      console.error('Session error in middleware:', sessionError)
+      console.error('Session error in middleware: ', sessionError)'
       // Clear any corrupted session data
       await supabase.auth.signOut()
       
@@ -113,7 +113,7 @@ export async function updateSession(request: NextRequest) {
     const { data: { user }, error: userError } = await supabase.auth.getUser()
     
     if (userError) {
-      console.error('User data error in middleware:', userError)
+      console.error('User data error in middleware: ', userError)'
       // Clear any corrupted session data
       await supabase.auth.signOut()
       
@@ -142,7 +142,7 @@ export async function updateSession(request: NextRequest) {
 
     return supabaseResponse
   } catch (error) {
-    console.error('Unexpected error in middleware:', error)
+    console.error('Unexpected error in middleware: ', error)'
     // Clear any corrupted session data
     await supabase.auth.signOut()
     

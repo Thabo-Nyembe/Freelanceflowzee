@@ -1,6 +1,6 @@
-"use client
+"use client"
 
-import { createClient } from '@/lib/supabase/client
+import { createClient } from '@/lib/supabase/client'
 
 export interface Post {
   id: string
@@ -58,7 +58,7 @@ class CommunityService {
 
       return this.transformPost(data)
     } catch (error) {
-      console.error('Error creating post:', error)
+      console.error('Error creating post: ', error)'
       throw error
     }
   }
@@ -85,7 +85,7 @@ class CommunityService {
 
       return data.map(this.transformPost)
     } catch (error) {
-      console.error('Error fetching posts:', error)
+      console.error('Error fetching posts: ', error)'
       throw error
     }
   }
@@ -102,7 +102,7 @@ class CommunityService {
 
       if (error) throw error
     } catch (error) {
-      console.error('Error liking post:', error)
+      console.error('Error liking post: ', error)'
       throw error
     }
   }
@@ -120,7 +120,7 @@ class CommunityService {
 
       if (error) throw error
     } catch (error) {
-      console.error('Error unliking post:', error)
+      console.error('Error unliking post: ', error)'
       throw error
     }
   }
@@ -146,7 +146,7 @@ class CommunityService {
 
       return this.transformComment(data)
     } catch (error) {
-      console.error('Error creating comment:', error)
+      console.error('Error creating comment: ', error)'
       throw error
     }
   }
@@ -168,7 +168,7 @@ class CommunityService {
 
       return data.map(this.transformComment)
     } catch (error) {
-      console.error('Error fetching comments:', error)
+      console.error('Error fetching comments: ', error)'
       throw error
     }
   }
