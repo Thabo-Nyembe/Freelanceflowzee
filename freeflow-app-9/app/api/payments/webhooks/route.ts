@@ -154,7 +154,7 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
       })
     }
   } catch (error) {
-    console.error('Error handling payment success: ', error)'
+    console.error(match.replace(/'$/g, ))
   }
 }
 
@@ -185,7 +185,7 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
       })
     }
   } catch (error) {
-    console.error('Error handling payment failure: ', error)'
+    console.error(match.replace(/'$/g, ))
   }
 }
 
@@ -209,7 +209,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Error handling invoice payment success: ', error)'
+    console.error(match.replace(/'$/g, ))
   }
 }
 
@@ -233,7 +233,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Error handling invoice payment failure: ', error)'
+    console.error(match.replace(/'$/g, ))
   }
 }
 
@@ -251,7 +251,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       trial_end: (subscription as any).trial_end ? new Date((subscription as any).trial_end * 1000) : null,
     })
   } catch (error) {
-    console.error('Error handling subscription creation: ', error)'
+    console.error(match.replace(/'$/g, ))
   }
 }
 
@@ -266,7 +266,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       current_period_end: new Date((subscription as any).current_period_end * 1000),
     })
   } catch (error) {
-    console.error('Error handling subscription update: ', error)'
+    console.error(match.replace(/'$/g, ))
   }
 }
 
@@ -280,7 +280,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       cancelled_at: new Date(),
     })
   } catch (error) {
-    console.error('Error handling subscription deletion: ', error)'
+    console.error(match.replace(/'$/g, ))
   }
 }
 
@@ -296,7 +296,7 @@ async function handleCustomerCreated(customer: Stripe.Customer) {
       created_at: new Date(customer.created * 1000),
     })
   } catch (error) {
-    console.error('Error handling customer creation: ', error)'
+    console.error(match.replace(/'$/g, ))
   }
 }
 
@@ -313,7 +313,7 @@ async function handlePaymentMethodAttached(paymentMethod: Stripe.PaymentMethod) 
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Error handling payment method attachment: ', error)'
+    console.error(match.replace(/'$/g, ))
   }
 }
 
@@ -330,7 +330,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       await handlePaymentCheckout(session)
     }
   } catch (error) {
-    console.error('Error handling checkout completion: ', error)'
+    console.error(match.replace(/'$/g, ))
   }
 }
 

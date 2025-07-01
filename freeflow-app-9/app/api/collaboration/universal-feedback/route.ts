@@ -213,7 +213,7 @@ export async function GET(request: NextRequest) {
         })
     }
   } catch (error) {
-    console.error('UPF API error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json({
       success: false,
       error: 'Internal server error'
@@ -377,7 +377,7 @@ export async function POST(request: NextRequest) {
         }, { status: 400 })
     }
   } catch (error) {
-    console.error('UPF POST error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json({
       success: false,
       error: 'Internal server error'
@@ -470,7 +470,7 @@ export async function PUT(request: NextRequest) {
         }, { status: 400 })
     }
   } catch (error) {
-    console.error('UPF PUT error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json({
       success: false,
       error: 'Internal server error'
@@ -526,7 +526,7 @@ export async function DELETE(request: NextRequest) {
         }, { status: 400 })
     }
   } catch (error) {
-    console.error('UPF DELETE error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json({
       success: false,
       error: 'Internal server error'

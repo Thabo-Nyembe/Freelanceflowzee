@@ -82,7 +82,7 @@ export async function GET(
       })
 
     if (signedUrlError || !signedUrlData) {
-      console.error('Signed URL error: ', signedUrlError)'
+      console.error(match.replace(/'$/g, ))
       return NextResponse.json({
         success: false,
         error: 'Failed to generate download link'
@@ -123,7 +123,7 @@ export async function GET(
     })
 
   } catch (error) {
-    console.error('Storage download error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json({
       success: false,
       error: 'Internal server error'
@@ -166,7 +166,7 @@ export async function POST(
       })
 
     if (signedUrlError) {
-      console.error('Signed URL generation error: ', signedUrlError)'
+      console.error(match.replace(/'$/g, ))
       return NextResponse.json({
         success: false,
         error: 'Failed to generate signed URL'
@@ -189,7 +189,7 @@ export async function POST(
     })
 
   } catch (error) {
-    console.error('Signed URL generation error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json({
       success: false,
       error: 'Internal server error'

@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       })
 
     if (uploadError) {
-      console.error('Upload error: ', uploadError)'
+      console.error(match.replace(/'$/g, ))
       return NextResponse.json({ 
         error: 'Upload failed', 
         details: uploadError.message 
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (dbError) {
-      console.error('Database error: ', dbError)'
+      console.error(match.replace(/'$/g, ))
       // Try to clean up uploaded file
       await supabase.storage
         .from('project-attachments')
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Upload endpoint error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json({ 
       error: 'Internal server error,'
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -200,7 +200,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('File listing error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json({ 
       error: 'Failed to list files,'
       details: error instanceof Error ? error.message : 'Unknown error'

@@ -38,13 +38,13 @@ const projectAnalysisTool = tool({
     }),
   }),
   onInputStart: ({ toolCallId }) => {
-    console.log('🎯 Project analysis started: ', toolCallId);'
+    console.log('🎯 Project analysis started: ', toolCallId);
   },
   onInputDelta: ({ inputTextDelta, toolCallId }) => {
-    console.log('📊 Analyzing project requirements: ', inputTextDelta);'
+    console.log('📊 Analyzing project requirements: ', inputTextDelta);
   },
   onInputAvailable: ({ input, toolCallId }) => {
-    console.log('✅ Project analysis input ready: ', input);'
+    console.log('✅ Project analysis input ready: ', input);
   },
   execute: async ({ projectType, budget, timeline, clientRequirements }) => {
     // Simulate project analysis processing
@@ -69,7 +69,7 @@ const projectAnalysisTool = tool({
       riskFactors: [
         'Scope creep potential',
         'Client feedback delays',
-        'Technical complexity variations
+        'Technical complexity variations',
       ],
       pricing: {
         suggested: Math.round(budget * 1.1),
@@ -102,13 +102,13 @@ const creativeAssetTool = tool({
     rationale: z.string(),
   }),
   onInputStart: ({ toolCallId }) => {
-    console.log('🎨 Creative asset generation started: ', toolCallId);'
+    console.log('🎨 Creative asset generation started: ', toolCallId);
   },
   onInputDelta: ({ inputTextDelta, toolCallId }) => {
-    console.log('🖌️ Processing creative requirements: ', inputTextDelta);'
+    console.log('🖌️ Processing creative requirements: ', inputTextDelta);
   },
   onInputAvailable: ({ input, toolCallId }) => {
-    console.log('✨ Creative input ready: ', input);'
+    console.log('✨ Creative input ready: ', input);
   },
   execute: async ({ assetType, style, industry, targetAudience }) => {
     // Simulate creative generation processing
@@ -155,10 +155,10 @@ const clientCommunicationTool = tool({
     urgency: z.enum(['low', 'medium', 'high']),
   }),
   onInputStart: ({ toolCallId }) => {
-    console.log('📧 Client communication generation started: ', toolCallId);'
+    console.log('📧 Client communication generation started: ', toolCallId);
   },
   onInputDelta: ({ inputTextDelta, toolCallId }) => {
-    console.log('💬 Processing communication request: ', inputTextDelta);'
+    console.log('💬 Processing communication request: ', inputTextDelta);
   },
   execute: async ({ communicationType, projectContext, clientName, urgency }) => {
     await new Promise(resolve => setTimeout(resolve, 600));
@@ -190,7 +190,7 @@ const timeBudgetTool = tool({
     priorities: z.array(z.enum(['low', 'medium', 'high', 'urgent'])),
   }),
   onInputStart: ({ toolCallId }) => {
-    console.log('⏰ Time budget optimization started: ', toolCallId);'
+    console.log('⏰ Time budget optimization started: ', toolCallId);
   },
   execute: async ({ availableHours, projectCount, deadlines, priorities }) => {
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -238,18 +238,18 @@ export async function POST(req: NextRequest) {
             console.log('📝 Text chunk:', chunk.text?.substring(0, 50) + '...');
             break;
           case 'tool-call':
-            console.log('🔧 Tool call: ', chunk.toolName);'
+            console.log('🔧 Tool call: ', chunk.toolName);
             break;
           case 'tool-result':
-            console.log('✅ Tool result: ', chunk.toolName);'
+            console.log('✅ Tool result: ', chunk.toolName);
             break;
           default:
-            console.log('📦 Chunk type: ', chunk.type);'
+            console.log('📦 Chunk type: ', chunk.type);
         }
       },
       onFinish({ text, finishReason, usage, response }) {
         // Log completion details
-        console.log('🎉 Stream finished: ', {'
+        console.log('🎉 Stream finished: ', {
           textLength: text.length,
           finishReason,
           totalTokens: usage.totalTokens,
@@ -260,7 +260,7 @@ export async function POST(req: NextRequest) {
       onError({ error }) {
         // Enhanced error logging with proper typing
         const err = error as Error;
-        console.error('❌ Stream error: ', {'
+        console.error('❌ Stream error: ', {
           message: err.message,
           type: err.constructor.name,
           stack: err.stack?.substring(0, 500),
@@ -278,7 +278,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('🚨 API Route Error: ', error);'
+    console.error('🚨 API Route Error: ', error);
     
     // Return a structured error response
     return new Response(

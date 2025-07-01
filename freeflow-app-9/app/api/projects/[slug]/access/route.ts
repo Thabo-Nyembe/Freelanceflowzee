@@ -125,7 +125,7 @@ export async function POST(
     })
 
   } catch (error) {
-    console.error('Access API error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { success: false, error: 'Internal server error', code: 'server_error' },
       { status: 500 }
@@ -173,7 +173,7 @@ export async function GET(
       )
     }
   } catch (error) {
-    console.error('Access GET API error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

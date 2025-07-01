@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { useState } from 'react'
 import Link from 'next/link'
 import { SiteHeader } from '@/components/site-header'
@@ -133,7 +134,7 @@ export default function DocsPage() {
           </div>
         </div>
 
-        {/* Quick Links */}"
+        {/* Quick Links */}
         <div className="bg-white border-b">
           <div className="max-w-7xl mx-auto px-4 py-8">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Access</h2>
@@ -143,7 +144,7 @@ export default function DocsPage() {
                   key={index}
                   href={link.href}
                   className="flex items-center gap-3 p-4 rounded-lg border hover:shadow-md transition-shadow"
-                >"
+                >
                   <div className="p-2 bg-blue-100 rounded-lg">
                     <link.icon className="w-5 h-5 text-blue-600" />
                   </div>
@@ -253,7 +254,7 @@ export default function DocsPage() {
                       variant="outline" 
                       className="w-full"
                       onClick={() => setShowDemoModal(true)}
-                    >"
+                    >
                       <Video className="w-4 h-4 mr-2" />
                       Watch Tutorials
                     </Button>
@@ -298,7 +299,7 @@ export default function DocsPage() {
               size="lg" 
               className="bg-white text-blue-600 hover:bg-gray-100"
               onClick={() => setShowDemoModal(true)}
-            >"
+            >
               <BookOpen className="w-5 h-5 mr-2" />
               Start Learning
             </Button>
@@ -310,8 +311,8 @@ export default function DocsPage() {
       <DemoModal 
         isOpen={showDemoModal} 
         onClose={() => setShowDemoModal(false)} 
-        title="Get Started with FreeflowZee
-        description="Access tutorials, documentation, and support resources
+        title="Get Started with FreeflowZee"
+        description="Access tutorials, documentation, and support resources"
       />
     </div>
   )

@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     });
     
   } catch (error) {
-    console.error('Startup analytics failed: ', error);'
+    console.error('Startup analytics failed: ', error);')
     return NextResponse.json(
       { 
         success: false, 
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     }
     
   } catch (error) {
-    console.error('Startup action failed: ', error);'
+    console.error('Startup action failed: ', error);')
     return NextResponse.json(
       { 
         success: false, 

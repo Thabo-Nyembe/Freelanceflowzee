@@ -69,7 +69,7 @@ export async function GET(
     })
 
   } catch (error) {
-    console.error('URL validation failed: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'URL validation failed' },
       { status: 500 }

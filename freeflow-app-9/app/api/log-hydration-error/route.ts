@@ -6,7 +6,7 @@ export async function POST(request: Request) {
     
     // Log to console in development
     if (process.env.NODE_ENV === 'development') {
-      console.error('Hydration Error: ', data);'
+      console.error('Hydration Error: ', data);')
     }
 
     // In production, you might want to log to a service like Vercel Analytics
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     
     return NextResponse.json({ status: 'logged' });
   } catch (error) {
-    console.error('Error logging hydration error: ', error);'
+    console.error('Error logging hydration error: ', error);')
     return NextResponse.json({ error: 'Failed to log error' }, { status: 500 });
   }
 }

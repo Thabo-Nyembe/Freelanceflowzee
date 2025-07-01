@@ -48,11 +48,11 @@ export async function POST(request: NextRequest) {
       const results = JSON.parse(content)
       return NextResponse.json({ results })
     } catch (e) {
-      console.error('Failed to parse analysis results: ', e)'
+      console.error('Failed to parse analysis results: ', e)
       return new NextResponse('Invalid analysis results format', { status: 500 })
     }
   } catch (error) {
-    console.error('Analysis error: ', error)'
+    console.error('Analysis error: ', error)
     return new NextResponse('Internal Server Error', { status: 500 })
   }
 } 

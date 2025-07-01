@@ -1,7 +1,7 @@
 'use client''
 
 import React, { useState } from 'react';'
-import { Button } from '@/components/ui/button';'
+import { Button } from '@/components/ui/button''
 
 // Built-in demo data
 const demoData = {

@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('Enhanced collaboration API error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -229,7 +229,7 @@ async function handleAddVideoAnnotation(data: unknown, supabase: unknown, user: 
       message: 'Video annotation added successfully'
     })
   } catch (error) {
-    console.error('Add video annotation error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to add video annotation' },
       { status: 500 }
@@ -321,7 +321,7 @@ async function handleAddImageAnnotation(data: unknown, supabase: unknown, user: 
       message: 'Image annotation added successfully'
     })
   } catch (error) {
-    console.error('Add image annotation error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to add image annotation' },
       { status: 500 }
@@ -419,7 +419,7 @@ async function handleUpdateClientPreference(data: unknown, supabase: unknown, us
       message: `File ${type.replace('_', ' ')} successfully
     })
   } catch (error) {
-    console.error('Update client preference error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to update preference' },
       { status: 500 }
@@ -512,7 +512,7 @@ async function handleSubmitApproval(data: unknown, supabase: unknown, user: unkn
       message: `Approval ${status} successfully
     })
   } catch (error) {
-    console.error('Submit approval error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to submit approval' },
       { status: 500 }
@@ -629,7 +629,7 @@ async function handleEscrowRelease(data: unknown, supabase: unknown, user: unkno
       message: `Escrow ${isFullRelease ? 'fully' : 'partially'} released successfully
     })
   } catch (error) {
-    console.error('Escrow release error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to release escrow' },
       { status: 500 }
@@ -731,7 +731,7 @@ async function handleGenerateDownloadAccess(data: unknown, supabase: unknown, us
       message: 'Download access granted successfully'
     })
   } catch (error) {
-    console.error('Generate download access error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to generate download access' },
       { status: 500 }
@@ -757,7 +757,7 @@ async function createActivityEvent(supabase: unknown, eventData: unknown) {
     // In production, this would trigger actual real-time updates
     console.log('Real-time activity created: ', eventData)'
   } catch (error) {
-    console.error('Failed to create activity event: ', error)'
+    console.error(match.replace(/'$/g, ))
   }
 }
 
@@ -784,7 +784,7 @@ async function sendMentionNotifications(supabase: unknown, data: unknown) {
       })
     }
   } catch (error) {
-    console.error('Failed to send mention notifications: ', error)'
+    console.error(match.replace(/'$/g, ))
   }
 }
 
@@ -808,7 +808,7 @@ async function checkApprovalWorkflow(supabase: unknown, projectId: string, data:
       }
     }
   } catch (error) {
-    console.error('Failed to check approval workflow: ', error)'
+    console.error(match.replace(/'$/g, ))
   }
 }
 
@@ -829,7 +829,7 @@ async function checkAllApproversCompleted(supabase: unknown, stepId: string): Pr
 
     return approvalFields.every((field: string) => step[field] !== null)
   } catch (error) {
-    console.error('Failed to check approvers: ', error)'
+    console.error(match.replace(/'$/g, ))
     return false
   }
 }
@@ -855,7 +855,7 @@ async function advanceToNextApprovalStep(supabase: unknown, projectId: string, c
         .eq('id', nextStep.id)
     }
   } catch (error) {
-    console.error('Failed to advance approval step: ', error)'
+    console.error(match.replace(/'$/g, ))
   }
 }
 
@@ -899,7 +899,7 @@ async function sendDownloadReadyNotification(supabase: unknown, data: unknown) {
       created_at: new Date().toISOString()
     })
   } catch (error) {
-    console.error('Failed to send download ready notification: ', error)'
+    console.error(match.replace(/'$/g, ))
   }
 }
 
@@ -948,7 +948,7 @@ export async function GET(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('Enhanced collaboration GET error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

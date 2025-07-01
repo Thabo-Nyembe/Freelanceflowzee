@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Demo analytics error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { success: false, error: 'Failed to track demo event' },
       { status: 500 }

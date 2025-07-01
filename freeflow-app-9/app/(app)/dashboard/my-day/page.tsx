@@ -32,7 +32,7 @@ interface AIInsight {
   title: string
   description: string
   actionable: boolean
-  priority: 'low' | 'medium' | 'high
+  priority: 'low' | 'medium' | 'high'
 }
 
 interface TimeBlock {
@@ -374,23 +374,21 @@ export default function MyDayPage() {
             </div>
             
             <div className="flex items-center gap-4">
-  <
               <Button 
                 variant="outline" 
                 size="sm" 
                 className="gap-2"
                 onClick={() => router.push('/dashboard')}
-              >"
+              >
                 <ArrowRight className="h-4 w-4 rotate-180" />
                 Back to Dashboard
               </Button>
-  <
               
               <Button 
                 size="sm" 
                 className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                onClick={() => setIsAddingTask(true)}"
-              >"
+                onClick={() => setIsAddingTask(true)}
+              >
                 <Plus className="h-4 w-4" />
                 Add Task
               </Button>
@@ -399,9 +397,7 @@ export default function MyDayPage() {
 
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-  <
             <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-  <
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -410,16 +406,13 @@ export default function MyDayPage() {
                     <p className="text-sm text-gray-500">{completionRate}% complete</p>
                   </div>
                   <div className="p-3 bg-purple-100 rounded-xl">
-  <
                     <Target className="h-6 w-6 text-purple-600" />
                   </div>
                 </div>
               </CardContent>
             </Card>
-  <
             
             <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-  <
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -428,16 +421,13 @@ export default function MyDayPage() {
                     <p className="text-sm text-gray-500">Today's work</p>
                   </div>
                   <div className="p-3 bg-blue-100 rounded-xl">
-  <
                     <Timer className="h-6 w-6 text-blue-600" />
                   </div>
                 </div>
               </CardContent>
             </Card>
-  <
             
             <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-  <
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -446,16 +436,13 @@ export default function MyDayPage() {
                     <p className="text-sm text-gray-500">Efficiency score</p>
                   </div>
                   <div className="p-3 bg-emerald-100 rounded-xl">
-  <
                     <TrendingUp className="h-6 w-6 text-emerald-600" />
                   </div>
                 </div>
               </CardContent>
             </Card>
-  <
             
             <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-  <
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -464,7 +451,6 @@ export default function MyDayPage() {
                     <p className="text-sm text-gray-500">Recommendations</p>
                   </div>
                   <div className="p-3 bg-rose-100 rounded-xl">
-  <
                     <Brain className="h-6 w-6 text-rose-600" />
                   </div>
                 </div>
@@ -476,12 +462,10 @@ export default function MyDayPage() {
         {/* Active Timer Display */}
         {state.currentTimer && (
           <Card className="mb-8 bg-gradient-to-r from-purple-500 to-pink-600 text-white border-0">
-  <
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-white/20 rounded-xl">
-  <
                     <Play className="h-6 w-6" />
                   </div>
                   <div>
@@ -496,12 +480,11 @@ export default function MyDayPage() {
                     <div className="text-3xl font-bold">{formatTime(state.elapsedTime)}</div>
                     <div className="text-purple-100 text-sm">Elapsed time</div>
                   </div>
-  <
                   <Button 
                     variant="outline" 
                     className="bg-white/20 border-white/30 text-white hover:bg-white/30"
-                    onClick={stopTimer}"
-                  >"
+                    onClick={stopTimer}
+                  >
                     <Pause className="h-4 w-4 mr-2" />
                     Stop
                   </Button>
@@ -513,32 +496,23 @@ export default function MyDayPage() {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-  <
           <TabsList className="grid w-full grid-cols-4 bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl p-2 shadow-xl">
-  <
             <TabsTrigger value="today" className="flex items-center gap-2 rounded-2xl">
-  <
               <Calendar className="h-4 w-4" />
               Today's Tasks
             </TabsTrigger>
-  <
             <TabsTrigger value="schedule" className="flex items-center gap-2 rounded-2xl">
-  <
               <Clock className="h-4 w-4" />
               Time Blocks
             </TabsTrigger>
-  <
             <TabsTrigger value="insights" className="flex items-center gap-2 rounded-2xl">
-  <
               <Brain className="h-4 w-4" />
               AI Insights
               <Badge variant="secondary" className="text-xs">
                 {mockAIInsights.filter(i => i.priority === 'high').length}
               </Badge>
             </TabsTrigger>
-  <
             <TabsTrigger value="analytics" className="flex items-center gap-2 rounded-2xl">
-  <
               <BarChart3 className="h-4 w-4" />
               Analytics
             </TabsTrigger>
@@ -549,36 +523,29 @@ export default function MyDayPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Tasks List */}
               <div className="lg:col-span-2 space-y-6">
-  <
                 <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-  <
                   <CardHeader>
-  <
                     <CardTitle className="flex items-center justify-between">
                       <span className="flex items-center gap-2">
-  <
                         <Target className="h-5 w-5" />
                         Today's Tasks
                       </span>
                       <div className="flex items-center gap-2">
-  <
                         <Badge variant="outline" className="text-xs">
                           {state.tasks.filter(t => !t.completed).length} remaining
                         </Badge>
-  <
                         <Button 
                           data-testid="add-task-btn"
                           size="sm" 
                           onClick={addTask}
                           className="gap-2"
-                        >"
+                        >
                           <Plus className="h-3 w-3" />
                           Add Task
                         </Button>
                       </div>
                     </CardTitle>
                   </CardHeader>
-  <
                   <CardContent className="space-y-4">
                     {state.tasks.map(task => (
                       <div 
@@ -591,15 +558,13 @@ export default function MyDayPage() {
                         )}
                       >
                         <div className="flex items-start gap-4">
-  <
                           <Button
                             variant="ghost"
-                            size="sm
+                            size="sm"
                             className="p-0 h-auto"
                             onClick={() => dispatch({ type: 'TOGGLE_TASK', id: task.id })}
                           >
-  <
-                            <CheckCircle "
+                            <CheckCircle 
                               className={cn("h-5 w-5", task.completed ? "text-green-600 fill-green-100" : "text-gray-400")} 
                             />
                           </Button>
@@ -617,24 +582,20 @@ export default function MyDayPage() {
                                 )}
                                 
                                 <div className="flex items-center gap-2 mt-2">
-  <
                                   <Badge 
                                     variant="outline" 
                                     className={cn("text-xs", getPriorityColor(task.priority))}
                                   >
                                     {task.priority}
                                   </Badge>
-  <
                                   
                                   <Badge variant="outline" className="text-xs">
-  <
                                     <Timer className="h-3 w-3 mr-1" />
                                     {formatDuration(task.estimatedTime)}
                                   </Badge>
                                   
                                   {task.category === 'meeting' && task.startTime && (
                                     <Badge variant="outline" className="text-xs">
-  <
                                       <Clock className="h-3 w-3 mr-1" />
                                       {task.startTime}
                                     </Badge>
@@ -658,19 +619,18 @@ export default function MyDayPage() {
                                   <Button
                                     data-testid="start-timer-btn"
                                     variant="outline"
-                                    size="sm
+                                    size="sm"
                                     className="gap-2"
                                     onClick={() => startTimer(task.id)}
                                     disabled={state.currentTimer === task.id}
                                   >
-                                    {state.currentTimer === task.id ? ("
-                                      <>"
+                                    {state.currentTimer === task.id ? (
+                                      <>
                                         <Pause className="h-3 w-3" />
                                         Active
                                       </>
                                     ) : (
                                       <>
-  <
                                         <Play className="h-3 w-3" />
                                         Start
                                       </>
@@ -680,10 +640,9 @@ export default function MyDayPage() {
                                 
                                 <Button
                                   variant="ghost"
-                                  size="sm
+                                  size="sm"
                                   onClick={() => dispatch({ type: 'DELETE_TASK', id: task.id })}
                                 >
-  <
                                   <Trash2 className="h-3 w-3" />
                                 </Button>
                               </div>
@@ -700,87 +659,71 @@ export default function MyDayPage() {
               <div className="space-y-6">
                 {/* Quick Actions */}
                 <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-  <
                   <CardHeader>
-  <
                     <CardTitle className="flex items-center gap-2">
-  <
                       <Zap className="h-5 w-5" />
                       Quick Actions
                     </CardTitle>
                   </CardHeader>
-  <
                   <CardContent className="space-y-3">
-  <
                     <Button 
                       data-testid="view-calendar-btn"
                       className="w-full justify-start gap-2"
                       variant="outline"
-                      onClick={() => {"
+                      onClick={() => {
                         console.log('View calendar clicked');
                         router.push('/dashboard/calendar');
                       }}
                     >
-  <
                       <Calendar className="h-4 w-4" />
                       View Calendar
                     </Button>
-  <
                     
                     <Button 
                       data-testid="generate-schedule-btn"
                       className="w-full justify-start gap-2"
                       variant="outline"
-                      onClick={() => {"
+                      onClick={() => {
                         console.log('Generate schedule clicked');
                         alert('AI-powered schedule generation started!');
                       }}
                     >
-  <
                       <Brain className="h-4 w-4" />
                       Generate Schedule
                     </Button>
-  <
                     
                     <Button 
                       className="w-full justify-start gap-2"
                       variant="outline"
                       onClick={() => router.push('/dashboard/collaboration')}
                     >
-  <
                       <MessageSquare className="h-4 w-4" />
                       Check Client Messages
                     </Button>
-  <
                     
                     <Button 
                       className="w-full justify-start gap-2"
                       variant="outline"
                       onClick={() => router.push('/dashboard/projects-hub')}
                     >
-  <
                       <Briefcase className="h-4 w-4" />
                       View Projects
                     </Button>
-  <
                     
                     <Button 
                       className="w-full justify-start gap-2"
                       variant="outline"
                       onClick={() => router.push('/dashboard/time-tracking')}
                     >
-  <
                       <Clock className="h-4 w-4" />
                       Time Tracking
                     </Button>
-  <
                     
                     <Button 
                       className="w-full justify-start gap-2"
                       variant="outline"
                       onClick={() => router.push('/dashboard/escrow')}
                     >
-  <
                       <Target className="h-4 w-4" />
                       Check Escrow
                     </Button>
@@ -789,16 +732,12 @@ export default function MyDayPage() {
 
                 {/* AI Productivity Tips */}
                 <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
-  <
                   <CardHeader>
-  <
                     <CardTitle className="flex items-center gap-2 text-purple-700">
-  <
                       <Lightbulb className="h-5 w-5" />
                       AI Tips
                     </CardTitle>
                   </CardHeader>
-  <
                   <CardContent className="space-y-3">
                     <div className="p-3 bg-white/70 rounded-lg">
                       <p className="text-sm text-purple-800 font-medium">
@@ -825,18 +764,13 @@ export default function MyDayPage() {
 
           {/* Time Blocks Tab */}
           <TabsContent value="schedule" className="space-y-6">
-  <
             <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-  <
               <CardHeader>
-  <
                 <CardTitle className="flex items-center gap-2">
-  <
                   <Clock className="h-5 w-5" />
                   Today's Schedule
                 </CardTitle>
               </CardHeader>
-  <
               <CardContent>
                 <div className="space-y-4">
                   {mockTimeBlocks.map(block => (
@@ -846,7 +780,6 @@ export default function MyDayPage() {
                           <h4 className="font-medium">{block.title}</h4>
                           <p className="text-sm opacity-75">{block.start} - {block.end}</p>
                         </div>
-  <
                         <Badge variant="outline" className="text-xs">
                           {block.type}
                         </Badge>
@@ -875,7 +808,6 @@ export default function MyDayPage() {
             <div className="grid gap-6">
               {mockAIInsights.map(insight => (
                 <Card key={insight.id} className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-  <
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
                       <div className={cn(
@@ -893,23 +825,21 @@ export default function MyDayPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="font-semibold text-gray-900">{insight.title}</h3>
-  <
                           <Badge 
                             variant="outline" 
                             className={cn(
                               "text-xs",
                               insight.priority === 'high' ? 'border-red-300 text-red-700' :
-                              insight.priority === 'medium' ? 'border-yellow-300 text-yellow-700' : "border-green-300 text-green-700
+                              insight.priority === 'medium' ? 'border-yellow-300 text-yellow-700' : 'border-green-300 text-green-700'
                             )}
                           >
                             {insight.priority} priority
                           </Badge>
-                        </div>"
+                        </div>
                         <p className="text-gray-600 mb-3">{insight.description}</p>
                         
                         {insight.actionable && (
                           <Button variant="outline" size="sm" className="gap-2">
-  <
                             <CheckCircle className="h-3 w-3" />
                             Apply Suggestion
                           </Button>
@@ -925,14 +855,10 @@ export default function MyDayPage() {
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-  <
               <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-  <
                 <CardHeader>
-  <
                   <CardTitle>Daily Performance</CardTitle>
                 </CardHeader>
-  <
                 <CardContent>
                   <div className="space-y-4">
                     <div>
@@ -963,15 +889,11 @@ export default function MyDayPage() {
                   </div>
                 </CardContent>
               </Card>
-  <
 
               <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-  <
                 <CardHeader>
-  <
                   <CardTitle>Time Distribution</CardTitle>
                 </CardHeader>
-  <
                 <CardContent>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
@@ -1000,20 +922,15 @@ export default function MyDayPage() {
         {/* Add Task Modal */}
         {isAddingTask && (
           <div className="fixed inset-0 bg-white/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-  <
             <Card className="w-full max-w-md bg-white">
-  <
               <CardHeader>
-  <
                 <CardTitle>Add New Task</CardTitle>
               </CardHeader>
-  <
               <CardContent className="space-y-4">
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">
                     Task Title
                   </label>
-  <
                   <Input
                     value={newTaskTitle}
                     onChange={(e) => setNewTaskTitle(e.target.value)}
@@ -1021,12 +938,10 @@ export default function MyDayPage() {
                     className="w-full"
                   />
                 </div>
-                "
-                <div>"
+                <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">
                     Description (Optional)
                   </label>
-  <
                   <Textarea
                     value={newTaskDescription}
                     onChange={(e) => setNewTaskDescription(e.target.value)}
@@ -1035,8 +950,7 @@ export default function MyDayPage() {
                     rows={3}
                   />
                 </div>
-                "
-                <div>"
+                <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">
                     Priority
                   </label>
@@ -1044,7 +958,7 @@ export default function MyDayPage() {
                     value={newTaskPriority}
                     onChange={(e) => setNewTaskPriority(e.target.value as any)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  >"
+                  >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
                     <option value="high">High</option>
@@ -1053,15 +967,14 @@ export default function MyDayPage() {
                 </div>
                 
                 <div className="flex gap-3 pt-4">
-  <
                   <Button
                     className="flex-1"
                     onClick={addTask}
                     disabled={!newTaskTitle.trim()}
                   >
                     Add Task
-                  </Button>"
-                  <Button"
+                  </Button>
+                  <Button
                     variant="outline"
                     className="flex-1"
                     onClick={() => setIsAddingTask(false)}
@@ -1078,6 +991,6 @@ export default function MyDayPage() {
   )
 }
 
-function cn(...classes: (string | undefined | boolean)[]): string {"
+function cn(...classes: (string | undefined | boolean)[]): string {
   return classes.filter(Boolean).join(' ')
-}"
+}

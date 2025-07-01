@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('UPF POST error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error,'
@@ -398,7 +398,7 @@ export async function GET(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('UPF API error: ', error)'
+    console.error(match.replace(/'$/g, ))
     
     // Even if there's an error, provide fallback
     const filteredComments = fileId 
@@ -475,7 +475,7 @@ async function handleAddComment(
       .single()
 
     if (commentError) {
-      console.error('Comment creation error: ', commentError)'
+      console.error(match.replace(/'$/g, ))
       return NextResponse.json(
         { error: 'Failed to create comment' },
         { status: 500 }
@@ -533,7 +533,7 @@ async function handleAddComment(
       message: 'Comment added successfully'
     })
   } catch (error) {
-    console.error('Add comment error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to add comment' },
       { status: 500 }
@@ -616,7 +616,7 @@ async function handleUpdateComment(body: unknown, supabase: unknown, user: unkno
       message: 'Comment updated successfully'
     })
   } catch (error) {
-    console.error('Update comment error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to update comment' },
       { status: 500 }
@@ -687,7 +687,7 @@ async function handleDeleteComment(body: unknown, supabase: unknown, user: unkno
       message: 'Comment deleted successfully'
     })
   } catch (error) {
-    console.error('Delete comment error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to delete comment' },
       { status: 500 }
@@ -732,7 +732,7 @@ async function handleAddReaction(
       message: 'Reaction added successfully'
     })
   } catch (error) {
-    console.error('Add reaction error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to add reaction' },
       { status: 500 }
@@ -757,7 +757,7 @@ async function handleAIAnalysis(
       message: 'AI analysis completed'
     })
   } catch (error) {
-    console.error('AI analysis error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to generate AI analysis' },
       { status: 500 }
@@ -800,7 +800,7 @@ async function handleVoiceNoteUpload(body: unknown, supabase: unknown, user: unk
       message: 'Voice note uploaded successfully'
     })
   } catch (error) {
-    console.error('Voice note upload error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to upload voice note' },
       { status: 500 }
@@ -831,7 +831,7 @@ async function handleRemoveReaction(body: unknown, supabase: unknown, user: unkn
       message: 'Reaction removed successfully'
     })
   } catch (error) {
-    console.error('Remove reaction error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to remove reaction' },
       { status: 500 }
@@ -911,7 +911,7 @@ async function handleMarkResolved(body: unknown, supabase: unknown, user: unknow
       message: `Comment ${resolved ? 'resolved' : 'reopened'} successfully
     })
   } catch (error) {
-    console.error('Mark resolved error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to update comment status' },
       { status: 500 }
@@ -984,7 +984,7 @@ async function handleAddReply(body: unknown, supabase: unknown, user: unknown) {
       message: 'Reply added successfully'
     })
   } catch (error) {
-    console.error('Add reply error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to add reply' },
       { status: 500 }
@@ -1035,7 +1035,7 @@ async function handleGenerateSummary(body: unknown, supabase: unknown, user: unk
       message: 'Summary generated successfully'
     })
   } catch (error) {
-    console.error('Generate summary error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to generate summary' },
       { status: 500 }

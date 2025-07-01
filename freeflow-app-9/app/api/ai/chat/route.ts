@@ -19,7 +19,7 @@ interface AIResponse {
   actionItems?: Array<{
     title: string
     action: string
-    priority: 'high' | 'medium' | 'low
+    priority: 'high' | 'medium' | 'low'
     estimatedTime?: string
     impact?: string
   }>
@@ -171,10 +171,10 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json({
-      message: response.choices[0]?.message?.content || 'No response generated
+      message: response.choices[0]?.message?.content || 'No response generated'
     })
   } catch (error) {
-    console.error('Chat error: ', error)'
+    console.error('Chat error: ', error)
     return new NextResponse('Internal Server Error', { status: 500 })
   }
 }
@@ -192,7 +192,7 @@ export async function GET() {
       message: 'AI chat service is ready',
     })
   } catch (error) {
-    console.error('Chat service check error: ', error)'
+    console.error('Chat service check error: ', error)
     return new NextResponse('Internal Server Error', { status: 500 })
   }
 } 

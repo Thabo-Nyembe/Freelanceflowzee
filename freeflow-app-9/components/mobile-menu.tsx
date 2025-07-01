@@ -24,14 +24,18 @@ export function MobileMenu() {
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden mobile-menu-toggle"
+          className="md:hidden mobile-menu-toggle transition-transform duration-200 ease-in-out"
           data-testid="mobile-menu-toggle"
         >
           <Menu className="h-5 w-5" />
           <span className="sr-only">Toggle menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+      <SheetContent 
+        side="left" 
+        className="w-[300px] sm:w-[400px] transition-transform duration-300 ease-in-out"
+        data-testid="mobile-menu-content"
+      >
         <div className="flex flex-col space-y-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" onClick={() => setIsOpen(false)} data-testid="mobile-nav-logo">
@@ -42,6 +46,7 @@ export function MobileMenu() {
               size="icon"
               onClick={() => setIsOpen(false)}
               data-testid="mobile-menu-close"
+              className="transition-transform duration-200 ease-in-out"
             >
               <X className="h-5 w-5" />
               <span className="sr-only">Close menu</span>
@@ -52,7 +57,7 @@ export function MobileMenu() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent"
+                className="rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent transition-colors duration-200"
                 onClick={() => setIsOpen(false)}
                 data-testid={item.testId}
               >

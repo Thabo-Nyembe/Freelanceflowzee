@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Moon, Sun, Monitor, Check } from "lucide-react"
 import { useTheme } from "@/components/theme-provider"
-import { Button } from "@/components/ui/button'"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,

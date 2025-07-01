@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('AI streaming error: ', error);'
+    console.error('AI streaming error: ', error);
     return new Response(
       JSON.stringify({ 
         success: false, 

@@ -32,7 +32,7 @@ export async function GET() {
       headers: { 'Content-Type': 'application/json' }
     })
   } catch (error) {
-    console.error('Payment system health check failed: ', error)'
+    console.error(match.replace(/'$/g, ))
     return new Response(JSON.stringify({
       status: 'error,'
       message: 'Payment system health check failed'
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
           customerId = customer.id
         }
       } catch (error) {
-        console.error('Customer creation/retrieval failed: ', error)'
+        console.error(match.replace(/'$/g, ))
         return NextResponse.json(
           { 
             success: false,
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
           publishable_key: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
         })
       } catch (error) {
-        console.error('Subscription creation failed: ', error)'
+        console.error(match.replace(/'$/g, ))
         return NextResponse.json(
           { 
             success: false,
@@ -190,7 +190,7 @@ export async function POST(request: NextRequest) {
         publishable_key: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
       })
     } catch (error) {
-      console.error('Payment intent creation failed: ', error)'
+      console.error(match.replace(/'$/g, ))
       return NextResponse.json(
         { 
           success: false,
@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
       )
     }
   } catch (error) {
-    console.error('Request processing failed: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { 
         success: false,
@@ -237,7 +237,7 @@ export async function PUT(request: NextRequest) {
       payment_intent: paymentIntent,
     })
   } catch (error) {
-    console.error('Payment intent update failed: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       {
         success: false,

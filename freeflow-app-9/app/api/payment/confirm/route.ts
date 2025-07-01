@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       )
     }
   } catch (error: unknown) {
-    console.error('Payment confirmation failed: ', error)'
+    console.error(match.replace(/'$/g, ))
     
     // Handle specific Stripe errors
     if (error.type === 'StripeCardError') {

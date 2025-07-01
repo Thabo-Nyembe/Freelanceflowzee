@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('UPF Test API error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { 
         error: 'Test API error', 
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('UPF Test POST error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Test POST error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

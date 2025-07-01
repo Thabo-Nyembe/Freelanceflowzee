@@ -1,7 +1,7 @@
 'use client''
 
 import React, { useState } from 'react';'
-import { Button } from '@/components/ui/button';'
+import { Button } from '@/components/ui/button''
 import { ClientPresentationDemo } from './client-presentation-demo';'
 import { InvestorDemo } from './investor-demo';'
 import { FreelancerOnboardingDemo } from './freelancer-onboarding-demo';'

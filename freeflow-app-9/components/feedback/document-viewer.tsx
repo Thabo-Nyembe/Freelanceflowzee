@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react'
-import { Button } from "@/components/ui/button'"
+import { Button } from "@/components/ui/button"
 import { ZoomIn, ZoomOut, MessageSquare, FileText } from 'lucide-react'
 import { CommentDialog } from './comment-dialog'
 

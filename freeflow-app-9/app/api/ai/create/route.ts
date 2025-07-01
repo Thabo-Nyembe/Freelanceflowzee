@@ -361,7 +361,7 @@ const AI_MODEL_CONFIGS: Record<string, AIModelConfig> = {
       max_tokens: params?.maxTokens || 1000,
       temperature: 0.7
     }),
-    responseParser: (response: any) => response.choices[0]?.message?.content || 'No response generated
+    responseParser: (response: any) => response.choices[0]?.message?.content || 'No response generated'
   }
 }
 
@@ -387,7 +387,7 @@ async function generateWithAI(prompt: string, modelConfig: AIModelConfig, apiKey
     const data = await response.json()
     return modelConfig.responseParser(data)
   } catch (error) {
-    console.error('AI generation error: ', error)'
+    console.error('AI generation error: ', error)
     return 'AI generation temporarily unavailable'
   }
 }
@@ -473,7 +473,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Asset generation error: ', error)'
+    console.error('Asset generation error: ', error)
     return NextResponse.json(
       { error: 'Failed to generate asset' },
       { status: 500 }
@@ -508,7 +508,7 @@ function getDimensionsForType(assetType: string): string {
     headlines: 'Text',
     hooks: 'Text'
   }
-  return dimensionMap[assetType] || 'Variable
+  return dimensionMap[assetType] || 'Variable'
 }
 
 function adjustSizeForQuality(baseSize: string, quality: string): string {

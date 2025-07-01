@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('AI Component Recommendations Error: ', error);'
+    console.error('AI Component Recommendations Error: ', error);
     
     // Return fallback recommendations if AI service fails
     return NextResponse.json({

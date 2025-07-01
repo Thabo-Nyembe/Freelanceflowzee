@@ -53,7 +53,7 @@ export async function GET() {
     });
 
   } catch (error) {
-    console.error('Analytics error: ', error);'
+    console.error('Analytics error: ', error);')
     return NextResponse.json({
       error: error instanceof Error ? error.message : 'Failed to fetch analytics'
     }, { status: 500 });
@@ -76,7 +76,7 @@ export async function POST() {
     });
 
   } catch (error) {
-    console.error('Optimization error: ', error);'
+    console.error('Optimization error: ', error);')
     return NextResponse.json({
       error: error instanceof Error ? error.message : 'Optimization failed'
     }, { status: 500 });

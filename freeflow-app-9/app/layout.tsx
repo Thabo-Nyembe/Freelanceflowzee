@@ -1,6 +1,5 @@
-'use client'
-
 import { Inter } from 'next/font/google'
+import { Metadata } from 'next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ErrorBoundary } from '@/components/error-handling/error-boundary'
 import { NetworkErrorHandler } from '@/components/error-handling/network-error'
@@ -13,6 +12,36 @@ import '@/styles/globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
+export const metadata: Metadata = {
+  title: 'FreeflowZee - Create, Share & Get Paid Like a Pro',
+  description: 'Generate creative assets with AI, share files like WeTransfer, manage projects with escrow payments, and build your creative business - all in one revolutionary platform.',
+  keywords: 'AI creative assets, file sharing, escrow payments, creative business, digital collaboration, freelance platform',
+  openGraph: {
+    title: 'FreeflowZee - Create, Share & Get Paid Like a Pro',
+    description: 'Generate creative assets with AI, share files like WeTransfer, manage projects with escrow payments, and build your creative business - all in one revolutionary platform.',
+    type: 'website',
+    url: 'https://freeflowzee.com',
+    images: [
+      {
+        url: 'https://freeflowzee.com/images/hero-banner.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'FreeflowZee Platform Preview'
+      }
+    ]
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'FreeflowZee - Create, Share & Get Paid Like a Pro',
+    description: 'Generate creative assets with AI, share files like WeTransfer, manage projects with escrow payments, and build your creative business - all in one revolutionary platform.',
+    images: ['https://freeflowzee.com/images/hero-banner.jpg']
+  },
+  other: {
+    'application-name': 'FreeflowZee',
+    'theme-color': '#4F46E5'
+  }
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -20,38 +49,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <title>FreeflowZee - Create, Share & Get Paid Like a Pro</title>
-        <meta name="description" content="Generate creative assets with AI, share files like WeTransfer, manage projects with escrow payments, and build your creative business - all in one revolutionary platform." />
-        <meta property="og:title" content="FreeflowZee - Create, Share & Get Paid Like a Pro" />
-        <meta property="og:description" content="Generate creative assets with AI, share files like WeTransfer, manage projects with escrow payments, and build your creative business - all in one revolutionary platform." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://freeflowzee.com" />
-        <meta property="og:image" content="https://freeflowzee.com/images/hero-banner.jpg" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="FreeflowZee - Create, Share & Get Paid Like a Pro" />
-        <meta name="twitter:description" content="Generate creative assets with AI, share files like WeTransfer, manage projects with escrow payments, and build your creative business - all in one revolutionary platform." />
-        <meta name="twitter:image" content="https://freeflowzee.com/images/hero-banner.jpg" />
-        <meta name="keywords" content="AI creative assets, file sharing, escrow payments, creative business, digital collaboration, freelance platform" />
-        <script 
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebApplication",
-              "name": "FreeflowZee",
-              "description": "Generate creative assets with AI, share files like WeTransfer, manage projects with escrow payments, and build your creative business - all in one revolutionary platform.",
-              "url": "https://freeflowzee.com",
-              "applicationCategory": "BusinessApplication",
-              "offers": {
-                "@type": "Offer",
-                "price": "0",
-                "priceCurrency": "USD"
-              }
-            })
-          }}
-        />
-      </head>
       <body className={cn('min-h-screen bg-background font-sans antialiased', inter.className)}>
         <ThemeProvider attribute="class" defaultTheme="system">
           <ErrorBoundary>

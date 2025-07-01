@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('Real-time collaboration API error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -156,7 +156,7 @@ async function handleAddComment(
       message: 'Comment added successfully'
     })
   } catch (error) {
-    console.error('Add comment error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to add comment' },
       { status: 500 }
@@ -242,7 +242,7 @@ async function handleAddApproval(
       message: `File ${approvalData.status.replace('_', ' ')} successfully
     })
   } catch (error) {
-    console.error('Add approval error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to add approval' },
       { status: 500 }
@@ -287,7 +287,7 @@ async function handleSendNotification(
       message: 'Notification sent successfully'
     })
   } catch (error) {
-    console.error('Send notification error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to send notification' },
       { status: 500 }
@@ -326,7 +326,7 @@ async function handleUpdateFileStatus(
       message: 'File status updated successfully'
     })
   } catch (error) {
-    console.error('Update file status error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to update file status' },
       { status: 500 }
@@ -368,7 +368,7 @@ async function createFileActivityNotification(supabase: unknown, data: unknown) 
       }
     }
   } catch (error) {
-    console.error('Failed to create file activity notification: ', error)'
+    console.error(match.replace(/'$/g, ))
   }
 }
 
@@ -403,7 +403,7 @@ async function createApprovalNotification(supabase: unknown, data: unknown) {
       }
     }
   } catch (error) {
-    console.error('Failed to create approval notification: ', error)'
+    console.error(match.replace(/'$/g, ))
   }
 }
 
@@ -445,7 +445,7 @@ async function checkWorkflowProgression(supabase: unknown, projectId: string, ap
       }
     }
   } catch (error) {
-    console.error('Failed to check workflow progression: ', error)'
+    console.error(match.replace(/'$/g, ))
   }
 }
 
@@ -506,7 +506,7 @@ export async function GET(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('Real-time collaboration GET error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

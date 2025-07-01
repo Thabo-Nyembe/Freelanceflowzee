@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('Edge function error: ', response.status, errorText)'
+      console.error(match.replace(/'$/g, ))
       
       // Return fallback response for demo purposes
       const fallbackResponse = generateFallbackResponse(action, requestData)
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result)
 
   } catch (error) {
-    console.error('OpenAI Collaboration API Error: ', error)'
+    console.error(match.replace(/'$/g, ))
     
     // Provide fallback response for development
     const body = await request.json().catch(() => ({}))

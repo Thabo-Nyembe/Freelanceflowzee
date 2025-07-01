@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Demo content API error: ', error);'
+    console.error('Demo content API error: ', error);')
     
     return NextResponse.json({
       success: false,
@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('Demo content POST error: ', error);'
+    console.error('Demo content POST error: ', error);')
     
     return NextResponse.json({
       success: false,

@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('AI generation error: ', error);'
+    console.error('AI generation error: ', error);
     return NextResponse.json(
       { 
         success: false, 

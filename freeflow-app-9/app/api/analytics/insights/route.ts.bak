@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Analytics insights error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { 
         error: 'Failed to generate insights',
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
     
-    console.error('Event analysis error: ', {'
+    console.error('Event analysis error: ', {')
       message: errorMessage
     })
     

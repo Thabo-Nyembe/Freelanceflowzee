@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('Enhanced unlock API error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -211,7 +211,7 @@ async function handleUnlockRequest(
       { status: 400 }
     )
   } catch (error) {
-    console.error('Unlock request error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to process unlock request' },
       { status: 500 }
@@ -281,7 +281,7 @@ async function handleGenerateToken(
       downloadLimit: tokenPayload.downloadLimit
     })
   } catch (error) {
-    console.error('Token generation error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to generate download token' },
       { status: 500 }
@@ -343,7 +343,7 @@ async function handleValidateAccess(
       accessLevel: project.client_access?.includes(clientEmail) ? 'client' : 'owner'
     })
   } catch (error) {
-    console.error('Access validation error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Failed to validate access' },
       { status: 500 }
@@ -463,7 +463,7 @@ async function sendUnlockNotifications(supabase: unknown, data: unknown) {
       }
     }
   } catch (error) {
-    console.error('Failed to send unlock notifications: ', error)'
+    console.error(match.replace(/'$/g, ))
   }
 }
 
@@ -508,7 +508,7 @@ export async function GET(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('Enhanced unlock GET error: ', error)'
+    console.error(match.replace(/'$/g, ))
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -1,7 +1,7 @@
 
 import React, { useState, useCallback, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
 import { Upload, FileIcon, CheckCircle, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

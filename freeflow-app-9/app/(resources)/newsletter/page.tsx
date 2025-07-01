@@ -72,7 +72,7 @@ const benefits = [
   "Industry trends and expert interviews",
   "Community spotlights and success stories",
   "Free resources and downloadable templates",
-  "Early access to webinars and events
+  "Early access to webinars and events"
 ]
 
 export default function NewsletterPage() {
