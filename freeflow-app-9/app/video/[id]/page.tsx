@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import MuxVideoPlayer from '@/components/video/mux-video-player';
 import { VideoThumbnailGrid } from '@/components/video/video-thumbnail';
+import { VideoSharingControls } from '@/components/video/video-sharing-controls';
 import { createClient } from '@/lib/supabase/server';
 import { formatDuration } from '@/lib/video/config';
 
@@ -313,6 +314,35 @@ export default async function VideoPage({ params, searchParams }: VideoPageProps
               </div>
             </CardContent>
           </Card>
+
+          {/* Video Sharing Controls - Only show for video owners */}
+          {isOwner && (
+            <VideoSharingControls
+              videoId={video.id}
+              title={video.title}
+              description={video.description}
+              isPublic={video.is_public}
+              passwordProtected={video.password_protected}
+              allowEmbedding={video.allow_embedding}
+              allowDownload={video.allow_download}
+              onSettingsChange={async (settings) => {
+                const response = await fetch(`/api/video/${video.id}/settings`, {
+                  method: 'PATCH',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(settings),
+                });
+                
+                if (!response.ok) {
+                  throw new Error('Failed to update settings');
+                }
+                
+                // Refresh the page to show updated settings
+                window.location.reload();
+              }}
+            />
+          )}
 
           {/* Comments Section */}
           <Card>
