@@ -3,6 +3,7 @@
 
 -- Enable Row Level Security and necessary extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS vector;
 
 -- Projects table
 CREATE TABLE IF NOT EXISTS projects (
@@ -18,9 +19,12 @@ CREATE TABLE IF NOT EXISTS projects (
   progress INTEGER DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
   start_date DATE,
   end_date DATE,
+  parent_id UUID REFERENCES projects(id) ON DELETE SET NULL,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  embedding vector(1536),
+  CONSTRAINT check_parent_id_not_self CHECK (id <> parent_id)
 );
 
 -- Feedback/Comments table for media files
@@ -242,6 +246,7 @@ CREATE INDEX IF NOT EXISTS idx_feedback_comments_project_id ON feedback_comments
 CREATE INDEX IF NOT EXISTS idx_feedback_comments_user_id ON feedback_comments(user_id);
 CREATE INDEX IF NOT EXISTS idx_project_attachments_project_id ON project_attachments(project_id);
 CREATE INDEX IF NOT EXISTS idx_time_entries_project_id ON time_entries(project_id);
+CREATE INDEX IF NOT EXISTS idx_projects_parent_id ON projects(parent_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_user_id ON invoices(user_id);
 
 -- Functions for updated_at timestamps
@@ -424,4 +429,31 @@ CREATE OR REPLACE TRIGGER update_post_likes_count
 CREATE OR REPLACE TRIGGER update_post_comments_count
   AFTER INSERT OR DELETE ON comments
   FOR EACH ROW
-  EXECUTE FUNCTION update_post_counts(); 
+  EXECUTE FUNCTION update_post_counts();
+
+-- Function to search for projects by embedding similarity
+CREATE OR REPLACE FUNCTION match_projects (
+  query_embedding vector(1536),
+  match_threshold float,
+  match_count int
+)
+RETURNS TABLE (
+  id uuid,
+  title text,
+  description text,
+  similarity float
+)
+LANGUAGE sql STABLE
+AS $$
+  SELECT
+    p.id,
+    p.title,
+    p.description,
+    1 - (p.embedding <=> query_embedding) AS similarity
+  FROM
+    projects AS p
+  WHERE p.embedding IS NOT NULL AND 1 - (p.embedding <=> query_embedding) > match_threshold
+  ORDER BY
+    similarity DESC
+  LIMIT match_count;
+$$;

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';'
 import { multiCloudStorage, getStorageAnalytics } from '@/lib/storage/multi-cloud-storage';
 
 // STARTUP COST ANALYTICS API
@@ -19,12 +19,12 @@ export async function GET(request: NextRequest) {
       startup_mode: process.env.STARTUP_MODE === 'true
     });
     
-  } catch (error) {
+  } catch (error) {'
     console.error('Startup analytics failed: ', error);')
     return NextResponse.json(
       { 
-        success: false, 
-        error: 'Failed to fetch startup analytics,'
+        success: false, '
+        error: 'Failed to fetch startup analytics,
         details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
@@ -35,8 +35,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const { action } = await request.json();
-    
-    if (action === 'optimize') {
+    '
+    if (action === 'optimize') {'
       // Run startup optimization - mock implementation since the method doesn't exist
       const optimization = {
         moved: 0,
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
         },
         message: 'Startup optimization completed successfully'
       });
-      
+      '
     } else if (action === 'budget_check') {
       // Check budget status
       const budgetStatus = await checkStartupBudget();
@@ -66,18 +66,17 @@ export async function POST(request: NextRequest) {
       });
       
     } else {
-      return NextResponse.json(
-        { success: false, error: 'Invalid action' },
+      return NextResponse.json({ success: false, error: 'Invalid action' },
         { status: 400 }
       );
     }
     
-  } catch (error) {
+  } catch (error) {'
     console.error('Startup action failed: ', error);')
     return NextResponse.json(
       { 
-        success: false, 
-        error: 'Action failed,'
+        success: false, '
+        error: 'Action failed,
         details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
@@ -86,8 +85,8 @@ export async function POST(request: NextRequest) {
 }
 
 // Calculate startup-specific cost metrics
-function calculateStartupMetrics(analytics: unknown) {
-  const STARTUP_BUDGET = parseFloat(process.env.STORAGE_MONTHLY_BUDGET || '50');
+function calculateStartupMetrics(analytics: unknown) {'
+  const STARTUP_BUDGET = parseFloat(process.env.STORAGE_MONTHLY_BUDGET || '50');'
   const SUPABASE_LIMIT = parseFloat(process.env.STORAGE_SUPABASE_LIMIT || '15');
   
   // Cost calculations
@@ -106,9 +105,9 @@ function calculateStartupMetrics(analytics: unknown) {
   const budgetUsed = (totalEstimatedCost / STARTUP_BUDGET) * 100;
   const budgetRemaining = STARTUP_BUDGET - totalEstimatedCost;
   
-  // Status determination
-  let status: 'safe' | 'warning' | 'over_budget' = 'safe';
-  if (budgetUsed >= 100) status = 'over_budget';
+  // Status determination'
+  let status: 'safe' | 'warning' | 'over_budget' = 'safe';'
+  if (budgetUsed >= 100) status = 'over_budget';'
   else if (budgetUsed >= 80) status = 'warning';
   
   // Savings calculations
@@ -178,7 +177,7 @@ function calculateOptimizationImpact(optimization: unknown) {
   const monthlySavings = supabaseCostSaved - wasabiCostAdded;
   const annualSavings = monthlySavings * 12;
   
-  // Calculate percentage of budget saved
+  // Calculate percentage of budget saved'
   const STARTUP_BUDGET = parseFloat(process.env.STORAGE_MONTHLY_BUDGET || '50');
   const budgetPercentageSaved = (monthlySavings / STARTUP_BUDGET) * 100;
   
@@ -189,7 +188,7 @@ function calculateOptimizationImpact(optimization: unknown) {
     bytes_optimized: savedBytes,
     files_moved: optimization.moved,
     roi_description: monthlySavings > 1 
-      ? `Saves ${budgetPercentageSaved.toFixed(1)}% of your monthly budget!
+      ? `Saves ${budgetPercentageSaved.toFixed(1)}% of your monthly budget!'
       : 'Meaningful cost reduction for your startup budget'
   };
 }
@@ -200,16 +199,16 @@ async function checkStartupBudget() {
   const startupMetrics = calculateStartupMetrics(analytics);
   
   const alerts: string[] = [];
-  
-  if (startupMetrics.status === 'over_budget') {
-    alerts.push('🚨 URGENT: Over budget! Immediate optimization needed');
-    alerts.push('💡 Move large files to Wasabi for instant 72% savings');
-  } else if (startupMetrics.status === 'warning') {
-    alerts.push('⚠️ Approaching budget limit - run optimization soon');
+  '
+  if (startupMetrics.status === 'over_budget') {'
+    alerts.push('🚨 URGENT: Over budget! Immediate optimization needed');'
+    alerts.push('💡 Move large files to Wasabi for instant 72% savings');'
+  } else if (startupMetrics.status === 'warning') {'
+    alerts.push('⚠️ Approaching budget limit - run optimization soon');'
     alerts.push('📊 Consider increasing Wasabi usage to stay within budget');
-  } else {
+  } else {'
     alerts.push('✅ Budget is healthy for startup operations');
-    if (startupMetrics.budget_used < 50) {
+    if (startupMetrics.budget_used < 50) {'
       alerts.push('🚀 Great savings! You have room to scale up');
     }
   }
@@ -225,8 +224,8 @@ async function checkStartupBudget() {
     budget_remaining: startupMetrics.budget_remaining,
     current_spend: startupMetrics.current_spend,
     alerts,
-    next_action: startupMetrics.status === 'safe' 
-      ? 'Continue monitoring - optimization on track
+    next_action: startupMetrics.status === 'safe' '
+      ? 'Continue monitoring - optimization on track'
       : 'Run storage optimization to reduce costs'
   };
 }
@@ -235,31 +234,31 @@ async function checkStartupBudget() {
 function generateStartupRecommendations(metrics: unknown): string[] {
   const recommendations: string[] = [];
   
-  // Budget-based recommendations
-  if (metrics.status === 'over_budget') {
-    recommendations.push('🚨 URGENT: Over budget! Move all possible files to Wasabi immediately');
-    recommendations.push('💡 Consider upgrading to Wasabi-only mode for maximum savings');
-  } else if (metrics.status === 'warning') {
-    recommendations.push('⚠️ Approaching budget limit - optimize storage now');
+  // Budget-based recommendations'
+  if (metrics.status === 'over_budget') {'
+    recommendations.push('🚨 URGENT: Over budget! Move all possible files to Wasabi immediately');'
+    recommendations.push('💡 Consider upgrading to Wasabi-only mode for maximum savings');'
+  } else if (metrics.status === 'warning') {'
+    recommendations.push('⚠️ Approaching budget limit - optimize storage now');'
     recommendations.push('📊 Run daily optimization to stay within budget');
-  } else {
+  } else {'
     recommendations.push('✅ Budget is healthy - continue current optimization strategy');
-    if (metrics.budgetUsed < 50) {
+    if (metrics.budgetUsed < 50) {'
       recommendations.push('🚀 Great savings! You have room to scale up if needed');
     }
   }
   
   // Storage-specific recommendations
-  if (metrics.supabaseCost > 10) {
+  if (metrics.supabaseCost > 10) {'
     recommendations.push('💰 Move large files from Supabase to Wasabi for 72% savings');
   }
   
-  if (metrics.analytics.supabaseSize > 1e9) {
+  if (metrics.analytics.supabaseSize > 1e9) {'
     recommendations.push('📁 You have over 1GB on Supabase - significant savings available');
   }
   
   // Optimization opportunities
-  if (metrics.analytics.optimizationScore < 80) {
+  if (metrics.analytics.optimizationScore < 80) {'
     recommendations.push('🔧 Run optimization to improve your score and save money');
   }
   
@@ -268,4 +267,4 @@ function generateStartupRecommendations(metrics: unknown): string[] {
   }
   
   return recommendations;
-} 
+} '

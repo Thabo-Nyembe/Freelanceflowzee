@@ -11,7 +11,7 @@ const dynamicRoutes: Array<{ path: string; lastmod: string }> = [
   // Add blog posts, projects, etc. when you have them
 ]
 
-export async function GET() {
+export async function GET() {'
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freeflow-app-9-6egesbwif-thabo-5265s-projects.vercel.app
   const currentDate = new Date().toISOString()
 
@@ -34,7 +34,7 @@ ${staticRoutes
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
   </url>
-  })
+  })'
   .join('\n')}
 ${dynamicRoutes
   .map((route) => {
@@ -44,67 +44,67 @@ ${dynamicRoutes
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
-  })
+  })'
   .join('\n')}
 </urlset>
 
   return new NextResponse(sitemap, {
-    headers: {
+    headers: {'
       'Content-Type': 'application/xml', 'Cache-Control': 'public, max-age=86400, s-maxage=86400', // 24 hours
     },
   })
 }
 
 function getPriority(route: string): string {
-  // Homepage gets highest priority
+  // Homepage gets highest priority'
   if (route === ') return '1.0'
   
-  // Important pages
-  if (['/features', '/pricing', '/contact', '/demo'].includes(route)) {
+  // Important pages'
+  if (['/features', '/pricing', '/contact', '/demo'].includes(route)) {'
     return '0.9'
   }
   
-  // Secondary pages
-  if (['/how-it-works', '/blog', '/community', '/docs'].includes(route)) {
+  // Secondary pages'
+  if (['/how-it-works', '/blog', '/community', '/docs'].includes(route)) {'
     return '0.8'
   }
   
-  // Tool pages
-  if (route.startsWith('/tools/')) {
+  // Tool pages'
+  if (route.startsWith('/tools/')) {'
     return '0.7'
   }
   
-  // Auth pages
-  if (['/login', '/signup'].includes(route)) {
+  // Auth pages'
+  if (['/login', '/signup'].includes(route)) {'
     return '0.6'
   }
   
-  // Legal pages
-  if (['/privacy', '/terms', '/support'].includes(route)) {
+  // Legal pages'
+  if (['/privacy', '/terms', '/support'].includes(route)) {'
     return '0.5'
   }
-  
+  '
   return '0.6'
 }
 
 function getChangeFreq(route: string): string {
-  // Homepage and blog change frequently
+  // Homepage and blog change frequently'
   if (route === ' || route === '/blog') return 'daily'
   
-  // Feature and pricing pages change weekly
-  if (['/features', '/pricing', '/community'].includes(route)) {
+  // Feature and pricing pages change weekly'
+  if (['/features', '/pricing', '/community'].includes(route)) {'
     return 'weekly'
   }
   
-  // Documentation changes monthly
-  if (['/docs', '/tutorials', '/api-docs'].includes(route)) {
+  // Documentation changes monthly'
+  if (['/docs', '/tutorials', '/api-docs'].includes(route)) {'
     return 'monthly'
   }
   
-  // Legal pages change yearly
-  if (['/privacy', '/terms'].includes(route)) {
+  // Legal pages change yearly'
+  if (['/privacy', '/terms'].includes(route)) {'
     return 'yearly'
   }
-  
+  '
   return 'monthly'
-} 
+} '

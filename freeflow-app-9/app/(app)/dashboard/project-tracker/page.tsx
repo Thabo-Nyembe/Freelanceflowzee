@@ -1,9 +1,10 @@
-'use client'
-
-import React, { useState } from 'react'
+import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '@/components/ui/badge';
+import { getTopLevelProjects } from '@/app/(app)/projects/actions';
+import { ProjectDetails } from '@/components/projects/project-details';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 
 interface ProjectUpdate {
   id: string
@@ -32,35 +33,38 @@ interface Project {
   deadline: string
 }
 
-export default function ProjectTrackerPage() {
-  const [projects] = useState<Project[]>([
-    {
-      id: '1',
-      title: 'Brand Identity Design',
-      status: 'active',
-      progress: 75,
-      milestones: [
-        {
-          id: '1',
-          title: 'Initial Concepts',
-          description: 'Create initial design concepts',
-          completed: true,
-          dueDate: '2024-01-15'
-        }
-      ],
-      updates: [
-        {
-          id: '1',
-          type: 'milestone',
-          title: 'Milestone Completed',
-          content: 'Initial concepts completed',
-          timestamp: '2024-01-16T10:00:00Z'
-        }
-      ],
-      client: 'ABC Corp',
-      deadline: '2024-03-31'
-    }
-  ])
+function ProjectCard({ project }) {
+  return (
+    <Card className="bg-white/60 backdrop-blur-xl border-0 shadow-2xl">
+      <CardHeader>
+        <CardTitle>{project.title}</CardTitle>
+        <Badge variant="default">{project.status || 'No Status'}</Badge>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-gray-600 pt-4">{project.description}</p>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="mt-4">View Project</Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl h-4/5 overflow-y-auto">
+            <ProjectDetails project={project} />
+          </DialogContent>
+        </Dialog>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default async function ProjectTrackerPage() {
+  const { projects, error } = await getTopLevelProjects();
+
+  if (error) {
+    return <div className="p-6 text-red-500">{error}</div>;
+  }
+
+  if (!projects || projects.length === 0) {
+    return <div className="p-6">No projects found.</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6">
@@ -68,48 +72,7 @@ export default function ProjectTrackerPage() {
         <h1 className="text-4xl font-bold mb-8">Project Tracker</h1>
         <div className="space-y-6">
           {projects.map((project) => (
-            <Card key={project.id} className="bg-white/60 backdrop-blur-xl border-0 shadow-2xl">
-              <CardHeader>
-                <CardTitle>{project.title}</CardTitle>
-                <Badge variant="default">{project.status}</Badge>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-blue-600 h-2 rounded-full"
-                    style={{ width: project.progress + '%' }}
-                  ></div>
-                </div>
-              </CardHeader>
-              <CardContent>"
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="font-semibold mb-3">Milestones</h3>
-                    <div className="space-y-2">
-                      {project.milestones.map((milestone) => (
-                        <div key={milestone.id} className="p-3 rounded-lg border bg-white">
-                          <h4 className="font-medium">{milestone.title}</h4>
-                          <p className="text-sm text-gray-600">{milestone.description}</p>
-                          <Badge variant={milestone.completed ? 'default' : 'outline'}>
-                            {milestone.completed ? 'Complete' : 'Pending'}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-3">Recent Updates</h3>
-                    <div className="space-y-2">
-                      {project.updates.map((update) => (
-                        <div key={update.id} className="p-3 bg-white rounded-lg border">
-                          <Badge variant="outline">{update.type}</Badge>
-                          <h4 className="font-medium text-sm">{update.title}</h4>
-                          <p className="text-sm text-gray-600">{update.content}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <ProjectCard key={project.id} project={project} />
           ))}
         </div>
       </div>

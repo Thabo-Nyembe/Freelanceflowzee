@@ -3,10 +3,10 @@ import { multiCloudStorage } from '@/lib/storage/multi-cloud-storage'
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
+    const { searchParams } = new URL(request.url)'
     const fileId = searchParams.get('fileId')
     
-    if (!fileId) {
+    if (!fileId) {'
       return NextResponse.json({ error: 'File ID is required' }, { status: 400 })
     }
 
@@ -16,14 +16,14 @@ export async function GET(request: NextRequest) {
     // Return file with proper headers
     return new NextResponse(buffer, {
       status: 200,
-      headers: {
+      headers: {'
         'Content-Type': metadata.mimeType, 'Content-Disposition': `attachment; filename= "${metadata.original_filename}"`, 'Content-Length': metadata.size.toString(), 'Cache-Control': 'private, max-age=3600', 'X-File-Provider': metadata.provider, 'X-File-Size': metadata.size.toString()
       }
     })
 
-  } catch (error) {
+  } catch (error) {'
     console.error(match.replace(/'$/g, ))
-    return NextResponse.json({
+    return NextResponse.json({'
       error: error instanceof Error ? error.message : 'Download failed'
     }, { status: 500 })
   }
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { fileId, expiresIn = 3600 } = body
     
-    if (!fileId) {
+    if (!fileId) {'
       return NextResponse.json({ error: 'File ID is required' }, { status: 400 })
     }
 
@@ -47,10 +47,10 @@ export async function POST(request: NextRequest) {
       expiresIn
     })
 
-  } catch (error) {
+  } catch (error) {'
     console.error(match.replace(/'$/g, ))
-    return NextResponse.json({
+    return NextResponse.json({'
       error: error instanceof Error ? error.message : 'Failed to generate signed URL'
     }, { status: 500 })
   }
-} 
+} '

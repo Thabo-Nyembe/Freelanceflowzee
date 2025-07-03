@@ -5,5 +5,5 @@ export async function GET() {
 }
 
 export async function POST() {
-  return NextResponse.json({ success: true, message: 'Feedback received' })
+  return new Response(JSON.stringify({ message: 'Feedback received (stub).' }), { headers: { 'Content-Type': 'application/json' } });
 }

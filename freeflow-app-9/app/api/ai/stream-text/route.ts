@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
     console.error('AI streaming error: ', error);
     return new Response(
       JSON.stringify({ 
-        success: false, 
+        success: false,
         error: 'Failed to stream response',
         details: error instanceof Error ? error.message : 'Unknown error'
       }),
@@ -124,4 +124,4 @@ export async function POST(req: NextRequest) {
       }
     );
   }
-} 
+}

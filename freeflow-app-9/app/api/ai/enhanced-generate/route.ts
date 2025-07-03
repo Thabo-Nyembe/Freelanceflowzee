@@ -117,11 +117,11 @@ export async function POST(req: NextRequest) {
     console.error('AI generation error: ', error);
     return NextResponse.json(
       { 
-        success: false, 
+        success: false,
         error: 'Failed to generate response',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     );
   }
-} 
+}

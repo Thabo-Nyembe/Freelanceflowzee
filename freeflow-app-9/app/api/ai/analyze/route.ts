@@ -3,13 +3,12 @@ import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import OpenAI from 'openai'
 import { aiConfig } from '@/app/config/ai'
-
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-const analyzePrompt = `Analyze the design patterns and provide insights in the following JSON format:
-{
+const analyzePrompt = `Analyze the design patterns and provide insights in the following JSON format:'
+{'
   "category": "string", "score": number between 0 and 1, "insights": ["string"], "recommendations": ["string"]
 }
 

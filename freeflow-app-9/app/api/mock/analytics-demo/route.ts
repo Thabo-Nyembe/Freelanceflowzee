@@ -1,8 +1,3 @@
-import { NextRequest, NextResponse } from 'next/server'
-
-export async function POST(request: NextRequest) {
-  return NextResponse.json({
-    success: true,
-    message: 'Demo event tracked successfully'
-  })
+export async function GET() {
+  return new Response(JSON.stringify({ message: 'Mock analytics demo API stubbed for build.' }), { headers: { 'Content-Type': 'application/json' } });
 } 

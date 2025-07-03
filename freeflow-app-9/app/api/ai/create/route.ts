@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-
 // Context7 Pattern: Enhanced request interface with model configuration
 interface AssetGenerationRequest {
   field: string
@@ -336,7 +335,7 @@ const ASSET_GENERATORS = {
   }
 }
 
-// Context7 Pattern: AI Model Provider Configurations
+// Context7 Pattern: AI Model Provider Configurations'
 const AI_MODEL_CONFIGS: Record<string, AIModelConfig> = {
   'gpt-4o-mini': {
     id: 'gpt-4o-mini',
@@ -400,8 +399,7 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!field || !assetType || !parameters?.style) {
-      return NextResponse.json(
-        { error: 'Missing required fields: field, assetType, and style' },
+      return NextResponse.json({ error: 'Missing required fields: field, assetType, and style' },
         { status: 400 }
       )
     }
@@ -474,8 +472,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Asset generation error: ', error)
-    return NextResponse.json(
-      { error: 'Failed to generate asset' },
+    return NextResponse.json({ error: 'Failed to generate asset' },
       { status: 500 }
     )
   }

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';'
 import { multiCloudStorage, getStorageAnalytics, checkStorageHealth } from '@/lib/storage/multi-cloud-storage';
 
 export async function GET() {
@@ -16,10 +16,10 @@ export async function GET() {
       wasabiSize: 0,
       potentialSavings: 0
     };
-
+'
     // Mock health check since the function doesn't return anything useful
-    const healthCheck = { 
-      status: 'healthy,'
+    const healthCheck = { '
+      status: 'healthy,
       supabase: { status: 'connected' },
       wasabi: { status: 'connected' }
     };
@@ -31,7 +31,7 @@ export async function GET() {
       percentageSavings: supabaseCost > 0 
         ? Math.round((mockAnalytics.potentialSavings / supabaseCost) * 100)
         : 0,
-      recommendedActions: [
+      recommendedActions: ['
         mockAnalytics.totalFiles > 50 ? 'Consider moving large files to Wasabi for cost savings' : null,
         mockAnalytics.wasabiSize > 0 ? 'Excellent cost optimization with Wasabi usage!' : null,
         mockAnalytics.totalSize > 1e10 ? 'Large storage usage - Wasabi can save up to 80%' : null
@@ -43,25 +43,25 @@ export async function GET() {
       analytics: mockAnalytics,
       healthCheck,
       insights,
-      status: {
-        overall: 'healthy,'
-        providers: {
-          supabase: 'connected,'
+      status: {'
+        overall: 'healthy,
+        providers: {'
+          supabase: 'connected,
           wasabi: 'connected'
         }
       }
     });
 
-  } catch (error) {
+  } catch (error) {'
     console.error('Analytics error: ', error);')
-    return NextResponse.json({
+    return NextResponse.json({'
       error: error instanceof Error ? error.message : 'Failed to fetch analytics'
     }, { status: 500 });
   }
 }
 
 export async function POST() {
-  try {
+  try {'
     // Mock optimization since the method doesn't exist
     const optimization = {
       moved: 0,
@@ -75,10 +75,10 @@ export async function POST() {
       message: `Storage optimization complete! Moved ${optimization.moved} files, saving approximately $${(optimization.saved / 1e9 * 0.023).toFixed(2)}/month
     });
 
-  } catch (error) {
+  } catch (error) {'
     console.error('Optimization error: ', error);')
-    return NextResponse.json({
+    return NextResponse.json({'
       error: error instanceof Error ? error.message : 'Optimization failed'
     }, { status: 500 });
   }
-} 
+} '

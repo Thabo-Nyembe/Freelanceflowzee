@@ -1,36 +1,39 @@
-import { FullConfig } from &apos;@playwright/test&apos;;
-import fs from &apos;fs&apos;;
-import path from &apos;path&apos;;
+import { FullConfig } from '@playwright/test'
+import { promises as fs } from 'fs'
+import path from 'path'
 
 async function globalTeardown(config: FullConfig) {
-  // Clean up storage state file
-  const storageStatePath = &apos;./tests/storage-state.json&apos;;
-  if (fs.existsSync(storageStatePath)) {
-    fs.unlinkSync(storageStatePath);
-  }
-
-  // Clean up test artifacts older than 7 days
-  const artifactDirs = [
-    &apos;test-results/screenshots&apos;,
-    &apos;test-results/videos&apos;,
-    &apos;test-results/traces&apos;
-  ];
-
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-  artifactDirs.forEach(dir => {
-    if (fs.existsSync(dir)) {
-      const files = fs.readdirSync(dir);
-      files.forEach(file => {
-        const filePath = path.join(dir, file);
-        const stats = fs.statSync(filePath);
-        if (stats.mtime < sevenDaysAgo) {
-          fs.unlinkSync(filePath);
-        }
-      });
+  console.log('🧹 Starting global test teardown...')
+  
+  try {
+    // Clean up authentication state files
+    const authFilePath = path.join(__dirname, 'auth.json')
+    try {
+      await fs.unlink(authFilePath)
+      console.log('🗑️  Cleaned up authentication state file')
+    } catch (error) {
+      // File doesn't exist, which is fine
     }
-  });
+    
+    // Clean up any test artifacts
+    const testArtifacts = [
+      'test-results.json',
+      'test-results.xml'
+    ]
+    
+    for (const artifact of testArtifacts) {
+      try {
+        await fs.unlink(path.join(process.cwd(), artifact))
+        console.log(`🗑️  Cleaned up ${artifact}`)
+      } catch (error) {
+        // File doesn't exist, which is fine
+      }
+    }
+    
+    console.log('✅ Global test teardown completed successfully')
+  } catch (error) {
+    console.error('❌ Error during global teardown:', error)
+  }
 }
 
-export default globalTeardown;
+export default globalTeardown

@@ -5,10 +5,10 @@ import { headers } from 'next/headers'
 // Context7 enhanced upload endpoint with multi-cloud support
 export async function POST(request: NextRequest) {
   try {
-    const headersList = await headers()
+    const headersList = await headers()'
     const authorization = headersList.get('authorization')
 
-    if (!authorization) {
+    if (!authorization) {'
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -16,22 +16,22 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient()
 
     // Parse multipart form data
-    const formData = await request.formData()
-    const file = formData.get('file') as File
-    const projectId = formData.get('projectId') as string
+    const formData = await request.formData()'
+    const file = formData.get('file') as File'
+    const projectId = formData.get('projectId') as string'
     const category = formData.get('category') as string || 'general
 
-    if (!file) {
+    if (!file) {'
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
     // File validation using Context7 patterns
-    const maxSize = 100 * 1024 * 1024 // 100MB
+    const maxSize = 100 * 1024 * 1024 // 100MB'
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/avi', 'video/mov', 'video/wmv', 'audio/mp3', 'audio/wav', 'audio/ogg', 'application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document
     ]
 
     if (file.size > maxSize) {
-      return NextResponse.json({ 
+      return NextResponse.json({ '
         error: 'File too large', 
         maxSize: maxSize,
         receivedSize: file.size 
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json({ 
+      return NextResponse.json({ '
         error: 'File type not allowed', 
         allowedTypes,
         receivedType: file.type 
@@ -48,34 +48,34 @@ export async function POST(request: NextRequest) {
 
     // Generate unique filename
     const timestamp = Date.now()
-    const randomString = Math.random().toString(36).substring(2, 15)
+    const randomString = Math.random().toString(36).substring(2, 15)'
     const fileExtension = file.name.split('.').pop()
     const uniqueFileName = `${timestamp}-${randomString}.${fileExtension}
     const storagePath = `uploads/${category}/${uniqueFileName}
 
     // Upload to Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { data: uploadData, error: uploadError } = await supabase.storage'
       .from('project-attachments')
-      .upload(storagePath, file, {
-        cacheControl: '3600,'
+      .upload(storagePath, file, {'
+        cacheControl: '3600,
         upsert: false
       })
 
-    if (uploadError) {
+    if (uploadError) {'
       console.error(match.replace(/'$/g, ))
-      return NextResponse.json({ 
+      return NextResponse.json({ '
         error: 'Upload failed', 
         details: uploadError.message 
       }, { status: 500 })
     }
 
     // Get public URL
-    const { data: urlData } = supabase.storage
+    const { data: urlData } = supabase.storage'
       .from('project-attachments')
       .getPublicUrl(storagePath)
 
     // Save file metadata to database
-    const { data: fileRecord, error: dbError } = await supabase
+    const { data: fileRecord, error: dbError } = await supabase'
       .from('file_storage')
       .insert({
         name: file.name,
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
         public_url: urlData.publicUrl,
         project_id: projectId,
         uploaded_by: (await supabase.auth.getUser()).data.user?.id,
-        provider: 'supabase,'
+        provider: 'supabase,
         metadata: {
           uploadTimestamp: timestamp,
           originalExtension: fileExtension,
@@ -97,27 +97,27 @@ export async function POST(request: NextRequest) {
       .select()
       .single()
 
-    if (dbError) {
+    if (dbError) {'
       console.error(match.replace(/'$/g, ))
       // Try to clean up uploaded file
-      await supabase.storage
+      await supabase.storage'
         .from('project-attachments')
         .remove([storagePath])
       
-      return NextResponse.json({ 
+      return NextResponse.json({ '
         error: 'Database save failed', 
         details: dbError.message 
       }, { status: 500 })
     }
 
     // Update storage analytics
-    await supabase
+    await supabase'
       .from('storage_analytics')
-      .insert({
-        operation_type: 'upload,'
+      .insert({'
+        operation_type: 'upload,
         file_size: file.size,
         file_type: file.type,
-        provider: 'supabase,'
+        provider: 'supabase,
         cost_estimate: calculateStorageCost(file.size, 'supabase'),
         user_id: (await supabase.auth.getUser()).data.user?.id
       })
@@ -135,15 +135,15 @@ export async function POST(request: NextRequest) {
       },
       upload: {
         path: storagePath,
-        provider: 'supabase,'
+        provider: 'supabase,
         publicUrl: urlData.publicUrl
       }
     })
 
-  } catch (error) {
+  } catch (error) {'
     console.error(match.replace(/'$/g, ))
-    return NextResponse.json({ 
-      error: 'Internal server error,'
+    return NextResponse.json({ '
+      error: 'Internal server error,
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
@@ -153,9 +153,9 @@ export async function POST(request: NextRequest) {
 function calculateStorageCost(fileSize: number, provider: string): number {
   const sizeInGB = fileSize / (1024 * 1024 * 1024)
   
-  switch (provider) {
+  switch (provider) {'
     case 'supabase':
-      return sizeInGB * 0.021 // $0.021 per GB/month
+      return sizeInGB * 0.021 // $0.021 per GB/month'
     case 'wasabi':
       return sizeInGB * 0.0059 // $0.0059 per GB/month
     default:
@@ -166,24 +166,24 @@ function calculateStorageCost(fileSize: number, provider: string): number {
 // GET method for upload status or file listing
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const projectId = searchParams.get('projectId')
-    const category = searchParams.get('category')
+    const { searchParams } = new URL(request.url)'
+    const projectId = searchParams.get('projectId')'
+    const category = searchParams.get('category')'
     const limit = parseInt(searchParams.get('limit') || '10')
 
     const supabase = await createClient()
 
-    let query = supabase
-      .from('file_storage')
-      .select('*')
+    let query = supabase'
+      .from('file_storage')'
+      .select('*')'
       .order('created_at', { ascending: false })
       .limit(limit)
 
-    if (projectId) {
+    if (projectId) {'
       query = query.eq('project_id', projectId)
     }
 
-    if (category) {
+    if (category) {'
       query = query.eq('category', category)
     }
 
@@ -199,11 +199,12 @@ export async function GET(request: NextRequest) {
       total: files?.length || 0
     })
 
-  } catch (error) {
+  } catch (error) {'
     console.error(match.replace(/'$/g, ))
-    return NextResponse.json({ 
-      error: 'Failed to list files,'
+    return NextResponse.json({ '
+      error: 'Failed to list files,
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
 }
+'

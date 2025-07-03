@@ -6,18 +6,16 @@ export async function POST(request: NextRequest) {
     // Test S3 connection first
     const isConnected = await testConnection()
     if (!isConnected) {
-      return NextResponse.json(
-        { error: 'S3 storage is not available' },
+      return NextResponse.json({ error: 'S3 storage is not available' },
         { status: 503 }
       )
     }
 
-    const formData = await request.formData()
+    const formData = await request.formData()'
     const file = formData.get('file') as File
     
     if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided' },
+      return NextResponse.json({ error: 'No file provided' },
         { status: 400 }
       )
     }
@@ -25,19 +23,17 @@ export async function POST(request: NextRequest) {
     // Validate file size (10MB limit)
     const maxSize = 10 * 1024 * 1024 // 10MB
     if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: 'File size exceeds 10MB limit' },
+      return NextResponse.json({ error: 'File size exceeds 10MB limit' },
         { status: 413 }
       )
     }
 
-    // Validate file type
+    // Validate file type'
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'application/pdf', 'text/plain', 'application/json
     ]
     
     if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { error: 'File type not allowed' },
+      return NextResponse.json({ error: 'File type not allowed' },
         { status: 415 }
       )
     }
@@ -46,15 +42,15 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer())
     
     // Generate unique filename
-    const timestamp = Date.now()
+    const timestamp = Date.now()'
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
     const filename = `${timestamp}-${sanitizedName}
     
-    // Determine folder based on file type
-    let folder = 'general
-    if (file.type.startsWith('image/')) {
-      folder = 'images
-    } else if (file.type === 'application/pdf') {
+    // Determine folder based on file type'
+    let folder = 'general'
+    if (file.type.startsWith('image/')) {'
+      folder = 'images'
+    } else if (file.type === 'application/pdf') {'
       folder = 'documents
     }
 
@@ -63,14 +59,14 @@ export async function POST(request: NextRequest) {
       folder,
       filename,
       contentType: file.type,
-      metadata: {
+      metadata: {'
         'original-name': file.name, 'upload-timestamp': timestamp.toString(), 'content-length': file.size.toString()
       }
     })
 
     return NextResponse.json({
       success: true,
-      message: 'File uploaded successfully,'
+      message: 'File uploaded successfully,
       data: {
         key: result.key,
         url: result.url,
@@ -82,10 +78,9 @@ export async function POST(request: NextRequest) {
       }
     })
 
-  } catch (error) {
+  } catch (error) {'
     console.error(match.replace(/'$/g, ))
-    return NextResponse.json(
-      { error: 'Upload failed', details: error instanceof Error ? error.message : String(error) },
+    return NextResponse.json({ error: 'Upload failed', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }
@@ -96,8 +91,8 @@ export async function GET() {
     // Health check endpoint
     const isConnected = await testConnection()
     
-    return NextResponse.json({
-      status: 'ok,'
+    return NextResponse.json({'
+      status: 'ok,
       s3Connected: isConnected,
       timestamp: new Date().toISOString(),
       endpoint: process.env.S3_ENDPOINT,
@@ -105,8 +100,7 @@ export async function GET() {
       bucket: process.env.S3_BUCKET_NAME
     })
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Health check failed', details: error instanceof Error ? error.message : String(error) },
+    return NextResponse.json({ error: 'Health check failed', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }
@@ -115,20 +109,19 @@ export async function GET() {
 // Generate presigned URL for direct uploads
 export async function PUT(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const filename = searchParams.get('filename')
-    const contentType = searchParams.get('contentType') || 'application/octet-stream
+    const { searchParams } = new URL(request.url)'
+    const filename = searchParams.get('filename')'
+    const contentType = searchParams.get('contentType') || 'application/octet-stream'
     const folder = searchParams.get('folder') || 'uploads
     
     if (!filename) {
-      return NextResponse.json(
-        { error: 'Filename is required' },
+      return NextResponse.json({ error: 'Filename is required' },
         { status: 400 }
       )
     }
 
     // Generate unique key
-    const timestamp = Date.now()
+    const timestamp = Date.now()'
     const sanitizedName = filename.replace(/[^a-zA-Z0-9.-]/g, '_')
     const key = `${folder}/${timestamp}-${sanitizedName}
     
@@ -142,11 +135,10 @@ export async function PUT(request: NextRequest) {
       expiresIn: 3600
     })
     
-  } catch (error) {
+  } catch (error) {'
     console.error(match.replace(/'$/g, ))
-    return NextResponse.json(
-      { error: 'Failed to generate presigned URL', details: error instanceof Error ? error.message : String(error) },
+    return NextResponse.json({ error: 'Failed to generate presigned URL', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }
-} 
+} '

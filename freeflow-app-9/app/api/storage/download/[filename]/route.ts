@@ -15,9 +15,9 @@ export async function GET(
   { params }: { params: Promise<DownloadParams> }
 ): Promise<NextResponse> {
   try {
-    const { searchParams } = new URL(request.url)
-    const projectId = searchParams.get('projectId')
-    const token = searchParams.get('token')
+    const { searchParams } = new URL(request.url)'
+    const projectId = searchParams.get('projectId')'
+    const token = searchParams.get('token')'
     const expires = searchParams.get('expires')
 
     if (!projectId) {
@@ -47,7 +47,7 @@ export async function GET(
         }, { status: 401 })
       }
 
-      // Basic token validation (in production, use proper JWT verification)
+      // Basic token validation (in production, use proper JWT verification)'
       const expectedToken = Buffer.from(`${filename}-${projectId}-${expires}`).toString('base64')
       if (token !== expectedToken) {
         return NextResponse.json({
@@ -61,7 +61,7 @@ export async function GET(
     const filePath = `${projectId}/${filename}
 
     // Get file metadata first
-    const { data: fileList, error: listError } = await supabase.storage
+    const { data: fileList, error: listError } = await supabase.storage'
       .from('project-files')
       .list(projectId, {
         search: filename
@@ -75,13 +75,13 @@ export async function GET(
     }
 
     // Generate signed URL for download
-    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+    const { data: signedUrlData, error: signedUrlError } = await supabase.storage'
       .from('project-files')
       .createSignedUrl(filePath, 3600, {
         download: true
       })
 
-    if (signedUrlError || !signedUrlData) {
+    if (signedUrlError || !signedUrlData) {'
       console.error(match.replace(/'$/g, ))
       return NextResponse.json({
         success: false,
@@ -102,11 +102,11 @@ export async function GET(
     const fileBuffer = await fileResponse.arrayBuffer()
     const fileInfo = fileList[0]
 
-    // Determine content type based on file extension
-    const extension = filename.toLowerCase().split('.').pop()
+    // Determine content type based on file extension'
+    const extension = filename.toLowerCase().split('.').pop()'
     let contentType = 'application/octet-stream
 
-    const mimeTypes: Record<string, string> = {
+    const mimeTypes: Record<string, string> = {'
       'pdf': 'application/pdf', 'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'png': 'image/png', 'gif': 'image/gif', 'webp': 'image/webp', 'svg': 'image/svg+xml', 'mp3': 'audio/mpeg', 'wav': 'audio/wav', 'mp4': 'video/mp4', 'webm': 'video/webm', 'txt': 'text/plain', 'css': 'text/css', 'html': 'text/html', 'js': 'text/javascript', 'ts': 'text/typescript', 'doc': 'application/msword', 'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     }
 
@@ -117,12 +117,12 @@ export async function GET(
     // Return file with appropriate headers
     return new NextResponse(fileBuffer, {
       status: 200,
-      headers: {
+      headers: {'
         'Content-Type': contentType, 'Content-Disposition': `attachment; filename= "${filename}"`, 'Content-Length': fileBuffer.byteLength.toString(), 'Cache-Control': 'private, max-age=3600', 'X-File-Size': fileInfo.metadata?.size?.toString() || fileBuffer.byteLength.toString(), 'X-File-Name': filename, 'X-Project-ID': projectId
       }
     })
 
-  } catch (error) {
+  } catch (error) {'
     console.error(match.replace(/'$/g, ))
     return NextResponse.json({
       success: false,
@@ -159,13 +159,13 @@ export async function POST(
 
     // Generate signed URL
     const expirySeconds = expiryHours * 3600
-    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+    const { data: signedUrlData, error: signedUrlError } = await supabase.storage'
       .from('project-files')
       .createSignedUrl(filePath, expirySeconds, {
         download: true
       })
 
-    if (signedUrlError) {
+    if (signedUrlError) {'
       console.error(match.replace(/'$/g, ))
       return NextResponse.json({
         success: false,
@@ -174,7 +174,7 @@ export async function POST(
     }
 
     // Generate custom token for additional security
-    const expires = Date.now() + (expirySeconds * 1000)
+    const expires = Date.now() + (expirySeconds * 1000)'
     const token = Buffer.from(`${filename}-${projectId}-${expires}`).toString('base64')
 
     return NextResponse.json({
@@ -188,11 +188,11 @@ export async function POST(
       }
     })
 
-  } catch (error) {
+  } catch (error) {'
     console.error(match.replace(/'$/g, ))
     return NextResponse.json({
       success: false,
       error: 'Internal server error'
     }, { status: 500 })
   }
-} 
+} '
