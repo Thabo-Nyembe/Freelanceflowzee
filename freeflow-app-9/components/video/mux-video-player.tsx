@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import MuxPlayer from '@mux/mux-player-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import {
   Share,
   Loader2
 } from 'lucide-react';
+import { useVideoAnalytics } from '@/hooks/video/useVideoAnalytics';
 
 export interface VideoChapter {
   id: string;
@@ -38,6 +39,8 @@ export interface MuxVideoPlayerProps {
   onTimeUpdate?: (currentTime: number) => void;
   showControls?: boolean;
   allowSharing?: boolean;
+  onError?: (error: Error) => void;
+  videoId: string;
 }
 
 interface PlayerState {
@@ -63,7 +66,9 @@ export default function MuxVideoPlayer({
   onEnded,
   onTimeUpdate,
   showControls = true,
-  allowSharing = true
+  allowSharing = true,
+  onError,
+  videoId,
 }: MuxVideoPlayerProps) {
   const playerRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -78,6 +83,11 @@ export default function MuxVideoPlayer({
   });
 
   const [controlsVisible, setControlsVisible] = useState(true);
+
+  const { startWatchSession, endWatchSession, trackEngagement } = useVideoAnalytics({
+    videoId,
+    onError,
+  });
 
   const togglePlay = useCallback(() => {
     if (!playerRef.current) return;
@@ -145,17 +155,24 @@ export default function MuxVideoPlayer({
   const handlePlay = useCallback(() => {
     setState(prev => ({ ...prev, isPlaying: true }));
     onPlay?.();
-  }, [onPlay]);
+    startWatchSession(state.duration);
+    trackEngagement('play');
+  }, [onPlay, startWatchSession, trackEngagement, state.duration]);
 
   const handlePause = useCallback(() => {
     setState(prev => ({ ...prev, isPlaying: false }));
     onPause?.();
-  }, [onPause]);
+    const progress = (state.currentTime / state.duration) * 100;
+    endWatchSession(progress);
+    trackEngagement('pause');
+  }, [onPause, startWatchSession, endWatchSession, trackEngagement, state.currentTime, state.duration]);
 
   const handleEnded = useCallback(() => {
     setState(prev => ({ ...prev, isPlaying: false }));
     onEnded?.();
-  }, [onEnded]);
+    endWatchSession(100);
+    trackEngagement('complete');
+  }, [onEnded, startWatchSession, endWatchSession, trackEngagement]);
 
   const handleWaiting = useCallback(() => {
     setState(prev => ({ ...prev, isLoading: true }));
@@ -164,6 +181,40 @@ export default function MuxVideoPlayer({
   const handleCanPlay = useCallback(() => {
     setState(prev => ({ ...prev, isLoading: false }));
   }, []);
+
+  useEffect(() => {
+    const player = playerRef.current;
+    if (!player) return;
+
+    const handleSeeking = () => {
+      const currentTime = player.currentTime;
+      trackEngagement('seek', {
+        from: currentTime,
+        to: player.seekable.end(0),
+      });
+    };
+
+    const handleError = (event: ErrorEvent) => {
+      trackEngagement('error', {
+        message: event.message,
+        code: event.error?.code,
+      });
+    };
+
+    player.addEventListener('play', handlePlay);
+    player.addEventListener('pause', handlePause);
+    player.addEventListener('ended', handleEnded);
+    player.addEventListener('seeking', handleSeeking);
+    player.addEventListener('error', handleError);
+
+    return () => {
+      player.removeEventListener('play', handlePlay);
+      player.removeEventListener('pause', handlePause);
+      player.removeEventListener('ended', handleEnded);
+      player.removeEventListener('seeking', handleSeeking);
+      player.removeEventListener('error', handleError);
+    };
+  }, [handlePlay, handlePause, handleEnded, trackEngagement]);
 
   return (
     <div 
@@ -191,6 +242,10 @@ export default function MuxVideoPlayer({
         onEnded={handleEnded}
         onWaiting={handleWaiting}
         onCanPlay={handleCanPlay}
+        metadata={{ video_title: title }}
+        streamType="on-demand"
+        thumbnailTime={0}
+        preload="metadata"
       />
 
       {/* Loading Overlay */}

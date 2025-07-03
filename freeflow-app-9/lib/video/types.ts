@@ -31,7 +31,16 @@ export interface Video {
   processing_progress: number;
   error_message?: string;
   
-  // AI features
+  // AI processing status
+  ai_processing_status?: 'pending' | 'processing' | 'completed' | 'failed' | 'disabled';
+  ai_processing_started_at?: string;
+  ai_processing_completed_at?: string;
+  has_transcription?: boolean;
+  has_ai_analysis?: boolean;
+  has_ai_tags?: boolean;
+  has_ai_chapters?: boolean;
+  
+  // Legacy AI features (deprecated - use separate tables)
   transcript?: string;
   ai_summary?: string;
   ai_chapters: VideoChapter[];
