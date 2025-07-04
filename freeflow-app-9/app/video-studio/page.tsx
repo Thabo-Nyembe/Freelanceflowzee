@@ -15,7 +15,8 @@ import {
   Users,
   TrendingUp,
   Activity,
-  ExternalLink
+  ExternalLink,
+  Edit
 } from 'lucide-react';
 import ScreenRecorder from '@/components/video/screen-recorder';
 import { VideoThumbnailGrid } from '@/components/video/video-thumbnail';
@@ -284,21 +285,80 @@ export default async function VideoStudioPage() {
           </div>
 
           {recentVideos && recentVideos.length > 0 ? (
-            <VideoThumbnailGrid
-              videos={recentVideos.map(video => ({
-                id: video.id,
-                title: video.title,
-                duration: video.duration,
-                viewCount: video.view_count,
-                // Don't pass status to enable real-time polling
-                playbackId: video.mux_playback_id
-              }))}
-              onVideoClick={(videoId) => {
-                // Navigate to video page
-                window.location.href = `/video/${videoId}`;
-              }}
-              columns={3}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {recentVideos.map(video => (
+                <Card key={video.id} className="group hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      {/* Video Thumbnail */}
+                      <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
+                        {video.thumbnail_url ? (
+                          <img 
+                            src={video.thumbnail_url} 
+                            alt={video.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <FileVideo className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                        <div className="absolute bottom-2 right-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {formatDuration(video.duration_seconds || 0)}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* Video Info */}
+                      <div className="space-y-2">
+                        <h3 className="font-medium text-sm line-clamp-2">{video.title}</h3>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span>{video.view_count || 0} views</span>
+                          <span>•</span>
+                          <span>{new Date(video.created_at).toLocaleDateString()}</span>
+                        </div>
+                        
+                        {/* Status Badge */}
+                        <Badge 
+                          variant={video.status === 'ready' ? 'default' : 'secondary'}
+                          className="text-xs"
+                        >
+                          {video.status}
+                        </Badge>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1" 
+                          asChild
+                        >
+                          <a href={`/video/${video.id}`}>
+                            <Play className="w-3 h-3 mr-1" />
+                            View
+                          </a>
+                        </Button>
+                        <Button 
+                          variant="default" 
+                          size="sm" 
+                          className="flex-1"
+                          asChild
+                        >
+                          <a href={`/video-studio/editor/${video.id}`}>
+                            <Edit className="w-3 h-3 mr-1" />
+                            Edit
+                          </a>
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           ) : (
             <Card>
               <CardContent className="p-12 text-center">
