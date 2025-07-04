@@ -19,6 +19,7 @@ import {
 import MuxVideoPlayer from '@/components/video/mux-video-player';
 import { VideoThumbnailGrid } from '@/components/video/video-thumbnail';
 import { VideoSharingControls } from '@/components/video/video-sharing-controls';
+import { VideoComments } from '@/components/video/video-comments';
 import { createClient } from '@/lib/supabase/server';
 import { formatDuration } from '@/lib/video/config';
 
@@ -155,6 +156,7 @@ export default async function VideoPage({ params, searchParams }: VideoPageProps
           <div className="bg-black rounded-lg overflow-hidden">
             {video.mux_playback_id ? (
               <MuxVideoPlayer
+                videoId={video.id}
                 playbackId={video.mux_playback_id}
                 title={video.title}
                 poster={video.thumbnail_url}
@@ -345,19 +347,15 @@ export default async function VideoPage({ params, searchParams }: VideoPageProps
           )}
 
           {/* Comments Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm flex items-center gap-2">
-                <MessageSquare className="w-4 h-4" />
-                Comments
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Comments feature coming soon...
-              </p>
-            </CardContent>
-          </Card>
+          <VideoComments
+            videoId={video.id}
+            currentUserId={user?.id}
+            currentTime={startTime || 0}
+            onSeekToTimestamp={(timestamp) => {
+              // This would integrate with the video player to seek to timestamp
+              window.location.href = `${window.location.pathname}?t=${timestamp}`;
+            }}
+          />
         </div>
       </div>
 
