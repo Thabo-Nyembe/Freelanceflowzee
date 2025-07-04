@@ -1,39 +1,55 @@
-import { test as base, type Page } from &apos;@playwright/test&apos;;
-import { createClient } from &apos;@supabase/supabase-js&apos;;
+import '@testing-library/jest-dom';
+import { expect, afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
+import * as matchers from '@testing-library/jest-dom/matchers';
+import { setupServer } from 'msw/node';
+import { rest } from 'msw';
 
-// Define custom fixtures
-type CustomFixtures = {
-  auth: Page;
-  authenticatedPage: Page;
-};
+// Extend Vitest's expect method with methods from react-testing-library
+expect.extend(matchers);
 
-// Extend base test with auth handling
-export const test = base.extend<CustomFixtures>({
-  // Authenticate before tests
-  auth: async ({ page }, use) => {
-    // Log in test user via POST request
-    await page.goto(&apos;http://localhost:3001&apos;);
-    const response = await page.request.post(&apos;http://localhost:3001/api/auth/test-login&apos;);
-    expect(response.ok()).toBeTruthy();
-
-    // Wait for cookies to be set
-    await page.waitForTimeout(1000);
-
-    await use(page);
-  },
-
-  // Set up authenticated page
-  authenticatedPage: async ({ page }, use) => {
-    // Log in test user via POST request
-    await page.goto(&apos;http://localhost:3001&apos;);
-    const response = await page.request.post(&apos;http://localhost:3001/api/auth/test-login&apos;);
-    expect(response.ok()).toBeTruthy();
-
-    // Wait for cookies to be set
-    await page.waitForTimeout(1000);
-
-    await use(page);
-  }
+// Clean up after each test case (e.g. clearing jsdom)
+afterEach(() => {
+  cleanup();
 });
 
-export { expect } from &apos;@playwright/test&apos;; 
+// Mock Service Worker setup
+export const server = setupServer(
+  // Define handlers
+  rest.post('/api/video/upload', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({
+        id: 'test-video-id',
+        url: 'https://example.com/test-video',
+      })
+    );
+  }),
+
+  rest.get('/api/video/:id', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({
+        id: req.params.id,
+        title: 'Test Video',
+        description: 'Test Description',
+        status: 'ready',
+      })
+    );
+  }),
+
+  rest.post('/api/video/bulk-operations', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({
+        id: 'test-operation-id',
+        status: 'completed',
+      })
+    );
+  })
+);
+
+// Start MSW
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterAll(() => server.close());
+afterEach(() => server.resetHandlers()); 
