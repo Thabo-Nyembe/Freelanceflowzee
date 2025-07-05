@@ -9,7 +9,7 @@ import { VideoMetadata } from '@/components/video/video-metadata';
 import { TranscriptSearch } from '@/components/video/transcript-search';
 import { VideoPageSkeleton } from '@/components/video/video-page-skeleton';
 import LazyVideoPlayer from '@/components/video/lazy-video-player';
-import { can_view_video } from '@/lib/db/permissions'; // Assuming a helper function
+import { AiInsights } from '@/components/video/ai-insights';
 
 interface VideoPageProps {
   params: { id: string };
@@ -50,13 +50,7 @@ export async function generateMetadata({ params }: VideoPageProps): Promise<Meta
 export default async function VideoPage({ params }: VideoPageProps) {
   const supabase = createServerComponentClient({ cookies });
 
-  // Check if user can view the video
-  const canView = await can_view_video(params.id);
-  if (!canView) {
-    // Or redirect to a login/access-denied page
-    notFound(); 
-  }
-
+  // RLS will enforce security, ensuring only authorized users can fetch the video.
   const { data: video } = await supabase
     .from('videos')
     .select('*, author:users(*)')
@@ -84,6 +78,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
           </div>
 
           <div className="space-y-6">
+            <AiInsights video={video} />
             {video.transcript && (
               <div className="rounded-lg border bg-card p-4">
                 <h2 className="mb-4 text-lg font-semibold">Search in Video</h2>
