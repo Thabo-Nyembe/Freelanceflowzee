@@ -1,384 +1,104 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { 
-  Eye, 
-  Calendar, 
-  Clock, 
-  User, 
-  Share, 
-  Download,
-  ThumbsUp,
-  MessageSquare,
-  Bookmark,
-  Play
-} from 'lucide-react';
-import MuxVideoPlayer from '@/components/video/mux-video-player';
-import { VideoThumbnailGrid } from '@/components/video/video-thumbnail';
-import { VideoSharingControls } from '@/components/video/video-sharing-controls';
-import { VideoComments } from '@/components/video/video-comments';
-import { createClient } from '@/lib/supabase/server';
-import { formatDuration } from '@/lib/video/config';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+import { Suspense } from 'react';
+
+import { ShareHeader } from '@/components/video/share-header';
+import { VideoMetadata } from '@/components/video/video-metadata';
+import { TranscriptSearch } from '@/components/video/transcript-search';
+import { VideoPageSkeleton } from '@/components/video/video-page-skeleton';
+import LazyVideoPlayer from '@/components/video/lazy-video-player';
+import { can_view_video } from '@/lib/db/permissions'; // Assuming a helper function
 
 interface VideoPageProps {
-  params: {
-    id: string;
-  };
-  searchParams: {
-    t?: string; // timestamp
-  };
+  params: { id: string };
+  searchParams: { t?: string };
 }
 
 export async function generateMetadata({ params }: VideoPageProps): Promise<Metadata> {
-  const supabase = await createClient();
+  const supabase = createServerComponentClient({ cookies });
   
   const { data: video } = await supabase
     .from('videos')
-    .select('title, description')
+    .select('title, description, thumbnail_url')
     .eq('id', params.id)
     .single();
 
+  if (!video) {
+    return { title: 'Video Not Found', description: 'This video may have been moved or deleted.' };
+  }
+
   return {
-    title: video?.title ? `${video.title} | FreeFlow` : 'Video | FreeFlow',
-    description: video?.description || 'Watch this video on FreeFlow',
+    title: `${video.title} | FreeFlow`,
+    description: video.description || 'Watch this video on FreeFlow',
+    openGraph: {
+      title: video.title,
+      description: video.description || '',
+      images: [
+        {
+          url: video.thumbnail_url || '/default-thumbnail.png',
+          width: 1200,
+          height: 630,
+          alt: video.title,
+        },
+      ],
+    },
   };
 }
 
-export default async function VideoPage({ params, searchParams }: VideoPageProps) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+export default async function VideoPage({ params }: VideoPageProps) {
+  const supabase = createServerComponentClient({ cookies });
 
-  // Get video details
-  const { data: video, error } = await supabase
+  // Check if user can view the video
+  const canView = await can_view_video(params.id);
+  if (!canView) {
+    // Or redirect to a login/access-denied page
+    notFound(); 
+  }
+
+  const { data: video } = await supabase
     .from('videos')
-    .select(`
-      *,
-      user:user_id (
-        display_name,
-        avatar_url
-      ),
-      project:project_id (
-        name,
-        description
-      )
-    `)
+    .select('*, author:users(*)')
     .eq('id', params.id)
     .single();
 
-  if (error || !video) {
+  if (!video || !video.author) {
     notFound();
   }
-
-  // Check video permissions
-  const isOwner = user?.id === video.user_id;
-  const isPublic = video.is_public;
-  
-  if (!isOwner && !isPublic) {
-    // Check if user has access through project or sharing
-    notFound();
-  }
-
-  // Get related videos
-  const { data: relatedVideos } = await supabase
-    .from('videos')
-    .select('id, title, duration, view_count, status, mux_playback_id, created_at')
-    .eq('user_id', video.user_id)
-    .neq('id', video.id)
-    .eq('is_public', true)
-    .order('created_at', { ascending: false })
-    .limit(6);
-
-  // Increment view count
-  if (!isOwner) {
-    await supabase
-      .from('videos')
-      .update({ view_count: (video.view_count || 0) + 1 })
-      .eq('id', video.id);
-  }
-
-  // Parse timestamp from URL
-  const startTime = searchParams.t ? parseInt(searchParams.t) : undefined;
-
-  // Sample chapters (would come from database)
-  const chapters = [
-    {
-      id: '1',
-      title: 'Introduction',
-      startTime: 0,
-      endTime: 30,
-      description: 'Welcome and overview'
-    },
-    {
-      id: '2',
-      title: 'Main Content',
-      startTime: 30,
-      endTime: 300,
-      description: 'Core tutorial content'
-    },
-    {
-      id: '3',
-      title: 'Conclusion',
-      startTime: 300,
-      description: 'Wrap up and next steps'
-    }
-  ];
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const handleShare = async () => {
-    const url = window.location.href;
-    if (navigator.share) {
-      await navigator.share({
-        title: video.title,
-        text: video.description,
-        url
-      });
-    } else {
-      await navigator.clipboard.writeText(url);
-    }
-  };
 
   return (
-    <div className="container mx-auto py-8 space-y-8">
-      {/* Video Player Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Main Video Player */}
-        <div className="lg:col-span-3 space-y-6">
-          <div className="bg-black rounded-lg overflow-hidden">
-            {video.mux_playback_id ? (
-              <MuxVideoPlayer
-                videoId={video.id}
-                playbackId={video.mux_playback_id}
+    <Suspense fallback={<VideoPageSkeleton />}>
+      <div className="container mx-auto p-4 space-y-6">
+        <ShareHeader video={video} author={video.author} />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="aspect-video w-full">
+              <LazyVideoPlayer
+                playbackId={video.mux_playback_id || ''}
                 title={video.title}
-                poster={video.thumbnail_url}
-                chapters={chapters}
-                className="w-full"
-                aspectRatio="16/9"
-                showControls={true}
-                allowSharing={true}
-                onPlay={() => console.log('Video started playing')}
-                onTimeUpdate={(time) => console.log('Time update:', time)}
               />
-            ) : (
-              <div className="aspect-video flex items-center justify-center bg-muted">
-                <div className="text-center">
-                  <Play className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">Video is still processing...</p>
-                  <Badge variant="outline" className="mt-2">
-                    {video.status}
-                  </Badge>
-                </div>
-              </div>
-            )}
+            </div>
+            <VideoMetadata video={video} />
           </div>
 
-          {/* Video Information */}
-          <div className="space-y-4">
-            <div>
-              <h1 className="text-2xl font-bold mb-2">{video.title}</h1>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Eye className="w-4 h-4" />
-                  {video.view_count || 0} views
-                </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  {formatDate(video.created_at)}
-                </div>
-                {video.duration && (
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    {formatDuration(video.duration)}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
-                <ThumbsUp className="w-4 h-4 mr-2" />
-                Like
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleShare}>
-                <Share className="w-4 h-4 mr-2" />
-                Share
-              </Button>
-              <Button variant="outline" size="sm">
-                <Bookmark className="w-4 h-4 mr-2" />
-                Save
-              </Button>
-              {isOwner && (
-                <Button variant="outline" size="sm">
-                  <Download className="w-4 h-4 mr-2" />
-                  Download
-                </Button>
-              )}
-            </div>
-
-            <Separator />
-
-            {/* Creator Information */}
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                <User className="w-6 h-6" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold">
-                  {video.user?.display_name || 'Unknown User'}
-                </h3>
-                <p className="text-sm text-muted-foreground">Content Creator</p>
-              </div>
-              <Button variant="outline" size="sm">
-                Subscribe
-              </Button>
-            </div>
-
-            {/* Description */}
-            {video.description && (
-              <div className="space-y-2">
-                <h3 className="font-semibold">Description</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">
-                  {video.description}
-                </p>
+          <div className="space-y-6">
+            {video.transcript && (
+              <div className="rounded-lg border bg-card p-4">
+                <h2 className="mb-4 text-lg font-semibold">Search in Video</h2>
+                <TranscriptSearch
+                  videoId={video.id}
+                  onTimestampClick={() => {
+                    // Logic to seek player
+                  }}
+                />
               </div>
             )}
-
-            {/* Project Information */}
-            {video.project && (
-              <div className="space-y-2">
-                <h3 className="font-semibold">Related Project</h3>
-                <Card>
-                  <CardContent className="p-4">
-                    <h4 className="font-medium">{video.project.name}</h4>
-                    {video.project.description && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {video.project.description}
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-
-            {/* Tags */}
-            {video.tags && video.tags.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="font-semibold">Tags</h3>
-                <div className="flex flex-wrap gap-2">
-                  {video.tags.map((tag: string, index: number) => (
-                    <Badge key={index} variant="secondary">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Comments section would go here */}
           </div>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Video Stats */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Video Stats</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span>Views</span>
-                <span className="font-medium">{video.view_count || 0}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Duration</span>
-                <span className="font-medium">
-                  {video.duration ? formatDuration(video.duration) : 'N/A'}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Status</span>
-                <Badge variant={video.status === 'ready' ? 'secondary' : 'outline'}>
-                  {video.status}
-                </Badge>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Published</span>
-                <span className="font-medium">{formatDate(video.created_at)}</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Video Sharing Controls - Only show for video owners */}
-          {isOwner && (
-            <VideoSharingControls
-              videoId={video.id}
-              title={video.title}
-              description={video.description}
-              isPublic={video.is_public}
-              passwordProtected={video.password_protected}
-              allowEmbedding={video.allow_embedding}
-              allowDownload={video.allow_download}
-              onSettingsChange={async (settings) => {
-                const response = await fetch(`/api/video/${video.id}/settings`, {
-                  method: 'PATCH',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify(settings),
-                });
-                
-                if (!response.ok) {
-                  throw new Error('Failed to update settings');
-                }
-                
-                // Refresh the page to show updated settings
-                window.location.reload();
-              }}
-            />
-          )}
-
-          {/* Comments Section */}
-          <VideoComments
-            videoId={video.id}
-            currentUserId={user?.id}
-            currentTime={startTime || 0}
-            onSeekToTimestamp={(timestamp) => {
-              // This would integrate with the video player to seek to timestamp
-              window.location.href = `${window.location.pathname}?t=${timestamp}`;
-            }}
-          />
         </div>
       </div>
-
-      {/* Related Videos */}
-      {relatedVideos && relatedVideos.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">More from this creator</h2>
-          <VideoThumbnailGrid
-            videos={relatedVideos.map(vid => ({
-              id: vid.id,
-              title: vid.title,
-              duration: vid.duration,
-              viewCount: vid.view_count,
-              status: vid.status as 'processing' | 'ready' | 'error' | 'uploading',
-              playbackId: vid.mux_playback_id
-            }))}
-            onVideoClick={(videoId) => {
-              window.location.href = `/video/${videoId}`;
-            }}
-            columns={4}
-          />
-        </div>
-      )}
-    </div>
+    </Suspense>
   );
 } 
