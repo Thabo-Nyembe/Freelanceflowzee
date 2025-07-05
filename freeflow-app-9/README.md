@@ -1,53 +1,15 @@
-# 🚀 Freeflow - AI-Powered Project Management
+# FreeFlowZee
 
-[![Next.js](https://img.shields.io/badge/Next.js-14.x-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![Supabase](https://img.shields.io/badge/Supabase-Backend-green?style=flat-square&logo=supabase)](https://supabase.com/)
-[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4-blueviolet?style=flat-square&logo=openai)](https://openai.com/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
+FreeFlowZee is a next-generation platform for creative collaboration, designed to streamline the feedback process for videos, images, audio files, and more.
 
-## ✨ Overview
+## Getting Started
 
-Freeflow is a modern, AI-powered project management application designed to help freelancers and teams streamline their workflow. It combines traditional project management tools with a suite of advanced AI features, transforming it into an intelligent assistant that helps with content creation, task management, and reporting.
-
-## 🎯 Key Features
-
-- **Hierarchical Project Management**: Organize projects with parent-child relationships.
-- **Rich-Text Editor**: A Notion-style editor for project descriptions and notes.
-- **Project Archiving**: A trash can system to archive, restore, and permanently delete projects.
-- **Customizable Dashboards**: Personalize your workspace with cover images and icons.
-- **Dark Mode**: A sleek, user-friendly dark theme.
-- **AI-Powered Summaries**: Instantly generate summaries of project content.
-- **AI Action Item Detection**: Automatically identify and prioritize tasks from project notes.
-- **Contextual Writing Assistant**: An in-editor AI to improve your writing on the fly.
-- **AI Roll-up Reporting**: Generate comprehensive reports for nested projects.
-- **Semantic Search**: A powerful global search that understands the meaning behind your query.
-
-## 🏗️ Tech Stack
-
-- **Framework**: Next.js (App Router)
-- **Backend & Database**: Supabase (PostgreSQL, Auth, Storage)
-- **AI Provider**: OpenAI (GPT-4-Turbo)
-- **UI**: shadcn/ui, Tailwind CSS, Radix UI
-- **Editor**: BlockNote
-- **Icons**: lucide-react
-- **Notifications**: Sonner
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js (v18 or later)
-- npm or yarn
-- A Supabase account
-- An OpenAI API key
-
-### Installation & Setup
+To get started with local development, follow these steps:
 
 1.  **Clone the repository:**
     ```bash
-    git clone <your-repository-url>
-    cd freeflow-app-9
+    git clone https://github.com/Thabo-Nyembe/Freelanceflowzee.git
+    cd Freelanceflowzee
     ```
 
 2.  **Install dependencies:**
@@ -56,39 +18,37 @@ Freeflow is a modern, AI-powered project management application designed to help
     ```
 
 3.  **Set up environment variables:**
-    Create a `.env.local` file by copying the example:
-    ```bash
-    cp .env.example .env.local
-    ```
-    Fill in the required values in `.env.local`:
-    - `NEXT_PUBLIC_SUPABASE_URL`
-    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-    - `SUPABASE_SERVICE_ROLE_KEY`
-    - `OPENAI_API_KEY`
+    *   Copy the `.env.example` file to a new file named `.env.local`.
+    *   Fill in the required API keys and secrets in your new `.env.local` file. See the "Environment Variable Management" section for more details.
 
-4.  **Set up the database:**
-    - Log in to your Supabase account and navigate to the **SQL Editor**.
-    - Open the `scripts/V2_super_migration_script.sql` file.
-    - Copy its entire content and run it in the SQL Editor. This will set up all tables, functions, and AI capabilities.
-
-5.  **Run the development server:**
+4.  **Run the development server:**
     ```bash
     npm run dev
     ```
-    The app will be available at `http://localhost:3000`.
 
-## 🤖 AI Features in Detail
+## Environment Variable Management
 
-- **Project Summaries**: Click "Summarize" on any project page to get a concise AI-generated summary.
-- **Action Item Detection**: Click "Find Action Items" to have the AI analyze your project content and suggest a prioritized task list.
-- **Writing Assistant**: Select text in the editor to trigger a floating toolbar with AI actions like "Improve" and "Make Professional".
-- **Roll-up Reporting**: On a parent project, click "Roll-up Report" to get a summary of the entire project hierarchy.
-- **Semantic Search**: Use the global search bar to find projects based on concepts, not just keywords.
+This project uses a `.env.local` file to manage all API keys and secrets. This file is **not** committed to Git and must be created locally.
 
-## 🤝 Contributing
+A template file, `.env.example`, is provided in the root of the repository. It lists all the necessary environment variables required for the application to function correctly.
 
-Contributions are welcome! Please feel free to open an issue or submit a pull request.
+-   `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL.
+-   `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anonymous public key.
+-   `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase service role key for admin-level operations.
+-   `OPENAI_API_KEY`: Your API key for OpenAI services.
+-   ... and other keys as listed in `.env.example`.
 
-## 📝 License
+## Core Integrations
 
-This project is licensed under the MIT License.
+### Supabase Integration
+
+The application uses Supabase as its backend for database storage, authentication, and more.
+
+-   **Client-side Client**: A utility function to create a Supabase client for use in browser environments is located at `lib/supabase/client.ts`.
+-   **Server-side Client**: A utility function to create a Supabase client for use in server-side logic (API routes, Server Components) is located at `lib/supabase/server.ts`. This client uses the `SUPABASE_SERVICE_ROLE_KEY` for elevated privileges.
+
+### AI Services
+
+The application leverages AI services like OpenAI for various features.
+
+-   **Title Generation**: An API endpoint at `app/api/generate-title/route.ts` uses the OpenAI API to generate a video title from a transcript. This is a `POST` endpoint that expects a `transcript` in the request body. 
