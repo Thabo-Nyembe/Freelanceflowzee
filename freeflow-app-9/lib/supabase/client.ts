@@ -2,6 +2,9 @@
 
 import { createBrowserClient } from '@supabase/ssr';
 import type { Database as SupabaseDatabase } from '@/types/supabase';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useCallback } from 'react';
+import { Database } from '../database.types';
 
 export const createClient = () => {
   return createBrowserClient<SupabaseDatabase>(
@@ -204,4 +207,10 @@ export type Database = {
       }
     }
   }
+}
+
+export function useSupabase() {
+  return useCallback(() => {
+    return createClientComponentClient<Database>();
+  }, [])();
 } 

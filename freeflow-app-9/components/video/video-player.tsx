@@ -26,9 +26,12 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
-  Loader2
+  Loader2,
+  Maximize2,
+  Minimize2
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 export interface VideoChapter {
   id: string;
@@ -131,6 +134,9 @@ export default function VideoPlayer({
   // Control visibility timer
   const controlsTimerRef = useRef<NodeJS.Timeout>();
 
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isPortrait = useMediaQuery('(orientation: portrait)');
+
   // Update current chapter based on time
   useEffect(() => {
     if (chapters.length === 0) return;
@@ -214,15 +220,19 @@ export default function VideoPlayer({
     playerRef.current.currentTime = Math.min(state.duration, state.currentTime + 10);
   }, [state.currentTime, state.duration]);
 
-  const toggleFullscreen = useCallback(() => {
+  const toggleFullscreen = useCallback(async () => {
     if (!containerRef.current) return;
 
-    if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen();
-      setState(prev => ({ ...prev, isFullscreen: true }));
-    } else {
-      document.exitFullscreen();
-      setState(prev => ({ ...prev, isFullscreen: false }));
+    try {
+      if (!state.isFullscreen) {
+        await containerRef.current.requestFullscreen();
+        setState(prev => ({ ...prev, isFullscreen: true }));
+      } else {
+        await document.exitFullscreen();
+        setState(prev => ({ ...prev, isFullscreen: false }));
+      }
+    } catch (error) {
+      console.error('Fullscreen error:', error);
     }
   }, []);
 
@@ -392,19 +402,47 @@ export default function VideoPlayer({
 
   const playbackRates = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
+  // Handle fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setState(prev => ({ ...prev, isFullscreen: document.fullscreenElement !== null }));
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  // Calculate optimal player dimensions
+  const getPlayerDimensions = () => {
+    if (isMobile) {
+      if (isPortrait) {
+        return {
+          maxWidth: '100%',
+          height: 'auto',
+          aspectRatio: '16/9'
+        };
+      } else {
+        return {
+          width: '100%',
+          height: '100vh',
+          maxHeight: '100vh'
+        };
+      }
+    }
+    return {};
+  };
+
   return (
     <div 
       ref={containerRef}
       className={cn(
         'relative group bg-black rounded-lg overflow-hidden',
-        state.isFullscreen && 'fixed inset-0 z-50 rounded-none',
+        state.isFullscreen ? 'fixed inset-0 z-50 rounded-none' : '',
         className
       )}
-      style={{ 
-        width: typeof width === 'number' ? `${width}px` : width,
-        height: typeof height === 'number' ? `${height}px` : height,
-        aspectRatio: height === 'auto' ? aspectRatio : undefined
-      }}
+      style={getPlayerDimensions()}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
@@ -626,9 +664,9 @@ export default function VideoPlayer({
                   className="text-white hover:bg-white/20"
                 >
                   {state.isFullscreen ? (
-                    <Minimize className="w-4 h-4" />
+                    <Minimize2 className="w-4 h-4" />
                   ) : (
-                    <Maximize className="w-4 h-4" />
+                    <Maximize2 className="w-4 h-4" />
                   )}
                 </Button>
               </div>
