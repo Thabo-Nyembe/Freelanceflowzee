@@ -7,7 +7,6 @@ import CommentPopover from './CommentPopover';
 import { useCollaboration } from '@/hooks/collaboration/useCollaboration';
 import { Insertion, Deletion } from '@/lib/tiptap/suggestions';
 
-// In a real app, this would be passed in as a prop
 const MOCK_DOCUMENT_ID = 1;
 
 interface BlockEditorProps {
@@ -29,7 +28,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({ isSuggestionMode = false }) =
         Welcome to your Collaboration Hub
       </h2>
       <p>
-        This is a block-based editor. Try toggling <strong>Suggestion Mode</strong> and pasting some text.
+        This is a block-based editor. Try toggling <strong>Suggestion Mode</strong> and then type or delete some text.
       </p>
     `,
     editorProps: {
@@ -45,6 +44,36 @@ const BlockEditor: React.FC<BlockEditorProps> = ({ isSuggestionMode = false }) =
     editor.setOptions({
       editorProps: {
         ...editor.props.editorProps,
+        handleTextInput: (view, from, to, text) => {
+          if (isSuggestionMode) {
+            const { state, dispatch } = view;
+            const tr = state.tr.replaceWith(from, to, state.schema.text(text));
+            tr.addMark(from, from + text.length, state.schema.marks.insertion.create());
+            dispatch(tr);
+            return true;
+          }
+          return false;
+        },
+        handleKeyDown: (view, event) => {
+          if (isSuggestionMode && (event.key === 'Backspace' || event.key === 'Delete')) {
+            const { state, dispatch } = view;
+            const { from, to, empty } = state.selection;
+
+            if (empty) {
+                const pos = event.key === 'Backspace' ? from - 1 : to;
+                if (pos < 0 || pos >= state.doc.content.size) return true;
+                
+                const tr = state.tr.addMark(pos, pos + 1, state.schema.marks.deletion.create());
+                dispatch(tr.setSelection(state.selection));
+            } else {
+                const tr = state.tr.addMark(from, to, state.schema.marks.deletion.create());
+                dispatch(tr.setSelection(state.selection));
+            }
+            
+            return true;
+          }
+          return false;
+        },
         handlePaste: (view, event, slice) => {
           if (isSuggestionMode) {
             const { state, dispatch } = view;
@@ -74,6 +103,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({ isSuggestionMode = false }) =
     });
   }, [isSuggestionMode, editor]);
 
+
   const handleComment = async (comment: string) => {
     if (!editor) return;
     const { from, to } = editor.state.selection;
@@ -83,51 +113,49 @@ const BlockEditor: React.FC<BlockEditorProps> = ({ isSuggestionMode = false }) =
       document_id: MOCK_DOCUMENT_ID,
       comment,
       target_type: 'text',
-      target_id: 'block-1', // In a real app, each block would have a unique ID
+      target_id: 'block-1',
       context_data: {
         selection: selectedText,
       }
     });
     
     setIsCommentPopoverVisible(false);
-    // Refocus the editor after commenting
     editor.commands.focus();
   };
 
   return (
     <div className="editor-container bg-white rounded-md border border-gray-200 shadow-sm p-4 relative">
-      {editor && (
-        <BubbleMenu 
+        {editor && (
+            <BubbleMenu 
+                editor={editor} 
+                tippyOptions={{ duration: 100 }} 
+                shouldShow={({ editor, from, to }) => {
+                    return from !== to && !isCommentPopoverVisible
+                }}
+            >
+            <button
+                onClick={() => setIsCommentPopoverVisible(true)}
+                className="bg-black text-white px-3 py-1 rounded-md"
+            >
+                Comment
+            </button>
+            </BubbleMenu>
+        )}
+        
+        {editor && isCommentPopoverVisible && (
+            <BubbleMenu 
             editor={editor} 
-            tippyOptions={{ duration: 100 }} 
-            shouldShow={({ editor, from, to }) => {
-                return from !== to && !isCommentPopoverVisible
-            }}
-        >
-          <button
-            onClick={() => setIsCommentPopoverVisible(true)}
-            className="bg-black text-white px-3 py-1 rounded-md"
-          >
-            Comment
-          </button>
-        </BubbleMenu>
-      )}
-      
-      {editor && isCommentPopoverVisible && (
-        <BubbleMenu 
-          editor={editor} 
-          tippyOptions={{ 
-            duration: 100, 
-            placement: 'bottom', 
-            appendTo: 'parent',
-            onHide: () => setIsCommentPopoverVisible(false)
-          }} 
-          className="w-64"
-        >
-          <CommentPopover onComment={handleComment} />
-        </BubbleMenu>
-      )}
-
+            tippyOptions={{ 
+                duration: 100, 
+                placement: 'bottom', 
+                appendTo: 'parent',
+                onHide: () => setIsCommentPopoverVisible(false)
+            }} 
+            className="w-64"
+            >
+            <CommentPopover onComment={handleComment} />
+            </BubbleMenu>
+        )}
       <EditorContent editor={editor} />
     </div>
   );
