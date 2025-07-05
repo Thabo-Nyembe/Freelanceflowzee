@@ -1,19 +1,24 @@
 'use client';
 
 import FeedbackSidebar from '@/components/collaboration/FeedbackSidebar';
-import React from 'react';
+import BlockEditor from '@/components/collaboration/BlockEditor';
+import SuggestionModeToggle from '@/components/collaboration/SuggestionModeToggle';
+import React, { useState } from 'react';
 
 const CollaborationTestPage = () => {
-  // Using a mock document ID for demonstration purposes.
-  // In a real application, this would come from the page's props or URL.
   const MOCK_DOCUMENT_ID = 1;
+  const [isSuggestionMode, setIsSuggestionMode] = useState(false);
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <main className="flex-1 p-8">
-        <h1 className="text-2xl font-bold mb-4">Document Content Area</h1>
-        <p>This is where the main document or asset (video, text, etc.) would be displayed.</p>
-        <p>The sidebar to the right shows the feedback and suggestions for this document.</p>
+      <main className="flex-1 p-8 flex flex-col">
+        <div className="mb-4 self-start">
+          <SuggestionModeToggle 
+            isSuggestionMode={isSuggestionMode}
+            onToggle={setIsSuggestionMode}
+          />
+        </div>
+        <BlockEditor />
       </main>
       <FeedbackSidebar documentId={MOCK_DOCUMENT_ID} />
     </div>

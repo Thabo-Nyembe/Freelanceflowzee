@@ -1,0 +1,31 @@
+'use client';
+
+import React from 'react';
+
+interface SuggestionModeToggleProps {
+  isSuggestionMode: boolean;
+  onToggle: (isActive: boolean) => void;
+}
+
+const SuggestionModeToggle: React.FC<SuggestionModeToggleProps> = ({ isSuggestionMode, onToggle }) => {
+  return (
+    <div className="flex items-center space-x-4 p-2 bg-gray-200 rounded-lg">
+      <span className="font-semibold text-gray-700">Suggesting Mode</span>
+      <label htmlFor="suggestion-toggle" className="flex items-center cursor-pointer">
+        <div className="relative">
+          <input 
+            id="suggestion-toggle" 
+            type="checkbox" 
+            className="sr-only" 
+            checked={isSuggestionMode}
+            onChange={(e) => onToggle(e.target.checked)}
+          />
+          <div className="block bg-gray-600 w-14 h-8 rounded-full"></div>
+          <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${isSuggestionMode ? 'transform translate-x-6 bg-green-400' : ''}`}></div>
+        </div>
+      </label>
+    </div>
+  );
+};
+
+export default SuggestionModeToggle; 
