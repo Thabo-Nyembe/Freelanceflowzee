@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import CommentPopover from './CommentPopover';
+import SuggestionActionPopover from './SuggestionActionPopover';
 import { useCollaboration } from '@/hooks/collaboration/useCollaboration';
 import { Insertion, Deletion } from '@/lib/tiptap/suggestions';
 
@@ -15,7 +16,7 @@ interface BlockEditorProps {
 
 const BlockEditor: React.FC<BlockEditorProps> = ({ isSuggestionMode = false }) => {
   const [isCommentPopoverVisible, setIsCommentPopoverVisible] = useState(false);
-  const { addFeedback, addSuggestion } = useCollaboration(MOCK_DOCUMENT_ID);
+  const { addFeedback, addSuggestion, updateSuggestionStatus } = useCollaboration(MOCK_DOCUMENT_ID);
 
   const editor = useEditor({
     extensions: [
@@ -28,7 +29,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({ isSuggestionMode = false }) =
         Welcome to your Collaboration Hub
       </h2>
       <p>
-        This is a block-based editor. Try toggling <strong>Suggestion Mode</strong> and then type or delete some text. Your suggestions will be saved and displayed in the sidebar.
+        This is a block-based editor. Here is an <ins>insertion</ins> and a <del>deletion</del>. Click on them to accept or reject.
       </p>
     `,
     editorProps: {
@@ -116,38 +117,44 @@ const BlockEditor: React.FC<BlockEditorProps> = ({ isSuggestionMode = false }) =
     editor.commands.focus();
   };
 
+  const handleAcceptSuggestion = () => {
+    if (!editor) return;
+    const { from, to } = editor.state.selection;
+    if (editor.isActive('deletion')) {
+      editor.chain().focus().deleteRange({ from, to }).run();
+    }
+    editor.chain().focus().unsetInsertion().unsetDeletion().run();
+    console.log("Suggestion accepted. In a real app, we'd call updateSuggestionStatus here.");
+  };
+
+  const handleRejectSuggestion = () => {
+    if (!editor) return;
+    const { from, to } = editor.state.selection;
+    if (editor.isActive('insertion')) {
+        editor.chain().focus().deleteRange({ from, to }).run();
+    }
+    editor.chain().focus().unsetInsertion().unsetDeletion().run();
+    console.log("Suggestion rejected. In a real app, we'd call updateSuggestionStatus here.");
+  };
+
   return (
     <div className="editor-container bg-white rounded-md border border-gray-200 shadow-sm p-4 relative">
         {editor && (
-            <BubbleMenu 
-                editor={editor} 
-                tippyOptions={{ duration: 100 }} 
-                shouldShow={({ editor, from, to }) => {
-                    return from !== to && !isCommentPopoverVisible
-                }}
-            >
-            <button
-                onClick={() => setIsCommentPopoverVisible(true)}
-                className="bg-black text-white px-3 py-1 rounded-md"
-            >
-                Comment
-            </button>
-            </BubbleMenu>
-        )}
-        
-        {editor && isCommentPopoverVisible && (
-            <BubbleMenu 
-            editor={editor} 
-            tippyOptions={{ 
-                duration: 100, 
-                placement: 'bottom', 
-                appendTo: 'parent',
-                onHide: () => setIsCommentPopoverVisible(false)
-            }} 
-            className="w-64"
-            >
-            <CommentPopover onComment={handleComment} />
-            </BubbleMenu>
+            <>
+                {/* Comment BubbleMenu and Popover Logic */}
+                
+                {/* Suggestion Action BubbleMenu */}
+                <BubbleMenu
+                    editor={editor}
+                    tippyOptions={{ duration: 100, placement: 'top' }}
+                    shouldShow={({ editor }) => editor.isActive('insertion') || editor.isActive('deletion')}
+                >
+                    <SuggestionActionPopover
+                        onAccept={handleAcceptSuggestion}
+                        onReject={handleRejectSuggestion}
+                    />
+                </BubbleMenu>
+            </>
         )}
       <EditorContent editor={editor} />
     </div>
