@@ -15,7 +15,7 @@ interface BlockEditorProps {
 
 const BlockEditor: React.FC<BlockEditorProps> = ({ isSuggestionMode = false }) => {
   const [isCommentPopoverVisible, setIsCommentPopoverVisible] = useState(false);
-  const { addFeedback } = useCollaboration(MOCK_DOCUMENT_ID);
+  const { addFeedback, addSuggestion } = useCollaboration(MOCK_DOCUMENT_ID);
 
   const editor = useEditor({
     extensions: [
@@ -28,7 +28,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({ isSuggestionMode = false }) =
         Welcome to your Collaboration Hub
       </h2>
       <p>
-        This is a block-based editor. Try toggling <strong>Suggestion Mode</strong> and then type or delete some text.
+        This is a block-based editor. Try toggling <strong>Suggestion Mode</strong> and then type or delete some text. Your suggestions will be saved and displayed in the sidebar.
       </p>
     `,
     editorProps: {
@@ -46,6 +46,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({ isSuggestionMode = false }) =
         ...editor.props.editorProps,
         handleTextInput: (view, from, to, text) => {
           if (isSuggestionMode) {
+            addSuggestion({ type: 'insertion', position: from, text }, 'block-1');
             const { state, dispatch } = view;
             const tr = state.tr.replaceWith(from, to, state.schema.text(text));
             tr.addMark(from, from + text.length, state.schema.marks.insertion.create());
@@ -58,14 +59,18 @@ const BlockEditor: React.FC<BlockEditorProps> = ({ isSuggestionMode = false }) =
           if (isSuggestionMode && (event.key === 'Backspace' || event.key === 'Delete')) {
             const { state, dispatch } = view;
             const { from, to, empty } = state.selection;
-
+            
             if (empty) {
                 const pos = event.key === 'Backspace' ? from - 1 : to;
-                if (pos < 0 || pos >= state.doc.content.size) return true;
-                
-                const tr = state.tr.addMark(pos, pos + 1, state.schema.marks.deletion.create());
-                dispatch(tr.setSelection(state.selection));
+                if (pos >= 0 && pos < state.doc.content.size) {
+                    const text = state.doc.textBetween(pos, pos + 1);
+                    addSuggestion({ type: 'deletion', start: pos, end: pos + 1, text }, 'block-1');
+                    const tr = state.tr.addMark(pos, pos + 1, state.schema.marks.deletion.create());
+                    dispatch(tr.setSelection(state.selection));
+                }
             } else {
+                const text = state.doc.textBetween(from, to);
+                addSuggestion({ type: 'deletion', start: from, end: to, text }, 'block-1');
                 const tr = state.tr.addMark(from, to, state.schema.marks.deletion.create());
                 dispatch(tr.setSelection(state.selection));
             }
@@ -75,33 +80,21 @@ const BlockEditor: React.FC<BlockEditorProps> = ({ isSuggestionMode = false }) =
           return false;
         },
         handlePaste: (view, event, slice) => {
-          if (isSuggestionMode) {
-            const { state, dispatch } = view;
-            const { tr } = state;
-            tr.replaceSelection(slice);
-            tr.addMark(tr.selection.from, tr.selection.to, view.state.schema.marks.insertion.create());
-            dispatch(tr);
-            return true;
-          }
-          return false;
+            if (isSuggestionMode) {
+                const text = slice.content.textBetween(0, slice.content.size);
+                addSuggestion({ type: 'insertion', position: view.state.selection.from, text }, 'block-1');
+                const { state, dispatch } = view;
+                const { tr } = state;
+                tr.replaceSelection(slice);
+                tr.addMark(tr.selection.from, tr.selection.to, view.state.schema.marks.insertion.create());
+                dispatch(tr);
+                return true;
+            }
+            return false;
         },
-        handleDrop: (view, event, slice, moved) => {
-          if (isSuggestionMode) {
-            const { state, dispatch } = view;
-            const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY });
-            if (!coordinates) return false;
-            
-            const pos = coordinates.pos;
-            const tr = state.tr.insert(pos, slice.content);
-            tr.addMark(pos, pos + slice.content.size, view.state.schema.marks.insertion.create());
-            dispatch(tr);
-            return true;
-          }
-          return false;
-        }
       }
     });
-  }, [isSuggestionMode, editor]);
+  }, [isSuggestionMode, editor, addSuggestion]);
 
 
   const handleComment = async (comment: string) => {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase-client';
-import { Feedback, Suggestion, SuggestionStatus } from '@/lib/types/collaboration';
+import { Feedback, Suggestion, SuggestionStatus, SuggestionData } from '@/lib/types/collaboration';
 
 export function useCollaboration(documentId: number) {
   const [feedback, setFeedback] = useState<Feedback[]>([]);
@@ -73,6 +73,37 @@ export function useCollaboration(documentId: number) {
       setLoading(false);
     }
   };
+  
+  const addSuggestion = async (suggestionData: SuggestionData, targetId: string) => {
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      const newSuggestion: Omit<Suggestion, 'id' | 'created_at' | 'user_id' | 'status' | 'resolved_at' | 'resolved_by'> = {
+        document_id: documentId,
+        target_id: targetId,
+        suggestion_data: suggestionData,
+      };
+
+      const { data, error } = await supabase
+        .from('suggestions')
+        .insert([{ ...newSuggestion, user_id: user.id }])
+        .select();
+      
+      if (error) throw error;
+      
+      if (data) {
+        setSuggestions(prev => [...prev, ...data]);
+      }
+      return data;
+    } catch (err: any) {
+      setError(err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const updateSuggestionStatus = async (suggestionId: number, status: SuggestionStatus) => {
     setLoading(true);
@@ -95,10 +126,10 @@ export function useCollaboration(documentId: number) {
     } catch (err: any) {
       setError(err);
       return null;
-    } finally {
+    } finally {.
       setLoading(false);
     }
   };
 
-  return { feedback, suggestions, loading, error, fetchFeedback, fetchSuggestions, addFeedback, updateSuggestionStatus };
+  return { feedback, suggestions, loading, error, fetchFeedback, fetchSuggestions, addFeedback, addSuggestion, updateSuggestionStatus };
 } 
