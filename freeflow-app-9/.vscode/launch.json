@@ -1,0 +1,122 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Next.js: debug server-side",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run dev:debug"
+    },
+    {
+      "name": "Next.js: debug client-side",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000"
+    },
+    {
+      "name": "Next.js: debug client-side (Firefox)",
+      "type": "firefox",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "reAttach": true,
+      "pathMappings": [
+        {
+          "url": "webpack://_N_E",
+          "path": "${workspaceFolder}"
+        }
+      ]
+    },
+    {
+      "name": "Next.js: debug full stack",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/next/dist/bin/next",
+      "runtimeArgs": ["--inspect"],
+      "env": {
+        "NODE_OPTIONS": "--max-old-space-size=16384"
+      },
+      "skipFiles": ["<node_internals>/**"],
+      "serverReadyAction": {
+        "action": "debugWithChrome",
+        "killOnServerStop": true,
+        "pattern": "- Local:.+(https?://.+)",
+        "uriFormat": "%s",
+        "webRoot": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "Playwright: Debug Responsive Tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/@playwright/test/cli.js",
+      "args": [
+        "test",
+        "tests/e2e/responsive-ui-ux.spec.ts",
+        "--debug"
+      ],
+      "env": {
+        "NODE_OPTIONS": "--max-old-space-size=8192"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Playwright: Debug Mobile Tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/@playwright/test/cli.js",
+      "args": [
+        "test",
+        "tests/e2e/responsive-ui-ux.spec.ts",
+        "--project=mobile-iphone-13",
+        "--debug"
+      ],
+      "env": {
+        "NODE_OPTIONS": "--max-old-space-size=8192"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Playwright: Debug Desktop Tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/@playwright/test/cli.js",
+      "args": [
+        "test",
+        "tests/e2e/responsive-ui-ux.spec.ts",
+        "--project=desktop-chrome-1920",
+        "--debug"
+      ],
+      "env": {
+        "NODE_OPTIONS": "--max-old-space-size=8192"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Context7: Debug Responsive Integration",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/context7-test-integration.js",
+      "args": ["responsive", "--debug"],
+      "env": {
+        "NODE_OPTIONS": "--inspect --max-old-space-size=8192"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Responsive Test Runner: Debug",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run-responsive-tests.js",
+      "args": ["--debug"],
+      "env": {
+        "NODE_OPTIONS": "--inspect --max-old-space-size=8192"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ]
+} 
