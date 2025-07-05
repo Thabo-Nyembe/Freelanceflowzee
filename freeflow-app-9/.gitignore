@@ -1,113 +1,117 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
-node_modules/
+# Dependencies
+/node_modules
+/.pnpm
+/pnpm-lock.yaml
+yarn.lock
+package-lock.json
 
-# next.js
+# Build outputs
 /.next/
 /out/
-
-# production
 /build
 
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
+# Static exports
+/export
 
-# env files
-.env*
+# Local environment variables
 .env.local
 .env.development.local
-.env.test.local
 .env.production.local
+.env.test.local
 
-# vercel
-.vercel
+# IDEs and editors
+/.idea
+/.vscode/*
+!/.vscode/settings.json
+!/.vscode/tasks.json
+!/.vscode/launch.json
+!/.vscode/extensions.json
+*.sublime-project
+*.sublime-workspace
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS files
+# OS-specific
 .DS_Store
 Thumbs.db
 
-# Logs
-logs
+# Log files
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dev.log
+dev_startup.log
+build.log
 
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
+# Temporary files and directories
+/tmp
+.tmp
+/temp
+/.vercel
 
-# Coverage directory used by tools like istanbul
-coverage/
+# Test outputs
+/coverage
+/test-results/
+/test-reports/
+/playwright-report/
+/playwright/.cache/
+test-results.json
+junit.xml
+*.spec.ts.snap
+*.test.ts.snap
+debug-screenshots/
 
-# nyc test coverage
-.nyc_output
+# Backup and temporary env files
+*.local.backup
+*.local.backup.*
+*.local.broken
+*.local.original
 
-# Dependency directories
-jspm_packages/
+# Generated documentation
+/docs/_build
 
-# Optional npm cache directory
-.npm
+# Miscellaneous
+*.pem
+*.swp
 
-# Optional REPL history
-.node_repl_history
+# Auto-generated reports and summaries
+*.md
+!README.md
+!ROADMAP.md
+!docs/**/*.md
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!components.json
+!babel.config.json
+!next.config.json
+!postcss.config.json
+!launch.json
+!jest.config.json
+!eslintrc.json
+!tsconfig.jest.json
 
-# Output of 'npm pack'
-*.tgz
+# One-off scripts
+check-db.js
+comprehensive-syntax-fix.js
+consolidated-tab-test-report.js
+create-working-ai-apis.js
+debug-tab-structure.js
+deploy-production.js
+final-syntax-fix.js
+fix-remaining-syntax.js
+fix-syntax-errors.js
+targeted-syntax-fix.js
+test-comprehensive-interactive-system.js
+test-interactive-buttons.js
+test-tabs-comprehensive.js
+quick-fix-dashboard-tests.sh
+start-server.sh
 
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variables file
-.env.test
-
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
-
-# next.js build output
-.next
-
-# nuxt.js build output
-.nuxt
-
-# vuepress build output
-.vuepress/dist
-
-# Serverless directories
-.serverless
-
-# FuseBox cache
-.fusebox/playwright-temp.config.ts
-structure.txt
-test-results/
-playwright-temp.config.ts
-structure.txt
-test-results/
-
-# Parent directory files that cause commit delays
-../.DS_Store
-../.localized
-../Adobe/
-../README.md
-../app/
-../archive/
-../build/
-../docs/
-../freeflow-app-9 Tee Zee .code-workspace
-../freeflow-app-9 Tee Zee ai .code-workspace
-../public/
+# Other
+NODE_OPTIONS=--max-old-space-size=8192
+freeflowt@0.1.0
+test-ai.html
+*.tsbuildinfo 
