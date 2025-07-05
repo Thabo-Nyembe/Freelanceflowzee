@@ -1,0 +1,49 @@
+name: Daily Database Backup
+
+on:
+  schedule:
+    # Runs at 3:00 AM UTC every day
+    - cron: '0 3 * * *'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    name: Backup Supabase Database
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up PostgreSQL client
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Run backup script
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "SUPABASE_DB_URL is not set. Skipping backup."
+            exit 1
+          fi
+          if [ -z "$AWS_S3_BUCKET" ]; then
+            echo "AWS_S3_BUCKET is not set. Skipping backup."
+            exit 1
+          fi
+          
+          chmod +x ./scripts/backup.sh
+          ./scripts/backup.sh
+
+      - name: Clean up old backups
+        # Optional: Add a step here to delete backups older than X days from S3
+        # Example using aws-cli:
+        # aws s3 ls s3://${{ secrets.AWS_S3_BUCKET }}/backups/ | while read -r line; do
+        #   ...logic to parse date and delete old files...
+        # done
+        run: echo "Cleanup step is not implemented yet." 
