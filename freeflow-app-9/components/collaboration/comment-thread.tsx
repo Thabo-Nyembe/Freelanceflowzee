@@ -9,175 +9,159 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { Check, MessageSquare, X } from 'lucide-react'
+import { Textarea } from '@/components/ui/textarea'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface Comment {
   id: string
   userId: string
+  userName: string
+  userAvatar?: string
   content: string
   timestamp: number
   resolved?: boolean
-}
-
-interface CommentProps {
-  comment: Comment
-  user: {
-    id: string
-    name: string
-    avatar?: string
-  }
-  onResolve: (id: string) => void
-}
-
-function Comment({ comment, user, onResolve }: CommentProps) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="flex items-start space-x-4 p-4"
-    >
-      <Avatar>
-        <AvatarImage src={user.avatar} alt={user.name} />
-        <AvatarFallback>
-          {user.name.split(' ').map(n => n[0]).join('')}
-        </AvatarFallback>
-      </Avatar>
-
-      <div className="flex-1 space-y-1">
-        <div className="flex items-center justify-between">
-          <div className="font-medium">{user.name}</div>
-          <time className="text-xs text-muted-foreground">
-            {format(comment.timestamp, 'MMM d, h:mm a')}
-          </time>
-        </div>
-
-        <p className="text-sm text-muted-foreground">{comment.content}</p>
-      </div>
-
-      {!comment.resolved && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onResolve(comment.id)}
-          className="shrink-0"
-        >
-          <Check className="h-4 w-4" />
-        </Button>
-      )}
-    </motion.div>
-  )
+  replies?: Comment[]
 }
 
 interface CommentThreadProps {
   comments: Comment[]
+  currentUser: {
+    id: string
+    name: string
+    avatar?: string
+  }
+  onAddComment: (content: string) => void
+  onResolveComment: (commentId: string) => void
 }
 
-export function CommentThread({ comments }: CommentThreadProps) {
-  const { state, addComment, resolveComment } = useCollaborationContext()
-  const [isOpen, setIsOpen] = useState(false)
+export function CommentThread({
+  comments,
+  currentUser,
+  onAddComment,
+  onResolveComment,
+}: CommentThreadProps) {
   const [newComment, setNewComment] = useState('')
-
-  const activeComments = comments.filter(c => !c.resolved)
-  const resolvedComments = comments.filter(c => c.resolved)
+  const [isExpanded, setIsExpanded] = useState(true)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newComment.trim()) return
-
-    addComment(newComment.trim())
-    setNewComment('')
+    if (newComment.trim()) {
+      onAddComment(newComment.trim())
+      setNewComment('')
+    }
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="mb-4"
-          >
-            <Card className="w-80">
-              <div className="max-h-96 overflow-y-auto">
-                {activeComments.length > 0 && (
-                  <div className="border-b">
-                    <div className="p-4 font-medium">Active Comments</div>
-                    {activeComments.map(comment => {
-                      const user = state.users.find(u => u.id === comment.userId)
-                      if (!user) return null
+    <div className="fixed right-4 bottom-4 w-80">
+      <motion.div
+        initial={false}
+        animate={{ height: isExpanded ? 'auto' : '48px' }}
+        className="bg-white rounded-lg shadow-lg overflow-hidden"
+      >
+        {/* Header */}
+        <div
+          className="p-4 bg-primary text-primary-foreground flex items-center justify-between cursor-pointer"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <div className="flex items-center gap-2">
+            <MessageSquare className="w-5 h-5" />
+            <span className="font-medium">Comments ({comments.length})</span>
+          </div>
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            {isExpanded ? <X className="w-4 h-4" /> : <MessageSquare className="w-4 h-4" />}
+          </Button>
+        </div>
 
-                      return (
-                        <Comment
-                          key={comment.id}
-                          comment={comment}
-                          user={user}
-                          onResolve={resolveComment}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              {/* Comments list */}
+              <ScrollArea className="h-[300px] p-4">
+                {comments.map((comment) => (
+                  <div
+                    key={comment.id}
+                    className={`mb-4 ${
+                      comment.resolved ? 'opacity-50' : ''
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <Avatar>
+                        <img
+                          src={comment.userAvatar || '/avatars/default.png'}
+                          alt={comment.userName}
+                          className="w-8 h-8 rounded-full"
                         />
-                      )
-                    })}
-                  </div>
-                )}
-
-                {resolvedComments.length > 0 && (
-                  <div>
-                    <div className="p-4 font-medium text-muted-foreground">
-                      Resolved Comments
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{comment.userName}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {format(comment.timestamp, 'MMM d, h:mm a')}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-sm">{comment.content}</p>
+                        {comment.replies?.map((reply) => (
+                          <div key={reply.id} className="ml-6 mt-2">
+                            <div className="flex items-start gap-2">
+                              <Avatar>
+                                <img
+                                  src={reply.userAvatar || '/avatars/default.png'}
+                                  alt={reply.userName}
+                                  className="w-6 h-6 rounded-full"
+                                />
+                              </Avatar>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-medium">
+                                    {reply.userName}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {format(reply.timestamp, 'MMM d, h:mm a')}
+                                  </span>
+                                </div>
+                                <p className="text-sm">{reply.content}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {!comment.resolved && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => onResolveComment(comment.id)}
+                        >
+                          <Check className="w-4 h-4" />
+                        </Button>
+                      )}
                     </div>
-                    {resolvedComments.map(comment => {
-                      const user = state.users.find(u => u.id === comment.userId)
-                      if (!user) return null
-
-                      return (
-                        <Comment
-                          key={comment.id}
-                          comment={comment}
-                          user={user}
-                          onResolve={resolveComment}
-                        />
-                      )
-                    })}
                   </div>
-                )}
-              </div>
+                ))}
+              </ScrollArea>
 
-              <form onSubmit={handleSubmit} className="border-t p-4">
-                <div className="flex space-x-2">
-                  <Input
-                    value={newComment}
-                    onChange={e => setNewComment(e.target.value)}
-                    placeholder="Add a comment..."
-                    className="flex-1"
-                  />
+              {/* Comment input */}
+              <form onSubmit={handleSubmit} className="p-4 border-t">
+                <Textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Add a comment..."
+                  className="min-h-[80px]"
+                />
+                <div className="mt-2 flex justify-end">
                   <Button type="submit" disabled={!newComment.trim()}>
                     Send
                   </Button>
                 </div>
               </form>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <Button
-        variant={isOpen ? 'secondary' : 'default'}
-        size="icon"
-        onClick={() => setIsOpen(!isOpen)}
-        className="h-12 w-12 rounded-full shadow-lg"
-      >
-        {isOpen ? (
-          <X className="h-6 w-6" />
-        ) : (
-          <>
-            <MessageSquare className="h-6 w-6" />
-            {activeComments.length > 0 && (
-              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
-                {activeComments.length}
-              </span>
-            )}
-          </>
-        )}
-      </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   )
 } 

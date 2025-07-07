@@ -1,98 +1,154 @@
 'use client'
 
-import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
 import {
-  Home,
-  Calendar,
-  Users,
-  FileText,
-  Settings,
+  BarChart3,
+  FolderClosed,
   Video,
+  Users,
+  Brain,
+  Sparkles,
+  Calendar,
+  Shield,
+  FileText,
   MessageSquare,
+  TrendingUp,
+  UserCircle,
+  Wallet,
   Bell,
-  FolderOpen,
-  BarChart2,
+  Palette,
+  Layers
 } from 'lucide-react'
 
 interface SidebarItem {
   name: string
   href: string
-  icon: React.ReactNode
+  icon: any
+  badge?: string
 }
 
-const mainNavItems: SidebarItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: <Home className="w-5 h-5" /> },
-  { name: 'Calendar', href: '/calendar', icon: <Calendar className="w-5 h-5" /> },
-  { name: 'Team', href: '/team', icon: <Users className="w-5 h-5" /> },
-  { name: 'Documents', href: '/documents', icon: <FileText className="w-5 h-5" /> },
-  { name: 'Videos', href: '/videos', icon: <Video className="w-5 h-5" /> },
-  { name: 'Chat', href: '/chat', icon: <MessageSquare className="w-5 h-5" /> },
+const sidebarItems: SidebarItem[] = [
+  {
+    name: 'Overview',
+    href: '/dashboard',
+    icon: BarChart3
+  },
+  {
+    name: 'Projects Hub',
+    href: '/dashboard/projects-hub',
+    icon: FolderClosed,
+    badge: 'A+++'
+  },
+  {
+    name: 'Video Studio',
+    href: '/dashboard/video-studio',
+    icon: Video,
+    badge: 'A+++'
+  },
+  {
+    name: 'Canvas Collaboration',
+    href: '/dashboard/canvas',
+    icon: Palette,
+    badge: 'A+++'
+  },
+  {
+    name: 'Community',
+    href: '/dashboard/community',
+    icon: Users,
+    badge: 'A+++'
+  },
+  {
+    name: 'AI Assistant',
+    href: '/dashboard/ai-assistant',
+    icon: Brain,
+    badge: 'A+++'
+  },
+  {
+    name: 'AI Create',
+    href: '/dashboard/ai-create',
+    icon: Sparkles,
+    badge: 'A+++'
+  },
+  {
+    name: 'My Day',
+    href: '/dashboard/my-day',
+    icon: Calendar,
+    badge: 'A+++'
+  },
+  {
+    name: 'Escrow',
+    href: '/dashboard/escrow',
+    icon: Shield,
+    badge: 'A+++'
+  },
+  {
+    name: 'Files Hub',
+    href: '/dashboard/files-hub',
+    icon: FileText,
+    badge: 'A+++'
+  },
+  {
+    name: 'Collaboration',
+    href: '/dashboard/collaboration',
+    icon: MessageSquare
+  },
+  {
+    name: 'Analytics',
+    href: '/dashboard/analytics',
+    icon: TrendingUp
+  },
+  {
+    name: 'Client Zone',
+    href: '/dashboard/client-zone',
+    icon: UserCircle
+  },
+  {
+    name: 'Financial Hub',
+    href: '/dashboard/financial-hub',
+    icon: Wallet
+  },
+  {
+    name: 'Notifications',
+    href: '/dashboard/notifications',
+    icon: Bell
+  }
 ]
 
-const secondaryNavItems: SidebarItem[] = [
-  { name: 'Projects', href: '/projects', icon: <FolderOpen className="w-5 h-5" /> },
-  { name: 'Analytics', href: '/analytics', icon: <BarChart2 className="w-5 h-5" /> },
-  { name: 'Notifications', href: '/notifications', icon: <Bell className="w-5 h-5" /> },
-  { name: 'Settings', href: '/settings', icon: <Settings className="w-5 h-5" /> },
-]
-
-export default function UnifiedSidebar() {
+export function UnifiedSidebar() {
   const pathname = usePathname()
 
-  const NavItem = ({ item }: { item: SidebarItem }) => (
-    <Link href={item.href}>
-      <Button
-        variant="ghost"
-        className={cn(
-          'w-full justify-start gap-2 px-2',
-          pathname === item.href && 'bg-muted'
-        )}
-      >
-        {item.icon}
-        <span>{item.name}</span>
-      </Button>
-    </Link>
-  )
-
   return (
-    <div className="flex flex-col h-screen w-64 border-r bg-background p-4 space-y-4">
-      <div className="flex items-center justify-center h-16">
-        <h1 className="text-2xl font-bold">FreeFlowZee</h1>
+    <div className="flex flex-col h-full bg-background border-r">
+      <div className="p-6">
+        <h1 className="text-2xl font-bold">FreeflowZee</h1>
+        <h2 className="text-lg text-muted-foreground">Enterprise Dashboard</h2>
       </div>
-
-      <nav className="space-y-1">
-        <div className="py-2">
-          <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight">Main Menu</h2>
-          <div className="space-y-1">
-            {mainNavItems.map((item) => (
-              <NavItem key={item.href} item={item} />
-            ))}
-          </div>
-        </div>
-
-        <div className="py-2">
-          <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight">Tools</h2>
-          <div className="space-y-1">
-            {secondaryNavItems.map((item) => (
-              <NavItem key={item.href} item={item} />
-            ))}
-          </div>
-        </div>
+      
+      <nav className="flex-1 px-4 space-y-1">
+        {sidebarItems.map((item) => {
+          const isActive = pathname === item.href
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                'flex items-center gap-3 px-3 py-2 rounded-lg group hover:bg-accent',
+                isActive && 'bg-accent'
+              )}
+            >
+              <item.icon className="w-5 h-5" />
+              <span className="flex-1">{item.name}</span>
+              {item.badge && (
+                <span className="px-2 py-1 text-sm rounded-full bg-purple-100 text-purple-900">
+                  {item.badge}
+                </span>
+              )}
+            </Link>
+          )
+        })}
       </nav>
-
-      <div className="mt-auto">
-        <div className="flex items-center gap-2 px-2 py-4">
-          <div className="w-10 h-10 rounded-full bg-muted" />
-          <div>
-            <p className="text-sm font-medium">John Doe</p>
-            <p className="text-xs text-muted-foreground">john@example.com</p>
-          </div>
-        </div>
-      </div>
     </div>
   )
 } 

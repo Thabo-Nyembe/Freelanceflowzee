@@ -1,36 +1,33 @@
 'use client'
 
+import { VideoAnalysisData } from '@/lib/types/ai'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
+import { AlertCircle, BarChart2, Tag } from 'lucide-react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 interface AIVideoAnalysisProps {
+  data?: VideoAnalysisData
   isLoading?: boolean
-  data?: {
-    quality: number
-    engagement: number
-    clarity: number
-    pacing: number
-    tags: string[]
-    summary: string
-    recommendations: string[]
-  }
 }
 
-export function AIVideoAnalysis({ isLoading, data }: AIVideoAnalysisProps) {
+export function AIVideoAnalysis({ data, isLoading }: AIVideoAnalysisProps) {
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>
-            <Skeleton className="h-6 w-48" />
+          <CardTitle className="flex items-center gap-2">
+            <BarChart2 className="h-5 w-5" />
+            Content Analysis
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-4 w-1/2" />
+        <CardContent>
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-gray-200 rounded w-3/4" />
+            <div className="h-4 bg-gray-200 rounded w-1/2" />
+            <div className="h-4 bg-gray-200 rounded w-2/3" />
+          </div>
         </CardContent>
       </Card>
     )
@@ -38,79 +35,76 @@ export function AIVideoAnalysis({ isLoading, data }: AIVideoAnalysisProps) {
 
   if (!data) return null
 
-  const {
-    quality,
-    engagement,
-    clarity,
-    pacing,
-    tags,
-    summary,
-    recommendations
-  } = data
-
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Content Analysis</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <BarChart2 className="h-5 w-5" />
+          Content Analysis
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Quality</span>
-              <span>{quality}%</span>
+      <CardContent>
+        <div className="space-y-6">
+          {/* Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Quality</span>
+                <span>{Math.round(data.quality)}%</span>
+              </div>
+              <Progress value={data.quality} className="bg-blue-100" />
             </div>
-            <Progress value={quality} />
-          </div>
 
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Engagement</span>
-              <span>{engagement}%</span>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Engagement</span>
+                <span>{Math.round(data.engagement)}%</span>
+              </div>
+              <Progress value={data.engagement} className="bg-green-100" />
             </div>
-            <Progress value={engagement} />
-          </div>
 
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Clarity</span>
-              <span>{clarity}%</span>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Clarity</span>
+                <span>{Math.round(data.clarity)}%</span>
+              </div>
+              <Progress value={data.clarity} className="bg-purple-100" />
             </div>
-            <Progress value={clarity} />
-          </div>
 
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Pacing</span>
-              <span>{pacing}%</span>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Pacing</span>
+                <span>{Math.round(data.pacing)}%</span>
+              </div>
+              <Progress value={data.pacing} className="bg-orange-100" />
             </div>
-            <Progress value={pacing} />
           </div>
-        </div>
 
-        <div>
-          <h4 className="font-medium mb-2">Tags</h4>
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <Badge key={tag} variant="secondary">
-                {tag}
-              </Badge>
-            ))}
+          {/* Tags */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium">Content Tags</h3>
+            <div className="flex flex-wrap gap-2">
+              {data.tags.map((tag, index) => (
+                <Badge key={index} variant="secondary" className="flex items-center">
+                  <Tag className="h-3 w-3 mr-1" />
+                  {tag}
+                </Badge>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div>
-          <h4 className="font-medium mb-2">Summary</h4>
-          <p className="text-sm text-muted-foreground">{summary}</p>
-        </div>
-
-        <div>
-          <h4 className="font-medium mb-2">Recommendations</h4>
-          <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-            {recommendations.map((rec, index) => (
-              <li key={index}>{rec}</li>
-            ))}
-          </ul>
+          {/* Recommendations */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium">Recommendations</h3>
+            <div className="space-y-2">
+              {data.recommendations.map((recommendation, index) => (
+                <Alert key={index}>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{recommendation}</AlertDescription>
+                </Alert>
+              ))}
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>

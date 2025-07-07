@@ -6,24 +6,16 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ScrollArea } from '@/components/ui/scroll-area'
-
-interface TranscriptSegment {
-  start: number
-  end: number
-  text: string
-  speaker?: string
-}
+import { VideoTranscriptionData } from '@/lib/types/ai'
+import { Badge } from '@/components/ui/badge'
+import { FileText, Languages } from 'lucide-react'
 
 interface VideoTranscriptionProps {
+  data?: VideoTranscriptionData
   isLoading?: boolean
-  data?: {
-    segments: TranscriptSegment[]
-    languages: string[]
-    confidence: number
-  }
 }
 
-export function VideoTranscription({ isLoading, data }: VideoTranscriptionProps) {
+export function VideoTranscription({ data, isLoading }: VideoTranscriptionProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedLanguage, setSelectedLanguage] = useState('en')
 
@@ -31,14 +23,17 @@ export function VideoTranscription({ isLoading, data }: VideoTranscriptionProps)
     return (
       <Card>
         <CardHeader>
-          <CardTitle>
-            <Skeleton className="h-6 w-48" />
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Transcription
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-4 w-1/2" />
+        <CardContent>
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-gray-200 rounded w-3/4" />
+            <div className="h-4 bg-gray-200 rounded w-1/2" />
+            <div className="h-4 bg-gray-200 rounded w-2/3" />
+          </div>
         </CardContent>
       </Card>
     )
@@ -70,72 +65,66 @@ export function VideoTranscription({ isLoading, data }: VideoTranscriptionProps)
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>Transcription</span>
-          <span className="text-sm text-muted-foreground">
-            Confidence: {(confidence * 100).toFixed(1)}%
-          </span>
+        <CardTitle className="flex items-center gap-2">
+          <FileText className="h-5 w-5" />
+          Transcription
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center space-x-2">
-          <Input
-            type="search"
-            placeholder="Search transcript..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <select
-            value={selectedLanguage}
-            onChange={(e) => setSelectedLanguage(e.target.value)}
-            className="h-10 rounded-md border border-input bg-background px-3"
-          >
-            {languages.map((lang) => (
-              <option key={lang} value={lang}>
-                {lang.toUpperCase()}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <ScrollArea className="h-[400px] rounded-md border p-4">
-          <div className="space-y-4">
-            {filteredSegments.map((segment, index) => (
-              <div
-                key={index}
-                className="flex items-start space-x-4 hover:bg-accent/50 p-2 rounded-md"
-              >
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleTimeClick(segment.start)}
-                  className="font-mono"
-                >
-                  {formatTime(segment.start)}
-                </Button>
-                <div className="flex-1">
-                  {segment.speaker && (
-                    <span className="font-medium text-sm text-primary mr-2">
-                      {segment.speaker}:
-                    </span>
-                  )}
-                  <span className="text-sm">{segment.text}</span>
-                </div>
-              </div>
-            ))}
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Languages className="h-4 w-4" />
+            <div className="flex gap-2">
+              {languages.map((lang) => (
+                <Badge key={lang} variant="secondary">
+                  {lang}
+                </Badge>
+              ))}
+            </div>
+            <Badge variant="outline">
+              {Math.round(confidence * 100)}% confidence
+            </Badge>
           </div>
-        </ScrollArea>
 
-        <div className="flex justify-end space-x-2">
-          <Button variant="outline" size="sm">
-            Copy Text
-          </Button>
-          <Button variant="outline" size="sm">
-            Download SRT
-          </Button>
-          <Button variant="outline" size="sm">
-            Download VTT
-          </Button>
+          <ScrollArea className="h-[400px] rounded-md border p-4">
+            <div className="space-y-4">
+              {filteredSegments.map((segment, index) => (
+                <div
+                  key={index}
+                  className="flex items-start space-x-4 hover:bg-accent/50 p-2 rounded-md"
+                >
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleTimeClick(segment.start)}
+                    className="font-mono"
+                  >
+                    {formatTime(segment.start)}
+                  </Button>
+                  <div className="flex-1">
+                    {segment.speaker && (
+                      <span className="font-medium text-sm text-primary mr-2">
+                        {segment.speaker}:
+                      </span>
+                    )}
+                    <span className="text-sm">{segment.text}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" size="sm">
+              Copy Text
+            </Button>
+            <Button variant="outline" size="sm">
+              Download SRT
+            </Button>
+            <Button variant="outline" size="sm">
+              Download VTT
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

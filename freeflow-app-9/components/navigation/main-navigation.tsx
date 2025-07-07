@@ -25,6 +25,7 @@ import {
   MessageSquare,
   Settings,
   LogOut,
+  Briefcase,
 } from 'lucide-react'
 
 const features = [
@@ -75,7 +76,13 @@ const features = [
     description: 'Client collaboration',
     href: '/client-portal',
     icon: MessageSquare
-  }
+  },
+  {
+    title: 'Freelancer',
+    href: '/freelancer',
+    icon: Briefcase,
+    description: 'Manage your freelance business with AI-powered tools',
+  },
 ]
 
 export function MainNavigation() {

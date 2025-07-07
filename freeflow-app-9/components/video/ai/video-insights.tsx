@@ -1,134 +1,163 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion'
+  Brain,
+  Users,
+  Clock,
+  Smile,
+  Meh,
+  Frown,
+  CheckCircle,
+  Target,
+  Tags,
+  Timer
+} from 'lucide-react'
 
-interface Insight {
-  category: string
-  score: number
-  details: string
-  recommendations: string[]
+interface VideoInsightData {
+  topics: string[]
+  targetAudience: string[]
+  sentiment: {
+    positive: number
+    neutral: number
+    negative: number
+  }
+  actionItems: string[]
+  estimatedWatchTime: number
 }
 
 interface VideoInsightsProps {
-  isLoading?: boolean
-  data?: {
-    insights: Insight[]
-    overallScore: number
-    topStrengths: string[]
-    improvementAreas: string[]
-  }
+  data?: VideoInsightData
 }
 
-export function VideoInsights({ isLoading, data }: VideoInsightsProps) {
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Skeleton className="h-6 w-48" />
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-4 w-1/2" />
-        </CardContent>
-      </Card>
-    )
-  }
-
+export function VideoInsights({ data }: VideoInsightsProps) {
   if (!data) return null
 
-  const { insights, overallScore, topStrengths, improvementAreas } = data
-
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-500'
-    if (score >= 60) return 'text-yellow-500'
-    return 'text-red-500'
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = Math.floor(seconds % 60)
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>Video Insights</span>
-          <span className={`text-2xl font-bold ${getScoreColor(overallScore)}`}>
-            {overallScore}%
-          </span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <h4 className="font-medium mb-2">Top Strengths</h4>
-            <ul className="space-y-1">
-              {topStrengths.map((strength, index) => (
-                <li key={index} className="flex items-center text-green-500">
-                  <span className="mr-2">✓</span>
-                  <span className="text-sm">{strength}</span>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Brain className="h-5 w-5" />
+            Content Insights
+          </CardTitle>
+          <CardDescription>
+            AI-powered analysis of your video content
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Topics */}
+          <div className="space-y-2">
+            <h3 className="flex items-center gap-2 font-medium">
+              <Tags className="h-4 w-4" />
+              Main Topics
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {data.topics.map((topic, index) => (
+                <Badge key={index} variant="secondary">
+                  {topic}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* Target Audience */}
+          <div className="space-y-2">
+            <h3 className="flex items-center gap-2 font-medium">
+              <Target className="h-4 w-4" />
+              Target Audience
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {data.targetAudience.map((audience, index) => (
+                <Badge key={index} variant="outline">
+                  {audience}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* Sentiment Analysis */}
+          <div className="space-y-2">
+            <h3 className="flex items-center gap-2 font-medium">
+              <Users className="h-4 w-4" />
+              Content Sentiment
+            </h3>
+            <div className="space-y-2">
+              <div className="flex items-center gap-4">
+                <Smile className="h-4 w-4 text-green-500" />
+                <Progress
+                  value={data.sentiment.positive * 100}
+                  className="flex-1"
+                />
+                <span className="w-12 text-sm">
+                  {Math.round(data.sentiment.positive * 100)}%
+                </span>
+              </div>
+              <div className="flex items-center gap-4">
+                <Meh className="h-4 w-4 text-yellow-500" />
+                <Progress
+                  value={data.sentiment.neutral * 100}
+                  className="flex-1"
+                />
+                <span className="w-12 text-sm">
+                  {Math.round(data.sentiment.neutral * 100)}%
+                </span>
+              </div>
+              <div className="flex items-center gap-4">
+                <Frown className="h-4 w-4 text-red-500" />
+                <Progress
+                  value={data.sentiment.negative * 100}
+                  className="flex-1"
+                />
+                <span className="w-12 text-sm">
+                  {Math.round(data.sentiment.negative * 100)}%
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Items */}
+          <div className="space-y-2">
+            <h3 className="flex items-center gap-2 font-medium">
+              <CheckCircle className="h-4 w-4" />
+              Key Takeaways
+            </h3>
+            <ul className="space-y-2">
+              {data.actionItems.map((item, index) => (
+                <li key={index} className="flex items-start gap-2">
+                  <span className="mt-1 h-2 w-2 rounded-full bg-primary" />
+                  <span className="text-sm">{item}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div>
-            <h4 className="font-medium mb-2">Areas for Improvement</h4>
-            <ul className="space-y-1">
-              {improvementAreas.map((area, index) => (
-                <li key={index} className="flex items-center text-yellow-500">
-                  <span className="mr-2">!</span>
-                  <span className="text-sm">{area}</span>
-                </li>
-              ))}
-            </ul>
+          {/* Estimated Watch Time */}
+          <div className="flex items-center gap-2 rounded-lg border p-4">
+            <Timer className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <p className="font-medium">Estimated Watch Time</p>
+              <p className="text-sm text-muted-foreground">
+                {formatTime(data.estimatedWatchTime)}
+              </p>
+            </div>
           </div>
-        </div>
-
-        <Accordion type="single" collapsible className="w-full">
-          {insights.map((insight, index) => (
-            <AccordionItem key={index} value={`item-${index}`}>
-              <AccordionTrigger>
-                <div className="flex items-center justify-between w-full pr-4">
-                  <span>{insight.category}</span>
-                  <Badge
-                    variant={insight.score >= 70 ? 'default' : 'secondary'}
-                    className={getScoreColor(insight.score)}
-                  >
-                    {insight.score}%
-                  </Badge>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-4 pt-2">
-                  <p className="text-sm text-muted-foreground">
-                    {insight.details}
-                  </p>
-
-                  <div>
-                    <h5 className="font-medium text-sm mb-2">Recommendations:</h5>
-                    <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-                      {insight.recommendations.map((rec, recIndex) => (
-                        <li key={recIndex}>{rec}</li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <Progress value={insight.score} className="mt-2" />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   )
 } 

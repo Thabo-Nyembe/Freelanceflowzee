@@ -1,122 +1,76 @@
 'use client'
 
+import { SmartChaptersData } from '@/lib/types/ai'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
+import { BookOpen, Clock, Tag } from 'lucide-react'
 
-interface Chapter {
-  title: string
-  start: number
-  end: number
-  summary: string
-  keywords: string[]
+interface SmartChaptersData {
+  chapters: { title: string; start: number; end: number; summary: string; keywords: string[] }[]
+  totalDuration: number
 }
 
 interface SmartChaptersProps {
-  isLoading?: boolean
-  data?: {
-    chapters: Chapter[]
-    totalDuration: number
-  }
+  data?: SmartChaptersData | { title: string; start: number; end: number; summary: string; keywords: string[] }[]
 }
 
-export function SmartChapters({ isLoading, data }: SmartChaptersProps) {
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Skeleton className="h-6 w-48" />
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-4 w-1/2" />
-        </CardContent>
-      </Card>
-    )
-  }
-
+export function SmartChapters({ data }: SmartChaptersProps) {
   if (!data) return null
 
-  const { chapters, totalDuration } = data
-
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60)
-    const remainingSeconds = Math.floor(seconds % 60)
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
-  }
-
-  const formatDuration = (start: number, end: number) => {
-    const duration = end - start
-    return `${formatTime(start)} - ${formatTime(end)} (${Math.round(duration)}s)`
-  }
-
-  const handleChapterClick = (start: number) => {
-    // Find the video element and seek to the chapter start time
-    const video = document.querySelector('video')
-    if (video) {
-      video.currentTime = start
-      video.play()
-    }
-  }
+  // Transform array data into SmartChaptersData format
+  const chaptersData: SmartChaptersData = Array.isArray(data) 
+    ? {
+        chapters: data,
+        totalDuration: data.reduce((max, chapter) => Math.max(max, chapter.end), 0)
+      }
+    : data
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>Smart Chapters</span>
-          <span className="text-sm text-muted-foreground">
-            Total Duration: {formatTime(totalDuration)}
-          </span>
+        <CardTitle className="flex items-center gap-2">
+          <BookOpen className="h-5 w-5" />
+          Smart Chapters
+          <Badge variant="outline" className="ml-auto">
+            <Clock className="h-3 w-3 mr-1" />
+            {formatTime(chaptersData.totalDuration)}
+          </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[400px] rounded-md border">
-          <div className="space-y-4 p-4">
-            {chapters.map((chapter, index) => (
-              <div
-                key={index}
-                className="space-y-2 hover:bg-accent/50 p-3 rounded-md cursor-pointer"
-                onClick={() => handleChapterClick(chapter.start)}
-              >
+        <ScrollArea className="h-[400px]">
+          <div className="space-y-4">
+            {chaptersData.chapters.map((chapter, index) => (
+              <div key={index} className="p-4 rounded-lg border">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-medium">
-                    {index + 1}. {chapter.title}
-                  </h4>
+                  <h4 className="font-medium">{chapter.title}</h4>
                   <span className="text-sm text-muted-foreground">
-                    {formatDuration(chapter.start, chapter.end)}
+                    {formatTime(chapter.start)} - {formatTime(chapter.end)}
                   </span>
                 </div>
-
-                <p className="text-sm text-muted-foreground">
-                  {chapter.summary}
-                </p>
-
-                <div className="flex flex-wrap gap-2">
-                  {chapter.keywords.map((keyword) => (
-                    <Badge key={keyword} variant="secondary">
+                <p className="mt-2 text-sm text-muted-foreground">{chapter.summary}</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {chapter.keywords.map((keyword, i) => (
+                    <span
+                      key={i}
+                      className="px-2 py-1 text-xs rounded-full bg-muted"
+                    >
                       {keyword}
-                    </Badge>
+                    </span>
                   ))}
                 </div>
               </div>
             ))}
           </div>
         </ScrollArea>
-
-        <div className="flex justify-end space-x-2 mt-4">
-          <Button variant="outline" size="sm">
-            Export Chapters
-          </Button>
-          <Button variant="outline" size="sm">
-            Generate Thumbnail Grid
-          </Button>
-        </div>
       </CardContent>
     </Card>
   )
+}
+
+function formatTime(seconds: number): string {
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = Math.floor(seconds % 60)
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
 } 

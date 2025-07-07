@@ -2,47 +2,51 @@
 
 import { useState, useCallback } from 'react'
 import { EnhancedAIService } from '@/lib/ai/enhanced-ai-service'
+import { toast } from '@/components/ui/use-toast'
 
 const aiService = new EnhancedAIService()
 
-interface AIData {
-  transcription?: {
-    text: string
-    segments: Array<{
-      start: number
-      end: number
-      text: string
-    }>
-    language: string
-    confidence: number
-  }
-  analysis?: {
-    quality: number
-    engagement: number
+interface TranscriptionData {
+  text: string
+  segments: { start: number; end: number; text: string }[]
+  language: string
+  confidence: number
+  languages: string[]
+}
+
+interface ChapterData {
+  chapters: { title: string; start: number; end: number; summary: string; keywords: string[] }[]
+  totalDuration: number
+}
+
+interface AnalysisData {
+  quality: {
     clarity: number
-    pacing: number
-    tags: string[]
-    summary: string
-    recommendations: string[]
+    engagement: number
+    professionalism: number
+    effectiveness: number
   }
-  chapters?: Array<{
-    title: string
-    start: number
-    end: number
-    summary: string
-    keywords: string[]
-  }>
-  insights?: {
-    insights: Array<{
-      category: string
-      score: number
-      details: string
-      recommendations: string[]
-    }>
-    overallScore: number
-    topStrengths: string[]
-    improvementAreas: string[]
+  technicalScore: number
+  contentScore: number
+}
+
+interface InsightData {
+  topics: string[]
+  targetAudience: string[]
+  sentiment: {
+    positive: number
+    neutral: number
+    negative: number
   }
+  actionItems: string[]
+  estimatedWatchTime: number
+}
+
+interface AIData {
+  transcription?: TranscriptionData
+  chapters?: ChapterData
+  analysis?: AnalysisData
+  insights?: InsightData
 }
 
 export function useAIOperations() {
