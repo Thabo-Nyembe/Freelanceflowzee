@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { Moon, Sun, Monitor, Check } from "lucide-react"
-import { useTheme } from "@/components/theme-provider"
+import { Moon, Sun } from "lucide-react"
+import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -12,85 +12,68 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 
-export function ThemeToggle() {
-  const { theme, setTheme, resolvedTheme } = useTheme()
+interface ThemeToggleProps {
+  align?: 'start' | 'center' | 'end'
+  side?: 'top' | 'right' | 'bottom' | 'left'
+  className?: string
+}
 
-  const themes = [
-    {
-      name: 'Light',
-      value: 'light' as const,
-      icon: Sun,
-      description: 'Light mode',
-    },
-    {
-      name: 'Dark',
-      value: 'dark' as const,
-      icon: Moon,
-      description: 'Dark mode',
-    },
-    {
-      name: 'System',
-      value: 'system' as const,
-      icon: Monitor,
-      description: 'Follow system preference',
-    },
-  ]
+export function ThemeToggle({
+  align = 'end',
+  side = 'bottom',
+  className,
+}: ThemeToggleProps) {
+  const { setTheme, theme } = useTheme()
+  const [isMounted, setIsMounted] = React.useState(false)
 
-  const getCurrentIcon = () => {
-    if (resolvedTheme === 'dark') return Moon
-    if (resolvedTheme === 'light') return Sun
-    return Monitor
+  // After mounting, we have access to the theme
+  React.useEffect(() => setIsMounted(true), [])
+
+  if (!isMounted) {
+    return (
+      <Button variant="ghost" size="icon" className={className}>
+        <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+        <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+        <span className="sr-only">Toggle theme</span>
+      </Button>
+    )
   }
-
-  const CurrentIcon = getCurrentIcon()
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          data-testid="theme-toggle"
-          aria-label="Toggle theme"
-          className="relative h-9 w-9 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-        >
-          <CurrentIcon className="h-4 w-4 transition-all" />
+        <Button variant="ghost" size="icon" className={className}>
+          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
-
-      <DropdownMenuContent
-        align="end"
-        className="w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg"
-      >
-        <div className="p-1">
-          {themes.map((themeOption) => {
-            const Icon = themeOption.icon
-            const isSelected = theme === themeOption.value
-            
-            return (
-              <DropdownMenuItem
-                key={themeOption.value}
-                onClick={() => setTheme(themeOption.value)}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2 text-sm rounded-md cursor-pointer transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus:bg-gray-100 dark:focus:bg-gray-800",
-                  isSelected && 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                <div className="flex flex-col flex-1">
-                  <span className="font-medium">{themeOption.name}</span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {themeOption.description}
-                  </span>
-                </div>
-                {isSelected && (
-                  <Check className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                )}
-              </DropdownMenuItem>
-            )
-          })}
-        </div>
+      <DropdownMenuContent align={align} side={side}>
+        <DropdownMenuItem onClick={() => setTheme('light')}>
+          <Sun className="mr-2 h-4 w-4" />
+          <span>Light</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme('dark')}>
+          <Moon className="mr-2 h-4 w-4" />
+          <span>Dark</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme('system')}>
+          <svg
+            className="mr-2 h-4 w-4"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+            <line x1="8" y1="21" x2="16" y2="21" />
+            <line x1="12" y1="17" x2="12" y2="21" />
+          </svg>
+          <span>System</span>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

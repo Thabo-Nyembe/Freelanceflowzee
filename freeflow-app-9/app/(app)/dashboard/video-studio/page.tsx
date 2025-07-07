@@ -18,14 +18,27 @@ import {
   Sparkles 
 } from 'lucide-react'
 
+// Define interfaces for event handler data
+interface RecordingData {
+  videoUrl: string;
+  duration: number;
+  transcription?: string;
+}
+
+interface ShareData {
+  platform: 'email' | 'link' | 'social';
+  recipients?: string[];
+  sharedUrl?: string;
+}
+
 export default function VideoStudioPage() {
   const currentUser = { id: '1', name: 'User', email: 'user@example.com' }
   
-  const handleRecordingComplete = (data: any) => {
+  const handleRecordingComplete = (data: RecordingData) => {
     console.log('Recording completed: ', data)
   }
   
-  const handleShare = (data: any) => {
+  const handleShare = (data: ShareData) => {
     console.log('Sharing: ', data)
   }
 

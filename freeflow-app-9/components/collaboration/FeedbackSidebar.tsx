@@ -4,6 +4,13 @@ import React from 'react';
 import { useCollaboration } from '@/hooks/collaboration/useCollaboration';
 import { Feedback, Suggestion } from '@/lib/types/collaboration';
 
+interface SuggestionData {
+  type: 'insertion' | 'deletion' | 'replacement';
+  text?: string;
+  old_text?: string;
+  new_text?: string;
+}
+
 interface FeedbackSidebarProps {
   documentId: number;
 }
@@ -34,7 +41,7 @@ const FeedbackSidebar: React.FC<FeedbackSidebarProps> = ({ documentId }) => {
     </div>
   );
 
-  const renderSuggestionText = (data: any) => {
+  const renderSuggestionText = (data: SuggestionData) => {
     switch (data.type) {
       case 'insertion':
         return `Insert "${data.text}"`;

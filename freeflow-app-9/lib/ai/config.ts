@@ -3,6 +3,130 @@
  * Handles OpenAI integration for video transcription and content analysis
  */
 
+import OpenAI from 'openai'
+import { GoogleGenerativeAI } from '@google/generative-ai'
+import Anthropic from '@anthropic-ai/sdk'
+
+// Initialize AI clients
+export const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+})
+
+export const googleAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '')
+
+export const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY || '',
+})
+
+// AI Model configurations
+export const AI_MODELS = {
+  openai: {
+    chat: 'gpt-4-turbo-preview',
+    vision: 'gpt-4-vision-preview',
+    embedding: 'text-embedding-3-small',
+    whisper: 'whisper-1',
+  },
+  google: {
+    chat: 'gemini-pro',
+    vision: 'gemini-pro-vision',
+  },
+  anthropic: {
+    chat: 'claude-3-opus-20240229',
+  },
+}
+
+// Feature-specific configurations
+export const AI_FEATURES = {
+  videoAnalysis: {
+    provider: 'openai',
+    model: AI_MODELS.openai.vision,
+    maxDuration: 300, // 5 minutes
+    chunkSize: 60, // 1 minute chunks
+  },
+  transcription: {
+    provider: 'openai',
+    model: AI_MODELS.openai.whisper,
+    languages: ['en', 'es', 'fr', 'de', 'it', 'pt', 'nl', 'ja', 'ko', 'zh'],
+  },
+  contentAnalysis: {
+    provider: 'anthropic',
+    model: AI_MODELS.anthropic.chat,
+    features: ['quality', 'engagement', 'clarity', 'pacing'],
+  },
+  insights: {
+    provider: 'google',
+    model: AI_MODELS.google.chat,
+    analysisTypes: ['technical', 'presentation', 'content', 'audience'],
+  },
+}
+
+// Rate limiting configuration
+export const RATE_LIMITS = {
+  videoAnalysis: {
+    tokensPerMinute: 100000,
+    requestsPerMinute: 50,
+  },
+  transcription: {
+    minutesPerHour: 60,
+    requestsPerMinute: 30,
+  },
+  contentAnalysis: {
+    tokensPerMinute: 80000,
+    requestsPerMinute: 40,
+  },
+  insights: {
+    tokensPerMinute: 60000,
+    requestsPerMinute: 30,
+  },
+}
+
+// Error messages
+export const AI_ERROR_MESSAGES = {
+  rateLimitExceeded: 'Rate limit exceeded. Please try again later.',
+  invalidInput: 'Invalid input provided. Please check your request.',
+  processingError: 'Error processing your request. Please try again.',
+  unsupportedLanguage: 'The specified language is not supported.',
+  videoTooLong: 'Video duration exceeds the maximum allowed length.',
+  missingApiKey: 'API key not configured for the selected AI provider.',
+}
+
+// Prompt templates
+export const PROMPT_TEMPLATES = {
+  videoAnalysis: `Analyze the following video content:
+- Assess overall quality and production value
+- Evaluate audience engagement factors
+- Check content clarity and structure
+- Review pacing and timing
+- Identify key topics and themes
+- Generate relevant tags
+- Provide specific improvement recommendations`,
+
+  contentInsights: `Generate insights for the following content:
+- Identify main strengths and weaknesses
+- Analyze presentation style and delivery
+- Evaluate technical aspects
+- Assess audience engagement
+- Provide actionable recommendations
+- Suggest optimization strategies`,
+
+  chapterGeneration: `Generate chapters for the following video:
+- Identify major topic transitions
+- Create clear and concise titles
+- Include timestamp information
+- Add brief summaries
+- Extract key terms and concepts
+- Maintain logical flow and structure`,
+}
+
+// Export configuration object
+export const aiConfig = {
+  models: AI_MODELS,
+  features: AI_FEATURES,
+  rateLimits: RATE_LIMITS,
+  errorMessages: AI_ERROR_MESSAGES,
+  promptTemplates: PROMPT_TEMPLATES,
+}
+
 export interface AIConfig {
   openai: {
     apiKey: string;

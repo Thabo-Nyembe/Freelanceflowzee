@@ -1,130 +1,176 @@
 "use client"
 
-import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { Search, Loader2, Folder } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { semanticSearchProjects } from '@/app/(app)/projects/actions'
-import { useDebounce } from 'use-debounce'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Command } from 'cmdk'
+import {
+  Calculator,
+  Calendar,
+  CreditCard,
+  File,
+  Settings,
+  Smile,
+  User,
+  Search,
+  X,
+} from 'lucide-react'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 
-interface SearchResult {
-  id: string;
-  title: string;
-  description: string;
-  similarity: number;
+const groups = [
+  {
+    name: 'Suggestions',
+    items: [
+      {
+        id: 'profile',
+        name: 'View Profile',
+        shortcut: ['P'],
+        icon: User,
+        url: '/profile',
+      },
+      {
+        id: 'calendar',
+        name: 'Calendar',
+        shortcut: ['C'],
+        icon: Calendar,
+        url: '/calendar',
+      },
+      {
+        id: 'settings',
+        name: 'Settings',
+        shortcut: ['S'],
+        icon: Settings,
+        url: '/settings',
+      },
+      {
+        id: 'billing',
+        name: 'Billing',
+        shortcut: ['B'],
+        icon: CreditCard,
+        url: '/billing',
+      },
+    ],
+  },
+  {
+    name: 'Recent',
+    items: [
+      {
+        id: 'doc1',
+        name: 'Project Proposal',
+        shortcut: [],
+        icon: File,
+        url: '/docs/proposal',
+      },
+      {
+        id: 'doc2',
+        name: 'Meeting Notes',
+        shortcut: [],
+        icon: File,
+        url: '/docs/meeting',
+      },
+    ],
+  },
+]
+
+interface GlobalSearchProps {
+  onClose?: () => void
 }
 
-export function GlobalSearch() {
-  const router = useRouter();
-  const searchRef = useRef<HTMLDivElement>(null);
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
-  const [activeResultIndex, setActiveResultIndex] = useState(-1);
-  const [debouncedQuery] = useDebounce(query, 500);
-
-  const performSearch = useCallback(async (searchQuery: string) => {
-    if (searchQuery.length > 2) {
-      setLoading(true);
-      setActiveResultIndex(-1);
-      const { projects, error } = await semanticSearchProjects(searchQuery);
-      if (error) {
-        console.error('Search error:', error);
-        setResults([]);
-      } else {
-        setResults(projects || []);
-      }
-      setLoading(false);
-    } else {
-      setResults([]);
-    }
-  }, []);
+export default function GlobalSearch({ onClose }: GlobalSearchProps) {
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
-    performSearch(debouncedQuery);
-  }, [debouncedQuery, performSearch]);
-
-  // Handle clicks outside to close
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setIsFocused(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (results.length === 0) return;
-
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setActiveResultIndex((prevIndex) => (prevIndex + 1) % results.length);
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setActiveResultIndex((prevIndex) => (prevIndex - 1 + results.length) % results.length);
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      if (activeResultIndex >= 0 && activeResultIndex < results.length) {
-        const project = results[activeResultIndex];
-        router.push(`/projects/${project.id}`);
-        setQuery('');
-        setIsFocused(false);
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        setOpen((open) => !open)
       }
     }
-  };
-  
-  const handleResultClick = (projectId: string) => {
-    router.push(`/projects/${projectId}`);
-    setQuery('');
-    setIsFocused(false);
-  };
+
+    document.addEventListener('keydown', down)
+    return () => document.removeEventListener('keydown', down)
+  }, [])
+
+  const runCommand = useCallback((command: { id: string; url: string }) => {
+    setOpen(false)
+    router.push(command.url)
+    onClose?.()
+  }, [router, onClose])
 
   return (
-    <div className="relative w-64" ref={searchRef}>
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
-        <Input 
-          placeholder="Semantic Search..." 
-          className="pl-10 w-full"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onKeyDown={handleKeyDown}
-        />
-        {loading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 animate-spin" />}
-      </div>
-      
-      {isFocused && query.length > 0 && (
-        <div className="absolute top-full mt-2 w-96 rounded-md bg-white shadow-lg border z-50">
-          {!loading && results.length === 0 && debouncedQuery.length > 2 ? (
-            <div className="p-4 text-sm text-center text-gray-500">No results found.</div>
-          ) : (
-            <ul className="py-1">
-              {results.map((project, index) => (
-                <li 
-                  key={project.id} 
-                  className={`px-4 py-2 cursor-pointer ${index === activeResultIndex ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
-                  onMouseDown={() => handleResultClick(project.id)}
-                  onMouseEnter={() => setActiveResultIndex(index)}
+    <>
+      <Button
+        variant="outline"
+        className="relative h-9 w-full justify-start text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64"
+        onClick={() => setOpen(true)}
+      >
+        <span className="hidden lg:inline-flex">Search documentation...</span>
+        <span className="inline-flex lg:hidden">Search...</span>
+        <kbd className="pointer-events-none absolute right-1.5 top-2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+          <span className="text-xs">⌘</span>K
+        </kbd>
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="overflow-hidden p-0">
+          <Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
+            <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
+              <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+              <Command.Input
+                value={search}
+                onValueChange={setSearch}
+                placeholder="Type a command or search..."
+                className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              />
+              {search && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={() => setSearch('')}
                 >
-                  <div className="flex items-center">
-                    <Folder className="h-4 w-4 mr-3 text-gray-500" />
-                    <div>
-                      <div className="font-medium text-sm">{project.title}</div>
-                      <p className="text-xs text-gray-600 truncate">{project.description}</p>
-                    </div>
-                  </div>
-                </li>
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            <Command.List className="max-h-[300px] overflow-y-auto overflow-x-hidden">
+              <Command.Empty className="py-6 text-center text-sm">
+                No results found.
+              </Command.Empty>
+              {groups.map((group) => (
+                <Command.Group key={group.name} heading={group.name}>
+                  {group.items.map((item) => (
+                    <Command.Item
+                      key={item.id}
+                      value={item.name}
+                      onSelect={() => runCommand(item)}
+                      className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                    >
+                      <div className="flex items-center gap-2 flex-1">
+                        <item.icon className="h-4 w-4" />
+                        {item.name}
+                      </div>
+                      {item.shortcut?.length ? (
+                        <kbd className="ml-auto flex gap-1">
+                          {item.shortcut.map((key, index) => (
+                            <span
+                              key={index}
+                              className="text-xs bg-muted px-1.5 py-0.5 rounded"
+                            >
+                              {key}
+                            </span>
+                          ))}
+                        </kbd>
+                      ) : null}
+                    </Command.Item>
+                  ))}
+                </Command.Group>
               ))}
-            </ul>
-          )}
-        </div>
-      )}
-    </div>
-  );
+            </Command.List>
+          </Command>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
 }

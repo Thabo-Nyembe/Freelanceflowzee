@@ -36,7 +36,7 @@ class CommunityService {
   private supabase = createClient()
 
   // Posts Methods
-  async createPost(post: Omit<Post, 'id' | &apos;likesCount&apos; | &apos;commentsCount&apos; | &apos;createdAt&apos; | &apos;updatedAt&apos;>): Promise<Post> {
+  async createPost(post: Omit<Post, 'id' | 'likesCount' | 'commentsCount' | 'createdAt' | 'updatedAt'>): Promise<Post> {
     if (!this.supabase) {
       throw new Error('Supabase client not initialized')
     }
@@ -58,7 +58,7 @@ class CommunityService {
 
       return this.transformPost(data)
     } catch (error) {
-      console.error('Error creating post: ', error)'
+      console.error('Error creating post: ', error);
       throw error
     }
   }
@@ -85,7 +85,7 @@ class CommunityService {
 
       return data.map(this.transformPost)
     } catch (error) {
-      console.error('Error fetching posts: ', error)'
+      console.error('Error fetching posts: ', error);
       throw error
     }
   }
@@ -102,7 +102,7 @@ class CommunityService {
 
       if (error) throw error
     } catch (error) {
-      console.error('Error liking post: ', error)'
+      console.error('Error liking post: ', error);
       throw error
     }
   }
@@ -120,13 +120,13 @@ class CommunityService {
 
       if (error) throw error
     } catch (error) {
-      console.error('Error unliking post: ', error)'
+      console.error('Error unliking post: ', error);
       throw error
     }
   }
 
   // Comments Methods
-  async createComment(comment: Omit<Comment, 'id' | &apos;createdAt&apos; | &apos;updatedAt&apos;>): Promise<Comment> {
+  async createComment(comment: Omit<Comment, 'id' | 'createdAt' | 'updatedAt'>): Promise<Comment> {
     if (!this.supabase) {
       throw new Error('Supabase client not initialized')
     }
@@ -146,7 +146,7 @@ class CommunityService {
 
       return this.transformComment(data)
     } catch (error) {
-      console.error('Error creating comment: ', error)'
+      console.error('Error creating comment: ', error);
       throw error
     }
   }
@@ -168,7 +168,7 @@ class CommunityService {
 
       return data.map(this.transformComment)
     } catch (error) {
-      console.error('Error fetching comments: ', error)'
+      console.error('Error fetching comments: ', error);
       throw error
     }
   }

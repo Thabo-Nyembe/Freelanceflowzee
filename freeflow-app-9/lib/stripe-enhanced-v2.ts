@@ -13,7 +13,7 @@ class StripeEnhancedService {
         typescript: true,
       }
     )
-    this.publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 
+    this.publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder'
   }
 
   // Enhanced Payment Intent with Apple Pay/Google Pay support
@@ -23,7 +23,7 @@ class StripeEnhancedService {
     metadata?: Record<string, string>
     paymentMethods?: string[]
     returnUrl?: string
-    setupFutureUsage?: 'on_session' | 'off_session
+    setupFutureUsage?: 'on_session' | 'off_session'
   }) {
     try {
       const { amount, currency, metadata, paymentMethods, returnUrl, setupFutureUsage } = params
@@ -31,8 +31,7 @@ class StripeEnhancedService {
       const paymentIntent = await this.stripe.paymentIntents.create({
         amount,
         currency,
-        payment_method_types: paymentMethods || ['card', 'apple_pay', 'google_pay', 'link', 'cashapp
-        ],
+        payment_method_types: paymentMethods || ['card', 'apple_pay', 'google_pay', 'link', 'cashapp'],
         metadata: {
           ...metadata,
           created_at: new Date().toISOString(),
@@ -53,7 +52,7 @@ class StripeEnhancedService {
         publishableKey: this.publishableKey
       }
     } catch (error) {
-      console.error('Enhanced payment intent creation failed: ', error)'
+      console.error('Enhanced payment intent creation failed: ', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Payment intent creation failed',
@@ -68,7 +67,7 @@ class StripeEnhancedService {
       await this.stripe.applePayDomains.create({ domain_name: domain })
       return { success: true, domain }
     } catch (error) {
-      console.error('Apple Pay domain verification failed: ', error)'
+      console.error('Apple Pay domain verification failed: ', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Domain verification failed'
@@ -111,7 +110,7 @@ class StripeEnhancedService {
         customerId: customer.id
       }
     } catch (error) {
-      console.error('Enhanced customer creation failed: ', error)'
+      console.error('Enhanced customer creation failed: ', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Customer creation failed'
@@ -162,7 +161,7 @@ class StripeEnhancedService {
           : null
       }
     } catch (error) {
-      console.error('Subscription creation failed: ', error)'
+      console.error('Subscription creation failed: ', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Subscription creation failed'
@@ -218,7 +217,7 @@ class StripeEnhancedService {
         invoicePdf: finalizedInvoice.invoice_pdf
       }
     } catch (error) {
-      console.error('Invoice creation failed: ', error)'
+      console.error('Invoice creation failed: ', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Invoice creation failed'
@@ -255,7 +254,7 @@ class StripeEnhancedService {
         customerId
       }
     } catch (error) {
-      console.error('Payment method save failed: ', error)'
+      console.error('Payment method save failed: ', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Payment method save failed'
@@ -293,7 +292,7 @@ class StripeEnhancedService {
           return { success: true, handled: false }
       }
     } catch (error) {
-      console.error('Webhook processing failed: ', error)'
+      console.error('Webhook processing failed: ', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Webhook processing failed'
@@ -335,7 +334,7 @@ class StripeEnhancedService {
         }
       }
     } catch (error) {
-      console.error('Payment analytics failed: ', error)'
+      console.error('Payment analytics failed: ', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Analytics retrieval failed'
@@ -345,25 +344,25 @@ class StripeEnhancedService {
 
   // Private helper methods for webhook processing
   private async handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
-    console.log('Payment succeeded: ', paymentIntent.id)'
+    console.log('Payment succeeded: ', paymentIntent.id);
     // Add your business logic here
     return { success: true, event: 'payment_succeeded', paymentIntentId: paymentIntent.id }
   }
 
   private async handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
-    console.log('Payment failed: ', paymentIntent.id)'
+    console.log('Payment failed: ', paymentIntent.id);
     // Add your business logic here
     return { success: true, event: 'payment_failed', paymentIntentId: paymentIntent.id }
   }
 
   private async handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-    console.log('Invoice payment succeeded: ', invoice.id)'
+    console.log('Invoice payment succeeded: ', invoice.id);
     // Add your business logic here
     return { success: true, event: 'invoice_payment_succeeded', invoiceId: invoice.id }
   }
 
   private async handleSubscriptionChanged(subscription: Stripe.Subscription) {
-    console.log('Subscription changed: ', subscription.id, subscription.status)'
+    console.log('Subscription changed: ', subscription.id, subscription.status);
     // Add your business logic here
     return { success: true, event: 'subscription_changed', subscriptionId: subscription.id }
   }

@@ -98,7 +98,7 @@ class Context7Client {
   private async fetchDocumentation(
     libraryId: string, 
     topic?: string, 
-    tokens: number = 10000
+    _tokens: number = 10000
   ): Promise<string> {
     // This would integrate with the actual Context7 MCP server
     // For now, return relevant documentation based on library
@@ -168,13 +168,13 @@ ${topic ? `\n## ${topic} Documentation:\n[Specific documentation for ${topic} wo
       `
     };
 
-    return docs[libraryId] || \`Documentation for \${libraryId} not found in local cache. This would fetch from Context7 MCP server.\`;
+    return docs[libraryId] || `Documentation for ${libraryId} not found in local cache. This would fetch from Context7 MCP server.`;
   }
 
   /**
    * Fetch code snippets for a library
    */
-  private async fetchCodeSnippets(libraryId: string, topic?: string): Promise<CodeSnippet[]> {
+  private async fetchCodeSnippets(libraryId: string, _topic?: string): Promise<CodeSnippet[]> {
     // This would integrate with Context7 to get real code snippets
     const snippets: Record<string, CodeSnippet[]> = {
       '/vercel/next.js': [
@@ -309,8 +309,7 @@ const { error } = await supabase.auth.signOut()`,
 
 // Export singleton instance
 export const context7Client = new Context7Client({
-  libraries: ['next.js', 'react', 'typescript', 'tailwindcss', 'supabase', '@radix-ui/react-accordion', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs', '@radix-ui/react-toast', 'lucide-react', 'react-hook-form', 'zod', 'class-variance-authority', 'clsx', 'tailwind-merge', 'date-fns', 'recharts
-  ],
+  libraries: ['next.js', 'react', 'typescript', 'tailwindcss', 'supabase', '@radix-ui/react-accordion', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs', '@radix-ui/react-toast', 'lucide-react', 'react-hook-form', 'zod', 'class-variance-authority', 'clsx', 'tailwind-merge', 'date-fns', 'recharts'],
   defaultTokens: 10000,
   autoUpdate: true
 });

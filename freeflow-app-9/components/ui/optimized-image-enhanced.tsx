@@ -56,8 +56,8 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
   objectFit = 'cover',
   objectPosition = 'center',
   fallbackSrc,
-  enableWebP = true,
-  enableAVIF = true,
+  // enableWebP = true,
+  // enableAVIF = true,
   responsive = true,
   lazyRoot,
   threshold = 0.1,
@@ -294,7 +294,6 @@ export const ImageGallery: React.FC<{
   )
 }
 
-
 // A more sophisticated utility for image measurements or analysis
 // This is a placeholder for a more complex implementation
 export const ImageAnalyzer = {
@@ -320,82 +319,81 @@ export const ImageAnalyzer = {
 }
 
 // Example of a client component using these utilities
-const AdvancedImageDisplay: React.FC<{ src: string, alt: string }> = ({ src, alt }) => {
-  const [aspectRatio, setAspectRatio] = useState<number | null>(null)
-  const [dominantColor, setDominantColor] = useState<string>('')
+// const AdvancedImageDisplay: React.FC<{ src: string, alt: string }> = ({ src, alt }) => {
+//   const [aspectRatio, setAspectRatio] = useState<number | null>(null)
+//   const [dominantColor, setDominantColor] = useState<string>('')
 
-  useEffect(() => {
-    const analyzeImage = async () => {
-      // In a real app, you might get dimensions from an API or by loading the image
-      const naturalWidth = 1920
-      const naturalHeight = 1080
-      setAspectRatio(ImageAnalyzer.getAspectRatio(naturalWidth, naturalHeight))
-      
-      const color = await ImageAnalyzer.getDominantColor(src)
-      setDominantColor(color)
-    }
+//   useEffect(() => {
+//     const analyzeImage = async () => {
+//       // In a real app, you might get dimensions from an API or by loading the image
+//       const naturalWidth = 1920
+//       const naturalHeight = 1080
+//       setAspectRatio(ImageAnalyzer.getAspectRatio(naturalWidth, naturalHeight))
+//       
+//       const color = await ImageAnalyzer.getDominantColor(src)
+//       setDominantColor(color)
+//     }
 
-    analyzeImage()
-  }, [src])
+//     analyzeImage()
+//   }, [src])
 
-  return (
-    <div className="p-4 border rounded-lg shadow-lg" style={{ backgroundColor: dominantColor }}>
-      <p className="text-sm text-white mb-2">
-        Image Analysis
-      </p>
-      {aspectRatio && <p className="text-xs text-white">Aspect Ratio: {aspectRatio.toFixed(2)}</p>}
-      <OptimizedImageEnhanced
-        src={src}
-        alt={alt}
-        width={800}
-        height={450}
-        className="rounded-md"
-        zoomOnHover
-      />
-    </div>
-  )
-}
-
+//   return (
+//     <div className="p-4 border rounded-lg shadow-lg" style={{ backgroundColor: dominantColor }}>
+//       <p className="text-sm text-white mb-2">
+//         Image Analysis
+//       </p>
+//       {aspectRatio && <p className="text-xs text-white">Aspect Ratio: {aspectRatio.toFixed(2)}</p>}
+//       <OptimizedImageEnhanced
+//         src={src}
+//         alt={alt}
+//         width={800}
+//         height={450}
+//         className="rounded-md"
+//         zoomOnHover
+//       />
+//     </div>
+//   )
+// }
 
 // Example helper function to dynamically generate image sources
 // This might be used to switch between different CDN providers or image services
-function buildSrc(
-  basePath: string,
-  {
-    width,
-    quality,
-    format,
-  }: {
-    width: number
-    quality?: number
-    format?: 'webp' | 'avif' | 'jpeg'
-  }
-): string {
-  const params = new URLSearchParams()
-  params.set('w', width.toString())
-  if (quality) {
-    params.set('q', quality.toString())
-  }
-  if (format) {
-    params.set('fm', format)
-  }
+// function buildSrc(
+//   basePath: string,
+//   {
+//     width,
+//     quality,
+//     format,
+//   }: {
+//     width: number
+//     quality?: number
+//     format?: 'webp' | 'avif' | 'jpeg'
+//   }
+// ): string {
+//   const params = new URLSearchParams()
+//   params.set('w', width.toString())
+//   if (quality) {
+//     params.set('q', quality.toString())
+//   }
+//   if (format) {
+//     params.set('fm', format)
+//   }
 
-  return `https://images.example.com/${basePath}?${params.toString()}`
-}
+//   return `https://images.example.com/${basePath}?${params.toString()}`
+// }
 
-function getAssetDimensions(assetId: string) {
-  // In a real application, this would fetch dimensions from a database or API
-  console.log('Fetching dimensions for', assetId)
-  return { width: 1200, height: 800 }
-}
+// function getAssetDimensions(assetId: string) {
+//   // In a real application, this would fetch dimensions from a database or API
+//   console.log('Fetching dimensions for', assetId)
+//   return { width: 1200, height: 800 }
+// }
 
-const measureImage = (src: string) => {
-  return new Promise<{width: number, height: number}>((resolve, reject) => {
-    const img = document.createElement('img')
-    img.onload = () => resolve({width: img.naturalWidth, height: img.naturalHeight})
-    img.onerror = reject
-    img.src = src
-  })
-}
+// const _measureImage = (src: string) => {
+//   return new Promise<{width: number, height: number}>((resolve, reject) => {
+//     const img = document.createElement('img')
+//     img.onload = () => resolve({width: img.naturalWidth, height: img.naturalHeight})
+//     img.onerror = reject
+//     img.src = src
+//   })
+// }
 
 export default OptimizedImageEnhanced 

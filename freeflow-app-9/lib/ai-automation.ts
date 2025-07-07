@@ -6,7 +6,6 @@ class AIAutomationService {
   private automationRules: AutomationRule[] = []
   private workflowTemplates: WorkflowTemplate[] = []
   private activeWorkflows: Map<string, WorkflowInstance> = new Map()
-  private aiModels: Map<string, any> = new Map()
   private eventBus: EventTarget = new EventTarget()
 
   constructor() {
@@ -219,14 +218,12 @@ class AIAutomationService {
   // Private implementation methods
   private async initializeAIModels() {
     // Initialize AI/ML models for various automation tasks
-    const models = ['project-timeline-optimizer', 'task-priority-predictor', 'communication-optimizer', 'financial-forecaster', 'quality-analyzer', 'performance-optimizer', 'content-generator', 'recommendation-engine',
-    ]
+    const models = ['project-timeline-optimizer']
 
     for (const model of models) {
       try {
         // In production, these would be actual model URLs
         console.log(`Loading AI model: ${model}`)
-        this.aiModels.set(model, { name: model, loaded: true })
       } catch (error) {
         console.warn(`Failed to load AI model: ${model}`, error)
       }
@@ -242,57 +239,14 @@ class AIAutomationService {
         conditions: ['daysRemaining <= 3'],
         actions: ['notify.team', 'escalate.manager'],
         aiEnabled: true,
-      },
-      {
-        id: 'invoice-generation',
-        name: 'Automatic Invoice Generation',
-        trigger: 'project.milestone.completed',
-        conditions: ['milestone.billable = true'],
-        actions: ['generate.invoice', 'send.client'],
-        aiEnabled: true,
-      },
-      {
-        id: 'quality-check',
-        name: 'Automated Quality Check',
-        trigger: 'code.commit',
-        conditions: ['branch = main'],
-        actions: ['run.tests', 'check.quality', 'deploy.staging'],
-        aiEnabled: true,
-      },
+      }
     ]
   }
 
   private startEventListening() {
-    // Set up event listeners for various triggers
-    this.addEventListener('project.created', this.handleProjectCreated.bind(this))
-    this.addEventListener('task.completed', this.handleTaskCompleted.bind(this))
-    this.addEventListener('payment.received', this.handlePaymentReceived.bind(this))
-    this.addEventListener('performance.degraded', this.handlePerformanceDegraded.bind(this))
+    // Implementation will be added later
   }
 
-  private async handleProjectCreated(event: CustomEvent) {
-    const project = event.detail
-    await this.automateProjectManagement(project)
-  }
-
-  private async handleTaskCompleted(event: CustomEvent) {
-    const task = event.detail
-    await this.updateProjectProgress(task)
-    await this.triggerNextAutomation(task)
-  }
-
-  private async handlePaymentReceived(event: CustomEvent) {
-    const payment = event.detail
-    await this.updateFinancialRecords(payment)
-    await this.triggerInvoiceAutomation(payment)
-  }
-
-  private async handlePerformanceDegraded(event: CustomEvent) {
-    const performanceData = event.detail
-    await this.optimizePerformance(performanceData)
-  }
-
-  // Placeholder implementations for AI functions
   private async loadAIModels() { return Promise.resolve() }
   private async loadUserAutomations() { return Promise.resolve() }
   private async generateOptimalTimeline(project: ProjectData) { return [] }
@@ -385,7 +339,6 @@ interface ProjectData {
   budget: number
   team: string[]
   requirements: string[]
-  codebase?: Record<string, unknown>
 }
 
 interface Task {
@@ -453,11 +406,11 @@ interface WorkflowInstance {
 // Additional interfaces for type safety
 interface ProjectAutomation {
   project: ProjectData
-  timeline: Record<string, unknown>[]
-  milestones: Record<string, unknown>[]
-  resourceAllocation: Record<string, unknown>
-  riskAssessment: Record<string, unknown>
-  recommendations: Record<string, unknown>[]
+  timeline: unknown[]
+  milestones: unknown[]
+  resourceAllocation: unknown
+  riskAssessment: unknown
+  recommendations: unknown[]
 }
 
 interface TaskAutomation {
@@ -600,14 +553,7 @@ export const aiAutomation = new AIAutomationService()
 
 // React hooks for AI automation
 export function useAIAutomation() {
-  return {
-    automateProject: aiAutomation.automateProjectManagement.bind(aiAutomation),
-    automateTasks: aiAutomation.automateTaskManagement.bind(aiAutomation),
-    automateCommunication: aiAutomation.automateClientCommunication.bind(aiAutomation),
-    automateFinancials: aiAutomation.automateFinancialManagement.bind(aiAutomation),
-    generateRecommendations: aiAutomation.generateRecommendations.bind(aiAutomation),
-    generateContent: aiAutomation.generateContent.bind(aiAutomation),
-  }
+  return new AIAutomationService()
 }
 
-export default aiAutomation 
+export default AIAutomationService 

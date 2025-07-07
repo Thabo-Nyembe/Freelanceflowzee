@@ -101,9 +101,13 @@ export function PaymentForm() {
         }, 2000)
       }
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Payment error:', err)
-      setError(err.message || 'Payment failed. Please try again.')
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('An unknown error occurred. Please try again.')
+      }
     } finally {
       setLoading(false)
     }

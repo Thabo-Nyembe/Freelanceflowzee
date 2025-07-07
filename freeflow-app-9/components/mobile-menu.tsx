@@ -1,80 +1,137 @@
 'use client'
 
-import { useState } from 'react'
+import * as React from 'react'
 import Link from 'next/link'
-import { Menu, X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { usePathname } from 'next/navigation'
+import { Menu } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { cn } from '@/lib/utils'
 
-const navigation = [
-  { name: 'Features', href: '/features', testId: 'mobile-nav-features' },
-  { name: 'How it Works', href: '/how-it-works', testId: 'mobile-nav-how-it-works' },
-  { name: 'Pricing', href: '/pricing', testId: 'mobile-nav-pricing' },
-  { name: 'Community', href: '/community', testId: 'mobile-nav-community' },
-  { name: 'Blog', href: '/blog', testId: 'mobile-nav-blog' },
-  { name: 'Contact', href: '/contact', testId: 'mobile-nav-contact' }
-]
+interface MobileMenuProps {
+  items: {
+    title: string
+    href: string
+    icon?: React.ComponentType<{ className?: string }>
+    disabled?: boolean
+    external?: boolean
+    label?: string
+  }[]
+  children?: React.ReactNode
+}
 
-export function MobileMenu() {
-  const [isOpen, setIsOpen] = useState(false)
+export function MobileMenu({ items, children }: MobileMenuProps) {
+  const [open, setOpen] = React.useState(false)
+  const pathname = usePathname()
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button
           variant="ghost"
-          size="icon"
-          className="md:hidden mobile-menu-toggle transition-transform duration-200 ease-in-out"
-          data-testid="mobile-menu-toggle"
+          className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 lg:hidden"
         >
-          <Menu className="h-5 w-5" />
-          <span className="sr-only">Toggle menu</span>
+          <Menu className="h-6 w-6" />
+          <span className="sr-only">Toggle Menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent 
-        side="left" 
-        className="w-[300px] sm:w-[400px] transition-transform duration-300 ease-in-out"
-        data-testid="mobile-menu-content"
-      >
-        <div className="flex flex-col space-y-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" onClick={() => setIsOpen(false)} data-testid="mobile-nav-logo">
-              <span className="text-xl font-bold">FreeflowZee</span>
-            </Link>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(false)}
-              data-testid="mobile-menu-close"
-              className="transition-transform duration-200 ease-in-out"
-            >
-              <X className="h-5 w-5" />
-              <span className="sr-only">Close menu</span>
-            </Button>
-          </div>
-          <nav className="flex flex-col space-y-2">
-            {navigation.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent transition-colors duration-200"
-                onClick={() => setIsOpen(false)}
-                data-testid={item.testId}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </nav>
-          <div className="flex flex-col space-y-2 pt-4 border-t">
-            <Button asChild variant="ghost" size="sm" data-testid="mobile-nav-login">
-              <Link href="/login" onClick={() => setIsOpen(false)}>Log in</Link>
-            </Button>
-            <Button asChild size="sm" data-testid="mobile-nav-signup">
-              <Link href="/signup" onClick={() => setIsOpen(false)}>Sign up</Link>
-            </Button>
-          </div>
+      <SheetContent side="left" className="pl-1 pr-0">
+        <div className="px-7">
+          <Link
+            href="/"
+            className="flex items-center"
+            onClick={() => setOpen(false)}
+          >
+            <span className="font-bold">FreeFlowZee</span>
+          </Link>
         </div>
+        <ScrollArea className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
+          <div className="pl-1 pr-7">
+            {items.map((item, index) => {
+              const Icon = item.icon
+              return (
+                item.href && (
+                  <Link
+                    key={index}
+                    href={item.href}
+                    className={cn(
+                      'flex w-full items-center rounded-md p-2 text-sm font-medium hover:underline',
+                      item.disabled && 'cursor-not-allowed opacity-60',
+                      pathname === item.href
+                        ? 'bg-muted font-medium text-primary'
+                        : 'text-muted-foreground'
+                    )}
+                    onClick={() => setOpen(false)}
+                    target={item.external ? '_blank' : undefined}
+                    rel={item.external ? 'noopener noreferrer' : undefined}
+                  >
+                    {Icon && (
+                      <Icon className="mr-2 h-4 w-4" />
+                    )}
+                    {item.title}
+                    {item.label && (
+                      <span className="ml-auto text-xs text-muted-foreground">
+                        {item.label}
+                      </span>
+                    )}
+                  </Link>
+                )
+              )
+            })}
+          </div>
+          {children}
+        </ScrollArea>
       </SheetContent>
     </Sheet>
+  )
+}
+
+interface MobileSubMenuProps {
+  title: string
+  items: {
+    title: string
+    href: string
+    disabled?: boolean
+  }[]
+}
+
+export function MobileSubMenu({ title, items }: MobileSubMenuProps) {
+  const pathname = usePathname()
+
+  return (
+    <div className="pl-1 pr-7">
+      <h4 className="mb-1 rounded-md px-2 py-1 text-sm font-medium">
+        {title}
+      </h4>
+      {items.map((item, index) => (
+        <Link
+          key={index}
+          href={item.href}
+          className={cn(
+            'block rounded-md px-2 py-1 text-sm hover:underline',
+            item.disabled && 'cursor-not-allowed opacity-60',
+            pathname === item.href
+              ? 'font-medium text-primary'
+              : 'text-muted-foreground'
+          )}
+        >
+          {item.title}
+        </Link>
+      ))}
+    </div>
+  )
+}
+
+interface MobileNavProps {
+  items: MobileMenuProps['items']
+  children?: React.ReactNode
+}
+
+export function MobileNav({ items, children }: MobileNavProps) {
+  return (
+    <div className="lg:hidden">
+      <MobileMenu items={items}>{children}</MobileMenu>
+    </div>
   )
 } 

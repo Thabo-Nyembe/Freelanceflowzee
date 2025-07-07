@@ -1,6 +1,6 @@
-import { Application, Router } from &apos;https://deno.land/x/oak@v12.6.1/mod.ts&apos;
-import { createClient } from &apos;https://esm.sh/@supabase/supabase-js@2&apos;
-import { corsHeaders } from &apos;../_shared/cors.ts&apos;
+import { Application, Router } from 'https://deno.land/x/oak@v12.6.1/mod.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { corsHeaders } from '../_shared/cors.ts'
 
 interface Database {
   public: {
@@ -88,8 +88,8 @@ interface Database {
 const router = new Router()
 
 // Initialize Supabase client
-const supabaseUrl = Deno.env.get(&apos;SUPABASE_URL&apos;)!
-const supabaseServiceKey = Deno.env.get(&apos;SUPABASE_SERVICE_ROLE_KEY&apos;)!
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const supabase = createClient<Database>(supabaseUrl, supabaseServiceKey)
 
@@ -98,30 +98,30 @@ const categorizeComment = (content: string): { category: string; priority: strin
   const lowerContent = content.toLowerCase()
   
   // AI categories
-  let category = &apos;general&apos;
-  if (lowerContent.includes(&apos;color&apos;) || lowerContent.includes(&apos;hue&apos;) || lowerContent.includes(&apos;saturation&apos;)) {
-    category = &apos;color_correction&apos;
-  } else if (lowerContent.includes(&apos;typo&apos;) || lowerContent.includes(&apos;text&apos;) || lowerContent.includes(&apos;copy&apos;)) {
-    category = &apos;text_content&apos;
-  } else if (lowerContent.includes(&apos;layout&apos;) || lowerContent.includes(&apos;position&apos;) || lowerContent.includes(&apos;spacing&apos;)) {
-    category = &apos;layout_design&apos;
-  } else if (lowerContent.includes(&apos;urgent&apos;) || lowerContent.includes(&apos;asap&apos;) || lowerContent.includes(&apos;priority&apos;)) {
-    category = &apos;urgent_revision&apos;
+  let category = 'general'
+  if (lowerContent.includes('color') || lowerContent.includes('hue') || lowerContent.includes('saturation')) {
+    category = 'color_correction'
+  } else if (lowerContent.includes('typo') || lowerContent.includes('text') || lowerContent.includes('copy')) {
+    category = 'text_content'
+  } else if (lowerContent.includes('layout') || lowerContent.includes('position') || lowerContent.includes('spacing')) {
+    category = 'layout_design'
+  } else if (lowerContent.includes('urgent') || lowerContent.includes('asap') || lowerContent.includes('priority')) {
+    category = 'urgent_revision'
   }
 
   // AI priority assessment
-  let priority = &apos;medium&apos;
-  if (lowerContent.includes(&apos;urgent&apos;) || lowerContent.includes(&apos;critical&apos;) || lowerContent.includes(&apos;asap&apos;)) {
-    priority = &apos;high&apos;
-  } else if (lowerContent.includes(&apos;minor&apos;) || lowerContent.includes(&apos;optional&apos;) || lowerContent.includes(&apos;suggestion&apos;)) {
-    priority = &apos;low&apos;
+  let priority = 'medium'
+  if (lowerContent.includes('urgent') || lowerContent.includes('critical') || lowerContent.includes('asap')) {
+    priority = 'high'
+  } else if (lowerContent.includes('minor') || lowerContent.includes('optional') || lowerContent.includes('suggestion')) {
+    priority = 'low'
   }
 
   return { category, priority }
 }
 
 // Universal Pinpoint Feedback Routes
-router.post(&apos;/api/upf/comments&apos;, async (context) => {
+router.post('/api/upf/comments', async (context) => {
   try {
     const body = await context.request.body().value
     const { file_id, project_id, user_id, content, position_x, position_y, timestamp } = body
@@ -130,7 +130,7 @@ router.post(&apos;/api/upf/comments&apos;, async (context) => {
     const { category, priority } = categorizeComment(content)
 
     const { data, error } = await supabase
-      .from(&apos;upf_comments&apos;)
+      .from('upf_comments')
       .insert({
         file_id,
         project_id,
@@ -139,7 +139,7 @@ router.post(&apos;/api/upf/comments&apos;, async (context) => {
         position_x,
         position_y,
         timestamp,
-        status: &apos;open&apos;,
+        status: 'open',
         ai_category: category,
         ai_priority: priority
       })
@@ -155,7 +155,7 @@ router.post(&apos;/api/upf/comments&apos;, async (context) => {
       ai_insights: {
         category,
         priority,
-        suggested_actions: category === &apos;urgent_revision&apos; ? [&apos;immediate_review&apos;, &apos;notify_team&apos;] : [&apos;standard_review&apos;]
+        suggested_actions: category === 'urgent_revision' ? ['immediate_review', 'notify_team'] : ['standard_review']
       }
     }
   } catch (error) {
@@ -164,14 +164,14 @@ router.post(&apos;/api/upf/comments&apos;, async (context) => {
   }
 })
 
-router.get(&apos;/api/upf/comments/:fileId&apos;, async (context) => {
+router.get('/api/upf/comments/:fileId', async (context) => {
   try {
     const fileId = context.params.fileId
     const { data, error } = await supabase
-      .from(&apos;upf_comments&apos;)
-      .select(&apos;*')
-      .eq(&apos;file_id&apos;, fileId)
-      .order(&apos;created_at&apos;, { ascending: false })
+      .from('upf_comments')
+      .select('*')
+      .eq('file_id', fileId)
+      .order('created_at', { ascending: false })
 
     if (error) throw error
 
@@ -182,15 +182,15 @@ router.get(&apos;/api/upf/comments/:fileId&apos;, async (context) => {
   }
 })
 
-router.put(&apos;/api/upf/comments/:commentId&apos;, async (context) => {
+router.put('/api/upf/comments/:commentId', async (context) => {
   try {
     const commentId = context.params.commentId
     const body = await context.request.body().value
     
     const { data, error } = await supabase
-      .from(&apos;upf_comments&apos;)
+      .from('upf_comments')
       .update(body)
-      .eq(&apos;id&apos;, commentId)
+      .eq('id', commentId)
       .select()
       .single()
 
@@ -204,14 +204,14 @@ router.put(&apos;/api/upf/comments/:commentId&apos;, async (context) => {
 })
 
 // AI Analytics for UPF
-router.get(&apos;/api/upf/analytics/:projectId&apos;, async (context) => {
+router.get('/api/upf/analytics/:projectId', async (context) => {
   try {
     const projectId = context.params.projectId
     
     const { data: comments, error } = await supabase
-      .from(&apos;upf_comments&apos;)
-      .select(&apos;*')
-      .eq(&apos;project_id&apos;, projectId)
+      .from('upf_comments')
+      .select('*')
+      .eq('project_id', projectId)
 
     if (error) throw error
 
@@ -219,11 +219,11 @@ router.get(&apos;/api/upf/analytics/:projectId&apos;, async (context) => {
     const analytics = {
       total_comments: comments.length,
       by_category: comments.reduce((acc, comment) => {
-        acc[comment.ai_category || &apos;uncategorized&apos;] = (acc[comment.ai_category || &apos;uncategorized&apos;] || 0) + 1
+        acc[comment.ai_category || 'uncategorized'] = (acc[comment.ai_category || 'uncategorized'] || 0) + 1
         return acc
       }, {} as Record<string, number>),
       by_priority: comments.reduce((acc, comment) => {
-        acc[comment.ai_priority || &apos;medium&apos;] = (acc[comment.ai_priority || &apos;medium&apos;] || 0) + 1
+        acc[comment.ai_priority || 'medium'] = (acc[comment.ai_priority || 'medium'] || 0) + 1
         return acc
       }, {} as Record<string, number>),
       by_status: comments.reduce((acc, comment) => {
@@ -231,16 +231,16 @@ router.get(&apos;/api/upf/analytics/:projectId&apos;, async (context) => {
         return acc
       }, {} as Record<string, number>),
       trending_issues: Object.entries(comments.reduce((acc, comment) => {
-        acc[comment.ai_category || &apos;general&apos;] = (acc[comment.ai_category || &apos;general&apos;] || 0) + 1
+        acc[comment.ai_category || 'general'] = (acc[comment.ai_category || 'general'] || 0) + 1
         return acc
       }, {} as Record<string, number>))
         .sort(([,a], [,b]) => b - a)
         .slice(0, 3)
         .map(([category, count]) => ({ category, count })),
       ai_recommendations: [
-        &apos;Focus on color consistency - 40% of feedback relates to color issues&apos;,
-        &apos;Consider layout review - spacing feedback is trending&apos;,
-        &apos;Text content needs attention - typography feedback increasing&apos;
+        'Focus on color consistency - 40% of feedback relates to color issues',
+        'Consider layout review - spacing feedback is trending',
+        'Text content needs attention - typography feedback increasing'
       ]
     }
 
@@ -252,18 +252,18 @@ router.get(&apos;/api/upf/analytics/:projectId&apos;, async (context) => {
 })
 
 // Collaboration Session Management
-router.post(&apos;/api/collaboration/sessions&apos;, async (context) => {
+router.post('/api/collaboration/sessions', async (context) => {
   try {
     const body = await context.request.body().value
     const { project_id, session_type, participants } = body
 
     const { data, error } = await supabase
-      .from(&apos;collaboration_sessions&apos;)
+      .from('collaboration_sessions')
       .insert({
         project_id,
         session_type,
         participants,
-        status: &apos;active&apos;
+        status: 'active'
       })
       .select()
       .single()
@@ -278,14 +278,14 @@ router.post(&apos;/api/collaboration/sessions&apos;, async (context) => {
   }
 })
 
-router.get(&apos;/api/collaboration/sessions/:projectId&apos;, async (context) => {
+router.get('/api/collaboration/sessions/:projectId', async (context) => {
   try {
     const projectId = context.params.projectId
     const { data, error } = await supabase
-      .from(&apos;collaboration_sessions&apos;)
-      .select(&apos;*')
-      .eq(&apos;project_id&apos;, projectId)
-      .eq(&apos;status&apos;, &apos;active&apos;)
+      .from('collaboration_sessions')
+      .select('*')
+      .eq('project_id', projectId)
+      .eq('status', 'active')
 
     if (error) throw error
 
@@ -297,7 +297,7 @@ router.get(&apos;/api/collaboration/sessions/:projectId&apos;, async (context) =
 })
 
 // File processing with AI insights
-router.post(&apos;/api/upf/files/analyze&apos;, async (context) => {
+router.post('/api/upf/files/analyze', async (context) => {
   try {
     const body = await context.request.body().value
     const { file_url, file_type, project_id } = body
@@ -310,16 +310,16 @@ router.post(&apos;/api/upf/files/analyze&apos;, async (context) => {
       quality_score: 85,
       metadata: {
         analyzed_at: new Date().toISOString(),
-        ai_version: &apos;1.0&apos;
+        ai_version: '1.0'
       }
     }
 
-    if (file_type === &apos;image&apos;) {
-      analysis.detected_issues = [&apos;Low contrast in header area&apos;, &apos;Color inconsistency detected&apos;]
-      analysis.suggestions = [&apos;Increase contrast ratio for better accessibility&apos;, &apos;Standardize color palette&apos;]
-    } else if (file_type === &apos;video&apos;) {
-      analysis.detected_issues = [&apos;Audio levels inconsistent&apos;, &apos;Frame rate drops detected&apos;]
-      analysis.suggestions = [&apos;Normalize audio levels&apos;, &apos;Consider re-encoding at consistent frame rate&apos;]
+    if (file_type === 'image') {
+      analysis.detected_issues = ['Low contrast in header area', 'Color inconsistency detected']
+      analysis.suggestions = ['Increase contrast ratio for better accessibility', 'Standardize color palette']
+    } else if (file_type === 'video') {
+      analysis.detected_issues = ['Audio levels inconsistent', 'Frame rate drops detected']
+      analysis.suggestions = ['Normalize audio levels', 'Consider re-encoding at consistent frame rate']
     }
 
     context.response.body = { success: true, analysis }
@@ -330,16 +330,16 @@ router.post(&apos;/api/upf/files/analyze&apos;, async (context) => {
 })
 
 // Real-time presence management
-router.post(&apos;/api/collaboration/presence&apos;, async (context) => {
+router.post('/api/collaboration/presence', async (context) => {
   try {
     const body = await context.request.body().value
     const { user_id, project_id, status, last_seen } = body
 
     // In a real implementation, this would update a presence table
-    // For now, we&apos;ll return a success response
+    // For now, we'll return a success response
     context.response.body = {
       success: true,
-      message: &apos;Presence updated&apos;,
+      message: 'Presence updated',
       data: { user_id, project_id, status, last_seen }
     }
   } catch (error) {
@@ -349,17 +349,17 @@ router.post(&apos;/api/collaboration/presence&apos;, async (context) => {
 })
 
 // Health check endpoint
-router.get(&apos;/health&apos;, (context) => {
+router.get('/health', (context) => {
   context.response.body = {
-    status: &apos;healthy&apos;,
+    status: 'healthy',
     timestamp: new Date().toISOString(),
-    service: &apos;FreelanceFlow Collaboration Oak Server&apos;,
+    service: 'FreelanceFlow Collaboration Oak Server',
     features: [
-      &apos;Universal Pinpoint Feedback&apos;,
-      &apos;AI-Powered Comment Categorization&apos;,
-      &apos;Real-time Collaboration Sessions&apos;,
-      &apos;File Analysis & Insights&apos;,
-      &apos;Presence Management&apos;
+      'Universal Pinpoint Feedback',
+      'AI-Powered Comment Categorization',
+      'Real-time Collaboration Sessions',
+      'File Analysis & Insights',
+      'Presence Management'
     ]
   }
 })
@@ -368,11 +368,11 @@ const app = new Application()
 
 // CORS middleware
 app.use(async (context, next) => {
-  context.response.headers.set(&apos;Access-Control-Allow-Origin&apos;, &apos;*')
-  context.response.headers.set(&apos;Access-Control-Allow-Headers&apos;, &apos;authorization, x-client-info, apikey, content-type&apos;)
-  context.response.headers.set(&apos;Access-Control-Allow-Methods&apos;, &apos;POST, GET, OPTIONS, PUT, DELETE&apos;)
+  context.response.headers.set('Access-Control-Allow-Origin', '*')
+  context.response.headers.set('Access-Control-Allow-Headers', 'authorization, x-client-info, apikey, content-type')
+  context.response.headers.set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT, DELETE')
   
-  if (context.request.method === &apos;OPTIONS&apos;) {
+  if (context.request.method === 'OPTIONS') {
     context.response.status = 200
     return
   }
@@ -382,12 +382,12 @@ app.use(async (context, next) => {
 
 // JSON response middleware
 app.use(async (context, next) => {
-  context.response.headers.set(&apos;Content-Type&apos;, &apos;application/json&apos;)
+  context.response.headers.set('Content-Type', 'application/json')
   await next()
 })
 
 app.use(router.routes())
 app.use(router.allowedMethods())
 
-console.log(&apos;🚀 FreelanceFlow Collaboration Oak Server starting...&apos;)
+console.log('🚀 FreelanceFlow Collaboration Oak Server starting...')
 await app.listen({ port: 8000 }) 

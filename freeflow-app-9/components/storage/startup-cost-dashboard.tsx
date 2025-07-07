@@ -2,7 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { Badge } from '@/components/ui/badge'
+import { DollarSign, TrendingDown, Target, PiggyBank, BarChart3, HardDrive, Zap, Cloud, CheckCircle, AlertTriangle } from 'lucide-react'
 
 interface StartupCostData {
   currentSpend: number;
@@ -51,14 +54,14 @@ export function StartupCostDashboard() {
           database: 0.50    // Supabase free tier
         },
         recommendations: [
-          '✅ Great savings! You\'re 72% below standard cloud costs',
-          '🚀 Consider scaling up - you have budget room', '💡 Move 3 more files to Wasabi for extra $2.10/month savings
+          '✅ Great savings! You&apos;re 72% below standard cloud costs',
+          '🚀 Consider scaling up - you have budget room', '💡 Move 3 more files to Wasabi for extra $2.10/month savings'
         ]
       });
       
       setLoading(false);
     } catch (error) {
-      console.error('Failed to fetch cost data: ', error);'
+      console.error('Failed to fetch cost data: ', error);
       setLoading(false);
     }
   };
@@ -76,12 +79,11 @@ export function StartupCostDashboard() {
         wasabiSavings: prev.wasabiSavings + 2.10,
         optimizationScore: Math.min(100, prev.optimizationScore + 5),
         potentialSavings: Math.max(0, prev.potentialSavings - 2.10),
-        recommendations: ['🎉 Optimization complete! Moved 3 files to Wasabi', '💰 Additional $2.10/month saved', '✅ Storage now 95% optimized for startup budget
-        ]
+        recommendations: ['🎉 Optimization complete! Moved 3 files to Wasabi', '💰 Additional $2.10/month saved', '✅ Storage now 95% optimized for startup budget']
       } : null);
       
     } catch (error) {
-      console.error('Optimization failed: ', error);'
+      console.error('Optimization failed: ', error);
     } finally {
       setOptimizing(false);
     }
@@ -117,7 +119,6 @@ export function StartupCostDashboard() {
   }
 
   const budgetStatus = costData.status;
-  const budgetColor = budgetStatus === 'safe' ? 'green' : budgetStatus === 'warning' ? 'yellow' : 'red';
 
   return (
     <div className= "space-y-6">
@@ -131,8 +132,8 @@ export function StartupCostDashboard() {
         </div>
         <Badge 
           variant={budgetStatus === 'safe' ? 'default' : budgetStatus === 'warning' ? 'secondary' : 'destructive'}
-          className="text-sm
-        >"
+          className="text-sm"
+        >
           {budgetStatus === 'safe' ? '✅ Budget Healthy' : 
            budgetStatus === 'warning' ? '⚠️ Approaching Limit' : 
            '🚨 Over Budget'}
@@ -197,12 +198,12 @@ export function StartupCostDashboard() {
             </p>
             {costData.potentialSavings > 0 && (
               <Button 
-                size= "sm" 
-                variant= "outline" 
-                className="mt-2 text-xs
+                size="sm" 
+                variant="outline" 
+                className="mt-2 text-xs"
                 onClick={runOptimization}
                 disabled={optimizing}
-              >"
+              >
                 {optimizing ? 'Optimizing...' : 'Optimize Now'}
               </Button>
             )}
@@ -254,38 +255,26 @@ export function StartupCostDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle className= "flex items-center gap-2">
-              {costData.recommendations.length > 0 ? (
-                <AlertTriangle className= "h-5 w-5 text-yellow-600" />
-              ) : (
-                <CheckCircle className= "h-5 w-5 text-green-600" />
-              )}
-              Recommendations
+            <CardTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              Actionable Recommendations
             </CardTitle>
             <CardDescription>
-              Ways to optimize your startup costs
+              AI-powered tips to optimize your spend and save money.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className= "space-y-3">
+            <div className="space-y-3">
               {costData.recommendations.map((recommendation, index) => (
-                <div 
+                <div
                   key={index}
-                  className="flex items-start gap-3 p-3 rounded-lg bg-muted/50
-                >"
-                  <div className= "text-sm flex-1">
+                  className="flex items-start gap-3 p-3 rounded-lg bg-muted/50"
+                >
+                  <div className="text-sm flex-1">
                     {recommendation}
                   </div>
                 </div>
               ))}
-              
-              {costData.recommendations.length === 0 && (
-                <div className= "text-center text-muted-foreground py-4">
-                  <CheckCircle className= "h-8 w-8 mx-auto mb-2 text-green-600" />
-                  <p>All optimizations applied!</p>
-                  <p className= "text-sm">Your startup costs are fully optimized.</p>
-                </div>
-              )}
             </div>
           </CardContent>
         </Card>

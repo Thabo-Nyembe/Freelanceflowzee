@@ -1,16 +1,44 @@
 'use client'
 
 import React, { useReducer, useEffect, useCallback } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
+import Link from 'next/link'
+import { Home, FolderOpen, Calendar, MessageSquare, Shield, Cloud, Users, Cpu, Sparkles, UserCheck, BarChart3, Star, Play, CreditCard, Eye, ExternalLink, ChevronRight, X } from 'lucide-react'
+import { Button } from "@/components/ui/button"
 // Context7 MCP Integration for Enhanced Interactive Patterns
- payload: string }
+type InteractiveState = {
+  currentRoute: string;
+  isLoading: boolean;
+  navigationOpen: boolean;
+  modals: Record<string, boolean>;
+  toasts: Array<{
+    id: string;
+    type: 'success' | 'error' | 'warning' | 'info';
+    message: string;
+    timestamp: number;
+  }>;
+  buttonStates: Record<string, {
+    loading?: boolean;
+    disabled?: boolean;
+    clicked?: boolean;
+  }>;
+  userInteractions: Array<{
+    type: string;
+    payload: Record<string, unknown>;
+    timestamp: number;
+  }>;
+};
+
+type InteractiveAction =
+  | { type: 'SET_ROUTE'; payload: string }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'TOGGLE_NAVIGATION' }
   | { type: 'OPEN_MODAL'; payload: string }
   | { type: 'CLOSE_MODAL'; payload: string }
-  | { type: &apos;ADD_TOAST&apos;; payload: Omit<InteractiveState['toasts'][0], 'id' | &apos;timestamp&apos;> }
+  | { type: 'ADD_TOAST'; payload: Omit<InteractiveState['toasts'][0], 'id' | 'timestamp'> }
   | { type: 'REMOVE_TOAST'; payload: string }
-  | { type: &apos;SET_BUTTON_STATE&apos;; payload: { id: string; state: Partial<InteractiveState['buttonStates'][0]> } }
-  | { type: &apos;TRACK_INTERACTION&apos;; payload: Omit<InteractiveState['userInteractions'][0], 'timestamp'> }
+  | { type: 'SET_BUTTON_STATE'; payload: { id: string; state: Partial<InteractiveState['buttonStates'][0]> } }
+  | { type: 'TRACK_INTERACTION'; payload: Omit<InteractiveState['userInteractions'][0], 'timestamp'> }
   | { type: 'RESET_BUTTON_STATES' }
 
 const initialState: InteractiveState = {
@@ -211,8 +239,8 @@ export const MARKETING_ROUTES = [
 interface EnhancedButtonProps {
   id: string
   children: React.ReactNode
-  variant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'link
-  size?: 'default' | 'sm' | 'lg' | 'icon
+  variant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'link'
+  size?: 'default' | 'sm' | 'lg' | 'icon'
   href?: string
   onClick?: () => void | Promise<void>
   disabled?: boolean
@@ -253,9 +281,11 @@ export function EnhancedButton({
     dispatch({
       type: 'TRACK_INTERACTION',
       payload: {
-        action: 'button_click',
-        target: id,
-        metadata: { href, trackingData }
+        type: 'button_click',
+        payload: {
+          target: id,
+          metadata: { href, trackingData }
+        }
       }
     })
 
@@ -283,7 +313,7 @@ export function EnhancedButton({
         type: 'ADD_TOAST',
         payload: {
           type: 'success',
-          message: `Action completed successfully
+          message: `Action completed successfully`
         }
       })
 
@@ -293,7 +323,7 @@ export function EnhancedButton({
         type: 'ADD_TOAST',
         payload: {
           type: 'error',
-          message: `Action failed: ${error instanceof Error ? error.message : 'Unknown error'}
+          message: `Action failed: ${error instanceof Error ? error.message : 'Unknown error'}`
         }
       })
     } finally {
@@ -318,11 +348,11 @@ export function EnhancedButton({
   const content = (
     <>
       {isLoading && (
-        <div className= "mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
       )}
       {children}
       {external && !isLoading && (
-        <ExternalLink className= "ml-2 h-4 w-4" />
+        <ExternalLink className="ml-2 h-4 w-4" />
       )}
     </>
   )
@@ -334,7 +364,7 @@ export function EnhancedButton({
         target={external ? '_blank' : undefined}
         rel={external ? 'noopener noreferrer' : undefined}
         download={download}
-        className="inline-block
+        className="inline-block"
       >
         <Button {...buttonProps}>
           {content}
@@ -357,29 +387,29 @@ export function EnhancedButton({
 type RouteType = {
   href: string
   title: string
-  icon: React.ComponentType<any>
+  icon: React.ComponentType<{ className?: string }>
   testId: string
   description?: string
   category?: string
 }
 
 interface EnhancedNavigationProps {
-  routes: RouteType[]"
-  variant?: 'sidebar' | 'header' | 'mobile' | 'breadcrumb
+  routes: RouteType[]
+  variant?: 'sidebar' | 'header' | 'mobile' | 'breadcrumb'
   activeRoute?: string
-  onRouteChange?: (route: string) => void
+  // onRouteChange?: (route: string) => void
   className?: string
 }
 
-export function EnhancedNavigation({ 
-  routes, 
-  variant = 'header', 
+export function EnhancedNavigation({
+  routes,
+  variant = 'header',
   activeRoute,
-  onRouteChange,
-  className = 
+  // onRouteChange,
+  className = ''
 }: EnhancedNavigationProps) {
   const pathname = usePathname()
-  const [state, dispatch] = useReducer(interactiveReducer, initialState)
+  // const [state, dispatch] = useReducer(interactiveReducer, initialState)
   
   const currentRoute = activeRoute || pathname
 
@@ -389,10 +419,10 @@ export function EnhancedNavigation({
     
     const buttonContent = (
       <>
-        <Icon className= "h-4 w-4" />
-        <span className={variant === 'sidebar' ? '&apos; : &apos;sr-only md:not-sr-only&apos;}>{route.title}</span>
+        <Icon className="h-4 w-4" />
+        <span className={variant === 'sidebar' ? '' : 'sr-only md:not-sr-only'}>{route.title}</span>
         {isActive && variant === 'sidebar' && (
-          <ChevronRight className= "ml-auto h-4 w-4" />
+          <ChevronRight className="ml-auto h-4 w-4" />
         )}
       </>
     )
@@ -403,7 +433,7 @@ export function EnhancedNavigation({
           key={route.href}
           id={`nav-${route.testId}`}
           variant={isActive ? 'secondary' : 'ghost'}
-          className={`w-full justify-start gap-3 ${isActive ? 'bg-accent border-r-2 border-primary' : }`}
+          className={`w-full justify-start gap-3 ${isActive ? 'bg-accent border-r-2 border-primary' : ''}`}
           href={route.href}
           testId={route.testId}
           trackingData={{ category: 'navigation', variant }}
@@ -419,8 +449,8 @@ export function EnhancedNavigation({
           key={route.href}
           id={`nav-${route.testId}`}
           variant="ghost"
-          size= "sm
-          className={`gap-2 ${isActive ? 'bg-accent text-accent-foreground' : }`}
+          size="sm"
+          className={`gap-2 ${isActive ? 'bg-accent text-accent-foreground' : ''}`}
           href={route.href}
           testId={route.testId}
           trackingData={{ category: 'navigation', variant }}
@@ -436,13 +466,13 @@ export function EnhancedNavigation({
           key={route.href}
           id={`nav-mobile-${route.testId}`}
           variant="ghost"
-          className={`flex-col gap-1 h-auto py-2 ${isActive ? 'text-primary bg-primary/10' : }`}
+          className={`flex-col gap-1 h-auto py-2 ${isActive ? 'text-primary bg-primary/10' : ''}`}
           href={route.href}
           testId={`mobile-${route.testId}`}
           trackingData={{ category: 'navigation', variant }}
         >
-          <Icon className= "h-5 w-5" />
-          <span className= "text-xs">{route.title}</span>
+          <Icon className="h-5 w-5" />
+          <span className="text-xs">{route.title}</span>
         </EnhancedButton>
       )
     }
@@ -452,7 +482,7 @@ export function EnhancedNavigation({
 
   if (variant === 'sidebar') {
     return (
-      <nav className={`space-y-1 ${className}`} data-testid= "sidebar-navigation">
+      <nav className={`space-y-1 ${className}`} data-testid="sidebar-navigation">
         {routes.map(renderRoute)}
       </nav>
     )
@@ -460,7 +490,7 @@ export function EnhancedNavigation({
 
   if (variant === 'header') {
     return (
-      <nav className={`flex items-center space-x-2 ${className}`} data-testid= "header-navigation">
+      <nav className={`flex items-center space-x-2 ${className}`} data-testid="header-navigation">
         {routes.map(renderRoute)}
       </nav>
     )
@@ -468,7 +498,7 @@ export function EnhancedNavigation({
 
   if (variant === 'mobile') {
     return (
-      <nav className={`flex justify-around items-center ${className}`} data-testid= "mobile-navigation">
+      <nav className={`flex justify-around items-center ${className}`} data-testid="mobile-navigation">
         {routes.slice(0, 5).map(renderRoute)}
       </nav>
     )
@@ -492,13 +522,13 @@ interface EnhancedCardProps {
     label: string
     icon?: React.ComponentType<{ className?: string }>
     onClick: () => void
-    variant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'destructive
+    variant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'destructive'
   }>
   className?: string
   testId?: string
   interactive?: boolean
   badge?: string
-  status?: 'active' | 'inactive' | 'pending' | 'complete
+  status?: 'active' | 'inactive' | 'pending' | 'complete'
 }
 
 export function EnhancedCard({
@@ -513,95 +543,78 @@ export function EnhancedCard({
   testId,
   interactive = true,
   badge,
-  status
+  status,
 }: EnhancedCardProps) {
-  const [state, dispatch] = useReducer(interactiveReducer, initialState)
-  
-  const handleCardClick = useCallback(() => {
-    if (!interactive) return
-    
-    dispatch({
-      type: 'TRACK_INTERACTION',
-      payload: {
-        action: 'card_click',
-        target: id,
-        metadata: { href, title }
-      }
-    })
+  const router = useRouter()
 
+  const handleCardClick = (e: React.MouseEvent) => {
     if (onClick) {
+      e.preventDefault()
       onClick()
+    } else if (href) {
+      router.push(href)
     }
-  }, [id, href, title, onClick, interactive])
+  }
+
+  const statusIndicator = status ? (
+    <div className={`absolute top-2 right-2 h-3 w-3 rounded-full ${
+      status === 'active' ? 'bg-green-500' :
+      status === 'inactive' ? 'bg-gray-400' :
+      status === 'pending' ? 'bg-yellow-500' :
+      'bg-blue-500'
+    }`} />
+  ) : null
 
   const cardContent = (
-    <Card 
-      className={
-        ${interactive ? 'hover:shadow-lg cursor-pointer transition-all duration-200' : }
-        ${className}
-      `}
+    <div
+      className={`relative p-6 bg-white rounded-lg shadow-sm border border-gray-200 ${
+        interactive ? 'hover:shadow-md cursor-pointer transition-shadow' : ''
+      } ${className}`}
       data-testid={testId}
-      onClick={handleCardClick}
+      onClick={interactive ? handleCardClick : undefined}
     >
-      <CardHeader className= "pb-3">
-        <div className= "flex items-start justify-between">
-          <div className= "space-y-1">
-            <CardTitle className= "text-lg">{title}</CardTitle>
-            {description && (
-              <p className= "text-sm text-muted-foreground">{description}</p>
-            )}
-          </div>
-          <div className= "flex items-center space-x-2">
-            {badge && (
-              <Badge variant= "secondary">{badge}</Badge>
-            )}
-            {status && (
-              <Badge 
-                variant={
-                  status === 'complete' ? 'default' :
-                  status === 'active' ? 'secondary' :
-                  status === 'pending' ? 'outline' : 'destructive'
-                }
-              >
-                {status}
-              </Badge>
-            )}
-          </div>
+      {statusIndicator}
+      <div className="flex items-start justify-between mb-4">
+        <div className="space-y-1">
+          <h3 className="text-lg font-semibold">{title}</h3>
+          {description && (
+            <p className="text-sm text-gray-500">{description}</p>
+          )}
         </div>
-      </CardHeader>
-      {children && (
-        <CardContent className= "pt-0">
-          {children}
-        </CardContent>
-      )}
+        {badge && (
+          <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
+            {badge}
+          </span>
+        )}
+      </div>
+      
+      {children}
+
       {actions.length > 0 && (
-        <CardContent className= "pt-0">
-          <Separator className= "mb-4" />
-          <div className= "flex items-center justify-end space-x-2">
-            {actions.map((action, index) => (
-              <EnhancedButton
-                key={index}
-                id={`${id}-action-${index}`}
-                variant={action.variant || 'outline'}
-                size= "sm
-                onClick={action.onClick}
-                testId={`${testId}-action-${index}`}
-              >
-                {action.icon && <action.icon className= "h-4 w-4 mr-2" />}
-                {action.label}
-              </EnhancedButton>
-            ))}
-          </div>
-        </CardContent>
+        <div className="mt-6 pt-4 border-t border-gray-200 flex items-center justify-end space-x-2">
+          {actions.map((action, index) => (
+            <EnhancedButton
+              key={index}
+              id={`${id}-action-${index}`}
+              variant={action.variant || 'outline'}
+              size="sm"
+              onClick={action.onClick}
+              testId={`${testId}-action-${index}`}
+            >
+              {action.icon && <action.icon className="h-4 w-4 mr-2" />}
+              {action.label}
+            </EnhancedButton>
+          ))}
+        </div>
       )}
-    </Card>
+    </div>
   )
 
   if (href && !onClick) {
     return (
-      <Link href={href} className= "block">
+      <a href={href} className="block">
         {cardContent}
-      </Link>
+      </a>
     )
   }
 
@@ -623,7 +636,7 @@ export function EnhancedInteractiveSystem({
   children, 
   enableTracking = true, 
   enableToasts = true,
-  className = 
+  className = ''
 }: EnhancedInteractiveSystemProps) {
   const [state, dispatch] = useReducer(interactiveReducer, initialState)
   
@@ -636,31 +649,37 @@ export function EnhancedInteractiveSystem({
     })
   }, [state.toasts])
 
+  // Context7 Pattern: Centralized Interaction Tracking
+  // const trackInteraction = useCallback((type: string, payload: Record<string, unknown>) => {
+  //   if (enableTracking) {
+  //     dispatch({ type: 'TRACK_INTERACTION', payload: { type, payload } })
+  //   }
+  // }, [enableTracking])
+
   return (
     <div className={`enhanced-interactive-system ${className}`}>
       {children}
       
       {/* Toast Notifications */}
       {enableToasts && state.toasts.length > 0 && (
-        <div className= "fixed top-4 right-4 z-50 space-y-2">
+        <div className="fixed top-4 right-4 z-50 space-y-2">
           {state.toasts.map(toast => (
             <div
               key={toast.id}
-              className={
-                p-4 rounded-lg shadow-lg max-w-sm
-                ${toast.type === 'success' ? 'bg-green-500 text-white' :
-                  toast.type === 'error' ? 'bg-red-500 text-white' :
-                  toast.type === 'warning' ? 'bg-yellow-500 text-white' :
-                  'bg-blue-500 text-white'}
-              `}
+              className={`p-4 rounded-lg shadow-lg max-w-sm ${
+                toast.type === 'success' ? 'bg-green-500 text-white' :
+                toast.type === 'error' ? 'bg-red-500 text-white' :
+                toast.type === 'warning' ? 'bg-yellow-500 text-white' :
+                'bg-blue-500 text-white'
+              }`}
             >
-              <div className= "flex items-center justify-between">
+              <div className="flex items-center justify-between">
                 <span>{toast.message}</span>
                 <button
                   onClick={() => dispatch({ type: 'REMOVE_TOAST', payload: toast.id })}
-                  className="ml-2 text-white hover:text-gray-200
-                >"
-                  <X className= "h-4 w-4" />
+                  className="ml-2 text-white hover:text-gray-200"
+                >
+                  <X className="h-4 w-4" />
                 </button>
               </div>
             </div>
@@ -670,8 +689,8 @@ export function EnhancedInteractiveSystem({
       
       {/* Interaction Tracker */}
       {enableTracking && (
-        <div className= "fixed bottom-4 left-4 z-40 bg-black/80 text-white p-2 rounded text-xs max-w-xs">
-          <div className= "text-green-400">
+        <div className="fixed bottom-4 left-4 z-40 bg-black/80 text-white p-2 rounded text-xs max-w-xs">
+          <div className="text-green-400">
             ✅ Interactive System Active ({state.userInteractions.length} interactions)
           </div>
         </div>

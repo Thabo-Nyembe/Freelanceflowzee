@@ -1,17 +1,105 @@
 "use client"
 
 import React, { useReducer, useCallback, useRef } from 'react'
- payload: UploadProgress }
+import { Shield, Upload, Image, Video, Music, FileText, Archive, Check, Unlock, X, Copy, Eye, Lock, Globe, Clock, Star, Download, Share2, Heart, TrendingUp, Zap } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { Badge } from '@/components/ui/badge'
+import { useToast } from '@/components/ui/use-toast'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+interface UploadedFile {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  url: string;
+  publicUrl: string;
+  thumbnailUrl?: string;
+  shareableLink: string;
+  downloadUrl: string;
+  escrowProtected: boolean;
+  escrowAmount?: number;
+  escrowStatus?: 'pending' | 'active' | 'released' | 'cancelled' | 'none';
+  accessLevel?: 'public' | 'password' | 'escrow';
+  unlockPrice?: number;
+  seo?: {
+    title: string;
+    description: string;
+  };
+  uploadedAt: Date;
+  expiresAt?: Date;
+  downloadCount?: number;
+  views?: number;
+}
+
+interface UploadProgress {
+  file: File;
+  progress: number;
+  status: 'uploading' | 'completed' | 'error';
+  error?: string;
+  result?: UploadedFile;
+}
+
+interface EscrowSettings {
+  enabled: boolean;
+  amount: number;
+  currency: string;
+  projectId?: string;
+  requireClientConfirmation: boolean;
+  autoReleaseConditions: string[];
+  protectionLevel: 'basic' | 'standard' | 'premium';
+}
+
+interface UploadState {
+  uploads: UploadProgress[];
+  completedFiles: UploadedFile[];
+  isDragging: boolean;
+  copiedLink: string | null;
+  uploadSettings: {
+    isPublic: boolean;
+    allowDownload: boolean;
+    requirePassword: boolean;
+    password: string;
+    customMessage: string;
+    enableNotifications: boolean;
+    generateSEO: boolean;
+    trackAnalytics: boolean;
+    enableEscrow: boolean;
+    escrowSettings: EscrowSettings;
+  };
+  escrowState: {
+    totalEscrowValue: number;
+    activeEscrows: number;
+    pendingReleases: number;
+    completedProjects: number;
+  };
+  sharingStats: {
+    totalShares: number;
+    totalViews: number;
+    conversionRate: number;
+  };
+}
+
+type UploadAction =
+    { type: 'SET_DRAGGING'; payload: boolean }
+  | { type: 'ADD_UPLOAD'; payload: UploadProgress }
   | { type: 'UPDATE_UPLOAD_PROGRESS'; payload: { file: File; progress: number } }
   | { type: 'COMPLETE_UPLOAD'; payload: { file: File; result: UploadedFile } }
   | { type: 'ERROR_UPLOAD'; payload: { file: File; error: string } }
   | { type: 'REMOVE_UPLOAD'; payload: File }
   | { type: 'CLEAR_COMPLETED' }
   | { type: 'SET_COPIED_LINK'; payload: string | null }
-  | { type: &apos;UPDATE_UPLOAD_SETTINGS&apos;; payload: Partial<UploadState['uploadSettings']> }
-  | { type: &apos;UPDATE_ESCROW_SETTINGS&apos;; payload: Partial<EscrowSettings> }
-  | { type: &apos;UPDATE_ESCROW_STATE&apos;; payload: Partial<UploadState['escrowState']> }
-  | { type: &apos;UPDATE_SHARING_STATS&apos;; payload: Partial<UploadState['sharingStats']> }
+  | { type: 'UPDATE_UPLOAD_SETTINGS'; payload: Partial<UploadState['uploadSettings']> }
+  | { type: 'UPDATE_ESCROW_SETTINGS'; payload: Partial<EscrowSettings> }
+  | { type: 'UPDATE_ESCROW_STATE'; payload: Partial<UploadState['escrowState']> }
+  | { type: 'UPDATE_SHARING_STATS'; payload: Partial<UploadState['sharingStats']> }
 
 // Context7 Reducer Pattern
 function uploadReducer(state: UploadState, action: UploadAction): UploadState {
@@ -160,21 +248,20 @@ export function EnhancedUploadProgress({
     const fileName = file.name.replace(/\.[^/.]+$/, "")
     
     return {
-      seoTitle: `Download ${fileName} - Premium ${fileType} by ${brandName}`,
-      seoDescription: `High-quality ${fileType} file: ${fileName}. Professional work by ${brandName}. Secure download with client protection.
+      title: `Download ${fileName} - Premium ${fileType} by ${brandName}`,
+      description: `High-quality ${fileType} file: ${fileName}. Professional work by ${brandName}. Secure download with client protection.`
     }
   }, [brandName])
 
   // Generate shareable link with UTM tracking
   const generateShareableLink = useCallback((fileId: string) => {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://freeflow-app-9.vercel.app'
-    return `${baseUrl}/files/${fileId}?utm_source=freeflow&utm_medium=share&utm_campaign=file_sharing
+    return `${baseUrl}/files/${fileId}?utm_source=freeflow&utm_medium=share&utm_campaign=file_sharing`
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Context7 Pattern: Enhanced Upload Simulation with Escrow
   const simulateUpload = async (file: File): Promise<UploadedFile> => {
-    const fileId = `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}
-    const seoData = generateSEOOptimizedData(file)
+    const fileId = `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -187,8 +274,7 @@ export function EnhancedUploadProgress({
           downloadUrl: `/api/files/${fileId}/download`,
           publicUrl: `/files/${fileId}`,
           shareableLink: generateShareableLink(fileId),
-          seoTitle: seoData.seoTitle,
-          seoDescription: seoData.seoDescription,
+          seo: generateSEOOptimizedData(file),
           uploadedAt: new Date(),
           expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
           downloadCount: 0,
@@ -244,7 +330,7 @@ export function EnhancedUploadProgress({
 
       toast({
         title: "Upload Complete! 🎉",
-        description: `${file.name} uploaded successfully${result.escrowProtected ? ' with escrow protection' : }.`,
+        description: `${file.name} uploaded successfully${result.escrowProtected ? ' with escrow protection.' : '.'}`,
       })
 
       onUploadComplete?.([result])
@@ -260,7 +346,7 @@ export function EnhancedUploadProgress({
         variant: "destructive",
       })
     }
-  }, [state.uploadSettings, state.escrowState, onUploadComplete, toast])
+  }, [state.uploadSettings, state.escrowState, onUploadComplete, toast, simulateUpload])
 
   // File selection and validation
   const handleFileSelect = useCallback((files: FileList | null) => {
@@ -309,7 +395,7 @@ export function EnhancedUploadProgress({
 
     // Upload each valid file
     validFiles.forEach(uploadFile)
-  }, [maxSize, maxFiles, allowedTypes, state.uploads.length, toast, uploadFile])
+  }, [maxSize, maxFiles, allowedTypes, state.uploads.length, toast, uploadFile, simulateUpload])
 
   // Drag and drop handlers
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -405,7 +491,7 @@ export function EnhancedUploadProgress({
             Upload & Share Files
           </CardTitle>
           <CardDescription>
-            Drag and drop files or click to browse. {enableEscrow ? 'Escrow protection available.' : }
+            Drag and drop files or click to browse. {enableEscrow ? 'Escrow protection available.' : ''}
           </CardDescription>
         </CardHeader>
         <CardContent className= "space-y-6">
@@ -419,8 +505,8 @@ export function EnhancedUploadProgress({
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
-            data-testid="upload-drop-zone
-          >"
+            data-testid="upload-drop-zone"
+          >
             <Upload className= "h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <h3 className= "text-lg font-semibold mb-2">
               {state.isDragging ? "Drop files here" : "Choose files to upload"}
@@ -430,22 +516,22 @@ export function EnhancedUploadProgress({
             </p>
             <Button
               onClick={() => fileInputRef.current?.click()}
-              data-testid="browse-files-btn
+              data-testid="browse-files-btn"
             >
               Browse Files
             </Button>
             <input
-              ref={fileInputRef}"
-              type="file
-              multiple"
+              ref={fileInputRef}
+              type="file"
+              multiple
               accept={allowedTypes.join(',')}
               onChange={(e) => handleFileSelect(e.target.files)}
               className="hidden"
-              data-testid="file-input
+              data-testid="file-input"
             />
           </div>
 
-          {/* Upload Settings */}"
+          {/* Upload Settings */}
           <div className= "grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className= "space-y-4">
               <h4 className= "font-semibold text-sm">Upload Settings</h4>
@@ -453,7 +539,7 @@ export function EnhancedUploadProgress({
               <div className= "flex items-center justify-between">
                 <Label htmlFor= "public-upload">Public Upload</Label>
                 <Switch
-                  id= "public-upload
+                  id= "public-upload"
                   checked={state.uploadSettings.isPublic}
                   onCheckedChange={(checked) => 
                     dispatch({ type: 'UPDATE_UPLOAD_SETTINGS', payload: { isPublic: checked } })
@@ -464,7 +550,7 @@ export function EnhancedUploadProgress({
               <div className= "flex items-center justify-between">
                 <Label htmlFor= "require-password">Require Password</Label>
                 <Switch
-                  id= "require-password
+                  id= "require-password"
                   checked={state.uploadSettings.requirePassword}
                   onCheckedChange={(checked) => 
                     dispatch({ type: 'UPDATE_UPLOAD_SETTINGS', payload: { requirePassword: checked } })
@@ -475,7 +561,7 @@ export function EnhancedUploadProgress({
               <div className= "flex items-center justify-between">
                 <Label htmlFor= "enable-escrow">Enable Escrow Protection</Label>
                 <Switch
-                  id= "enable-escrow
+                  id= "enable-escrow"
                   checked={state.uploadSettings.enableEscrow}
                   onCheckedChange={(checked) => 
                     dispatch({ type: 'UPDATE_UPLOAD_SETTINGS', payload: { enableEscrow: checked } })
@@ -487,20 +573,20 @@ export function EnhancedUploadProgress({
                 <div>
                   <Label htmlFor= "password">Access Password</Label>
                   <Input
-                    id= "password
-                    type="password
+                    id= "password"
+                    type="password"
                     value={state.uploadSettings.password}
-                    onChange={(e) => "
+                    onChange={(e) => 
                       dispatch({ type: 'UPDATE_UPLOAD_SETTINGS', payload: { password: e.target.value } })
                     }
-                    placeholder="Enter password
+                    placeholder="Enter password"
                   />
                 </div>
               )}
             </div>
 
             {/* Escrow Settings */}
-            {state.uploadSettings.enableEscrow && ("
+            {state.uploadSettings.enableEscrow && (
               <div className= "space-y-4">
                 <h4 className= "font-semibold text-sm flex items-center gap-2">
                   <Shield className= "h-4 w-4 text-emerald-600" />
@@ -510,7 +596,7 @@ export function EnhancedUploadProgress({
                 <div className= "flex items-center justify-between">
                   <Label htmlFor= "escrow-enabled">Enable for this upload</Label>
                   <Switch
-                    id= "escrow-enabled
+                    id= "escrow-enabled"
                     checked={state.uploadSettings.escrowSettings.enabled}
                     onCheckedChange={(enabled) => 
                       dispatch({ type: 'UPDATE_ESCROW_SETTINGS', payload: { enabled } })
@@ -520,14 +606,14 @@ export function EnhancedUploadProgress({
 
                 {state.uploadSettings.escrowSettings.enabled && (
                   <>
-                    <div className= "grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor= "escrow-amount">Amount</Label>
                         <Input
-                          id= "escrow-amount
-                          type="number
+                          id= "escrow-amount"
+                          type="number"
                           value={state.uploadSettings.escrowSettings.amount}
-                          onChange={(e) => "
+                          onChange={(e) => 
                             dispatch({ type: 'UPDATE_ESCROW_SETTINGS', payload: { amount: Number(e.target.value) } })
                           }
                           placeholder="0"
@@ -557,7 +643,7 @@ export function EnhancedUploadProgress({
                       <Label htmlFor= "protection-level">Protection Level</Label>
                       <Select
                         value={state.uploadSettings.escrowSettings.protectionLevel}
-                        onValueChange={(protectionLevel: 'basic' | 'premium' | 'enterprise') => 
+                        onValueChange={(protectionLevel: 'basic' | 'standard' | 'premium') => 
                           dispatch({ type: 'UPDATE_ESCROW_SETTINGS', payload: { protectionLevel } })
                         }
                       >
@@ -566,8 +652,8 @@ export function EnhancedUploadProgress({
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value= "basic">Basic ($1.99)</SelectItem>
-                          <SelectItem value= "premium">Premium ($4.99)</SelectItem>
-                          <SelectItem value= "enterprise">Enterprise ($9.99)</SelectItem>
+                          <SelectItem value= "standard">Premium ($4.99)</SelectItem>
+                          <SelectItem value= "premium">Enterprise ($9.99)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -582,12 +668,12 @@ export function EnhancedUploadProgress({
               <div>
                 <Label htmlFor= "custom-message">Custom Message for Recipients</Label>
                 <Textarea
-                  id= "custom-message
+                  id= "custom-message"
                   value={state.uploadSettings.customMessage}
                   onChange={(e) => 
                     dispatch({ type: 'UPDATE_UPLOAD_SETTINGS', payload: { customMessage: e.target.value } })
                   }
-                  placeholder="Add a personal message...
+                  placeholder="Add a personal message..."
                   rows={3}
                 />
               </div>
@@ -597,7 +683,7 @@ export function EnhancedUploadProgress({
       </Card>
 
       {/* Upload Progress */}
-      {state.uploads.length > 0 && ("
+      {state.uploads.length > 0 && (
         <Card data-testid= "upload-progress-section">
           <CardHeader className= "flex flex-row items-center justify-between">
             <div>
@@ -614,11 +700,11 @@ export function EnhancedUploadProgress({
               size= "sm" 
               onClick={clearCompleted}
               disabled={state.uploads.filter(u => u.status === 'completed').length === 0}
-              data-testid="clear-completed-btn
+              data-testid="clear-completed-btn"
             >
               Clear Completed
             </Button>
-          </CardHeader>"
+          </CardHeader>
           <CardContent className= "space-y-4">
             {state.uploads.map((upload, index) => {
               const FileIcon = getFileIcon(upload.file.type)
@@ -656,7 +742,7 @@ export function EnhancedUploadProgress({
                   {upload.status === 'uploading' && (
                     <Button
                       variant="ghost"
-                      size= "sm
+                      size= "sm"
                       onClick={() => dispatch({ type: 'REMOVE_UPLOAD', payload: upload.file })}
                     >
                       <X className= "h-4 w-4" />
@@ -690,7 +776,7 @@ export function EnhancedUploadProgress({
                     <div>
                       <h4 className= "font-semibold">{file.name}</h4>
                       <p className= "text-sm text-muted-foreground">
-                        {(file.size / 1024 / 1024).toFixed(2)} MB • Uploaded {file.uploadedAt.toLocaleTimeString()}
+                        {(file.size / 1024 / 1024).toFixed(2)} MB • Uploaded {file.uploadedAt.toLocaleDateString()}
                       </p>
                       {file.escrowProtected && (
                         <div className= "flex items-center gap-2 mt-1">
@@ -713,7 +799,7 @@ export function EnhancedUploadProgress({
                 <div className= "flex items-center gap-2">
                   {file.accessLevel === 'escrow' && (
                     <Badge className= "bg-emerald-100 text-emerald-800">
-                      <Shield className= "h-3 w-3 mr-1" />
+                      <Shield className="h-3 w-3 mr-1" />
                       Escrow Protected
                     </Badge>
                   )}
@@ -737,17 +823,17 @@ export function EnhancedUploadProgress({
                     <Input
                       value={file.shareableLink}
                       readOnly
-                      className="flex-1
+                      className="flex-1"
                       data-testid={`share-link-${file.id}`}
                     />
-                    <Button"
-                      size= "sm
-                      variant="outline
-                      onClick={() => copyToClipboard(file.shareableLink, file.id)}"
-                      className="shrink-0
+                    <Button
+                      size= "sm"
+                      variant="outline"
+                      onClick={() => copyToClipboard(file.shareableLink, file.id)}
+                      className="shrink-0"
                       data-testid={`copy-share-btn-${file.id}`}
                     >
-                      {state.copiedLink === file.id ? ("
+                      {state.copiedLink === file.id ? (
                         <Check className= "h-4 w-4" />
                       ) : (
                         <Copy className= "h-4 w-4" />
@@ -759,17 +845,17 @@ export function EnhancedUploadProgress({
                     <Input
                       value={file.downloadUrl}
                       readOnly
-                      className="flex-1
+                      className="flex-1"
                       data-testid={`download-link-${file.id}`}
                     />
-                    <Button"
-                      size= "sm
-                      variant="outline
-                      onClick={() => copyToClipboard(file.downloadUrl, file.id)}"
-                      className="shrink-0
+                    <Button
+                      size= "sm"
+                      variant="outline"
+                      onClick={() => copyToClipboard(file.downloadUrl, file.id)}
+                      className="shrink-0"
                       data-testid={`copy-download-btn-${file.id}`}
                     >
-                      {state.copiedLink === file.id ? ("
+                      {state.copiedLink === file.id ? (
                         <Check className= "h-4 w-4" />
                       ) : (
                         <Copy className= "h-4 w-4" />
@@ -783,37 +869,74 @@ export function EnhancedUploadProgress({
                   <div className= "bg-muted/50 p-3 rounded-md space-y-2">
                     <h5 className= "font-medium text-sm">SEO Preview:</h5>
                     <div className= "text-sm">
-                      <p className= "font-medium text-primary">{file.seoTitle}</p>
-                      <p className= "text-muted-foreground text-xs">{file.seoDescription}</p>
+                      <p className= "font-medium text-primary">{file.seo?.title}</p>
+                      <p className= "text-muted-foreground text-xs">{file.seo?.description}</p>
                     </div>
                   </div>
                 )}
 
-                {/* Quick Actions */}
-                <div className= "flex gap-2 pt-2 border-t">
-                  <Button size= "sm" variant= "outline" className= "flex-1">
-                    <Eye className= "h-4 w-4 mr-2" />
-                    Preview
-                  </Button>
-                  <Button size= "sm" variant= "outline" className= "flex-1">
-                    <Download className= "h-4 w-4 mr-2" />
+                {/* Action buttons */}
+                <div className= "flex items-center gap-2 mt-4">
+                  <Button variant="outline" size="sm">
+                    <Download className="h-4 w-4 mr-2" />
                     Download
                   </Button>
-                  <Button size= "sm" variant= "outline" className= "flex-1">
-                    <Share2 className= "h-4 w-4 mr-2" />
+                  <Button variant="outline" size="sm">
+                    <Share2 className="h-4 w-4 mr-2" />
                     Share
                   </Button>
-                  {file.escrowProtected && (
-                    <Button 
-                      size= "sm" 
-                      variant= "outline" 
-                      className="flex-1 border-emerald-200 text-emerald-700 hover:bg-emerald-50
-                    >"
-                      <Unlock className= "h-4 w-4 mr-2" />
-                      Release Escrow
-                    </Button>
-                  )}
+                  <Button variant="outline" size="sm" className="ml-auto">
+                    <Heart className="h-4 w-4 mr-2" />
+                    Like
+                  </Button>
                 </div>
+
+                {/* File Analytics */}
+                <div className= "border-t pt-4">
+                  <h5 className= "font-medium text-sm mb-3">File Analytics</h5>
+                  <div className= "grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div>
+                      <p className= "font-bold text-lg">{file.views}</p>
+                      <p className= "text-xs text-muted-foreground">Views</p>
+                    </div>
+                    <div>
+                      <p className= "font-bold text-lg">{file.downloadCount}</p>
+                      <p className= "text-xs text-muted-foreground">Downloads</p>
+                    </div>
+                    <div>
+                      <p className= "font-bold text-lg">{(file.views && file.downloadCount) ? ((file.downloadCount / file.views) * 100).toFixed(1) : 0}%</p>
+                      <p className= "text-xs text-muted-foreground">Conversion</p>
+                    </div>
+                    <div>
+                      <div className= "flex items-center justify-center text-lg font-bold text-green-600">
+                        <TrendingUp className="h-5 w-5 mr-1" />
+                        <span>+5%</span>
+                      </div>
+                      <p className= "text-xs text-muted-foreground">vs last week</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Advanced Options */}
+                <div className= "border-t pt-4">
+                  <h5 className= "font-medium text-sm mb-3">Advanced Options</h5>
+                  <Button variant="destructive" size="sm">
+                    <Zap className="h-4 w-4 mr-2" />
+                    Delete File Permanently
+                  </Button>
+                </div>
+
+                {/* Escrow Release Button */}
+                {file.escrowStatus === 'pending' && (
+                  <Button 
+                    size= "sm" 
+                    variant= "outline" 
+                    className="flex-1 border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                  >
+                    <Unlock className= "h-4 w-4 mr-2" />
+                    Release Escrow
+                  </Button>
+                )}
               </div>
             ))}
           </CardContent>

@@ -300,13 +300,8 @@ class MultiCloudStorage {
         };
       }
     } catch (error) {
-      console.error('Upload failed: ', error);'
-      return {
-        success: false,
-        provider: useWasabi ? 'wasabi' : 'supabase',
-        size: fileSize,
-        cost_per_month: 0
-      };
+      console.error(`Upload failed for ${fileName}:`, error);
+      return { success: false, provider: useWasabi ? 'wasabi' : 'supabase', size: fileSize, cost_per_month: 0 };
     }
   }
 
@@ -338,7 +333,7 @@ class MultiCloudStorage {
       .single();
 
     if (error) {
-      console.error('Database insert error: ', error);'
+      console.error('Database insert error: ', error);
       throw new Error(`Failed to store file metadata: ${error.message}`);
     }
 
@@ -601,7 +596,7 @@ class MultiCloudStorage {
       .limit(30);
 
     if (error) {
-      console.error('Analytics fetch error: ', error);'
+      console.error('Analytics fetch error: ', error);
       return null;
     }
 

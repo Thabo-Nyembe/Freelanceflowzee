@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Home } from 'lucide-react'
 
 export function DashboardBreadcrumbs() {
   const pathname = usePathname()
@@ -12,21 +12,32 @@ export function DashboardBreadcrumbs() {
     <nav className="flex items-center space-x-1 text-sm text-muted-foreground">
       <Link
         href="/dashboard"
-        className="hover:text-foreground transition-colors"
+        className="flex items-center space-x-1 text-foreground hover:text-foreground/80"
       >
-        Dashboard
+        <Home className="h-4 w-4" />
+        <span className="hidden sm:inline">Dashboard</span>
       </Link>
-      {segments.slice(1).map((segment, index) => (
-        <div key={segment} className="flex items-center">
-          <ChevronRight className="h-4 w-4" />
-          <Link
-            href={`/${segments.slice(0, index + 2).join('/')}`}
-            className="ml-1 capitalize hover:text-foreground transition-colors"
-          >
-            {segment.replace(/-/g, ' ')}
-          </Link>
-        </div>
-      ))}
+      {segments.map((segment, index) => {
+        const href = `/${segments.slice(0, index + 1).join('/')}`
+        const isLast = index === segments.length - 1
+        const title = segment.charAt(0).toUpperCase() + segment.slice(1)
+
+        return (
+          <div key={segment} className="flex items-center space-x-1">
+            <ChevronRight className="h-4 w-4" />
+            {isLast ? (
+              <span className="font-medium text-foreground">{title}</span>
+            ) : (
+              <Link
+                href={href}
+                className="hover:text-foreground hover:underline"
+              >
+                {title}
+              </Link>
+            )}
+          </div>
+        )
+      })}
     </nav>
   )
 } 

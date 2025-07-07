@@ -1,12 +1,12 @@
 export const corsHeaders = {
-  &apos;Access-Control-Allow-Origin&apos;: &apos;*',
-  &apos;Access-Control-Allow-Headers&apos;: &apos;authorization, x-client-info, apikey, content-type&apos;,
-  &apos;Access-Control-Allow-Methods&apos;: &apos;POST, GET, OPTIONS, PUT, DELETE&apos;
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE'
 }
 
 export const handleCors = (req: Request): Response | null => {
-  if (req.method === &apos;OPTIONS&apos;) {
-    return new Response(&apos;ok&apos;, { headers: corsHeaders })
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
   }
   return null
 } 

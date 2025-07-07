@@ -1,103 +1,149 @@
 'use client'
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import { useState, useCallback } from 'react'
+import { EnhancedAIService } from '@/lib/ai/enhanced-ai-service'
 
-interface AIGenerationParams {
-  prompt: string
-  type: 'design' | 'content' | 'asset'
-  settings?: Record<string, any>
-}
+const aiService = new EnhancedAIService()
 
-interface AIAnalysisParams {
-  content: string
-  type: 'design' | 'performance' | 'seo'
-  options?: Record<string, any>
+interface AIData {
+  transcription?: {
+    text: string
+    segments: Array<{
+      start: number
+      end: number
+      text: string
+    }>
+    language: string
+    confidence: number
+  }
+  analysis?: {
+    quality: number
+    engagement: number
+    clarity: number
+    pacing: number
+    tags: string[]
+    summary: string
+    recommendations: string[]
+  }
+  chapters?: Array<{
+    title: string
+    start: number
+    end: number
+    summary: string
+    keywords: string[]
+  }>
+  insights?: {
+    insights: Array<{
+      category: string
+      score: number
+      details: string
+      recommendations: string[]
+    }>
+    overallScore: number
+    topStrengths: string[]
+    improvementAreas: string[]
+  }
 }
 
 export function useAIOperations() {
-  const queryClient = useQueryClient()
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [aiData, setAIData] = useState<AIData>({})
 
-  // Generate content/assets using AI
-  const generateMutation = useMutation({
-    mutationFn: async (params: AIGenerationParams) => {
-      const response = await fetch('/api/ai/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(params),
-      })
-      
-      if (!response.ok) {
-        throw new Error('Generation failed')
-      }
-      
-      return response.json()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ai-history'] })
-      toast.success('Generation completed successfully')
-    },
-    onError: (error) => {
-      toast.error('Generation failed: ' + error.message)
+  const transcribeVideo = useCallback(async (videoUrl: string, language = 'en') => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      const transcription = await aiService.transcribeVideo(videoUrl, language)
+      setAIData(prev => ({ ...prev, transcription }))
+      return transcription
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to transcribe video'
+      setError(message)
+      throw err
+    } finally {
+      setIsLoading(false)
     }
-  })
+  }, [])
 
-  // Analyze content using AI
-  const analyzeMutation = useMutation({
-    mutationFn: async (params: AIAnalysisParams) => {
-      const response = await fetch('/api/ai/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(params),
-      })
-      
-      if (!response.ok) {
-        throw new Error('Analysis failed')
-      }
-      
-      return response.json()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ai-history'] })
-      toast.success('Analysis completed successfully')
-    },
-    onError: (error) => {
-      toast.error('Analysis failed: ' + error.message)
+  const analyzeContent = useCallback(async (videoUrl: string) => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      const analysis = await aiService.analyzeVideoContent(videoUrl)
+      setAIData(prev => ({ ...prev, analysis }))
+      return analysis
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to analyze video content'
+      setError(message)
+      throw err
+    } finally {
+      setIsLoading(false)
     }
-  })
+  }, [])
 
-  // Get AI operation history
-  const historyQuery = useQuery({
-    queryKey: ['ai-history'],
-    queryFn: async () => {
-      const response = await fetch('/api/ai/history')
-      if (!response.ok) {
-        throw new Error('Failed to fetch history')
-      }
-      return response.json()
+  const generateChapters = useCallback(async (videoUrl: string) => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      
+      // First ensure we have a transcription
+      const transcription = aiData.transcription || await transcribeVideo(videoUrl)
+      
+      const chapters = await aiService.generateChapters(videoUrl, transcription.text)
+      setAIData(prev => ({ ...prev, chapters }))
+      return chapters
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to generate chapters'
+      setError(message)
+      throw err
+    } finally {
+      setIsLoading(false)
     }
-  })
+  }, [aiData.transcription, transcribeVideo])
 
-  // Get AI component recommendations
-  const recommendationsQuery = useQuery({
-    queryKey: ['ai-recommendations'],
-    queryFn: async () => {
-      const response = await fetch('/api/ai/component-recommendations')
-      if (!response.ok) {
-        throw new Error('Failed to fetch recommendations')
-      }
-      return response.json()
+  const generateInsights = useCallback(async (videoUrl: string) => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      
+      // First ensure we have analysis data
+      const analysis = aiData.analysis || await analyzeContent(videoUrl)
+      
+      const insights = await aiService.generateInsights(videoUrl, analysis)
+      setAIData(prev => ({ ...prev, insights }))
+      return insights
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to generate insights'
+      setError(message)
+      throw err
+    } finally {
+      setIsLoading(false)
     }
-  })
+  }, [aiData.analysis, analyzeContent])
+
+  const streamAIResponse = useCallback(async function* (
+    provider: 'openai' | 'anthropic' | 'google',
+    prompt: string
+  ) {
+    try {
+      setError(null)
+      yield* aiService.streamResponse(provider, prompt)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to stream AI response'
+      setError(message)
+      throw err
+    }
+  }, [])
 
   return {
-    generate: generateMutation.mutate,
-    isGenerating: generateMutation.isPending,
-    analyze: analyzeMutation.mutate,
-    isAnalyzing: analyzeMutation.isPending,
-    history: historyQuery.data,
-    isLoadingHistory: historyQuery.isLoading,
-    recommendations: recommendationsQuery.data,
-    isLoadingRecommendations: recommendationsQuery.isLoading,
+    transcribeVideo,
+    analyzeContent,
+    generateChapters,
+    generateInsights,
+    streamAIResponse,
+    aiData,
+    isLoading,
+    error,
   }
 } 

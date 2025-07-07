@@ -1,40 +1,21 @@
 import { Inter } from 'next/font/google'
-import { Metadata } from 'next'
-import { cn } from '@/lib/utils'
+import { Analytics } from '@vercel/analytics/react'
+import { Toaster } from '@/components/ui/toaster'
+import { ThemeProvider } from '@/components/providers/theme-provider'
+import { AnalyticsProvider } from '@/components/providers/analytics-provider'
+import { Context7Provider } from '@/components/providers/context7-provider'
 import { Providers } from '@/components/providers'
-import { SiteHeader } from '@/components/site-header'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata: Metadata = {
-  title: 'FreeflowZee - Create, Share & Get Paid Like a Pro',
-  description: 'Generate creative assets with AI, share files like WeTransfer, manage projects with escrow payments, and build your creative business - all in one revolutionary platform.',
-  keywords: 'AI creative assets, file sharing, escrow payments, creative business, digital collaboration, freelance platform',
-  openGraph: {
-    title: 'FreeflowZee - Create, Share & Get Paid Like a Pro',
-    description: 'Generate creative assets with AI, share files like WeTransfer, manage projects with escrow payments, and build your creative business - all in one revolutionary platform.',
-    type: 'website',
-    url: 'https://freeflowzee.com',
-    images: [
-      {
-        url: 'https://freeflowzee.com/images/hero-banner.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'FreeflowZee Platform Preview'
-      }
-    ]
+export const metadata = {
+  title: 'FreeFlowZee - Modern Freelance Management Platform',
+  description: 'AI-powered freelance management platform with video collaboration and real-time document editing',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
   },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'FreeflowZee - Create, Share & Get Paid Like a Pro',
-    description: 'Generate creative assets with AI, share files like WeTransfer, manage projects with escrow payments, and build your creative business - all in one revolutionary platform.',
-    images: ['https://freeflowzee.com/images/hero-banner.jpg']
-  },
-  other: {
-    'application-name': 'FreeflowZee',
-    'theme-color': '#4F46E5'
-  }
 }
 
 export default function RootLayout({
@@ -44,15 +25,23 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-      </head>
-      <body className={cn('min-h-screen bg-background font-sans antialiased', inter.className)}>
-        <Providers>
-          <div className="relative flex min-h-screen flex-col">
-            <SiteHeader />
-            <main className="flex-1">{children}</main>
-          </div>
-        </Providers>
+      <body className={inter.className}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Providers>
+            <AnalyticsProvider>
+              <Context7Provider>
+                {children}
+                <Toaster />
+              </Context7Provider>
+            </AnalyticsProvider>
+          </Providers>
+        </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )

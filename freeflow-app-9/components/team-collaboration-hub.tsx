@@ -16,21 +16,21 @@ import {
 } from "@/components/ui/select"
 import { 
   Users, 
-  FolderOpen, 
+  // FolderOpen, 
   MessageSquare, 
   Search, 
-  Filter, 
+  // Filter, 
   Download, 
   Share2,
   Star,
-  Globe,
+  // Globe,
   Clock,
   MapPin,
-  DollarSign,
+  // DollarSign,
   FileText,
-  Image as ImageIcon,
+  ImageIcon,
   Film,
-  Archive,
+  // Archive,
   Plus,
   Eye,
   MoreHorizontal,
@@ -65,7 +65,7 @@ interface Project {
   name: string
   description: string
   status: "active" | "completed" | "archived"
-  members: string[]
+  members: any[]
   tasks: number
   progress: number
   dueDate: string
@@ -265,15 +265,7 @@ const initialState: TeamState = {
 
 export function TeamCollaborationHub() {
   const [state, dispatch] = useReducer(teamReducer, initialState)
-  const [newMember, setNewMember] = useState({
-    name: '',
-    email: '',
-    title: '',
-    company: '',
-    location: '',
-    skills: '',
-    hourlyRate: 0
-  })
+  const [newMember, setNewMember] = useState({ name: '', email: '', title: '' })
 
   const teamStats: TeamStats = {
     totalMembers: state.members.length,
@@ -288,13 +280,16 @@ export function TeamCollaborationHub() {
   }
 
   const getStatusColor = (status: string) => {
-    const colors = {
-      online: 'bg-green-100 text-green-700 border-green-200',
-      offline: 'bg-gray-100 text-gray-700 border-gray-200',
-      busy: 'bg-red-100 text-red-700 border-red-200',
-      away: 'bg-yellow-100 text-yellow-700 border-yellow-200'
+    switch (status) {
+      case 'active':
+        return 'bg-green-500'
+      case 'completed':
+        return 'bg-blue-500'
+      case 'archived':
+        return 'bg-gray-500'
+      default:
+        return 'bg-gray-500'
     }
-    return colors[status as keyof typeof colors] || colors.offline
   }
 
   const getFileTypeIcon = (type: string) => {

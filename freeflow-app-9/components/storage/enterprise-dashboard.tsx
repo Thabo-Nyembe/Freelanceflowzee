@@ -2,8 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { DollarSign, TrendingDown, Gauge, Shield, BarChart3, Target, CheckCircle2, Zap, Database, HardDrive } from 'lucide-react'
 
 interface EnterpriseMetrics {
   budget: {
@@ -85,13 +88,12 @@ export function EnterpriseDashboard() {
           percentage: 62
         },
         compliance: ['SOC2', 'GDPR', 'HIPAA', 'ISO27001'],
-        recommendations: ['🎯 Excellent cost optimization - 62% below enterprise alternatives', '⚡ Performance is optimal with 1.2s load times', '💡 Consider lifecycle policies for 15% additional savings', '🚀 Ready to scale - 22% budget headroom available
-        ]
+        recommendations: ['🎯 Excellent cost optimization - 62% below enterprise alternatives', '⚡ Performance is optimal with 1.2s load times', '💡 Consider lifecycle policies for 15% additional savings', '🚀 Ready to scale - 22% budget headroom available']
       });
       
       setLoading(false);
     } catch (error) {
-      console.error('Failed to fetch enterprise metrics: ', error);'
+      console.error('Failed to fetch enterprise metrics: ', error);
       setLoading(false);
     }
   };
@@ -128,12 +130,11 @@ export function EnterpriseDashboard() {
           annual: (prev.savings.monthly + 8.50) * 12,
           percentage: Math.min(75, prev.savings.percentage + 8)
         },
-        recommendations: ['🎉 Optimization complete! Additional $8.50/month saved', '📁 Moved 2.3GB from Supabase to Wasabi Pro', '✅ Storage now 95% optimized for enterprise efficiency', '💰 Total annual savings now $1,248 vs enterprise cloud
-        ]
+        recommendations: ['🎉 Optimization complete! Additional $8.50/month saved', '📁 Moved 2.3GB from Supabase to Wasabi Pro', '✅ Storage now 95% optimized for enterprise efficiency', '💰 Total annual savings now $1,248 vs enterprise cloud']
       } : null);
       
     } catch (error) {
-      console.error('Optimization failed: ', error);'
+      console.error('Optimization failed: ', error);
     } finally {
       setOptimizing(false);
     }
@@ -168,10 +169,6 @@ export function EnterpriseDashboard() {
     );
   }
 
-  const budgetColor = metrics.budget.status === 'optimal' ? 'green' : 
-                     metrics.budget.status === 'efficient' ? 'blue' :
-                     metrics.budget.status === 'warning' ? 'yellow' : 'red';
-
   return (
     <div className= "space-y-6">
       {/* Header */}
@@ -185,8 +182,8 @@ export function EnterpriseDashboard() {
         <div className= "flex items-center gap-4">
           <Badge 
             variant={metrics.budget.status === 'optimal' || metrics.budget.status === 'efficient' ? 'default' : 'destructive'}
-            className="text-sm
-          >"
+            className="text-sm"
+          >
             {metrics.budget.status === 'optimal' ? '🎯 Optimal' :
              metrics.budget.status === 'efficient' ? '✅ Efficient' :
              metrics.budget.status === 'warning' ? '⚠️ Warning' : '🚨 Critical'}
@@ -194,8 +191,8 @@ export function EnterpriseDashboard() {
           <Button 
             onClick={runEnterpriseOptimization} 
             disabled={optimizing}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700
-          >"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          >
             {optimizing ? 'Optimizing...' : 'Optimize Now'}
           </Button>
         </div>
@@ -272,16 +269,33 @@ export function EnterpriseDashboard() {
       </div>
 
       {/* Detailed Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className= "space-y-4">
-        <TabsList className= "grid w-full grid-cols-4">
-          <TabsTrigger value= "overview">Overview</TabsTrigger>
-          <TabsTrigger value= "services">Services</TabsTrigger>
-          <TabsTrigger value= "performance">Performance</TabsTrigger>
-          <TabsTrigger value= "savings">Savings</TabsTrigger>
+      <Tabs defaultValue="overview" onValueChange={setActiveTab}>
+        <TabsList className= "grid w-full grid-cols-3">
+          <TabsTrigger value="overview">
+            <BarChart3 className= "mr-2 h-4 w-4" /> Overview
+          </TabsTrigger>
+          <TabsTrigger value="services">
+            <Database className= "mr-2 h-4 w-4" /> Service Details
+          </TabsTrigger>
+          <TabsTrigger value="recommendations">
+            <Target className= "mr-2 h-4 w-4" /> Recommendations
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value= "overview" className= "space-y-4">
+        {/* Overview Tab */}
+        <TabsContent value="overview" className= "mt-6">
           <div className= "grid gap-6 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Cost Optimization</CardTitle>
+                <CardDescription>
+                  You&apos;re saving an estimated ${metrics.savings.annual.toFixed(0)} annually.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {/* ... Chart or details here ... */}
+              </CardContent>
+            </Card>
             <Card>
               <CardHeader>
                 <CardTitle className= "flex items-center gap-2">
@@ -336,8 +350,8 @@ export function EnterpriseDashboard() {
                   {metrics.recommendations.map((recommendation, index) => (
                     <div 
                       key={index}
-                      className="flex items-start gap-3 p-3 rounded-lg bg-muted/50
-                    >"
+                      className="flex items-start gap-3 p-3 rounded-lg bg-muted/50"
+                    >
                       <div className= "text-sm flex-1">
                         {recommendation}
                       </div>
@@ -480,6 +494,27 @@ export function EnterpriseDashboard() {
                     🏆 Best-in-class performance with enterprise-grade features at startup costs
                   </div>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value= "compliance" className= "space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Enterprise Compliance</CardTitle>
+              <CardDescription>
+                We&apos;ve got you covered for enterprise-grade security and compliance.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className= "space-y-3">
+                {metrics.compliance.map((cert, index) => (
+                  <div key={index} className= "flex items-center gap-2">
+                    <CheckCircle2 className= "h-3 w-3 text-green-600" />
+                    <span>{cert}</span>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>

@@ -4,7 +4,7 @@ import Stripe from 'stripe'
 export const stripe = new Stripe(
   process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder',
   {
-    apiVersion: '2025-05-28.basil',
+    apiVersion: '2024-06-20',
     appInfo: {
       name: 'FreeflowZee Payment Platform',
       version: '1.0.0',
@@ -80,7 +80,7 @@ export async function createAdvancedPaymentIntent(params: {
       currency: paymentIntent.currency,
     }
   } catch (error) {
-    console.error('Enhanced payment intent creation failed: ', error)'
+    console.error('Enhanced payment intent creation failed: ', error);
     throw new Error('Failed to create payment intent')
   }
 }
@@ -91,6 +91,9 @@ export async function processWebhookEvent(
   rawBody: string,
   endpointSecret: string
 ) {
+  if (!rawBody) {
+    throw new Error('Webhook event has empty body');
+  }
   try {
     const event = stripe.webhooks.constructEvent(rawBody, signature, endpointSecret)
 
@@ -123,7 +126,7 @@ export async function processWebhookEvent(
 
     return { received: true, processed: event.type }
   } catch (error) {
-    console.error('Webhook processing error: ', error)'
+    console.error('Webhook processing error: ', error);
     throw error
   }
 }
@@ -132,7 +135,7 @@ export async function processWebhookEvent(
 async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   const { projectId } = paymentIntent.metadata
   
-  console.log(`✅ Payment succeeded for project: ${projectId}`)
+  console.log(`✅ Payment succeeded for project: ${projectId}`);
   
   // Here you would typically:
   // 1. Update database with payment status
@@ -154,7 +157,7 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
 async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
   const { projectId } = paymentIntent.metadata
   
-  console.log(`❌ Payment failed for project: ${projectId}`)
+  console.log(`❌ Payment failed for project: ${projectId}`);
   
   // Handle payment failure
   await updateProjectAccess(projectId, {
@@ -167,7 +170,7 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
 
 // Subscription creation handler
 async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
-  console.log(`🎉 New subscription created: ${subscription.id}`)
+  console.log(`🎉 New subscription created: ${subscription.id}`);
   
   // Handle new subscription
   await createSubscriptionRecord({
@@ -182,7 +185,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
 
 // Subscription update handler
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  console.log(`📝 Subscription updated: ${subscription.id}`)
+  console.log(`📝 Subscription updated: ${subscription.id}`);
   
   // Handle subscription updates
   await updateSubscriptionRecord(subscription.id, {
@@ -194,7 +197,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
 // Invoice payment success handler
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-  console.log(`💰 Invoice payment succeeded: ${invoice.id}`)
+  console.log(`💰 Invoice payment succeeded: ${invoice.id}`);
   
   // Handle successful invoice payment
   await processInvoicePayment({
@@ -239,7 +242,7 @@ export async function createEnhancedCustomer(params: {
 
     return customer
   } catch (error) {
-    console.error('Enhanced customer creation failed: ', error)'
+    console.error('Enhanced customer creation failed: ', error);
     throw error
   }
 }
@@ -264,7 +267,7 @@ export async function createSubscription(params: {
 
     return subscription
   } catch (error) {
-    console.error('Subscription creation failed: ', error)'
+    console.error('Subscription creation failed: ', error);
     throw error
   }
 }
@@ -273,15 +276,9 @@ export async function createSubscription(params: {
 export async function getPaymentStatus(paymentIntentId: string) {
   try {
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
-    return {
-      status: paymentIntent.status,
-      amount: paymentIntent.amount,
-      currency: paymentIntent.currency,
-      metadata: paymentIntent.metadata,
-      lastError: paymentIntent.last_payment_error,
-    }
+    return { status: paymentIntent.status, charge: paymentIntent.latest_charge }
   } catch (error) {
-    console.error('Payment status retrieval failed: ', error)'
+    console.error('Payment status retrieval failed: ', error);
     throw error
   }
 }
@@ -303,29 +300,29 @@ export async function createRefund(params: {
 
     return refund
   } catch (error) {
-    console.error('Refund creation failed: ', error)'
+    console.error('Refund creation failed: ', error);
     throw error
   }
 }
 
 // Mock database operations (replace with actual database calls)
 async function updateProjectAccess(projectId: string, data: Record<string, unknown>) {
-  console.log(`Updating project access for ${projectId}:`, data)
+  console.log(`Updating project access for ${projectId}:`, data);
   // Implement actual database update
 }
 
 async function createSubscriptionRecord(data: Record<string, unknown>) {
-  console.log('Creating subscription record: ', data)'
+  console.log('Creating subscription record: ', data);
   // Implement actual database insert
 }
 
 async function updateSubscriptionRecord(subscriptionId: string, data: Record<string, unknown>) {
-  console.log(`Updating subscription ${subscriptionId}:`, data)
+  console.log(`Updating subscription ${subscriptionId}:`, data);
   // Implement actual database update
 }
 
 async function processInvoicePayment(data: Record<string, unknown>) {
-  console.log('Processing invoice payment: ', data)'
+  console.log('Processing invoice payment: ', data);
   // Implement actual invoice processing
 }
 
@@ -349,5 +346,5 @@ export const StripeUtils = {
 
   isTestKey: (key: string) => key.startsWith('sk_test_'),
 
-  getPublishableKey: () => process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 
+  getPublishableKey: () => process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''
 } 

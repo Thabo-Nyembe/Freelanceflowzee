@@ -403,7 +403,7 @@ export default async function VideoReviewPage({ params, searchParams }: VideoRev
                   <Eye className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
                   <h3 className="text-lg font-semibold mb-2">No Active Review</h3>
                   <p className="text-muted-foreground mb-4">
-                    This video doesn&apos;t have an active review workflow.
+                    This video doesn't have an active review workflow.
                   </p>
                   {user && video.user_id === user.id && (
                     <Link href={`/reviews?create=true&video=${video.id}`}>

@@ -1,155 +1,113 @@
 "use client"
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import * as React from 'react'
+import { ThemeProvider as NextThemesProvider } from 'next-themes'
+import { type ThemeProviderProps } from 'next-themes/dist/types'
 
-type Theme = 'dark' | 'light' | 'system'
-
-type ThemeProviderProps = {
-  children: React.ReactNode
-  defaultTheme?: Theme
-  storageKey?: string
-  attribute?: string
-  defaultSystemTheme?: 'dark' | 'light'
-  value?: {
-    theme: Theme
-    setTheme: (theme: Theme) => void
-    resolvedTheme: 'dark' | 'light'
-    systemTheme: 'dark' | 'light'
-    themes: Theme[]
-  }
-}
-
-type ThemeProviderState = {
-  theme: Theme
-  setTheme: (theme: Theme) => void
-  resolvedTheme: 'dark' | 'light'
-  systemTheme: 'dark' | 'light'
-  themes: Theme[]
-}
-
-// Create a dummy function that won't be serialized
-const noop = () => {}
-
-const ThemeProviderContext = createContext<ThemeProviderState>({
-  theme: 'system',
-  setTheme: noop,
-  resolvedTheme: 'light',
-  systemTheme: 'light',
-  themes: ['light', 'dark', 'system'],
-})
-
-export function ThemeProvider({
-  children,
-  defaultTheme = 'system',
-  storageKey = 'freeflowzee-ui-theme',
-  attribute = 'class',
-  defaultSystemTheme = 'light',
-  ...props
-}: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(defaultTheme)
-  const [systemTheme, setSystemTheme] = useState<'dark' | 'light'>(defaultSystemTheme)
-  const [mounted, setMounted] = useState(false)
-
-  // Get resolved theme (actual theme being applied)
-  const resolvedTheme = theme === 'system' ? systemTheme : theme
-
-  // Handle system theme detection
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    
-    const handleChange = (e: MediaQueryListEvent) => {
-      setSystemTheme(e.matches ? 'dark' : 'light')
-    }
-
-    // Set initial system theme
-    setSystemTheme(mediaQuery.matches ? 'dark' : 'light')
-    
-    // Listen for changes
-    mediaQuery.addEventListener('change', handleChange)
-    
-    return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [])
-
-  // Load theme from localStorage
-  useEffect(() => {
-    try {
-      const storedTheme = localStorage.getItem(storageKey) as Theme
-      if (storedTheme && ['light', 'dark', 'system'].includes(storedTheme)) {
-        setTheme(storedTheme)
-      }
-    } catch (error) {
-      console.warn('Failed to load theme from localStorage: ', error)
-    }
-    setMounted(true)
-  }, [storageKey])
-
-  // Apply theme to document
-  useEffect(() => {
-    if (!mounted) return
-
-    const root = window.document.documentElement
-    
-    // Remove existing theme classes
-    root.classList.remove('light', 'dark')
-    
-    // Add new theme class
-    if (attribute === 'class') {
-      root.classList.add(resolvedTheme)
-    } else {
-      root.setAttribute(attribute, resolvedTheme)
-    }
-
-    // Update meta theme-color for mobile browsers
-    const metaThemeColor = document.querySelector('meta[name="theme-color"]')
-    if (metaThemeColor) {
-      metaThemeColor.setAttribute('content', resolvedTheme === 'dark' ? '#1a1a1a' : '#ffffff')
-    } else {
-      const meta = document.createElement('meta')
-      meta.name = 'theme-color'
-      meta.content = resolvedTheme === 'dark' ? '#1a1a1a' : '#ffffff'
-      document.head.appendChild(meta)
-    }
-  }, [resolvedTheme, attribute, mounted])
-
-  // Save theme to localStorage
-  const updateTheme = (newTheme: Theme) => {
-    try {
-      localStorage.setItem(storageKey, newTheme)
-    } catch (error) {
-      console.warn('Failed to save theme to localStorage: ', error)
-    }
-    setTheme(newTheme)
-  }
-
-  const value = {
-    theme,
-    setTheme: updateTheme,
-    resolvedTheme,
-    systemTheme,
-    themes: ['light', 'dark', 'system'] as Theme[],
-  }
-
-  // Prevent hydration mismatch by not rendering until mounted
-  if (!mounted) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        {children}
-      </div>
-    )
-  }
-
+export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   return (
-    <ThemeProviderContext.Provider {...props} value={value}>
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+      {...props}
+    >
       {children}
-    </ThemeProviderContext.Provider>
+    </NextThemesProvider>
   )
 }
 
-export const useTheme = () => {
-  const context = useContext(ThemeProviderContext)
+export function useTheme() {
+  const { theme, setTheme } = React.useContext(NextThemesProvider)
+  return { theme, setTheme }
+}
 
-  if (context === undefined)
-    throw new Error('useTheme must be used within a ThemeProvider')
+export function useSystemTheme() {
+  const [systemTheme, setSystemTheme] = React.useState<'light' | 'dark'>('light')
 
-  return context
+  React.useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    
+    const updateSystemTheme = (e: MediaQueryListEvent | MediaQueryList) => {
+      setSystemTheme(e.matches ? 'dark' : 'light')
+    }
+
+    // Set initial value
+    updateSystemTheme(mediaQuery)
+
+    // Listen for changes
+    mediaQuery.addEventListener('change', updateSystemTheme)
+
+    return () => {
+      mediaQuery.removeEventListener('change', updateSystemTheme)
+    }
+  }, [])
+
+  return systemTheme
+}
+
+export function useThemeValue() {
+  const { theme } = useTheme()
+  const systemTheme = useSystemTheme()
+  
+  return theme === 'system' ? systemTheme : theme
+}
+
+export function useIsDark() {
+  const themeValue = useThemeValue()
+  return themeValue === 'dark'
+}
+
+export function useThemeColor(lightColor: string, darkColor: string) {
+  const isDark = useIsDark()
+  return isDark ? darkColor : lightColor
+}
+
+export function withTheme<T extends object>(
+  Component: React.ComponentType<T>,
+  lightStyles: Partial<T>,
+  darkStyles: Partial<T>
+) {
+  return function ThemedComponent(props: T) {
+    const isDark = useIsDark()
+    const themeProps = isDark ? darkStyles : lightStyles
+    
+    return <Component {...props} {...themeProps} />
+  }
+}
+
+export function useThemeTransition(duration = 200) {
+  const [isTransitioning, setIsTransitioning] = React.useState(false)
+  const { setTheme } = useTheme()
+
+  const toggleTheme = React.useCallback((newTheme: string) => {
+    setIsTransitioning(true)
+    setTheme(newTheme)
+    
+    setTimeout(() => {
+      setIsTransitioning(false)
+    }, duration)
+  }, [setTheme, duration])
+
+  return {
+    isTransitioning,
+    toggleTheme,
+  }
+}
+
+export function useThemedValue<T>(lightValue: T, darkValue: T): T {
+  const isDark = useIsDark()
+  return isDark ? darkValue : lightValue
+}
+
+export function useThemeClass(lightClass: string, darkClass: string): string {
+  return useThemedValue(lightClass, darkClass)
+}
+
+export function useThemeStyle<T extends React.CSSProperties>(
+  lightStyle: T,
+  darkStyle: T
+): T {
+  return useThemedValue(lightStyle, darkStyle)
 }

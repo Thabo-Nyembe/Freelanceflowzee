@@ -1,6 +1,18 @@
 'use client'
 
- hrefLang: string }>
+import Head from 'next/head'
+import { useEffect } from 'react'
+
+interface SEOProps {
+  title?: string
+  description?: string
+  keywords?: string[]
+  canonical?: string
+  ogImage?: string
+  ogType?: string
+  structuredData?: any
+  noIndex?: boolean
+  alternateUrls?: Array<{ href: string, hrefLang: string }>
 }
 
 export function DynamicSEO({
@@ -14,10 +26,10 @@ export function DynamicSEO({
   noIndex = false,
   alternateUrls = []
 }: SEOProps) {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freeflow-app-9-6egesbwif-thabo-5265s-projects.vercel.app
-  const fullTitle = title.includes('FreeflowZee') ? title : `${title} | FreeflowZee
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freeflow-app-9-6egesbwif-thabo-5265s-projects.vercel.app'
+  const fullTitle = title.includes('FreeflowZee') ? title : `${title} | FreeflowZee`
   const fullCanonical = canonical || baseUrl
-  const fullOgImage = ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}
+  const fullOgImage = ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`
 
   useEffect(() => {
     // Update document title
@@ -38,9 +50,9 @@ export function DynamicSEO({
     // Add structured data if provided
     if (structuredData) {
       const script = document.createElement('script')
-      script.type="application/ld+json
-      script.textContent = JSON.stringify(structuredData)"
-      script.id = 'dynamic-structured-data
+      script.type = "application/ld+json"
+      script.textContent = JSON.stringify(structuredData)
+      script.id = 'dynamic-structured-data'
       
       // Remove existing dynamic structured data
       const existing = document.getElementById('dynamic-structured-data')
@@ -87,14 +99,14 @@ export function DynamicSEO({
       {/* Additional Meta Tags */}
       <meta name= "author" content= "FreeflowZee Team" />
       <meta name= "publisher" content= "FreeflowZee" />
-      <meta name= "robots" content={noIndex ? 'noindex, nofollow&apos; : &apos;index, follow&apos;} />
-      <meta name= "googlebot" content={noIndex ? &apos;noindex, nofollow&apos; : &apos;index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1&apos;} />
+      <meta name= "robots" content={noIndex ? 'noindex, nofollow' : 'index, follow'} />
+      <meta name= "googlebot" content={noIndex ? 'noindex, nofollow' : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'} />
       
       {/* Alternate URLs for i18n */}
       {alternateUrls.map((alternate, index) => (
         <link
           key={index}
-          rel= "alternate
+          rel="alternate"
           hrefLang={alternate.hrefLang}
           href={alternate.href}
         />
@@ -123,14 +135,14 @@ export function generateArticleStructuredData(article: {
   image?: string
   url: string
 }) {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freeflow-app-9-6egesbwif-thabo-5265s-projects.vercel.app
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freeflow-app-9-6egesbwif-thabo-5265s-projects.vercel.app'
   
   return {
     "@context": "https://schema.org", "@type": "Article", "headline": article.title, "description": article.description, "image": article.image || `${baseUrl}/images/homepage-mockup.jpg`, "author": {
       "@type": "Person", "name": article.author
     }, "publisher": {
       "@type": "Organization", "name": "FreeflowZee", "logo": {
-        "@type": "ImageObject", "url": `${baseUrl}/images/logo-preview.jpg
+        "@type": "ImageObject", "url": `${baseUrl}/images/logo-preview.jpg`
       }
     }, "datePublished": article.datePublished, "dateModified": article.dateModified || article.datePublished, "mainEntityOfPage": {
       "@type": "WebPage", "@id": article.url
@@ -149,14 +161,14 @@ export function generateProductStructuredData(product: {
   rating?: number
   reviewCount?: number
 }) {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freeflow-app-9-6egesbwif-thabo-5265s-projects.vercel.app
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freeflow-app-9-6egesbwif-thabo-5265s-projects.vercel.app'
   
   return {
     "@context": "https://schema.org", "@type": "Product", "name": product.name, "description": product.description, "image": product.image || `${baseUrl}/images/homepage-mockup.jpg`, "brand": {
       "@type": "Brand", "name": 'FreeflowZee'
     }, "offers": {
       "@type": "Offer", "price": product.price || "0",
-      "priceCurrency": product.currency || "USD", "availability": `https://schema.org/${product.availability || 'InStock'}
+      "priceCurrency": product.currency || "USD", "availability": `https://schema.org/${product.availability || 'InStock'}`
     }, "aggregateRating": product.rating ? {
       "@type": "AggregateRating", "ratingValue": product.rating, "reviewCount": product.reviewCount || 1
     } : undefined

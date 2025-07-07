@@ -1,6 +1,6 @@
 // Status type exports for API usage
-export type BookingStatus = &apos;pending&apos; | &apos;confirmed&apos; | &apos;paid&apos; | &apos;in-progress&apos; | &apos;completed&apos; | &apos;cancelled&apos; | &apos;no-show&apos;
-export type PaymentStatus = &apos;pending&apos; | &apos;paid&apos; | &apos;failed&apos; | &apos;refunded&apos;
+export type BookingStatus = 'pending' | 'confirmed' | 'paid' | 'in-progress' | 'completed' | 'cancelled' | 'no-show'
+export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded'
 
 export interface BookingService {
   id: string
@@ -8,7 +8,7 @@ export interface BookingService {
   description: string
   duration: number // in minutes
   price: number // in cents
-  category: &apos;consultation&apos; | &apos;design&apos; | &apos;development&apos; | &apos;strategy&apos; | &apos;review&apos; | &apos;workshop&apos; | &apos;other&apos;
+  category: 'consultation' | 'design' | 'development' | 'strategy' | 'review' | 'workshop' | 'other'
   freelancerId: string
   isActive: boolean
   maxAdvanceBooking: number // days in advance
@@ -32,7 +32,7 @@ export interface TimeSlot {
   serviceId: string
   freelancerId: string
   recurring?: {
-    pattern: &apos;daily&apos; | &apos;weekly&apos; | &apos;monthly&apos;
+    pattern: 'daily' | 'weekly' | 'monthly'
     endDate?: string
     daysOfWeek?: number[] // 0 = Sunday, 1 = Monday, etc.
   }
@@ -47,8 +47,8 @@ export interface Booking {
   freelancerId: string
   serviceId: string
   timeSlotId: string
-  status: &apos;pending&apos; | &apos;confirmed&apos; | &apos;paid&apos; | &apos;in-progress&apos; | &apos;completed&apos; | &apos;cancelled&apos; | &apos;no-show&apos;
-  paymentStatus: &apos;pending&apos; | &apos;paid&apos; | &apos;failed&apos; | &apos;refunded&apos;
+  status: 'pending' | 'confirmed' | 'paid' | 'in-progress' | 'completed' | 'cancelled' | 'no-show'
+  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded'
   paymentIntentId?: string
   startTime: string // ISO string
   endTime: string // ISO string
@@ -62,9 +62,9 @@ export interface Booking {
   cancelledAt?: string
   cancelReason?: string
   remindersSent?: {
-    &apos;24h&apos;?: boolean
-    &apos;1h&apos;?: boolean
-    &apos;15min&apos;?: boolean
+    '24h'?: boolean
+    '1h'?: boolean
+    '15min'?: boolean
   }
 }
 
@@ -88,8 +88,8 @@ export interface CalendarEvent {
     bookingId: string
     serviceId: string
     clientName: string
-    status: Booking[&apos;status&apos;]
-    paymentStatus: Booking[&apos;paymentStatus&apos;]
+    status: Booking['status']
+    paymentStatus: Booking['paymentStatus']
   }
   allDay?: boolean
 }
@@ -141,18 +141,18 @@ export interface BlockedTime {
 export interface BookingNotification {
   id: string
   bookingId: string
-  type: &apos;confirmation&apos; | &apos;reminder&apos; | &apos;cancellation&apos; | &apos;rescheduling&apos;
+  type: 'confirmation' | 'reminder' | 'cancellation' | 'rescheduling'
   recipientEmail: string
   sentAt?: string
   scheduledFor?: string
-  status: &apos;pending&apos; | &apos;sent&apos; | &apos;failed&apos;
+  status: 'pending' | 'sent' | 'failed'
 }
 
 export interface PaymentDetails {
   paymentIntentId: string
   amount: number
   currency: string
-  status: &apos;requires_payment_method&apos; | &apos;requires_confirmation&apos; | &apos;requires_action&apos; | &apos;processing&apos; | &apos;requires_capture&apos; | &apos;canceled&apos; | &apos;succeeded&apos;
+  status: 'requires_payment_method' | 'requires_confirmation' | 'requires_action' | 'processing' | 'requires_capture' | 'canceled' | 'succeeded'
   clientSecret: string
   paymentMethodId?: string
   receiptUrl?: string
@@ -173,7 +173,7 @@ export interface BookingClient {
   averageRating?: number
   notes?: string
   tags: string[]
-  preferredCommunication: &apos;email&apos; | &apos;phone&apos; | &apos;video&apos; | &apos;in-person&apos;
+  preferredCommunication: 'email' | 'phone' | 'video' | 'in-person'
   createdAt: string
   lastBookingAt?: string
 }
@@ -193,7 +193,7 @@ export interface BookingSettings {
   cancellationPolicy: {
     allowCancellation: boolean
     cancellationDeadline: number // hours before appointment
-    refundPolicy: &apos;full&apos; | &apos;partial&apos; | &apos;none&apos;
+    refundPolicy: 'full' | 'partial' | 'none'
     refundPercentage?: number
   }
   
@@ -209,7 +209,7 @@ export interface BookingSettings {
   
   // Integration
   calendarIntegration: {
-    provider?: &apos;google&apos; | &apos;outlook&apos; | &apos;apple&apos;
+    provider?: 'google' | 'outlook' | 'apple'
     syncEnabled: boolean
     calendarId?: string
   }
@@ -234,7 +234,7 @@ export interface BookingCalendarEvent {
   start: Date
   end: Date
   bookingId: string
-  status: Booking[&apos;status&apos;]
+  status: Booking['status']
   clientName: string
   serviceName: string
   backgroundColor: string

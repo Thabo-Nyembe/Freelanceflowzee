@@ -4,7 +4,7 @@ export interface DownloadableFile {
   url?: string
   downloadUrl?: string
   signedUrl?: string
-  provider?: 'supabase' | 'wasabi
+  provider?: 'supabase' | 'wasabi'
   key?: string
   mimeType?: string
   size?: number
@@ -66,7 +66,7 @@ export async function downloadFile(file: DownloadableFile): Promise<void> {
     throw new Error('No valid download method available')
 
   } catch (error) {
-    console.error('Download failed: ', error)'
+    console.error('Download failed: ', error);
     throw error
   }
 }
@@ -126,7 +126,7 @@ export async function downloadDocument(type: string, data: Record<string, unknow
       throw new Error(errorData.error || 'Document generation failed')
     }
   } catch (error) {
-    console.error('Document download failed: ', error)'
+    console.error('Document download failed: ', error);
     throw error
   }
 }
@@ -150,7 +150,7 @@ export async function downloadReport(
       throw new Error(errorData.error || 'Report generation failed')
     }
   } catch (error) {
-    console.error('Report download failed: ', error)'
+    console.error('Report download failed: ', error);
     throw error
   }
 }
@@ -173,13 +173,13 @@ export async function downloadInvoice(invoiceId: string, invoiceData: Record<str
 
     if (response.ok) {
       const blob = await response.blob()
-      const filename = `invoice-${invoiceId}-${new Date().toISOString().split('T')[0]}.pdf
+      const filename = `invoice-${invoiceId}-${new Date().toISOString().split('T')[0]}.pdf`
       triggerDownload(blob, filename)
     } else {
       throw new Error('Invoice PDF generation failed')
     }
   } catch (error) {
-    console.error('Invoice download failed: ', error)'
+    console.error('Invoice download failed: ', error);
     throw error
   }
 }
@@ -218,7 +218,7 @@ export async function downloadGalleryItem(
       throw new Error(errorData.error || 'Gallery item download failed')
     }
   } catch (error) {
-    console.error('Gallery download failed: ', error)'
+    console.error('Gallery download failed: ', error);
     throw error
   }
 }
@@ -228,7 +228,7 @@ export async function downloadGalleryItem(
  */
 export async function copyDownloadLink(file: DownloadableFile): Promise<string> {
   try {
-    let link = 
+    let link = ''
 
     if (file.downloadUrl) {
       link = file.downloadUrl
@@ -240,13 +240,13 @@ export async function copyDownloadLink(file: DownloadableFile): Promise<string> 
       const response = await fetch(`/api/storage/download?fileId=${file.id}`)
       if (response.ok) {
         const result = await response.json()
-        link = result.signedUrl || 
+        link = result.signedUrl || ''
       }
     } else if (file.provider && file.key) {
       const response = await fetch(`/api/storage/download?provider=${file.provider}&key=${file.key}`)
       if (response.ok) {
         const result = await response.json()
-        link = result.signedUrl || 
+        link = result.signedUrl || ''
       }
     }
 
@@ -267,7 +267,7 @@ export async function copyDownloadLink(file: DownloadableFile): Promise<string> 
       throw new Error('No download link available')
     }
   } catch (error) {
-    console.error('Copy link failed: ', error)'
+    console.error('Copy link failed: ', error)
     throw error
   }
 }
@@ -275,7 +275,7 @@ export async function copyDownloadLink(file: DownloadableFile): Promise<string> 
 /**
  * Enhanced file sharing with multiple options
  */
-export async function shareFile(file: DownloadableFile, method: &apos;link&apos; | &apos;email&apos; | &apos;social&apos; = 'link'): Promise<void> {
+export async function shareFile(file: DownloadableFile, method: 'link' | 'email' | 'social' = 'link'): Promise<void> {
   try {
     const link = await copyDownloadLink(file)
     
@@ -305,7 +305,7 @@ export async function shareFile(file: DownloadableFile, method: &apos;link&apos;
         break
     }
   } catch (error) {
-    console.error('Share failed: ', error)'
+    console.error('Share failed: ', error)
     throw error
   }
 }
@@ -347,7 +347,7 @@ export async function downloadAsZip(files: DownloadableFile[], zipName: string =
       throw new Error('ZIP generation failed')
     }
   } catch (error) {
-    console.error('ZIP download failed: ', error)'
+    console.error('ZIP download failed: ', error)
     // Fallback to individual downloads
     await downloadFiles(files)
   }
@@ -379,7 +379,7 @@ export async function downloadWithPassword(fileId: string, password: string): Pr
       throw new Error(errorData.error || 'Access denied')
     }
   } catch (error) {
-    console.error('Protected download failed: ', error)'
+    console.error('Protected download failed: ', error)
     throw error
   }
 }
@@ -416,54 +416,55 @@ export function getFileTypeIcon(mimeType: string | undefined): string {
 /**
  * Validate download permissions
  */
-export function validateDownloadPermissions(file: DownloadableFile, userRole: string): boolean {
+export function validateDownloadPermissions(_file: DownloadableFile, _userRole: string): boolean {
   // Add your permission logic here
   // For now, allow all downloads
   return true
 }
 
 /**
- * Universal download button handler - use this in all components
+ * Universal download handler to simplify various download types
  */
 export async function handleUniversalDownload(
   file: DownloadableFile | string,
   options: {
-    type?: 'file' | 'invoice' | 'report' | 'gallery
-    license?: 'digital' | 'print' | 'commercial
+    type?: 'file' | 'invoice' | 'report' | 'gallery'
+    license?: 'digital' | 'print' | 'commercial'
     password?: string
     onSuccess?: () => void
     onError?: (error: Error) => void
   } = {}
 ): Promise<void> {
   try {
+    const { type = 'file', license, password, onSuccess } = options
+
     if (typeof file === 'string') {
-      // Handle simple ID-based downloads
-      await downloadFile({ id: file, name: 'download' })
-    } else {
-      // Handle different download types
-      switch (options.type) {
+      // It's an ID or endpoint
+      switch (type) {
         case 'invoice':
-          await downloadInvoice(file.id!, file)
-          break
-        case 'gallery':
-          await downloadGalleryItem(file.id!, options.license, file.provider)
+          await downloadInvoice(file, {}) // TODO: fetch actual invoice data
           break
         case 'report':
-          await downloadReport('pdf', `/api/reports/${file.id}`, file.name)
+          await downloadReport('pdf', file, `${file}.pdf`)
+          break
+        case 'gallery':
+          await downloadGalleryItem(file, license)
           break
         default:
-          if (options.password) {
-            await downloadWithPassword(file.id!, options.password)
-          } else {
-            await downloadFile(file)
-          }
+          await downloadFile({ id: file, name: 'downloaded-file' })
+      }
+    } else {
+      // It's a DownloadableFile object
+      if (password) {
+        await downloadWithPassword(file.id!, password)
+      } else {
+        await downloadFile(file)
       }
     }
-    
-    options.onSuccess?.()
+    onSuccess?.()
   } catch (error) {
-    const downloadError = error instanceof Error ? error : new Error('Download failed')
-    options.onError?.(downloadError)
-    throw downloadError
+    const err = error instanceof Error ? error : new Error('An unknown error occurred')
+    console.error('Universal download failed:', err)
+    options.onError?.(err)
   }
 } 

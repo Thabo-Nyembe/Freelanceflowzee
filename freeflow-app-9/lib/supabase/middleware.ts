@@ -3,8 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies'
 
 // Define protected routes that require authentication
-const protectedRoutes = ['/dashboard', '/projects', '/analytics', '/feedback', '/settings
-]
+const protectedRoutes = ['/dashboard', '/projects', '/analytics', '/feedback', '/settings']
 
 // Helper function to check if a route is protected
 function isProtectedRoute(pathname: string): boolean {
@@ -19,7 +18,7 @@ export async function updateSession(request: NextRequest) {
   // Check if we're in a test environment - skip auth for testing
   const isTestEnvironment = process.env.NODE_ENV === 'test' || 
                            request.headers.get('user-agent')?.includes('Playwright') ||
-                           request.headers.get('x-test-mode') === 'true
+                           request.headers.get('x-test-mode') === 'true'
 
   // Check if we're in local development environment
   const isDevelopmentLocal = process.env.NODE_ENV === 'development' &&
@@ -90,7 +89,7 @@ export async function updateSession(request: NextRequest) {
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()
     
     if (sessionError) {
-      console.error('Session error in middleware: ', sessionError)'
+      console.error('Session error in middleware: ', sessionError);
       // Clear any corrupted session data
       await supabase.auth.signOut()
       
@@ -104,7 +103,7 @@ export async function updateSession(request: NextRequest) {
       
       // Redirect to login with error message
       const loginUrl = request.nextUrl.clone()
-      loginUrl.pathname = '/login
+      loginUrl.pathname = '/login'
       loginUrl.searchParams.set('error', 'Session error. Please log in again.')
       return NextResponse.redirect(loginUrl)
     }
@@ -113,7 +112,7 @@ export async function updateSession(request: NextRequest) {
     const { data: { user }, error: userError } = await supabase.auth.getUser()
     
     if (userError) {
-      console.error('User data error in middleware: ', userError)'
+      console.error('User data error in middleware: ', userError);
       // Clear any corrupted session data
       await supabase.auth.signOut()
       
@@ -127,7 +126,7 @@ export async function updateSession(request: NextRequest) {
       
       // Redirect to login with error message
       const loginUrl = request.nextUrl.clone()
-      loginUrl.pathname = '/login
+      loginUrl.pathname = '/login'
       loginUrl.searchParams.set('error', 'Failed to get user data. Please log in again.')
       return NextResponse.redirect(loginUrl)
     }
@@ -135,14 +134,14 @@ export async function updateSession(request: NextRequest) {
     // If no session and user is trying to access protected route, redirect to login
     if (!session && !user && isProtectedRoute(request.nextUrl.pathname)) {
       const loginUrl = request.nextUrl.clone()
-      loginUrl.pathname = '/login
+      loginUrl.pathname = '/login'
       loginUrl.searchParams.set('redirect', request.nextUrl.pathname)
       return NextResponse.redirect(loginUrl)
     }
 
     return supabaseResponse
   } catch (error) {
-    console.error('Unexpected error in middleware: ', error)'
+    console.error('Unexpected error in middleware: ', error);
     // Clear any corrupted session data
     await supabase.auth.signOut()
     
@@ -156,7 +155,7 @@ export async function updateSession(request: NextRequest) {
     
     // Redirect to login with error message
     const loginUrl = request.nextUrl.clone()
-    loginUrl.pathname = '/login
+    loginUrl.pathname = '/login'
     loginUrl.searchParams.set('error', 'An unexpected error occurred. Please try again.')
     return NextResponse.redirect(loginUrl)
   }

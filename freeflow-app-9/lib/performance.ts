@@ -75,7 +75,7 @@ export class PerformanceOptimizer {
           const navEntry = entry as PerformanceNavigationTiming
           
           if (process.env.NODE_ENV === 'development') {
-            console.log('🚀 Navigation timing: ', {'
+            console.log('🚀 Navigation timing: ', {
               domContentLoaded: navEntry.domContentLoadedEventEnd - navEntry.domContentLoadedEventStart,
               loadComplete: navEntry.loadEventEnd - navEntry.loadEventStart,
               totalTime: navEntry.loadEventEnd - navEntry.fetchStart,
@@ -160,7 +160,7 @@ export function monitorMemoryUsage() {
   const memory = (window.performance as any).memory
   
   if (process.env.NODE_ENV === 'development') {
-    console.log('🧠 Memory usage: ', {'
+    console.log('🧠 Memory usage: ', {
       used: `${(memory.usedJSHeapSize / 1048576).toFixed(2)} MB`,
       total: `${(memory.totalJSHeapSize / 1048576).toFixed(2)} MB`,
       limit: `${(memory.jsHeapSizeLimit / 1048576).toFixed(2)} MB`,

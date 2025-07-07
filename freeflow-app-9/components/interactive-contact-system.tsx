@@ -34,7 +34,21 @@ import { Badge } from '@/components/ui/badge'
 import {
     Alert,
     AlertDescription,
+    AlertTitle,
 } from '@/components/ui/alert'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import * as z from 'zod'
+import {
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/components/ui/form'
+import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 
 // types
 type ContactMethod = 'email' | 'phone' | 'scheduler' | 'form';
@@ -142,6 +156,29 @@ interface InteractiveContactSystemProps {
   className?: string;
 }
 
+const formSchema = z.object({
+  name: z.string().min(2, {
+    message: 'Name must be at least 2 characters.',
+  }),
+  email: z.string().email({
+    message: 'Please enter a valid email address.',
+  }),
+  subject: z.string().min(5, {
+    message: 'Subject must be at least 5 characters.',
+  }),
+  category: z.string({
+    required_error: 'Please select a category.',
+  }),
+  message: z.string().min(10, {
+    message: 'Message must be at least 10 characters.',
+  }),
+})
+
+interface ContactFormState {
+  status: 'idle' | 'submitting' | 'success' | 'error'
+  message?: string
+}
+
 export function InteractiveContactSystem({
   variant = 'full',
   showMethods = true,
@@ -151,6 +188,20 @@ export function InteractiveContactSystem({
 }: InteractiveContactSystemProps) {
   const [state, dispatch] = useReducer(contactReducer, initialState);
   const [localTime, setLocalTime] = useState('');
+  const [formState, setFormState] = useState<ContactFormState>({
+    status: 'idle',
+  })
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      subject: '',
+      category: '',
+      message: '',
+    },
+  })
 
   // Context7 Pattern: Real-time local time display
   useEffect(() => {
@@ -270,6 +321,28 @@ export function InteractiveContactSystem({
     </Card>
   );
 
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      setFormState({ status: 'submitting' })
+      
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      
+      // Success state
+      setFormState({
+        status: 'success',
+        message: 'Thank you for your message. We will get back to you soon!',
+      })
+      
+      form.reset()
+    } catch (error) {
+      setFormState({
+        status: 'error',
+        message: 'Something went wrong. Please try again later.',
+      })
+    }
+  }
+
   return (
     <div className={`bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-2xl ${className}`}>
         <div className={`grid ${variant === 'full' ? 'grid-cols-1 lg:grid-cols-2 gap-12' : 'grid-cols-1 gap-8'}`}>
@@ -278,7 +351,7 @@ export function InteractiveContactSystem({
                     <div>
                         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Get in Touch</h2>
                         <p className="mt-2 text-gray-600 dark:text-gray-300">
-                            We&apos;re here to help. Reach out to us through any of the methods below.
+                            We're here to help. Reach out to us through any of the methods below.
                         </p>
                     </div>
 
@@ -317,51 +390,127 @@ export function InteractiveContactSystem({
                 <div>
                     <Card>
                         <CardContent className="p-8">
-                            {state.ui.isSuccess ? (
+                            {formState.status === 'success' && (
                                 <div className="text-center py-12">
-                                     <Check className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                                     <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
                                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Message Sent!</h3>
                                     <p className="mt-2 text-gray-600 dark:text-gray-300">
-                                        Thanks for reaching out. We&apos;ll get back to you shortly.
+                                        {formState.message}
                                     </p>
                                 </div>
-                            ) : (
-                                <form onSubmit={handleFormSubmit} className="space-y-6">
+                            )}
+                            {formState.status === 'error' && (
+                                <Alert variant="destructive">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertTitle>Error</AlertTitle>
+                                    <AlertDescription>{formState.message}</AlertDescription>
+                                </Alert>
+                            )}
+                            <Form {...form}>
+                                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <Input 
-                                            placeholder="Your Name"
-                                            value={state.formData.name}
-                                            onChange={(e) => dispatch({ type: 'UPDATE_FORM_FIELD', field: 'name', value: e.target.value })}
-                                            required 
+                                        <FormField
+                                            control={form.control}
+                                            name="name"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Name</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="John Doe" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
                                         />
-                                        <Input 
-                                            type="email"
-                                            placeholder="Your Email"
-                                            value={state.formData.email}
-                                            onChange={(e) => dispatch({ type: 'UPDATE_FORM_FIELD', field: 'email', value: e.target.value })}
-                                            required 
+                                        <FormField
+                                            control={form.control}
+                                            name="email"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Email</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="john@example.com" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
                                         />
                                     </div>
-                                    <Input 
-                                        placeholder="Subject"
-                                        value={state.formData.subject}
-                                        onChange={(e) => dispatch({ type: 'UPDATE_FORM_FIELD', field: 'subject', value: e.target.value })}
-                                        required 
+                                    <FormField
+                                        control={form.control}
+                                        name="subject"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Subject</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="What is this regarding?" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
                                     />
-                                    <Textarea 
-                                        placeholder="Your Message"
-                                        rows={5}
-                                        value={state.formData.message}
-                                        onChange={(e) => dispatch({ type: 'UPDATE_FORM_FIELD', field: 'message', value: e.target.value })}
-                                        required 
+                                    <FormField
+                                        control={form.control}
+                                        name="category"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Category</FormLabel>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select a category" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        <SelectItem value="general">General Inquiry</SelectItem>
+                                                        <SelectItem value="support">Technical Support</SelectItem>
+                                                        <SelectItem value="billing">Billing Question</SelectItem>
+                                                        <SelectItem value="feedback">Feedback</SelectItem>
+                                                        <SelectItem value="other">Other</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormDescription>
+                                                    Choose the category that best matches your inquiry.
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="message"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Message</FormLabel>
+                                                <FormControl>
+                                                    <Textarea
+                                                        placeholder="Type your message here..."
+                                                        className="min-h-[120px]"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
                                     />
                                     <div className="flex justify-end">
-                                        <Button type="submit" disabled={state.ui.isSubmitting}>
-                                            {state.ui.isSubmitting ? 'Sending...' : 'Send Message'}
+                                        <Button
+                                            type="submit"
+                                            className="w-full md:w-auto"
+                                            disabled={formState.status === 'submitting'}
+                                        >
+                                            {formState.status === 'submitting' ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Sending...
+                                                </>
+                                            ) : (
+                                                'Send Message'
+                                            )}
                                         </Button>
                                     </div>
                                 </form>
-                            )}
+                            </Form>
                         </CardContent>
                     </Card>
                 </div>

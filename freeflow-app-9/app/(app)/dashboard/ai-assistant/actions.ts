@@ -7,18 +7,63 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Define interfaces for BlockNote content
+interface InlineContent {
+  type: string;
+  text: string;
+  styles: Record<string, unknown>;
+}
+
+interface BlockContent {
+  id: string;
+  type: string;
+  props: Record<string, string>;
+  content?: InlineContent[];
+  children: BlockContent[];
+}
+
+// Define interface for action items
+interface ActionItem {
+  task: string;
+  assignee?: string;
+  dueDate?: string;
+}
+
 // Helper function to convert BlockNote JSON to plain text for the AI
-const stringifyProjectContent = (content: any): string => {
+const stringifyProjectContent = (content: BlockContent[] | string | null | undefined): string => {
     if (!content) return "";
-    try {
-        // Assuming content is an array of BlockNote blocks
-        return content.map((block: any) => 
-            block.content?.map((inline: any) => inline.text).join('') || ''
-        ).join('\n');
-    } catch (e) {
-        // Fallback for plain text or unexpected format
-        return typeof content === 'string' ? content : JSON.stringify(content);
+
+    // Handle string content directly
+    if (typeof content === 'string') {
+        try {
+            // Try to parse it as it might be a JSON string
+            const parsed = JSON.parse(content);
+            if (Array.isArray(parsed)) {
+                return parsed.map((block: BlockContent) => 
+                    block.content?.map((inline: InlineContent) => inline.text).join('') || ''
+                ).join('\n');
+            }
+        } catch (e) {
+            // If parsing fails, it's just a plain string
+            return content;
+        }
     }
+    
+    // Handle array of BlockNote blocks
+    if (Array.isArray(content)) {
+        try {
+            return content.map((block: BlockContent) => 
+                block.content?.map((inline: InlineContent) => inline.text).join('') || ''
+            ).join('\n');
+        } catch (e) {
+            console.error("Error stringifying project content:", e);
+            // Fallback for unexpected format within the array
+            return JSON.stringify(content);
+        }
+    }
+    
+    // Fallback for any other unexpected format
+    return JSON.stringify(content);
 }
 
 export async function getProjectSummary(projectId: string): Promise<{ summary?: string; error?: string }> {
@@ -54,7 +99,7 @@ export async function getProjectSummary(projectId: string): Promise<{ summary?: 
     }
 }
 
-export async function extractActionItems(projectId: string): Promise<{ actionItems?: any[]; error?: string }> {
+export async function extractActionItems(projectId: string): Promise<{ actionItems?: ActionItem[]; error?: string }> {
     // 1. Get the full project content
     const projectDetails = await getProjectDetails({ projectId });
     if (projectDetails.error || !projectDetails.project) {

@@ -35,19 +35,19 @@ import {
   Download,
   Eye,
   Upload,
-  FolderOpen,
-  Copy,
   Share2,
   Trash2,
-  Star,
-  X,
   ImageIcon,
   FileVideo,
   FileAudio,
-  Calculator,
-  HelpCircle,
   CheckCircle,
   AlertCircle,
+  X,
+  FolderOpen,
+  Star,
+  Copy,
+  Calculator,
+  HelpCircle,
 } from 'lucide-react'
 import {
   Dialog,
@@ -56,18 +56,23 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs'
 import { toast } from 'sonner'
 
 // Type definitions
@@ -1899,7 +1904,7 @@ export default function AICreate() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Finding Your API Key</DialogTitle>
-            <DialogDescription>API keys can usually be found in your provider&apos;s dashboard under &quot;API&quot; or &quot;Settings&quot;.</DialogDescription>
+            <DialogDescription>API keys can usually be found in your provider's dashboard under "API" or "Settings".</DialogDescription>
           </DialogHeader>
           {/* Add provider-specific instructions here */}
           <DialogFooter>

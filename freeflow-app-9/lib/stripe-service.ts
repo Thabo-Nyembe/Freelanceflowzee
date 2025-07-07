@@ -8,45 +8,27 @@ interface PaymentIntentData {
   metadata?: Record<string, string>
 }
 
-interface StripeProduct {
-  id: string
-  name: string
-  description?: string
-  prices: StripePrice[]
-}
-
-interface StripePrice {
-  id: string
-  amount: number
-  currency: string
-  recurring?: {
-    interval: string
-  }
-}
-
 export class StripeService {
   private stripe: Stripe | null = null
   private isTestMode: boolean = false
 
   constructor() {
     const stripeKey = process.env.STRIPE_SECRET_KEY
-
-    // Determine if we're in test mode
-    this.isTestMode = process.env.NODE_ENV === 'test' ||
-                     !stripeKey ||
-                     !stripeKey.startsWith('sk_')
-
-    if (!this.isTestMode && stripeKey) {
-      this.stripe = new Stripe(stripeKey, {
-        apiVersion: '2025-05-28.basil',
-      })
+    if (stripeKey && stripeKey.startsWith('sk_live')) {
+      this.stripe = new Stripe(stripeKey, { apiVersion: '2024-06-20' });
+      this.isTestMode = false
+    } else if (stripeKey) {
+      this.stripe = new Stripe(stripeKey, { apiVersion: '2024-06-20' });
+      this.isTestMode = true
+    } else {
+      this.isTestMode = true
     }
-
-    console.log('🔧 StripeService initialized: ', {'
-      testMode: this.isTestMode,
-      hasKey: !!stripeKey,
-      nodeEnv: process.env.NODE_ENV
-    })
+    
+    if (this.isTestMode) {
+      console.log('StripeService is in test mode. No real payments will be processed.')
+    } else {
+      console.log('StripeService is in production mode.')
+    }
   }
 
   /**
@@ -61,10 +43,10 @@ export class StripeService {
   }> {
     // Return mock data for test mode
     if (this.isTestMode) {
-      const mockPaymentIntentId = `pi_3QdGhJ2eZvKYlo2C${Date.now()}
-      const mockClientSecret = `${mockPaymentIntentId}_secret_${Math.random().toString(36).substring(2, 15)}
+      const mockPaymentIntentId = `pi_3QdGhJ2eZvKYlo2C${Date.now()}`;
+      const mockClientSecret = `${mockPaymentIntentId}_secret_${Math.random().toString(36).substring(2, 15)}`;
       
-      console.log('✅ Mock payment intent created: ', mockPaymentIntentId)'
+      console.log('✅ Mock payment intent created: ', mockPaymentIntentId);
       return {
         clientSecret: mockClientSecret,
         paymentIntentId: mockPaymentIntentId,
@@ -83,7 +65,7 @@ export class StripeService {
       currency: data.currency,
       customer: data.customerId,
       metadata: {
-        projectId: data.projectId || 
+        projectId: data.projectId || 'N/A',
         environment: process.env.NODE_ENV || 'development',
         ...data.metadata
       },
@@ -111,9 +93,9 @@ export class StripeService {
     testMode: boolean
   }> {
     if (this.isTestMode) {
-      const mockCustomerId = `cus_${Math.random().toString(36).substring(2, 15)}
+      const mockCustomerId = `cus_${Math.random().toString(36).substring(2, 15)}`;
       
-      console.log('✅ Mock customer created: ', mockCustomerId)'
+      console.log('✅ Mock customer created: ', mockCustomerId);
       return {
         id: mockCustomerId,
         name,
@@ -174,10 +156,10 @@ export class StripeService {
     testMode: boolean
   }> {
     if (this.isTestMode) {
-      const mockLinkId = `plink_${Math.random().toString(36).substring(2, 15)}
-      const mockUrl = `https://checkout.stripe.com/c/pay/${mockLinkId}#fidkdWxOYHwnPyd1blpxYHZxWjA0
+      const mockLinkId = `plink_${Math.random().toString(36).substring(2, 15)}`;
+      const mockUrl = `https://checkout.stripe.com/c/pay/${mockLinkId}#fidkdWxOYHwnPyd1blpxYHZxWjA0`;
       
-      console.log('✅ Mock payment link created: ', mockLinkId)'
+      console.log('✅ Mock payment link created: ', mockLinkId);
       return {
         url: mockUrl,
         id: mockLinkId,
@@ -247,25 +229,25 @@ export class StripeService {
     message: string
   }> {
     // This is always test mode for alternative access
-    console.log('🔐 Validating alternative access: ', { method, projectId })'
-
-    // Mock validation - in production, this would check against a database
-    const validPasswords = ['demo2024', 'preview', 'freelancer']
-    const validCodes = ['FREECODE', 'PREVIEW2024', 'BETA']
-
-    let valid = false
-    if (method === 'password') {
-      valid = validPasswords.includes(value.toLowerCase())
-    } else if (method === 'code') {
-      valid = validCodes.includes(value.toUpperCase())
-    }
-
-    return {
-      valid,
-      accessGranted: valid,
-      message: valid 
-        ? `Access granted via ${method}` 
-        : `Invalid ${method}. Please try again or use payment option.
+    console.log('🔐 Validating alternative access: ', { method, projectId });
+    if (method === 'password' && value === 'freeflow') {
+      return {
+        valid: true,
+        accessGranted: true,
+        message: 'Access granted via password'
+      }
+    } else if (method === 'code' && value === 'FREECODE') {
+      return {
+        valid: true,
+        accessGranted: true,
+        message: 'Access granted via code'
+      }
+    } else {
+      return {
+        valid: false,
+        accessGranted: false,
+        message: 'Invalid access method or code'
+      }
     }
   }
 

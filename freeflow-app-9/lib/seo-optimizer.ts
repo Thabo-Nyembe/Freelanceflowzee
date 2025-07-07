@@ -205,7 +205,7 @@ export function generatePageSEO(
       title: template.title,
       description: template.description,
       type: SEO_CONFIG.site.type as any,
-      url: `${SEO_CONFIG.site.url}/${page === 'homepage' ?  : page}`,
+      url: `${SEO_CONFIG.site.url}/${page === 'homepage' ? '' : page}`,
       siteName: SEO_CONFIG.site.name,
       locale: SEO_CONFIG.site.locale,
       images: [
@@ -213,7 +213,7 @@ export function generatePageSEO(
           url: SEO_CONFIG.site.image,
           width: 1200,
           height: 630,
-          alt: `${SEO_CONFIG.site.name} - ${template.title}
+          alt: `${SEO_CONFIG.site.name} - ${template.title}`
         }
       ]
     },
@@ -224,13 +224,6 @@ export function generatePageSEO(
       title: template.title,
       description: template.description,
       images: [SEO_CONFIG.site.image]
-    },
-    alternates: {
-      canonical: `${SEO_CONFIG.site.url}/${page === 'homepage' ?  : page}`,
-      languages: SEO_CONFIG.site.alternateLocales.reduce((acc, locale) => {
-        acc[locale] = `${SEO_CONFIG.site.url}/${locale}/${page === 'homepage' ?  : page}
-        return acc
-      }, {} as Record<string, string>)
     },
     verification: {
       google: 'your-google-verification-code',
@@ -291,7 +284,7 @@ export function generateStructuredData(
     case 'Offer':
       return {
         "@context": "https://schema.org", "@type": "Offer", "name": data?.product || SEO_CONFIG.site.name, "description": data?.description, "price": data?.price || "0",
-        "priceCurrency": data?.currency || "USD", "availability": "https://schema.org/InStock", "seller": baseOrganization, "url": data?.url || `${SEO_CONFIG.site.url}/pricing
+        "priceCurrency": data?.currency || "USD", "availability": "https://schema.org/InStock", "seller": baseOrganization, "url": data?.url || `${SEO_CONFIG.site.url}/pricing`
       }
 
     case 'SoftwareApplication':
@@ -317,7 +310,7 @@ export function analyzeSEO(content: string, metadata: Metadata) {
   }
 
   // Title analysis
-  const titleLength = (typeof metadata.title === 'string' ? metadata.title : metadata.title?.toString() || ).length
+  const titleLength = (typeof metadata.title === 'string' ? metadata.title : metadata.title?.toString() || '').length
   if (titleLength < 30) {
     analysis.issues.push('Title is too short (< 30 characters)')
   } else if (titleLength > 60) {
@@ -402,32 +395,32 @@ export function slugify(text: string): string {
 
 export function generateSitemap(pages: string[]): string {
   const urls = pages.map(page => {
-    const url = page === '/' ? SEO_CONFIG.site.url : `${SEO_CONFIG.site.url}${page}
-    return 
+    const url = page === '/' ? SEO_CONFIG.site.url : `${SEO_CONFIG.site.url}${page}`
+    return `
   <url>
     <loc>${url}</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>${page === '/' ? &apos;1.0&apos; : &apos;0.8&apos;}</priority>
+    <priority>${page === '/' ? '1.0' : '0.8'}</priority>
   </url>
+`
   }).join('')
 
-  return `<?xml version= "1.0" encoding= "UTF-8"?>
-<urlset xmlns= "http://www.sitemaps.org/schemas/sitemap/0.9">
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls}
-</urlset>
+</urlset>`
 }
 
 export function generateRobotsTxt(): string {
+  const disallowRules = SEO_CONFIG.site.disallowedPaths.map(path => `Disallow: ${path}`).join('\n')
   return `User-agent: *
 Allow: /
 
 Sitemap: ${SEO_CONFIG.site.url}/sitemap.xml
 
 # Disallow admin areas
-Disallow: /admin/
-Disallow: /api/
-Disallow: /dashboard/
+${disallowRules}
 
 # Allow important pages
 Allow: /
@@ -436,4 +429,5 @@ Allow: /pricing
 Allow: /blog
 Allow: /contact
 Allow: /demo
+`
 } 

@@ -1,5 +1,5 @@
-import { createServerClient } from &apos;@supabase/ssr&apos;
-import { NextResponse, type NextRequest } from &apos;next/server&apos;
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -36,16 +36,16 @@ export async function updateSession(request: NextRequest) {
 
   if (
     !user &&
-    !request.nextUrl.pathname.startsWith(&apos;/login&apos;) &&
-    !request.nextUrl.pathname.startsWith(&apos;/auth&apos;)
+    !request.nextUrl.pathname.startsWith('/login') &&
+    !request.nextUrl.pathname.startsWith('/auth')
   ) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
-    url.pathname = &apos;/login&apos;
+    url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  // IMPORTANT: You *must* return the supabaseResponse object as it is. If you&apos;re
+  // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
   // creating a new response object with NextResponse.next() make sure to:
   // 1. Pass the request in it, like so:
   //    const myNewResponse = NextResponse.next({ request })
@@ -56,6 +56,6 @@ export async function updateSession(request: NextRequest) {
   // 4. Finally:
   //    return myNewResponse
   // If this is not done, you may be causing the browser and server to go out
-  // of sync and terminate the user&apos;s session prematurely!
+  // of sync and terminate the user's session prematurely!
   return supabaseResponse
 } 

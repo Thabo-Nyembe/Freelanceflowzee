@@ -51,8 +51,8 @@ export default function RecordingTestPage() {
           <div className="mt-8 p-4 bg-blue-50 rounded-lg">
             <h3 className="font-semibold text-blue-900 mb-2">Testing Instructions:</h3>
             <ul className="text-blue-800 space-y-1 text-sm">
-              <li>1. Click &quot;Record Feedback&quot; to open the recording modal</li>
-              <li>2. Click &quot;Prepare to Record&quot; to initialize the recorder</li>
+              <li>1. Click "Record Feedback" to open the recording modal</li>
+              <li>2. Click "Prepare to Record" to initialize the recorder</li>
               <li>3. Enable camera and/or screen sharing</li>
               <li>4. Start recording and test the functionality</li>
               <li>5. Stop recording and verify the video is processed</li>

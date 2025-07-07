@@ -1,7 +1,7 @@
 export interface MediaFile {
   id: string
   name: string
-  type: &quot;image&quot; | &quot;video&quot; | &quot;audio&quot; | &quot;document&quot; | &quot;code&quot; | &quot;screenshot&quot;
+  type: "image" | "video" | "audio" | "document" | "code" | "screenshot"
   url: string
   size: number
   uploadedAt: number
@@ -19,8 +19,8 @@ export interface Comment {
   timeRange?: { start: number; end: number }
   textSelection?: { start: number; end: number; selectedText: string }
   codeLocation?: { line: number; file: string }
-  status?: &quot;pending&quot; | &quot;resolved&quot; | &quot;approved&quot;
-  priority?: &quot;low&quot; | &quot;medium&quot; | &quot;high&quot;
+  status?: "pending" | "resolved" | "approved"
+  priority?: "low" | "medium" | "high"
   replies?: Comment[]
 }
 
@@ -29,7 +29,7 @@ export interface Creator {
   name: string
   username: string
   avatar: string
-  category: &quot;photographer&quot; | &quot;designer&quot; | &quot;developer&quot; | &quot;influencer&quot; | &quot;videographer&quot; | &quot;writer&quot;
+  category: "photographer" | "designer" | "developer" | "influencer" | "videographer" | "writer"
   verified: boolean
   rating: number
   reviewCount: number
@@ -45,7 +45,7 @@ export interface Post {
   id: string
   creatorId: string
   creator: Creator
-  type: &quot;image&quot; | &quot;video&quot; | &quot;audio&quot; | &quot;carousel&quot;
+  type: "image" | "video" | "audio" | "carousel"
   media: string[]
   caption: string
   tags: string[]

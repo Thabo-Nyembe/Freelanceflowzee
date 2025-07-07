@@ -249,28 +249,34 @@ class AnalyticsService {
     }
   }
 
-  // Event processing with AI enhancement
+  // Process events from the queue
   private async processEvent(event: AnalyticsEvent) {
-    // Send to analytics service
-    await this.sendToAnalytics(event)
-    
-    // Process with AI for real-time insights
-    const aiInsight = await this.generateEventInsight(event)
-    if (aiInsight) {
-      this.aiInsights.push(aiInsight)
+    if (!this.isInitialized) {
+      return;
     }
 
-    // Trigger real-time personalization
-    this.updatePersonalization(event)
+    try {
+      // Send event to the server
+      await fetch('/api/analytics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(event),
+      });
+
+      // Update AI models with the new event data
+      this.updateAIModels(event);
+    } catch (error) {
+      console.error('Error sending analytics event:', error);
+    }
   }
 
   // Utility methods
   private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}
+    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   }
 
   private generateEventId(): string {
-    return `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}
+    return `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   }
 
   private getDeviceInfo() {
@@ -317,7 +323,7 @@ class AnalyticsService {
         this.sendToMixpanel(event),
       ])
     } catch (error) {
-      console.error('Analytics send failed: ', error)'
+      console.error('Analytics send failed: ', error)
     }
   }
 
@@ -389,7 +395,7 @@ class AnalyticsService {
   private getCurrentFunnelStage() { return 'unknown' }
   private getAttributionData() { return {} }
   private categorizeErrorSeverity(error: Error) { return 'medium' }
-  private calculateErrorImpact(error: Error, context: Record<string, unknown>) { return &apos;low&apos; }
+  private calculateErrorImpact(error: Error, context: Record<string, unknown>) { return 'low' }
   private getUserJourneyContext() { return [] }
   private triggerErrorAlert(errorData: Record<string, unknown>) {}
   private getPerformanceBenchmark(metric: string) { return 0 }

@@ -1,5 +1,8 @@
 'use client'
 
+import { openai, googleAI, anthropic, aiConfig } from './config'
+import { createParser } from 'eventsource-parser'
+
 interface AIContext {
   userId: string
   sessionId: string
@@ -48,7 +51,7 @@ interface AnalysisResult {
     [key: string]: unknown;
 }
 
-class EnhancedAIService {
+export class EnhancedAIService {
   private initialized = false
   private modelEndpoints: Map<string, string> = new Map()
   private aiProviders = {
@@ -57,8 +60,22 @@ class EnhancedAIService {
     local: null
   }
 
+  private rateLimiters: Map<string, {
+    tokens: number
+    requests: number
+    lastReset: number
+  }> = new Map()
+
   constructor() {
     this.initializeProviders()
+    // Initialize rate limiters
+    Object.keys(aiConfig.rateLimits).forEach(feature => {
+      this.rateLimiters.set(feature, {
+        tokens: 0,
+        requests: 0,
+        lastReset: Date.now()
+      })
+    })
   }
 
   async initialize() {
@@ -466,6 +483,230 @@ Ready to get started? Let's schedule a call to discuss next steps!`;
   private assessChurnRisk(_context: AIContext): Promise<Record<string, unknown>> { return Promise.resolve({}); }
   private identifyUpsellOpportunities(_context: AIContext): Promise<Record<string, unknown>> { return Promise.resolve({}); }
   private analyzeSatisfactionTrend(_context: AIContext): Promise<Record<string, unknown>> { return Promise.resolve({}); }
+
+  private checkRateLimit(feature: keyof typeof aiConfig.rateLimits) {
+    const limits = aiConfig.rateLimits[feature]
+    const current = this.rateLimiters.get(feature)
+
+    if (!current) return false
+
+    const now = Date.now()
+    if (now - current.lastReset >= 60000) {
+      // Reset counters after 1 minute
+      current.tokens = 0
+      current.requests = 0
+      current.lastReset = now
+    }
+
+    return (
+      current.tokens < limits.tokensPerMinute &&
+      current.requests < limits.requestsPerMinute
+    )
+  }
+
+  private updateRateLimit(feature: string, tokens: number) {
+    const current = this.rateLimiters.get(feature)
+    if (current) {
+      current.tokens += tokens
+      current.requests += 1
+    }
+  }
+
+  async transcribeVideo(videoUrl: string, language = 'en') {
+    try {
+      if (!this.checkRateLimit('transcription')) {
+        throw new Error(aiConfig.errorMessages.rateLimitExceeded)
+      }
+
+      const transcription = await openai.audio.transcriptions.create({
+        file: await fetch(videoUrl).then(r => r.blob()),
+        model: aiConfig.models.openai.whisper,
+        language,
+        response_format: 'verbose_json',
+      })
+
+      this.updateRateLimit('transcription', transcription.segments.length * 100)
+
+      return {
+        text: transcription.text,
+        segments: transcription.segments.map(segment => ({
+          start: segment.start,
+          end: segment.end,
+          text: segment.text,
+        })),
+        language: transcription.language,
+        confidence: transcription.confidence,
+      }
+    } catch (error) {
+      console.error('Transcription error:', error)
+      throw new Error(aiConfig.errorMessages.processingError)
+    }
+  }
+
+  async analyzeVideoContent(videoUrl: string) {
+    try {
+      if (!this.checkRateLimit('videoAnalysis')) {
+        throw new Error(aiConfig.errorMessages.rateLimitExceeded)
+      }
+
+      const response = await openai.chat.completions.create({
+        model: aiConfig.models.openai.vision,
+        messages: [
+          {
+            role: 'system',
+            content: aiConfig.promptTemplates.videoAnalysis,
+          },
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: 'Please analyze this video:' },
+              { type: 'image_url', url: videoUrl },
+            ],
+          },
+        ],
+        max_tokens: 1000,
+      })
+
+      this.updateRateLimit('videoAnalysis', response.usage?.total_tokens || 1000)
+
+      // Parse the response into structured data
+      const analysis = JSON.parse(response.choices[0].message.content || '{}')
+
+      return {
+        quality: analysis.quality || 0,
+        engagement: analysis.engagement || 0,
+        clarity: analysis.clarity || 0,
+        pacing: analysis.pacing || 0,
+        tags: analysis.tags || [],
+        summary: analysis.summary || '',
+        recommendations: analysis.recommendations || [],
+      }
+    } catch (error) {
+      console.error('Video analysis error:', error)
+      throw new Error(aiConfig.errorMessages.processingError)
+    }
+  }
+
+  async generateChapters(videoUrl: string, transcription: string) {
+    try {
+      if (!this.checkRateLimit('contentAnalysis')) {
+        throw new Error(aiConfig.errorMessages.rateLimitExceeded)
+      }
+
+      const response = await anthropic.messages.create({
+        model: aiConfig.models.anthropic.chat,
+        max_tokens: 1000,
+        messages: [
+          {
+            role: 'user',
+            content: `${aiConfig.promptTemplates.chapterGeneration}\n\nTranscription:\n${transcription}`,
+          },
+        ],
+      })
+
+      this.updateRateLimit('contentAnalysis', 1000)
+
+      // Parse the response into structured data
+      const chapters = JSON.parse(response.content[0].text || '[]')
+
+      return chapters.map((chapter: any) => ({
+        title: chapter.title,
+        start: chapter.start,
+        end: chapter.end,
+        summary: chapter.summary,
+        keywords: chapter.keywords,
+      }))
+    } catch (error) {
+      console.error('Chapter generation error:', error)
+      throw new Error(aiConfig.errorMessages.processingError)
+    }
+  }
+
+  async generateInsights(videoUrl: string, analysis: any) {
+    try {
+      if (!this.checkRateLimit('insights')) {
+        throw new Error(aiConfig.errorMessages.rateLimitExceeded)
+      }
+
+      const model = googleAI.getGenerativeModel({
+        model: aiConfig.models.google.chat,
+      })
+
+      const result = await model.generateContent([
+        aiConfig.promptTemplates.contentInsights,
+        JSON.stringify(analysis),
+      ])
+      const response = await result.response
+      const insights = JSON.parse(response.text() || '{}')
+
+      this.updateRateLimit('insights', 1000)
+
+      return {
+        insights: insights.categories || [],
+        overallScore: insights.overallScore || 0,
+        topStrengths: insights.strengths || [],
+        improvementAreas: insights.improvements || [],
+      }
+    } catch (error) {
+      console.error('Insights generation error:', error)
+      throw new Error(aiConfig.errorMessages.processingError)
+    }
+  }
+
+  // Helper method to stream AI responses
+  async *streamResponse(provider: 'openai' | 'anthropic' | 'google', prompt: string) {
+    try {
+      switch (provider) {
+        case 'openai': {
+          const stream = await openai.chat.completions.create({
+            model: aiConfig.models.openai.chat,
+            messages: [{ role: 'user', content: prompt }],
+            stream: true,
+          })
+
+          for await (const chunk of stream) {
+            if (chunk.choices[0]?.delta?.content) {
+              yield chunk.choices[0].delta.content
+            }
+          }
+          break
+        }
+
+        case 'anthropic': {
+          const stream = await anthropic.messages.create({
+            model: aiConfig.models.anthropic.chat,
+            max_tokens: 1000,
+            messages: [{ role: 'user', content: prompt }],
+            stream: true,
+          })
+
+          for await (const chunk of stream) {
+            if (chunk.type === 'content_block_delta') {
+              yield chunk.delta.text
+            }
+          }
+          break
+        }
+
+        case 'google': {
+          const model = googleAI.getGenerativeModel({
+            model: aiConfig.models.google.chat,
+          })
+
+          const result = await model.generateContentStream(prompt)
+          for await (const chunk of result.stream) {
+            if (chunk.text) {
+              yield chunk.text
+            }
+          }
+          break
+        }
+      }
+    } catch (error) {
+      console.error('Stream response error:', error)
+      throw new Error(aiConfig.errorMessages.processingError)
+    }
+  }
 }
 
 export const enhancedAIService = new EnhancedAIService()
