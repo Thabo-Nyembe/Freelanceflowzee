@@ -654,7 +654,7 @@ export default function FilesHub({ projects, userId }: FilesHubProps) {
                                   onClick={(e) => {
                                     e.stopPropagation()
                                     handleDownload(file)
-                                  }}"
+                                  }}
                                   data-testid="download-file-btn"
                                 >
                                   <Download className="w-4 h-4" />
@@ -666,7 +666,7 @@ export default function FilesHub({ projects, userId }: FilesHubProps) {
                                   onClick={(e) => {
                                     e.stopPropagation()
                                     handleShare(file)
-                                  }}"
+                                  }}
                                   data-testid="share-file-btn"
                                 >
                                   <Share className="w-4 h-4" />

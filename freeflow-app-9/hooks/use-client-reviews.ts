@@ -223,7 +223,7 @@ export function useClientReviews() {
       overdue_reviews: 0
     };
 
-    let completionTimes: number[] = [];
+    const completionTimes: number[] = [];
 
     reviews.forEach(review => {
       // Count by status

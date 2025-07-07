@@ -125,7 +125,7 @@ export default function SimpleAIChat() {
       if (!reader) throw new Error('No response body');
 
       let assistantMessage = '';
-      let toolsUsed: string[] = [];
+      const toolsUsed: string[] = [];
       let model = '';
 
       const assistantMessageId = (Date.now() + 1).toString();

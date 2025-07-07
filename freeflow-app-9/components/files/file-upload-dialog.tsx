@@ -88,15 +88,16 @@ export function FileUploadDialog({ isOpen, onClose, onUploadComplete }: FileUplo
 
           uploadedFiles.push(fileRecord)
           setProgress(prev => ({ ...prev, [file.name]: 100 }))
-        } catch (error: Record<string, unknown>) {
+        } catch (error: unknown) {
           console.error(`Error uploading ${file.name}:`, error)
-          setErrors(prev => ({ ...prev, [file.name]: error.message }))
+          const errorMessage = error instanceof Error ? error.message : 'Upload failed'
+          setErrors(prev => ({ ...prev, [file.name]: errorMessage }))
         }
       }
 
       onUploadComplete(uploadedFiles)
     } catch (error) {
-      console.error('Upload error: ', error)'
+      console.error('Upload error: ', error)
     } finally {
       setUploading(false)
     }
@@ -104,7 +105,7 @@ export function FileUploadDialog({ isOpen, onClose, onUploadComplete }: FileUplo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className= "sm:max-w-md">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Upload Files</DialogTitle>
           <DialogDescription>
@@ -114,45 +115,44 @@ export function FileUploadDialog({ isOpen, onClose, onUploadComplete }: FileUplo
 
         <div
           {...getRootProps()}
-          className={
-            border-2 border-dashed rounded-lg p-6 text-center cursor-pointer
-            ${isDragActive ? 'border-primary bg-primary/10' : 'border-gray-300'}
-          `}
+          className={`p-6 text-center cursor-pointer border-2 border-dashed rounded-lg ${
+            isDragActive ? 'border-primary bg-primary/10' : 'border-gray-300'
+          }`}
         >
           <input {...getInputProps()} />
-          <Upload className= "h-10 w-10 text-gray-400 mx-auto mb-4" />
-          <p className= "text-sm text-gray-600">
+          <Upload className="h-10 w-10 text-gray-400 mx-auto mb-4" />
+          <p className="text-sm text-gray-600">
             {isDragActive
-              ? "Drop the files here
+              ? "Drop the files here"
               : "Drag 'n' drop files here, or click to select files"}
           </p>
         </div>
 
         {files.length > 0 && (
-          <div className= "mt-4 space-y-4">
+          <div className="mt-4 space-y-4">
             {files.map(file => (
-              <div key={file.name} className= "flex items-center gap-4">
-                <div className= "flex-1 space-y-1">
-                  <div className= "flex items-center justify-between">
-                    <p className= "text-sm font-medium">{file.name}</p>
+              <div key={file.name} className="flex items-center gap-4">
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">{file.name}</p>
                     <Button
                       variant="ghost"
-                      size= "sm
+                      size="sm"
                       onClick={() => removeFile(file)}
                     >
-                      <X className= "h-4 w-4" />
+                      <X className="h-4 w-4" />
                     </Button>
                   </div>
                   <Progress value={progress[file.name] || 0} />
                   {errors[file.name] && (
-                    <p className= "text-xs text-red-600 flex items-center gap-1">
-                      <AlertCircle className= "h-3 w-3" />
+                    <p className="text-xs text-red-600 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
                       {errors[file.name]}
                     </p>
                   )}
                   {progress[file.name] === 100 && !errors[file.name] && (
-                    <p className= "text-xs text-green-600 flex items-center gap-1">
-                      <CheckCircle className= "h-3 w-3" />
+                    <p className="text-xs text-green-600 flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3" />
                       Upload complete
                     </p>
                   )}
@@ -162,15 +162,15 @@ export function FileUploadDialog({ isOpen, onClose, onUploadComplete }: FileUplo
           </div>
         )}
 
-        <div className= "flex justify-end gap-4 mt-6">
-          <Button variant= "outline" onClick={onClose}>
+        <div className="flex justify-end gap-4 mt-6">
+          <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
           <Button
             onClick={uploadFiles}
             disabled={files.length === 0 || uploading}
-            className="bg-gradient-to-r from-purple-600 to-blue-600 text-white
-          >"
+            className="bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+          >
             {uploading ? 'Uploading...' : 'Upload Files'}
           </Button>
         </div>

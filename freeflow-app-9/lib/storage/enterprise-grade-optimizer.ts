@@ -251,7 +251,7 @@ export class EnterpriseOptimizer {
   } {
     let supabaseSize = 0;
     let wasabiSize = 0;
-    let totalFiles = files.length;
+    const totalFiles = files.length;
     
     files.forEach(file => {
       if (file.provider === 'supabase') {

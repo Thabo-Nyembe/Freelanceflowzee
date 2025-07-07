@@ -348,24 +348,24 @@ export default function ProjectsHub({ projects, _userId }: ProjectsHubProps) {
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                onClick={() => setIsImportDialogOpen(true)}"
-                data-testid="import-project-btn
-              >"
+                onClick={() => setIsImportDialogOpen(true)}
+                data-testid="import-project-btn"
+              >
                 <Upload className="h-4 w-4 mr-2" />
                 Import Project
               </Button>
               <Button
                 variant="outline"
-                onClick={() => setIsQuickStartDialogOpen(true)}"
-                data-testid="quick-start-btn
-              >"
+                onClick={() => setIsQuickStartDialogOpen(true)}
+                data-testid="quick-start-btn"
+              >
                 <Rocket className="h-4 w-4 mr-2" />
                 Quick Start
               </Button>
               <Button
                 onClick={() => setIsCreateDialogOpen(true)}
-                data-testid="create-project-btn
-              >"
+                data-testid="create-project-btn"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Create Project
               </Button>
@@ -449,9 +449,9 @@ export default function ProjectsHub({ projects, _userId }: ProjectsHubProps) {
                       </div>
                       <select
                         value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}"
-                        className="px-3 py-2 border rounded-md bg-background
-                      >"
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="px-3 py-2 border rounded-md bg-background"
+                      >
                         <option value="all">All Status</option>
                         <option value="active">Active</option>
                         <option value="completed">Completed</option>
@@ -461,8 +461,8 @@ export default function ProjectsHub({ projects, _userId }: ProjectsHubProps) {
                       <select
                         value={priorityFilter}
                         onChange={(e) => setPriorityFilter(e.target.value)}
-                        className="px-3 py-2 border rounded-md bg-background
-                      >"
+                        className="px-3 py-2 border rounded-md bg-background"
+                      >
                         <option value="all">All Priority</option>
                         <option value="urgent">Urgent</option>
                         <option value="high">High</option>
@@ -472,14 +472,14 @@ export default function ProjectsHub({ projects, _userId }: ProjectsHubProps) {
                       <div className="flex border rounded-md">
                         <Button
                           variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                          size="sm
+                          size="sm"
                           onClick={() => setViewMode('grid')}
                         >
                           Grid
                         </Button>
                         <Button
                           variant={viewMode === 'list' ? 'default' : 'ghost'}
-                          size="sm
+                          size="sm"
                           onClick={() => setViewMode('list')}
                         >
                           List

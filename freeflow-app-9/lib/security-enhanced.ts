@@ -155,7 +155,7 @@ class SecurityService {
     const sensitiveFields = this.detectSensitiveFields(data)
 
     // Apply appropriate protection
-    let protectedData = { ...data }
+    const protectedData = { ...data }
 
     for (const field of sensitiveFields) {
       switch (field.type) {

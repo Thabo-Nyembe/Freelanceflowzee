@@ -3,7 +3,61 @@
 import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { format, addDays, startOfDay } from 'date-fns'
-)
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { CalendarDays, Clock, User, Mail, Phone, CheckCircle, Check, AlertCircle } from 'lucide-react'
+import { loadStripe } from '@stripe/stripe-js'
+
+interface TimeSlot {
+  id: string
+  startTime: string
+  endTime: string
+  isAvailable: boolean
+  displayTime: string
+}
+
+interface ServiceConfig {
+  id: string
+  name: string
+  duration: number
+  price: number
+}
+
+interface FormData {
+  selectedDate: string
+  selectedTime: string
+  clientName: string
+  clientEmail: string
+  clientPhone: string
+  notes: string
+}
+
+interface BookingFormProps {
+  service: ServiceConfig
+  className?: string
+}
+
+export function BookingForm({ service, className = "" }: BookingFormProps) {
+  const [step, setStep] = useState<'datetime' | 'details' | 'payment'>('datetime')
+  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isValid }
+  } = useForm<FormData>({
+    mode: 'onChange'
+  })
+
+  const watchedDate = watch('selectedDate')
+  const watchedTime = watch('selectedTime')
 
   // Generate simple time slots
   useEffect(() => {
@@ -13,7 +67,7 @@ import { format, addDays, startOfDay } from 'date-fns'
       // Generate slots from 9 AM to 6 PM, 30-minute intervals
       for (let hour = 9; hour < 18; hour++) {
         for (let minute = 0; minute < 60; minute += 30) {
-          const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}
+          const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
           const displayTime = new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
@@ -97,7 +151,7 @@ import { format, addDays, startOfDay } from 'date-fns'
   }
 
   const nextStep = () => {
-    const steps: Array<&apos;datetime&apos; | &apos;details&apos; | &apos;payment&apos;> = ['datetime&apos;, 'details', &apos;payment']
+    const steps: Array<'datetime' | 'details' | 'payment'> = ['datetime', 'details', 'payment']
     const currentIndex = steps.indexOf(step)
     if (currentIndex < steps.length - 1) {
       setStep(steps[currentIndex + 1])
@@ -105,7 +159,7 @@ import { format, addDays, startOfDay } from 'date-fns'
   }
 
   const prevStep = () => {
-    const steps: Array<&apos;datetime&apos; | &apos;details&apos; | &apos;payment&apos;> = ['datetime&apos;, 'details', &apos;payment']
+    const steps: Array<'datetime' | 'details' | 'payment'> = ['datetime', 'details', 'payment']
     const currentIndex = steps.indexOf(step)
     if (currentIndex > 0) {
       setStep(steps[currentIndex - 1])
@@ -114,12 +168,12 @@ import { format, addDays, startOfDay } from 'date-fns'
 
   if (success) {
     return (
-      <Card className= "max-w-2xl mx-auto">
-        <CardContent className= "pt-6 text-center">
-          <CheckCircle className= "w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h2 className= "text-2xl font-bold text-gray-900 mb-2">Booking Confirmed!</h2>
-          <p className= "text-gray-600 mb-4">
-            Your appointment has been successfully booked. You'll receive a confirmation email shortly.
+      <Card className="max-w-2xl mx-auto">
+        <CardContent className="pt-6 text-center">
+          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Booking Confirmed!</h2>
+          <p className="text-gray-600 mb-4">
+            Your appointment has been successfully booked. You&apos;ll receive a confirmation email shortly.
           </p>
           <Button onClick={() => window.location.href = '/'}>
             Return to Home
@@ -132,7 +186,7 @@ import { format, addDays, startOfDay } from 'date-fns'
   return (
     <div className={`max-w-2xl mx-auto space-y-6 ${className}`}>
       {/* Progress Steps */}
-      <div className= "flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-8">
         {['datetime', 'details', 'payment'].map((stepName, index) => {
           const stepLabels = {
             datetime: 'Date & Time',
@@ -144,12 +198,12 @@ import { format, addDays, startOfDay } from 'date-fns'
           const isCurrent = step === stepName
           
           return (
-            <div key={stepName} className= "flex items-center">
+            <div key={stepName} className="flex items-center">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                 isCompleted ? 'bg-green-500 text-white' : 
-                isCurrent ? 'bg-blue-500 text-white' : "bg-gray-200 text-gray-600
-              }`}>"
-                {isCompleted ? <Check className= "w-4 h-4" /> : index + 1}
+                isCurrent ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'
+              }`}>
+                {isCompleted ? <Check className="w-4 h-4" /> : index + 1}
               </div>
               <span className={`ml-2 text-sm font-medium ${
                 isCurrent ? 'text-blue-600' : 'text-gray-600'
@@ -167,63 +221,68 @@ import { format, addDays, startOfDay } from 'date-fns'
       </div>
 
       {error && (
-        <Card className= "border-red-200 bg-red-50">
-          <CardContent className= "pt-6">
-            <div className= "flex items-center gap-2 text-red-700">
-              <AlertCircle className= "w-5 h-5" />
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-red-700">
+              <AlertCircle className="w-5 h-5" />
               <p>{error}</p>
             </div>
           </CardContent>
         </Card>
       )}
 
-      <form onSubmit={handleSubmit(handleFormSubmit)} className= "space-y-6">
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
         {/* Date & Time Selection */}
         {step === 'datetime' && (
           <Card>
             <CardHeader>
-              <CardTitle className= "flex items-center gap-2">
-                <CalendarDays className= "w-5 h-5" />
+              <CardTitle className="flex items-center gap-2">
+                <CalendarDays className="w-5 h-5" />
                 Choose Date & Time
               </CardTitle>
               <CardDescription>Select your preferred appointment time</CardDescription>
             </CardHeader>
-            <CardContent className= "space-y-6">
+            <CardContent className="space-y-6">
               <div>
-                <Label htmlFor= "selectedDate">Date</Label>
+                <Label htmlFor="selectedDate">Date</Label>
                 <Input
-                  id= "selectedDate
+                  id="selectedDate"
                   type="date"
                   min={format(new Date(), 'yyyy-MM-dd')}
                   {...register('selectedDate', { required: 'Please select a date' })}
-                  className="mt-1
+                  className="mt-1"
                 />
-                {errors.selectedDate && ("
-                  <p className= "text-sm text-red-600 mt-1">{errors.selectedDate.message}</p>
+                {errors.selectedDate && (
+                  <p className="text-sm text-red-600 mt-1">{errors.selectedDate.message}</p>
                 )}
               </div>
 
-              {watchedDate && (
+              {watchedDate && timeSlots.length > 0 && (
                 <div>
                   <Label>Available Times</Label>
-                  <div className= "grid grid-cols-3 gap-2 mt-2">
-                    {timeSlots.map((slot) => (
-                      <button
+                  <div className="grid grid-cols-3 gap-3 mt-2">
+                    {timeSlots.map(slot => (
+                      <Label
                         key={slot.id}
-                        type="button"
-                        onClick={() => setValue('selectedTime', slot.startTime)}
-                        className={`p-2 text-sm border rounded-md transition-colors ${
+                        className={`flex items-center justify-center p-3 border rounded cursor-pointer transition-colors ${
                           watchedTime === slot.startTime
-                            ? 'bg-blue-500 text-white border-blue-500
-                            : 'bg-white text-gray-700 border-gray-300 hover:border-blue-300'
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-gray-200 hover:border-gray-300'
                         }`}
                       >
+                        <input
+                          type="radio"
+                          value={slot.startTime}
+                          {...register('selectedTime', { required: 'Please select a time' })}
+                          className="sr-only"
+                        />
+                        <Clock className="w-4 h-4 mr-2" />
                         {slot.displayTime}
-                      </button>
+                      </Label>
                     ))}
                   </div>
                   {errors.selectedTime && (
-                    <p className= "text-sm text-red-600 mt-1">{errors.selectedTime.message}</p>
+                    <p className="text-sm text-red-600 mt-1">{errors.selectedTime.message}</p>
                   )}
                 </div>
               )}
@@ -231,167 +290,129 @@ import { format, addDays, startOfDay } from 'date-fns'
           </Card>
         )}
 
-        {/* Client Details */}
+        {/* Details Form */}
         {step === 'details' && (
           <Card>
             <CardHeader>
-              <CardTitle className= "flex items-center gap-2">
-                <User className= "w-5 h-5" />
-                Your Information
+              <CardTitle className="flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Your Details
               </CardTitle>
-              <CardDescription>We&apos;ll use this information to confirm your appointment</CardDescription>
+              <CardDescription>Please provide your contact information</CardDescription>
             </CardHeader>
-            <CardContent className= "space-y-4">
-              <div className= "grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor= "clientName">Full Name *</Label>
-                  <Input
-                    id= "clientName
-                    {...register('clientName', { required: 'Name is required' })}
-                    className="mt-1
-                  />
-                  {errors.clientName && ("
-                    <p className= "text-sm text-red-600 mt-1">{errors.clientName.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor= "clientPhone">Phone Number</Label>
-                  <Input
-                    id= "clientPhone
-                    type="tel"
-                    {...register('clientPhone')}
-                    className="mt-1
-                  />
-                </div>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="clientName">Full Name</Label>
+                <Input
+                  id="clientName"
+                  {...register('clientName', { required: 'Name is required' })}
+                  placeholder="Enter your full name"
+                  className="mt-1"
+                />
+                {errors.clientName && (
+                  <p className="text-sm text-red-600 mt-1">{errors.clientName.message}</p>
+                )}
               </div>
 
-              <div>"
-                <Label htmlFor= "clientEmail">Email Address *</Label>
+              <div>
+                <Label htmlFor="clientEmail">Email Address</Label>
                 <Input
-                  id= "clientEmail
+                  id="clientEmail"
                   type="email"
                   {...register('clientEmail', { 
                     required: 'Email is required',
                     pattern: {
-                      value: /^\S+@\S+$/i,
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                       message: 'Please enter a valid email address'
                     }
                   })}
-                  className="mt-1
+                  placeholder="Enter your email address"
+                  className="mt-1"
                 />
-                {errors.clientEmail && ("
-                  <p className= "text-sm text-red-600 mt-1">{errors.clientEmail.message}</p>
+                {errors.clientEmail && (
+                  <p className="text-sm text-red-600 mt-1">{errors.clientEmail.message}</p>
                 )}
               </div>
 
               <div>
-                <Label htmlFor= "notes">Additional Notes (Optional)</Label>
+                <Label htmlFor="clientPhone">Phone Number</Label>
+                <Input
+                  id="clientPhone"
+                  type="tel"
+                  {...register('clientPhone')}
+                  placeholder="Enter your phone number"
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="notes">Additional Notes (Optional)</Label>
                 <Textarea
-                  id= "notes
+                  id="notes"
                   {...register('notes')}
-                  placeholder="Any specific requirements or questions..."
-                  className="mt-1
+                  placeholder="Any specific requirements or notes..."
+                  className="mt-1"
+                  rows={3}
                 />
               </div>
-"
-              <div className= "flex items-center space-x-2">
-                <Checkbox
-                  id= "agreeToTerms
-                  {...register('agreeToTerms', { required: 'You must agree to the terms' })}
-                />
-                <Label htmlFor= "agreeToTerms" className= "text-sm">
-                  I agree to the terms and conditions and privacy policy
-                </Label>
-              </div>
-              {errors.agreeToTerms && (
-                <p className= "text-sm text-red-600">{errors.agreeToTerms.message}</p>
-              )}
             </CardContent>
           </Card>
         )}
 
-        {/* Payment Summary */}
+        {/* Payment Step */}
         {step === 'payment' && (
           <Card>
             <CardHeader>
-              <CardTitle className= "flex items-center gap-2">
-                <CreditCard className= "w-5 h-5" />
-                Booking Summary
-              </CardTitle>
+              <CardTitle>Review & Payment</CardTitle>
               <CardDescription>Review your booking details and complete payment</CardDescription>
             </CardHeader>
-            <CardContent className= "space-y-4">
-              <div className= "bg-gray-50 p-4 rounded-lg space-y-3">
-                <div className= "flex justify-between items-start">
-                  <div>
-                    <h3 className= "font-medium">{service.title}</h3>
-                    <p className= "text-sm text-gray-600">{service.description}</p>
-                    <div className= "flex items-center gap-4 mt-2 text-sm text-gray-500">
-                      <span className= "flex items-center gap-1">
-                        <Clock className= "w-4 h-4" />
-                        {service.duration} minutes
-                      </span>
-                      <Badge variant= "secondary">{service.category}</Badge>
-                    </div>
-                  </div>
-                  <div className= "text-right">
-                    <div className= "text-2xl font-bold">{service.formattedPrice}</div>
-                  </div>
+            <CardContent className="space-y-4">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-medium">{service.name}</span>
+                  <span className="font-bold">${service.price}</span>
                 </div>
-
-                {watchedDate && watchedTime && (
-                  <div className= "border-t pt-3">
-                    <div className= "flex justify-between">
-                      <span className= "text-sm text-gray-600">Date & Time:</span>
-                      <span className= "text-sm font-medium">
-                        {format(new Date(watchedDate), 'EEEE, MMMM d, yyyy')} at{' '}
-                        {timeSlots.find(slot => slot.startTime === watchedTime)?.displayTime}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className= "text-center">
-                <Button
-                  type="submit"
-                  size= "lg
-                  className="w-full
-                  disabled={loading}
-                >"
-                  {loading ? 'Processing...' : `Pay ${service.formattedPrice} & Book Appointment`}
-                </Button>
-                <p className= "text-xs text-gray-500 mt-2">
-                  Secure payment powered by Stripe. You'll receive a confirmation email after payment.
-                </p>
+                <div className="text-sm text-gray-600">
+                  <p>Date: {watchedDate && format(new Date(watchedDate), 'EEEE, MMMM d, yyyy')}</p>
+                  <p>Time: {timeSlots.find(slot => slot.startTime === watchedTime)?.displayTime}</p>
+                  <p>Duration: {service.duration} minutes</p>
+                </div>
               </div>
             </CardContent>
           </Card>
         )}
 
         {/* Navigation Buttons */}
-        <div className= "flex justify-between">
+        <div className="flex justify-between">
           <Button
             type="button"
-            variant="outline
-            onClick={prevStep}"
+            variant="outline"
+            onClick={prevStep}
             disabled={step === 'datetime'}
           >
             Previous
           </Button>
           
-          {step !== 'payment' && (
-            <Button
-              type="button
-              onClick={nextStep}
-              disabled={!canProceedToNext()}
-            >
-              Next
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {step !== 'payment' ? (
+              <Button
+                type="button"
+                onClick={nextStep}
+                disabled={!canProceedToNext()}
+              >
+                Next
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                disabled={loading || !canProceedToNext()}
+              >
+                {loading ? 'Processing...' : `Pay $${service.price}`}
+              </Button>
+            )}
+          </div>
         </div>
       </form>
     </div>
   )
-}"
+}

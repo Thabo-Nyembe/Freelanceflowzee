@@ -138,7 +138,7 @@ export function useScreenRecorder({ onRecordingComplete, onUploadComplete }: Use
 
       // Get display media stream
       const displayStream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
-      let combinedStream = displayStream;
+      const combinedStream = displayStream;
 
       // Add microphone audio if requested
       if (options.video.audio) {
