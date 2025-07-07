@@ -1,30 +1,26 @@
-# FreeFlowZee
+# Freelanceflowzee
 
-FreeFlowZee is a next-generation platform for creative collaboration, designed to streamline the feedback process for videos, images, audio files, and more.
+FreelanceFlowzee is a comprehensive platform designed to streamline the workflow for freelancers and their clients. It provides tools for project management, collaboration, and communication, all in one place.
 
 ## Getting Started
 
-To get started with local development, follow these steps:
+To get started with development, you'll need to have Node.js and npm installed.
 
 1.  **Clone the repository:**
-    ```bash
     git clone https://github.com/Thabo-Nyembe/Freelanceflowzee.git
-    cd Freelanceflowzee
-    ```
 
 2.  **Install dependencies:**
-    ```bash
     npm install
-    ```
 
-3.  **Set up environment variables:**
-    *   Copy the `.env.example` file to a new file named `.env.local`.
-    *   Fill in the required API keys and secrets in your new `.env.local` file. See the "Environment Variable Management" section for more details.
+3.  **Set up your environment variables:**
+    cp .env.example .env
+
+    You will need to fill in the required environment variables in the `.env` file.
 
 4.  **Run the development server:**
-    ```bash
     npm run dev
-    ```
+
+The application will be available at `http://localhost:3000`.
 
 ## Environment Variable Management
 
