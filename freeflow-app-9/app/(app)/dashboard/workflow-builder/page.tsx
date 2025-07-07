@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
   Target, 
   FileText, 
@@ -22,7 +24,15 @@ import {
   Filter,
   Plus,
   Settings,
-  TrendingUp
+  TrendingUp,
+  MoreHorizontal,
+  Eye,
+  Edit3,
+  Sparkles,
+  Wand2,
+  Save,
+  Download,
+  CheckCircle2
 } from 'lucide-react'
 
 interface WorkflowNode {

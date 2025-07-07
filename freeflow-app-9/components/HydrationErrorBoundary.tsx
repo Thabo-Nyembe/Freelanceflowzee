@@ -23,7 +23,7 @@ class HydrationErrorBoundary extends React.Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log the error to your error reporting service
-    console.error('Hydration error: ', {'
+    console.error('Hydration error: ', {
       error,
       componentStack: errorInfo.componentStack,
     });
@@ -53,15 +53,15 @@ class HydrationErrorBoundary extends React.Component<Props, State> {
     if (this.state.hasError) {
       // You can render any custom fallback UI
       return (
-        <div className= "p-4 bg-yellow-50 border-l-4 border-yellow-400">
-          <div className= "flex">
-            <div className= "flex-shrink-0">
-              <svg className= "h-5 w-5 text-yellow-400" viewBox= "0 0 20 20" fill= "currentColor">
-                <path fillRule= "evenodd" d= "M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule= "evenodd" />
+        <div className="p-4 bg-yellow-50 border-l-4 border-yellow-400">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
             </div>
-            <div className= "ml-3">
-              <p className= "text-sm text-yellow-700">
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
                 We encountered an issue with this component. The page will automatically refresh to fix it.
               </p>
             </div>
@@ -74,19 +74,4 @@ class HydrationErrorBoundary extends React.Component<Props, State> {
   }
 }
 
-// Higher-order component to add auto-refresh on hydration errors
-export default function HydrationErrorBoundaryWithRefresh(props: Props) {
-  useEffect(() => {
-    // Check for hydration mismatch by comparing server and client content
-    const serverHTML = document.documentElement.innerHTML;
-    const clientHTML = document.documentElement.innerHTML;
-    
-    if (serverHTML !== clientHTML) {
-      console.warn('Hydration mismatch detected');
-      // You can choose to refresh the page or handle it differently
-      // window.location.reload();
-    }
-  }, []);
-
-  return <HydrationErrorBoundary {...props} />;
-}
+export default HydrationErrorBoundary;

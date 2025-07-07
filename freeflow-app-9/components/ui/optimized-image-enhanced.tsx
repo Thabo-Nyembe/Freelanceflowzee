@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import React, { useState, useEffect, useRef, memo } from 'react'
 import Image from 'next/image'
@@ -13,16 +13,16 @@ interface OptimizedImageProps {
   className?: string
   priority?: boolean
   quality?: number
-  placeholder?: 'blur' | 'empty
+  placeholder?: 'blur' | 'empty'
   blurDataURL?: string
   sizes?: string
   fill?: boolean
-  loading?: 'lazy' | 'eager
+  loading?: 'lazy' | 'eager'
   onLoad?: () => void
   onError?: () => void
   onClick?: () => void
   style?: React.CSSProperties
-  objectFit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down
+  objectFit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down'
   objectPosition?: string
   fallbackSrc?: string
   enableWebP?: boolean
@@ -123,7 +123,7 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
   const generateSizes = () => {
     if (sizes) return sizes
     if (!responsive) return undefined
-    
+
     return '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
   }
 
@@ -140,16 +140,19 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
   // Generate blur placeholder
   const generateBlurDataURL = () => {
     if (blurDataURL) return blurDataURL
-    
+
     // Simple base64 placeholder
-    return 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k= '
+    return 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k='
   }
 
   // Image container styles
   const containerClasses = cn(
     'relative overflow-hidden',
     {
-      'group cursor-pointer': zoomOnHover, 'transition-opacity duration-500 ease-in-out': fadeIn, 'opacity-0': fadeIn && !isLoaded, 'opacity-100': fadeIn && isLoaded,
+      'group cursor-pointer': zoomOnHover,
+      'transition-opacity duration-500 ease-in-out': fadeIn,
+      'opacity-0': fadeIn && !isLoaded,
+      'opacity-100': fadeIn && isLoaded,
     },
     className
   )
@@ -167,12 +170,12 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
   const ErrorFallback = () => (
     <div className={cn(
       'flex items-center justify-center bg-gray-100 text-gray-400 text-sm',
-      fill ? 'absolute inset-0' : ,
+      fill ? 'absolute inset-0' : '',
       !fill && width && height ? `w-[${width}px] h-[${height}px]` : 'min-h-[200px]'
     )}>
-      <div className= "text-center">
-        <svg className= "mx-auto h-12 w-12 text-gray-300 mb-2" fill= "none" viewBox= "0 0 24 24" stroke= "currentColor">
-          <path strokeLinecap= "round" strokeLinejoin= "round" strokeWidth={1} d= "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      <div className="text-center">
+        <svg className="mx-auto h-12 w-12 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
         <p>Image failed to load</p>
       </div>
@@ -183,7 +186,7 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
   const LoadingPlaceholder = () => (
     <div className={cn(
       'animate-pulse bg-gray-200',
-      fill ? 'absolute inset-0' : ,
+      fill ? 'absolute inset-0' : '',
       !fill && width && height ? `w-[${width}px] h-[${height}px]` : 'min-h-[200px]'
     )} />
   )
@@ -199,37 +202,25 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
           <Image
             src={getOptimizedSrc(currentSrc)}
             alt={alt}
-            width={fill ? undefined : width}
-            height={fill ? undefined : height}
-            fill={fill}
+            width={width}
+            height={height}
+            className={cn('transition-transform', imageStyles)}
             priority={priority}
             quality={quality}
             placeholder={placeholder}
             blurDataURL={generateBlurDataURL()}
             sizes={generateSizes()}
+            fill={fill}
             loading={loading}
             onLoad={handleLoad}
             onError={handleError}
             style={imageStyles}
-            className={cn(
-              'transition-all duration-300',
-              {
-                'group-hover:scale-110': zoomOnHover, 'opacity-0': !isLoaded && fadeIn, 'opacity-100': isLoaded || !fadeIn,
-              }
-            )}
+            objectFit={objectFit}
+            objectPosition={objectPosition}
           />
-
-          {/* Overlay */}
-          {overlay && overlayContent && (
-            <div className= "absolute inset-0 bg-purple-100/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+          {overlay && (
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
               {overlayContent}
-            </div>
-          )}
-
-          {/* Loading indicator */}
-          {!isLoaded && !hasError && (
-            <div className= "absolute inset-0 flex items-center justify-center bg-gray-100">
-              <div className= "animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
           )}
         </>
@@ -238,57 +229,29 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
   )
 })
 
-OptimizedImageEnhanced.displayName = 'OptimizedImageEnhanced
+OptimizedImageEnhanced.displayName = "OptimizedImageEnhanced"
 
-// Higher-order component for lazy loading images
-export const withLazyLoading = <P extends object>(
-  Component: React.ComponentType<P>
-) => {
-  return React.forwardRef<any, P & React.RefAttributes<any>>((props, ref) => {
-    const [isVisible, setIsVisible] = useState(false)
-    const elementRef = useRef<HTMLDivElement>(null)
+// Further Enhancements
+// 1. <picture> element support for WebP/AVIF
+// 2. Advanced error handling and reporting
+// 3. Integration with a CMS or data source
+// 4. More sophisticated placeholder generation (e.g., dominant color)
 
-    useEffect(() => {
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setIsVisible(true)
-            observer.disconnect()
-          }
-        },
-        { threshold: 0.1 }
-      )
-
-      if (elementRef.current) {
-        observer.observe(elementRef.current)
-      }
-
-      return () => observer.disconnect()
-    }, [])
-
-    return (
-      <div ref={elementRef}>
-        {isVisible && <Component {...(props as any)} ref={ref} />}
-      </div>
-    )
-  })
-}
-
-// Picture component for better format support
+// Example of using <picture> element
 export const PictureComponent: React.FC<OptimizedImageProps & {
   webpSrc?: string
   avifSrc?: string
 }> = ({ webpSrc, avifSrc, src, alt, ...props }) => {
   return (
     <picture>
-      {avifSrc && <source srcSet={avifSrc} type= "image/avif" />}
-      {webpSrc && <source srcSet={webpSrc} type= "image/webp" />}
+      {avifSrc && <source srcSet={avifSrc} type="image/avif" />}
+      {webpSrc && <source srcSet={webpSrc} type="image/webp" />}
       <OptimizedImageEnhanced src={src} alt={alt} {...props} />
     </picture>
   )
 }
 
-// Gallery component with optimized loading
+// Example of a Gallery component
 export const ImageGallery: React.FC<{
   images: Array<{
     src: string
@@ -300,94 +263,139 @@ export const ImageGallery: React.FC<{
   gap?: number
   onImageClick?: (index: number) => void
 }> = ({ images, columns = 3, gap = 16, onImageClick }) => {
+  const [dominantColors, setDominantColors] = useState<string[]>([])
+
+  useEffect(() => {
+    // Simulating dominant color extraction
+    const extractedColors = images.map(() => `rgba(${Math.random()*255},${Math.random()*255},${Math.random()*255},0.2)`)
+    setDominantColors(extractedColors)
+  }, [images])
+
   return (
-    <div 
-      className="grid
-      style={{
-        gridTemplateColumns: `repeat(${columns}, 1fr)`,
-        gap: `${gap}px
-      }}
-    >
+    <div className="grid" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)`, gap: `${gap}px` }}>
       {images.map((image, index) => (
-        <OptimizedImageEnhanced
+        <div
           key={index}
-          {...image}"
-          className="w-full h-auto cursor-pointer hover:opacity-80 transition-opacity
-          zoomOnHover
+          className="gallery-item relative"
           onClick={() => onImageClick?.(index)}
-        />
+          style={{ backgroundColor: dominantColors[index] }}
+        >
+          <OptimizedImageEnhanced
+            {...image}
+            placeholder="blur"
+            blurDataURL={dominantColors[index]}
+            zoomOnHover
+            overlay
+            overlayContent={<div className="text-white text-lg p-4">View Image</div>}
+          />
+        </div>
       ))}
     </div>
   )
 }
 
-// Progressive image loading hook
-export const useProgressiveImage = (src: string, fallbackSrc?: string) => {"
-  const [currentSrc, setCurrentSrc] = useState(fallbackSrc || '')
-  const [isLoading, setIsLoading] = useState(true)
-  const [hasError, setHasError] = useState(false)
 
-  useEffect(() => {
-    const img = new window.Image()
-    
-    img.onload = () => {
-      setCurrentSrc(src)
-      setIsLoading(false)
-    }
-    
-    img.onerror = () => {
-      setHasError(true)
-      setIsLoading(false)
-      if (fallbackSrc) {
-        setCurrentSrc(fallbackSrc)
-      }
-    }
-    
-    img.src = src
-  }, [src, fallbackSrc])
+// A more sophisticated utility for image measurements or analysis
+// This is a placeholder for a more complex implementation
+export const ImageAnalyzer = {
+  getAspectRatio: (width: number, height: number): number => {
+    if (height === 0) return 0
+    return width / height
+  },
 
-  return { src: currentSrc, isLoading, hasError }
+  // This would be a much more complex function in a real scenario
+  getDominantColor: async (imageUrl: string): Promise<string> => {
+    return new Promise((resolve) => {
+      // Simulate async operation
+      setTimeout(() => {
+        // In a real implementation, you would use canvas to get pixel data
+        // and find the dominant color.
+        const randomColor = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(
+          Math.random() * 255
+        )}, ${Math.floor(Math.random() * 255)}, 0.5)`
+        resolve(randomColor)
+      }, 50)
+    })
+  },
 }
 
-// Performance monitoring for images
-export const useImagePerformance = () => {
-  const [metrics, setMetrics] = useState<{
-    loadTime: number
-    renderTime: number
-    size: number
-  }>()
+// Example of a client component using these utilities
+const AdvancedImageDisplay: React.FC<{ src: string, alt: string }> = ({ src, alt }) => {
+  const [aspectRatio, setAspectRatio] = useState<number | null>(null)
+  const [dominantColor, setDominantColor] = useState<string>('')
 
-  const measureImage = (src: string) => {
-    const startTime = performance.now()
-    const img = new window.Image()
-    
-    img.onload = () => {
-      const loadTime = performance.now() - startTime
+  useEffect(() => {
+    const analyzeImage = async () => {
+      // In a real app, you might get dimensions from an API or by loading the image
+      const naturalWidth = 1920
+      const naturalHeight = 1080
+      setAspectRatio(ImageAnalyzer.getAspectRatio(naturalWidth, naturalHeight))
       
-      // Get image size if available
-      fetch(src, { method: 'HEAD' })
-        .then(response => {
-          const size = parseInt(response.headers.get('content-length') || '0')
-          
-          setMetrics({
-            loadTime,
-            renderTime: performance.now() - startTime,
-            size
-          })
-        })
-        .catch(() => {
-          setMetrics({
-            loadTime,
-            renderTime: performance.now() - startTime,
-            size: 0
-          })
-        })
+      const color = await ImageAnalyzer.getDominantColor(src)
+      setDominantColor(color)
     }
-    
-    img.src = src
+
+    analyzeImage()
+  }, [src])
+
+  return (
+    <div className="p-4 border rounded-lg shadow-lg" style={{ backgroundColor: dominantColor }}>
+      <p className="text-sm text-white mb-2">
+        Image Analysis
+      </p>
+      {aspectRatio && <p className="text-xs text-white">Aspect Ratio: {aspectRatio.toFixed(2)}</p>}
+      <OptimizedImageEnhanced
+        src={src}
+        alt={alt}
+        width={800}
+        height={450}
+        className="rounded-md"
+        zoomOnHover
+      />
+    </div>
+  )
+}
+
+
+// Example helper function to dynamically generate image sources
+// This might be used to switch between different CDN providers or image services
+function buildSrc(
+  basePath: string,
+  {
+    width,
+    quality,
+    format,
+  }: {
+    width: number
+    quality?: number
+    format?: 'webp' | 'avif' | 'jpeg'
+  }
+): string {
+  const params = new URLSearchParams()
+  params.set('w', width.toString())
+  if (quality) {
+    params.set('q', quality.toString())
+  }
+  if (format) {
+    params.set('fm', format)
   }
 
-  return { metrics, measureImage }
+  return `https://images.example.com/${basePath}?${params.toString()}`
+}
+
+function getAssetDimensions(assetId: string) {
+  // In a real application, this would fetch dimensions from a database or API
+  console.log('Fetching dimensions for', assetId)
+  return { width: 1200, height: 800 }
+}
+
+const measureImage = (src: string) => {
+  return new Promise<{width: number, height: number}>((resolve, reject) => {
+    const img = document.createElement('img')
+    img.onload = () => resolve({width: img.naturalWidth, height: img.naturalHeight})
+    img.onerror = reject
+    img.src = src
+  })
 }
 
 export default OptimizedImageEnhanced 

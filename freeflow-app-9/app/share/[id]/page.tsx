@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import MuxVideoPlayer from '@/components/video/mux-video-player';
@@ -142,7 +143,7 @@ export default async function PublicVideoPage({ params }: PageProps) {
           </CardHeader>
           <CardContent className="text-center">
             <Button asChild>
-              <a href="/">Go to FreeFlow</a>
+              <Link href="/">Go to FreeFlow</Link>
             </Button>
           </CardContent>
         </Card>
@@ -208,17 +209,17 @@ export default async function PublicVideoPage({ params }: PageProps) {
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <a href="/" className="font-bold text-xl">FreeFlow</a>
+              <Link href="/" className="font-bold text-xl">FreeFlow</Link>
               <Badge variant="outline" className="flex items-center gap-1">
                 <Globe className="h-3 w-3" />
                 Public
               </Badge>
             </div>
             <Button variant="outline" size="sm" asChild>
-              <a href="/" className="flex items-center gap-1">
+              <Link href="/" className="flex items-center gap-1">
                 <ExternalLink className="h-3 w-3" />
                 Open FreeFlow
-              </a>
+              </Link>
             </Button>
           </div>
         </div>
@@ -231,6 +232,7 @@ export default async function PublicVideoPage({ params }: PageProps) {
             {/* Video Player */}
             <div className="aspect-video rounded-lg overflow-hidden bg-black">
               <MuxVideoPlayer
+                videoId={video.id}
                 playbackId={video.mux_playback_id!}
                 title={video.title || 'Untitled Video'}
                 poster={video.thumbnail_url}
@@ -404,7 +406,7 @@ export default async function PublicVideoPage({ params }: PageProps) {
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <p className="text-muted-foreground text-sm">
-              Powered by <a href="/" className="font-medium hover:underline">FreeFlow</a> - 
+              Powered by <Link href="/" className="font-medium hover:underline">FreeFlow</Link> - 
               Professional video sharing for freelancers
             </p>
           </div>

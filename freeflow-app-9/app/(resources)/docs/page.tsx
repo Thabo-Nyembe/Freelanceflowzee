@@ -3,8 +3,7 @@
 import React from 'react'
 import { useState } from 'react'
 import Link from 'next/link'
-import { SiteHeader } from '@/components/site-header'
-import { SiteFooter } from '@/components/site-footer'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -107,8 +106,6 @@ export default function DocsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <SiteHeader />
-      
       <main className="pt-16">
         {/* Hero Section */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
@@ -307,7 +304,6 @@ export default function DocsPage() {
         </div>
       </main>
 
-      <SiteFooter />
       <DemoModal 
         isOpen={showDemoModal} 
         onClose={() => setShowDemoModal(false)} 

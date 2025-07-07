@@ -1,9 +1,11 @@
+'use client';
 import { Suspense } from 'react';
 import { VideoSearch } from '@/components/video/video-search';
 import { VideoFilters } from '@/components/video/video-filters';
 import { VideoGrid } from '@/components/video/video-grid';
 import { useVideoSearch } from '@/hooks/use-video-search';
 import { useSearchParams } from 'next/navigation';
+import { VideoSearchFilters } from '@/lib/types/video-search';
 
 export default function VideoSearchPage() {
   return (
@@ -18,7 +20,7 @@ export default function VideoSearchPage() {
 
 function SearchContent() {
   const searchParams = useSearchParams();
-  const initialQuery = searchParams.get('q') || '';
+  const initialQuery = searchParams?.get('q') || '';
 
   const {
     results,
@@ -35,7 +37,7 @@ function SearchContent() {
     updateFilters({ query });
   };
 
-  const handleFilterChange = (newFilters: any) => {
+  const handleFilterChange = (newFilters: Partial<VideoSearchFilters>) => {
     updateFilters(newFilters);
   };
 
@@ -75,9 +77,7 @@ function SearchContent() {
             videos={results.map(video => ({
               id: video.id,
               title: video.title,
-              thumbnailUrl: video.thumbnail_url,
-              duration: video.duration,
-              status: video.status as any
+              status: video.status as 'processing' | 'ready' | 'error'
             }))}
             className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
           />

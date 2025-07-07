@@ -9,7 +9,7 @@ export interface AIAnalysisResult {
   id: string
   timestamp: string
   type: FileType
-  status: 'analyzing' | 'complete' | 'error
+  status: 'analyzing' | 'complete' | 'error'
   result: string
 }
 
@@ -23,7 +23,7 @@ export interface AIGenerationResult {
   id: string
   timestamp: string
   type: string
-  status: 'generating' | 'complete' | 'error
+  status: 'generating' | 'complete' | 'error'
   result: string
 }
 
@@ -42,7 +42,7 @@ export class AIService {
   async analyzeFile(file: File, type: FileType): Promise<AIAnalysisResult> {
     try {
       // Upload file to Supabase Storage
-      const { data: uploadData, error: uploadError } = await this.supabase.storage
+      const { error: uploadError } = await this.supabase.storage
         .from('ai-analysis')
         .upload(`${Date.now()}-${file.name}`, file)
 
@@ -54,7 +54,7 @@ export class AIService {
         .insert({
           file_type: type,
           status: 'analyzing',
-          result: 
+          result: ''
         })
         .select()
         .single()
@@ -84,7 +84,7 @@ export class AIService {
         result: data.result
       }
     } catch (error) {
-      console.error('Error analyzing file: ', error)'
+      console.error('Error analyzing file: ', error)
       throw error
     }
   }
@@ -107,10 +107,10 @@ export class AIService {
         timestamp: item.created_at,
         type: item.file_type as FileType,
         status: item.status as 'analyzing' | 'complete' | 'error',
-        result: item.result || 
+        result: item.result || ''
       }))
     } catch (error) {
-      console.error('Error fetching analysis history: ', error)'
+      console.error('Error fetching analysis history: ', error)
       throw error
     }
   }
@@ -136,7 +136,7 @@ export class AIService {
           prompt,
           settings,
           status: 'generating',
-          result: 
+          result: ''
         })
         .select()
         .single()
@@ -163,7 +163,7 @@ export class AIService {
         result: data.result
       }
     } catch (error) {
-      console.error('Error generating asset: ', error)'
+      console.error('Error generating asset: ', error)
       throw error
     }
   }
@@ -186,10 +186,10 @@ export class AIService {
         timestamp: item.created_at,
         type: item.type,
         status: item.status as 'generating' | 'complete' | 'error',
-        result: item.result || 
+        result: item.result || ''
       }))
     } catch (error) {
-      console.error('Error fetching generation library: ', error)'
+      console.error('Error fetching generation library: ', error)
       throw error
     }
   }

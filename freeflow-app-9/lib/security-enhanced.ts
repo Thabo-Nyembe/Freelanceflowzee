@@ -26,7 +26,7 @@ class SecurityService {
       this.isInitialized = true
       console.log('🔒 Enhanced security system initialized')
     } catch (error) {
-      console.error('❌ Security initialization failed: ', error)'
+      console.error('❌ Security initialization failed: ', error)
     }
   }
 
@@ -44,14 +44,14 @@ class SecurityService {
     const rateLimitThreat = await this.checkRateLimit(request)
     if (rateLimitThreat.detected) {
       assessment.threats.push(rateLimitThreat)
-      assessment.threatLevel = 'high
+      assessment.threatLevel = 'high'
     }
 
     // SQL injection detection
     const sqlInjectionThreat = await this.detectSQLInjection(request)
     if (sqlInjectionThreat.detected) {
       assessment.threats.push(sqlInjectionThreat)
-      assessment.threatLevel = 'critical
+      assessment.threatLevel = 'critical'
     }
 
     // XSS detection
@@ -204,7 +204,7 @@ class SecurityService {
     // Validate session
     const sessionValidation = await this.validateSession(request.sessionToken)
     if (!sessionValidation.valid) {
-      validation.reason = 'Invalid or expired session
+      validation.reason = 'Invalid or expired session'
       return validation
     }
 
@@ -235,13 +235,13 @@ class SecurityService {
     // Check for suspicious access patterns
     const accessPattern = await this.analyzeAccessPattern(request)
     if (accessPattern.suspicious) {
-      validation.reason = 'Suspicious access pattern detected
+      validation.reason = 'Suspicious access pattern detected'
       await this.alertSystem.sendAccessAlert(request, accessPattern)
       return validation
     }
 
     validation.granted = true
-    validation.reason = 'Access granted
+    validation.reason = 'Access granted'
 
     // Log successful access
     await this.securityLogger.logAccess(request, validation)
@@ -267,7 +267,7 @@ class SecurityService {
   }
 
   // Compliance checking
-  async checkCompliance(standards: string[] = ['GDPR&apos;, 'SOC2', &apos;PCI-DSS']): Promise<ComplianceReport> {
+  async checkCompliance(standards: string[] = ['GDPR', 'SOC2', 'PCI-DSS']): Promise<ComplianceReport> {
     const report: ComplianceReport = {
       standards: {},
       overallScore: 0,
@@ -382,32 +382,32 @@ class SecurityService {
   // Threat detection methods
   private async checkRateLimit(request: SecurityRequest): Promise<ThreatDetection> {
     // Implement rate limiting logic
-    return { detected: false, type: 'rate_limit', severity: 'high', description: , confidence: 0 }
+    return { detected: false, type: 'rate_limit', severity: 'high', description: '', confidence: 0 }
   }
 
   private async detectSQLInjection(request: SecurityRequest): Promise<ThreatDetection> {
     // SQL injection detection logic
-    return { detected: false, type: 'sql_injection', severity: 'critical', description: , confidence: 0 }
+    return { detected: false, type: 'sql_injection', severity: 'critical', description: '', confidence: 0 }
   }
 
   private async detectXSS(request: SecurityRequest): Promise<ThreatDetection> {
     // XSS detection logic
-    return { detected: false, type: 'xss', severity: 'high', description: , confidence: 0 }
+    return { detected: false, type: 'xss', severity: 'high', description: '', confidence: 0 }
   }
 
   private async detectCSRF(request: SecurityRequest): Promise<ThreatDetection> {
     // CSRF detection logic
-    return { detected: false, type: 'csrf', severity: 'medium', description: , confidence: 0 }
+    return { detected: false, type: 'csrf', severity: 'medium', description: '', confidence: 0 }
   }
 
   private async detectSuspiciousBehavior(request: SecurityRequest): Promise<ThreatDetection> {
     // Behavioral analysis logic
-    return { detected: false, type: 'suspicious_behavior', severity: 'medium', description: , confidence: 0 }
+    return { detected: false, type: 'suspicious_behavior', severity: 'medium', description: '', confidence: 0 }
   }
 
   private async detectBot(request: SecurityRequest): Promise<ThreatDetection> {
     // Bot detection logic
-    return { detected: false, type: 'bot', severity: 'low', description: , confidence: 0 }
+    return { detected: false, type: 'bot', severity: 'low', description: '', confidence: 0 }
   }
 
   private escalateThreatLevel(current: ThreatLevel, new_level: ThreatLevel): ThreatLevel {
@@ -459,7 +459,7 @@ class SecurityService {
   }
 
   private async tokenizeFinancialData(data: string): Promise<string> {
-    return `token_${Math.random().toString(36).substr(2, 9)}
+    return `token_${Math.random().toString(36).substr(2, 9)}`
   }
 
   private async hashPassword(password: string): Promise<string> {
@@ -501,7 +501,7 @@ class SecurityService {
   }
 
   private async executeSecurityAction(event: SecurityEvent, analysis: SecurityEventAnalysis): Promise<void> {
-    console.log('Executing security action for event: ', event.type)'
+    console.log('Executing security action for event: ', event.type)
   }
 
   // Compliance methods
@@ -541,11 +541,11 @@ class SecurityService {
 
   // Utility methods
   private generateScanId(): string {
-    return `scan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}
+    return `scan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   }
 
   private generateTestSuiteId(): string {
-    return `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}
+    return `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   }
 }
 
@@ -560,21 +560,21 @@ class VulnerabilityScanner {
 
 class SecurityLogger {
   async logThreat(assessment: ThreatAssessment, request: SecurityRequest): Promise<void> {
-    console.log('Logging threat assessment: ', assessment.threatLevel)'
+    console.log('Logging threat assessment: ', assessment.threatLevel)
   }
 
   async logVulnerabilityReport(report: VulnerabilityReport): Promise<void> {
-    console.log('Logging vulnerability report: ', report.scanId)'
+    console.log('Logging vulnerability report: ', report.scanId)
   }
 
   async logAccess(request: AccessRequest, validation: AccessValidation): Promise<void> {
-    console.log('Logging access: ', request.resource, validation.granted)'
+    console.log('Logging access: ', request.resource, validation.granted)
   }
 }
 
 class SecurityAlertSystem {
   async sendAlert(assessment: ThreatAssessment, request: SecurityRequest): Promise<void> {
-    console.log('Sending security alert: ', assessment.threatLevel)'
+    console.log('Sending security alert: ', assessment.threatLevel)
   }
 
   async sendAccessAlert(request: AccessRequest, pattern: AccessPattern): Promise<void> {
@@ -582,7 +582,7 @@ class SecurityAlertSystem {
   }
 
   async sendSecurityAlert(event: SecurityEvent, analysis: SecurityEventAnalysis): Promise<void> {
-    console.log('Sending security event alert: ', event.type)'
+    console.log('Sending security event alert: ', event.type)
   }
 }
 
@@ -618,7 +618,7 @@ interface SecurityRequest {
   userId?: string
 }
 
-type ThreatLevel = 'low' | 'medium' | 'high' | 'critical
+type ThreatLevel = 'low' | 'medium' | 'high' | 'critical'
 
 interface ThreatDetection {
   detected: boolean
@@ -639,7 +639,7 @@ interface ThreatAssessment {
 interface Vulnerability {
   id: string
   type: string
-  severity: 'info' | 'low' | 'medium' | 'high' | 'critical
+  severity: 'info' | 'low' | 'medium' | 'high' | 'critical'
   description: string
   location: string
   recommendation: string
@@ -668,7 +668,7 @@ interface ProtectedData {
 
 interface SensitiveField {
   name: string
-  type: 'pii' | 'financial' | 'password' | 'confidential
+  type: 'pii' | 'financial' | 'password' | 'confidential'
   confidence: number
 }
 
@@ -734,7 +734,7 @@ interface ComplianceStandardResult {
 
 interface SecurityTest {
   name: string
-  status: 'passed' | 'failed' | 'skipped
+  status: 'passed' | 'failed' | 'skipped'
   description: string
   details?: Record<string, unknown>
 }

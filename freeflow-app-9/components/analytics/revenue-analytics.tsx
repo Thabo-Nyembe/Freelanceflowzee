@@ -2,10 +2,60 @@
 'use client'
 
 import React, { useReducer, useCallback, useEffect } from 'react'
- payload: Partial<RevenueState['engagement']> }
-  | { type: &apos;UPDATE_MONETIZATION&apos;; payload: Partial<RevenueState['monetization']> }
-  | { type: &apos;UPDATE_ANALYTICS&apos;; payload: Partial<RevenueState['analytics']> }
-  | { type: &apos;UPDATE_REALTIME&apos;; payload: Partial<RevenueState['realtimeData']> }
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { Clock, BarChart3, Zap, TrendingUp, Users, Star, DollarSign, Eye, Download, Share2, Monitor, Smartphone } from 'lucide-react'
+
+// Define state and action types
+interface RevenueState {
+  metrics: {
+    totalRevenue: number;
+    monthlyRevenue: number;
+    dailyRevenue: number;
+    conversionRate: number;
+    averageOrderValue: number;
+    totalUsers: number;
+    premiumUsers: number;
+    freeUsers: number;
+  };
+  engagement: {
+    totalViews: number;
+    totalDownloads: number;
+    totalShares: number;
+    uniqueVisitors: number;
+    bounceRate: number;
+    sessionDuration: number;
+  };
+  monetization: {
+    adRevenue: number;
+    subscriptionRevenue: number;
+    premiumUpgrades: number;
+    affiliateRevenue: number;
+    escrowFees: number;
+    storageUpgrades: number;
+  };
+  analytics: {
+    topPerformingFiles: Array<{ id: string; fileName: string; views: number; downloads: number; revenue: number; conversionRate: number; shareCount: number }>;
+    trafficSources: Array<{ source: string; users: number; revenue: number; conversionRate: number; percentage: number }>;
+    deviceBreakdown: Array<{ device: string; users: number; revenue: number; percentage: number }>;
+    geographicData: Array<{ country: string; users: number; revenue: number; flag: string }>;
+  };
+  realtimeData: {
+    currentUsers: number;
+    recentUploads: number;
+    activeDownloads: number;
+    revenueToday: number;
+  };
+}
+
+type RevenueAction =
+  | { type: 'UPDATE_METRICS'; payload: Partial<RevenueState['metrics']> }
+  | { type: 'UPDATE_ENGAGEMENT'; payload: Partial<RevenueState['engagement']> }
+  | { type: 'UPDATE_MONETIZATION'; payload: Partial<RevenueState['monetization']> }
+  | { type: 'UPDATE_ANALYTICS'; payload: Partial<RevenueState['analytics']> }
+  | { type: 'UPDATE_REALTIME'; payload: Partial<RevenueState['realtimeData']> }
   | { type: 'REFRESH_ALL_DATA' }
 
 // Context7 Pattern: Revenue Reducer
@@ -30,15 +80,12 @@ const revenueReducer = (state: RevenueState, action: RevenueAction): RevenueStat
 
 interface RevenueAnalyticsProps {
   userId?: string
-  timeRange?: 'today' | 'week' | 'month' | 'year
+  timeRange?: 'today' | 'week' | 'month' | 'year'
   showAdMetrics?: boolean
   enableRealtimeUpdates?: boolean
 }
 
 export function RevenueAnalytics({
-  userId,
-  timeRange = 'month',
-  showAdMetrics = true,
   enableRealtimeUpdates = true
 }: RevenueAnalyticsProps) {
   
@@ -114,7 +161,7 @@ export function RevenueAnalytics({
 
   // Format percentage
   const formatPercentage = useCallback((value: number) => {
-    return `${value.toFixed(1)}%
+    return `${value.toFixed(1)}%`
   }, [])
 
   // Format number with commas
@@ -154,7 +201,7 @@ export function RevenueAnalytics({
             <Clock className= "h-3 w-3" />
             Last updated: {new Date().toLocaleTimeString()}
           </Badge>
-          <Button variant= "outline" size= "sm" onClick={() => dispatch({ type: &apos;REFRESH_ALL_DATA&apos; })}>
+          <Button variant= "outline" size= "sm" onClick={() => dispatch({ type: 'REFRESH_ALL_DATA' })}>
             <BarChart3 className= "h-4 w-4 mr-2" />
             Refresh
           </Button>
@@ -201,29 +248,31 @@ export function RevenueAnalytics({
               <div>
                 <p className= "text-sm font-medium text-muted-foreground">Total Revenue</p>
                 <p className= "text-2xl font-bold">{formatCurrency(state.metrics.totalRevenue)}</p>
-                <p className= "text-xs text-green-600 flex items-center gap-1">
-                  <ArrowUp className= "h-3 w-3" />
-                  +12.5% from last month
-                </p>
               </div>
-              <DollarSign className= "h-8 w-8 text-emerald-600" />
+              <div className= "text-green-600">
+                <TrendingUp className="h-6 w-6" />
+              </div>
             </div>
+            <p className= "text-xs text-muted-foreground mt-2">
+              {formatCurrency(state.metrics.monthlyRevenue)} this month
+            </p>
           </CardContent>
         </Card>
-
+        
         <Card>
           <CardContent className= "p-6">
             <div className= "flex items-center justify-between">
               <div>
                 <p className= "text-sm font-medium text-muted-foreground">Conversion Rate</p>
                 <p className= "text-2xl font-bold">{formatPercentage(state.metrics.conversionRate)}</p>
-                <p className= "text-xs text-green-600 flex items-center gap-1">
-                  <ArrowUp className= "h-3 w-3" />
-                  +2.1% improvement
-                </p>
               </div>
-              <Target className= "h-8 w-8 text-blue-600" />
+              <div className= "text-blue-600">
+                <Users className="h-6 w-6" />
+              </div>
             </div>
+            <p className= "text-xs text-muted-foreground mt-2">
+              AOV: {formatCurrency(state.metrics.averageOrderValue)}
+            </p>
           </CardContent>
         </Card>
 
@@ -233,13 +282,14 @@ export function RevenueAnalytics({
               <div>
                 <p className= "text-sm font-medium text-muted-foreground">Premium Users</p>
                 <p className= "text-2xl font-bold">{formatNumber(state.metrics.premiumUsers)}</p>
-                <p className= "text-xs text-green-600 flex items-center gap-1">
-                  <ArrowUp className= "h-3 w-3" />
-                  +8.3% this month
-                </p>
               </div>
-              <Star className= "h-8 w-8 text-yellow-600" />
+              <div className= "text-purple-600">
+                <Star className="h-6 w-6" />
+              </div>
             </div>
+            <p className= "text-xs text-muted-foreground mt-2">
+              {formatPercentage(state.metrics.premiumUsers / state.metrics.totalUsers * 100)} of total users
+            </p>
           </CardContent>
         </Card>
 
@@ -247,15 +297,16 @@ export function RevenueAnalytics({
           <CardContent className= "p-6">
             <div className= "flex items-center justify-between">
               <div>
-                <p className= "text-sm font-medium text-muted-foreground">Avg Order Value</p>
-                <p className= "text-2xl font-bold">{formatCurrency(state.metrics.averageOrderValue)}</p>
-                <p className= "text-xs text-red-600 flex items-center gap-1">
-                  <ArrowDown className= "h-3 w-3" />
-                  -1.2% decline
-                </p>
+                <p className= "text-sm font-medium text-muted-foreground">Ad Revenue</p>
+                <p className= "text-2xl font-bold">{formatCurrency(state.monetization.adRevenue)}</p>
               </div>
-              <BarChart3 className= "h-8 w-8 text-purple-600" />
+              <div className= "text-emerald-600">
+                <DollarSign className="h-6 w-6" />
+              </div>
             </div>
+            <p className= "text-xs text-muted-foreground mt-2">
+              {formatPercentage(state.monetization.adRevenue / state.metrics.totalRevenue * 100)} of total revenue
+            </p>
           </CardContent>
         </Card>
       </div>

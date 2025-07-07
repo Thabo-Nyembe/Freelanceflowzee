@@ -22,7 +22,7 @@ export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
   const [content, setContent] = useState('')
   const [category, setCategory] = useState('general')
   const [mediaUrls, setMediaUrls] = useState<string[]>([])
-  const [mediaType, setMediaType] = useState<&apos;image&apos; | &apos;video&apos; | &apos;link&apos;>('image')
+  const [mediaType, setMediaType] = useState<'image' | 'video' | 'link'>('image')
   const [mediaUrl, setMediaUrl] = useState('')
 
   const handleAddMedia = () => {
@@ -56,16 +56,16 @@ export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className= "space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <Input
-        placeholder= "Post title
+        placeholder="Post title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         required
       />
 
       <Textarea
-        placeholder= "Write your post content...
+        placeholder="Write your post content..."
         value={content}
         onChange={(e) => setContent(e.target.value)}
         required
@@ -74,82 +74,81 @@ export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
 
       <Select value={category} onValueChange={setCategory}>
         <SelectTrigger>
-          <SelectValue placeholder= "Select category" />
+          <SelectValue placeholder="Select category" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value= "general">General</SelectItem>
-          <SelectItem value= "design">Design</SelectItem>
-          <SelectItem value= "development">Development</SelectItem>
-          <SelectItem value= "marketing">Marketing</SelectItem>
-          <SelectItem value= "other">Other</SelectItem>
+          <SelectItem value="general">General</SelectItem>
+          <SelectItem value="design">Design</SelectItem>
+          <SelectItem value="development">Development</SelectItem>
+          <SelectItem value="marketing">Marketing</SelectItem>
+          <SelectItem value="other">Other</SelectItem>
         </SelectContent>
       </Select>
 
-      <div className= "space-y-2">
-        <div className= "flex gap-2">
+      <div className="space-y-2">
+        <div className="flex gap-2">
           <Button
-            type= "button
+            type="button"
             variant={mediaType === 'image' ? 'default' : 'outline'}
             onClick={() => setMediaType('image')}
-            size= "sm
+            size="sm"
           >
-            <ImageIcon className= "mr-2 h-4 w-4" />
+            <ImageIcon className="mr-2 h-4 w-4" />
             Image
           </Button>
           <Button
-            type= "button
+            type="button"
             variant={mediaType === 'video' ? 'default' : 'outline'}
             onClick={() => setMediaType('video')}
-            size= "sm
+            size="sm"
           >
-            <Video className= "mr-2 h-4 w-4" />
+            <Video className="mr-2 h-4 w-4" />
             Video
           </Button>
           <Button
-            type= "button
+            type="button"
             variant={mediaType === 'link' ? 'default' : 'outline'}
             onClick={() => setMediaType('link')}
-            size= "sm
+            size="sm"
           >
-            <LinkIcon className= "mr-2 h-4 w-4" />
+            <LinkIcon className="mr-2 h-4 w-4" />
             Link
           </Button>
         </div>
 
-        <div className= "flex gap-2">
+        <div className="flex gap-2">
           <Input
             placeholder={`Add ${mediaType} URL`}
             value={mediaUrl}
             onChange={(e) => setMediaUrl(e.target.value)}
-            type= "url
+            type="url"
           />
           <Button
-            type= "button
+            type="button"
             onClick={handleAddMedia}
             disabled={!mediaUrl}
-            size= "sm
+            size="sm"
           >
             Add
           </Button>
         </div>
 
         {mediaUrls.length > 0 && (
-          <div className= "grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {mediaUrls.map((url, index) => (
-              <div key={index} className= "relative group">
+              <div key={index} className="relative group">
                 {url.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-                  <img src={url} alt={`Media ${index + 1}>
+                  <img src={url} alt={`Media ${index + 1}`} />
                 ) : (
-                  <div >
+                  <div>
                     {url.match(/\.(mp4|webm)$/i) ? (
-                      <Video >
+                      <Video />
                     ) : (
-                      <LinkIcon >
+                      <LinkIcon />
                     )}
                   </div>
                 )}
-                <Button > handleRemoveMedia(url)}
-                >
+                <Button onClick={() => handleRemoveMedia(url)}>
                   Remove
                 </Button>
               </div>
@@ -158,14 +157,14 @@ export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
         )}
       </div>
 
-      <Button disabled={isLoading || !title || !content}>
+      <Button type="submit" disabled={isLoading || !title || !content}>
         {isLoading ? (
           <>
-            <Loader2 >
+            <Loader2 />
             Creating Post...
           </>
         ) : (
-          'Create Post
+          'Create Post'
         )}
       </Button>
     </form>

@@ -1,7 +1,101 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
- percentage: number }>
+import React, { useState, useEffect, useCallback } from 'react'
+import {
+  Share2,
+  Settings,
+  Grid,
+  List,
+  Search,
+  Download,
+  Heart,
+  BarChart,
+  Code,
+  Eye,
+  Lock,
+  QrCode,
+  X,
+  Copy,
+  Mail,
+  Play,
+  Globe,
+  Clock,
+  Facebook,
+  Twitter,
+  Linkedin
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem
+} from '@/components/ui/dropdown-menu'
+import { Textarea } from '@/components/ui/textarea'
+
+// Type definitions
+interface GalleryItem {
+  id: string
+  type: 'image' | 'video' | 'document'
+  name: string
+  url: string
+  thumbnailUrl?: string
+  createdAt: string
+  metadata: {
+    resolution?: string
+    duration?: number
+    pages?: number
+    fileSize: number
+    tags: string[]
+    camera?: string
+    lens?: string
+  }
+  stats: {
+    views: number
+    likes: number
+    downloads: number
+  }
+}
+
+interface GallerySettings {
+  isPublic: boolean
+  password?: string
+  allowDownloads: boolean
+  showMetadata: boolean
+  allowComments: boolean
+  customDomain?: string
+  watermark?: {
+    text?: string
+    imageUrl?: string
+    position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+    opacity: number
+  }
+}
+
+interface VisitorAnalytics {
+  totalVisitors: number
+  uniqueVisitors: number
+  avgVisitDuration: number // in seconds
+  bounceRate: number // percentage
+  topReferrers: Array<{ source: string; count: number }>
+  countryDistribution: Array<{ country: string; percentage: number }>
   popularItems: Array<{ id: string; name: string; views: number }>
 }
 
@@ -9,12 +103,12 @@ interface AdvancedGallerySharingSystemProps {
   galleryId: string
   items: GalleryItem[]
   settings: GallerySettings
-  analytics?: VisitorAnalytics
+  _analytics?: VisitorAnalytics
   currentUser: {
     id: string
     name: string
     avatar?: string
-    role: 'owner' | 'collaborator' | 'viewer
+    role: 'owner' | 'collaborator' | 'viewer'
   }
   isOwnerView?: boolean
 }
@@ -23,46 +117,49 @@ export function AdvancedGallerySharingSystem({
   galleryId,
   items,
   settings: initialSettings,
-  analytics,
+  _analytics,
   currentUser,
   isOwnerView = false
 }: AdvancedGallerySharingSystemProps) {
   const [settings, setSettings] = useState<GallerySettings>(initialSettings)
-  const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [_selectedItems, _setSelectedItems] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState('')
-  const [filterTag, setFilterTag] = useState<string>('&apos;)
-  const [sortBy, setSortBy] = useState<&apos;date&apos; | &apos;name&apos; | &apos;views&apos; | &apos;likes&apos;>('date')
-  const [viewMode, setViewMode] = useState<&apos;grid&apos; | &apos;list&apos;>('grid')
-  const [lightboxItem, setLightboxItem] = useState<GalleryItem | null>(null)
+  const [filterTag, setFilterTag] = useState<string>('')
+  const [sortBy, setSortBy] = useState<'date' | 'name' | 'views' | 'likes'>('date')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [_lightboxItem, _setLightboxItem] = useState<GalleryItem | null>(null)
   const [shareDialog, setShareDialog] = useState(false)
-  const [settingsDialog, setSettingsDialog] = useState(false)
-  const [analyticsDialog, setAnalyticsDialog] = useState(false)
-  const [qrCodeDialog, setQrCodeDialog] = useState(false)
+  const [_settingsDialog, setSettingsDialog] = useState(false)
+  const [_analyticsDialog, setAnalyticsDialog] = useState(false)
+  const [_qrCodeDialog, setQrCodeDialog] = useState(false)
   const [customMessage, setCustomMessage] = useState('')
-  const [embedCode, setEmbedCode] = useState('')
+  const [_embedCode, _setEmbedCode] = useState('')
 
-  const galleryUrl = `${typeof window !== 'undefined' ? window.location.origin : }/gallery/${galleryId}
+  const galleryUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/gallery/${galleryId}`
   const publicShareUrl = settings.customDomain ? `https://${settings.customDomain}` : galleryUrl
+
+  const generateEmbedCode = useCallback(() => {
+    const code = `<iframe
+  src="${publicShareUrl}?embed=true"
+  width="100%"
+  height="600"
+  frameborder="0"
+  allowfullscreen>
+</iframe>`
+    _setEmbedCode(code)
+  }, [publicShareUrl])
 
   useEffect(() => {
     generateEmbedCode()
-  }, [settings])
-
-  const generateEmbedCode = () => {
-    const code = `<iframe 
-  src= "${publicShareUrl}?embed=true" 
-  width= "100%" 
-  height= "600" 
-  frameborder="0" 
-  allowfullscreen>
-</iframe>
-    setEmbedCode(code)
-  }
+  }, [generateEmbedCode])
 
   const filteredAndSortedItems = items
     .filter(item => {
-      const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           item.metadata.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      const matchesSearch =
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.metadata.tags.some(tag =>
+          tag.toLowerCase().includes(searchQuery.toLowerCase())
+        )
       const matchesTag = !filterTag || item.metadata.tags.includes(filterTag)
       return matchesSearch && matchesTag
     })
@@ -84,9 +181,11 @@ export function AdvancedGallerySharingSystem({
 
   const handleShare = async (platform: string) => {
     const url = encodeURIComponent(publicShareUrl)
-    const text = encodeURIComponent(customMessage || `Check out this amazing gallery!`)
-    
-    const shareUrls = {
+    const text = encodeURIComponent(
+      customMessage || 'Check out this amazing gallery!'
+    )
+
+    const shareUrls: { [key: string]: string } = {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
       twitter: `https://twitter.com/intent/tweet?url=${url}&text=${text}`,
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
@@ -97,15 +196,18 @@ export function AdvancedGallerySharingSystem({
     if (platform === 'copy') {
       await navigator.clipboard.writeText(shareUrls.copy)
       alert('Link copied to clipboard!')
-    } else if (shareUrls[platform as keyof typeof shareUrls]) {
-      window.open(shareUrls[platform as keyof typeof shareUrls], '_blank', 'width=600,height=400')
+    } else if (shareUrls[platform]) {
+      window.open(shareUrls[platform], '_blank', 'width=600,height=400')
     }
 
     // Track share event
     await trackEvent('share', { platform, galleryId })
   }
 
-  const handleDownload = async (item: GalleryItem, license: 'digital' | 'print' | 'commercial') => {
+  const handleDownload = async (
+    item: GalleryItem,
+    license: 'digital' | 'print' | 'commercial'
+  ) => {
     if (!settings.allowDownloads && currentUser.role === 'viewer') {
       alert('Downloads are not enabled for this gallery')
       return
@@ -151,11 +253,11 @@ export function AdvancedGallerySharingSystem({
         })
       })
     } catch (error) {
-      console.error('Failed to track event: ', error)'
+      console.error('Failed to track event: ', error)
     }
   }
 
-  const updateSettings = async (newSettings: Partial<GallerySettings>) => {
+  const _updateSettings = async (newSettings: Partial<GallerySettings>) => {
     try {
       const response = await fetch('/api/gallery/settings', {
         method: 'PUT',
@@ -170,7 +272,7 @@ export function AdvancedGallerySharingSystem({
         setSettings(prev => ({ ...prev, ...newSettings }))
       }
     } catch (error) {
-      console.error('Failed to update settings: ', error)'
+      console.error('Failed to update settings: ', error)
     }
   }
 
@@ -178,113 +280,91 @@ export function AdvancedGallerySharingSystem({
     const sizes = ['B', 'KB', 'MB', 'GB']
     if (bytes === 0) return '0 B'
     const i = Math.floor(Math.log(bytes) / Math.log(1024))
-    return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}
+    return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`
   }
 
-  const formatDuration = (seconds: number): string => {
+  const _formatDuration = (seconds: number): string => {
     const hrs = Math.floor(seconds / 3600)
     const mins = Math.floor((seconds % 3600) / 60)
     const secs = Math.floor(seconds % 60)
-    
+
     if (hrs > 0) {
-      return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}
+      return `${hrs}:${mins.toString().padStart(2, '0')}:${secs
+        .toString()
+        .padStart(2, '0')}`
     }
-    return `${mins}:${secs.toString().padStart(2, '0')}
+    return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
   return (
-    <div className= "w-full max-w-7xl mx-auto p-6 space-y-6">
+    <div className="w-full max-w-7xl mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className= "flex items-center justify-between">
-        <div className= "space-y-1">
-          <h1 className= "text-3xl font-bold">Professional Gallery</h1>
-          <div className= "flex items-center space-x-4 text-sm text-gray-600">
-            <span>{items.length} items</span>
-            {analytics && (
-              <>
-                <span>•</span>
-                <span>{analytics.totalVisitors} visitors</span>
-                <span>•</span>
-                <span>{analytics.pageViews} views</span>
-              </>
-            )}
-          </div>
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold">Professional Gallery</h1>
+          <p className="text-gray-500">{items.length} items</p>
         </div>
-
-        <div className= "flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           {isOwnerView && (
-            <>
-              <Button
-                variant="outline
-                onClick={() => setAnalyticsDialog(true)}"
-                className="space-x-2
-              >"
-                <BarChart3 className= "h-4 w-4" />
-                <span>Analytics</span>
-              </Button>
-              
-              <Button
-                variant="outline
-                onClick={() => setSettingsDialog(true)}"
-                className="space-x-2
-              >"
-                <Settings className= "h-4 w-4" />
-                <span>Settings</span>
-              </Button>
-            </>
+            <Button variant="outline" onClick={() => setAnalyticsDialog(true)}>
+              <BarChart className="mr-2 h-4 w-4" />
+              Analytics
+            </Button>
           )}
-
-          <Button
-            onClick={() => setShareDialog(true)}
-            className="space-x-2
-          >"
-            <Share2 className= "h-4 w-4" />
-            <span>Share Gallery</span>
+          <Button onClick={() => setShareDialog(true)}>
+            <Share2 className="mr-2 h-4 w-4" />
+            Share
           </Button>
+          {isOwnerView && (
+            <Button variant="secondary" onClick={() => setSettingsDialog(true)}>
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </Button>
+          )}
         </div>
       </div>
 
       {/* Status indicators */}
-      <div className= "flex items-center space-x-4">
-        <Badge variant={settings.isPublic ? &apos;default&apos; : &apos;secondary&apos;} className= "space-x-1">
-          {settings.isPublic ? <Globe className= "h-3 w-3" /> : <Lock className= "h-3 w-3" />}
-          <span>{settings.isPublic ? &apos;Public&apos; : &apos;Private&apos;}</span>
+      <div className="flex items-center space-x-4">
+        <Badge variant={settings.isPublic ? 'default' : 'secondary'} className="space-x-1">
+          {settings.isPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+          <span>{settings.isPublic ? 'Public' : 'Private'}</span>
         </Badge>
         
         {settings.passwordProtected && (
-          <Badge variant= "outline" className= "space-x-1">
-            <Lock className= "h-3 w-3" />
+          <Badge variant="outline" className="space-x-1">
+            <Lock className="h-3 w-3" />
             <span>Password Protected</span>
           </Badge>
         )}
         
         {settings.expiresAt && (
-          <Badge variant= "outline" className= "space-x-1">
-            <Clock className= "h-3 w-3" />
+          <Badge variant="outline" className="space-x-1">
+            <Clock className="h-3 w-3" />
             <span>Expires {new Date(settings.expiresAt).toLocaleDateString()}</span>
           </Badge>
         )}
       </div>
 
       {/* Controls */}
-      <div className= "flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-        <div className= "flex items-center space-x-4">
-          <div className= "relative">
-            <Search className= "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+        <div className="flex items-center space-x-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search items...
+              placeholder="Search items..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}"
-              className="pl-10 w-64
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 w-64"
             />
           </div>
 
-          <Select value={filterTag} onValueChange={setFilterTag}>"
-            <SelectTrigger className= "w-40">
-              <SelectValue placeholder= "Filter by tag" />
+          <Select value={filterTag} onValueChange={setFilterTag}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Filter by tag" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="&quot;>All tags</SelectItem>
+              <SelectItem value="All tags">All tags</SelectItem>
               {allTags.map(tag => (
                 <SelectItem key={tag} value={tag}>{tag}</SelectItem>
               ))}
@@ -292,75 +372,74 @@ export function AdvancedGallerySharingSystem({
           </Select>
 
           <Select value={sortBy} onValueChange={(value: Record<string, unknown>) => setSortBy(value)}>
-            <SelectTrigger className= "w-40">
+            <SelectTrigger className="w-40">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value= "date">Sort by date</SelectItem>
-              <SelectItem value= "name">Sort by name</SelectItem>
-              <SelectItem value= "views">Sort by views</SelectItem>
-              <SelectItem value= "likes">Sort by likes</SelectItem>
+              <SelectItem value="date">Sort by date</SelectItem>
+              <SelectItem value="name">Sort by name</SelectItem>
+              <SelectItem value="views">Sort by views</SelectItem>
+              <SelectItem value="likes">Sort by likes</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        <div className= "flex items-center space-x-2">
+        <div className="flex items-center space-x-2">
           <Button
             variant={viewMode === 'grid' ? 'default' : 'outline'}
-            size= "sm
+            size="sm"
             onClick={() => setViewMode('grid')}
           >
-            <Grid className= "h-4 w-4" />
+            <Grid className="h-4 w-4" />
           </Button>
           <Button
             variant={viewMode === 'list' ? 'default' : 'outline'}
-            size= "sm
+            size="sm"
             onClick={() => setViewMode('list')}
           >
-            <List className= "h-4 w-4" />
+            <List className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
       {/* Gallery */}
       {viewMode === 'grid' ? (
-        <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredAndSortedItems.map((item) => (
-            <Card key={item.id} className= "group overflow-hidden hover:shadow-lg transition-shadow">
-              <div className= "relative aspect-square overflow-hidden">
-                <img src={item.thumbnailUrl} alt={item.name}> setLightboxItem(item)}
-                />
+            <Card key={item.id} className="group overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="relative aspect-square overflow-hidden">
+                <img src={item.thumbnailUrl} alt={item.name} onClick={() => _setLightboxItem(item)} />
                 
                 {/* Overlay controls */}
-                <div >
-                  <Button >
-                    <Eye >
+                <div className="absolute inset-0 flex items-center justify-between">
+                  <Button>
+                    <Eye />
                   </Button>
-                  <Button >
-                    <Heart >
+                  <Button>
+                    <Heart />
                   </Button>
                   {settings.allowDownloads && (
-                    <DropdownMenu >
-                      <DropdownMenuTrigger >
-                        <Button >
-                          <Download >
+                    <DropdownMenu>
+                      <DropdownMenuTrigger>
+                        <Button>
+                          <Download />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent >
+                      <DropdownMenuContent>
                         {settings.showPricing ? (
                           <>
-                            <DropdownMenuItem > handleDownload(item, 'digital')}>
+                            <DropdownMenuItem onClick={() => handleDownload(item, 'digital')}>
                               Digital (${item.pricing.digital})
                             </DropdownMenuItem>
-                            <DropdownMenuItem > handleDownload(item, 'print')}>
+                            <DropdownMenuItem onClick={() => handleDownload(item, 'print')}>
                               Print (${item.pricing.print})
                             </DropdownMenuItem>
-                            <DropdownMenuItem > handleDownload(item, 'commercial')}>
+                            <DropdownMenuItem onClick={() => handleDownload(item, 'commercial')}>
                               Commercial (${item.pricing.commercial})
                             </DropdownMenuItem>
                           </>
                         ) : (
-                          <DropdownMenuItem > handleDownload(item, 'digital')}>
+                          <DropdownMenuItem onClick={() => handleDownload(item, 'digital')}>
                             Download
                           </DropdownMenuItem>
                         )}
@@ -371,44 +450,44 @@ export function AdvancedGallerySharingSystem({
 
                 {/* Media type indicator */}
                 {item.type === 'video' && (
-                  <div >
-                    <Badge >
-                      <Play >
-                      <span >Video</span>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Badge>
+                      <Play />
+                      <span>Video</span>
                     </Badge>
                   </div>
                 )}
 
                 {/* Stats overlay */}
-                <div >
-                  <Badge >
-                    <Eye >
-                    <span >{item.stats.views}</span>
+                <div className="absolute inset-0 flex items-center justify-between">
+                  <Badge>
+                    <Eye />
+                    <span>{item.stats.views}</span>
                   </Badge>
-                  <Badge >
-                    <Heart >
-                    <span >{item.stats.likes}</span>
+                  <Badge>
+                    <Heart />
+                    <span>{item.stats.likes}</span>
                   </Badge>
                 </div>
               </div>
 
-              <CardContent >
-                <h3 >{item.name}</h3>
+              <CardContent>
+                <h3>{item.name}</h3>
                 
-                <div >
-                  <span >{formatFileSize(item.size)}</span>
-                  <span >{item.dimensions.width} × {item.dimensions.height}</span>
+                <div>
+                  <span>{formatFileSize(item.size)}</span>
+                  <span>{item.dimensions.width} × {item.dimensions.height}</span>
                 </div>
                 
                 {item.metadata.tags.length > 0 && (
-                  <div >
+                  <div>
                     {item.metadata.tags.slice(0, 3).map(tag => (
                       <Badge key={tag}>
                         {tag}
                       </Badge>
                     ))}
                     {item.metadata.tags.length > 3 && (
-                      <Badge >
+                      <Badge>
                         +{item.metadata.tags.length - 3}
                       </Badge>
                     )}
@@ -419,69 +498,66 @@ export function AdvancedGallerySharingSystem({
           ))}
         </div>
       ) : (
-        <div >
+        <div>
           {filteredAndSortedItems.map((item) => (
             <Card key={item.id}>
-              <div >
-                <img src={item.thumbnailUrl} alt={item.name}> setLightboxItem(item)}
-                />
+              <div>
+                <img src={item.thumbnailUrl} alt={item.name} onClick={() => _setLightboxItem(item)} />
                 
-                <div >
-                  <h3 >{item.name}</h3>
-                  <div >
-                    <span >{formatFileSize(item.size)}</span>
-                    <span >{item.dimensions.width} × {item.dimensions.height}</span>
-                    <span >{new Date(item.createdAt).toLocaleDateString()}</span>
+                <div>
+                  <h3>{item.name}</h3>
+                  <div>
+                    <span>{formatFileSize(item.size)}</span>
+                    <span>{item.dimensions.width} × {item.dimensions.height}</span>
+                    <span>{new Date(item.createdAt).toLocaleDateString()}</span>
                   </div>
-                  <div >
-                    <span >
-                      <Eye >
-                      <span >{item.stats.views}</span>
+                  <div>
+                    <span>
+                      <Eye />
+                      <span>{item.stats.views}</span>
                     </span>
-                    <span >
-                      <Heart >
-                      <span >{item.stats.likes}</span>
+                    <span>
+                      <Heart />
+                      <span>{item.stats.likes}</span>
                     </span>
-                    <span >
-                      <Download >
-                      <span >{item.stats.downloads}</span>
+                    <span>
+                      <Download />
+                      <span>{item.stats.downloads}</span>
                     </span>
                   </div>
                 </div>
                 
-                <div >
-                  <Button > setLightboxItem(item)}
-                  >
-                    <Eye >
+                <div>
+                  <Button onClick={() => _setLightboxItem(item)}>
+                    <Eye />
                   </Button>
                   
-                  <Button > handleLike(item.id)}
-                  >
-                    <Heart >
+                  <Button onClick={() => handleLike(item.id)}>
+                    <Heart />
                   </Button>
                   
                   {settings.allowDownloads && (
-                    <DropdownMenu >
-                      <DropdownMenuTrigger >
-                        <Button >
-                          <Download >
+                    <DropdownMenu>
+                      <DropdownMenuTrigger>
+                        <Button>
+                          <Download />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent >
+                      <DropdownMenuContent>
                         {settings.showPricing ? (
                           <>
-                            <DropdownMenuItem > handleDownload(item, 'digital')}>
+                            <DropdownMenuItem onClick={() => handleDownload(item, 'digital')}>
                               Digital (${item.pricing.digital})
                             </DropdownMenuItem>
-                            <DropdownMenuItem > handleDownload(item, 'print')}>
+                            <DropdownMenuItem onClick={() => handleDownload(item, 'print')}>
                               Print (${item.pricing.print})
                             </DropdownMenuItem>
-                            <DropdownMenuItem > handleDownload(item, 'commercial')}>
+                            <DropdownMenuItem onClick={() => handleDownload(item, 'commercial')}>
                               Commercial (${item.pricing.commercial})
                             </DropdownMenuItem>
                           </>
                         ) : (
-                          <DropdownMenuItem > handleDownload(item, 'digital')}>
+                          <DropdownMenuItem onClick={() => handleDownload(item, 'digital')}>
                             Download
                           </DropdownMenuItem>
                         )}
@@ -497,76 +573,58 @@ export function AdvancedGallerySharingSystem({
 
       {/* Share Dialog */}
       <Dialog open={shareDialog} onOpenChange={setShareDialog}>
-        <DialogContent >
-          <DialogHeader >
-            <DialogTitle >Share Gallery</DialogTitle>
-            <DialogDescription >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share Gallery</DialogTitle>
+            <DialogDescription>
               Share your gallery with clients and get detailed analytics on engagement
             </DialogDescription>
           </DialogHeader>
           
-          <div >
-            <div >
-              <label >Gallery URL</label>
-              <div >
-                <Input value={publicShareUrl}>
-                <Button > handleShare('copy')}
-                >
-                  <Copy >
+          <div>
+            <div>
+              <label>Gallery URL</label>
+              <div>
+                <Input value={publicShareUrl} />
+                <Button onClick={() => handleShare('copy')}>
+                  <Copy />
                 </Button>
               </div>
             </div>
 
-            <div >
-              <label >Custom Message (Optional)</label>
-              <Textarea value={customMessage}> setCustomMessage(e.target.value)}
-                className="mt-1
-              />
+            <div>
+              <label>Custom Message (Optional)</label>
+              <Textarea value={customMessage} onChange={(e) => setCustomMessage(e.target.value)} className="mt-1" />
             </div>
 
-            <div >"
-              <Button > handleShare('facebook')}
-                className="space-x-2
-              >
-                <Facebook >
-                <span >Facebook</span>
+            <div>
+              <Button onClick={() => handleShare('facebook')} className="space-x-2">
+                <Facebook />
+                <span>Facebook</span>
               </Button>
-              "
-              <Button > handleShare('twitter')}
-                className="space-x-2
-              >
-                <Twitter >
-                <span >Twitter</span>
+              <Button onClick={() => handleShare('twitter')} className="space-x-2">
+                <Twitter />
+                <span>Twitter</span>
               </Button>
-              "
-              <Button > handleShare('linkedin')}
-                className="space-x-2
-              >
-                <Linkedin >
-                <span >LinkedIn</span>
+              <Button onClick={() => handleShare('linkedin')} className="space-x-2">
+                <Linkedin />
+                <span>LinkedIn</span>
               </Button>
-              "
-              <Button > handleShare('email')}
-                className="space-x-2
-              >
-                <Mail >
-                <span >Email</span>
+              <Button onClick={() => handleShare('email')} className="space-x-2">
+                <Mail />
+                <span>Email</span>
               </Button>
             </div>
 
-            <div >
-              <Button > setQrCodeDialog(true)}"
-                className="flex-1 space-x-2
-              >
-                <QrCode >
-                <span >QR Code</span>
+            <div>
+              <Button onClick={() => setQrCodeDialog(true)} className="flex-1 space-x-2">
+                <QrCode />
+                <span>QR Code</span>
               </Button>
               
-              <Button > navigator.clipboard.writeText(embedCode)}"
-                className="flex-1 space-x-2
-              >
-                <Code >
-                <span >Embed</span>
+              <Button onClick={() => navigator.clipboard.writeText(_embedCode)} className="flex-1 space-x-2">
+                <Code />
+                <span>Embed</span>
               </Button>
             </div>
           </div>
@@ -574,56 +632,52 @@ export function AdvancedGallerySharingSystem({
       </Dialog>
 
       {/* Lightbox */}
-      {lightboxItem && (
-        <Dialog open={!!lightboxItem}> setLightboxItem(null)}>
-          <DialogContent >
-            <div >"
-              {lightboxItem.type === 'video' ? (
-                <video src={lightboxItem.url}>
+      {_lightboxItem && (
+        <Dialog open={!!_lightboxItem} onOpenChange={_setLightboxItem}>
+          <DialogContent>
+            <div className="relative">
+              {_lightboxItem.type === 'video' ? (
+                <video src={_lightboxItem.url} />
               ) : (
-                <img src={lightboxItem.url} alt={lightboxItem.name}>
+                <img src={_lightboxItem.url} alt={_lightboxItem.name} />
               )}
               
-              <Button > setLightboxItem(null)}
-                className="absolute top-2 right-2 bg-purple-600/90 text-white hover:bg-purple-700/90 backdrop-blur-sm
-              >
-                <X >
+              <Button onClick={_setLightboxItem} className="absolute top-2 right-2 bg-purple-600/90 text-white hover:bg-purple-700/90 backdrop-blur-sm">
+                <X />
               </Button>
             </div>
             
-            <div >
-              <div >
-                <h3 >{lightboxItem.name}</h3>
-                <div >
-                  <Button > handleLike(lightboxItem.id)}
-                  >
-                    <Heart >
-                    {lightboxItem.stats.likes}
+            <div>
+              <div>
+                <h3>{_lightboxItem.name}</h3>
+                <div>
+                  <Button onClick={() => handleLike(_lightboxItem.id)}>
+                    <Heart />
+                    {_lightboxItem.stats.likes}
                   </Button>
                   
                   {settings.allowDownloads && (
-                    <DropdownMenu >
-                      <DropdownMenuTrigger >
-                        <Button >
-                          <Download >
-                          Download
+                    <DropdownMenu>
+                      <DropdownMenuTrigger>
+                        <Button>
+                          <Download />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent >
+                      <DropdownMenuContent>
                         {settings.showPricing ? (
-                          <>"
-                            <DropdownMenuItem > handleDownload(lightboxItem, 'digital')}>
-                              Digital License (${lightboxItem.pricing.digital})
+                          <>
+                            <DropdownMenuItem onClick={() => handleDownload(_lightboxItem, 'digital')}>
+                              Digital License (${_lightboxItem.pricing.digital})
                             </DropdownMenuItem>
-                            <DropdownMenuItem > handleDownload(lightboxItem, 'print')}>
-                              Print License (${lightboxItem.pricing.print})
+                            <DropdownMenuItem onClick={() => handleDownload(_lightboxItem, 'print')}>
+                              Print License (${_lightboxItem.pricing.print})
                             </DropdownMenuItem>
-                            <DropdownMenuItem > handleDownload(lightboxItem, 'commercial')}>
-                              Commercial License (${lightboxItem.pricing.commercial})
+                            <DropdownMenuItem onClick={() => handleDownload(_lightboxItem, 'commercial')}>
+                              Commercial License (${_lightboxItem.pricing.commercial})
                             </DropdownMenuItem>
                           </>
                         ) : (
-                          <DropdownMenuItem > handleDownload(lightboxItem, 'digital')}>
+                          <DropdownMenuItem onClick={() => handleDownload(_lightboxItem, 'digital')}>
                             Download Full Resolution
                           </DropdownMenuItem>
                         )}
@@ -633,34 +687,34 @@ export function AdvancedGallerySharingSystem({
                 </div>
               </div>
               
-              <div >
-                <div >
-                  <span >Size:</span>
-                  <br >
-                  {formatFileSize(lightboxItem.size)}
+              <div>
+                <div>
+                  <span>Size:</span>
+                  <br />
+                  {formatFileSize(_lightboxItem.size)}
                 </div>
-                <div >
-                  <span >Dimensions:</span>
-                  <br >
-                  {lightboxItem.dimensions.width} × {lightboxItem.dimensions.height}
+                <div>
+                  <span>Dimensions:</span>
+                  <br />
+                  {_lightboxItem.dimensions.width} × {_lightboxItem.dimensions.height}
                 </div>
-                <div >
-                  <span >Views:</span>
-                  <br >
-                  {lightboxItem.stats.views}
+                <div>
+                  <span>Views:</span>
+                  <br />
+                  {_lightboxItem.stats.views}
                 </div>
-                <div >
-                  <span >Downloads:</span>
-                  <br >
-                  {lightboxItem.stats.downloads}
+                <div>
+                  <span>Downloads:</span>
+                  <br />
+                  {_lightboxItem.stats.downloads}
                 </div>
               </div>
               
-              {lightboxItem.metadata.tags.length > 0 && (
-                <div >
-                  <span >Tags:</span>
-                  <div >
-                    {lightboxItem.metadata.tags.map(tag => (
+              {_lightboxItem.metadata.tags.length > 0 && (
+                <div>
+                  <span>Tags:</span>
+                  <div>
+                    {_lightboxItem.metadata.tags.map(tag => (
                       <Badge key={tag}>
                         {tag}
                       </Badge>

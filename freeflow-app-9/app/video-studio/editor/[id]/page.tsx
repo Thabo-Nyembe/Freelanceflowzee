@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import VideoEditor from '@/components/video/video-editor';
+import VideoEditor, { VideoEdit, ExportFormat, ShareSettings } from '@/components/video/video-editor';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Share, Eye } from 'lucide-react';
 import Link from 'next/link';
@@ -53,7 +53,7 @@ export default async function VideoEditorPage({ params }: VideoEditorPageProps) 
     ai_chapters: video.video_chapters || []
   };
 
-  const handleSave = async (edits: any[]) => {
+  const handleSave = async (edits: VideoEdit[]) => {
     'use server';
     
     const supabase = await createClient();
@@ -79,7 +79,7 @@ export default async function VideoEditorPage({ params }: VideoEditorPageProps) 
     }
   };
 
-  const handleExport = async (format: any) => {
+  const handleExport = async (format: ExportFormat) => {
     'use server';
     
     // Trigger export process
@@ -87,7 +87,7 @@ export default async function VideoEditorPage({ params }: VideoEditorPageProps) 
     // Implementation would trigger Mux or other video processing service
   };
 
-  const handleShare = async (settings: any) => {
+  const handleShare = async (settings: ShareSettings) => {
     'use server';
     
     const supabase = await createClient();

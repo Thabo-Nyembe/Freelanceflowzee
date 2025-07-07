@@ -8,11 +8,11 @@ import { Progress } from '@/components/ui/progress'
 import { 
   TrendingUp, 
   Users, 
-  Clock, '
-  Activity, '
-  BarChart2, "
-  RefreshCw,'
-  Download"
+  Clock,
+  Activity,
+  BarChart2,
+  RefreshCw,
+  Download
 } from 'lucide-react'
 
 interface AnalyticsSummary {
@@ -25,6 +25,9 @@ interface AnalyticsSummary {
   payments: number;
   eventTypes: Array<{ type: string; count: number }>;
 }
+
+interface RealtimeMetrics {}
+interface ChartData {}
 
 interface AnalyticsData {
   summary: AnalyticsSummary;
@@ -62,10 +65,10 @@ export default function AnalyticsDashboard() {
       if (result.success) {
         setData(result.data)
       } else {
-        console.error('Failed to fetch analytics: ', result.error)'
+        console.error('Failed to fetch analytics: ', result.error)
       }
     } catch (error) {
-      console.error('Analytics fetch error: ', error)'
+      console.error('Analytics fetch error: ', error)
     } finally {
       setLoading(false)
     }
@@ -81,8 +84,8 @@ export default function AnalyticsDashboard() {
   }, [timeRange, autoRefresh])
 
   const formatNumber = (num: number) => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
     return num.toString()
   }
 
@@ -139,7 +142,7 @@ export default function AnalyticsDashboard() {
                 onClick={() => setTimeRange(range.value)}
                 className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
                   timeRange === range.value
-                    ? 'bg-white text-indigo-600 shadow-sm
+                    ? 'bg-white text-indigo-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -151,18 +154,16 @@ export default function AnalyticsDashboard() {
           {/* Auto Refresh Toggle */}
           <Button
             variant="outline"
-            size="sm
+            size="sm"
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`gap-2 ${autoRefresh ? 'text-green-600' : 'text-gray-600'}`}
           >
-  <
             <RefreshCw className={`w-4 h-4 ${autoRefresh ? 'animate-spin' : ''}`} />
             {autoRefresh ? 'Auto-refresh On' : 'Auto-refresh Off'}
           </Button>
 
           {/* Export Button */}
           <Button variant="outline" size="sm" className="gap-2">
-  <
             <Download className="w-4 h-4" />
             Export
           </Button>
@@ -173,20 +174,15 @@ export default function AnalyticsDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Users Card */}
         <Card>
-  <
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-  <
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-  <
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-  <
           <CardContent>
             <div className="text-2xl font-bold">{data?.summary.totalUsers.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
               +{((data?.summary.activeUsers / data?.summary.totalUsers) * 100).toFixed(1)}% from last {timeRange}
             </p>
-  <
             <Progress 
               value={((data?.summary.activeUsers / data?.summary.totalUsers) * 100)} 
               className="mt-2"
@@ -194,43 +190,31 @@ export default function AnalyticsDashboard() {
           </CardContent>
         </Card>
 
-        {/* Session Time Card */}"
-        <Card>"
+        {/* Session Time Card */}
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-  <
             <CardTitle className="text-sm font-medium">Avg. Session Time</CardTitle>
-  <
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-  <
           <CardContent>
-            <div className="text-2xl font-bold">
-              {Math.floor(data?.summary.avgSessionTime / 60)}m {data?.summary.avgSessionTime % 60}s
-            </div>
+            <div className="text-2xl font-bold">{formatDuration(data?.summary.avgSessionTime)}</div>
             <p className="text-xs text-muted-foreground">
-              {data?.summary.bounceRate}% bounce rate
+              -2.1% from last {timeRange}
             </p>
-  <
-            <Progress value={100 - data?.summary.bounceRate} className="mt-2" />
           </CardContent>
         </Card>
 
         {/* Page Views Card */}
         <Card>
-  <
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-  <
             <CardTitle className="text-sm font-medium">Total Page Views</CardTitle>
-  <
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-  <
           <CardContent>
             <div className="text-2xl font-bold">{data?.summary.totalViews.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
               {data?.userActivity.page_views} views today
             </p>
-  <
             <Progress 
               value={(data?.userActivity.page_views / data?.summary.totalViews) * 100} 
               className="mt-2"
@@ -238,15 +222,12 @@ export default function AnalyticsDashboard() {
           </CardContent>
         </Card>
 
-        {/* Revenue Card */}"
-        <Card>"
+        {/* Revenue Card */}
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-  <
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-  <
             <BarChart2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-  <
           <CardContent>
             <div className="text-2xl font-bold">
               ${data?.summary.revenue.toLocaleString()}
@@ -254,7 +235,6 @@ export default function AnalyticsDashboard() {
             <p className="text-xs text-muted-foreground">
               {data?.summary.payments} payments
             </p>
-  <
             <Progress 
               value={(data?.summary.payments / data?.summary.totalUsers) * 100} 
               className="mt-2"
@@ -263,5 +243,5 @@ export default function AnalyticsDashboard() {
         </Card>
       </div>
     </div>
-  )"
-} "
+  )
+}

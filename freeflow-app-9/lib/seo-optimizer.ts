@@ -26,10 +26,8 @@ export const SEO_CONFIG = {
     }
   },
   features: {
-    primary: ['Project Management', 'Client Collaboration', 'Payment Processing', 'Time Tracking', 'File Sharing', 'Team Management
-    ],
-    benefits: ['Increase productivity by 40%', 'Reduce project turnaround time', 'Streamline client communication', 'Automate invoicing and payments', 'Secure file collaboration', 'Real-time project tracking
-    ]
+    primary: ['Project Management', 'Client Collaboration', 'Payment Processing', 'Time Tracking', 'File Sharing', 'Team Management'],
+    benefits: ['Increase productivity by 40%', 'Reduce project turnaround time', 'Streamline client communication', 'Automate invoicing and payments', 'Secure file collaboration', 'Real-time project tracking']
   },
   keywords: {
     primary: 'freelance management, project collaboration, client portal, payment processing',
@@ -92,7 +90,7 @@ export interface BlogPostSEO {
 }
 
 export function generateBlogPostSEO(post: BlogPostSEO): Metadata {
-  const title = `${post.title} | ${SEO_CONFIG.site.name} Blog
+  const title = `${post.title} | ${SEO_CONFIG.site.name} Blog`
   const description = post.description.length > 160 
     ? post.description.substring(0, 157) + '...' 
     : post.description
@@ -125,13 +123,13 @@ export function generateBlogPostSEO(post: BlogPostSEO): Metadata {
     twitter: {
       card: 'summary_large_image',
       site: SEO_CONFIG.site.creator,
-      creator: `@${post.author.toLowerCase().replace(' ', )}`,
+      creator: `@${post.author.toLowerCase().replace(' ', '')}`,
       title,
       description,
       images: [`${SEO_CONFIG.site.url}/images/blog/${slugify(post.title)}-twitter.jpg`]
     },
     alternates: {
-      canonical: `${SEO_CONFIG.site.url}/blog/${slugify(post.title)}
+      canonical: `${SEO_CONFIG.site.url}/blog/${slugify(post.title)}`,
     }
   }
 }
@@ -141,7 +139,7 @@ export interface SalesPageSEO {
   product: string
   price: number
   currency: string
-  availability: 'InStock' | 'PreOrder' | 'OutOfStock
+  availability: 'InStock' | 'PreOrder' | 'OutOfStock'
   features: string[]
   benefits: string[]
   testimonials?: number
@@ -150,8 +148,8 @@ export interface SalesPageSEO {
 }
 
 export function generateSalesPageSEO(sales: SalesPageSEO): Metadata {
-  const title = `${sales.product} - Professional ${SEO_CONFIG.site.tagline}
-  const description = `Get ${sales.product} for ${sales.currency}${sales.price}. ${sales.benefits.slice(0, 2).join('. ')}. Trusted by thousands of freelancers worldwide.
+  const title = `${sales.product} - Professional ${SEO_CONFIG.site.tagline}`
+  const description = `Get ${sales.product} for ${sales.currency}${sales.price}. ${sales.benefits.slice(0, 2).join('. ')}. Trusted by thousands of freelancers worldwide.`
 
   return {
     title,

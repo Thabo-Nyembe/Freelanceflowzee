@@ -93,16 +93,16 @@ function aiAssistantReducer(state: AIAssistantState, action: AIAssistantAction):
         isAnalyzing: false,
         currentAnalysis: action.analysis,
         suggestions: action.suggestions,
-        confidence: action.analysis.score
+        confidence: action.analysis.score,
       }
     
     case 'ADD_MESSAGE':
       return { 
         ...state, 
         chatHistory: [...state.chatHistory, action.message],
-        userInput: "
-      }"
-    "
+        userInput: '',
+      }
+    
     case 'SET_USER_INPUT':
       return { ...state, userInput: action.input }
     
@@ -186,7 +186,7 @@ export function AIDesignAssistant({
   projectId,
   currentFile,
   onSuggestionApply,
-  className="
+  className,
 }: AIDesignAssistantProps) {
   const [state, dispatch] = useReducer(aiAssistantReducer, {
     isAnalyzing: false,
@@ -194,10 +194,10 @@ export function AIDesignAssistant({
     suggestions: [],
     chatHistory: [],
     selectedSuggestion: null,
-    isGenerating: false,"
+    isGenerating: false,
     userInput: '',
     analysisMode: 'design',
-    confidence: 0
+    confidence: 0,
   })
 
   // Simulate AI Analysis
@@ -296,14 +296,14 @@ export function AIDesignAssistant({
               <Button
                 key={key}
                 variant={state.analysisMode === key ? "default" : "outline"}
-                size="sm
+                size="sm"
                 onClick={() => {
                   dispatch({ type: 'SET_ANALYSIS_MODE', mode: key as any })
                   runAnalysis(key as any)
                 }}
                 disabled={state.isAnalyzing}
                 className="flex flex-col items-center gap-1 h-auto p-3"
-              >"
+              >
                 <Icon className="w-4 h-4" />
                 <span className="text-xs">{label}</span>
               </Button>
@@ -511,7 +511,7 @@ export function AIDesignAssistant({
             <Button 
               onClick={sendMessage}
               disabled={!state.userInput.trim() || state.isGenerating}
-              size="icon
+              size="icon"
             >
               <Send className="w-4 h-4" />
             </Button>

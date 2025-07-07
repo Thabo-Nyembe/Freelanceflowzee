@@ -46,26 +46,24 @@ export function ThemeToggle() {
 
   return (
     <DropdownMenu>
-  <
       <DropdownMenuTrigger asChild>
-  <
         <Button
           variant="ghost"
-          size= "sm
+          size="sm"
+          data-testid="theme-toggle"
+          aria-label="Toggle theme"
           className="relative h-9 w-9 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          aria-label= "Toggle theme
         >
-  <
-          <CurrentIcon className= "h-4 w-4 transition-all" />
-          <span className= "sr-only">Toggle theme</span>
+          <CurrentIcon className="h-4 w-4 transition-all" />
+          <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
-  <
-      <DropdownMenuContent 
-        align= "end" 
-        className="w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg
-      >"
-        <div className= "p-1">
+
+      <DropdownMenuContent
+        align="end"
+        className="w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg"
+      >
+        <div className="p-1">
           {themes.map((themeOption) => {
             const Icon = themeOption.icon
             const isSelected = theme === themeOption.value
@@ -75,20 +73,19 @@ export function ThemeToggle() {
                 key={themeOption.value}
                 onClick={() => setTheme(themeOption.value)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2 text-sm rounded-md cursor-pointer transition-colors", "hover:bg-gray-100 dark:hover:bg-gray-800", "focus:bg-gray-100 dark:focus:bg-gray-800",
-                  isSelected && "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300
+                  "flex items-center gap-3 px-3 py-2 text-sm rounded-md cursor-pointer transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus:bg-gray-100 dark:focus:bg-gray-800",
+                  isSelected && 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
                 )}
               >
-  <
-                <Icon className= "h-4 w-4" />
-                <div className= "flex flex-col flex-1">
-                  <span className= "font-medium">{themeOption.name}</span>
-                  <span className= "text-xs text-gray-500 dark:text-gray-400">
+                <Icon className="h-4 w-4" />
+                <div className="flex flex-col flex-1">
+                  <span className="font-medium">{themeOption.name}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
                     {themeOption.description}
                   </span>
                 </div>
                 {isSelected && (
-                  <Check className= "h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  <Check className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                 )}
               </DropdownMenuItem>
             )
@@ -110,17 +107,18 @@ export function ThemeToggleSimple() {
   return (
     <Button
       variant="ghost"
-      size= "sm
+      size="sm"
       onClick={toggleTheme}
+      data-testid="theme-toggle-simple"
+      aria-label="Toggle theme"
       className="h-9 w-9 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-      aria-label= "Toggle theme
     >
       {resolvedTheme === 'dark' ? (
-        <Sun className= "h-4 w-4" />
+        <Sun className="h-4 w-4" />
       ) : (
-        <Moon className= "h-4 w-4" />
+        <Moon className="h-4 w-4" />
       )}
-      <span className= "sr-only">Toggle theme</span>
+      <span className="sr-only">Toggle theme</span>
     </Button>
   )
 } 

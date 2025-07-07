@@ -11,7 +11,7 @@ interface AIEnhancedCanvasCollaborationProps {
 
 export function AIEnhancedCanvasCollaboration({
   projectId,
-  className = 
+  className,
 }: AIEnhancedCanvasCollaborationProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const supabase = createClient()

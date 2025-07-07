@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { MobileMenu } from '@/components/mobile-menu'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 const navigation = [
   { name: 'Features', href: '/features', testId: 'nav-features' },
@@ -23,6 +24,7 @@ export function SiteHeader() {
             <span className="text-xl font-bold">FreeflowZee</span>
           </Link>
           
+          {/* Desktop Navigation - Hidden on mobile (< 768px), visible on medium screens and up (>= 768px) */}
           <div className="hidden md:flex md:gap-6">
             {navigation.map((item) => (
               <Link
@@ -37,7 +39,9 @@ export function SiteHeader() {
           </div>
         </div>
 
-        <div className="hidden md:flex items-center gap-2">
+        {/* Desktop Actions - Hidden on mobile, visible on medium screens and up */}
+        <div className="hidden md:flex md:items-center md:gap-2">
+          <ThemeToggle />
           <Button asChild variant="ghost" size="sm" data-testid="nav-login">
             <Link href="/login">Log in</Link>
           </Button>

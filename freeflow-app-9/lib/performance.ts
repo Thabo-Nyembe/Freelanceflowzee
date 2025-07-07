@@ -14,14 +14,14 @@ export async function trackWebVitals() {
     onFCP(sendToAnalytics)
     onTTFB(sendToAnalytics)
   } catch (error) {
-    console.warn('Failed to load web-vitals: ', error)'
+    console.warn('Failed to load web-vitals: ', error)
   }
 }
 
 function sendToAnalytics(metric: Record<string, unknown>) {
   // In production, send to your analytics service
   if (process.env.NODE_ENV === 'development') {
-    console.log('📊 Web Vital: ', metric.name, metric.value, metric.rating)'
+    console.log('📊 Web Vital: ', metric.name, metric.value, metric.rating)
   }
   
   // Example: Send to Google Analytics
@@ -55,7 +55,7 @@ export class PerformanceOptimizer {
           
           // Log slow resources in development
           if (process.env.NODE_ENV === 'development' && resourceEntry.duration > 1000) {
-            console.warn('🐌 Slow resource: ', resourceEntry.name, `${resourceEntry.duration.toFixed(2)}ms`)'
+            console.warn('🐌 Slow resource: ', resourceEntry.name, `${resourceEntry.duration.toFixed(2)}ms`)
           }
         }
       })
@@ -98,7 +98,7 @@ export class PerformanceOptimizer {
       const lastEntry = entries[entries.length - 1]
       
       if (process.env.NODE_ENV === 'development') {
-        console.log('🎯 LCP element: ', lastEntry)'
+        console.log('🎯 LCP element: ', lastEntry)
       }
     })
 
@@ -131,7 +131,7 @@ export async function preloadCriticalImages(images: string[]) {
     await Promise.all(images.map(preloadImage))
     console.log('✅ Critical images preloaded')
   } catch (error) {
-    console.warn('⚠️ Failed to preload some images: ', error)'
+    console.warn('⚠️ Failed to preload some images: ', error)
   }
 }
 
@@ -150,7 +150,7 @@ export function logBundleInfo() {
     return total
   }, 0)
 
-  console.log('📦 Estimated bundle chunks: ', totalSize)'
+  console.log('📦 Estimated bundle chunks: ', totalSize)
 }
 
 // Memory usage monitoring

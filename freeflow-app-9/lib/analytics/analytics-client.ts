@@ -28,7 +28,7 @@ class IntegratedAnalyticsClient {
   }
 
   private generateSessionId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}
+    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
   }
 
   private initializeIfNeeded() {
@@ -75,7 +75,7 @@ class IntegratedAnalyticsClient {
 
     window.addEventListener('unhandledrejection', (event) => {
       this.trackError('promise_rejection', {
-        message: event.reason?.toString() || 'Unknown promise rejection
+        message: event.reason?.toString() || 'Unknown promise rejection'
       })
     })
   }
@@ -87,7 +87,7 @@ class IntegratedAnalyticsClient {
       timestamp: Date.now(),
       session_id: this.sessionId,
       user_agent: navigator.userAgent,
-      viewport: `${window.innerWidth}x${window.innerHeight}
+      viewport: `${window.innerWidth}x${window.innerHeight}`
     }
 
     // Send to internal analytics API
@@ -98,7 +98,7 @@ class IntegratedAnalyticsClient {
       try {
         track(eventName, enrichedProperties)
       } catch (error) {
-        console.warn('Vercel Analytics tracking failed: ', error)'
+        console.warn('Vercel Analytics tracking failed: ', error)
       }
     }
   }
@@ -107,7 +107,7 @@ class IntegratedAnalyticsClient {
     const pageData = {
       path,
       title: title || document.title,
-      referrer: document.referrer || 'direct
+      referrer: document.referrer || 'direct'
     }
 
     this.trackEvent('page_view', pageData)
@@ -151,7 +151,7 @@ class IntegratedAnalyticsClient {
       this.trackEvent('error', errorData)
     } catch (error) {
       // Log error but don't throw to prevent error tracking from breaking the app
-      console.error('Failed to track error: ', {'
+      console.error('Failed to track error: ', {
         error_type: 'analytics_error',
         message: error instanceof Error ? error.message : 'Unknown error occurred',
         context: {
@@ -163,8 +163,7 @@ class IntegratedAnalyticsClient {
 
   // Helper methods
   private isImportantEvent(eventName: string): boolean {
-    const importantEvents = ['page_view', 'conversion', 'signup', 'login', 'purchase', 'subscription', 'error', 'performance
-    ]
+    const importantEvents = ['page_view', 'conversion', 'signup', 'login', 'purchase', 'subscription', 'error', 'performance']
     return importantEvents.includes(eventName)
   }
 
@@ -181,7 +180,7 @@ class IntegratedAnalyticsClient {
         })
       })
     } catch (error) {
-      console.warn('Internal analytics tracking failed: ', error)'
+      console.warn('Internal analytics tracking failed: ', error)
     }
   }
 }

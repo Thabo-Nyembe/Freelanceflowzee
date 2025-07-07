@@ -8,8 +8,6 @@ import React, {
   useState,
   useReducer,
   useRef,
-  useEffect,
-  type JSX,
 } from 'react'
 
 /* ------------------------------------------------------------------
@@ -24,38 +22,12 @@ import {
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Slider } from '@/components/ui/slider'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Progress } from '@/components/ui/progress'
 import { 
   Play, 
-  Pause, 
-  Square, 
-  Volume2, 
-  Monitor, 
-  Camera, 
-  Settings,
   Download,
   Share2,
-  Users,
-  MessageSquare,
-  TrendingUp,
-  RotateCcw,
-  VolumeX,
-  Maximize,
-  Video,
-  Mic,
-  Eye,
-  Brain,
-  Sparkles,
-  Edit3,
-  StopCircle,
-  Upload,
-  Clock,
-  Zap,
-  Subtitles,
-  Heart,
   MoreHorizontal
 } from 'lucide-react'
 
@@ -199,7 +171,7 @@ interface ViewerAnalytics {
 }
 
 // Enhanced Context7 Reducer
-const videoStudioReducer = (state: VideoStudioState, action: any): VideoStudioState => {
+const videoStudioReducer = (state: VideoStudioState, action: { type: string; [key: string]: unknown }): VideoStudioState => {
   switch (action.type) {
     case "START_RECORDING":
       return { ...state, isRecording: true, isPaused: false }
@@ -210,109 +182,76 @@ const videoStudioReducer = (state: VideoStudioState, action: any): VideoStudioSt
     case "RESUME_RECORDING":
       return { ...state, isPaused: false }
     case "SET_RECORDING_MODE":
-      return { ...state, recordingMode: action.mode }
+      return { ...state, recordingMode: action.mode as string }
     case "TOGGLE_AUDIO":
       return { ...state, audioEnabled: !state.audioEnabled }
     case "TOGGLE_VIDEO":
       return { ...state, videoEnabled: !state.videoEnabled }
     case "SET_CURRENT_TIME":
-      return { ...state, currentTime: action.time }
+      return { ...state, currentTime: action.time as number }
     case "SET_ZOOM":
-      return { ...state, zoom: action.zoom }
+      return { ...state, zoom: action.zoom as number }
     case "TOGGLE_PLAY":
       return { ...state, isPlaying: !state.isPlaying }
     case "ADD_RECORDING":
-      return { ...state, recordings: [...state.recordings, action.recording] }
+      return { ...state, recordings: [...state.recordings, action.recording as VideoRecording] }
     case "ADD_COMMENT":
-      return { ...state, comments: [...state.comments, action.comment] }
+      return { ...state, comments: [...state.comments, action.comment as VideoComment] }
     case "UPDATE_TRANSCRIPTION":
-      return { ...state, transcription: action.transcription }
+      return { ...state, transcription: action.transcription as TranscriptionSegment[] }
     case "UPDATE_AI_ANALYSIS":
-      return { ...state, aiAnalysis: action.analysis }
+      return { ...state, aiAnalysis: action.analysis as AIAnalysis }
     case "ADD_LIVE_VIEWER":
-      return { ...state, liveViewers: [...state.liveViewers, action.viewer] }
+      return { ...state, liveViewers: [...state.liveViewers, action.viewer as LiveViewer] }
     case "REMOVE_LIVE_VIEWER":
-      return { ...state, liveViewers: state.liveViewers.filter(v => v.id !== action.viewerId) }
+      return { ...state, liveViewers: state.liveViewers.filter(v => v.id !== action.viewerId as string) }
     case "UPDATE_VIEWER_CURSOR":
       return {
         ...state,
         liveViewers: state.liveViewers.map(v =>
-          v.id === action.viewerId ? { ...v, cursor: action.cursor } : v
+          v.id === action.viewerId as string ? { ...v, cursor: action.cursor as { x: number; y: number } } : v
         )
       }
     case "SET_QUALITY_SETTINGS":
-      return { ...state, qualitySettings: { ...state.qualitySettings, ...action.settings } }
+      return { ...state, qualitySettings: { ...state.qualitySettings, ...action.settings as QualitySettings } }
     case "ADD_ANNOTATION":
-      return { ...state, annotations: [...state.annotations, action.annotation] }
+      return { ...state, annotations: [...state.annotations, action.annotation as VideoAnnotation] }
     case "UPDATE_VIEWER_ANALYTICS":
-      return { ...state, viewerAnalytics: { ...state.viewerAnalytics, ...action.analytics } }
+      return { ...state, viewerAnalytics: { ...state.viewerAnalytics, ...action.analytics as ViewerAnalytics } }
     case "SET_VOLUME":
-      return { ...state, volume: action.volume }
+      return { ...state, volume: action.volume as number }
     default:
       return state
   }
 }
 
-// Initial state with Context7 enhancements
 const initialState: VideoStudioState = {
   isRecording: false,
   isPaused: false,
-  recordingMode: 'screen',
+  recordingMode: 'desktop',
   audioEnabled: true,
   videoEnabled: true,
   currentTime: 0,
   duration: 0,
-  zoom: 100,
+  zoom: 1,
   isPlaying: false,
   selectedClip: null,
-  recordings: [
-    {
-      id: '1',
-      title: 'Project Overview Presentation',
-      duration: 1845,
-      size: 250,
-      format: 'MP4',
-      quality: '1080p',
-      thumbnail: '/images/video-thumb-1.jpg',
-      createdAt: '2024-01-15T10:30:00Z',
-      views: 124,
-      comments: 8,
-      likes: 23,
-      shares: 5,
-      url: '/videos/project-overview.mp4',
-      transcriptUrl: '/transcripts/project-overview.txt',
-      aiSummary: 'Comprehensive overview of Q1 project goals and team responsibilities.',
-      tags: ['presentation', 'overview', 'project'],
-      isPublic: true,
-      downloadEnabled: true,
-      passwordProtected: false
-    }
-  ],
-  liveViewers: [
-    {
-      id: 'viewer-1',
-      name: 'Sarah Chen',
-      avatar: 'SC',
-      timestamp: Date.now(),
-      isActive: true,
-      cursor: { x: 250, y: 150 },
-      isWatching: true
-    }
-  ],
+  recordings: [],
+  liveViewers: [],
   comments: [],
   transcription: [],
   aiAnalysis: {
-    summary: 'Professional video recording with clear audio and engaging presentation style.',
-    keyTopics: ['project management', 'team collaboration', 'quarterly goals'],
-    sentiment: 'positive',
-    engagementScore: 85,
-    suggestedTags: ['business', 'presentation', 'quarterly'],
-    optimizationTips: ['Consider adding captions', 'Optimize for mobile viewing'],
-    accessibilityScore: 78,
-    qualityScore: 92,
-    contentType: 'presentation',
-    difficulty: 'intermediate',
-    estimatedWatchTime: 1680
+    summary: '',
+    keyTopics: [],
+    sentiment: '',
+    engagementScore: 0,
+    suggestedTags: [],
+    optimizationTips: [],
+    accessibilityScore: 0,
+    qualityScore: 0,
+    contentType: '',
+    difficulty: '',
+    estimatedWatchTime: 0,
   },
   collaborators: [],
   isLiveSession: false,
@@ -320,336 +259,185 @@ const initialState: VideoStudioState = {
     resolution: '1080p',
     frameRate: 30,
     bitrate: 5000,
-    audioQuality: "high",
-    compression: ""
+    audioQuality: 'high',
+    compression: 'h264',
+  },
+  annotations: [],
+  chapters: [],
+  isEditing: false,
+  editingTool: null,
+  exportProgress: 0,
+  viewerAnalytics: {
+    totalViews: 0,
+    averageWatchTime: 0,
+    engagementRate: 0,
+    dropOffPoints: [],
+    audienceRetention: [],
+    peakViewers: 0,
+    comments: 0,
+    shares: 0,
+    likes: 0,
   },
   volume: 80,
-}
+};
 
 interface EnterpriseVideoStudioProps {
   className?: string
   onRecordingComplete?: (rec: VideoRecording) => void
 }
 
-export default function EnterpriseVideoStudio({
+export function EnterpriseVideoStudio({
   className = "",
   onRecordingComplete,
 }: EnterpriseVideoStudioProps) {
   const [state, dispatch] = useReducer(videoStudioReducer, initialState)
-  const [volume, setVolume] = useState(80)
-  const [playbackSpeed, setPlaybackSpeed] = useState(1)
-  const [showTranscript, setShowTranscript] = useState(false)
-  const [selectedViewer, setSelectedViewer] = useState<string | null>(null)
-  const [commentText, setCommentText] = useState('')
-  const videoRef = useRef<HTMLVideoElement>(null)
 
-  // Context7 enhanced recording functions
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: { mediaSource: 'screen' as any },
-        audio: true
-      })
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const [isClient, setIsClient] = useState(false)
+
+  React.useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+
+  const handleDataAvailable = (event: BlobEvent) => {
+    if (event.data.size > 0) {
+      const newRecording: VideoRecording = {
+        id: `rec-${Date.now()}`,
+        title: `Recording ${new Date().toLocaleString()}`,
+        duration: state.currentTime,
+        size: event.data.size,
+        format: event.data.type,
+        quality: state.qualitySettings.resolution,
+        thumbnail: '', // Placeholder
+        createdAt: new Date().toISOString(),
+        views: 0,
+        comments: 0,
+        likes: 0,
+        shares: 0,
+        url: URL.createObjectURL(event.data),
+        transcriptUrl: '',
+        aiSummary: '',
+        tags: [],
+        isPublic: false,
+        downloadEnabled: true,
+        passwordProtected: false,
+      };
+      dispatch({ type: 'ADD_RECORDING', recording: newRecording });
+      if (onRecordingComplete) {
+        onRecordingComplete(newRecording);
       }
-      
-      dispatch({ type: 'START_RECORDING' })
-    } catch (error) {
-      console.error('Error starting recording: ', error)
     }
-  }
+  };
+
+  const startRecording = async () => {
+    const stream = await navigator.mediaDevices.getDisplayMedia({
+      video: true,
+      audio: true
+    });
+    mediaRecorderRef.current = new MediaRecorder(stream);
+    mediaRecorderRef.current.ondataavailable = handleDataAvailable;
+    mediaRecorderRef.current.start();
+    dispatch({ type: 'START_RECORDING' });
+  };
 
   const stopRecording = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream
-      stream.getTracks().forEach(track => track.stop())
-      videoRef.current.srcObject = null
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+      dispatch({ type: 'STOP_RECORDING' });
     }
-    
-    dispatch({ type: 'STOP_RECORDING' })
-    
-    const newRecording: VideoRecording = {
-      id: Date.now().toString(),
-      title: `Recording ${new Date().toLocaleDateString()}`,
-      duration: state.currentTime,
-      size: Math.round(state.currentTime / 60 * 25),
-      format: 'MP4',
-      quality: '1080p',
-      thumbnail: '/images/recording-thumb.jpg',
-      createdAt: new Date().toISOString(),
-      views: 0,
-      comments: 0,
-      likes: 0,
-      shares: 0,
-      url: `/videos/recording-${Date.now()}.mp4`,
-      transcriptUrl: `/transcripts/recording-${Date.now()}.txt`,
-      aiSummary: 'AI-generated summary will be available shortly...',
-      tags: [],
-      isPublic: false,
-      downloadEnabled: true,
-      passwordProtected: false
-    }
-    
-    dispatch({ type: 'ADD_RECORDING', recording: newRecording })
-    onRecordingComplete?.(newRecording)
-  }
-
-  const addComment = (content: string, timestamp: number) => {
-    const comment: VideoComment = {
-      id: Date.now().toString(),
-      userId: 'current-user',
-      userName: 'Current User',
-      userAvatar: 'CU',
-      content,
-      timestamp: Date.now(),
-      videoTimestamp: timestamp,
-      replies: [],
-      reactions: [],
-      createdAt: new Date().toISOString(),
-      isResolved: false,
-      aiSentiment: 'neutral'
-    }
-    dispatch({ type: 'ADD_COMMENT', comment })
-  }
+  };
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = Math.floor(seconds % 60)
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-  }
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
 
   const formatFileSize = (bytes: number) => {
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  if (!isClient) {
+    return null;
   }
 
   return (
-    <div className={`space-y-6 ${className}`}>
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl">
-              <Video className="h-6 w-6 text-white" />
+    <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 p-6 bg-slate-50 rounded-lg ${className}`}>
+      {/* Main Video Player & Controls */}
+      <div className="lg:col-span-2">
+        <Card>
+          <CardContent className="p-0">
+            <div className="aspect-video bg-black rounded-t-lg relative">
+              <video ref={videoRef} className="w-full h-full" />
+              {/* Add canvas for annotations here */}
             </div>
-            Enterprise Video Studio
-          </h2>
-          <p className="text-gray-600 mt-1">
-            Professional video recording and collaboration tools
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-            <Eye className="h-3 w-3 mr-1" />
-            Live Recording
-          </Badge>
-          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-            <Brain className="h-3 w-3 mr-1" />
-            AI-Powered
-          </Badge>
-          <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-            <Sparkles className="h-3 w-3 mr-1" />
-            Enterprise
-          </Badge>
-        </div>
+            <div className="p-4 border-t">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Button onClick={() => dispatch({ type: 'TOGGLE_PLAY' })} size="icon">
+                    <Play className="h-5 w-5" />
+                  </Button>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-mono">{formatTime(state.currentTime)}</span>
+                    <span className="text-sm text-gray-400">/</span>
+                    <span className="text-sm font-mono">{formatTime(state.duration)}</span>
+                  </div>
+                </div>
+                {/* Add more controls like volume, fullscreen, etc. here */}
+              </div>
+              <Progress value={state.duration > 0 ? (state.currentTime / state.duration) * 100 : 0} className="mt-4" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <Tabs defaultValue="record" className="w-full">
-        <TabsList className="grid grid-cols-5 w-full max-w-2xl">
-          <TabsTrigger value="record" className="flex items-center gap-2">
-            <Video className="h-4 w-4" />
-            Record
-          </TabsTrigger>
-          <TabsTrigger value="edit" className="flex items-center gap-2">
-            <Edit3 className="h-4 w-4" />
-            Edit
-          </TabsTrigger>
-          <TabsTrigger value="library" className="flex items-center gap-2">
-            <Square className="h-4 w-4" />
-            Library
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
-            Analytics
-          </TabsTrigger>
-          <TabsTrigger value="collaborate" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Live Session
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Record Tab */}
-        <TabsContent value="record" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recording Controls</CardTitle>
-              <CardDescription>Start, pause, or stop your video recording</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-4">
-                {!state.isRecording ? (
-                  <Button onClick={startRecording} className="bg-red-500 hover:bg-red-600">
-                    <Video className="h-4 w-4 mr-2" />
-                    Start Recording
-                  </Button>
-                ) : (
-                  <Button onClick={stopRecording} variant="outline">
-                    <Square className="h-4 w-4 mr-2" />
-                    Stop Recording
-                  </Button>
-                )}
-                
-                <Button variant="outline">
-                  <Mic className="h-4 w-4 mr-2" />
-                  Audio: ON
-                </Button>
-                
-                <Button variant="outline">
-                  <Camera className="h-4 w-4 mr-2" />
-                  Camera: ON
-                </Button>
-              </div>
-
-              {state.isRecording && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-medium">Recording: {formatTime(state.currentTime)}</span>
-                  </div>
-                  <Progress value={75} className="w-full" />
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Library Tab */}
-        <TabsContent value="library" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Video Library</CardTitle>
-              <CardDescription>Manage your recorded videos and presentations</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {state.recordings.map((recording) => (
-                  <Card key={recording.id} className="overflow-hidden">
-                    <div className="aspect-video bg-gray-100 relative">
-                      <img 
-                        src={recording.thumbnail} 
-                        alt={recording.title}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                        <Button size="sm" variant="secondary">
-                          <Play className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
-                        {formatTime(recording.duration)}
-                      </div>
+      {/* Sidebar with Tabs */}
+      <div>
+        <Tabs defaultValue="recordings">
+          <TabsList>
+            <TabsTrigger value="recordings">Recordings</TabsTrigger>
+            <TabsTrigger value="live">Live</TabsTrigger>
+            <TabsTrigger value="ai">AI Insights</TabsTrigger>
+          </TabsList>
+          <TabsContent value="recordings">
+            <div className="space-y-4">
+              {state.recordings.map((rec) => (
+                <Card key={rec.id}>
+                  <CardHeader>
+                    <CardTitle>{rec.title}</CardTitle>
+                    <CardDescription>{new Date(rec.createdAt).toLocaleString()}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <Badge variant="outline">{formatFileSize(rec.size)}</Badge>
+                      <Badge variant="secondary">{formatTime(rec.duration)}</Badge>
                     </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold text-sm mb-2 line-clamp-2">{recording.title}</h3>
-                      <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
-                        <span>{formatFileSize(recording.size)}</span>
-                        <span>{recording.quality}</span>
-                      </div>
-                      <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <div className="flex items-center gap-1">
-                          <Eye className="h-3 w-3" />
-                          {recording.views}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MessageSquare className="h-3 w-3" />
-                          {recording.comments}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Heart className="h-3 w-3" />
-                          {recording.likes}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 mt-3">
-                        <Button size="sm" variant="outline" className="flex-1">
-                          <Share2 className="h-3 w-3 mr-1" />
-                          Share
-                        </Button>
-                        <Button size="sm" variant="outline" className="flex-1">
-                          <Download className="h-3 w-3 mr-1" />
-                          Download
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <MoreHorizontal className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Analytics Tab */}
-        <TabsContent value="analytics" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Total Views</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{state.viewerAnalytics.totalViews.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">+12% from last month</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Watch Time</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{formatTime(state.viewerAnalytics.averageWatchTime)}</div>
-                <p className="text-xs text-muted-foreground">+8% from last month</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Engagement Rate</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{state.viewerAnalytics.engagementRate}%</div>
-                <p className="text-xs text-muted-foreground">+3% from last month</p>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* Collaboration Tab */}
-        <TabsContent value="collaborate" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Live Collaboration</CardTitle>
-              <CardDescription>Real-time video collaboration and feedback</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-center py-8">
-                <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Start Live Session</h3>
-                <p className="text-gray-600 mb-4">Invite team members to collaborate in real-time</p>
-                <Button>
-                  <Video className="h-4 w-4 mr-2" />
-                  Start Live Session
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      <video ref={videoRef} className="hidden" />
+                    <div className="flex items-center gap-2">
+                      <Button size="icon" variant="ghost"><Share2 className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="ghost"><Download className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4" /></Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+          <TabsContent value="live">
+            {/* Live viewers content here */}
+          </TabsContent>
+          <TabsContent value="ai">
+            {/* AI insights content here */}
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
-  )
+  );
 }
+
+export default EnterpriseVideoStudio;

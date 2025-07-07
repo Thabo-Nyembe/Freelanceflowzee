@@ -6,13 +6,13 @@ const s3Client = new S3Client({
   endpoint: process.env.S3_ENDPOINT || process.env.AWS_S3_ENDPOINT,
   region: process.env.S3_REGION || process.env.AWS_REGION || 'us-east-1',
   credentials: {
-    accessKeyId: process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || 
-    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || 
+    accessKeyId: process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || '',
   },
   forcePathStyle: true, // Required for Supabase S3 compatibility
 })
 
-const BUCKET_NAME = process.env.S3_BUCKET_NAME || 'freeflowzee-storage
+const BUCKET_NAME = process.env.S3_BUCKET_NAME || 'freeflowzee-storage'
 
 export interface UploadResult {
   key: string
@@ -60,7 +60,7 @@ export async function uploadFile(
       bucket: BUCKET_NAME,
     }
   } catch (error) {
-    console.error('Failed to upload file: ', error)'
+    console.error('Failed to upload file: ', error)
     throw new Error('File upload failed')
   }
 }
@@ -82,7 +82,7 @@ export async function getUploadPresignedUrl(
 
     return await getSignedUrl(s3Client, command, { expiresIn })
   } catch (error) {
-    console.error('Failed to generate upload presigned URL: ', error)'
+    console.error('Failed to generate upload presigned URL: ', error)
     throw new Error('Presigned URL generation failed')
   }
 }
@@ -102,7 +102,7 @@ export async function getDownloadPresignedUrl(
 
     return await getSignedUrl(s3Client, command, { expiresIn })
   } catch (error) {
-    console.error('Failed to generate download presigned URL: ', error)'
+    console.error('Failed to generate download presigned URL: ', error)
     throw new Error('Presigned URL generation failed')
   }
 }
@@ -120,7 +120,7 @@ export async function deleteFile(key: string): Promise<boolean> {
     await s3Client.send(command)
     return true
   } catch (error) {
-    console.error('Failed to delete file: ', error)'
+    console.error('Failed to delete file: ', error)
     return false
   }
 }
@@ -142,12 +142,12 @@ export async function listFiles(
     const response = await s3Client.send(command)
     
     return (response.Contents || []).map(object => ({
-      key: object.Key || 
+      key: object.Key || '',
       size: object.Size || 0,
       lastModified: object.LastModified || new Date(),
     }))
   } catch (error) {
-    console.error('Failed to list files: ', error)'
+    console.error('Failed to list files: ', error)
     throw new Error('File listing failed')
   }
 }
@@ -165,7 +165,7 @@ export async function testConnection(): Promise<boolean> {
     await s3Client.send(command)
     return true
   } catch (error) {
-    console.error('S3 connection test failed: ', error)'
+    console.error('S3 connection test failed: ', error)
     return false
   }
 }

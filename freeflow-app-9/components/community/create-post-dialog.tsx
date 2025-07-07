@@ -39,7 +39,7 @@ export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDia
       setSelectedFiles([])
       onOpenChange(false)
     } catch (error) {
-      console.error('Error creating post: ', error)'
+      console.error('Error creating post: ', error)
     } finally {
       setIsSubmitting(false)
     }
@@ -56,59 +56,48 @@ export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDia
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-  <
-      <DialogContent className= "sm:max-w-[500px]">
-  <
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-  <
           <DialogTitle>Create Post</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className= "space-y-4">
-          <div className= "space-y-2">
-  <
-            <Label htmlFor= "title">Title</Label>
-  <
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Title</Label>
             <Input
-              id= "title
+              id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Give your post a title...
+              placeholder="Give your post a title..."
             />
-          </div>"
-          <div className= "space-y-2">
-  <
-            <Label htmlFor= "content">Content</Label>
-  <
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="content">Content</Label>
             <Textarea
-              id= "content
+              id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder= "What's on your mind?
+              placeholder="What's on your mind?"
               rows={4}
             />
           </div>
           
           {selectedFiles.length > 0 && (
-            <div className= "space-y-2">
-  <
+            <div className="space-y-2">
               <Label>Selected Files</Label>
-              <div className= "grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {selectedFiles.map((file, index) => (
-                  <div key={index} className= "relative group">
+                  <div key={index} className="relative group">
                     {file.type.startsWith('image/') ? (
-                      <div className= "aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                        <img src={URL.createObjectURL(file)} alt={`Selected file ${index + 1}>
+                      <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                        <img src={URL.createObjectURL(file)} alt={`Selected file ${index + 1}`} />
                       </div>
                     ) : (
-                      <div >
-  <
-                        <Video >
+                      <div>
+                        <Video />
                       </div>
                     )}
-                    <Button > removeFile(index)}
-                    >
-  <
-                      <X >
+                    <Button onClick={() => removeFile(index)}>
+                      <X />
                     </Button>
                   </div>
                 ))}
@@ -116,29 +105,21 @@ export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDia
             </div>
           )}
 
-          <div >
-  <
-            <Button > document.getElementById('image-upload')?.click()}
-            >
-  <
-              <Image >
+          <div>
+            <Button onClick={() => document.getElementById('image-upload')?.click()}>
+              <Image />
               Add Image
             </Button>
-  <
-            <Button > document.getElementById('video-upload')?.click()}
-            >
-  <
-              <Video >
+            <Button onClick={() => document.getElementById('video-upload')?.click()}>
+              <Video />
               Add Video
             </Button>
-            <input onChange={handleFileSelect}>
-            <input onChange={handleFileSelect}>
+            <input type="file" id="image-upload" hidden accept="image/*" onChange={handleFileSelect} />
+            <input type="file" id="video-upload" hidden accept="video/*" onChange={handleFileSelect} />
           </div>
-  <
 
-          <DialogFooter >
-  <
-            <Button disabled={isSubmitting || !content.trim()}>
+          <DialogFooter>
+            <Button type="submit" disabled={isSubmitting || !content.trim()}>
               {isSubmitting ? 'Creating...' : 'Create Post'}
             </Button>
           </DialogFooter>

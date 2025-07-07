@@ -9,7 +9,7 @@ import { Toaster } from '@/components/ui/toaster'
 
 export function RootProviders({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient())
-  const [supabaseClient] = useState(() => {
+  const [_supabaseClient] = useState(() => {
     if (typeof window !== 'undefined') {
       return createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,10 +22,10 @@ export function RootProviders({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider
-        attribute= "class
-        defaultTheme= "system
-        storageKey= "freeflowzee-ui-theme
-        defaultSystemTheme= "light
+        attribute="class"
+        defaultTheme="system"
+        storageKey="freeflowzee-ui-theme"
+        enableSystem
       >
         {children}
         <Toaster />

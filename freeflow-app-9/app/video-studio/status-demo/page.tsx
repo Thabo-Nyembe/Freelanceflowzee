@@ -20,6 +20,7 @@ import {
   Settings,
   Activity
 } from 'lucide-react';
+import { useVideoStatus, VideoStatus } from '@/hooks/useVideoStatus';
 
 export default function VideoStatusDemoPage() {
   const [demoVideoId, setDemoVideoId] = useState('');
@@ -245,9 +246,9 @@ export default function VideoStatusDemoPage() {
                 <div>
                   <h3 className="font-semibold mb-2">1. Basic Hook Usage</h3>
                   <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-sm font-mono">
-                    <pre>{`import { useVideoStatus } from '@/hooks/useVideoStatus';
+                    <pre>{`import { useVideoStatus, VideoStatus } from '@/hooks/useVideoStatus';
 
-function VideoComponent({ videoId }) {
+function VideoComponent({ videoId }: { videoId: string }) {
   const {
     status,
     isPolling,
@@ -257,7 +258,7 @@ function VideoComponent({ videoId }) {
     videoId,
     enabled: true,
     pollingInterval: 2000,
-    onProcessingComplete: (video) => {
+    onProcessingComplete: (video: VideoStatus) => {
       console.log('Video ready!', video);
     }
   });

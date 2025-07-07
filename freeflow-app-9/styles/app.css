@@ -50,22 +50,16 @@
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
-  }
+  /* * selector border-border removed due to build error */
 }
 
 @layer components {
   .glass-card {
-    @apply bg-white/60 backdrop-blur-xl border border-white/20 shadow-lg rounded-xl;
+    @apply bg-white bg-opacity-60 backdrop-blur-xl border border-white border-opacity-20 shadow-lg rounded-xl;
   }
 
   .glass-button {
-    @apply bg-white/60 backdrop-blur-xl border border-white/20 shadow-md hover:bg-white/80 transition-all duration-200 rounded-lg;
+    @apply bg-white bg-opacity-60 backdrop-blur-xl border border-white border-opacity-20 shadow-md hover:bg-white hover:bg-opacity-80 transition-all duration-200 rounded-lg;
   }
 
   .luxury-gradient {

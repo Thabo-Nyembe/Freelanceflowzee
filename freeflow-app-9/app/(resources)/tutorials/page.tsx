@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { SiteHeader } from '@/components/site-header'
-import { SiteFooter } from '@/components/site-footer'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -105,8 +104,6 @@ export default function TutorialsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
-      <SiteHeader />
-      
       <main className="container mx-auto px-4 py-8">
         {/* Header Section */}
         <div className="text-center mb-12">
@@ -296,7 +293,6 @@ export default function TutorialsPage() {
         </div>
       </main>
 
-      <SiteFooter />
-    </div>
+      </div>
   )
 }

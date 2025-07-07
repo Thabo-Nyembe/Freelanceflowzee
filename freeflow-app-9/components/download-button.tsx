@@ -35,7 +35,7 @@ export function DownloadButton({
       const downloadUrl = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = downloadUrl
-      link.download = filename || url.split('/').pop() || 'download
+      link.download = filename || url.split('/').pop() || 'download'
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -56,7 +56,7 @@ export function DownloadButton({
       data-testid="download-button"
       aria-label={`Download ${filename || 'file'}`}
       className="flex items-center space-x-2"
-    >"
+    >
       <Download className="h-4 w-4" aria-hidden="true" />
       <span>{isDownloading ? 'Downloading...' : 'Download'}</span>
     </Button>

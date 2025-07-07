@@ -1,83 +1,79 @@
-import { useCallback, useEffect, useRef } from 'react';
-import { VideoEventType } from '@/lib/types/video';
+'use client';
 
-interface VideoAnalyticsOptions {
+import { useState, useCallback } from 'react';
+
+interface VideoAnalyticsProps {
   videoId: string;
   onError?: (error: Error) => void;
 }
 
-interface WatchSession {
-  startTime: Date;
-  duration: number;
-  progress: number;
+interface EngagementData {
+  from?: number;
+  to?: number;
+  message?: string;
+  code?: number;
 }
 
-export function useVideoAnalytics({ videoId, onError }: VideoAnalyticsOptions) {
-  const watchSessionRef = useRef<WatchSession | null>(null);
+export function useVideoAnalytics({ videoId, onError }: VideoAnalyticsProps) {
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
-  const trackEvent = useCallback(async (
-    type: 'view' | 'watch_time' | 'engagement',
-    data: Record<string, any>
-  ) => {
+  const handleError = useCallback((error: Error) => {
+    console.error('Video analytics error:', error);
+    onError?.(error);
+  }, [onError]);
+
+  const startWatchSession = useCallback(async (duration: number) => {
     try {
-      const response = await fetch(`/api/video/${videoId}/analytics`, {
+      const response = await fetch('/api/video/analytics/start', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ type, data }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoId, duration }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to track video event');
-      }
+      if (!response.ok) throw new Error('Failed to start watch session');
+
+      const data = await response.json();
+      setSessionId(data.sessionId);
     } catch (error) {
-      console.error('Error tracking video event:', error);
-      onError?.(error as Error);
+      handleError(error as Error);
     }
-  }, [videoId, onError]);
+  }, [videoId, handleError]);
 
-  const startWatchSession = useCallback((duration: number) => {
-    watchSessionRef.current = {
-      startTime: new Date(),
-      duration,
-      progress: 0,
-    };
-  }, []);
+  const endWatchSession = useCallback(async (progress: number) => {
+    if (!sessionId) return;
 
-  const endWatchSession = useCallback((progress: number) => {
-    const session = watchSessionRef.current;
-    if (session) {
-      const endTime = new Date();
-      trackEvent('watch_time', {
-        startTime: session.startTime,
-        endTime,
-        duration: session.duration,
-        progress: Math.min(100, Math.max(0, progress)),
+    try {
+      await fetch('/api/video/analytics/end', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, progress }),
       });
-      watchSessionRef.current = null;
+    } catch (error) {
+      handleError(error as Error);
     }
-  }, [trackEvent]);
+  }, [sessionId, handleError]);
 
-  const trackEngagement = useCallback((
-    eventType: VideoEventType,
-    data?: Record<string, any>
+  const trackEngagement = useCallback(async (
+    action: 'play' | 'pause' | 'seek' | 'error' | 'complete',
+    data?: EngagementData
   ) => {
-    trackEvent('engagement', {
-      eventType,
-      data: data || {},
-    });
-  }, [trackEvent]);
+    if (!sessionId) return;
 
-  // Track initial view
-  useEffect(() => {
-    trackEvent('view', {
-      timestamp: new Date(),
-      duration: 0,
-      quality: 'auto',
-      platform: navigator.platform,
-    });
-  }, [trackEvent]);
+    try {
+      await fetch('/api/video/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          videoId,
+          action,
+          ...data,
+        }),
+      });
+    } catch (error) {
+      handleError(error as Error);
+    }
+  }, [sessionId, videoId, handleError]);
 
   return {
     startWatchSession,

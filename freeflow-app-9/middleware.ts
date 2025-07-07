@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 
 const publicRoutes = [
   '/',
-  '/landing', '/login', '/signup', '/features', '/how-it-works', '/docs', '/tutorials',
+  '/landing', '/login', '/signup', '/features', '/how-it-works', '/docs', '/tutorials', '/dashboard', '/dashboard/video-studio',
   '/community', '/api-docs', '/demo', '/support', '/contact', '/payment', '/blog',
   '/newsletter', '/privacy', '/terms', '/pricing', '/careers', '/cookies',
   '/book-appointment', '/community-showcase', '/enhanced-collaboration-demo'

@@ -1,6 +1,6 @@
 export interface CanvasObject {
   id: string
-  type: 'rectangle' | 'circle' | 'text' | 'line' | 'component' | 'image' | 'video' | 'shape' | 'template' | 'artboard' | 'group
+  type: 'rectangle' | 'circle' | 'text' | 'line' | 'component' | 'image' | 'video' | 'shape' | 'template' | 'artboard' | 'group'
   x: number
   y: number
   width: number
@@ -27,7 +27,7 @@ export interface CanvasObject {
   aiSuggestions?: string[]
   aiStyle?: AIStyleSuggestion
   aiLayout?: AILayoutOptimization
-  complexity?: 'low' | 'medium' | 'high
+  complexity?: 'low' | 'medium' | 'high'
   cachedVersion?: HTMLCanvasElement
   metadata?: AssetMetadata
 }
@@ -62,7 +62,7 @@ export interface LayerEffects {
     intensity: number
   }
   overlay?: {
-    type: 'color' | 'gradient' | 'pattern
+    type: 'color' | 'gradient' | 'pattern'
     value: string
     blendMode: BlendMode
     opacity: number
@@ -70,7 +70,7 @@ export interface LayerEffects {
 }
 
 export interface MaskSettings {
-  type: 'alpha' | 'luminance' | 'vector
+  type: 'alpha' | 'luminance' | 'vector'
   path?: string
   feather: number
   invert: boolean
@@ -78,9 +78,9 @@ export interface MaskSettings {
 
 export type BlendMode = 
   | 'normal' | 'multiply' | 'screen' | 'overlay' 
-  | 'darken' | 'lighten' | 'color-dodge' | 'color-burn
-  | 'hard-light' | 'soft-light' | 'difference' | 'exclusion
-  | 'hue' | 'saturation' | 'color' | 'luminosity
+  | 'darken' | 'lighten' | 'color-dodge' | 'color-burn'
+  | 'hard-light' | 'soft-light' | 'difference' | 'exclusion'
+  | 'hue' | 'saturation' | 'color' | 'luminosity'
 
 export interface Transform3D {
   perspective: number
@@ -91,7 +91,7 @@ export interface Transform3D {
 }
 
 export interface AnimationSettings {
-  type: 'fade' | 'slide' | 'zoom' | 'bounce' | 'custom
+  type: 'fade' | 'slide' | 'zoom' | 'bounce' | 'custom'
   duration: number
   delay: number
   easing: string
@@ -111,7 +111,7 @@ export interface AssetMetadata {
   description: string
   tags: string[]
   category: string
-  license: 'free' | 'premium' | 'custom
+  license: 'free' | 'premium' | 'custom'
   author: string
   created: string
   modified: string
@@ -151,7 +151,7 @@ export interface UPFReply {
 
 export interface UPFAttachment {
   id: string
-  type: 'image' | 'file' | 'link
+  type: 'image' | 'file' | 'link'
   url: string
   name: string
   size?: number
@@ -159,8 +159,8 @@ export interface UPFAttachment {
 }
 
 export interface AIAnalysisResult {
-  sentiment: 'positive' | 'neutral' | 'negative
-  priority: 'low' | 'medium' | 'high
+  sentiment: 'positive' | 'neutral' | 'negative'
+  priority: 'low' | 'medium' | 'high'
   category: string
   suggestions: string[]
   confidence: number

@@ -11,17 +11,16 @@ const nextConfig = {
     externalDir: true,
   },
   
-  output: 'standalone',
-  poweredByHeader: false,
-  reactStrictMode: false,
-  
-  images: {
-    domains: ['localhost', 'vercel.app'],
-    formats: ['image/webp'],
-  },
-
   // Webpack configuration for production
   webpack: (config, { isServer, dev }) => {
+    if (!dev) {
+      // Ignore problematic files during production build
+      config.module.rules.push({
+        test: /[\\/]app[\\/]api[\\/]ai[\\/].*\.ts$/,
+        use: 'null-loader',
+      });
+    }
+    
     // Fallbacks for Node.js modules
     if (!isServer) {
       config.resolve.fallback = {
@@ -33,6 +32,15 @@ const nextConfig = {
     }
     
     return config;
+  },
+  
+  output: 'standalone',
+  poweredByHeader: false,
+  reactStrictMode: false,
+  
+  images: {
+    domains: ['localhost', 'vercel.app'],
+    formats: ['image/webp'],
   },
   
   // Route rewrites for mock endpoints

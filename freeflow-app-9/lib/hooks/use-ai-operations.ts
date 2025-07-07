@@ -5,13 +5,13 @@ import { toast } from 'sonner'
 
 interface AIGenerationParams {
   prompt: string
-  type: 'design' | 'content' | 'asset
+  type: 'design' | 'content' | 'asset'
   settings?: Record<string, any>
 }
 
 interface AIAnalysisParams {
   content: string
-  type: 'design' | 'performance' | 'seo
+  type: 'design' | 'performance' | 'seo'
   options?: Record<string, any>
 }
 
@@ -38,7 +38,7 @@ export function useAIOperations() {
       toast.success('Generation completed successfully')
     },
     onError: (error) => {
-      toast.error('Generation failed: ' + error.message)'
+      toast.error('Generation failed: ' + error.message)
     }
   })
 
@@ -62,7 +62,7 @@ export function useAIOperations() {
       toast.success('Analysis completed successfully')
     },
     onError: (error) => {
-      toast.error('Analysis failed: ' + error.message)'
+      toast.error('Analysis failed: ' + error.message)
     }
   })
 

@@ -4,8 +4,7 @@ import React, { useState, use } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { SiteHeader } from '@/components/site-header'
-import { SiteFooter } from '@/components/site-footer'
+
 import { DemoModal } from '@/components/demo-modal'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -91,8 +90,6 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <SiteHeader />
-      
       <main className="pt-16">
         {/* Hero Section */}
         <article className="bg-white">
@@ -248,13 +245,14 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             </div>
           </section>
         )}
-      </main>
-
-      <SiteFooter />
-      <DemoModal 
-        isOpen={showDemoModal} 
-        onClose={() => setShowDemoModal(false)} 
-      />
-    </div>
+              </main>
+        
+        <DemoModal 
+          isOpen={showDemoModal} 
+          onClose={() => setShowDemoModal(false)}
+          title="Read Full Article"
+          description="Access the complete article and more resources!"
+        />
+      </div>
   )
 }

@@ -1,7 +1,10 @@
 'use client'
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { FileText, Users, BarChart3, DollarSign, Calendar, Zap, Eye, Play, ArrowRight } from 'lucide-react';
 
 export function DemoFeatureShowcase() {
   const [activeDemo, setActiveDemo] = useState<string | null>(null);
@@ -64,62 +67,62 @@ export function DemoFeatureShowcase() {
   ];
 
   return (
-    <div className= "demo-feature-showcase mb-8">
-      <div className= "flex items-center justify-between mb-6">
+    <div className="demo-feature-showcase mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className= "text-2xl font-bold">Feature Showcase</h2>
-          <p className= "text-gray-600">Experience FreeflowZee&apos;s powerful features with live demo data</p>
+          <h2 className="text-2xl font-bold">Feature Showcase</h2>
+          <p className="text-gray-600">Experience FreeflowZee&apos;s powerful features with live demo data</p>
         </div>
-        <Badge variant= "secondary" className= "bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+        <Badge variant="secondary" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
           🎭 Interactive Demos Available
         </Badge>
       </div>
 
-      <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {features.map((feature) => (
           <Card 
             key={feature.id} 
-            className="hover:shadow-xl transition-all duration-300 cursor-pointer group
+            className="hover:shadow-xl transition-all duration-300 cursor-pointer group"
             onClick={() => setActiveDemo(feature.id)}
           >
-            <CardHeader>"
-              <div className= "flex items-center justify-between">
+            <CardHeader>
+              <div className="flex items-center justify-between">
                 <div className={`p-3 rounded-lg ${feature.color}`}>
-                  <feature.icon className= "h-6 w-6 text-white" />
+                  <feature.icon className="h-6 w-6 text-white" />
                 </div>
-                <div className= "flex gap-2">
-                  <Button size= "sm" variant= "ghost" className= "opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Eye className= "h-4 w-4" />
+                <div className="flex gap-2">
+                  <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Eye className="h-4 w-4" />
                   </Button>
-                  <Button size= "sm" variant= "ghost" className= "opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Play className= "h-4 w-4" />
+                  <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Play className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
-              <CardTitle className= "text-lg">{feature.title}</CardTitle>
-              <p className= "text-sm text-gray-600">{feature.description}</p>
+              <CardTitle className="text-lg">{feature.title}</CardTitle>
+              <p className="text-sm text-gray-600">{feature.description}</p>
             </CardHeader>
             <CardContent>
-              <div className= "space-y-3">
-                <div className= "grid grid-cols-3 gap-2 text-center">
+              <div className="space-y-3">
+                <div className="grid grid-cols-3 gap-2 text-center">
                   {Object.entries(feature.metrics).map(([key, value]) => (
-                    <div key={key} className= "p-2 bg-gray-50 rounded-lg">
-                      <div className= "text-sm font-bold">{value}</div>
-                      <div className= "text-xs text-gray-500 capitalize">{key.replace(&apos;_', &apos; ')}</div>
+                    <div key={key} className="p-2 bg-gray-50 rounded-lg">
+                      <div className="text-sm font-bold">{value}</div>
+                      <div className="text-xs text-gray-500 capitalize">{key.replace(/_/g, ' ')}</div>
                     </div>
                   ))}
                 </div>
                 
                 <Button 
                   className="w-full group-hover:bg-primary group-hover:text-white transition-colors"
-                  variant="outline
+                  variant="outline"
                   onClick={(e) => {
-                    e.stopPropagation();"
+                    e.stopPropagation();
                     window.open(feature.demoUrl, '_blank');
                   }}
                 >
                   Try Demo
-                  <ArrowRight className= "ml-2 h-4 w-4" />
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
             </CardContent>
@@ -128,19 +131,19 @@ export function DemoFeatureShowcase() {
       </div>
 
       {activeDemo && (
-        <div className= "mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className= "flex items-center justify-between">
+        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center justify-between">
             <div>
-              <h3 className= "font-semibold text-blue-900">
+              <h3 className="font-semibold text-blue-900">
                 Demo Mode: {features.find(f => f.id === activeDemo)?.title}
               </h3>
-              <p className= "text-blue-700 text-sm">
+              <p className="text-blue-700 text-sm">
                 Click "Try Demo" to experience this feature with realistic data
               </p>
             </div>
             <Button 
-              variant= "outline" 
-              size= "sm
+              variant="outline" 
+              size="sm"
               onClick={() => setActiveDemo(null)}
             >
               Close

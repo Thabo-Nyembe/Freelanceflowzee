@@ -116,7 +116,7 @@ class MultiCloudStorage {
         secretAccessKey: process.env.WASABI_SECRET_ACCESS_KEY!,
         endpoint: process.env.WASABI_ENDPOINT || 'https://s3.wasabisys.com',
         region: process.env.WASABI_REGION || 'us-east-1',
-        bucket: process.env.WASABI_BUCKET_NAME || 'freeflowzee-storage
+        bucket: process.env.WASABI_BUCKET_NAME || 'freeflowzee-storage'
       }
     };
 
@@ -248,13 +248,13 @@ class MultiCloudStorage {
           file_id: fileRecord.id
         };
       } else {
-        // Upload to Supabase for speed (small/critical files only)
+        // Upload to Supabase for speed and simplicity
         const { data, error } = await this.supabaseClient.storage
           .from(this.config.supabase.bucket)
           .upload(fileKey, file, {
             contentType: mimeType,
-            metadata: options.metadata,
-            cacheControl: options.cacheControl || '3600
+            cacheControl: options.cacheControl || '3600', // Default to 1 hour
+            upsert: false,
           });
 
         if (error) throw error;

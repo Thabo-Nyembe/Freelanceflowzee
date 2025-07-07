@@ -20,6 +20,9 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import Link from 'next/link';
+import { 
+  ClientReview
+} from '@/components/video/client-review-panel';
 
 interface VideoReviewPageProps {
   params: { id: string };
@@ -39,6 +42,18 @@ export async function generateMetadata({ params }: VideoReviewPageProps): Promis
     title: video ? `Review: ${video.title} | FreeFlow` : 'Video Review | FreeFlow',
     description: video?.description || 'Review and approve video content',
   };
+}
+
+type Collaborator = {
+  user_id: string;
+  role: 'client' | 'collaborator';
+}
+
+type Review = {
+  status: 'approved' | 'rejected' | 'changes_requested' | 'in_review' | 'draft';
+  settings?: {
+    allow_comments?: boolean;
+  }
 }
 
 async function getVideoReviewData(videoId: string, reviewId?: string, userId?: string) {
@@ -61,7 +76,7 @@ async function getVideoReviewData(videoId: string, reviewId?: string, userId?: s
     }
 
     // Get review data if reviewId is provided
-    let review = null;
+    let review: ClientReview | null = null;
     let userRole: 'client' | 'freelancer' | 'collaborator' | null = null;
 
     if (reviewId) {
@@ -92,7 +107,7 @@ async function getVideoReviewData(videoId: string, reviewId?: string, userId?: s
             userRole = 'freelancer';
           } else {
             const collaboration = reviewData.collaborators?.find(
-              (c: any) => c.user_id === userId
+              (c: Collaborator) => c.user_id === userId
             );
             if (collaboration) {
               userRole = collaboration.role === 'client' ? 'client' : 'collaborator';
@@ -130,7 +145,7 @@ async function getVideoReviewData(videoId: string, reviewId?: string, userId?: s
             userRole = 'freelancer';
           } else {
             const collaboration = activeReview.collaborators?.find(
-              (c: any) => c.user_id === userId
+              (c: Collaborator) => c.user_id === userId
             );
             if (collaboration) {
               userRole = collaboration.role === 'client' ? 'client' : 'collaborator';
@@ -301,9 +316,6 @@ export default async function VideoReviewPage({ params, searchParams }: VideoRev
                       poster={video.thumbnail_url}
                       aspectRatio="16:9"
                       showControls={true}
-                      allowFullscreen={true}
-                      enableComments={review?.settings?.allow_comments ?? true}
-                      reviewMode={!!review}
                     />
                   ) : (
                     <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
@@ -391,7 +403,7 @@ export default async function VideoReviewPage({ params, searchParams }: VideoRev
                   <Eye className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
                   <h3 className="text-lg font-semibold mb-2">No Active Review</h3>
                   <p className="text-muted-foreground mb-4">
-                    This video doesn't have an active review workflow.
+                    This video doesn&apos;t have an active review workflow.
                   </p>
                   {user && video.user_id === user.id && (
                     <Link href={`/reviews?create=true&video=${video.id}`}>

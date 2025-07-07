@@ -33,7 +33,8 @@ import {
   Captions,
   MapPin,
   Sparkles,
-  BarChart3
+  BarChart3,
+  MessageCircle
 } from 'lucide-react'
 
 interface VideoAnnotation {

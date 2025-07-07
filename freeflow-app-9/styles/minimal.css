@@ -31,7 +31,7 @@
 
 @layer components {
   .glass-card {
-    @apply bg-white/60 backdrop-blur-xl border border-white/20 shadow-lg rounded-xl;
+    @apply bg-white\/60 backdrop-blur-xl border border-white\/20 shadow-lg rounded-xl;
   }
   
   .luxury-gradient {

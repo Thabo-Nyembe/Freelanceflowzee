@@ -1,3 +1,4 @@
+'use client';
 import { useState } from 'react';
 import { useVideoSearch } from '@/hooks/use-video-search';
 import { useDebounce } from '@/hooks/use-debounce';

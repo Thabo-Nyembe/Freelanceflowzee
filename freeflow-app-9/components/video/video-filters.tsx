@@ -1,3 +1,4 @@
+'use client';
 import { useState } from 'react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { cn } from '@/lib/utils';
@@ -17,31 +18,28 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { VideoSearchFilters } from '@/lib/types/video-search';
 
 interface VideoFiltersProps {
-  onFilterChange: (filters: VideoFilters) => void;
+  onFilterChange: (filters: Partial<VideoSearchFilters>) => void;
   className?: string;
 }
 
-interface VideoFilters {
-  sortBy: 'newest' | 'oldest' | 'popular' | 'alphabetical';
-  duration: 'all' | 'short' | 'medium' | 'long';
-  status: 'all' | 'ready' | 'processing' | 'error';
-}
+type LocalVideoFilters = Pick<VideoSearchFilters, 'sortBy' | 'duration' | 'status'>;
 
-const defaultFilters: VideoFilters = {
-  sortBy: 'newest',
-  duration: 'all',
-  status: 'all',
+const defaultFilters: LocalVideoFilters = {
+  sortBy: 'relevance',
+  duration: 'any',
+  status: 'any',
 };
 
 export function VideoFilters({ onFilterChange, className }: VideoFiltersProps) {
-  const [filters, setFilters] = useState<VideoFilters>(defaultFilters);
+  const [filters, setFilters] = useState<LocalVideoFilters>(defaultFilters);
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   const handleFilterChange = (
-    key: keyof VideoFilters,
-    value: VideoFilters[keyof VideoFilters]
+    key: keyof LocalVideoFilters,
+    value: LocalVideoFilters[keyof LocalVideoFilters]
   ) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
@@ -52,43 +50,42 @@ export function VideoFilters({ onFilterChange, className }: VideoFiltersProps) {
     <div className={cn('space-y-4', !isMobile && 'flex items-center gap-4 space-y-0')}>
       <Select
         value={filters.sortBy}
-        onValueChange={(value) => handleFilterChange('sortBy', value as VideoFilters['sortBy'])}
+        onValueChange={(value) => handleFilterChange('sortBy', value as LocalVideoFilters['sortBy'])}
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="newest">Newest First</SelectItem>
-          <SelectItem value="oldest">Oldest First</SelectItem>
-          <SelectItem value="popular">Most Popular</SelectItem>
-          <SelectItem value="alphabetical">Alphabetical</SelectItem>
+          <SelectItem value="relevance">Relevance</SelectItem>
+          <SelectItem value="date">Newest First</SelectItem>
+          <SelectItem value="views">Most Popular</SelectItem>
         </SelectContent>
       </Select>
 
       <Select
         value={filters.duration}
-        onValueChange={(value) => handleFilterChange('duration', value as VideoFilters['duration'])}
+        onValueChange={(value) => handleFilterChange('duration', value as LocalVideoFilters['duration'])}
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Duration" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Durations</SelectItem>
-          <SelectItem value="short">Short (< 5 min)</SelectItem>
+          <SelectItem value="any">All Durations</SelectItem>
+          <SelectItem value="short">Short (&lt; 5 min)</SelectItem>
           <SelectItem value="medium">Medium (5-20 min)</SelectItem>
-          <SelectItem value="long">Long (> 20 min)</SelectItem>
+          <SelectItem value="long">Long (&gt; 20 min)</SelectItem>
         </SelectContent>
       </Select>
 
       <Select
         value={filters.status}
-        onValueChange={(value) => handleFilterChange('status', value as VideoFilters['status'])}
+        onValueChange={(value) => handleFilterChange('status', value as LocalVideoFilters['status'])}
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Status" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Status</SelectItem>
+          <SelectItem value="any">All Status</SelectItem>
           <SelectItem value="ready">Ready</SelectItem>
           <SelectItem value="processing">Processing</SelectItem>
           <SelectItem value="error">Error</SelectItem>

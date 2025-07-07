@@ -10,18 +10,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-} from 'recharts';
 import { VideoAnalyticsSummary } from '@/lib/types/video';
+import ClientCharts from './ClientCharts';
 
 async function getVideoAnalytics(videoId: string): Promise<{
   video: { id: string; title: string; user_id: string };
@@ -163,64 +153,10 @@ function AnalyticsContent({
       </div>
 
       {/* Charts */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Views Over Time</CardTitle>
-            <CardDescription>Daily view count</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={analytics.viewsByDay}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="date" 
-                    tickFormatter={(date) => new Date(date).toLocaleDateString()}
-                  />
-                  <YAxis />
-                  <Tooltip 
-                    labelFormatter={(date) => new Date(date).toLocaleDateString()}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="views"
-                    stroke="#2563eb"
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Engagement Breakdown</CardTitle>
-            <CardDescription>User interactions</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={Object.entries(analytics.engagementByType).map(
-                    ([type, count]) => ({
-                      type: type.charAt(0).toUpperCase() + type.slice(1),
-                      count,
-                    })
-                  )}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="type" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#2563eb" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <ClientCharts
+        viewsByDay={analytics.viewsByDay}
+        engagementByType={analytics.engagementByType}
+      />
     </div>
   );
 }

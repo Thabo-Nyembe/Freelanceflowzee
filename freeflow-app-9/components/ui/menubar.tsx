@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import * as MenubarPrimitive from ""@radix-ui/react-menubar
-import { Check, ChevronRight, Circle } from 'lucide-react'
+import * as MenubarPrimitive from "@radix-ui/react-menubar"
+import { Check, ChevronRight, Circle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -62,7 +62,7 @@ const MenubarSubTrigger = React.forwardRef<
     {...props}
   >
     {children}
-    <ChevronRight className= "ml-auto h-4 w-4" />
+    <ChevronRight className="ml-auto h-4 w-4" />
   </MenubarPrimitive.SubTrigger>
 ))
 MenubarSubTrigger.displayName = MenubarPrimitive.SubTrigger.displayName
@@ -138,9 +138,9 @@ const MenubarCheckboxItem = React.forwardRef<
     checked={checked}
     {...props}
   >
-    <span className= "absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
       <MenubarPrimitive.ItemIndicator>
-        <Check className= "h-4 w-4" />
+        <Check className="h-4 w-4" />
       </MenubarPrimitive.ItemIndicator>
     </span>
     {children}
@@ -160,9 +160,9 @@ const MenubarRadioItem = React.forwardRef<
     )}
     {...props}
   >
-    <span className= "absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
       <MenubarPrimitive.ItemIndicator>
-        <Circle className= "h-2 w-2 fill-current" />
+        <Circle className="h-2 w-2 fill-current" />
       </MenubarPrimitive.ItemIndicator>
     </span>
     {children}
@@ -206,15 +206,12 @@ const MenubarShortcut = ({
 }: React.HTMLAttributes<HTMLSpanElement>) => {
   return (
     <span
-      className={cn(
-        "ml-auto text-xs tracking-widest text-muted-foreground",
-        className
-      )}
+      className={cn("ml-auto text-xs tracking-widest text-muted-foreground", className)}
       {...props}
     />
   )
 }
-MenubarShortcut.displayname = "MenubarShortcut
+MenubarShortcut.displayName = "MenubarShortcut"
 
 export {
   Menubar,

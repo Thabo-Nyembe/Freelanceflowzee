@@ -2,29 +2,213 @@
 
 import React, { useReducer, useState, useCallback, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
- payload: Category }
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { Label } from '@/components/ui/label'
+import {
+  Camera,
+  Video,
+  Palette,
+  Music,
+  Code,
+  FileText,
+  Wand2,
+  Sparkles,
+  Settings,
+  Brain,
+  Key,
+  Layers,
+  Info,
+  RefreshCw,
+  Archive,
+  FileImage,
+  Download,
+  Eye,
+  Upload,
+  FolderOpen,
+  Copy,
+  Share2,
+  Trash2,
+  Star,
+  X,
+  ImageIcon,
+  FileVideo,
+  FileAudio,
+  Calculator,
+  HelpCircle,
+  CheckCircle,
+  AlertCircle,
+} from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Slider } from '@/components/ui/slider'
+import { Switch } from '@/components/ui/switch'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { toast } from 'sonner'
+
+// Type definitions
+interface Category {
+  id: string
+  name: string
+}
+
+interface AIModel {
+  id: string
+  name: string
+  provider: string
+  description: string
+  costPerRequest: number
+  speed: string
+  quality: string
+  requiresApiKey: boolean
+  isFree: boolean
+  tier: string
+  specialty: string[]
+  features: string[]
+  limits: {
+    dailyRequests: number
+    concurrent: number
+    freeTrialRequests: number
+  }
+  maxTokens?: number
+}
+
+interface UploadedFile {
+  id: string
+  name: string
+  size: number
+  type: string
+  progress: number
+  analysis?: FileAnalysis
+  isProcessing?: boolean
+}
+
+interface FileAnalysis {
+  summary: string
+  keywords: string[]
+  sentiment: string
+  fileType: string
+  quality: number
+  suggestions: string[]
+  compatibleAssetTypes: string[]
+  extractedMetadata: {
+    resolution?: string
+    duration?: string
+  }
+}
+
+interface GeneratedAsset {
+  id: string
+  name: string
+  type: string
+  url: string
+  thumbnailUrl: string
+  modelUsed: string
+  prompt: string
+  isFavorite: boolean
+  createdAt: Date
+  size: string
+  format: string
+  qualityScore: number
+  tags: string[]
+  baseFile?: string
+}
+
+interface AdvancedSettings {
+  quality: number
+  style: string
+  chaos: number
+  weird: number
+  batch: boolean
+  iterationCount: number
+}
+
+interface AssetGenerationState {
+  creativeField: string
+  assetType: string
+  categories: Category[]
+  selectedModel: AIModel | null
+  prompt: string
+  isUploading: boolean
+  uploadedFiles: UploadedFile[]
+  isGenerating: boolean
+  generatedAssets: GeneratedAsset[]
+  advancedSettings: AdvancedSettings
+  useCustomApi: boolean
+  userApiKeys: Record<string, string>
+  apiProvider: string
+  showUploadModal: boolean
+  showApiKeyModal: boolean
+  apiKeyValid: Record<string, boolean>
+  costSavings: {
+    freeTierUsed: number
+    paidTierSavings: number
+    monthly: number
+    total: number
+    requestsThisMonth: number
+  }
+  showApiKeySettings: boolean
+}
+
+type AssetGenerationAction =
+  | { type: 'SET_FIELD'; payload: string }
+  | { type: 'SET_ASSET_TYPE'; payload: string }
+  | { type: 'SET_CATEGORIES'; payload: Category[] }
   | { type: 'SET_MODEL'; payload: AIModel }
   | { type: 'SET_PROVIDER'; payload: string }
   | { type: 'SET_PROMPT'; payload: string }
   | { type: 'SET_UPLOADING'; payload: boolean }
   | { type: 'ADD_UPLOADED_FILE'; payload: UploadedFile }
   | { type: 'REMOVE_UPLOADED_FILE'; payload: string }
-  | { type: 'UPDATE_FILE_PROGRESS'; payload: { id: string, progress: number } }
-  | { type: 'UPDATE_FILE_ANALYSIS'; payload: { id: string, analysis: FileAnalysis } }
+  | { type: 'UPDATE_FILE_PROGRESS'; payload: { id: string; progress: number } }
+  | {
+      type: 'UPDATE_FILE_ANALYSIS'
+      payload: { id: string; analysis: FileAnalysis }
+    }
   | { type: 'SET_GENERATING'; payload: boolean }
   | { type: 'ADD_GENERATED_ASSET'; payload: GeneratedAsset }
   | { type: 'SET_GENERATED_ASSETS'; payload: GeneratedAsset[] }
-  | { type: &apos;UPDATE_ADVANCED_SETTINGS&apos;; payload: Partial<AdvancedSettings> }
+  | { type: 'UPDATE_ADVANCED_SETTINGS'; payload: Partial<AdvancedSettings> }
   | { type: 'TOGGLE_CUSTOM_API'; payload: boolean }
   | { type: 'SET_API_KEY'; payload: string }
   | { type: 'TOGGLE_UPLOAD_MODAL'; payload: boolean }
-  | { type: 'SET_USER_API_KEY'; payload: { provider: string, apiKey: string } } // Add this
-  | { type: 'SET_API_PROVIDER'; payload: string } // Add this
-  | { type: 'TOGGLE_API_KEY_MODAL'; payload: boolean } // Add this
-  | { type: 'CLEAR_API_KEYS' } // Add this for security
-  | { type: 'TOGGLE_API_KEY_SETTINGS'; payload: boolean } // Add this for full settings modal
-  | { type: 'SET_API_KEY_VALID'; payload: { provider: string, isValid: boolean } } // Add this for validation tracking
-  | { type: &apos;UPDATE_COST_SAVINGS&apos;; payload: Partial<AssetGenerationState['costSavings']> } // Add this for cost tracking
+  | { type: 'SET_USER_API_KEY'; payload: { provider: string; apiKey: string } }
+  | { type: 'SET_API_PROVIDER'; payload: string }
+  | { type: 'TOGGLE_API_KEY_MODAL'; payload: boolean }
+  | { type: 'CLEAR_API_KEYS' }
+  | { type: 'TOGGLE_API_KEY_SETTINGS'; payload: boolean }
+  | {
+      type: 'SET_API_KEY_VALID'
+      payload: { provider: string; isValid: boolean }
+    }
+  | {
+      type: 'UPDATE_COST_SAVINGS'
+      payload: Partial<AssetGenerationState['costSavings']>
+    }
 
 // A+++ Enhanced Creative Fields with More Options
 const CREATIVE_FIELDS = {
@@ -83,7 +267,8 @@ const CREATIVE_FIELDS = {
       { id: 'effects', name: 'Audio Effects', description: 'Reverb, delay, distortion presets', tier: 'pro' },
       { id: 'mastering', name: 'Mastering Chains', description: 'Professional mastering templates', tier: 'enterprise' }
     ]
-  }, 'web-development': {
+  },
+  webDevelopment: {
     name: 'Web Development',
     icon: Code,
     color: 'bg-orange-500',
@@ -208,60 +393,57 @@ const AI_MODELS: AIModel[] = [
 ]
 
 const initialState: AssetGenerationState = {
-  selectedAssetType: 'image',
-  selectedCategory: Object.values(CREATIVE_FIELDS)[0].assetTypes[0],
+  creativeField: Object.values(CREATIVE_FIELDS)[0].name,
+  assetType: Object.values(CREATIVE_FIELDS)[0].assetTypes[0].id,
+  categories: Object.values(CREATIVE_FIELDS).flatMap(field => field.assetTypes.map(type => ({ id: type.id, name: type.name }))),
   selectedModel: AI_MODELS[0],
-  selectedProvider: 'platform',
   prompt: '',
-  uploadedFiles: [],
   isUploading: false,
-  showUploadModal: false,
+  uploadedFiles: [],
   isGenerating: false,
   generatedAssets: [],
   advancedSettings: {
-    quality: 'professional',
+    quality: 85,
     style: 'modern',
-    colorScheme: 'vibrant',
-    resolution: '1024x1024',
-    format: 'PNG',
-    aiTemperature: 0.7,
-    diversityFactor: 0.5,
-    iterationCount: 1,
-    enhanceMode: true,
-    antiAliasing: true,
-    hdrSupport: false,
-    metadata: true,
-    watermark: false,
+    chaos: 0.5,
+    weird: 0.5,
     batch: false,
-    realTime: false
+    iterationCount: 5,
   },
   useCustomApi: false,
-  customApiKey: '',
-  userApiKeys: {}, // Initialize empty API keys storage
-  selectedApiProvider: 'platform', // Default to platform APIs
-  showApiKeyModal: false, // Initialize API key modal state
-  showApiKeySettings: false, // Initialize full API key settings state
-  userApiKeysValid: {}, // Initialize validation status
+  userApiKeys: {},
+  apiProvider: 'platform',
+  showUploadModal: false,
+  showApiKeyModal: false,
+  apiKeyValid: {},
   costSavings: {
+    freeTierUsed: 0,
+    paidTierSavings: 0,
     monthly: 0,
     total: 0,
-    freeCreditsUsed: 0,
-    requestsThisMonth: 0
-  }
+    requestsThisMonth: 0,
+  },
+  showApiKeySettings: false,
 }
 
 const assetGenerationReducer = (state: AssetGenerationState, action: AssetGenerationAction): AssetGenerationState => {
   switch (action.type) {
+    case 'SET_FIELD':
+      return {
+        ...state,
+        creativeField: action.payload
+      }
+    
     case 'SET_ASSET_TYPE':
       return {
         ...state,
-        selectedAssetType: action.payload
+        assetType: action.payload
       }
     
-    case 'SET_CATEGORY':
+    case 'SET_CATEGORIES':
       return {
         ...state,
-        selectedCategory: action.payload
+        categories: action.payload
       }
     
     case 'SET_MODEL':
@@ -273,7 +455,7 @@ const assetGenerationReducer = (state: AssetGenerationState, action: AssetGenera
     case 'SET_PROVIDER':
       return {
         ...state,
-        selectedProvider: action.payload
+        apiProvider: action.payload
       }
     
     case 'SET_PROMPT':
@@ -305,7 +487,7 @@ const assetGenerationReducer = (state: AssetGenerationState, action: AssetGenera
         ...state,
         uploadedFiles: state.uploadedFiles.map(file =>
           file.id === action.payload.id
-            ? { ...file, processingProgress: action.payload.progress }
+            ? { ...file, progress: action.payload.progress }
             : file
         )
       }
@@ -315,7 +497,7 @@ const assetGenerationReducer = (state: AssetGenerationState, action: AssetGenera
         ...state,
         uploadedFiles: state.uploadedFiles.map(file =>
           file.id === action.payload.id
-            ? { ...file, analysisResult: action.payload.analysis }
+            ? { ...file, analysis: action.payload.analysis }
             : file
         )
       }
@@ -353,7 +535,10 @@ const assetGenerationReducer = (state: AssetGenerationState, action: AssetGenera
     case 'SET_API_KEY':
       return {
         ...state,
-        customApiKey: action.payload
+        userApiKeys: {
+          ...state.userApiKeys,
+          [action.payload]: action.payload
+        }
       }
     
     case 'TOGGLE_UPLOAD_MODAL':
@@ -374,7 +559,7 @@ const assetGenerationReducer = (state: AssetGenerationState, action: AssetGenera
     case 'SET_API_PROVIDER':
       return {
         ...state,
-        selectedApiProvider: action.payload
+        apiProvider: action.payload
       }
     
     case 'TOGGLE_API_KEY_MODAL':
@@ -387,7 +572,7 @@ const assetGenerationReducer = (state: AssetGenerationState, action: AssetGenera
       return {
         ...state,
         userApiKeys: {},
-        selectedApiProvider: 'platform'
+        apiProvider: 'platform'
       }
     
     case 'TOGGLE_API_KEY_SETTINGS':
@@ -399,8 +584,8 @@ const assetGenerationReducer = (state: AssetGenerationState, action: AssetGenera
     case 'SET_API_KEY_VALID':
       return {
         ...state,
-        userApiKeysValid: {
-          ...state.userApiKeysValid,
+        apiKeyValid: {
+          ...state.apiKeyValid,
           [action.payload.provider]: action.payload.isValid
         }
       }
@@ -441,10 +626,7 @@ export default function AICreate() {
         name: file.name,
         size: file.size,
         type: file.type,
-        url: URL.createObjectURL(file),
-        uploadedAt: new Date(),
-        isProcessing: true,
-        processingProgress: 0
+        progress: 0
       }
 
       dispatch({ type: 'ADD_UPLOADED_FILE', payload: uploadedFile })
@@ -461,18 +643,27 @@ export default function AICreate() {
 
         // Simulate file analysis
         const mockAnalysis: FileAnalysis = {
-          fileType: file.type.startsWith('image/') ? 'image' : 
-                   file.type.startsWith('video/') ? 'video' : 'other',
+          summary: `Mock analysis for ${file.name}`,
+          keywords: ['mock', 'analysis', 'placeholder'],
+          sentiment: 'neutral',
+          fileType: file.type.startsWith('image/')
+            ? 'image'
+            : file.type.startsWith('video/')
+            ? 'video'
+            : 'other',
           quality: Math.floor(Math.random() * 30) + 70, // 70-100%
-          suggestions: ['Consider adjusting brightness for better results', 'Image quality is excellent for AI generation', 'This file is perfect for style transfer
+          suggestions: [
+            'Consider adjusting brightness for better results',
+            'Image quality is excellent for AI generation',
+            'This file is perfect for style transfer',
           ],
-          compatibleAssetTypes: file.type.startsWith('image/') 
+          compatibleAssetTypes: file.type.startsWith('image/')
             ? ['luts', 'presets', 'overlays', 'templates']
             : ['transitions', 'effects', 'audio'],
           extractedMetadata: {
             resolution: file.type.startsWith('image/') ? '1920x1080' : 'N/A',
-            duration: file.type.startsWith('video/') ? '00:05:23' : 'N/A'
-          }
+            duration: file.type.startsWith('video/') ? '00:05:23' : 'N/A',
+          },
         }
 
         dispatch({ 
@@ -520,8 +711,8 @@ export default function AICreate() {
       
       // In a real implementation, this would trigger the actual download
       const link = document.createElement('a')
-      link.href = asset.downloadUrl
-      link.download = asset.name + asset.format
+      link.href = asset.url
+      link.download = asset.name + '.zip'
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -535,14 +726,21 @@ export default function AICreate() {
   const generateAssets = async () => {
     dispatch({ type: 'SET_GENERATING', payload: true })
     
+    if (!state.selectedModel) {
+      toast.error('No AI model selected. Please choose a model to continue.')
+      dispatch({ type: 'SET_GENERATING', payload: false })
+      return
+    }
+
     try {
       // Context7 Pattern: Build request payload with model configuration and uploaded files
       const requestPayload = {
-        field: state.selectedCategory.id,
-        assetType: state.selectedCategory.id,
+        field: state.assetType,
+        assetType: state.assetType,
         parameters: {
           style: state.advancedSettings.style || 'modern',
-          colorScheme: state.advancedSettings.colorScheme || 'vibrant',
+          chaos: state.advancedSettings.chaos,
+          weird: state.advancedSettings.weird,
           customPrompt: state.prompt
         },
         advancedSettings: state.advancedSettings,
@@ -550,21 +748,22 @@ export default function AICreate() {
           id: file.id,
           name: file.name,
           type: file.type,
-          analysis: file.analysisResult
+          progress: file.progress,
+          analysis: file.analysis
         })),
         // Context7 Pattern: Model and API configuration
         modelConfig: {
           modelId: state.selectedModel.id,
           provider: state.selectedModel.provider,
           useCustomApi: state.useCustomApi,
-          customApiKey: state.useCustomApi ? state.customApiKey : undefined,
+          customApiKey: state.useCustomApi ? state.userApiKeys[state.apiProvider] : undefined,
           maxTokens: state.selectedModel.maxTokens,
           qualityLevel: state.selectedModel.quality
         }
       }
 
       // Context7 Pattern: Conditional API routing based on model selection
-      const apiEndpoint = state.useCustomApi && state.customApiKey 
+      const apiEndpoint = state.useCustomApi && state.userApiKeys[state.apiProvider] 
         ? '/api/ai/create/custom' 
         : '/api/ai/create'
 
@@ -574,8 +773,8 @@ export default function AICreate() {
           'Content-Type': 'application/json',
           // Context7 Pattern: Add model-specific headers
           'X-AI-Model': state.selectedModel.id, 'X-Use-Custom-API': state.useCustomApi.toString(),
-          ...(state.useCustomApi && state.customApiKey && {
-            'X-Custom-API-Key': state.customApiKey
+          ...(state.useCustomApi && state.userApiKeys[state.apiProvider] && {
+            'X-Custom-API-Key': state.userApiKeys[state.apiProvider]
           })
         },
         body: JSON.stringify(requestPayload)
@@ -592,7 +791,7 @@ export default function AICreate() {
       
       for (const step of progressSteps) {
         await new Promise(resolve => setTimeout(resolve, 600))
-        dispatch({ type: 'SET_GENERATING', payload: true })
+        // dispatch({ type: 'SET_GENERATING', payload: true })
       }
 
       // Add generated assets from API
@@ -603,18 +802,17 @@ export default function AICreate() {
             id: asset.id,
             name: asset.name,
             type: asset.type,
-            category: asset.category,
-            downloadUrl: asset.downloadUrl,
-            previewUrl: asset.previewUrl,
-            metadata: {
-              dimensions: asset.metadata.dimensions,
-              tags: asset.metadata.tags,
-              description: asset.metadata.description
-            },
-            createdAt: new Date(asset.createdAt),
-            size: asset.metadata.size,
-            format: asset.metadata.format,
-            tags: asset.metadata.tags || []
+            url: asset.url,
+            thumbnailUrl: asset.thumbnailUrl,
+            modelUsed: asset.modelUsed,
+            prompt: asset.prompt,
+            isFavorite: asset.isFavorite || false,
+            createdAt: new Date(),
+            size: asset.size,
+            format: asset.format,
+            qualityScore: asset.qualityScore,
+            tags: asset.tags,
+            baseFile: asset.baseFile
           }
           
           dispatch({ type: 'ADD_GENERATED_ASSET', payload: formattedAsset })
@@ -624,14 +822,14 @@ export default function AICreate() {
       
       dispatch({ type: 'SET_GENERATING', payload: false })
     } catch (error) {
-      console.error('Asset generation failed: ', error)'
+      console.error('Asset generation failed: ', error)
       // Enhanced mock generation with uploaded file context
-      const field = CREATIVE_FIELDS[state.selectedCategory.id as keyof typeof CREATIVE_FIELDS]
-      const assetType = field?.assetTypes.find(type => type.id === state.selectedCategory.id)
+      const field = state.creativeField ? CREATIVE_FIELDS[state.creativeField as keyof typeof CREATIVE_FIELDS] : undefined
+      const assetType = field?.assetTypes.find(type => type.id === state.assetType)
       const mockAssets = generateMockAssets(
-        state.selectedCategory.id, 
-        state.selectedCategory.id, 
-        assetType?.name || 
+        state.creativeField, 
+        state.assetType, 
+        assetType?.name || 'Asset',
         state.uploadedFiles
       )
       
@@ -660,26 +858,17 @@ export default function AICreate() {
         id: `${field}-${type}-${Date.now()}-1`,
         name: `${basePrefix} ${typeName} - Style A`,
         type,
-        category: field,
-        downloadUrl: '#download-asset-1',
-        previewUrl: '/images/placeholder.jpg',
-        metadata: {
-          dimensions: hasUploadedFiles ? '1920x1080' : '1280x720',
-          tags: hasUploadedFiles 
-            ? ['ai-enhanced', 'custom', 'high-quality', 'professional'] 
-            : ['ai-generated', 'modern', 'creative'],
-          description: hasUploadedFiles 
-            ? `AI-enhanced ${typeName.toLowerCase()} based on your uploaded content
-            : `AI-generated ${typeName.toLowerCase()} with professional quality
-        },
+        url: '#download-asset-1',
+        thumbnailUrl: '/images/placeholder.jpg',
+        modelUsed: 'Advanced AI v2.1',
+        prompt: hasUploadedFiles ? 'Enhanced from uploaded file' : 'Generated from prompt',
+        isFavorite: !!hasUploadedFiles,
         createdAt: new Date(),
         size: fileSizes[0],
         format: getFormatForType(type),
         qualityScore: qualityScores[0],
-        aiModel: 'Advanced AI v2.1',
-        promptUsed: hasUploadedFiles ? 'Enhanced from uploaded file' : 'Generated from prompt',
         tags: hasUploadedFiles 
-          ? ['ai-enhanced', 'custom', 'high-quality'] 
+          ? ['ai-enhanced', 'custom', 'high-quality', 'professional'] 
           : ['ai-generated', 'modern', 'creative'],
         baseFile: hasUploadedFiles ? uploadedFiles[0].id : undefined
       },
@@ -687,20 +876,15 @@ export default function AICreate() {
         id: `${field}-${type}-${Date.now()}-2`,
         name: `${basePrefix} ${typeName} - Style B`,
         type,
-        category: field,
-        downloadUrl: '#download-asset-2',
-        previewUrl: '/images/placeholder.jpg',
-        metadata: {
-          dimensions: '1920x1080',
-          tags: ['ai-generated', 'artistic', 'unique', 'premium'],
-          description: `Creative variation of ${typeName.toLowerCase()} with artistic flair
-        },
+        url: '#download-asset-2',
+        thumbnailUrl: '/images/placeholder.jpg',
+        modelUsed: 'Creative AI v1.8',
+        prompt: 'Artistic interpretation',
+        isFavorite: false,
         createdAt: new Date(),
         size: fileSizes[1],
         format: getFormatForType(type),
         qualityScore: qualityScores[1],
-        aiModel: 'Creative AI v1.8',
-        promptUsed: 'Artistic interpretation',
         tags: ['artistic', 'unique', 'premium'],
         baseFile: hasUploadedFiles && uploadedFiles.length > 1 ? uploadedFiles[1].id : undefined
       },
@@ -708,20 +892,15 @@ export default function AICreate() {
         id: `${field}-${type}-${Date.now()}-3`,
         name: `${basePrefix} ${typeName} - Style C`,
         type,
-        category: field,
-        downloadUrl: '#download-asset-3',
-        previewUrl: '/images/placeholder.jpg',
-        metadata: {
-          dimensions: '1920x1080',
-          tags: ['minimalist', 'clean', 'elegant', 'professional'],
-          description: `Clean and minimalist ${typeName.toLowerCase()} design
-        },
+        url: '#download-asset-3',
+        thumbnailUrl: '/images/placeholder.jpg',
+        modelUsed: 'Precision AI v1.5',
+        prompt: 'Minimalist design approach',
+        isFavorite: false,
         createdAt: new Date(),
         size: fileSizes[2],
         format: getFormatForType(type),
         qualityScore: qualityScores[2],
-        aiModel: 'Precision AI v1.5',
-        promptUsed: 'Minimalist design approach',
         tags: ['minimalist', 'clean', 'elegant']
       }
     ]
@@ -732,20 +911,15 @@ export default function AICreate() {
         id: `${field}-${type}-${Date.now()}-4`,
         name: `${basePrefix} ${typeName} - Custom Variation`,
         type,
-        category: field,
-        downloadUrl: '#download-asset-4',
-        previewUrl: '/images/placeholder.jpg',
-        metadata: {
-          dimensions: '2560x1440',
-          tags: ['custom', 'enhanced', 'high-res', 'premium'],
-          description: `High-resolution custom ${typeName.toLowerCase()} created from your files
-        },
+        url: '#download-asset-4',
+        thumbnailUrl: '/images/placeholder.jpg',
+        modelUsed: 'Ultra AI v3.0',
+        prompt: `Based on ${uploadedFiles[0].name}`,
+        isFavorite: false,
         createdAt: new Date(),
         size: fileSizes[3],
         format: getFormatForType(type),
         qualityScore: qualityScores[3],
-        aiModel: 'Ultra AI v3.0',
-        promptUsed: `Based on ${uploadedFiles[0].name}`,
         tags: ['custom', 'enhanced', 'high-res'],
         baseFile: uploadedFiles[0].id
       })
@@ -774,10 +948,10 @@ export default function AICreate() {
       snippets: '.js'
     }
     
-    return formatMap[type] || '.zip
+    return formatMap[type] || '.zip'
   }
 
-  const selectedField = CREATIVE_FIELDS[state.selectedCategory.id as keyof typeof CREATIVE_FIELDS]
+  const selectedField = state.creativeField ? CREATIVE_FIELDS[state.creativeField as keyof typeof CREATIVE_FIELDS] : undefined
 
   return (
     <div className= "w-full max-w-7xl mx-auto p-6 space-y-6">
@@ -819,11 +993,11 @@ export default function AICreate() {
                     <Card
                       key={key}
                       className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
-                        state.selectedCategory.id === key 
+                        state.creativeField === key 
                           ? 'ring-2 ring-purple-500 bg-purple-50' 
                           : 'hover:shadow-lg'
                       }`}
-                      onClick={() => dispatch({ type: 'SET_CATEGORY', payload: field.assetTypes[0] })}
+                      onClick={() => dispatch({ type: 'SET_FIELD', payload: key })}
                     >
                       <CardContent className= "p-6 text-center space-y-3">
                         <div className={`w-16 h-16 ${field.color} rounded-full flex items-center justify-center mx-auto`}>
@@ -855,11 +1029,11 @@ export default function AICreate() {
                     <Card
                       key={assetType.id}
                       className={`cursor-pointer transition-all duration-200 ${
-                        state.selectedCategory.id === assetType.id 
+                        state.assetType === assetType.id 
                           ? 'ring-2 ring-purple-500 bg-purple-50' 
                           : 'hover:shadow-md'
                       }`}
-                      onClick={() => dispatch({ type: 'SET_CATEGORY', payload: assetType })}
+                      onClick={() => dispatch({ type: 'SET_ASSET_TYPE', payload: assetType.id })}
                     >
                       <CardContent className= "p-4">
                         <h4 className= "font-semibold text-lg mb-2">{assetType.name}</h4>
@@ -872,7 +1046,7 @@ export default function AICreate() {
             </Card>
           )}
 
-          {state.selectedCategory && (
+          {state.assetType && (
             <Card>
               <CardHeader>
                 <CardTitle className= "flex items-center gap-2">
@@ -902,37 +1076,42 @@ export default function AICreate() {
                   </div>
 
                   <div className= "space-y-2">
-                    <label className= "text-sm font-medium">Color Scheme</label>
-                    <Select
-                      value={state.advancedSettings.colorScheme || 'vibrant'}
-                      onValueChange={(value) => dispatch({ type: 'UPDATE_ADVANCED_SETTINGS', payload: { colorScheme: value } })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder= "Select color scheme" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value= "vibrant">Vibrant</SelectItem>
-                        <SelectItem value= "muted">Muted</SelectItem>
-                        <SelectItem value= "monochrome">Monochrome</SelectItem>
-                        <SelectItem value= "warm">Warm Tones</SelectItem>
-                        <SelectItem value= "cool">Cool Tones</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <label className= "text-sm font-medium">Chaos</label>
+                    <Slider
+                      value={[state.advancedSettings.chaos]}
+                      onValueChange={(value) => dispatch({ type: 'UPDATE_ADVANCED_SETTINGS', payload: { chaos: value[0] } })}
+                      max={1}
+                      min={0}
+                      step={0.1}
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div className= "space-y-2">
+                    <label className= "text-sm font-medium">Weird</label>
+                    <Slider
+                      value={[state.advancedSettings.weird]}
+                      onValueChange={(value) => dispatch({ type: 'UPDATE_ADVANCED_SETTINGS', payload: { weird: value[0] } })}
+                      max={1}
+                      min={0}
+                      step={0.1}
+                      className="w-full"
+                    />
                   </div>
                 </div>
 
                 <div className= "space-y-2">
                   <label className= "text-sm font-medium">Custom Prompt (Optional)</label>
                   <Textarea
-                    placeholder="Describe specific requirements or style preferences...
-                    value={state.prompt}"
+                    placeholder="Describe specific requirements or style preferences..."
+                    value={state.prompt}
                     onChange={(e) => dispatch({ type: 'SET_PROMPT', payload: e.target.value })}
-                    className="min-h-[100px]
+                    className="min-h-[100px]"
                   />
                 </div>
 
-                {/* Context7 Pattern: AI Model Selection with Cost Optimization */}"
-                <Card className= "border-dashed border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
+                {/* Context7 Pattern: AI Model Selection with Cost Optimization */}
+                {state.selectedModel && <Card className= "border-dashed border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
                   <CardHeader className= "pb-3">
                     <CardTitle className= "flex items-center gap-2 text-lg">
                       <Brain className= "w-5 h-5 text-purple-600" />
@@ -948,7 +1127,7 @@ export default function AICreate() {
                         <Card
                           key={model.id}
                           className={`cursor-pointer transition-all duration-200 ${
-                            state.selectedModel.id === model.id 
+                            state.selectedModel && state.selectedModel.id === model.id 
                               ? 'ring-2 ring-purple-500 bg-purple-50' 
                               : 'hover:shadow-md'
                           }`}
@@ -963,10 +1142,10 @@ export default function AICreate() {
                               <div className= "flex gap-1">
                                 <Badge 
                                   variant={model.tier === 'enterprise' ? 'default' : model.tier === 'pro' ? 'secondary' : 'outline'}
-                                  className="text-xs
+                                  className="text-xs"
                                 >
                                   {model.tier}
-                                </Badge>"
+                                </Badge>
                                 {model.isFree && <Badge variant= "outline" className= "text-xs bg-green-50">Free</Badge>}
                               </div>
                             </div>
@@ -999,7 +1178,7 @@ export default function AICreate() {
                     </div>
 
                     {/* Custom API Configuration */}
-                    {state.selectedModel.requiresApiKey && (
+                    {state.selectedModel && state.selectedModel.requiresApiKey && (
                       <Card className= "border-amber-200 bg-amber-50">
                         <CardHeader className= "pb-3">
                           <CardTitle className= "flex items-center gap-2 text-sm">
@@ -1019,10 +1198,11 @@ export default function AICreate() {
                             <div className= "space-y-2">
                               <label className= "text-sm font-medium">API Key</label>
                               <Input
-                                type="password
+                                type="password"
                                 placeholder={`Enter your ${state.selectedModel.provider} API key`}
-                                value={state.customApiKey}"
+                                value={state.userApiKeys[state.apiProvider] || ''}
                                 onChange={(e) => dispatch({ type: 'SET_API_KEY', payload: e.target.value })}
+                                className="pr-10"
                               />
                               <p className= "text-xs text-gray-500">
                                 Your API key is stored securely and only used for this session.
@@ -1062,8 +1242,8 @@ export default function AICreate() {
                                 max={50}
                                 min={5}
                                 step={5}
-                                className="w-full
-                              />"
+                                className="w-full"
+                              />
                               <div className= "flex justify-between text-xs text-gray-500">
                                 <span>5 assets</span>
                                 <span>50 assets</span>
@@ -1071,22 +1251,22 @@ export default function AICreate() {
                             </div>
                             <div className= "flex items-center gap-2 text-xs text-blue-600">
                               <Info className= "w-4 h-4" />
-                              <span>Estimated cost: ${(state.selectedModel.costPerRequest * state.advancedSettings.iterationCount).toFixed(3)}</span>
+                              <span>Estimated cost: ${state.selectedModel && !state.selectedModel.isFree ? (state.selectedModel.costPerRequest * state.advancedSettings.iterationCount).toFixed(3) : '0.00'}</span>
                             </div>
                           </div>
                         )}
                       </CardContent>
                     </Card>
                   </CardContent>
-                </Card>
+                </Card>}
 
                 <Button
                   onClick={generateAssets}
-                  disabled={state.isGenerating || !state.selectedCategory}
+                  disabled={state.isGenerating || !state.assetType}
                   className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-                  data-testid="generate-assets-btn
+                  data-testid="generate-assets-btn"
                 >
-                  {state.isGenerating ? ("
+                  {state.isGenerating ? (
                     <div className= "flex items-center gap-2">
                       <RefreshCw className= "w-5 h-5 animate-spin" />
                       Generating... {state.generatedAssets.length} assets
@@ -1138,7 +1318,7 @@ export default function AICreate() {
                         </div>
                         <div>
                           <h4 className= "font-medium truncate">{asset.name}</h4>
-                          <p className= "text-xs text-gray-600 line-clamp-2">{asset.metadata.description}</p>
+                          <p className= "text-xs text-gray-600 line-clamp-2">{asset.prompt}</p>
                         </div>
                         <div className= "flex items-center justify-between text-xs">
                           <span className= "text-gray-500">{asset.size}</span>
@@ -1154,21 +1334,21 @@ export default function AICreate() {
                         <div className= "flex gap-2">
                           <Button
                             variant="outline"
-                            size= "sm
+                            size= "sm"
                             className="flex-1"
-                            onClick={() => console.log('Preview asset: ', asset.id)}'
-                            data-testid="preview-asset-btn
-                          >"
+                            onClick={() => console.log('Preview asset: ', asset.id)}
+                            data-testid="preview-asset-btn"
+                          >
                             <Eye className= "w-4 h-4 mr-1" />
                             Preview
                           </Button>
                           <Button
                             variant="default"
-                            size= "sm
-                            className="flex-1
-                            onClick={() => handleDownloadAsset(asset)}"
-                            data-testid="download-asset-btn
-                          >"
+                            size= "sm"
+                            className="flex-1"
+                            onClick={() => handleDownloadAsset(asset)}
+                            data-testid="download-asset-btn"
+                          >
                             <Download className= "w-4 h-4 mr-1" />
                             Download
                           </Button>
@@ -1196,12 +1376,12 @@ export default function AICreate() {
             <CardContent className= "space-y-6">
               {/* File Upload Area */}
               <div
-                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-400 transition-colors cursor-pointer
+                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-400 transition-colors cursor-pointer"
                 onDragOver={handleDragOver}
                 onDragEnter={handleDragEnter}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
-              >"
+              >
                 <div className= "space-y-4">
                   <div className= "flex justify-center">
                     <div className= "p-3 bg-purple-50 rounded-full">
@@ -1236,10 +1416,10 @@ export default function AICreate() {
 
               <input
                 ref={fileInputRef}
-                type="file
-                multiple"
-                accept= "image/*,video/*,audio/*
-                className="hidden
+                type="file"
+                multiple
+                accept= "image/*,video/*,audio/*"
+                className="hidden"
                 onChange={(e) => {
                   if (e.target.files) {
                     handleFileUpload(e.target.files)
@@ -1248,7 +1428,7 @@ export default function AICreate() {
               />
 
               {/* Upload Progress */}
-              {state.isUploading && ("
+              {state.isUploading && (
                 <Card className= "border-blue-200 bg-blue-50">
                   <CardContent className= "p-4">
                     <div className= "flex items-center gap-2 text-blue-700">
@@ -1265,68 +1445,68 @@ export default function AICreate() {
                   <h3 className= "text-lg font-semibold">Uploaded Files</h3>
                   <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {state.uploadedFiles.map((file) => (
-                      <Card key={file.id} className= "hover:shadow-md transition-shadow">
-                        <CardContent className= "p-4 space-y-3">
-                          <div className= "flex items-start justify-between">
-                            <div className= "flex items-center gap-2">
-                              {file.type.startsWith('image/') && <ImageIcon className= "w-5 h-5 text-blue-500" />}
-                              {file.type.startsWith('video/') && <FileVideo className= "w-5 h-5 text-green-500" />}
-                              {file.type.startsWith('audio/') && <FileAudio className= "w-5 h-5 text-purple-500" />}
+                      <Card key={file.id} className="hover:shadow-md transition-shadow">
+                        <CardContent className="p-4 space-y-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-2">
+                              {file.type.startsWith('image/') && <ImageIcon className="w-5 h-5 text-blue-500" />}
+                              {file.type.startsWith('video/') && <FileVideo className="w-5 h-5 text-green-500" />}
+                              {file.type.startsWith('audio/') && <FileAudio className="w-5 h-5 text-purple-500" />}
                               <div>
-                                <h4 className= "font-medium text-sm truncate max-w-32">{file.name}</h4>
-                                <p className= "text-xs text-gray-500">
+                                <h4 className="font-medium text-sm truncate max-w-32">{file.name}</h4>
+                                <p className="text-xs text-gray-500">
                                   {(file.size / 1024 / 1024).toFixed(1)} MB
                                 </p>
                               </div>
                             </div>
                             <Button
                               variant="ghost"
-                              size= "sm
+                              size="sm"
                               className="w-6 h-6 p-0 text-red-500"
                               onClick={() => dispatch({ type: 'REMOVE_UPLOADED_FILE', payload: file.id })}
                             >
-                              <X className= "w-4 h-4" />
+                              <X className="w-4 h-4" />
                             </Button>
                           </div>
 
                           {file.isProcessing && (
-                            <div className= "space-y-2">
-                              <div className= "flex justify-between text-xs">
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-xs">
                                 <span>Processing...</span>
-                                <span>{file.processingProgress}%</span>
+                                <span>{file.progress}%</span>
                               </div>
-                              <Progress value={file.processingProgress} className= "w-full" />
+                              <Progress value={file.progress} className="w-full" />
                             </div>
                           )}
 
-                          {file.analysisResult && (
-                            <div className= "space-y-3">
-                              <div className= "flex items-center justify-between">
-                                <Badge variant= "outline" className= "text-xs">
-                                  Quality: {file.analysisResult.quality}%
+                          {file.analysis && (
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <Badge variant="outline" className="text-xs">
+                                  Quality: {file.analysis.quality}%
                                 </Badge>
-                                <Badge variant= "secondary" className= "text-xs">
-                                  {file.analysisResult.fileType}
+                                <Badge variant="secondary" className="text-xs">
+                                  {file.analysis.fileType}
                                 </Badge>
                               </div>
-                              
-                              <div className= "space-y-2">
-                                <p className= "text-xs font-medium">Compatible Asset Types:</p>
-                                <div className= "flex flex-wrap gap-1">
-                                  {file.analysisResult.compatibleAssetTypes.map((type, idx) => (
-                                    <Badge key={idx} variant= "outline" className= "text-xs">
+
+                              <div className="space-y-2">
+                                <p className="text-xs font-medium">Compatible Asset Types:</p>
+                                <div className="flex flex-wrap gap-1">
+                                  {file.analysis.compatibleAssetTypes.map((type, idx) => (
+                                    <Badge key={idx} variant="outline" className="text-xs">
                                       {type}
                                     </Badge>
                                   ))}
                                 </div>
                               </div>
 
-                              <div className= "space-y-2">
-                                <p className= "text-xs font-medium">AI Suggestions:</p>
-                                <ul className= "text-xs text-gray-600 space-y-1">
-                                  {file.analysisResult.suggestions.slice(0, 2).map((suggestion, idx) => (
-                                    <li key={idx} className= "flex items-start gap-1">
-                                      <span className= "text-purple-500">•</span>
+                              <div className="space-y-2">
+                                <p className="text-xs font-medium">AI Suggestions:</p>
+                                <ul className="text-xs text-gray-600 space-y-1">
+                                  {file.analysis.suggestions.slice(0, 2).map((suggestion, idx) => (
+                                    <li key={idx} className="flex items-start gap-1">
+                                      <span className="text-purple-500">•</span>
                                       <span>{suggestion}</span>
                                     </li>
                                   ))}
@@ -1335,32 +1515,35 @@ export default function AICreate() {
 
                               <Button
                                 variant="default"
-                                size= "sm
-                                className="w-full
+                                size="sm"
+                                className="w-full"
                                 onClick={() => {
                                   // Auto-populate generation settings based on uploaded file
-                                  if (file.analysisResult) {"
-                                    const field = file.type.startsWith('image/') ? 'photography' : 
-                                                file.type.startsWith('video/') ? 'videography' : 'music'
+                                  if (file.analysis) {
+                                    const field = file.type.startsWith('image/')
+                                      ? 'photography'
+                                      : file.type.startsWith('video/')
+                                      ? 'videography'
+                                      : 'music'
                                     // dispatch({ type: 'SET_ASSET_TYPE', payload: 'image' as AssetType })
-                                    
-                                    const assetType = file.analysisResult.compatibleAssetTypes[0]
+
+                                    const assetType = file.analysis.compatibleAssetTypes[0]
                                     if (assetType) {
                                       // dispatch({ type: 'SET_CATEGORY', payload: { id: 'logos', name: 'Logos' } as Category })
                                     }
-                                    
-                                    dispatch({ 
-                                      type: 'SET_PROMPT', 
-                                      payload: `Generate assets based on uploaded ${file.name}` 
+
+                                    dispatch({
+                                      type: 'SET_PROMPT',
+                                      payload: `Generate assets based on uploaded ${file.name}`,
                                     })
-                                    
+
                                     // Switch to generate tab
-                                    const generateTab = document.querySelector('[value= "generate"]') as HTMLElement
+                                    const generateTab = document.querySelector('[value="generate"]') as HTMLElement
                                     generateTab?.click()
                                   }
                                 }}
                               >
-                                <Sparkles className= "w-4 h-4 mr-1" />
+                                <Sparkles className="w-4 h-4 mr-1" />
                                 Generate from this file
                               </Button>
                             </div>
@@ -1400,41 +1583,38 @@ export default function AICreate() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className= "space-y-4">
+              <div className="space-y-4">
                 {/* Library Controls */}
-                <div className= "flex items-center justify-between">
-                  <div className= "flex gap-2">
-                    <Input
-                      placeholder="Search assets..."
-                      className="w-64
-                    />"
-                    <Select defaultValue= "all">
-                      <SelectTrigger className= "w-32">
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-2">
+                    <Input placeholder="Search assets..." className="w-64" />
+                    <Select defaultValue="all">
+                      <SelectTrigger className="w-32">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value= "all">All Types</SelectItem>
-                        <SelectItem value= "luts">LUTs</SelectItem>
-                        <SelectItem value= "presets">Presets</SelectItem>
-                        <SelectItem value= "templates">Templates</SelectItem>
+                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="luts">LUTs</SelectItem>
+                        <SelectItem value="presets">Presets</SelectItem>
+                        <SelectItem value="templates">Templates</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className= "flex gap-2">
-                    <Button 
-                      variant= "outline" 
-                      size= "sm" 
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => {
-                        const uploadTab = document.querySelector('[value= "upload"]') as HTMLElement
-                        uploadTab?.click()
+                        const uploadTab = document.querySelector('[value="upload"]') as HTMLElement;
+                        uploadTab?.click();
                       }}
-                      data-testid="upload-asset-btn
-                    >"
-                      <Upload className= "w-4 h-4 mr-1" />
+                      data-testid="upload-asset-btn"
+                    >
+                      <Upload className="w-4 h-4 mr-1" />
                       Upload
                     </Button>
-                    <Button variant= "outline" size= "sm" data-testid= "export-all-btn">
-                      <Archive className= "w-4 h-4 mr-1" />
+                    <Button variant="outline" size="sm" data-testid="export-all-btn">
+                      <Archive className="w-4 h-4 mr-1" />
                       Export All
                     </Button>
                   </div>
@@ -1442,41 +1622,43 @@ export default function AICreate() {
 
                 {/* Library Grid */}
                 {state.generatedAssets.length > 0 ? (
-                  <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {state.generatedAssets.map((asset) => (
-                      <Card key={asset.id} className= "group hover:shadow-md transition-all duration-200">
-                        <CardContent className= "p-3 space-y-2">
-                          <div className= "aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center relative overflow-hidden">
-                            <FileImage className= "w-6 h-6 text-gray-400" />
-                            <div className= "absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-                              <div className= "flex gap-1">
-                                <Button size= "sm" variant= "secondary" className= "w-8 h-8 p-0">
-                                  <Eye className= "w-4 h-4" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {state.generatedAssets.map(asset => (
+                      <Card key={asset.id} className="group hover:shadow-md transition-all duration-200">
+                        <CardContent className="p-3 space-y-2">
+                          <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center relative overflow-hidden">
+                            <FileImage className="w-6 h-6 text-gray-400" />
+                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                              <div className="flex gap-1">
+                                <Button size="sm" variant="secondary" className="w-8 h-8 p-0">
+                                  <Eye className="w-4 h-4" />
                                 </Button>
-                                <Button size= "sm" variant= "secondary" className= "w-8 h-8 p-0">
-                                  <Download className= "w-4 h-4" />
+                                <Button size="sm" variant="secondary" className="w-8 h-8 p-0">
+                                  <Download className="w-4 h-4" />
                                 </Button>
-                                <Button size= "sm" variant= "secondary" className= "w-8 h-8 p-0">
-                                  <Star className= "w-4 h-4" />
+                                <Button size="sm" variant="secondary" className="w-8 h-8 p-0">
+                                  <Star className="w-4 h-4" />
                                 </Button>
                               </div>
                             </div>
                           </div>
                           <div>
-                            <h4 className= "font-medium text-sm truncate">{asset.name}</h4>
-                            <p className= "text-xs text-gray-500">{asset.size}</p>
+                            <h4 className="font-medium text-sm truncate">{asset.name}</h4>
+                            <p className="text-xs text-gray-500">{asset.size}</p>
                           </div>
-                          <div className= "flex items-center justify-between">
-                            <Badge variant= "outline" className= "text-xs">{asset.format}</Badge>
-                            <div className= "flex gap-1">
-                              <Button size= "sm" variant= "ghost" className= "w-6 h-6 p-0">
-                                <Copy className= "w-3 h-3" />
+                          <div className="flex items-center justify-between">
+                            <Badge variant="outline" className="text-xs">
+                              {asset.format}
+                            </Badge>
+                            <div className="flex gap-1">
+                              <Button size="sm" variant="ghost" className="w-6 h-6 p-0">
+                                <Copy className="w-3 h-3" />
                               </Button>
-                              <Button size= "sm" variant= "ghost" className= "w-6 h-6 p-0">
-                                <Share2 className= "w-3 h-3" />
+                              <Button size="sm" variant="ghost" className="w-6 h-6 p-0">
+                                <Share2 className="w-3 h-3" />
                               </Button>
-                              <Button size= "sm" variant= "ghost" className= "w-6 h-6 p-0 text-red-500">
-                                <Trash2 className= "w-3 h-3" />
+                              <Button size="sm" variant="ghost" className="w-6 h-6 p-0 text-red-500">
+                                <Trash2 className="w-3 h-3" />
                               </Button>
                             </div>
                           </div>
@@ -1485,12 +1667,12 @@ export default function AICreate() {
                     ))}
                   </div>
                 ) : (
-                  <div className= "text-center py-12">
-                    <Archive className= "w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className= "text-lg font-medium text-gray-900 mb-2">No assets yet</h3>
-                    <p className= "text-gray-600 mb-4">Generate your first assets to build your library</p>
-                    <Button onClick={() => (document.querySelector('[value= "generate"]') as HTMLElement)?.click()}>
-                      <Wand2 className= "w-4 h-4 mr-1" />
+                  <div className="text-center py-12">
+                    <Archive className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No assets yet</h3>
+                    <p className="text-gray-600 mb-4">Generate your first assets to build your library</p>
+                    <Button onClick={() => (document.querySelector('[value="generate"]') as HTMLElement)?.click()}>
+                      <Wand2 className="w-4 h-4 mr-1" />
                       Generate Assets
                     </Button>
                   </div>
@@ -1501,7 +1683,7 @@ export default function AICreate() {
         </TabsContent>
 
         <TabsContent value= "settings" className= "h-full m-0">
-          <div className= "tab-panel p-6 space-y-6">
+          <div className= "p-6 space-y-6">
             {/* Cost Savings Overview Card */}
             <Card className= "glass-card border-2 border-green-200/50 bg-green-50/30">
               <CardHeader>
@@ -1520,11 +1702,11 @@ export default function AICreate() {
                     <div className= "text-xs text-green-700">Monthly Savings</div>
                   </div>
                   <div className= "text-center p-3 bg-blue-100 rounded-lg">
-                    <div className= "text-2xl font-bold text-blue-600">${state.costSavings.freeCreditsUsed.toFixed(2)}</div>
+                    <div className= "text-2xl font-bold text-blue-600">${(state.costSavings.freeTierUsed || 0).toFixed(2)}</div>
                     <div className= "text-xs text-blue-700">Free Credits Used</div>
                   </div>
                   <div className= "text-center p-3 bg-purple-100 rounded-lg">
-                    <div className= "text-2xl font-bold text-purple-600">{state.costSavings.requestsThisMonth}</div>
+                    <div className= "text-2xl font-bold text-purple-600">{state.costSavings.requestsThisMonth || 0}</div>
                     <div className= "text-xs text-purple-700">Requests This Month</div>
                   </div>
                   <div className= "text-center p-3 bg-amber-100 rounded-lg">
@@ -1553,19 +1735,19 @@ export default function AICreate() {
                   <Button
                     onClick={() => dispatch({ type: 'TOGGLE_API_KEY_SETTINGS', payload: true })}
                     className="flex-1"
-                    variant="outline
-                  >"
+                    variant="outline"
+                  >
                     <Settings className= "h-4 w-4 mr-2" />
                     Manage All API Keys
                   </Button>
                   <Button
                     onClick={() => {
-                      const savings = (Object.keys(state.userApiKeys).length * 15) + (state.costSavings.freeCreditsUsed * 0.8)
+                      const savings = (Object.keys(state.userApiKeys).length * 15) + (state.costSavings.freeTierUsed * 0.8)
                       dispatch({ type: 'UPDATE_COST_SAVINGS', payload: { monthly: savings } })
                       toast.success(`Updated cost savings: $${savings.toFixed(2)}/month`)
                     }}
                     variant="outline"
-                    size= "sm
+                    size= "sm"
                   >
                     <RefreshCw className= "h-4 w-4" />
                   </Button>
@@ -1574,8 +1756,8 @@ export default function AICreate() {
                 <div className= "space-y-3">
                   <Label className= "text-sm font-medium">API Provider</Label>
                   <Select 
-                    value={state.selectedApiProvider} 
-                    onValueChange={(value) => dispatch({ type: 'SET_API_PROVIDER', payload: value })}
+                    value={state.apiProvider} 
+                    onValueChange={(value) => dispatch({ type: 'SET_PROVIDER', payload: value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder= "Select API provider" />
@@ -1593,25 +1775,25 @@ export default function AICreate() {
                 </div>
 
                 {/* API Key Input for Selected Provider */}
-                {state.selectedApiProvider !== 'platform' && (
+                {state.apiProvider !== 'platform' && (
                   <div className= "space-y-3">
                     <Label className= "text-sm font-medium">
-                      {state.selectedApiProvider.charAt(0).toUpperCase() + state.selectedApiProvider.slice(1)} API Key
+                      {state.apiProvider.charAt(0).toUpperCase() + state.apiProvider.slice(1)} API Key
                     </Label>
                     <div className= "relative">
                       <Input
-                        type="password
-                        placeholder={`Enter your ${state.selectedApiProvider} API key`}"
-                        value={state.userApiKeys[state.selectedApiProvider] || ''}
+                        type="password"
+                        placeholder={`Enter your ${state.apiProvider} API key`}
+                        value={state.userApiKeys[state.apiProvider] || ''}
                         onChange={(e) => dispatch({ 
                           type: 'SET_USER_API_KEY', 
-                          payload: { provider: state.selectedApiProvider, apiKey: e.target.value }
+                          payload: { provider: state.apiProvider, apiKey: e.target.value }
                         })}
-                        className="pr-10
+                        className="pr-10"
                       />
-                      <Button"
+                      <Button
                         variant="ghost"
-                        size= "sm
+                        size= "sm"
                         className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
                         onClick={() => dispatch({ type: 'TOGGLE_API_KEY_MODAL', payload: true })}
                       >
@@ -1621,7 +1803,7 @@ export default function AICreate() {
                     
                     {/* API Key Status Indicator */}
                     <div className= "flex items-center gap-2 text-sm">
-                      {state.userApiKeys[state.selectedApiProvider] ? (
+                      {state.userApiKeys[state.apiProvider] ? (
                         <>
                           <CheckCircle className= "h-4 w-4 text-green-500" />
                           <span className= "text-green-600">API key configured</span>
@@ -1637,10 +1819,10 @@ export default function AICreate() {
                     {/* Provider-specific Benefits */}
                     <div className= "bg-blue-50 p-3 rounded-lg border border-blue-200">
                       <h4 className= "text-sm font-medium text-blue-800 mb-2">
-                        Benefits of using your {state.selectedApiProvider} API:
+                        Benefits of using your {state.apiProvider} API:
                       </h4>
                       <ul className= "text-xs text-blue-700 space-y-1">
-                        {state.selectedApiProvider === 'openai' && (
+                        {state.apiProvider === 'openai' && (
                           <>
                             <li>• Access to latest GPT-4o and DALL-E 3 models</li>
                             <li>• Higher rate limits and faster processing</li>
@@ -1648,7 +1830,7 @@ export default function AICreate() {
                             <li>• Direct API access without platform markup</li>
                           </>
                         )}
-                        {state.selectedApiProvider === 'anthropic' && (
+                        {state.apiProvider === 'anthropic' && (
                           <>
                             <li>• Access to Claude 3.5 Sonnet creative capabilities</li>
                             <li>• Advanced reasoning and artistic generation</li>
@@ -1656,7 +1838,7 @@ export default function AICreate() {
                             <li>• Long context window for complex projects</li>
                           </>
                         )}
-                        {state.selectedApiProvider === 'google' && (
+                        {state.apiProvider === 'google' && (
                           <>
                             <li>• Free tier with generous usage limits</li>
                             <li>• Multimodal capabilities (text, image, code)</li>
@@ -1664,7 +1846,7 @@ export default function AICreate() {
                             <li>• No cost for many use cases</li>
                           </>
                         )}
-                        {state.selectedApiProvider === 'huggingface' && (
+                        {state.apiProvider === 'huggingface' && (
                           <>
                             <li>• Completely free open-source models</li>
                             <li>• No usage limits on many models</li>
@@ -1672,7 +1854,7 @@ export default function AICreate() {
                             <li>• Community-driven model ecosystem</li>
                           </>
                         )}
-                        {state.selectedApiProvider === 'openrouter' && (
+                        {state.apiProvider === 'openrouter' && (
                           <>
                             <li>• Access to 100+ AI models from one API</li>
                             <li>• Competitive pricing across providers</li>
@@ -1680,255 +1862,95 @@ export default function AICreate() {
                             <li>• Support for latest and experimental models</li>
                           </>
                         )}
-                        {state.selectedApiProvider === 'replicate' && (
+                        {state.apiProvider === 'replicate' && (
                           <>
                             <li>• Open-source models with transparent pricing</li>
                             <li>• Specialized image and video generation</li>
                             <li>• Community-contributed model variants</li>
-                            <li>• Pay-per-use with no minimum charges</li>
+                            <li>• Pay per-second billing for fine-tuned control</li>
                           </>
                         )}
                       </ul>
                     </div>
                   </div>
                 )}
-
-                {/* Cost Comparison */}
-                <div className= "bg-green-50 p-3 rounded-lg border border-green-200">
-                  <h4 className= "text-sm font-medium text-green-800 mb-2">💰 Cost Savings</h4>
-                  <div className= "text-xs text-green-700 space-y-1">
-                    <div className= "flex justify-between">
-                      <span>Platform API (per request):</span>
-                      <span className= "font-medium">$0.05 - $0.15</span>
-                    </div>
-                    <div className= "flex justify-between">
-                      <span>Your API (direct pricing):</span>
-                      <span className= "font-medium text-green-600">$0.01 - $0.03</span>
-                    </div>
-                    <div className= "flex justify-between border-t border-green-300 pt-1 mt-1">
-                      <span className= "font-medium">Your Savings:</span>
-                      <span className= "font-bold text-green-600">60-80%</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Security Notice */}
-                <div className= "bg-gray-50 p-3 rounded-lg border border-gray-200">
-                  <div className= "flex items-start gap-2">
-                    <Shield className= "h-4 w-4 text-gray-500 mt-0.5" />
-                    <div className= "text-xs text-gray-600">
-                      <p className= "font-medium mb-1">🔒 Security & Privacy</p>
-                      <ul className= "space-y-0.5">
-                        <li>• API keys are stored in browser memory only</li>
-                        <li>• Keys are never sent to our servers</li>
-                        <li>• Direct communication with AI providers</li>
-                        <li>• Keys are cleared when you close the browser</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Clear API Keys Button */}
-                {Object.keys(state.userApiKeys).length > 0 && (
-                  <Button
-                    variant="outline"
-                    size= "sm
-                    onClick={() => dispatch({ type: 'CLEAR_API_KEYS' })}
-                    className="w-full
-                  >"
-                    <Trash2 className= "h-4 w-4 mr-2" />
-                    Clear All API Keys
-                  </Button>
-                )}
               </CardContent>
+              <CardFooter className= "flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size= "sm"
+                  onClick={() => dispatch({ type: 'CLEAR_API_KEYS' })}
+                  className="w-full"
+                >
+                  <Trash2 className= "h-4 w-4 mr-2" />
+                  Clear All API Keys
+                </Button>
+                <Button variant= "default" size= "sm" className= "w-full">
+                  Save Changes
+                </Button>
+              </CardFooter>
             </Card>
-
-            {/* API Key Help Modal */}
-            {state.showApiKeyModal && (
-              <div className= "fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                <div className= "bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-                  <div className= "p-6">
-                    <div className= "flex justify-between items-center mb-4">
-                      <h3 className= "text-lg font-semibold">How to Get API Keys</h3>
-                      <Button
-                        variant="ghost"
-                        size= "sm
-                        onClick={() => dispatch({ type: 'TOGGLE_API_KEY_MODAL', payload: false })}
-                      >
-                        <X className= "h-4 w-4" />
-                      </Button>
-                    </div>
-                    
-                    <div className= "space-y-4 text-sm">
-                      <div className= "border border-gray-200 rounded-lg p-4">
-                        <h4 className= "font-medium text-blue-700 mb-2">🤖 OpenAI API Key</h4>
-                        <ol className= "list-decimal list-inside space-y-1 text-gray-600">
-                          <li>Visit <a href= "https://platform.openai.com/api-keys" target= "_blank" className= "text-blue-600 hover:underline">platform.openai.com/api-keys</a></li>
-                          <li>Sign up or log in to your OpenAI account</li>
-                          <li>Click &quot;Create new secret key&quot;</li>
-                          <li>Copy the key (starts with sk-...)</li>
-                          <li>Paste it in the API key field above</li>
-                        </ol>
-                        <p className= "text-xs text-green-600 mt-2">💡 $5 free credit for new accounts!</p>
-                      </div>
-
-                      <div className= "border border-gray-200 rounded-lg p-4">
-                        <h4 className= "font-medium text-purple-700 mb-2">🧠 Anthropic Claude API Key</h4>
-                        <ol className= "list-decimal list-inside space-y-1 text-gray-600">
-                          <li>Visit <a href= "https://console.anthropic.com/keys" target= "_blank" className= "text-blue-600 hover:underline">console.anthropic.com/keys</a></li>
-                          <li>Create an Anthropic account</li>
-                          <li>Generate a new API key</li>
-                          <li>Copy the key (starts with sk-ant-...)</li>
-                          <li>Paste it in the API key field above</li>
-                        </ol>
-                        <p className= "text-xs text-green-600 mt-2">💡 $5 free credit for new accounts!</p>
-                      </div>
-
-                      <div className= "border border-gray-200 rounded-lg p-4">
-                        <h4 className= "font-medium text-green-700 mb-2">🔍 Google Gemini API Key</h4>
-                        <ol className= "list-decimal list-inside space-y-1 text-gray-600">
-                          <li>Visit <a href= "https://makersuite.google.com/app/apikey" target= "_blank" className= "text-blue-600 hover:underline">makersuite.google.com/app/apikey</a></li>
-                          <li>Sign in with your Google account</li>
-                          <li>Click &quot;Create API key&quot;</li>
-                          <li>Copy the generated key</li>
-                          <li>Paste it in the API key field above</li>
-                        </ol>
-                        <p className= "text-xs text-green-600 mt-2">💡 Generous free tier with 60 requests per minute!</p>
-                      </div>
-
-                      <div className= "border border-gray-200 rounded-lg p-4">
-                        <h4 className= "font-medium text-orange-700 mb-2">🤗 Hugging Face API Key</h4>
-                        <ol className= "list-decimal list-inside space-y-1 text-gray-600">
-                          <li>Visit <a href= "https://huggingface.co/settings/tokens" target= "_blank" className= "text-blue-600 hover:underline">huggingface.co/settings/tokens</a></li>
-                          <li>Sign up for a free Hugging Face account</li>
-                          <li>Click &quot;New token&quot;</li>
-                          <li>Set role to &quot;Inference&quot;</li>
-                          <li>Copy the token and paste it above</li>
-                        </ol>
-                        <p className= "text-xs text-green-600 mt-2">💡 Completely free for many models!</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ... rest of existing settings content ... */}
-            
           </div>
         </TabsContent>
-
-        {/* API Key Settings Modal */}
-        {state.showApiKeySettings && (
-          <div className= "fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className= "bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <div className= "p-6">
-                <div className= "flex justify-between items-center mb-4">
-                  <h3 className= "text-xl font-semibold">Comprehensive API Key Management</h3>
-                  <Button
-                    variant="ghost"
-                    size= "sm
-                    onClick={() => dispatch({ type: 'TOGGLE_API_KEY_SETTINGS', payload: false })}
-                  >
-                    <X className= "h-4 w-4" />
-                  </Button>
-                </div>
-                
-                <APIKeySettings
-                  onApiKeyUpdate={(provider, apiKey, isValid) => {
-                    dispatch({ type: 'SET_USER_API_KEY', payload: { provider, apiKey } })
-                    dispatch({ type: 'SET_API_KEY_VALID', payload: { provider, isValid } })
-                    
-                    // Update cost savings based on provider
-                    const providerSavings = {
-                      'openai': 12, 'anthropic': 15, 'google': 25, 'huggingface': 35
-                    }
-                    const newSavings = providerSavings[provider as keyof typeof providerSavings] || 10
-                    dispatch({ type: 'UPDATE_COST_SAVINGS', payload: { 
-                      monthly: state.costSavings.monthly + newSavings,
-                      freeCreditsUsed: state.costSavings.freeCreditsUsed + (isValid ? 5 : 0)
-                    }})
-                  }}
-                  onProviderChange={(provider) => {
-                    dispatch({ type: 'SET_API_PROVIDER', payload: provider })
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        )}
       </Tabs>
 
-      {/* Asset Preview Modal */}
-      {state.generatedAssets.length > 0 && (
-        <div className= "fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <Card className= "w-full max-w-4xl max-h-[90vh] overflow-hidden">
-            <CardHeader>
-              <div className= "flex items-center justify-between">
-                <CardTitle>{state.generatedAssets[0].name}</CardTitle>
-                <Button
-                  variant="ghost"
-                  size= "sm
-                  onClick={() => dispatch({ type: 'SET_GENERATED_ASSETS', payload: [] })}
-                >
-                  ✕
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className= "space-y-4">
-              <div className= "aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
-                <FileImage className= "w-16 h-16 text-gray-400" />
-              </div>
-              <div className= "grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h4 className= "font-medium mb-2">Details</h4>
-                  <div className= "space-y-2 text-sm">
-                    <div className= "flex justify-between">
-                      <span>Format:</span>
-                      <Badge variant= "outline">{state.generatedAssets[0].format}</Badge>
-                    </div>
-                    <div className= "flex justify-between">
-                      <span>Size:</span>
-                      <span>{state.generatedAssets[0].size}</span>
-                    </div>
-                    <div className= "flex justify-between">
-                      <span>Dimensions:</span>
-                      <span>{state.generatedAssets[0].metadata.dimensions}</span>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <h4 className= "font-medium mb-2">Tags</h4>
-                  <div className= "flex flex-wrap gap-1">
-                    {state.generatedAssets[0].tags.map((tag, idx) => (
-                      <Badge key={idx} variant= "secondary" className= "text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <p className= "text-sm text-gray-600">
-                {state.generatedAssets[0].metadata.description}
-              </p>
-              <div className= "flex gap-2">
-                <Button className= "flex-1">
-                  <Download className= "w-4 h-4 mr-1" />
-                  Download
-                </Button>
-                <Button variant= "outline">
-                  <Star className= "w-4 h-4 mr-1" />
-                  Favorite
-                </Button>
-                <Button variant= "outline">
-                  <Share2 className= "w-4 h-4 mr-1" />
-                  Share
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      {/* API Key Help Modal */}
+      <Dialog open={state.showApiKeyModal} onOpenChange={isOpen => dispatch({ type: 'TOGGLE_API_KEY_MODAL', payload: isOpen })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Finding Your API Key</DialogTitle>
+            <DialogDescription>API keys can usually be found in your provider&apos;s dashboard under &quot;API&quot; or &quot;Settings&quot;.</DialogDescription>
+          </DialogHeader>
+          {/* Add provider-specific instructions here */}
+          <DialogFooter>
+            <Button variant="ghost" size="sm" onClick={() => dispatch({ type: 'TOGGLE_API_KEY_MODAL', payload: false })}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Full-Screen API Key Management Modal */}
+      <Dialog open={state.showApiKeySettings} onOpenChange={(isOpen) => dispatch({ type: 'TOGGLE_API_KEY_SETTINGS', payload: isOpen })}>
+        <DialogContent className= "max-w-4xl h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>Manage All API Keys</DialogTitle>
+            <DialogDescription>
+              Configure all your API keys in one place for maximum savings and model access.
+            </DialogDescription>
+          </DialogHeader>
+          <div className= "p-4 h-full overflow-y-auto">
+            <ApiKeyManager 
+              userApiKeys={state.userApiKeys}
+              onApiKeyChange={(provider, key) => {
+                dispatch({ type: 'SET_USER_API_KEY', payload: { provider, apiKey: key } })
+              }}
+              onProviderChange={(provider) => {
+                dispatch({ type: 'SET_PROVIDER', payload: provider })
+              }}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              size= "sm"
+              onClick={() => dispatch({ type: 'TOGGLE_API_KEY_SETTINGS', payload: false })}
+            >
+              Close
+            </Button>
+            <Button size= "sm">Save All Settings</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
-} 
+}
+
+// Dummy ApiKeyManager component
+const ApiKeyManager = ({ userApiKeys, onApiKeyChange, onProviderChange }: { 
+  userApiKeys: Record<string, string>,
+  onApiKeyChange: (provider: string, key: string) => void,
+  onProviderChange: (provider: string) => void
+}) => {
+  return <div>ApiKeyManager</div>
+}

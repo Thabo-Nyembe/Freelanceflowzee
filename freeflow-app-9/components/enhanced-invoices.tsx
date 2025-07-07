@@ -1,16 +1,102 @@
 'use client'
 
 import { useState, useReducer } from 'react'
- invoice: Invoice | null }
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Search, Plus, Trash2, Edit, Eye, Code, Copy, Palette, X, Download, Send, MoreVertical, Settings, DollarSign, Calendar, Clock, BarChart2, FileText, Layout, Type, Image, Star } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
+
+interface InvoiceClient {
+    name: string;
+    email: string;
+    company: string;
+    address: string;
+}
+
+interface InvoiceItem {
+    id: string;
+    description: string;
+    quantity: number;
+    rate: number;
+    amount: number;
+}
+
+interface InvoiceCustomization {
+    logoUrl?: string;
+    brandColors?: { primary: string; secondary: string };
+    paymentTerms?: string;
+    headerText?: string;
+    footerText?: string;
+    backgroundColor?: string;
+    textColor?: string;
+    accentColor?: string;
+}
+
+interface Invoice {
+    id: string;
+    number: string;
+    client: InvoiceClient;
+    project: string;
+    date: string;
+    dueDate: string;
+    status: 'draft' | 'sent' | 'paid' | 'overdue';
+    currency: string;
+    items: InvoiceItem[];
+    subtotal: number;
+    tax: number;
+    total: number;
+    notes: string;
+    terms: string;
+    template: InvoiceTemplate;
+    customization?: InvoiceCustomization;
+}
+
+interface InvoiceTemplate {
+    id: string;
+    name: string;
+    description: string;
+    category: 'modern' | 'classic' | 'creative' | 'elegant';
+    primaryColor: string;
+    secondaryColor: string;
+    fontFamily: string;
+    layout: 'minimal' | 'standard' | 'detailed' | 'compact';
+    headerStyle: 'logo-left' | 'logo-center' | 'logo-right';
+    showDividers: boolean;
+    showBackground: boolean;
+    previewImage: string;
+}
+
+interface InvoiceState {
+  invoices: Invoice[];
+  templates: InvoiceTemplate[];
+  selectedTemplate: InvoiceTemplate | null;
+  selectedInvoice: Invoice | null;
+  showCreateModal: boolean;
+  showTemplateModal: boolean;
+  showPreviewModal: boolean;
+  previewMode: 'form' | 'template' | 'preview';
+  template: Record<string, string>;
+}
+
+type InvoiceAction =
+  | { type: 'SET_SELECTED_TEMPLATE'; template: InvoiceTemplate | null }
+  | { type: 'SET_SELECTED_INVOICE'; invoice: Invoice | null }
   | { type: 'SET_CREATE_MODAL'; show: boolean }
   | { type: 'SET_TEMPLATE_MODAL'; show: boolean }
   | { type: 'SET_PREVIEW_MODAL'; show: boolean }
   | { type: 'SET_PREVIEW_MODE'; mode: 'form' | 'template' | 'preview' }
   | { type: 'ADD_INVOICE'; invoice: Invoice }
-  | { type: &apos;UPDATE_INVOICE&apos;; id: string; invoice: Partial<Invoice> }
+  | { type: 'UPDATE_INVOICE'; id: string; invoice: Partial<Invoice> }
   | { type: 'DELETE_INVOICE'; id: string }
   | { type: 'ADD_CUSTOM_TEMPLATE'; template: InvoiceTemplate }
-  | { type: 'UPDATE_TEMPLATE_HISTORY'; invoiceId: string; templateId: string }
+  | { type: 'UPDATE_TEMPLATE_HISTORY'; invoiceId: string; templateId: string };
 
 // Invoice Templates
 const defaultTemplates: InvoiceTemplate[] = [
@@ -161,7 +247,7 @@ function invoiceReducer(state: InvoiceState, action: InvoiceAction): InvoiceStat
       return {
         ...state,
         template: {
-          ...state.template
+          ...state.template,
           [action.invoiceId]: action.templateId
         }
       }
@@ -186,10 +272,10 @@ const initialState: InvoiceState = {
 export function EnhancedInvoices() {
   const [state, dispatch] = useReducer(invoiceReducer, initialState)
   const [newInvoice, setNewInvoice] = useState({
-    client: { name: '', email: , company: ', address:  },'
+    client: { name: '', email: '', company: '', address: '' },
     project: '',
     dueDate: '',
-    items: [{ description: '', quantity: 1, rate: 0 }],
+    items: [{id: '1', description: '', quantity: 1, rate: 0, amount: 0 }],
     notes: '',
     terms: 'Payment due within 15 days',
     currency: 'USD'
@@ -348,7 +434,7 @@ export function EnhancedInvoices() {
                   <Card 
                     key={template.id} 
                     className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                      state.selectedTemplate?.id === template.id ? 'ring-2 ring-blue-500' : 
+                      state.selectedTemplate?.id === template.id ? 'ring-2 ring-blue-500' : ''
                     }`}
                     onClick={() => dispatch({ type: 'SET_SELECTED_TEMPLATE', template })}
                   >
@@ -356,9 +442,9 @@ export function EnhancedInvoices() {
                       <div className= "space-y-4">
                         {/* Template Preview */}
                         <div 
-                          className="w-full h-48 rounded-lg border-2 border-dashed border-slate-200 flex items-center justify-center
+                          className="w-full h-48 rounded-lg border-2 border-dashed border-slate-200 flex items-center justify-center"
                           style={{ backgroundColor: template.secondaryColor }}
-                        >"
+                        >
                           <div className= "text-center">
                             <Layout className= "h-12 w-12 mx-auto mb-2" style={{ color: template.primaryColor }} />
                             <p className= "text-sm text-slate-600" style={{ fontFamily: template.fontFamily }}>
@@ -418,9 +504,9 @@ export function EnhancedInvoices() {
                           <Button 
                             size= "sm" 
                             variant= "outline" 
-                            className="flex-1
+                            className="flex-1"
                             onClick={(e) => {
-                              e.stopPropagation()"
+                              e.stopPropagation();
                               dispatch({ type: 'SET_PREVIEW_MODE', mode: 'preview' })
                             }}
                           >
@@ -429,11 +515,11 @@ export function EnhancedInvoices() {
                           </Button>
                           <Button 
                             size= "sm" 
-                            className="flex-1
+                            className="flex-1"
                             onClick={(e) => {
-                              e.stopPropagation()"
-                              dispatch({ type: 'SET_SELECTED_TEMPLATE', template })
-                              dispatch({ type: 'SET_TEMPLATE_MODAL', show: false })
+                              e.stopPropagation();
+                              dispatch({ type: 'SET_SELECTED_TEMPLATE', template });
+                              dispatch({ type: 'SET_TEMPLATE_MODAL', show: false });
                             }}
                           >
                             <Star className= "h-3 w-3 mr-1" />
@@ -464,225 +550,90 @@ export function EnhancedInvoices() {
                           <Label htmlFor= "primary-color">Primary Color</Label>
                           <div className= "flex gap-2 mt-1">
                             <Input
-                              id= "primary-color
-                              type="color
+                              id= "primary-color"
+                              type="color"
                               value={customization.brandColors?.primary || state.selectedTemplate.primaryColor}
                               onChange={(e) => setCustomization(prev => ({
                                 ...prev,
                                 brandColors: {
-                                  ...prev.brandColors,
+                                  ...(prev.brandColors || { primary: '', secondary: '' }),
                                   primary: e.target.value
                                 }
-                              }))}"
-                              className="w-16 h-10
+                              }))}
+                              className="w-16 h-10"
                             />
                             <Input
                               value={customization.brandColors?.primary || state.selectedTemplate.primaryColor}
                               onChange={(e) => setCustomization(prev => ({
                                 ...prev,
                                 brandColors: {
-                                  ...prev.brandColors,
+                                  ...(prev.brandColors || { primary: '', secondary: '' }),
                                   primary: e.target.value
                                 }
-                              }))}"
-                              className="flex-1
+                              }))}
+                              className="flex-1"
                             />
                           </div>
                         </div>
 
-                        <div>"
+                        <div>
                           <Label htmlFor= "secondary-color">Secondary Color</Label>
                           <div className= "flex gap-2 mt-1">
                             <Input
-                              id= "secondary-color
-                              type="color
+                              id= "secondary-color"
+                              type="color"
                               value={customization.brandColors?.secondary || state.selectedTemplate.secondaryColor}
                               onChange={(e) => setCustomization(prev => ({
                                 ...prev,
                                 brandColors: {
-                                  ...prev.brandColors,
+                                  ...(prev.brandColors || { primary: '', secondary: '' }),
                                   secondary: e.target.value
                                 }
-                              }))}"
-                              className="w-16 h-10
+                              }))}
+                              className="w-16 h-10"
                             />
                             <Input
                               value={customization.brandColors?.secondary || state.selectedTemplate.secondaryColor}
                               onChange={(e) => setCustomization(prev => ({
                                 ...prev,
                                 brandColors: {
-                                  ...prev.brandColors,
+                                  ...(prev.brandColors || { primary: '', secondary: '' }),
                                   secondary: e.target.value
                                 }
-                              }))}"
-                              className="flex-1
+                              }))}
+                              className="flex-1"
                             />
                           </div>
                         </div>
 
-                        <div>"
+                        <div>
                           <Label htmlFor= "header-text">Header Text</Label>
                           <Input
-                            id= "header-text
+                            id= "header-text"
                             value={customization.headerText || ''}
                             onChange={(e) => setCustomization(prev => ({
                               ...prev,
                               headerText: e.target.value
                             }))}
-                            placeholder="Professional Services
+                            placeholder="Professional Services"
                           />
                         </div>
 
-                        <div>"
+                        <div>
                           <Label htmlFor= "footer-text">Footer Text</Label>
                           <Input
-                            id= "footer-text
+                            id= "footer-text"
                             value={customization.footerText || ''}
                             onChange={(e) => setCustomization(prev => ({
                               ...prev,
                               footerText: e.target.value
                             }))}
-                            placeholder="Thank you for your business
+                            placeholder="Thank You!"
                           />
-                        </div>
-
-                        <div>"
-                          <Label htmlFor= "payment-terms">Payment Terms</Label>
-                          <Select 
-                            value={customization.paymentTerms || 'Net 15'}
-                            onValueChange={(value) => setCustomization(prev => ({
-                              ...prev,
-                              paymentTerms: value
-                            }))}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value= "Due on Receipt">Due on Receipt</SelectItem>
-                              <SelectItem value= "Net 15">Net 15</SelectItem>
-                              <SelectItem value= "Net 30">Net 30</SelectItem>
-                              <SelectItem value= "Net 45">Net 45</SelectItem>
-                              <SelectItem value= "Net 60">Net 60</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div>
-                          <Label htmlFor= "late-fees">Late Fees</Label>
-                          <Input
-                            id= "late-fees
-                            value={customization.lateFees || ''}
-                            onChange={(e) => setCustomization(prev => ({
-                              ...prev,
-                              lateFees: e.target.value
-                            }))}
-                            placeholder="2.5% per month on overdue amounts
-                          />
-                        </div>
-                      </div>
-
-                      {/* Live Preview */}"
-                      <div className= "bg-slate-50 rounded-lg p-4">
-                        <h4 className= "font-semibold text-slate-800 mb-3">Live Preview</h4>
-                        <div 
-                          className="bg-white rounded-lg shadow-sm p-6 border-2
-                          style={{ 
-                            borderColor: customization.brandColors?.primary || state.selectedTemplate.primaryColor,
-                            fontFamily: state.selectedTemplate.fontFamily 
-                          }}
-                        >
-                          {/* Mock Invoice Preview */}"
-                          <div className= "space-y-4">
-                            <div className= "flex justify-between items-start">
-                              <div>
-                                <h5 
-                                  className="text-xl font-bold
-                                  style={{ color: customization.brandColors?.primary || state.selectedTemplate.primaryColor }}
-                                >"
-                                  {customization.headerText || 'INVOICE'}
-                                </h5>
-                                <p className= "text-sm text-slate-600">INV-2024-001</p>
-                              </div>
-                              <div className= "text-right">
-                                <p className= "text-sm text-slate-600">Due Date</p>
-                                <p className= "font-semibold">June 15, 2024</p>
-                              </div>
-                            </div>
-
-                            <div 
-                              className="h-px
-                              style={{ backgroundColor: customization.brandColors?.secondary || state.selectedTemplate.secondaryColor }}
-                            ></div>
-"
-                            <div className= "grid grid-cols-2 gap-4 text-sm">
-                              <div>
-                                <p className= "text-slate-600">Bill To:</p>
-                                <p className= "font-semibold">Sample Client</p>
-                              </div>
-                              <div>
-                                <p className= "text-slate-600">Amount Due:</p>
-                                <p 
-                                  className="font-bold text-lg
-                                  style={{ color: customization.brandColors?.primary || state.selectedTemplate.primaryColor }}
-                                >
-                                  $2,500.00
-                                </p>
-                              </div>
-                            </div>
-
-                            {customization.footerText && ("
-                              <div className= "text-center text-xs text-slate-500 mt-4 pt-2 border-t">
-                                {customization.footerText}
-                              </div>
-                            )}
-                          </div>
                         </div>
                       </div>
                     </div>
                   )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value= "history" className= "space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Template Usage</CardTitle>
-                  <CardDescription>
-                    Track which templates you've used for different invoices
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className= "space-y-4">
-                    {state.invoices.map((invoice) => (
-                      <div key={invoice.id} className= "flex items-center justify-between p-4 border rounded-lg">
-                        <div className= "flex items-center gap-4">
-                          <div 
-                            className="w-10 h-10 rounded-lg flex items-center justify-center
-                            style={{ backgroundColor: invoice.template.secondaryColor }}
-                          >
-                            <FileText "
-                              className= "h-5 w-5" 
-                              style={{ color: invoice.template.primaryColor }}
-                            />
-                          </div>
-                          <div>
-                            <p className= "font-semibold text-slate-800">{invoice.number}</p>
-                            <p className= "text-sm text-slate-600">{invoice.client.name} • {invoice.project}</p>
-                          </div>
-                        </div>
-                        <div className= "text-right">
-                          <Badge className={getCategoryColor(invoice.template.category)}>
-                            {invoice.template.name}
-                          </Badge>
-                          <p className= "text-sm text-slate-500 mt-1">
-                            {new Date(invoice.date).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -703,14 +654,14 @@ export function EnhancedInvoices() {
             {state.invoices.map((invoice) => (
               <div 
                 key={invoice.id} 
-                className="flex items-center justify-between p-4 border rounded-lg hover:shadow-sm transition-all duration-200 bg-white/50
-              >"
+                className="flex items-center justify-between p-4 border rounded-lg hover:shadow-sm transition-all duration-200 bg-white/50"
+              >
                 <div className= "flex items-center gap-4">
                   <div 
-                    className="w-12 h-12 rounded-lg flex items-center justify-center
+                    className="w-12 h-12 rounded-lg flex items-center justify-center"
                     style={{ backgroundColor: invoice.template.secondaryColor }}
                   >
-                    <FileText "
+                    <FileText
                       className= "h-6 w-6" 
                       style={{ color: invoice.template.primaryColor }}
                     />
@@ -739,7 +690,7 @@ export function EnhancedInvoices() {
                   <div className= "flex gap-2">
                     <Button 
                       variant= "outline" 
-                      size= "sm
+                      size= "sm"
                       onClick={() => {
                         dispatch({ type: 'SET_SELECTED_INVOICE', invoice })
                         dispatch({ type: 'SET_PREVIEW_MODAL', show: true })

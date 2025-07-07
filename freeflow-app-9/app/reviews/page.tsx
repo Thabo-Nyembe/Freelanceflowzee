@@ -13,6 +13,15 @@ export const metadata: Metadata = {
   description: 'Manage client review workflows and approval processes for your video projects',
 };
 
+// Define a type for your review object for better type safety
+type Review = {
+  status: 'in_review' | 'draft' | 'approved' | 'rejected';
+  deadline?: string;
+  completed_at?: string;
+  started_at?: string;
+  // Add other properties of review here based on your data structure
+};
+
 async function getReviewData(userId: string) {
   const supabase = createServerComponentClient({ cookies });
   
@@ -81,7 +90,7 @@ function getDefaultStats() {
   };
 }
 
-function calculateReviewStats(reviews: any[]) {
+function calculateReviewStats(reviews: Review[]) {
   const now = new Date();
   
   const stats = {
@@ -93,7 +102,7 @@ function calculateReviewStats(reviews: any[]) {
     overdue_reviews: 0
   };
 
-  let completionTimes: number[] = [];
+  const completionTimes: number[] = [];
 
   reviews.forEach(review => {
     // Count by status
@@ -246,17 +255,17 @@ export default async function ReviewsPage() {
         reviews={reviews}
         templates={templates}
         stats={stats}
-        onCreateReview={async (reviewData) => {
+        onCreateReview={async (_reviewData) => {
           'use server';
           // This would be handled by the client component
           // Server actions could be implemented here if needed
         }}
-        onUpdateReview={async (reviewId, updates) => {
+        onUpdateReview={async (_reviewId, _updates) => {
           'use server';
           // This would be handled by the client component
           // Server actions could be implemented here if needed
         }}
-        onDeleteReview={async (reviewId) => {
+        onDeleteReview={async (_reviewId) => {
           'use server';
           // This would be handled by the client component
           // Server actions could be implemented here if needed

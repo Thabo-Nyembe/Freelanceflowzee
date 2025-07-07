@@ -19,7 +19,7 @@ import {
   Edit
 } from 'lucide-react';
 import ScreenRecorder from '@/components/video/screen-recorder';
-import { VideoThumbnailGrid } from '@/components/video/video-thumbnail';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
@@ -71,7 +71,7 @@ export default async function VideoStudioPage() {
     }
   };
 
-  const handleRecordingComplete = (videoBlob: Blob, metadata: any) => {
+  const handleRecordingComplete = (videoBlob: Blob, metadata: unknown) => {
     console.log('Recording completed:', { size: videoBlob.size, metadata });
   };
 
@@ -293,10 +293,11 @@ export default async function VideoStudioPage() {
                       {/* Video Thumbnail */}
                       <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
                         {video.thumbnail_url ? (
-                          <img 
+                          <Image 
                             src={video.thumbnail_url} 
                             alt={video.title}
-                            className="w-full h-full object-cover"
+                            layout="fill"
+                            objectFit="cover"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">

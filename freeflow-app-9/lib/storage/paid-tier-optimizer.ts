@@ -116,7 +116,7 @@ export const PAID_TIER_CONFIG = {
   costTargets: {
     monthly: {
       vercel: 20,      // Pro plan
-      supabase: 25,    // Pro plan  
+      supabase: 25,    // Pro plan
       wasabi: 10,      // Bulk storage
       total: 55,       // Total monthly budget
     },
@@ -355,8 +355,7 @@ export class PaidTierOptimizer {
     const budgetStatus = await this.monitorPaidTierBudget();
     const utilizationImproved = budgetStatus.status === 'optimal' || budgetStatus.status === 'efficient';
     
-    const nextSteps = ['📊 Monitor usage in Vercel Pro dashboard', '🗄️ Check Supabase Pro metrics for efficiency', '💾 Review Wasabi dashboard for cost tracking', '🔄 Schedule weekly optimization reviews', '📈 Plan for scaling when usage grows
-    ];
+    const nextSteps = ['📊 Monitor usage in Vercel Pro dashboard', '🗄️ Check Supabase Pro metrics for efficiency', '💾 Review Wasabi dashboard for cost tracking', '🔄 Schedule weekly optimization reviews', '📈 Plan for scaling when usage grows'];
     
     return {
       moved: optimization.moved,

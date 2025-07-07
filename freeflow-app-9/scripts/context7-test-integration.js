@@ -23,19 +23,19 @@ const CONFIG = {
 const VIEWPORT_TESTS = {
   mobile: {
     name: 'Mobile Tests',
-    projects: ['mobile-iphone-13', 'mobile-pixel-7-pro', 'mobile-iphone-se'],
+    projects: ['Mobile Chrome', 'Mobile Safari'],
     specs: ['responsive-ui-ux.spec.ts'],
     priority: 'high'
   },
   tablet: {
     name: 'Tablet Tests', 
-    projects: ['tablet-ipad', 'tablet-surface-pro'],
+    projects: ['Mobile Chrome'], // Using a mobile project for tablet for now
     specs: ['responsive-ui-ux.spec.ts'],
     priority: 'medium'
   },
   desktop: {
     name: 'Desktop Tests',
-    projects: ['desktop-chrome-1920', 'desktop-firefox', 'ultrawide-desktop'],
+    projects: ['chromium', 'firefox', 'webkit'],
     specs: ['responsive-ui-ux.spec.ts'],
     priority: 'high'
   }
@@ -118,7 +118,7 @@ async function analyzeResponsiveIssues() {
   console.log('📱 Mobile-first analysis...');
   const mobileResults = await runPlaywrightTest({
     spec: 'responsive-ui-ux.spec.ts',
-    project: 'mobile-iphone-13',
+    project: 'Mobile Chrome',
     grep: '@layout'
   });
   
@@ -135,7 +135,7 @@ async function analyzeResponsiveIssues() {
   console.log('🖥️ Desktop scaling analysis...');
   const desktopResults = await runPlaywrightTest({
     spec: 'responsive-ui-ux.spec.ts',
-    project: 'desktop-chrome-1920',
+    project: 'chromium',
     grep: '@scaling'
   });
   
@@ -266,10 +266,10 @@ async function runPlaywrightTest(options) {
   
   const args = ['test',
     `tests/e2e/${spec}`,
-    project ? `--project=${project}` : '','
-    headed ? '--headed' : ,'
-    debug ? '--debug' : ,'
-    grep ? `--grep=${grep}` : '','
+    project ? `--project=${project}` : '',
+    headed ? '--headed' : '',
+    debug ? '--debug' : '',
+    grep ? `--grep=${grep}` : '',
     '--reporter=json'
   ].filter(Boolean);
   

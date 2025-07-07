@@ -1,8 +1,140 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useReducer, useCallback } from 'react'
- position?: number }
-  | { type: &apos;UPDATE_BLOCK&apos;; id: string; updates: Partial<ContentBlock> }
+import {
+  PlusCircle,
+  GripVertical,
+  Trash2,
+  Heading1,
+  Heading2,
+  Heading3,
+  List,
+  CheckSquare,
+  Image,
+  Table,
+  Link,
+  Users,
+  Eye,
+  Settings,
+  Database,
+  LayoutTemplate,
+  Search,
+  Type,
+  Hash,
+  Quote,
+  Code,
+  FileText,
+  Video,
+  Filter,
+  Save,
+  Share2,
+  Copy,
+  MoreHorizontal,
+  Edit,
+  Plus,
+  Sparkles,
+  ArrowUpDown,
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragStartEvent,
+  DragOverlay,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import NextImage from 'next/image'
+
+// Type Definitions
+interface ContentBlock {
+  id: string
+  type: 'heading' | 'text' | 'checklist' | 'image' | 'table' | 'list' | 'quote' | 'code' | 'database' | 'file' | 'video'
+  content: any
+  position: number
+  properties: {
+    alignment: 'left' | 'center' | 'right'
+    fontSize?: 'normal' | 'large' | 'xl'
+  }
+  createdAt: string
+  updatedAt: string
+  userId: string
+}
+
+interface BlockTemplate {
+  id: string
+  name: string
+  description: string
+  category: string
+  thumbnail: string
+  blocks: ContentBlock[]
+  tags: string[]
+  isPublic: boolean
+  usageCount: number
+}
+
+interface DatabaseTable {
+  id: string
+  name: string
+  fields: {
+    id: string
+    name: string
+    type: string
+    options?: string[]
+  }[]
+  records: any[]
+}
+
+interface DatabaseSource {
+  id: string
+  name: string
+  type: string
+  url: string
+  apiKey: string
+  tables: DatabaseTable[]
+  isConnected: boolean
+}
+
+interface EditorState {
+  blocks: ContentBlock[]
+  selectedBlockId: string | null
+  isEditing: boolean
+  draggedBlockId: string | null
+  showTemplates: boolean
+  showDatabase: boolean
+  templates: BlockTemplate[]
+  databases: DatabaseSource[]
+  searchQuery: string
+  filterBy: string
+  sortBy: string
+  viewMode: 'edit' | 'preview'
+  collaborators: number
+  autoSave: boolean
+  wordCount: number
+}
+
+type EditorAction =
+  | { type: 'ADD_BLOCK'; block: Omit<ContentBlock, 'position'>; position?: number }
+  | { type: 'UPDATE_BLOCK'; id: string; updates: Partial<ContentBlock> }
   | { type: 'DELETE_BLOCK'; id: string }
   | { type: 'REORDER_BLOCKS'; fromIndex: number; toIndex: number }
   | { type: 'SELECT_BLOCK'; id: string | null }
@@ -249,7 +381,7 @@ export function BlockBasedContentEditor({
   currentUser,
   onSave,
   onShare,
-  className = 
+  className,
 }: BlockBasedContentEditorProps) {
   const [state, dispatch] = useReducer(editorReducer, initialState)
   const [showBlockMenu, setShowBlockMenu] = useState(false)
@@ -264,7 +396,6 @@ export function BlockBasedContentEditor({
     { type: 'checklist', icon: CheckSquare, label: 'To-do List', description: 'List with checkboxes' },
     { type: 'quote', icon: Quote, label: 'Quote', description: 'Capture a quote' },
     { type: 'code', icon: Code, label: 'Code', description: 'Code snippet with syntax highlighting' },
-    { type: 'divider', icon: Divider, label: 'Divider', description: 'Visual divider' },
     { type: 'image', icon: Image, label: 'Image', description: 'Upload or embed an image' },
     { type: 'video', icon: Video, label: 'Video', description: 'Embed a video' },
     { type: 'table', icon: Table, label: 'Table', description: 'Simple table' },
@@ -286,7 +417,7 @@ export function BlockBasedContentEditor({
   useEffect(() => {
     const wordCount = state.blocks.reduce((count, block) => {
       if (block.type === 'text' || block.type === 'heading') {
-        const text = block.content.text || 
+        const text = block.content.text || ''
         return count + text.split(/\s+/).filter(word => word.length > 0).length
       }
       return count
@@ -296,7 +427,7 @@ export function BlockBasedContentEditor({
     if (wordCount !== state.wordCount) {
       // This would typically be done through a reducer action
     }
-  }, [state.blocks])
+  }, [state.blocks, state.wordCount])
 
   const createBlock = (type: ContentBlock['type'], content: unknown = {}) => {
     const newBlock: ContentBlock = {
@@ -329,7 +460,7 @@ export function BlockBasedContentEditor({
         content = { items: [{ id: `item-${Date.now()}`, text: '', checked: false }] }
         break
       case 'quote':
-        content = { text: '', author:  }
+        content = { text: '', author: '' }
         break
       case 'code':
         content = { code: '', language: 'javascript' }
@@ -337,11 +468,11 @@ export function BlockBasedContentEditor({
       case 'table':
         content = { 
           headers: ['Column 1', 'Column 2'], 
-          rows: [['', ]] 
+          rows: [['', '']] 
         }
         break
       case 'database':
-        content = { databaseId: '', viewId: , filters: [] }
+        content = { databaseId: '', viewId: '', filters: [] }
         break
     }
     
@@ -366,7 +497,7 @@ export function BlockBasedContentEditor({
     setShowBlockMenu(true)
   }
 
-  const renderBlock = (block: ContentBlock) => {
+  const renderBlock = (block: ContentBlock, attributes?: any, listeners?: any) => {
     const isSelected = state.selectedBlockId === block.id
     const isEditing = isSelected && state.isEditing
 
@@ -382,22 +513,17 @@ export function BlockBasedContentEditor({
                 updates: { content: { ...block.content, text: e.target.value } }
               })}
               onBlur={() => dispatch({ type: 'SET_EDITING', editing: false })}
-              className="border-none p-0 resize-none focus:ring-0
+              className="border-none p-0 resize-none focus:ring-0"
               autoFocus
             />
           ) : (
-            <p "
-              className="cursor-text"
-              onClick={() => dispatch({ type: 'SET_EDITING', editing: true })}
-            >
-              {block.content.text || 'Type something...'}
-            </p>
+            <p className="min-h-[24px]">{block.content.text}</p>
           )
 
         case 'heading':
-          const headingLevel = block.content.level || 1
+          const HeadingTag = `h${block.content.level || 1}` as keyof JSX.IntrinsicElements;
           return isEditing ? (
-            <Input
+            <input
               value={block.content.text || ''}
               onChange={(e) => dispatch({
                 type: 'UPDATE_BLOCK',
@@ -405,193 +531,105 @@ export function BlockBasedContentEditor({
                 updates: { content: { ...block.content, text: e.target.value } }
               })}
               onBlur={() => dispatch({ type: 'SET_EDITING', editing: false })}
-              className="border-none p-0 text-2xl font-bold focus:ring-0
+              className="border-none p-0 focus:ring-0 font-bold w-full"
               autoFocus
             />
           ) : (
-            <div "
-              className="cursor-text text-2xl font-bold"
-              onClick={() => dispatch({ type: 'SET_EDITING', editing: true })}
-              style={{
-                fontSize: headingLevel === 1 ? '2rem' : 
-                         headingLevel === 2 ? '1.75rem' : 
-                         headingLevel === 3 ? '1.5rem' : '1.25rem'
-              }}
-            >
-              {block.content.text || 'Heading'}
-            </div>
+            <HeadingTag className="font-bold">{block.content.text}</HeadingTag>
           )
 
         case 'checklist':
           return (
-            <div className= "space-y-2">
-              {block.content.items?.map((item: unknown, index: number) => (
-                <div key={item.id || index} className= "flex items-center gap-2">
+            <div className="space-y-2">
+              {block.content.items.map((item: any, index: number) => (
+                <div key={item.id} className="flex items-center gap-2">
                   <input
-                    type="checkbox
-                    checked={item.checked || false}
+                    type="checkbox"
+                    checked={item.checked}
                     onChange={(e) => {
-                      const updatedItems = [...block.content.items]
-                      updatedItems[index] = { ...item, checked: e.target.checked }
-                      dispatch({"
-                        type: 'UPDATE_BLOCK',
-                        id: block.id,
-                        updates: { content: { ...block.content, items: updatedItems } }
-                      })
-                    }}
-                    className="rounded
-                  />
-                  <Input"
-                    value={item.text || ''}
-                    onChange={(e) => {
-                      const updatedItems = [...block.content.items]
-                      updatedItems[index] = { ...item, text: e.target.value }
+                      const newItems = [...block.content.items];
+                      newItems[index] = { ...item, checked: e.target.checked };
                       dispatch({
                         type: 'UPDATE_BLOCK',
                         id: block.id,
-                        updates: { content: { ...block.content, items: updatedItems } }
-                      })
+                        updates: { content: { ...block.content, items: newItems } }
+                      });
                     }}
-                    className="border-none p-0 focus:ring-0"
-                    placeholder="To-do item
+                  />
+                  <input
+                    type="text"
+                    value={item.text}
+                    onChange={(e) => {
+                      const newItems = [...block.content.items];
+                      newItems[index] = { ...item, text: e.target.value };
+                      dispatch({
+                        type: 'UPDATE_BLOCK',
+                        id: block.id,
+                        updates: { content: { ...block.content, items: newItems } }
+                      });
+                    }}
+                    className="flex-grow border-none p-0 focus:ring-0"
                   />
                 </div>
               ))}
             </div>
           )
-"
-        case 'code':
+
+        case 'image':
           return (
-            <div className= "bg-gray-900 text-gray-100 p-4 rounded-lg">
-              <div className= "flex items-center justify-between mb-2">
-                <select
-                  value={block.content.language || 'javascript'}
-                  onChange={(e) => dispatch({
-                    type: 'UPDATE_BLOCK',
-                    id: block.id,
-                    updates: { content: { ...block.content, language: e.target.value } }
-                  })}
-                  className="bg-gray-800 text-gray-200 text-sm border-gray-700 rounded px-2 py-1
-                >"
-                  <option value= "javascript">JavaScript</option>
-                  <option value= "typescript">TypeScript</option>
-                  <option value= "python">Python</option>
-                  <option value= "css">CSS</option>
-                  <option value= "html">HTML</option>
-                </select>
-                <Button size= "sm" variant= "ghost" className= "text-gray-400 hover:text-gray-200">
-                  <Copy className= "h-4 w-4" />
-                </Button>
-              </div>
-              <Textarea
-                value={block.content.code || ''}
-                onChange={(e) => dispatch({
-                  type: 'UPDATE_BLOCK',
-                  id: block.id,
-                  updates: { content: { ...block.content, code: e.target.value } }
-                })}
-                className="bg-transparent border-none text-gray-100 font-mono text-sm resize-none focus:ring-0"
-                placeholder="// Enter your code here
-                rows={6}
+            <div className="my-2">
+              <NextImage
+                src={block.content.url}
+                alt={block.content.caption || 'Image block'}
+                width={500}
+                height={300}
+                className="w-full h-auto rounded-lg"
               />
+              <p className="text-sm text-gray-500 italic mt-1">{block.content.caption}</p>
             </div>
           )
-"
-        case 'quote':
-          return (
-            <blockquote className= "border-l-4 border-purple-500 pl-4 italic text-gray-700">
-              <Textarea
-                value={block.content.text || ''}
-                onChange={(e) => dispatch({
-                  type: 'UPDATE_BLOCK',
-                  id: block.id,
-                  updates: { content: { ...block.content, text: e.target.value } }
-                })}
-                className="border-none p-0 italic resize-none focus:ring-0"
-                placeholder="Enter quote...
-              />
-              {block.content.author && ("
-                <footer className= "text-sm text-gray-500 mt-2">
-                  — {block.content.author}
-                </footer>
-              )}
-            </blockquote>
-          )
-
-        case 'divider':
-          return <hr className= "border-gray-300 my-4" />
 
         case 'table':
           return (
-            <div className= "overflow-x-auto">
-              <table className= "w-full border-collapse border border-gray-300">
-                <thead>
-                  <tr className= "bg-gray-50">
-                    {block.content.headers?.map((header: string, index: number) => (
-                      <th key={index} className= "border border-gray-300 p-2 text-left">
-                        <Input
-                          value={header}
-                          onChange={(e) => {
-                            const updatedHeaders = [...block.content.headers]
-                            updatedHeaders[index] = e.target.value
-                            dispatch({
-                              type: 'UPDATE_BLOCK',
-                              id: block.id,
-                              updates: { content: { ...block.content, headers: updatedHeaders } }
-                            })
-                          }}
-                          className="border-none p-0 font-medium focus:ring-0
-                        />
-                      </th>
+            <table className="w-full border-collapse border">
+              <thead>
+                <tr>
+                  {block.content.headers.map((header: string, colIndex: number) => (
+                    <th key={colIndex} className="border p-2">{header}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {block.content.rows.map((row: string[], rowIndex: number) => (
+                  <tr key={rowIndex}>
+                    {row.map((cell, colIndex) => (
+                      <td key={colIndex} className="border p-2">{cell}</td>
                     ))}
                   </tr>
-                </thead>
-                <tbody>
-                  {block.content.rows?.map((row: string[], rowIndex: number) => (
-                    <tr key={rowIndex}>
-                      {row.map((cell: string, cellIndex: number) => ("
-                        <td key={cellIndex} className= "border border-gray-300 p-2">
-                          <Input
-                            value={cell}
-                            onChange={(e) => {
-                              const updatedRows = [...block.content.rows]
-                              updatedRows[rowIndex][cellIndex] = e.target.value
-                              dispatch({
-                                type: 'UPDATE_BLOCK',
-                                id: block.id,
-                                updates: { content: { ...block.content, rows: updatedRows } }
-                              })
-                            }}
-                            className="border-none p-0 focus:ring-0
-                          />
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           )
-"
+
         case 'database':
           const database = state.databases.find(db => db.id === block.content.databaseId)
           const table = database?.tables.find(t => t.id === block.content.tableId)
           
           return (
-            <Card className= "border-blue-200">
+            <Card className="border-blue-200">
               <CardHeader>
-                <div className= "flex items-center justify-between">
-                  <CardTitle className= "text-sm flex items-center gap-2">
-                    <Database className= "h-4 w-4" />
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Database className="h-4 w-4" />
                     {database?.name || 'Select Database'}
                   </CardTitle>
-                  <div className= "flex gap-2">
-                    <Button size= "sm" variant= "outline">
-                      <Filter className= "h-3 w-3 mr-1" />
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline">
+                      <Filter className="h-3 w-3 mr-1" />
                       Filter
                     </Button>
-                    <Button size= "sm" variant= "outline">
-                      <Sort className= "h-3 w-3 mr-1" />
+                    <Button size="sm" variant="outline">
+                      <ArrowUpDown className="h-3 w-3 mr-1" />
                       Sort
                     </Button>
                   </div>
@@ -599,12 +637,12 @@ export function BlockBasedContentEditor({
               </CardHeader>
               <CardContent>
                 {table ? (
-                  <div className= "overflow-x-auto">
-                    <table className= "w-full text-sm">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
                       <thead>
-                        <tr className= "border-b">
+                        <tr className="border-b">
                           {table.fields.map(field => (
-                            <th key={field.id} className= "text-left p-2 font-medium">
+                            <th key={field.id} className="text-left p-2 font-medium">
                               {field.name}
                             </th>
                           ))}
@@ -612,9 +650,9 @@ export function BlockBasedContentEditor({
                       </thead>
                       <tbody>
                         {table.records.slice(0, 5).map((record, index) => (
-                          <tr key={index} className= "border-b hover:bg-gray-50">
+                          <tr key={index} className="border-b hover:bg-gray-50">
                             {table.fields.map(field => (
-                              <td key={field.id} className= "p-2">
+                              <td key={field.id} className="p-2">
                                 {record[field.name]}
                               </td>
                             ))}
@@ -623,17 +661,17 @@ export function BlockBasedContentEditor({
                       </tbody>
                     </table>
                     {table.records.length > 5 && (
-                      <div className= "text-center py-2 text-gray-500 text-sm">
+                      <div className="text-center py-2 text-gray-500 text-sm">
                         +{table.records.length - 5} more rows
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className= "text-center py-8 text-gray-500">
-                    <Database className= "h-12 w-12 mx-auto mb-2 text-gray-300" />
+                  <div className="text-center py-8 text-gray-500">
+                    <Database className="h-12 w-12 mx-auto mb-2 text-gray-300" />
                     <p>Select a database to display</p>
                     <Button
-                      size= "sm
+                      size="sm"
                       variant="outline"
                       className="mt-2"
                       onClick={() => dispatch({ type: 'TOGGLE_DATABASE' })}
@@ -647,293 +685,224 @@ export function BlockBasedContentEditor({
           )
 
         default:
-          return <div className= "text-gray-500">Unsupported block type: {block.type}</div>
+          return <div className="p-4 bg-gray-100 rounded-lg">Unsupported block type: {block.type}</div>
       }
     })()
 
     return (
       <div
-        key={block.id}
-        className={`group relative p-2 rounded-lg transition-colors ${
-          isSelected ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'
+        className={`relative group p-2 rounded-lg ${
+          isSelected ? 'bg-purple-50 ring-2 ring-purple-300' : 'hover:bg-gray-50'
         }`}
         onClick={(e) => handleBlockClick(block.id, e)}
-        draggable
-        onDragStart={() => dispatch({ type: 'SET_DRAGGING', id: block.id })}
-        onDragEnd={() => dispatch({ type: 'SET_DRAGGING', id: null })}
       >
-        {/* Block Handle */}
-        <div className= "absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-6 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button size= "sm" variant= "ghost" className= "h-6 w-6 p-0 cursor-grab">
-            <GripVertical className= "h-4 w-4 text-gray-400" />
-          </Button>
+        <div
+          {...attributes}
+          {...listeners}
+          className="absolute -left-6 top-1/2 -translate-y-1/2 cursor-grab opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <GripVertical className="w-5 h-5 text-gray-400" />
         </div>
-
-        {/* Block Content */}
-        <div className={`${block.properties.alignment === 'center' ? &apos;text-center&apos; : block.properties.alignment === 'right' ? &apos;text-right&apos; : &apos;text-left&apos;}`}>
+        <div
+          className="absolute -right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <Trash2 className="w-5 h-5 text-gray-400 cursor-pointer" onClick={(e) => {
+            e.stopPropagation()
+            dispatch({ type: 'DELETE_BLOCK', id: block.id })
+          }} />
+        </div>
+        <div className={`${block.properties.alignment === 'center' ? 'text-center' : block.properties.alignment === 'right' ? 'text-right' : 'text-left'}`}>
           {blockContent}
         </div>
-
-        {/* Block Actions */}
-        {isSelected && (
-          <div className= "absolute right-0 top-0 transform translate-x-full flex gap-1 ml-2">
-            <Button size= "sm" variant= "ghost" className= "h-6 w-6 p-0">
-              <Copy className= "h-3 w-3" />
-            </Button>
-            <Button 
-              size= "sm" 
-              variant= "ghost" 
-              className="h-6 w-6 p-0"
-              onClick={() => dispatch({ type: 'DELETE_BLOCK', id: block.id })}
-            >
-              <Trash2 className= "h-3 w-3" />
-            </Button>
-            <Button size= "sm" variant= "ghost" className= "h-6 w-6 p-0">
-              <MoreHorizontal className= "h-3 w-3" />
-            </Button>
-          </div>
-        )}
       </div>
     )
   }
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  )
+
+  const handleDragStart = (event: DragStartEvent) => {
+    dispatch({ type: 'SET_DRAGGING', id: event.active.id as string })
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (over && active.id !== over.id) {
+      const oldIndex = state.blocks.findIndex((b) => b.id === active.id)
+      const newIndex = state.blocks.findIndex((b) => b.id === over.id)
+      dispatch({ type: 'REORDER_BLOCKS', fromIndex: oldIndex, toIndex: newIndex })
+    }
+    dispatch({ type: 'SET_DRAGGING', id: null })
+  }
+  
+  const BlockWrapper = ({ block }: { block: ContentBlock }) => {
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+    } = useSortable({ id: block.id })
+    
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+    }
+    
+    return (
+      <div ref={setNodeRef} style={style}>
+        {renderBlock(block, attributes, listeners)}
+      </div>
+    )
+  }
+
+  const filteredTemplates = state.templates.filter(
+    (template) =>
+      template.name.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
+      template.category.toLowerCase().includes(state.searchQuery.toLowerCase())
+  )
+
+  const filteredDatabases = state.databases.filter(
+    (db) =>
+      db.name.toLowerCase().includes(state.searchQuery.toLowerCase())
+  )
+
+  const CardComponent = Card as any;
+  const CardHeaderComponent = CardHeader as any;
+  const CardTitleComponent = CardTitle as any;
+  const CardContentComponent = CardContent as any;
+  const ButtonComponent = Button as any;
+  const TextareaComponent = Textarea as any;
+  const InputComponent = Input as any;
+  const HeadingTagComponent = 'h1' as any; // Placeholder
+  const DndContextComponent = DndContext as any;
+  const SortableContextComponent = SortableContext as any;
+  const DragOverlayComponent = DragOverlay as any;
+
   return (
-    <div className={`space-y-6 ${className}`}>
-      {/* Header */}
-      <div className= "flex items-center justify-between">
-        <div>
-          <h2 className= "text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Sparkles className= "h-6 w-6 text-purple-600" />
-            Block-Based Content Editor
-          </h2>
-          <p className= "text-gray-600">Notion-level knowledge management with blocks</p>
-        </div>
+    <div className={`flex h-full bg-white rounded-lg shadow-lg ${className}`}>
+      {/* Main Editor */}
+      <div className="flex-1 p-8 overflow-y-auto" ref={editorRef}>
+        <header className="mb-8 flex justify-between items-center">
+          <h1 className="text-4xl font-bold">Content Editor</h1>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Eye className="w-4 h-4" />
+              <span>{state.collaborators}</span>
+            </div>
+            <ButtonComponent variant="outline" size="sm" onClick={() => dispatch({ type: 'SET_VIEW_MODE', mode: state.viewMode === 'edit' ? 'preview' : 'edit' })}>
+              {state.viewMode === 'edit' ? <Eye className="w-4 h-4 mr-2" /> : <Settings className="w-4 h-4 mr-2" />}
+              {state.viewMode === 'edit' ? 'Preview' : 'Edit'}
+            </ButtonComponent>
+            <ButtonComponent size="sm" onClick={() => onSave?.(state.blocks)}>Save</ButtonComponent>
+            <ButtonComponent size="sm" variant="secondary" onClick={() => onShare?.({})}>Share</ButtonComponent>
+          </div>
+        </header>
 
-        <div className= "flex items-center gap-2">
-          <Badge variant= "outline">
-            {state.blocks.filter(b => b.type === 'text' || b.type === 'heading').reduce((count, block) => {
-              const text = block.content.text || 
-              return count + text.split(/\s+/).filter(word => word.length > 0).length
-            }, 0)} words
-          </Badge>
+        <DndContextComponent
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContextComponent items={state.blocks.map(b => b.id)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-4">
+              {state.blocks.map((block) => (
+                <BlockWrapper key={block.id} block={block} />
+              ))}
+            </div>
+          </SortableContextComponent>
+          <DragOverlayComponent>
+            {state.draggedBlockId ? (
+              renderBlock(state.blocks.find(b => b.id === state.draggedBlockId)!)
+            ) : null}
+          </DragOverlayComponent>
+        </DndContextComponent>
 
-          <Button
-            size= "sm
-            variant="outline"
-            onClick={() => dispatch({ type: 'TOGGLE_TEMPLATES' })}
-          >
-            <Template className= "h-4 w-4 mr-2" />
-            Templates
-          </Button>
-
-          <Button
-            size= "sm
-            variant="outline"
-            onClick={() => dispatch({ type: 'TOGGLE_DATABASE' })}
-          >
-            <Database className= "h-4 w-4 mr-2" />
-            Database
-          </Button>
-
-          <Button
-            size= "sm
-            variant={state.viewMode === 'preview' ? 'default' : 'outline'}
-            onClick={() => dispatch({ 
-              type: 'SET_VIEW_MODE', 
-              mode: state.viewMode === 'edit' ? 'preview' : 'edit' 
-            })}
-          >
-            {state.viewMode === 'edit' ? <Eye className= "h-4 w-4 mr-2" /> : <Edit className= "h-4 w-4 mr-2" />}
-            {state.viewMode === 'edit' ? 'Preview' : 'Edit'}
-          </Button>
-
-          <Button onClick={() => onSave?.(state.blocks)} size= "sm">
-            <Save className= "h-4 w-4 mr-2" />
-            Save
-          </Button>
-
-          <Button onClick={() => onShare?.({ blocks: state.blocks, projectId })} size= "sm" variant= "outline">
-            <Share2 className= "h-4 w-4 mr-2" />
-            Share
-          </Button>
+        <div className="mt-8 text-center">
+          <ButtonComponent variant="ghost" onClick={handleAddBlockClick}>
+            <PlusCircle className="w-6 h-6 text-gray-400" />
+          </ButtonComponent>
         </div>
       </div>
 
-      <div className= "grid grid-cols-12 gap-6">
-        {/* Main Editor */}
-        <div className= "col-span-9">
-          <Card>
-            <CardContent className= "p-6">
-              <div ref={editorRef} className= "space-y-4 min-h-[600px]">
-                {state.blocks.map((block) => renderBlock(block))}
-                
-                {/* Add Block Button */}
-                <div className= "flex items-center justify-center py-4">
-                  <Button
-                    variant="ghost
-                    onClick={handleAddBlockClick}"
-                    className="text-gray-400 hover:text-gray-600
-                  >"
-                    <Plus className= "h-4 w-4 mr-2" />
-                    Add a block
-                  </Button>
+      {/* Side Panel for Templates/Database */}
+      {(state.showTemplates || state.showDatabase) && (
+        <div className="w-80 border-l bg-gray-50 p-4 flex flex-col">
+           <div className="flex gap-2 mb-4 border-b">
+            <ButtonComponent variant="ghost" size="sm" onClick={() => dispatch({type: 'TOGGLE_TEMPLATES'})} disabled={state.showTemplates}>
+              <LayoutTemplate className="w-4 h-4 mr-2"/>
+              Templates
+            </ButtonComponent>
+             <ButtonComponent variant="ghost" size="sm" onClick={() => dispatch({type: 'TOGGLE_DATABASE'})} disabled={state.showDatabase}>
+              <Database className="w-4 h-4 mr-2"/>
+              Database
+            </ButtonComponent>
+          </div>
+          
+          <div className="relative mb-4">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <input 
+              type="text"
+              placeholder="Search..."
+              value={state.searchQuery}
+              onChange={(e) => dispatch({ type: 'SET_SEARCH', query: e.target.value })}
+              className="w-full pl-8 pr-2 py-1.5 border rounded-md"
+            />
+          </div>
+
+          {state.showTemplates && (
+            <div className="overflow-y-auto space-y-2">
+              {filteredTemplates.map(template => (
+                <div key={template.id} className="p-3 border rounded-lg hover:bg-gray-100 cursor-pointer" onClick={() => dispatch({type: 'APPLY_TEMPLATE', template})}>
+                  <h4 className="font-semibold">{template.name}</h4>
+                  <p className="text-sm text-gray-600">{template.description}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {state.showDatabase && (
+             <div className="overflow-y-auto space-y-2">
+              {filteredDatabases.map(db => (
+                <div key={db.id} className="p-3 border rounded-lg">
+                  <h4 className="font-semibold">{db.name}</h4>
+                  <p className={`text-sm ${db.isConnected ? 'text-green-600' : 'text-red-600'}`}>
+                    {db.isConnected ? 'Connected' : 'Disconnected'}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Block Add Menu */}
+      {showBlockMenu && (
+        <div 
+          className="fixed z-50 bg-white shadow-lg rounded-lg p-2"
+          style={{ top: blockMenuPosition.y, left: blockMenuPosition.x }}
+        >
+          <div className="grid grid-cols-2 gap-1">
+            {blockTypes.map(blockType => (
+              <div 
+                key={blockType.type}
+                className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 cursor-pointer"
+                onClick={() => addBlock(blockType.type as ContentBlock['type'])}
+              >
+                <blockType.icon className="w-5 h-5" />
+                <div>
+                  <p className="font-medium">{blockType.label}</p>
+                  <p className="text-xs text-gray-500">{blockType.description}</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sidebar */}
-        <div className= "col-span-3 space-y-4">
-          {/* Templates */}
-          {state.showTemplates && (
-            <Card>
-              <CardHeader>
-                <CardTitle className= "text-sm">Templates</CardTitle>
-              </CardHeader>
-              <CardContent className= "space-y-2">
-                {state.templates.map(template => (
-                  <div
-                    key={template.id}
-                    className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-                    onClick={() => dispatch({ type: 'APPLY_TEMPLATE', template })}
-                  >
-                    <div className= "font-medium text-sm">{template.name}</div>
-                    <div className= "text-xs text-gray-500 mb-2">{template.description}</div>
-                    <div className= "flex items-center justify-between">
-                      <Badge variant= "outline" className= "text-xs">{template.category}</Badge>
-                      <span className= "text-xs text-gray-500">{template.usageCount} uses</span>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Database Connections */}
-          {state.showDatabase && (
-            <Card>
-              <CardHeader>
-                <CardTitle className= "text-sm">Database Connections</CardTitle>
-              </CardHeader>
-              <CardContent className= "space-y-2">
-                {state.databases.map(database => (
-                  <div key={database.id} className= "p-3 border rounded-lg">
-                    <div className= "flex items-center justify-between mb-2">
-                      <div className= "font-medium text-sm">{database.name}</div>
-                      <Badge variant={database.isConnected ? &apos;default&apos; : &apos;secondary&apos;} className= "text-xs">
-                        {database.isConnected ? 'Connected' : 'Disconnected'}
-                      </Badge>
-                    </div>
-                    <div className= "text-xs text-gray-500 mb-2">{database.type}</div>
-                    <div className= "space-y-1">
-                      {database.tables.map(table => (
-                        <div
-                          key={table.id}
-                          className="text-xs p-1 bg-gray-50 rounded cursor-pointer hover:bg-gray-100
-                          onClick={() => {"
-                            const block = createBlock('database', {
-                              databaseId: database.id,
-                              tableId: table.id
-                            })
-                            dispatch({ type: 'ADD_BLOCK', block })
-                          }}
-                        >
-                          {table.name} ({table.records.length} records)
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Block Types */}
-          <Card>
-            <CardHeader>
-              <CardTitle className= "text-sm">Add Blocks</CardTitle>
-            </CardHeader>
-            <CardContent className= "space-y-1">
-              {blockTypes.map(blockType => (
-                <Button
-                  key={blockType.type}
-                  variant="ghost"
-                  size= "sm
-                  className="w-full justify-start h-auto p-2"
-                  onClick={() => addBlock(blockType.type as ContentBlock['type'])}
-                >
-                  <blockType.icon className= "h-4 w-4 mr-3 text-gray-400" />
-                  <div className= "text-left">
-                    <div className= "text-sm font-medium">{blockType.label}</div>
-                    <div className= "text-xs text-gray-500">{blockType.description}</div>
-                  </div>
-                </Button>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Document Stats */}
-          <Card>
-            <CardHeader>
-              <CardTitle className= "text-sm">Document Stats</CardTitle>
-            </CardHeader>
-            <CardContent className= "space-y-2">
-              <div className= "flex justify-between text-sm">
-                <span>Blocks:</span>
-                <span>{state.blocks.length}</span>
-              </div>
-              <div className= "flex justify-between text-sm">
-                <span>Words:</span>
-                <span>
-                  {state.blocks.filter(b => b.type === 'text' || b.type === 'heading').reduce((count, block) => {
-                    const text = block.content.text || 
-                    return count + text.split(/\s+/).filter(word => word.length > 0).length
-                  }, 0)}
-                </span>
-              </div>
-              <div className= "flex justify-between text-sm">
-                <span>Characters:</span>
-                <span>
-                  {state.blocks.filter(b => b.type === 'text' || b.type === 'heading').reduce((count, block) => {
-                    return count + (block.content.text || '').length
-                  }, 0)}
-                </span>
-              </div>
-              <div className= "flex justify-between text-sm">
-                <span>Collaborators:</span>
-                <span>{state.collaborators}</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Block Menu Modal */}
-      {showBlockMenu && (
-        <div className= "fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-          <Card className= "w-96 max-h-96 overflow-y-auto">
-            <CardHeader>
-              <CardTitle className= "text-sm">Choose a block type</CardTitle>
-            </CardHeader>
-            <CardContent className= "space-y-1">
-              {blockTypes.map(blockType => (
-                <Button
-                  key={blockType.type}
-                  variant="ghost"
-                  size= "sm
-                  className="w-full justify-start h-auto p-3"
-                  onClick={() => addBlock(blockType.type as ContentBlock['type'])}
-                >
-                  <blockType.icon className= "h-5 w-5 mr-3 text-gray-400" />
-                  <div className= "text-left">
-                    <div className= "font-medium">{blockType.label}</div>
-                    <div className= "text-xs text-gray-500">{blockType.description}</div>
-                  </div>
-                </Button>
-              ))}
-            </CardContent>
-          </Card>
+            ))}
+          </div>
         </div>
       )}
     </div>

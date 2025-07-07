@@ -27,15 +27,16 @@ type ThemeProviderState = {
   themes: Theme[]
 }
 
-const initialState: ThemeProviderState = {
+// Create a dummy function that won't be serialized
+const noop = () => {}
+
+const ThemeProviderContext = createContext<ThemeProviderState>({
   theme: 'system',
-  setTheme: () => null,
+  setTheme: noop,
   resolvedTheme: 'light',
   systemTheme: 'light',
   themes: ['light', 'dark', 'system'],
-}
-
-const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
+})
 
 export function ThemeProvider({
   children,

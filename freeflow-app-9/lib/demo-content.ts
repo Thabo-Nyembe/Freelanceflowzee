@@ -187,7 +187,7 @@ class DemoContentManager {
     console.log('🎭 Initializing Demo Content Manager...');
 
     // Pre-load all content files
-    const contentFiles = ['enhanced-users.json', 'enhanced-projects.json', 'enhanced-posts.json', 'enhanced-files.json', 'enhanced-transactions.json', 'enhanced-analytics.json', 'enhanced-images.json
+    const contentFiles = ['enhanced-users.json', 'enhanced-projects.json', 'enhanced-posts.json', 'enhanced-files.json', 'enhanced-transactions.json', 'enhanced-analytics.json', 'enhanced-images.json'
     ];
 
     for (const file of contentFiles) {

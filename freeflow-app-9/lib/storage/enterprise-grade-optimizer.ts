@@ -120,7 +120,7 @@ export const ENTERPRISE_CONFIG = {
         customDomains: true,         // Custom domain support
         privateNetworking: true,     // VPC/private network support
         complianceCertifications: [  // Enterprise compliance
-          'SOC2', 'GDPR', 'HIPAA', 'ISO27001
+          'SOC2', 'GDPR', 'HIPAA', 'ISO27001'
         ]
       }
     }
@@ -470,12 +470,10 @@ export class EnterpriseOptimizer {
     };
     
     // Enterprise features being utilized
-    const enterpriseFeatures = ['🏢 Multi-cloud architecture with enterprise SLAs', '⚡ Edge optimization with Vercel Pro global deployment', '🔒 Enterprise security with Supabase Pro advanced auth', '💾 Cost-optimized storage with Wasabi Pro enterprise features', '📊 Advanced analytics and monitoring across all platforms', '🔄 Automated lifecycle management and optimization', '🌍 Global CDN with 99.9% uptime guarantee', '🛡️ Compliance-ready with SOC2, GDPR, HIPAA certifications
-    ];
+    const enterpriseFeatures = ['🏢 Multi-cloud architecture with enterprise SLAs', '⚡ Edge optimization with Vercel Pro global deployment', '🔒 Enterprise security with Supabase Pro advanced auth', '💾 Cost-optimized storage with Wasabi Pro enterprise features', '📊 Advanced analytics and monitoring across all platforms', '🔄 Automated lifecycle management and optimization', '🌍 Global CDN with 99.9% uptime guarantee', '🛡️ Compliance-ready with SOC2, GDPR, HIPAA certifications'];
     
     // Next optimization opportunities
-    const nextOptimizations = ['📈 Implement predictive scaling based on usage patterns', '🎯 Set up automated cost alerts and budget management', '🔍 Advanced analytics for storage access pattern optimization', '⚡ Consider CDN optimization for global performance', '📊 Implement advanced monitoring and alerting', '🔄 Set up automated compliance reporting', '💡 Explore AI-powered storage optimization', '🌐 Consider multi-region disaster recovery setup
-    ];
+    const nextOptimizations = ['📈 Implement predictive scaling based on usage patterns', '🎯 Set up automated cost alerts and budget management', '🔍 Advanced analytics for storage access pattern optimization', '⚡ Consider CDN optimization for global performance', '📊 Implement advanced monitoring and alerting', '🔄 Set up automated compliance reporting', '💡 Explore AI-powered storage optimization', '🌐 Consider multi-region disaster recovery setup'];
     
     return {
       optimizationResults: {

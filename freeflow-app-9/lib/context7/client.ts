@@ -104,7 +104,7 @@ class Context7Client {
     // For now, return relevant documentation based on library
     
     const docs: Record<string, string> = {
-      '/vercel/next.js': 
+      '/vercel/next.js': `
 # Next.js Documentation
 
 Next.js is a React framework for building full-stack web applications.
@@ -121,11 +121,12 @@ Next.js is a React framework for building full-stack web applications.
 - Use \`app/\` directory for new projects
 - Create \`page.tsx\` files for routes
 - Use \`layout.tsx\` for shared layouts
-- Implement loading states with \`loading.tsx\
-- Handle errors with \`error.tsx\
+- Implement loading states with \`loading.tsx\`
+- Handle errors with \`error.tsx\`
 
 ${topic ? `\n## ${topic} Documentation:\n[Specific documentation for ${topic} would be fetched here]` : ''}
-      `, '/supabase/supabase': 
+      `, 
+      '/supabase/supabase': `
 # Supabase Documentation
 
 Supabase is an open-source Firebase alternative providing authentication, database, and real-time features.
@@ -144,7 +145,8 @@ Supabase is an open-source Firebase alternative providing authentication, databa
 - Use TypeScript for better type safety
 
 ${topic ? `\n## ${topic} Documentation:\n[Specific documentation for ${topic} would be fetched here]` : ''}
-      `, '/radix-ui/primitives': 
+      `, 
+      '/radix-ui/primitives': `
 # Radix UI Documentation
 
 Radix UI provides low-level UI primitives for building design systems and accessible user interfaces.
@@ -163,10 +165,10 @@ Radix UI provides low-level UI primitives for building design systems and access
 - Implement controlled and uncontrolled components
 
 ${topic ? `\n## ${topic} Documentation:\n[Specific documentation for ${topic} would be fetched here]` : ''}
-      
+      `
     };
 
-    return docs[libraryId] || `Documentation for ${libraryId} not found in local cache. This would fetch from Context7 MCP server.`;
+    return docs[libraryId] || \`Documentation for \${libraryId} not found in local cache. This would fetch from Context7 MCP server.\`;
   }
 
   /**

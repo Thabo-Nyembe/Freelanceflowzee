@@ -23,7 +23,7 @@ class AIAutomationService {
       this.isInitialized = true
       console.log('🤖 AI Automation system initialized successfully')
     } catch (error) {
-      console.error('❌ AI Automation initialization failed: ', error)'
+      console.error('❌ AI Automation initialization failed: ', error)
     }
   }
 
@@ -310,11 +310,11 @@ class AIAutomationService {
   private async identifyAutomatableTasks(tasks: Task[]) { return [] }
   private async analyzeClientBehavior(clientId: string) { return {} }
   private async optimizeCommunicationTiming(context: Record<string, unknown>, insights: Record<string, unknown>) { return {} }
-  private async generatePersonalizedContent(context: Record<string, unknown>, insights: Record<string, unknown>) { return '&apos; }'
-  private async selectOptimalChannel(context: Record<string, unknown>, insights: Record<string, unknown>) { return &apos;email&apos; }
+  private async generatePersonalizedContent(context: Record<string, unknown>, insights: Record<string, unknown>) { return '' }
+  private async selectOptimalChannel(context: Record<string, unknown>, insights: Record<string, unknown>) { return 'email' }
   private async scheduleIntelligentFollowUp(context: Record<string, unknown>) { return {} }
   private async createDynamicTemplates(context: Record<string, unknown>) { return [] }
-  private async analyzeSentiment(messages: Record<string, unknown>[]) { return &apos;neutral&apos; }
+  private async analyzeSentiment(messages: Record<string, unknown>[]) { return 'neutral' }
   private async automateInvoiceGeneration(data: Record<string, unknown>) { return {} }
   private async optimizePricingStrategy(data: Record<string, unknown>) { return {} }
   private async generateRevenueForecasts(data: Record<string, unknown>) { return {} }
@@ -344,9 +344,9 @@ class AIAutomationService {
   private async predictPerformanceTrends(data: Record<string, unknown>) { return {} }
   private async establishPerformanceBenchmarks(data: Record<string, unknown>) { return {} }
   private async buildContentContext(request: Record<string, unknown>) { return {} }
-  private async generateText(request: Record<string, unknown>, context: Record<string, unknown>) { return '&apos; }'
+  private async generateText(request: Record<string, unknown>, context: Record<string, unknown>) { return '' }
   private async generateImages(request: Record<string, unknown>, context: Record<string, unknown>) { return [] }
-  private async generateCode(request: Record<string, unknown>, context: Record<string, unknown>) { return '&apos; }'
+  private async generateCode(request: Record<string, unknown>, context: Record<string, unknown>) { return '' }
   private async generatePresentations(request: Record<string, unknown>, context: Record<string, unknown>) { return {} }
   private async optimizeContent(request: Record<string, unknown>, context: Record<string, unknown>) { return {} }
   private async predictUserBehavior(data: Record<string, unknown>) { return {} }
@@ -392,18 +392,18 @@ interface Task {
   id: string
   title: string
   description: string
-  priority: 'low' | 'medium' | 'high' | 'urgent
+  priority: 'low' | 'medium' | 'high' | 'urgent'
   estimatedHours: number
   assignee?: string
   dependencies: string[]
-  status: 'todo' | 'in_progress' | 'completed
+  status: 'todo' | 'in_progress' | 'completed'
 }
 
 interface CommunicationContext {
   clientId: string
   projectId: string
   messageType: string
-  urgency: 'low' | 'medium' | 'high
+  urgency: 'low' | 'medium' | 'high'
   previousMessages: Record<string, unknown>[]
 }
 
@@ -434,7 +434,7 @@ interface WorkflowTemplate {
 interface WorkflowStep {
   id: string
   name: string
-  type: 'manual' | 'automated' | 'ai
+  type: 'manual' | 'automated' | 'ai'
   action: string
   conditions: string[]
 }
@@ -443,7 +443,7 @@ interface WorkflowInstance {
   id: string
   template: WorkflowTemplate
   context: Record<string, unknown>
-  status: 'running' | 'completed' | 'failed' | 'paused
+  status: 'running' | 'completed' | 'failed' | 'paused'
   currentStep: number
   data: Record<string, unknown>
   startTime: Date
@@ -529,7 +529,7 @@ interface OptimizationResult {
 }
 
 interface ContentRequest {
-  type: 'text' | 'image' | 'code' | 'documentation' | 'presentation
+  type: 'text' | 'image' | 'code' | 'documentation' | 'presentation'
   context: Record<string, unknown>
   requirements: string[]
   style: Record<string, unknown>
@@ -579,7 +579,7 @@ interface SmartRecommendations {
 }
 
 interface DeploymentConfig {
-  environment: 'staging' | 'production
+  environment: 'staging' | 'production'
   strategy: string
   tests: string[]
   monitoring: Record<string, unknown>

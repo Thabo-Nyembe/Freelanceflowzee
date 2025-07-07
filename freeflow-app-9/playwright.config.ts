@@ -9,7 +9,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
     video: 'retain-on-failure',
   },
@@ -35,9 +35,11 @@ export default defineConfig({
       use: { ...devices['iPhone 12'] },
     },
   ],
+  /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run dev',
-    port: 3000,
+    command: 'PORT=3000 npm run start -- -p 3000',
+    url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
   },
 });

@@ -55,6 +55,7 @@ export function VideoSearch({
             'pl-9 pr-8',
             isFocused && 'ring-2 ring-primary ring-offset-2'
           )}
+          data-testid="video-search-input"
         />
         <Search
           className={cn(

@@ -10,7 +10,7 @@ class AnalyticsService {
   private aiInsights: AIInsight[] = []
 
   constructor() {
-    this.apiKey = process.env.NEXT_PUBLIC_ANALYTICS_KEY || 
+    this.apiKey = process.env.NEXT_PUBLIC_ANALYTICS_KEY || ''
     this.sessionId = this.generateSessionId()
     this.initializeWebVitals()
     this.initializePerformanceObserver()

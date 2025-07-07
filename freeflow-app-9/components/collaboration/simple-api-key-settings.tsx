@@ -64,7 +64,7 @@ export default function APIKeySettings({ onApiKeyUpdate, onProviderChange }: API
           </label>
           <Input
             type="password"
-            id="apiKey
+            id="apiKey"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             placeholder="Enter your API key"

@@ -3,7 +3,100 @@
 
 import React, { useState, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
- progress += 10) {
+import {
+  Download,
+  Share2,
+  Copy,
+  Check,
+  Star,
+  Twitter,
+  Linkedin,
+  Facebook,
+  Mail,
+  MoreHorizontal,
+  CreditCard,
+  Lock,
+  Eye,
+  BarChart,
+} from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { useToast } from '@/components/ui/use-toast'
+import { Progress } from '@/components/ui/progress'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+import { Zap } from 'lucide-react'
+
+interface FileData {
+  id: string
+  name: string
+  url: string
+  size: number
+  price?: number
+  currency?: string
+  requiresPayment?: boolean
+  externalShareUrl?: string
+  downloadCount?: number
+  viewCount?: number
+}
+
+interface SmartDownloadButtonProps {
+  file: FileData
+  variant?: 'default' | 'premium' | 'freemium'
+  trackingEnabled?: boolean
+  onDownload?: (fileId: string) => void
+  onShare?: (fileId: string, platform: string) => void
+  onPayment?: (fileId: string, amount?: number) => void
+  enableMonetization?: boolean
+  showAnalytics?: boolean
+}
+
+export function SmartDownloadButton({
+  file,
+  variant = 'default',
+  trackingEnabled = true,
+  onDownload,
+  onShare,
+  onPayment,
+  enableMonetization = true,
+  showAnalytics = true,
+}: SmartDownloadButtonProps) {
+  const [isDownloading, setIsDownloading] = useState(false)
+  const [downloadProgress, setDownloadProgress] = useState(0)
+  const [copiedLink, setCopiedLink] = useState(false)
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
+  const [shareMetrics, setShareMetrics] = useState({
+    totalShares: 0,
+    platformBreakdown: { twitter: 0, facebook: 0, linkedin: 0, email: 0, social: 0 },
+    revenueGenerated: 0,
+  })
+  const { toast } = useToast()
+
+  const generateExternalShareLink = useCallback(() => {
+    return file.externalShareUrl || file.url;
+  }, [file.externalShareUrl, file.url]);
+
+  const handleDownload = async () => {
+    setIsDownloading(true)
+    setDownloadProgress(0)
+
+    if (file.requiresPayment) {
+        setPaymentDialogOpen(true);
+        setIsDownloading(false);
+        return;
+    }
+
+    // Simulate download progress
+    for (let progress = 0; progress <= 100; progress += 10) {
       await new Promise(resolve => setTimeout(resolve, 200))
       setDownloadProgress(progress)
     }
@@ -68,22 +161,22 @@ import { Button } from '@/components/ui/button'
     const link = generateExternalShareLink()
     const text = encodeURIComponent(`Check out this file: ${file.name}`)
     
-    let shareUrl = 
+    let shareUrl = ''
     
     switch (platform) {
       case 'twitter':
-        shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(link)}
+        shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(link)}`
         break
       case 'facebook':
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`
         break
       case 'linkedin':
-        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(link)}
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(link)}`
         break
       case 'email':
         const subject = encodeURIComponent(`Download: ${file.name}`)
         const body = encodeURIComponent(`Please download the file using this link: ${link}`)
-        shareUrl = `mailto:?subject=${subject}&body=${body}
+        shareUrl = `mailto:?subject=${subject}&body=${body}`
         break
     }
 
@@ -105,7 +198,8 @@ import { Button } from '@/components/ui/button'
           platformBreakdown: {
             ...prev.platformBreakdown,
             social: prev.platformBreakdown.social + 1
-          }
+          },
+          revenueGenerated: prev.revenueGenerated + (file.price || 0)
         }))
       }
 
@@ -121,6 +215,7 @@ import { Button } from '@/components/ui/button'
 
   // Track events for analytics
   const trackEvent = async (eventName: string, data: unknown) => {
+    if (!trackingEnabled) return;
     try {
       await fetch('/api/analytics/track-event', {
         method: 'POST',
@@ -134,7 +229,7 @@ import { Button } from '@/components/ui/button'
         })
       })
     } catch (error) {
-      console.error('Analytics tracking failed: ', error)'
+      console.error('Analytics tracking failed: ', error)
     }
   }
 
@@ -186,7 +281,7 @@ import { Button } from '@/components/ui/button'
           className={`flex-1 gap-2 ${
             variant === 'premium' ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700' :
             variant === 'freemium' ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700' :
-            
+            ''
           }`}
         >
           {isDownloading ? (
@@ -225,13 +320,13 @@ import { Button } from '@/components/ui/button'
                   <Input
                     value={generateExternalShareLink()}
                     readOnly
-                    className="flex-1
+                    className="flex-1"
                   />
-                  <Button"
-                    size= "icon
-                    variant="outline
+                  <Button
+                    size="icon"
+                    variant="outline"
                     onClick={copyExternalLink}
-                  >"
+                  >
                     {copiedLink ? <Check className= "h-4 w-4" /> : <Copy className= "h-4 w-4" />}
                   </Button>
                 </div>
@@ -247,32 +342,32 @@ import { Button } from '@/components/ui/button'
                   <Button
                     variant="outline"
                     onClick={() => shareToSocial('twitter')}
-                    className="gap-2
-                  >"
+                    className="gap-2"
+                  >
                     <Twitter className= "h-4 w-4" />
                     Twitter
                   </Button>
                   <Button
                     variant="outline"
                     onClick={() => shareToSocial('facebook')}
-                    className="gap-2
-                  >"
+                    className="gap-2"
+                  >
                     <Facebook className= "h-4 w-4" />
                     Facebook
                   </Button>
                   <Button
                     variant="outline"
                     onClick={() => shareToSocial('linkedin')}
-                    className="gap-2
-                  >"
+                    className="gap-2"
+                  >
                     <Linkedin className= "h-4 w-4" />
                     LinkedIn
                   </Button>
                   <Button
                     variant="outline"
                     onClick={() => shareToSocial('email')}
-                    className="gap-2
-                  >"
+                    className="gap-2"
+                  >
                     <Mail className= "h-4 w-4" />
                     Email
                   </Button>

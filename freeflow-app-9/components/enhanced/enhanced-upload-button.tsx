@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -22,7 +21,7 @@ export function EnhancedUploadButton({
 }: EnhancedUploadButtonProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadStatus, setUploadStatus] = useState<&apos;idle&apos; | &apos;uploading&apos; | &apos;success&apos; | &apos;error&apos;>('idle');
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
   const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -80,7 +79,7 @@ export function EnhancedUploadButton({
       }, 2000);
     } catch (error) {
       setUploadStatus('error');
-      console.error('Upload failed: ', error);'
+      console.error('Upload failed: ', error);
     }
   }, [maxSize, onUpload]);
 
@@ -97,20 +96,21 @@ export function EnhancedUploadButton({
     <div className={cn('relative', className)}>
       <input
         ref={fileInputRef}
-        type="file
-        multiple={multiple}"
+        type="file"
+        multiple={multiple}
         accept={acceptedTypes.join(',')}
         onChange={handleFileSelect}
         className="hidden"
-        data-testid="file-input
+        data-testid="file-input"
       />
       
       <div
-        className={cn("
-          'border-2 border-dashed rounded-lg p-6 transition-all duration-200', 'hover:border-primary/50 hover:bg-primary/5',
+        className={cn(
+          'border-2 border-dashed rounded-lg p-6 transition-all duration-200',
+          'hover:border-primary/50 hover:bg-primary/5',
           isDragging && 'border-primary bg-primary/10',
           uploadStatus === 'success' && 'border-green-500 bg-green-50',
-          uploadStatus === 'error' && 'border-red-500 bg-red-50
+          uploadStatus === 'error' && 'border-red-500 bg-red-50'
         )}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -121,7 +121,7 @@ export function EnhancedUploadButton({
             <div className= "w-full space-y-2">
               <Progress value={uploadProgress} className= "w-full" />
               <p className= "text-sm text-muted-foreground">
-                Uploading {files.length} file{files.length !== 1 ? 's' : }... {uploadProgress}%
+                Uploading {files.length} file{files.length !== 1 ? 's' : ''}... {uploadProgress}%
               </p>
             </div>
           )}
@@ -150,8 +150,8 @@ export function EnhancedUploadButton({
               <Button
                 onClick={handleClick}
                 data-testid="upload-file-btn"
-                className="mt-4
-              >"
+                className="mt-4"
+              >
                 <Upload className= "w-4 h-4 mr-2" />
                 Choose Files
               </Button>

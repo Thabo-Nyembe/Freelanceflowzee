@@ -1,4 +1,5 @@
 import React from 'react';
+import { CheckCircle, Clock, Bell } from 'lucide-react';
 
 interface MyDayTodayProps {
   userId: string;
@@ -24,7 +25,7 @@ export const MyDayToday: React.FC<MyDayTodayProps> = ({ userId }) => {
         <div>
           <h4 className= "font-medium mb-4 flex items-center">
             <CheckCircle className= "w-5 h-5 mr-2" />
-            Today's Tasks
+            Today&apos;s Tasks
           </h4>
           <div className= "space-y-3">
             <div className= "flex items-center justify-between p-3 bg-gray-50 rounded">
