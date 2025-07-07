@@ -7,7 +7,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
-    forceSwcTransforms: true,
+    // forceSwcTransforms: true,
     externalDir: true,
   },
   

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,16 +22,9 @@ import {
 } from 'lucide-react';
 import ScreenRecorder from '@/components/video/screen-recorder';
 import Image from 'next/image';
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
 import { AIVideoRecordingSystem } from '@/components/collaboration/ai-video-recording-system'
 import { VideoAIPanel } from '@/components/video/ai/video-ai-panel'
 import { EnterpriseVideoStudio } from '@/components/collaboration/enterprise-video-studio'
-
-export const metadata: Metadata = {
-  title: 'Video Studio | FreeFlow',
-  description: 'Professional screen recording and video management for freelancers',
-};
 
 export default function VideoStudioPage() {
   const [currentVideoId, setCurrentVideoId] = useState<string | null>(null)
