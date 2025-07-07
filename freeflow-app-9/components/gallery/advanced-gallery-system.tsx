@@ -1,7 +1,79 @@
 'use client'
 
-import { useState, } from 'react'
- timestamp: string; details: string }>
+import { useState } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { 
+  Download, Share2, Heart, Eye, Copy, ExternalLink, QrCode, 
+  Settings, BarChart3, Users, Calendar, MapPin, Camera,
+  Grid3X3, List, Filter, Search, Play, Pause, Volume2, VolumeX
+} from 'lucide-react'
+
+interface GalleryItem {
+  id: string
+  name: string
+  type: 'image' | 'video' | 'document'
+  url: string
+  thumbnail: string
+  description?: string
+  tags: string[]
+  status: 'processing' | 'ready' | 'error'
+  favorites: number
+  downloads: number
+  views: number
+  isFavorited: boolean
+  metadata: ItemMetadata
+  pricing?: ItemPricing
+}
+
+interface GalleryCollection {
+  id: string
+  name: string
+  description: string
+  coverImage: string
+  createdAt: string
+  updatedAt: string
+  settings: CollectionSettings
+  sharing: SharingSettings
+  analytics: CollectionAnalytics
+  items: GalleryItem[]
+}
+
+interface CollectionSettings {
+  isPublic: boolean
+  passwordProtected: boolean
+  password?: string
+  downloadEnabled: boolean
+  favoritesEnabled: boolean
+  commentsEnabled: boolean
+  watermarkEnabled: boolean
+  expiryDate?: string
+  clientAccess: string[]
+  downloadLimit?: number
+  viewLimit?: number
+}
+
+interface SharingSettings {
+  publicUrl: string
+  directLinks: boolean
+  socialSharing: boolean
+  embedCode: string
+  qrCode: string
+  brandingEnabled: boolean
+}
+
+interface CollectionAnalytics {
+  totalViews: number
+  uniqueVisitors: number
+  downloadCount: number
+  favoriteCount: number
+  topCountries: Array<{ country: string; count: number }>
+  recentActivity: Array<{ type: string; timestamp: string; details: string }>
 }
 
 interface ItemMetadata {
@@ -24,9 +96,9 @@ interface ItemPricing {
 
 interface Watermark {
   enabled: boolean
-  type: 'text' | 'logo
+  type: 'text' | 'logo'
   content: string
-  position: 'center' | 'corner' | 'repeated
+  position: 'center' | 'corner' | 'repeated'
   opacity: number
 }
 
@@ -56,7 +128,7 @@ export function AdvancedGallerySystem() {
         publicUrl: 'https://gallery.freeflow.com/wedding-sarah-mike',
         directLinks: true,
         socialSharing: true,
-        embedCode: &apos;<iframe src= "https://gallery.freeflow.com/embed/coll_001" width= "800" height= "600"></iframe>',
+        embedCode: '<iframe src="https://gallery.freeflow.com/embed/coll_001" width="800" height="600"></iframe>',
         qrCode: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...',
         brandingEnabled: true
       },
@@ -105,37 +177,13 @@ export function AdvancedGallerySystem() {
             commercial: 150,
             exclusive: 500
           }
-        },
-        {
-          id: 'vid_001',
-          name: 'Wedding Highlights',
-          type: 'video',
-          url: '/videos/wedding-highlights.mp4',
-          thumbnail: '/images/video-thumb.jpg',
-          description: 'Beautiful 3-minute highlight reel',
-          tags: ['highlights', 'cinematic', 'love'],
-          status: 'ready',
-          favorites: 35,
-          downloads: 5,
-          views: 89,
-          isFavorited: true,
-          metadata: {
-            duration: 180,
-            size: '245 MB',
-            format: '4K MP4',
-            createdAt: '2024-02-01T21:00:00Z'
-          },
-          pricing: {
-            digital: 150,
-            exclusive: 750
-          }
         }
       ]
     }
   ])
 
   const [selectedCollection, setSelectedCollection] = useState<GalleryCollection | null>(collections[0])
-  const [viewMode, setViewMode] = useState<&apos;grid&apos; | &apos;list&apos;>('grid')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [activeTab, setActiveTab] = useState('gallery')
   const [sharingPanelOpen, setSharingPanelOpen] = useState(false)
   const [copiedText, setCopiedText] = useState<string | null>(null)
@@ -146,7 +194,7 @@ export function AdvancedGallerySystem() {
       setCopiedText(type)
       setTimeout(() => setCopiedText(null), 2000)
     } catch (err) {
-      console.error('Failed to copy: ', err)'
+      console.error('Failed to copy: ', err)
     }
   }
 
@@ -186,7 +234,7 @@ export function AdvancedGallerySystem() {
                 {
                   type: 'download',
                   timestamp: new Date().toISOString(),
-                  details: `Downloaded ${item.name}
+                  details: `Downloaded ${item.name}`
                 },
                 ...collection.analytics.recentActivity.slice(0, 4)
               ]
@@ -200,462 +248,272 @@ export function AdvancedGallerySystem() {
     // In real app: window.open(item.url, '_blank')
   }
 
-  const handleFavorite = (item: GalleryItem) => {
-    setCollections(prev => prev.map(collection =>
-      collection.id === selectedCollection?.id
-        ? {
-            ...collection,
-            items: collection.items.map(i =>
-              i.id === item.id
-                ? { 
-                    ...i, 
-                    isFavorited: !i.isFavorited,
-                    favorites: i.isFavorited ? i.favorites - 1 : i.favorites + 1
-                  }
-                : i
-            )
-          }
-        : collection
-    ))
-  }
-
-  if (!selectedCollection) return null
-
   return (
-    <div className= "space-y-8">
-      {/* Header */}
-      <div className= "flex items-center justify-between">
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className= "text-3xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            🎨 Advanced Gallery System
-          </h1>
-          <p className= "text-muted-foreground mt-2">
-            Professional client galleries with advanced sharing and analytics
+          <h1 className="text-3xl font-bold">Gallery Management</h1>
+          <p className="text-muted-foreground">
+            Manage your collections, analytics, and client galleries
           </p>
         </div>
-        <div className= "flex gap-3">
-          <Button
-            variant="outline
-            onClick={() => setSharingPanelOpen(!sharingPanelOpen)}
-          >"
-            <Share2 className= "mr-2 h-4 w-4" />
-            Share Gallery
-          </Button>
-          <Button className= "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
-            <Plus className= "mr-2 h-4 w-4" />
-            New Gallery
-          </Button>
-        </div>
+        <Button>
+          <Settings className="w-4 h-4 mr-2" />
+          Settings
+        </Button>
       </div>
 
-      {/* Sharing Panel */}
-      {sharingPanelOpen && (
-        <Card className= "border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
-          <CardHeader>
-            <CardTitle className= "flex items-center gap-2">
-              <Share2 className= "h-5 w-5 text-purple-600" />
-              Share "{selectedCollection.name}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className= "space-y-6">
-            {/* Public Link */}
-            <div className= "space-y-3">
-              <h4 className= "font-medium flex items-center gap-2">
-                <Globe className= "h-4 w-4" />
-                Public Gallery Link
-              </h4>
-              <div className= "flex gap-2">
-                <Input
-                  value={selectedCollection.sharing.publicUrl}
-                  readOnly
-                  className="flex-1
-                />
-                <Button"
-                  size= "sm
-                  onClick={() => copyToClipboard(selectedCollection.sharing.publicUrl, 'url')}
-                >
-                  {copiedText === 'url' ? <Check className= "h-4 w-4" /> : <Copy className= "h-4 w-4" />}
-                </Button>
-                <Button
-                  size= "sm
-                  variant="outline"
-                  onClick={() => window.open(selectedCollection.sharing.publicUrl, '_blank')}
-                >
-                  <ExternalLink className= "h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Quick Share Options */}
-            <div className= "grid md:grid-cols-3 gap-4">
-              <Button
-                variant="outline"
-                onClick={() => handleShare('email')}
-                className="h-20 flex-col gap-2
-              >"
-                <Mail className= "h-6 w-6" />
-                Email Share
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => handleShare('social')}
-                className="h-20 flex-col gap-2
-              >"
-                <Share2 className= "h-6 w-6" />
-                Social Media
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => handleShare('direct')}
-                className="h-20 flex-col gap-2
-              >"
-                <Link2 className= "h-6 w-6" />
-                Copy Link
-              </Button>
-            </div>
-
-            {/* Embed Code */}
-            <div className= "space-y-3">
-              <h4 className= "font-medium">Embed Code</h4>
-              <div className= "flex gap-2">
-                <Input
-                  value={selectedCollection.sharing.embedCode}
-                  readOnly
-                  className="flex-1 text-xs
-                />
-                <Button"
-                  size= "sm
-                  onClick={() => copyToClipboard(selectedCollection.sharing.embedCode, 'embed')}
-                >
-                  {copiedText === 'embed' ? <Check className= "h-4 w-4" /> : <Copy className= "h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Gallery Navigation */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className= "space-y-6">
-        <TabsList className= "grid w-full grid-cols-4">
-          <TabsTrigger value= "gallery">Gallery</TabsTrigger>
-          <TabsTrigger value= "settings"></TabsTrigger>
-          <TabsTrigger value= "analytics">Analytics</TabsTrigger>
-          <TabsTrigger value= "clients">Client Access</TabsTrigger>
-        </TabsList>
-
-        {/* Gallery Tab */}
-        <TabsContent value= "gallery" className= "space-y-6">
-          {/* Collection Header */}
-          <Card className= "border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
-            <CardContent className= "p-6">
-              <div className= "flex items-start justify-between">
+      {selectedCollection && (
+        <div className="grid gap-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
                 <div>
-                  <h2 className= "text-2xl font-bold text-purple-800 mb-2">
-                    {selectedCollection.name}
-                  </h2>
-                  <p className= "text-purple-600 mb-4">{selectedCollection.description}</p>
-                  <div className= "flex items-center gap-4 text-sm text-purple-700">
-                    <span className= "flex items-center gap-1">
-                      <ImageIcon className= "h-4 w-4" />
-                      {selectedCollection.items.length} items
-                    </span>
-                    <span className= "flex items-center gap-1">
-                      <Eye className= "h-4 w-4" />
-                      {selectedCollection.analytics.totalViews} views
-                    </span>
-                    <span className= "flex items-center gap-1">
-                      <Download className= "h-4 w-4" />
-                      {selectedCollection.analytics.downloadCount} downloads
-                    </span>
-                    <Badge className={selectedCollection.settings.isPublic ? 
-                      'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}>
-                      {selectedCollection.settings.isPublic ? (
-                        <><Unlock className= "h-3 w-3 mr-1" />Public</>
-                      ) : (
-                        <><Lock className= "h-3 w-3 mr-1" />Private</>
-                      )}
-                    </Badge>
-                  </div>
+                  <CardTitle>{selectedCollection.name}</CardTitle>
+                  <CardDescription>{selectedCollection.description}</CardDescription>
                 </div>
-                <div className= "flex items-center gap-2">
-                  <Button
-                    size= "sm
-                    variant={viewMode === 'grid' ? 'default' : 'outline'}
-                    onClick={() => setViewMode('grid')}
-                  >
-                    <Grid3X3 className= "h-4 w-4" />
-                  </Button>
-                  <Button
-                    size= "sm
-                    variant={viewMode === 'list' ? 'default' : 'outline'}
-                    onClick={() => setViewMode('list')}
-                  >
-                    <List className= "h-4 w-4" />
-                  </Button>
-                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => setSharingPanelOpen(true)}
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share
+                </Button>
               </div>
-            </CardContent>
-          </Card>
+            </CardHeader>
+            <CardContent>
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="gallery">Gallery</TabsTrigger>
+                  <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                  <TabsTrigger value="settings">Settings</TabsTrigger>
+                  <TabsTrigger value="sharing">Sharing</TabsTrigger>
+                </TabsList>
 
-          {/* Gallery Items */}
-          <div className={`grid gap-6 ${
-            viewMode === 'grid' 
-              ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-              : 'grid-cols-1'
-          }`}>
-            {selectedCollection.items.map(item => (
-              <Card key={item.id} className= "group hover:shadow-lg transition-all duration-300">
-                <CardContent className= "p-0">
-                  <div className= "relative">
-                    {/* Media Thumbnail */}
-                    <div className= "aspect-square bg-gray-100 relative overflow-hidden rounded-t-lg">
-                      <div className= "absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20"></div>
-                      
-                      {/* Type Badge */}
-                      <div className= "absolute top-2 left-2 z-10">
-                        <Badge className={`${
-                          item.type === 'video' 
-                            ? 'bg-blue-600 text-white' 
-                            : 'bg-green-600 text-white'
-                        }`}>
-                          {item.type === 'video' ? (
-                            <><Video className= "h-3 w-3 mr-1" />Video</>
-                          ) : (
-                            <><ImageIcon className= "h-3 w-3 mr-1" />Photo</>
-                          )}
-                        </Badge>
-                      </div>
-
-                      {/* Status Badge */}
-                      <div className= "absolute top-2 right-2 z-10">
-                        <Badge className={`${
-                          item.status === 'ready' 
-                            ? 'bg-green-100 text-green-800' 
-                            : item.status === 'processing
-                            ? 'bg-yellow-100 text-yellow-800
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {item.status === 'ready' && <Check className= "h-3 w-3 mr-1" />}
-                          {item.status === 'processing' && <Clock className= "h-3 w-3 mr-1" />}
-                          {item.status}
-                        </Badge>
-                      </div>
-
-                      {/* Hover Actions */}
-                      <div className= "absolute inset-0 bg-purple-100/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <div className= "flex gap-2">
-                          <Button size= "sm" variant= "ghost" className= "text-white hover:bg-white/20">
-                            <Eye className= "h-4 w-4" />
-                          </Button>
-                          {item.type === 'video' && (
-                            <Button size= "sm" variant= "ghost" className= "text-white hover:bg-white/20">
-                              <Video className= "h-4 w-4" />
-                            </Button>
-                          )}
-                          <Button 
-                            size= "sm" 
-                            variant= "ghost" 
-                            className="text-white hover:bg-white/20
-                            onClick={() => handleDownloadItem(item)}
-                          >"
-                            <Download className= "h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Video Duration */}
-                      {item.type === 'video' && item.metadata.duration && (
-                        <div className= "absolute bottom-2 right-2 bg-purple-600 text-white text-xs px-2 py-1 rounded">
-                          {Math.floor(item.metadata.duration / 60)}:{(item.metadata.duration % 60).toString().padt(2, '0')}
-                        </div>
-                      )}
+                <TabsContent value="gallery" className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant={viewMode === 'grid' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setViewMode('grid')}
+                      >
+                        <Grid3X3 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant={viewMode === 'list' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setViewMode('list')}
+                      >
+                        <List className="w-4 h-4" />
+                      </Button>
                     </div>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        placeholder="Search items..."
+                        className="w-64"
+                      />
+                      <Button variant="outline" size="sm">
+                        <Filter className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
 
-                    {/* Item Info */}
-                    <div className= "p-4 space-y-3">
+                  <div className={viewMode === 'grid' ? 'grid grid-cols-4 gap-4' : 'space-y-2'}>
+                    {selectedCollection.items.map((item) => (
+                      <Card key={item.id} className="group relative">
+                        <CardContent className="p-3">
+                          <div className="aspect-square relative overflow-hidden rounded-lg bg-muted mb-3">
+                            <img
+                              src={item.thumbnail}
+                              alt={item.name}
+                              className="w-full h-full object-cover"
+                            />
+                            {item.type === 'video' && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <Play className="w-8 h-8 text-white bg-black bg-opacity-50 rounded-full p-1" />
+                              </div>
+                            )}
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => handleDownloadItem(item)}
+                              >
+                                <Download className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-sm mb-1">{item.name}</h4>
+                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                              <div className="flex items-center space-x-3">
+                                <span className="flex items-center">
+                                  <Eye className="w-3 h-3 mr-1" />
+                                  {item.views}
+                                </span>
+                                <span className="flex items-center">
+                                  <Heart className="w-3 h-3 mr-1" />
+                                  {item.favorites}
+                                </span>
+                                <span className="flex items-center">
+                                  <Download className="w-3 h-3 mr-1" />
+                                  {item.downloads}
+                                </span>
+                              </div>
+                              <Badge variant="secondary" className="text-xs">
+                                {item.metadata.format}
+                              </Badge>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="analytics" className="space-y-4">
+                  <div className="grid grid-cols-4 gap-4">
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-muted-foreground">Total Views</p>
+                            <p className="text-2xl font-bold">{selectedCollection.analytics.totalViews}</p>
+                          </div>
+                          <Eye className="w-8 h-8 text-muted-foreground" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-muted-foreground">Unique Visitors</p>
+                            <p className="text-2xl font-bold">{selectedCollection.analytics.uniqueVisitors}</p>
+                          </div>
+                          <Users className="w-8 h-8 text-muted-foreground" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-muted-foreground">Downloads</p>
+                            <p className="text-2xl font-bold">{selectedCollection.analytics.downloadCount}</p>
+                          </div>
+                          <Download className="w-8 h-8 text-muted-foreground" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-muted-foreground">Favorites</p>
+                            <p className="text-2xl font-bold">{selectedCollection.analytics.favoriteCount}</p>
+                          </div>
+                          <Heart className="w-8 h-8 text-muted-foreground" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="settings" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Collection Settings</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="public">Public Gallery</Label>
+                        <Switch
+                          id="public"
+                          checked={selectedCollection.settings.isPublic}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="password">Password Protected</Label>
+                        <Switch
+                          id="password"
+                          checked={selectedCollection.settings.passwordProtected}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="downloads">Allow Downloads</Label>
+                        <Switch
+                          id="downloads"
+                          checked={selectedCollection.settings.downloadEnabled}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="sharing" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Share Gallery</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
                       <div>
-                        <h4 className= "font-medium text-gray-900 truncate">
-                          {item.name}
-                        </h4>
-                        {item.description && (
-                          <p className= "text-sm text-gray-600 line-clamp-2">
-                            {item.description}
-                          </p>
+                        <Label>Public URL</Label>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Input
+                            value={selectedCollection.sharing.publicUrl}
+                            readOnly
+                          />
+                          <Button
+                            variant="outline"
+                            onClick={() => copyToClipboard(selectedCollection.sharing.publicUrl, 'url')}
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        {copiedText === 'url' && (
+                          <p className="text-sm text-green-600 mt-1">Copied to clipboard!</p>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <Label>Embed Code</Label>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Input
+                            value={selectedCollection.sharing.embedCode}
+                            readOnly
+                          />
+                          <Button
+                            variant="outline"
+                            onClick={() => copyToClipboard(selectedCollection.sharing.embedCode, 'embed')}
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        {copiedText === 'embed' && (
+                          <p className="text-sm text-green-600 mt-1">Copied to clipboard!</p>
                         )}
                       </div>
 
-                      {/* Tags */}
-                      {item.tags.length > 0 && (
-                        <div className= "flex flex-wrap gap-1">
-                          {item.tags.slice(0, 3).map(tag => (
-                            <Badge key={tag} variant= "outline" className= "text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
-                          {item.tags.length > 3 && (
-                            <Badge variant= "outline" className= "text-xs">
-                              +{item.tags.length - 3}
-                            </Badge>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Stats */}
-                      <div className= "flex items-center justify-between text-sm text-gray-500">
-                        <div className= "flex items-center gap-3">
-                          <span className= "flex items-center gap-1">
-                            <Heart className={`w-4 h-4 ${item.isFavorited ? 'fill-red-500 text-red-500&apos; : '&apos;}`} />'
-                            {item.favorites}
-                          </span>
-                          <span className= "flex items-center gap-1">
-                            <Eye className= "w-4 h-4" />
-                            {item.views}
-                          </span>
-                          <span className= "flex items-center gap-1">
-                            <Download className= "w-4 h-4" />
-                            {item.downloads}
-                          </span>
-                        </div>
-                        <span className= "text-xs text-gray-400">
-                          {item.metadata.size}
-                        </span>
-                      </div>
-
-                      {/* Actions */}
-                      <div className= "flex gap-2">
-                        <Button
-                          size= "sm
-                          variant="outline
-                          onClick={() => handleFavorite(item)}"
-                          className={`flex-1 ${item.isFavorited ? 'text-red-600 border-red-200' : }`}
-                        >
-                          <Heart className={`w-4 h-4 mr-1 ${item.isFavorited ? 'fill-current&apos; : '&apos;}`} />'
-                          {item.isFavorited ? 'Favorited' : 'Favorite'}
+                      <div className="flex space-x-2">
+                        <Button onClick={() => handleShare('email')}>
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          Share via Email
                         </Button>
-                        <Button
-                          size= "sm
-                          onClick={() => handleDownloadItem(item)}
-                          className="bg-purple-600 hover:bg-purple-700
-                        >"
-                          <Download className= "w-4 h-4 mr-1" />
-                          Download
+                        <Button variant="outline" onClick={() => handleShare('social')}>
+                          <Share2 className="w-4 h-4 mr-2" />
+                          Share on Social
                         </Button>
                       </div>
-
-                      {/* Pricing */}
-                      {item.pricing && (
-                        <div className= "pt-2 border-t">
-                          <div className= "flex items-center justify-between text-sm">
-                            <span className= "text-gray-600">Digital</span>
-                            <span className= "font-medium">${item.pricing.digital}</span>
-                          </div>
-                          {item.pricing.print && (
-                            <div className= "flex items-center justify-between text-sm">
-                              <span className= "text-gray-600">Print License</span>
-                              <span className= "font-medium">${item.pricing.print}</span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        {/* Analytics Tab */}
-        <TabsContent value= "analytics" className= "space-y-6">
-          <div className= "grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card>
-              <CardContent className= "p-6">
-                <div className= "flex items-center gap-3">
-                  <div className= "p-2 bg-blue-100 rounded-lg">
-                    <Eye className= "h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className= "text-2xl font-bold">{selectedCollection.analytics.totalViews}</p>
-                    <p className= "text-sm text-gray-600">Total Views</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className= "p-6">
-                <div className= "flex items-center gap-3">
-                  <div className= "p-2 bg-green-100 rounded-lg">
-                    <Users className= "h-6 w-6 text-green-600" />
-                  </div>
-                  <div>
-                    <p className= "text-2xl font-bold">{selectedCollection.analytics.uniqueVisitors}</p>
-                    <p className= "text-sm text-gray-600">Unique Visitors</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className= "p-6">
-                <div className= "flex items-center gap-3">
-                  <div className= "p-2 bg-purple-100 rounded-lg">
-                    <Download className= "h-6 w-6 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className= "text-2xl font-bold">{selectedCollection.analytics.downloadCount}</p>
-                    <p className= "text-sm text-gray-600">Downloads</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className= "p-6">
-                <div className= "flex items-center gap-3">
-                  <div className= "p-2 bg-red-100 rounded-lg">
-                    <Heart className= "h-6 w-6 text-red-600" />
-                  </div>
-                  <div>
-                    <p className= "text-2xl font-bold">{selectedCollection.analytics.favoriteCount}</p>
-                    <p className= "text-sm text-gray-600">Favorites</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Recent Activity */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className= "space-y-3">
-                {selectedCollection.analytics.recentActivity.map((activity, index) => (
-                  <div key={index} className= "flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <div className={`p-1 rounded-full ${
-                      activity.type === 'download' ? 'bg-blue-100' :
-                      activity.type === 'view' ? 'bg-green-100' : "bg-purple-100
-                    }`}>"
-                      {activity.type === 'download' && <Download className= "h-3 w-3 text-blue-600" />}
-                      {activity.type === 'view' && <Eye className= "h-3 w-3 text-green-600" />}
-                      {activity.type === 'favorite' && <Heart className= "h-3 w-3 text-purple-600" />}
-                    </div>
-                    <div className= "flex-1">
-                      <p className= "text-sm text-gray-900">{activity.details}</p>
-                      <p className= "text-xs text-gray-500">
-                        {new Date(activity.timestamp).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
     </div>
   )
 } 

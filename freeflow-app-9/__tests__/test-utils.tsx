@@ -1,6 +1,6 @@
 import React from 'react'
-import { render as rtlRender } from '@testing-library/react"
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query"
+import { render as rtlRender } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from '@/components/theme-provider'
 
 function renderWithProviders(ui: React.ReactElement, { ...options } = {}) {
@@ -10,11 +10,11 @@ function renderWithProviders(ui: React.ReactElement, { ...options } = {}) {
         retry: false,
       },
     },
-  })'
-'
-  function Wrapper({ children }: { children: React.ReactNode }) {"
-    return ('
-      <QueryClientProvider client={queryClient}>"
+  })
+
+  function Wrapper({ children }: { children: React.ReactNode }) {
+    return (
+      <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
           {children}
         </ThemeProvider>
@@ -26,7 +26,7 @@ function renderWithProviders(ui: React.ReactElement, { ...options } = {}) {
 }
 
 // Re-export everything
-export * from '@testing-library/react
+export * from '@testing-library/react'
 
-// Export the custom render method'
-export { renderWithProviders } "
+// Export the custom render method
+export { renderWithProviders }
