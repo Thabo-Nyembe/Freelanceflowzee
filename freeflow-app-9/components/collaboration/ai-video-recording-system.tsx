@@ -330,8 +330,8 @@ export function AIVideoRecordingSystem({
   className = ''
 }: AIVideoRecordingSystemProps) {
   const [state, dispatch] = useReducer(recordingReducer, initialState)
-  const videoRef =<HTMLVideoElement>(null)
-  const mediaRecorderRef =<MediaRecorder | null>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const [isAddingAnnotation, setIsAddingAnnotation] = useState(false)
   const [newAnnotationPos, setNewAnnotationPos] = useState<{ x: number; y: number } | null>(null)
 

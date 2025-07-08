@@ -26,8 +26,8 @@ export default function VideoMessageRecorder({
   const [hasCamera, setHasCamera] = useState(false);
   const [hasScreen, setHasScreen] = useState(false);
   
-  const _videoRef =<HTMLVideoElement>(null);
-  const _containerRef =<HTMLDivElement>(null);
+  const _videoRef = useRef<HTMLVideoElement>(null);
+  const _containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     return () => {

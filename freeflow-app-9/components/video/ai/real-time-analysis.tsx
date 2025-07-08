@@ -70,7 +70,7 @@ export function RealTimeAnalysis({
     priority: 'high' | 'medium' | 'low'
   }[]>([])
 
-  const aiServiceRef =<RealTimeAIService | null>(null)
+  const aiServiceRef = useRef<RealTimeAIService | null>(null)
 
   // Initialize AI service
   useEffect(() => {

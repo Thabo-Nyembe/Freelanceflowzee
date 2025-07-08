@@ -291,8 +291,8 @@ export function EnterpriseVideoStudio({
 }: EnterpriseVideoStudioProps) {
   const [state, dispatch] = useReducer(videoStudioReducer, initialState)
 
-  const videoRef =<HTMLVideoElement>(null)
-  const mediaRecorderRef =<MediaRecorder | null>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const [isClient, setIsClient] = useState(false)
 
   React.useEffect(() => {
