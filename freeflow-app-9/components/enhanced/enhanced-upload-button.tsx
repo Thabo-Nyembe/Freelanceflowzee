@@ -23,6 +23,7 @@ export function EnhancedUploadButton({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
   const [files, setFiles] = useState<File[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Context7 drag-and-drop handler
@@ -40,8 +41,13 @@ export function EnhancedUploadButton({
     e.preventDefault();
     setIsDragging(false);
     
-    const droppedFiles = Array.from(e.dataTransfer.files);
-    await processFiles(droppedFiles);
+    try {
+      const droppedFiles = Array.from(e.dataTransfer.files);
+      await processFiles(droppedFiles);
+    } catch (error) {
+      console.error('Error processing dropped files:', error);
+      setError('Failed to process dropped files. Please try again.');
+    }
   }, []);
 
   // Context7 file processing with validation
@@ -137,6 +143,7 @@ export function EnhancedUploadButton({
             <div className= "text-red-600">
               <AlertCircle className= "w-12 h-12 mx-auto mb-2" />
               <p className= "font-medium">Upload Failed</p>
+              {error && <p className= "text-sm text-red-500 mt-1">{error}</p>}
             </div>
           )}
           

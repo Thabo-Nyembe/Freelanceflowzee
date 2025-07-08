@@ -70,8 +70,8 @@ export default function MuxVideoPlayer({
   onError,
   videoId,
 }: MuxVideoPlayerProps) {
-  const playerRef =<any>(null);
-  const containerRef =<HTMLDivElement>(null);
+  const playerRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   
   const [state, setState] = useState<PlayerState>({
     isPlaying: false,

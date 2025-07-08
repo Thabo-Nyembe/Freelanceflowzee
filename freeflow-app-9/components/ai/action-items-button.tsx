@@ -32,14 +32,20 @@ export function ActionItemsButton({ projectId }: ActionItemsButtonProps) {
     setError(null);
     setActionItems([]);
 
-    const result = await detectActionItems(projectId);
+    try {
+      const result = await detectActionItems(projectId);
 
-    if (result.error) {
-      setError(result.error);
-    } else if (result.actionItems) {
-      setActionItems(result.actionItems);
+      if (result.error) {
+        setError(result.error);
+      } else if (result.actionItems) {
+        setActionItems(result.actionItems);
+      }
+    } catch (error) {
+      console.error('Error detecting action items:', error);
+      setError('Failed to detect action items. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleCopyToClipboard = () => {

@@ -1,3 +1,4 @@
+import React from 'react'
 import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react'
 import { Toaster } from '@/components/ui/toaster'
@@ -12,6 +13,7 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata = {
   title: 'FreeFlowZee - Modern Freelance Management Platform',
   description: 'AI-powered freelance management platform with video collaboration and real-time document editing',
+  viewport: 'width=device-width, initial-scale=1',
   icons: {
     icon: '/favicon.ico',
     apple: '/apple-touch-icon.png',

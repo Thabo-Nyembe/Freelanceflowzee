@@ -1,784 +1,597 @@
 "use client"
 
-import React, { useState, useReducer, useCallback } from 'react'
+import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Progress } from '@/components/ui/progress'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
-  Folder,
-  File as FileIcon,
-  Search,
-
-  Grid,
-  List,
-  UploadCloud,
-  MoreVertical,
-  Star,
-  Share2,
-  Trash2,
-  Download,
-  Edit3,
-  Copy,
-  FolderPlus,
-  ArrowDownUp,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  FileText,
   Image,
   Video,
-  Text,
-  Archive,
   Music,
-  ChevronRight
+  Archive,
+  Upload,
+  Download,
+  Share2,
+  Trash2,
+  MoreHorizontal,
+  Search,
+  Filter,
+  Grid,
+  List,
+  FolderOpen,
+  Star,
+  Clock,
+  Users,
+  Link,
+  Eye,
+  Edit,
+  Cloud,
+  HardDrive,
+  Zap,
+  Shield,
+  TrendingUp
 } from 'lucide-react'
 
-type Action =
-  | { type: 'SET_VIEW_MODE'; payload: 'grid' | 'list' }
-  | { type: 'SET_SEARCH_QUERY'; payload: string }
-  | { type: 'SELECT_ITEM'; payload: string }
-  | { type: 'DESELECT_ITEM'; payload: string }
-  | { type: 'CLEAR_SELECTION' }
-  | { type: 'SET_CURRENT_FOLDER'; payload: string | null }
-  | { type: 'START_UPLOAD' }
-  | { type: 'UPDATE_UPLOAD_PROGRESS'; payload: number }
-  | { type: 'COMPLETE_UPLOAD' }
-  | { type: 'ADD_FILE'; payload: Record<string, any> }
-  | { type: 'DELETE_FILES'; payload: string[] }
-  | { type: 'UPLOAD_SUCCESS'; payload: { files: Record<string, any>[] } }
-  | { type: 'UPLOAD_ERROR'; payload: { error: string } }
-  | { type: 'DOWNLOAD_START'; payload: { fileId: string } }
-  | { type: 'DOWNLOAD_SUCCESS'; payload: { fileId: string } }
-  | { type: 'DOWNLOAD_ERROR'; payload: { fileId: string; error: string } }
-
-interface State {
-    files: any[];
-    folders: any[];
-    selectedItems: any[];
-    viewMode: 'grid' | 'list';
-    searchQuery: string;
-    currentFolder: string | null;
-    uploadProgress: number;
-    isUploading: boolean;
-    storageStats: {
-        used: number;
-        total: number;
-        files: number;
-        folders: number;
-    };
-}
-
-const initialState:State = {
-  files: [
-    {
-      id: '1',
-      name: 'Brand_Guidelines_V2.pdf',
-      type: 'pdf',
-      size: '2.4 MB',
-      modified: '2 hours ago',
-      author: 'Sarah Chen',
-      shared: true,
-      starred: true,
-      icon: 'Text',
-      color: 'text-red-500'
-    },
-    {
-      id: '2',
-      name: 'Logo_Concepts.psd',
-      type: 'image',
-      size: '45.2 MB',
-      modified: '1 day ago',
-      author: 'You',
-      shared: false,
-      starred: false,
-      icon: 'Image',
-      color: 'text-purple-500'
-    },
-    {
-      id: '3',
-      name: 'Presentation_Video.mp4',
-      type: 'video',
-      size: '127.8 MB',
-      modified: '3 days ago',
-      author: 'Mike Johnson',
-      shared: true,
-      starred: false,
-      icon: 'Video',
-      color: 'text-blue-500'
-    },
-    {
-      id: '4',
-      name: 'Project_Archive.zip',
-      type: 'archive',
-      size: '89.1 MB',
-      modified: '1 week ago',
-      author: 'Team',
-      shared: false,
-      starred: true,
-      icon: 'Archive',
-      color: 'text-orange-500'
-    },
-    {
-      id: '5',
-      name: 'Audio_Branding.wav',
-      type: 'audio',
-      size: '15.6 MB',
-      modified: '2 weeks ago',
-      author: 'Audio Team',
-      shared: true,
-      starred: false,
-      icon: 'Music',
-      color: 'text-green-500'
-    }
-  ],
-  folders: [
-    {
-      id: 'f1',
-      name: 'Brand Assets',
-      filesCount: 23,
-      modified: '1 day ago',
-      shared: true,
-      color: 'text-purple-600'
-    },
-    {
-      id: 'f2',
-      name: 'Client Reviews',
-      filesCount: 8,
-      modified: '3 days ago',
-      shared: false,
-      color: 'text-blue-600'
-    },
-    {
-      id: 'f3',
-      name: 'Final Deliverables',
-      filesCount: 12,
-      modified: '1 week ago',
-      shared: true,
-      color: 'text-green-600'
-    },
-    {
-      id: 'f4',
-      name: 'Work in Progress',
-      filesCount: 34,
-      modified: '2 hours ago',
-      shared: false,
-      color: 'text-orange-600'
-    }
-  ],
-  selectedItems: [],
-  viewMode: 'grid',
-  searchQuery: '',
-  currentFolder: null,
-  uploadProgress: 0,
-  isUploading: false,
-  storageStats: {
-    used: 869.5,
-    total: 2000,
-    files: 156,
-    folders: 24
+// Types
+interface FileItem {
+  id: string
+  name: string
+  type: 'image' | 'video' | 'audio' | 'document' | 'archive' | 'other'
+  size: number
+  url: string
+  thumbnailUrl?: string
+  uploadedAt: string
+  uploadedBy: {
+    id: string
+    name: string
+    avatar?: string
   }
-}
-
-function fileReducer(state:State, action:Action):State {
-  switch (action.type) {
-    case 'SET_VIEW_MODE':
-      return { ...state, viewMode: action.payload }
-    case 'SET_SEARCH_QUERY':
-      return { ...state, searchQuery: action.payload }
-    case 'SELECT_ITEM':
-      return {
-        ...state,
-        selectedItems: [...state.selectedItems, action.payload]
-      }
-    case 'DESELECT_ITEM':
-      return {
-        ...state,
-        selectedItems: state.selectedItems.filter(id => id !== action.payload)
-      }
-    case 'CLEAR_SELECTION':
-      return { ...state, selectedItems: [] }
-    case 'SET_CURRENT_FOLDER':
-      return { ...state, currentFolder: action.payload }
-    case 'START_UPLOAD':
-      return { ...state, isUploading: true, uploadProgress: 0 }
-    case 'UPDATE_UPLOAD_PROGRESS':
-      return { ...state, uploadProgress: action.payload }
-    case 'COMPLETE_UPLOAD':
-      return { ...state, isUploading: false, uploadProgress: 0 }
-    case 'ADD_FILE':
-      return { ...state, files: [...state.files, action.payload] }
-    case 'DELETE_FILES':
-      return {
-        ...state,
-        files: state.files.filter(file => !action.payload.includes(file.id)),
-        selectedItems: []
-      }
-    case 'UPLOAD_SUCCESS':
-      return {
-        ...state,
-        files: [...state.files, ...action.payload.files],
-        isUploading: false,
-        uploadProgress: 0
-      }
-    case 'UPLOAD_ERROR':
-      return {
-        ...state,
-        isUploading: false,
-        uploadProgress: 0
-      }
-    case 'DOWNLOAD_START':
-      return state // Could add download tracking if needed
-    case 'DOWNLOAD_SUCCESS':
-      return state // Could add download tracking if needed
-    case 'DOWNLOAD_ERROR':
-      return state // Could add download tracking if needed
-    default:
-      return state
-  }
+  shared: boolean
+  starred: boolean
+  downloads: number
+  views: number
+  folder?: string
+  tags: string[]
+  metadata?: any
 }
 
 interface FilesHubProps {
-    projects: any[];
-    userId: string;
+  userId: string
+  onFileUpload?: (files: FileItem[]) => void
+  onFileDelete?: (fileId: string) => void
+  onFileShare?: (fileId: string) => void
 }
 
-export default function FilesHub({ projects, userId }: FilesHubProps) {
-  const [state, dispatch] = useReducer(fileReducer, initialState)
-  const [_activeTab, setActiveTab] = useState('files')
-  const fileInputRef =<HTMLInputElement>(null)
-  const [_isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
-  const [_isNewFolderDialogOpen, setIsNewFolderDialogOpen] = useState(false)
-  const [_newFolderName, setNewFolderName] = useState('')
-  const [_loading, setLoading] = useState(false)
+const FILE_TYPES = {
+  image: { icon: Image, color: 'text-blue-500', bgColor: 'bg-blue-50' },
+  video: { icon: Video, color: 'text-purple-500', bgColor: 'bg-purple-50' },
+  audio: { icon: Music, color: 'text-green-500', bgColor: 'bg-green-50' },
+  document: { icon: FileText, color: 'text-orange-500', bgColor: 'bg-orange-50' },
+  archive: { icon: Archive, color: 'text-gray-500', bgColor: 'bg-gray-50' },
+  other: { icon: FileText, color: 'text-gray-500', bgColor: 'bg-gray-50' }
+}
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-
-  // Interactive handlers using Context7 patterns
-  const handleUploadClick = useCallback(() => {
-    fileInputRef.current?.click()
-  }, [])
-
-  const handleChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (!files || files.length === 0) return
-
-    console.log('Starting file upload...', files[0].name)
-    dispatch({ type: 'START_UPLOAD' })
-    
-    try {
-      const uploadPromises = Array.from(files).map(async (file) => {
-        const formData = new FormData()
-        formData.append('file', file)
-        formData.append('folder', 'uploads')
-        formData.append('publicRead', 'false')
-        formData.append('project_id', 'sample-project')
-        
-        const response = await fetch('/api/storage/upload', {
-          method: 'POST',
-          body: formData
-        })
-        
-        if (!response.ok) {
-          throw new Error(`Upload failed: ${response.statusText}`)
-        }
-        
-        const result = await response.json()
-        return {
-          id: result.file.file_id || `file_${Date.now()}_${Math.random()}`,
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          url: result.file.url,
-          provider: result.file.provider,
-          uploadedAt: new Date().toISOString(),
-          status: 'completed' as const
-        }
-      })
-      
-      const uploadeds = await Promise.all(uploadPromises)
-      
-      dispatch({ 
-        type: 'UPLOAD_SUCCESS',
-        payload: { files: uploadeds }
-      })
-    } catch (error) {
-      console.error('Upload error: ', error)
-      dispatch({ 
-        type: 'UPLOAD_ERROR',
-        payload: { error: error instanceof Error ? error.message : 'Upload failed' }
-      })
+const MOCK_FILES: FileItem[] = [
+  {
+    id: 'file_001',
+    name: 'Brand Guidelines Final.pdf',
+    type: 'document',
+    size: 2457600, // 2.4 MB
+    url: '/files/brand-guidelines.pdf',
+    thumbnailUrl: '/thumbnails/brand-guidelines.png',
+    uploadedAt: '2024-01-15T10:30:00Z',
+    uploadedBy: {
+      id: 'user_001',
+      name: 'Sarah Johnson',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah'
+    },
+    shared: true,
+    starred: false,
+    downloads: 45,
+    views: 123,
+    folder: 'Projects/Brand Identity',
+    tags: ['branding', 'guidelines', 'final'],
+    metadata: {
+      pages: 24,
+      version: '1.0'
     }
-    
-    // Reset file input
-    event.target.value = ''
-  }, [])
-
-  const handleCreateFolder = async () => {
-    if (!newFolderName.trim()) return
-
-    setLoading(true)
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-
-      const { data, error } = await supabase
-        .from('folders')
-        .insert([{
-          user_id: user.id,
-          name: newFolderName.trim(),
-          created_at: new Date().toISOString()
-        }])
-        .select()
-        .single()
-
-      if (error) throw error
-
-      dispatch({ type: 'ADD_FILE', payload: data })
-      setIsNewFolderDialogOpen(false)
-      setNewFolderName('')
-    } catch (error) {
-      console.error('Error creating folder: ', error)
-      alert('Failed to create folder. Please try again.')
-    } finally {
-      setLoading(false)
+  },
+  {
+    id: 'file_002',
+    name: 'Hero Video Draft.mp4',
+    type: 'video',
+    size: 157286400, // 150 MB
+    url: '/files/hero-video.mp4',
+    thumbnailUrl: '/thumbnails/hero-video.png',
+    uploadedAt: '2024-01-20T14:15:00Z',
+    uploadedBy: {
+      id: 'user_002',
+      name: 'Mike Chen',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mike'
+    },
+    shared: false,
+    starred: true,
+    downloads: 12,
+    views: 67,
+    folder: 'Projects/Website',
+    tags: ['video', 'hero', 'draft'],
+    metadata: {
+      duration: 180,
+      resolution: '1920x1080',
+      format: 'mp4'
+    }
+  },
+  {
+    id: 'file_003',
+    name: 'Logo Variations.zip',
+    type: 'archive',
+    size: 8388608, // 8 MB
+    url: '/files/logo-variations.zip',
+    uploadedAt: '2024-01-25T09:00:00Z',
+    uploadedBy: {
+      id: 'user_003',
+      name: 'Alex Rivera',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex'
+    },
+    shared: true,
+    starred: false,
+    downloads: 89,
+    views: 156,
+    folder: 'Assets/Logos',
+    tags: ['logo', 'variations', 'final'],
+    metadata: {
+      files: 12,
+      compressed: true
+    }
+  },
+  {
+    id: 'file_004',
+    name: 'Product Photo 1.jpg',
+    type: 'image',
+    size: 3145728, // 3 MB
+    url: '/files/product-photo-1.jpg',
+    thumbnailUrl: '/thumbnails/product-photo-1.jpg',
+    uploadedAt: '2024-02-01T11:20:00Z',
+    uploadedBy: {
+      id: 'user_001',
+      name: 'Sarah Johnson',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah'
+    },
+    shared: false,
+    starred: true,
+    downloads: 23,
+    views: 89,
+    folder: 'Photos/Products',
+    tags: ['product', 'photo', 'high-res'],
+    metadata: {
+      dimensions: '3840x2160',
+      format: 'jpeg'
     }
   }
+]
 
-  const handleDownload = useCallback(async (file: Record<string, unknown>) => {
-    try {
-      dispatch({ type: 'DOWNLOAD_START', payload: { fileId: file.id } })
-      
-      const response = await fetch(`/api/storage/download?fileId=${file.id}`)
-      
-      if (!response.ok) {
-        throw new Error(`Download failed: ${response.statusText}`)
-      }
-      
-      const blob = await response.blob()
-      
-      // Create download link
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = file.name
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-      
-      dispatch({ 
-        type: 'DOWNLOAD_SUCCESS',
-        payload: { fileId: file.id }
-      })
-    } catch (error) {
-      console.error('Download error: ', error)
-      dispatch({ 
-        type: 'DOWNLOAD_ERROR',
-        payload: { 
-          fileId: file.id,
-          error: error instanceof Error ? error.message : 'Download failed' 
-        }
-      })
-    }
-  }, [])
+export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileShare }: FilesHubProps) {
+  const [files, setFiles] = useState<FileItem[]>(MOCK_FILES)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
+  const [sortBy, setSortBy] = useState<'name' | 'date' | 'size' | 'downloads'>('date')
+  const [filterType, setFilterType] = useState<string>('all')
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploading, setUploading] = useState(false)
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([])
 
-  const handleShare = useCallback((file: Record<string, unknown>) => {
-    console.log(`Sharing ${file.name}...`)
-    alert(`Share link copied for ${file.name}!`)
-  }, [])
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  }
 
-  const handleDeleteSelected = useCallback(() => {
-    if (state.selectedItems.length > 0) {
-      const confirmed = confirm(`Delete ${state.selectedItems.length} item(s)?`)
-      if (confirmed) {
-        dispatch({ type: 'DELETE_FILES', payload: state.selectedItems })
-        alert('Items deleted successfully!')
-      }
-    }
-  }, [state.selectedItems])
-
-  const handleItemSelect = useCallback((id: string) => {
-    if (state.selectedItems.includes(id)) {
-      dispatch({ type: 'DESELECT_ITEM', payload: id })
-    } else {
-      dispatch({ type: 'SELECT_ITEM', payload: id })
-    }
-  }, [state.selectedItems])
-
-  const filteredFiles = state.files.filter(file =>
-    file.name.toLowerCase().includes(state.searchQuery.toLowerCase())
-  )
-
-  const filteredFolders = state.folders.filter(folder =>
-    folder.name.toLowerCase().includes(state.searchQuery.toLowerCase())
-  )
-
-  const handleUploadComplete = (uploadeds: Record<string, unknown>[]) => {
-    dispatch({ 
-      type: 'UPLOAD_SUCCESS',
-      payload: { files: uploadeds }
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
     })
-    setIsUploadDialogOpen(false)
   }
 
-  return (
-    <div className="w-full space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Enterprises Hub
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Professional file management with cloud storage optimization
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setIsNewFolderDialogOpen(true)}
-            data-testid="new-folder-btn"
-          >
-            <Folder className="w-4 h-4 mr-2" />
-            New Folder
-          </Button>
-          <Button 
-            onClick={() => setIsUploadDialogOpen(true)}
-            disabled={state.isUploading}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            data-testid="upload-file-btn"
-          >
-            <Upload className="w-4 h-4 mr-2" />
-            {state.isUploading ? `Uploading ${state.uploadProgress}%` : 'Uploads'}
-          </Button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            onChange={handleChange}
-            className="hidden"
-            accept="image/*,video/*,audio/*,.pdf,.zip,.txt,.json,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
-            multiple={true}
-          />
-        </div>
-      </div>
+  const filteredFiles = files.filter(file => {
+    const matchesSearch = file.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         file.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+    const matchesFolder = !selectedFolder || file.folder === selectedFolder
+    const matchesType = filterType === 'all' || file.type === filterType
+    return matchesSearch && matchesFolder && matchesType
+  })
 
-      {/* Storage Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <Cloud className="w-8 h-8" />
-              <div>
-                <div className="text-2xl font-bold">{state.storageStats.used} MB</div>
-                <div className="text-sm opacity-90">Storage Used</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <Text className="w-8 h-8" />
-              <div>
-                <div className="text-2xl font-bold">{state.storageStats.files}</div>
-                <div className="text-sm opacity-90">Totals</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <Folder className="w-8 h-8" />
-              <div>
-                <div className="text-2xl font-bold">{state.storageStats.folders}</div>
-                <div className="text-sm opacity-90">Folders</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <TrendingUp className="w-8 h-8" />
-              <div>
-                <div className="text-2xl font-bold">{Math.round((state.storageStats.used / state.storageStats.total) * 100)}%</div>
-                <div className="text-sm opacity-90">Usage</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+  const sortedFiles = [...filteredFiles].sort((a, b) => {
+    switch (sortBy) {
+      case 'name':
+        return a.name.localeCompare(b.name)
+      case 'size':
+        return b.size - a.size
+      case 'downloads':
+        return b.downloads - a.downloads
+      case 'date':
+      default:
+        return new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+    }
+  })
 
-      {/* Toolbar */}
-      <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4 flex-1">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-                <Input
-                  placeholder="Search files and folders..."
-                  value={state.searchQuery}
-                  onChange={(e) => dispatch({ type: 'SET_SEARCH_QUERY', payload: e.target.value })}
-                  className="pl-10 bg-white/80"
-                />
+  const folders = [...new Set(files.map(f => f.folder).filter(Boolean))]
+  const totalSize = files.reduce((sum, file) => sum + file.size, 0)
+  const totalDownloads = files.reduce((sum, file) => sum + file.downloads, 0)
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const uploadedFiles = event.target.files
+    if (!uploadedFiles) return
+
+    setUploading(true)
+    setUploadProgress(0)
+
+    // Simulate upload progress
+    const progressInterval = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(progressInterval)
+          setUploading(false)
+          return 100
+        }
+        return prev + 10
+      })
+    }, 200)
+
+    // Process files (mock implementation)
+    const newFiles: FileItem[] = Array.from(uploadedFiles).map((file, index) => ({
+      id: `file_${Date.now()}_${index}`,
+      name: file.name,
+      type: file.type.startsWith('image/') ? 'image' : 
+            file.type.startsWith('video/') ? 'video' :
+            file.type.startsWith('audio/') ? 'audio' :
+            file.type.includes('pdf') || file.type.includes('document') ? 'document' :
+            file.type.includes('zip') || file.type.includes('archive') ? 'archive' : 'other',
+      size: file.size,
+      url: URL.createObjectURL(file),
+      uploadedAt: new Date().toISOString(),
+      uploadedBy: {
+        id: userId,
+        name: 'Current User',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=User'
+      },
+      shared: false,
+      starred: false,
+      downloads: 0,
+      views: 0,
+      folder: selectedFolder || 'Uploads',
+      tags: [],
+      metadata: {}
+    }))
+
+    setTimeout(() => {
+      setFiles(prev => [...newFiles, ...prev])
+      onFileUpload?.(newFiles)
+    }, 2000)
+  }
+
+  const handleFileDelete = (fileId: string) => {
+    setFiles(prev => prev.filter(f => f.id !== fileId))
+    onFileDelete?.(fileId)
+  }
+
+  const handleFileShare = (fileId: string) => {
+    setFiles(prev => prev.map(f => 
+      f.id === fileId ? { ...f, shared: !f.shared } : f
+    ))
+    onFileShare?.(fileId)
+  }
+
+  const toggleStar = (fileId: string) => {
+    setFiles(prev => prev.map(f => 
+      f.id === fileId ? { ...f, starred: !f.starred } : f
+    ))
+  }
+
+  const FileCard = ({ file }: { file: FileItem }) => {
+    const FileIcon = FILE_TYPES[file.type].icon
+    
+    return (
+      <Card className="group hover:shadow-lg transition-all duration-200">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${FILE_TYPES[file.type].bgColor}`}>
+                <FileIcon className={`w-5 h-5 ${FILE_TYPES[file.type].color}`} />
               </div>
-              <Button variant="outline" size="sm">
-                <Filter className="w-4 h-4 mr-2" />
-                Filter
+              <div className="flex-1">
+                <h3 className="font-medium text-sm line-clamp-1">{file.name}</h3>
+                <p className="text-xs text-gray-500 mt-1">{formatFileSize(file.size)}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleStar(file.id)}
+                className={file.starred ? 'text-yellow-500' : 'text-gray-400'}
+              >
+                <Star className="w-4 h-4" />
               </Button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {state.selectedItems.length > 0 && (
-                <>
-                  <Button variant="outline" size="sm" onClick={() => dispatch({ type: 'CLEAR_SELECTION' })}>
-                    Clear ({state.selectedItems.length})
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <MoreHorizontal className="w-4 h-4" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={handleDeleteSelected} data-testid="delete-file-btn">
-                    <Trash2 className="w-4 h-4 mr-2" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>
+                    <Eye className="mr-2 h-4 w-4" />
+                    Preview
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleFileShare(file.id)}>
+                    <Share2 className="mr-2 h-4 w-4" />
+                    {file.shared ? 'Unshare' : 'Share'}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Rename
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    className="text-red-600"
+                    onClick={() => handleFileDelete(file.id)}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
                     Delete
-                  </Button>
-                </>
-              )}
-              
-              <div className="flex border rounded-lg overflow-hidden">
-                <Button
-                  variant={state.viewMode === 'grid' ? 'default' : 'ghost'}
-                  size="sm"
-                  className="rounded-none"
-                  onClick={() => dispatch({ type: 'SET_VIEW_MODE', payload: 'grid' })}
-                >
-                  <Grid className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant={state.viewMode === 'list' ? 'default' : 'ghost'}
-                  size="sm"
-                  className="rounded-none"
-                  onClick={() => dispatch({ type: 'SET_VIEW_MODE', payload: 'list' })}
-                >
-                  <List className="w-4 h-4" />
-                </Button>
-              </div>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <Avatar className="w-4 h-4">
+                <AvatarImage src={file.uploadedBy.avatar} />
+                <AvatarFallback>{file.uploadedBy.name[0]}</AvatarFallback>
+              </Avatar>
+              <span>{file.uploadedBy.name}</span>
+              <span>•</span>
+              <span>{formatDate(file.uploadedAt)}</span>
+            </div>
+            <div className="flex items-center gap-4 text-xs text-gray-500">
+              <div className="flex items-center gap-1">
+                <Eye className="w-3 h-3" />
+                {file.views}
+              </div>
+              <div className="flex items-center gap-1">
+                <Download className="w-3 h-3" />
+                {file.downloads}
+              </div>
+              {file.shared && (
+                <div className="flex items-center gap-1">
+                  <Share2 className="w-3 h-3" />
+                  Shared
+                </div>
+              )}
+            </div>
+            {file.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {file.tags.slice(0, 3).map(tag => (
+                  <Badge key={tag} variant="secondary" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
+    )
+  }
 
-      <div className="tab-content-container">
-        <Tabs value={_activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-          <TabsList className="tabs-list-fixed">
-            <TabsTrigger value="files" className="flex items-center gap-2">
-              <Text className="w-4 h-4" />s
-            </TabsTrigger>
-            <TabsTrigger value="shared" className="flex items-center gap-2">
-              <Share className="w-4 h-4" />
-              Shared
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" />
-              Analytics
-            </TabsTrigger>
-          </TabsList>
-
-          <div className="tabs-content-area">
-            <TabsContent value="files" className="h-full m-0">
-              <div className="tab-panel p-6">
-                {/* Folders */}
-                {filteredFolders.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                      <Folder className="w-5 h-5" />
-                      Folders
-                    </h3>
-                    <div className={`grid gap-4 ${state.viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1'}`}>
-                      {filteredFolders.map(folder => (
-                        <Card 
-                          key={folder.id}
-                          className={`cursor-pointer transition-all hover:shadow-lg ${state.selectedItems.includes(folder.id) ? 'ring-2 ring-blue-500' : ''}`}
-                          onClick={() => handleItemSelect(folder.id)}
-                        >
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-3">
-                              <Folder className={`w-8 h-8 ${folder.color}`} />
-                              <div className="flex-1 min-w-0">
-                                <div className="font-medium truncate">{folder.name}</div>
-                                <div className="text-sm text-gray-500">{folder.filesCount} files</div>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                {folder.shared && <Users className="w-4 h-4 text-blue-500" />}
-                                <Button variant="ghost" size="sm" className="p-1">
-                                  <MoreHorizontal className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/*s */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                    <Text className="w-5 h-5" />s
-                  </h3>
-                  <div className={`grid gap-4 ${state.viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
-                    {filteredFiles.map(file => (
-                      <Card 
-                        key={file.id}
-                        className={`cursor-pointer transition-all hover:shadow-lg ${state.selectedItems.includes(file.id) ? 'ring-2 ring-blue-500' : ''}`}
-                        onClick={() => handleItemSelect(file.id)}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-start gap-3">
-                            <file.icon className={`w-8 h-8 ${file.color} flex-shrink-0`} />
-                            <div className="flex-1 min-w-0">
-                              <div className="font-medium truncate flex items-center gap-2">
-                                {file.name}
-                                {file.starred && <Star className="w-4 h-4 text-yellow-500 fill-current" />}
-                              </div>
-                              <div className="text-sm text-gray-500">{file.size}</div>
-                              <div className="text-xs text-gray-400">Modified {file.modified}</div>
-                              <div className="text-xs text-gray-400">by {file.author}</div>
-                            </div>
-                            <div className="flex flex-col gap-1">
-                              {file.shared && <Badge variant="secondary" className="text-xs">Shared</Badge>}
-                              <div className="flex items-center gap-1">
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="p-1"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleDownload(file)
-                                  }}
-                                  data-testid="download-file-btn"
-                                >
-                                  <Download className="w-4 h-4" />
-                                </Button>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="p-1"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleShare(file)
-                                  }}
-                                  data-testid="share-file-btn"
-                                >
-                                  <Share className="w-4 h-4" />
-                                </Button>
-                                <Button variant="ghost" size="sm" className="p-1">
-                                  <MoreHorizontal className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="shared" className="h-full m-0">
-              <div className="tab-panel p-6">
-                <div className="text-center py-12">
-                  <Share className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Shareds</h3>
-                  <p className="text-gray-600 mb-4">s shared with team members and clients</p>
-                  <Button onClick={() => alert('Shared files feature coming soon!')}>
-                    View Shareds
-                  </Button>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="analytics" className="h-full m-0">
-              <div className="tab-panel p-6">
-                <div className="text-center py-12">
-                  <TrendingUp className="w-12 h-12 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2"> Analytics</h3>
-                  <p className="text-gray-600 mb-4">Track file usage, downloads, and collaboration metrics</p>
-                  <Button onClick={() => alert('Analytics dashboard coming soon!')}>
-                    View Analytics
-                  </Button>
-                </div>
-              </div>
-            </TabsContent>
-          </div>
-        </Tabs>
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Files Hub</h1>
+          <p className="text-gray-600 mt-1">
+            Manage and share your files with clients and team members
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="file"
+            multiple
+            onChange={handleFileUpload}
+            className="hidden"
+            id="file-upload"
+          />
+          <label htmlFor="file-upload">
+            <Button asChild className="cursor-pointer">
+              <span>
+                <Upload className="w-4 h-4 mr-2" />
+                Upload Files
+              </span>
+            </Button>
+          </label>
+        </div>
       </div>
 
-      {/* Upload Dialog */}
-      <UploadDialog
-        isOpen={_isUploadDialogOpen}
-        onClose={() => setIsUploadDialogOpen(false)}
-        onUploadComplete={handleUploadComplete}
-      />
-
-      {/* New Folder Dialog */}
-      <Dialog open={_isNewFolderDialogOpen} onOpenChange={setIsNewFolderDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Create New Folder</DialogTitle>
-            <DialogDescription>
-              Enter a name for your new folder
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Input
-              value={_newFolderName}
-              onChange={(e) => setNewFolderName(e.target.value)}
-              placeholder="Folder name"
-            />
-            <div className="flex justify-end gap-4">
-              <Button
-                variant="outline"
-                onClick={() => setIsNewFolderDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleCreateFolder}
-                disabled={!_newFolderName.trim() || _loading}
-              >
-                {_loading ? 'Creating...' : 'Create Folder'}
-              </Button>
+      {/* Upload Progress */}
+      {uploading && (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <Upload className="w-5 h-5 text-blue-500" />
+              <div className="flex-1">
+                <div className="flex justify-between text-sm mb-1">
+                  <span>Uploading files...</span>
+                  <span>{uploadProgress}%</span>
+                </div>
+                <Progress value={uploadProgress} className="h-2" />
+              </div>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Total Files</p>
+                <p className="text-2xl font-bold">{files.length}</p>
+              </div>
+              <FileText className="w-8 h-8 text-blue-500" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Storage Used</p>
+                <p className="text-2xl font-bold">{formatFileSize(totalSize)}</p>
+              </div>
+              <HardDrive className="w-8 h-8 text-purple-500" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Total Downloads</p>
+                <p className="text-2xl font-bold">{totalDownloads}</p>
+              </div>
+              <Download className="w-8 h-8 text-green-500" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Shared Files</p>
+                <p className="text-2xl font-bold">{files.filter(f => f.shared).length}</p>
+              </div>
+              <Share2 className="w-8 h-8 text-orange-500" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters and Controls */}
+      <div className="flex flex-wrap gap-4 items-center">
+        <div className="flex-1 min-w-64">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="Search files..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+        <select
+          value={filterType}
+          onChange={(e) => setFilterType(e.target.value)}
+          className="px-3 py-2 border rounded-md"
+        >
+          <option value="all">All Types</option>
+          <option value="image">Images</option>
+          <option value="video">Videos</option>
+          <option value="document">Documents</option>
+          <option value="archive">Archives</option>
+        </select>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as any)}
+          className="px-3 py-2 border rounded-md"
+        >
+          <option value="date">Sort by Date</option>
+          <option value="name">Sort by Name</option>
+          <option value="size">Sort by Size</option>
+          <option value="downloads">Sort by Downloads</option>
+        </select>
+        <div className="flex border rounded-md">
+          <Button
+            variant={viewMode === 'grid' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setViewMode('grid')}
+          >
+            <Grid className="w-4 h-4" />
+          </Button>
+          <Button
+            variant={viewMode === 'list' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setViewMode('list')}
+          >
+            <List className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Files Grid */}
+      {sortedFiles.length > 0 ? (
+        <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+          {sortedFiles.map(file => (
+            <FileCard key={file.id} file={file} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">No files found</h3>
+          <p className="text-gray-600 mb-4">
+            {searchQuery ? 'Try adjusting your search criteria' : 'Upload your first file to get started'}
+          </p>
+          <label htmlFor="file-upload-empty">
+            <Button asChild className="cursor-pointer">
+              <span>
+                <Upload className="w-4 h-4 mr-2" />
+                Upload Files
+              </span>
+            </Button>
+          </label>
+          <input
+            type="file"
+            multiple
+            onChange={handleFileUpload}
+            className="hidden"
+            id="file-upload-empty"
+          />
+        </div>
+      )}
     </div>
   )
 }
-
-function StorageStatCard({ title, value, total, icon, color, progress }) {
-  const Icon = icon
-  return (
-    <div className="bg-gray-50 rounded-lg p-4">
-      <div className="flex items-center">
-        <div className={`mr-4 p-2 rounded-full ${color.replace('text-', 'bg-').replace('500', '100')}`}>
-          <Icon className={color} />
-        </div>
-        <div>
-          <p className="text-sm text-gray-500">{title}</p>
-          <p className="text-xl font-bold">{value}</p>
-        </div>
-      </div>
-      <div className="mt-4">
-        <div className="h-2 bg-gray-200 rounded-full">
-          <div
-            className={`h-2 rounded-full ${color.replace('text-', 'bg-')}`}
-            style={{ width: `${progress}%` }}
-          ></div>
-        </div>
-        <p className="text-right text-sm text-gray-500 mt-1">{total} GB</p>
-      </div>
-    </div>
-  )
-} 

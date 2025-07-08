@@ -69,7 +69,7 @@ export default function VideoPlayer({
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const containerRef =<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleFullscreenChange = () => {

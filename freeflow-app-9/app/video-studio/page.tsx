@@ -27,8 +27,8 @@ import { VideoAIPanel } from '@/components/video/ai/video-ai-panel'
 import { EnterpriseVideoStudio } from '@/components/collaboration/enterprise-video-studio'
 
 export default function VideoStudioPage() {
-  const [currentVideoId, setCurrentVideoId] =<string | null>(null)
-  const [currentVideoUrl, setCurrentVideoUrl] =<string | null>(null)
+  const [currentVideoId, setCurrentVideoId] = useState<string | null>(null)
+  const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(null)
 
   const handleRecordingComplete = (videoId: string, videoUrl: string) => {
     setCurrentVideoId(videoId)

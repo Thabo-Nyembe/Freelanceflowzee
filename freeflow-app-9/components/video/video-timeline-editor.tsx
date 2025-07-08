@@ -66,7 +66,7 @@ export default function VideoTimelineEditor({
   onExport,
   className
 }: VideoTimelineEditorProps) {
-  const timelineRef =<HTMLDivElement>(null);
+  const timelineRef = useRef<HTMLDivElement>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);

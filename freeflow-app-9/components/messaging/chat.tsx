@@ -68,6 +68,15 @@ const Chat = () => {
     }
   }, [selectedChat])
 
+  // Cleanup typing timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeout) {
+        clearTimeout(typingTimeout)
+      }
+    }
+  }, [typingTimeout])
+
   const handleChatSelect = (chat: Chat) => {
     setSelectedChat(chat)
   }

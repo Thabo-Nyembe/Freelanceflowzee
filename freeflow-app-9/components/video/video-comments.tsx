@@ -122,6 +122,15 @@ export function VideoComments({
                   variant="outline" 
                   className="cursor-pointer hover:bg-blue-50"
                   onClick={() => onSeekToTimestamp?.(comment.timestamp_seconds!)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Jump to timestamp ${formatTimestamp(comment.timestamp_seconds)}`}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      onSeekToTimestamp?.(comment.timestamp_seconds!)
+                    }
+                  }}
                 >
                   <Clock className="h-3 w-3 mr-1" />
                   {formatTimestamp(comment.timestamp_seconds)}

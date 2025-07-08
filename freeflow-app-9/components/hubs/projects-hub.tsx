@@ -18,7 +18,12 @@ import {
   Paperclip,
   Trash2,
   Users,
-  Calendar
+  Calendar,
+  FileText,
+  Upload,
+  Rocket,
+  PlayCircle,
+  DollarSign
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -57,6 +62,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 // types
 type Project = {
@@ -90,6 +96,11 @@ export default function ProjectsHub({ projects, _userId }: ProjectsHubProps) {
   const [filterByPriority, setFilterByPriority] = useState('all')
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
+  const [isQuickStartDialogOpen, setIsQuickStartDialogOpen] = useState(false)
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [priorityFilter, setPriorityFilter] = useState('all')
 
   const router = useRouter()
 
@@ -137,6 +148,27 @@ export default function ProjectsHub({ projects, _userId }: ProjectsHubProps) {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   };
+
+  // Computed values
+  const projectStats = {
+    total: projects.length,
+    active: projects.filter(p => p.status === 'active').length,
+    completed: projects.filter(p => p.status === 'completed').length,
+    totalBudget: projects.reduce((sum, p) => sum + p.budget, 0),
+    totalSpent: projects.reduce((sum, p) => sum + p.spent, 0)
+  };
+
+  // Filter projects based on search and filters
+  const filteredProjects = projects.filter(project => {
+    const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         project.client_name.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
+    const matchesPriority = priorityFilter === 'all' || project.priority === priorityFilter;
+    
+    return matchesSearch && matchesStatus && matchesPriority;
+  });
 
   const ProjectCard = ({ project }: { project: Project }) => {
     const statusColors = {

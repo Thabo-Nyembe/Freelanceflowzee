@@ -7,13 +7,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Wand2 } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Slider } from '@/components/ui/slider'
+import { Wand2, Copy, Download, RefreshCw, FileText, Image, Code, Mail, Sparkles, Zap } from 'lucide-react'
 
 const MODELS = {
-  'google-ai': 'Google AI',
-  'openai': 'OpenAI',
-  'anthropic': 'Anthropic',
-  'openrouter': 'OpenRouter'
+  'gpt-4o-mini': 'GPT-4o Mini',
+  'gpt-4o': 'GPT-4o',
+  'claude-3-5-sonnet': 'Claude 3.5 Sonnet',
+  'claude-3-haiku': 'Claude 3 Haiku'
+}
+
+const CONTENT_TYPES = {
+  'text': { label: 'Text Content', icon: FileText, color: 'bg-blue-500' },
+  'image': { label: 'Image Description', icon: Image, color: 'bg-purple-500' },
+  'code': { label: 'Code Generation', icon: Code, color: 'bg-green-500' },
+  'email': { label: 'Email Writing', icon: Mail, color: 'bg-orange-500' }
 }
 
 interface AICreateStudioProps {
@@ -21,15 +31,22 @@ interface AICreateStudioProps {
   defaultModel?: keyof typeof MODELS
 }
 
+type ContentType = keyof typeof CONTENT_TYPES
+
 export function AICreateStudio({
   onGenerate,
-  defaultModel = 'google-ai'
+  defaultModel = 'gpt-4o-mini'
 }: AICreateStudioProps) {
   const [prompt, setPrompt] = useState('')
   const [generating, setGenerating] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [selectedModel, setSelectedModel] = useState<keyof typeof MODELS>(defaultModel)
+  const [contentType, setContentType] = useState<ContentType>('text')
+  const [temperature, setTemperature] = useState([0.7])
+  const [maxTokens, setMaxTokens] = useState([1000])
+  const [history, setHistory] = useState<Array<{prompt: string, result: string, timestamp: Date}>>([])
+  const [copied, setCopied] = useState(false)
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return
@@ -39,18 +56,73 @@ export function AICreateStudio({
       setError(null)
       setResult(null)
 
-      // TODO: Replace with actual AI generation
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      const mockResult = `Generated content for: "${prompt}"\nUsing ${MODELS[selectedModel]}`
+      // Call AI generation API
+      const response = await fetch('/api/ai/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt,
+          model: selectedModel,
+          type: contentType,
+          temperature: temperature[0],
+          maxTokens: maxTokens[0]
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('AI generation failed')
+      }
+
+      const data = await response.json()
+      const generatedContent = data.result || data.content
+      setResult(generatedContent)
+      onGenerate?.(generatedContent)
       
-      setResult(mockResult)
-      onGenerate?.(mockResult)
+      // Add to history
+      setHistory(prev => [...prev, {
+        prompt,
+        result: generatedContent,
+        timestamp: new Date()
+      }])
 
     } catch (err) {
       setError('Generation failed. Please try again.')
     } finally {
       setGenerating(false)
     }
+  }
+
+  const copyToClipboard = async () => {
+    if (result) {
+      await navigator.clipboard.writeText(result)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
+  const downloadResult = () => {
+    if (result) {
+      const blob = new Blob([result], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `ai-generated-${contentType}-${Date.now()}.txt`
+      a.click()
+      URL.revokeObjectURL(url)
+    }
+  }
+
+  const regenerate = () => {
+    handleGenerate()
+  }
+
+  const clearAll = () => {
+    setPrompt('')
+    setResult(null)
+    setError(null)
+    setHistory([])
   }
 
   return (
