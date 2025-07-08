@@ -120,7 +120,6 @@ export function OptimizedImage({
     return (
       <Image
         {...imageProps}
-        alt=""
         fill
         sizes={sizes || "100vw"}
       />
@@ -130,7 +129,6 @@ export function OptimizedImage({
   return (
     <Image
       {...imageProps}
-      alt=""
       width={width}
       height={height}
       sizes={sizes}

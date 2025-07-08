@@ -106,7 +106,7 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
         className="relative h-9 w-full justify-start text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64"
         onClick={() => setOpen(true)}
       >
-        <span className="hidden lg:inline-flex">Search documentation...</span>
+        <span className="hidden lg:inline-flex">Search commands and docs...</span>
         <span className="inline-flex lg:hidden">Search...</span>
         <kbd className="pointer-events-none absolute right-1.5 top-2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
           <span className="text-xs">⌘</span>K
@@ -120,7 +120,7 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
               <Command.Input
                 value={search}
                 onValueChange={setSearch}
-                placeholder="Type a command or search..."
+                placeholder="Search commands, docs, and projects..."
                 className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
               />
               {search && (

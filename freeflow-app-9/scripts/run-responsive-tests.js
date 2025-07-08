@@ -261,8 +261,8 @@ ${rec.description}
 
 **Action**: ${rec.action}
 
-${rec.viewports ? `**Affected Viewports**: ${rec.viewports.join(', ')}` : }'
-${rec.affectedViewports ? `**Affected Viewports**: ${rec.affectedViewports.join(', ')}` : }'
+${rec.viewports ? `**Affected Viewports**: ${rec.viewports.join(', ')}` : ''}
+${rec.affectedViewports ? `**Affected Viewports**: ${rec.affectedViewports.join(', ')}` : ''}
 `).join('\n') : '**No specific recommendations** - All tests passing! 🎉'
 }
 

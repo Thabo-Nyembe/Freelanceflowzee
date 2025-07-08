@@ -136,27 +136,31 @@ export default function DashboardPage() {
             </div>
             
             {/* Quick Stats */}
-            <div className="flex items-center gap-4">
-              <GlobalSearch />
-              <Card className="glass-card p-4">
-                <div className="flex items-center gap-2">
-                  <Wallet className="h-5 w-5 text-green-600" />
-                  <div>
-                    <p className="text-sm text-gray-600">Earnings</p>
-                    <p className="font-bold text-green-600">${mockData.earnings.toLocaleString()}</p>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+              <div className="order-2 sm:order-1">
+                <GlobalSearch />
+              </div>
+              <div className="flex gap-3 order-1 sm:order-2">
+                <Card className="glass-card p-3 sm:p-4 flex-1 sm:flex-initial">
+                  <div className="flex items-center gap-2">
+                    <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-gray-600">Earnings</p>
+                      <p className="font-bold text-green-600 text-sm sm:text-base">${mockData.earnings.toLocaleString()}</p>
+                    </div>
                   </div>
-                </div>
-              </Card>
-              
-              <Card className="glass-card p-4">
-                <div className="flex items-center gap-2">
-                  <FolderOpen className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <p className="text-sm text-gray-600">Active Projects</p>
-                    <p className="font-bold text-blue-600">{mockData.activeProjects}</p>
+                </Card>
+                
+                <Card className="glass-card p-3 sm:p-4 flex-1 sm:flex-initial">
+                  <div className="flex items-center gap-2">
+                    <FolderOpen className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-gray-600">Active Projects</p>
+                      <p className="font-bold text-blue-600 text-sm sm:text-base">{mockData.activeProjects}</p>
+                    </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </div>
             </div>
           </div>
         </div>
@@ -166,26 +170,28 @@ export default function DashboardPage() {
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Tab Navigation */}
-          <div className="bg-white/70 backdrop-blur-sm rounded-xl p-2 border border-white/20 shadow-lg overflow-x-auto">
-            <TabsList className="grid w-full grid-cols-8 bg-transparent gap-1 min-w-max">
-              {tabConfig.map((tab) => {
+          <div className="bg-white/70 backdrop-blur-sm rounded-xl p-2 border border-white/20 shadow-lg">
+            <div className="overflow-x-auto scrollbar-hide">
+              <TabsList className="flex w-max md:grid md:w-full md:grid-cols-8 bg-transparent gap-1 min-w-max">
+                {tabConfig.map((tab) => {
                 const IconComponent = tab.icon
                 return (
                   <TabsTrigger
                     key={tab.value}
                     value={tab.value}
-                    className={`flex-1 group rounded-lg transition-all duration-300 ease-in-out h-24 flex flex-col items-center justify-center gap-2 ${
+                    className={`flex-shrink-0 min-w-[120px] md:flex-1 group rounded-lg transition-all duration-300 ease-in-out h-20 md:h-24 flex flex-col items-center justify-center gap-1 md:gap-2 px-3 ${
                       activeTab === tab.value
                         ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg scale-105'
                         : 'text-gray-600 hover:bg-white/80 hover:shadow-md hover:scale-105'
                     }`}
                   >
-                    <IconComponent className={`h-6 w-6 transition-all ${activeTab === tab.value ? 'text-white' : 'text-gray-400 group-hover:text-blue-500'}`} />
-                    <span className="font-semibold text-sm">{tab.label}</span>
+                    <IconComponent className={`h-5 w-5 md:h-6 md:w-6 transition-all ${activeTab === tab.value ? 'text-white' : 'text-gray-400 group-hover:text-blue-500'}`} />
+                    <span className="font-semibold text-xs md:text-sm text-center leading-tight">{tab.label}</span>
                   </TabsTrigger>
                 )
               })}
-            </TabsList>
+              </TabsList>
+            </div>
           </div>
           
           {/* Tab Content */}
@@ -209,9 +215,9 @@ export default function DashboardPage() {
 // Placeholder Components for each tab
 function DashboardOverview() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
       {/* Left Column */}
-      <div className="lg:col-span-2 space-y-6">
+      <div className="lg:col-span-2 space-y-4 lg:space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
@@ -260,7 +266,7 @@ function DashboardOverview() {
       </div>
 
       {/* Right Column */}
-      <div className="space-y-6">
+      <div className="space-y-4 lg:space-y-6">
         <Card className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
           <CardHeader>
             <CardTitle>AI Assistant</CardTitle>
@@ -283,22 +289,22 @@ function DashboardOverview() {
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="flex flex-col h-24 items-center justify-center gap-2">
-              <Plus className="h-6 w-6" />
-              <span>New Project</span>
+          <CardContent className="grid grid-cols-2 gap-3">
+            <Button variant="outline" className="flex flex-col h-20 sm:h-24 items-center justify-center gap-1 sm:gap-2 p-2">
+              <Plus className="h-5 w-5 sm:h-6 sm:w-6" />
+              <span className="text-xs sm:text-sm">New Project</span>
             </Button>
-            <Button variant="outline" className="flex flex-col h-24 items-center justify-center gap-2">
-              <Users className="h-6 w-6" />
-              <span>Add Client</span>
+            <Button variant="outline" className="flex flex-col h-20 sm:h-24 items-center justify-center gap-1 sm:gap-2 p-2">
+              <Users className="h-5 w-5 sm:h-6 sm:w-6" />
+              <span className="text-xs sm:text-sm">Add Client</span>
             </Button>
-            <Button variant="outline" className="flex flex-col h-24 items-center justify-center gap-2">
-              <FileText className="h-6 w-6" />
-              <span>New Invoice</span>
+            <Button variant="outline" className="flex flex-col h-20 sm:h-24 items-center justify-center gap-1 sm:gap-2 p-2">
+              <FileText className="h-5 w-5 sm:h-6 sm:w-6" />
+              <span className="text-xs sm:text-sm">New Invoice</span>
             </Button>
-            <Button variant="outline" className="flex flex-col h-24 items-center justify-center gap-2">
-              <Settings className="h-6 w-6" />
-              <span>Settings</span>
+            <Button variant="outline" className="flex flex-col h-20 sm:h-24 items-center justify-center gap-1 sm:gap-2 p-2">
+              <Settings className="h-5 w-5 sm:h-6 sm:w-6" />
+              <span className="text-xs sm:text-sm">Settings</span>
             </Button>
           </CardContent>
         </Card>
