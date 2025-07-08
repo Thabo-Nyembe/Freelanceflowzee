@@ -76,7 +76,7 @@ interface GlobalSearchProps {
   onClose?: () => void
 }
 
-function GlobalSearch({ onClose }: GlobalSearchProps) {
+export default function GlobalSearch({ onClose }: GlobalSearchProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -174,6 +174,3 @@ function GlobalSearch({ onClose }: GlobalSearchProps) {
     </>
   )
 }
-
-export default GlobalSearch
-export { GlobalSearch }

@@ -1,18 +1,17 @@
-const React = require('react')
+import React from 'react'
 
-const ThemeProvider = ({ children }) => {
-  return React.createElement(React.Fragment, null, children)
+interface ThemeProviderProps {
+  children: React.ReactNode
 }
 
-const useTheme = () => {
+export const ThemeProvider = ({ children }: ThemeProviderProps) => {
+  return <>{children}</>
+}
+
+export const useTheme = () => {
   return {
-    theme: 'light',
+    theme: 'light' as const,
     setTheme: () => {},
-    systemTheme: 'light'
+    systemTheme: 'light' as const
   }
-}
-
-module.exports = {
-  ThemeProvider,
-  useTheme
 } 

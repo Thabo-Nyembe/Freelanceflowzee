@@ -88,12 +88,17 @@ export function PaymentForm() {
       if (paymentIntent?.status === 'succeeded') {
         setSuccess('Payment successful! Redirecting to unlocked content...')
         
-        // Store access token
-        localStorage.setItem(`project_access_${TEST_PROJECT.id}`, JSON.stringify({
-          accessToken: `access_token_${Date.now()}`,
-          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-          projectId: TEST_PROJECT.id
-        }))
+        // Store access token with error handling
+        try {
+          localStorage.setItem(`project_access_${TEST_PROJECT.id}`, JSON.stringify({
+            accessToken: `access_token_${Date.now()}`,
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            projectId: TEST_PROJECT.id
+          }))
+        } catch (storageError) {
+          console.warn('Failed to store access token in localStorage:', storageError)
+          // Continue with redirect even if storage fails
+        }
 
         // Redirect after delay
         setTimeout(() => {

@@ -48,19 +48,29 @@ const mockLink = {
   click: jest.fn(),
   download: '',
   href: '',
+  setAttribute: jest.fn(),
+  getAttribute: jest.fn(),
+  removeAttribute: jest.fn(),
+  appendChild: jest.fn(),
+  removeChild: jest.fn(),
+  style: {},
 }
+
+const originalCreateElement = document.createElement.bind(document)
 
 Object.defineProperty(document, 'createElement', {
   writable: true,
   value: jest.fn((tag) => {
     if (tag === 'a') return mockLink
-    const element = document.createElement(tag)
+    
+    // Use original createElement to avoid infinite recursion
+    const element = originalCreateElement(tag)
     element.setAttribute = jest.fn()
     element.getAttribute = jest.fn()
     element.removeAttribute = jest.fn()
     element.appendChild = jest.fn()
     element.removeChild = jest.fn()
-    element.style = {}
+    element.style = element.style || {}
     element.click = jest.fn()
     return element
   }),

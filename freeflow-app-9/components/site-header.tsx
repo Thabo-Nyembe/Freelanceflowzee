@@ -5,8 +5,8 @@ import { usePathname } from 'next/navigation'
 import { MobileNav } from '@/components/mobile-menu'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { UserButton } from '@/components/user-button'
-import { GlobalSearch } from '@/components/global-search'
+import UserButton from '@/components/user-button'
+import GlobalSearch from '@/components/global-search'
 import { cn } from '@/lib/utils'
 
 const mainNav = [

@@ -48,7 +48,8 @@ import {
   Library,
   Presentation,
   Rocket,
-  Target
+  Target,
+  LogOut
 } from 'lucide-react'
 
 interface SidebarItem {
@@ -330,6 +331,15 @@ const sidebarItems: SidebarItem[] = [
 export function Sidebar() {
   const pathname = usePathname()
 
+  const handleLogout = () => {
+    // Clear authentication token from localStorage
+    localStorage.removeItem('auth-token')
+    localStorage.removeItem('user-data')
+    localStorage.removeItem('session-data')
+    // Redirect to homepage
+    window.location.href = '/'
+  }
+
   return (
     <div className="flex flex-col h-full bg-background border-r">
       <div className="p-6">
@@ -370,6 +380,18 @@ export function Sidebar() {
           )
         })}
       </nav>
+      
+      {/* Logout Button */}
+      <div className="p-4 border-t">
+        <button
+          onClick={handleLogout}
+          data-testid="logout"
+          className="flex items-center gap-3 px-3 py-2 rounded-lg w-full hover:bg-red-50 hover:text-red-600 transition-colors text-left"
+        >
+          <LogOut className="w-5 h-5" />
+          <span>Log out</span>
+        </button>
+      </div>
     </div>
   )
 } 

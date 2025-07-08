@@ -23,7 +23,7 @@ import {
   Wallet,
   Video,
 } from 'lucide-react'
-import { GlobalSearch } from '@/components/global-search'
+import GlobalSearch from '@/components/global-search'
 import { AnimatePresence, motion } from 'framer-motion'
 
 // Mock data
