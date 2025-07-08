@@ -89,15 +89,25 @@ export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDia
                   <div key={index} className="relative group">
                     {file.type.startsWith('image/') ? (
                       <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                        <img src={URL.createObjectURL(file)} alt={`Selected file ${index + 1}`} />
+                        <img 
+                          src={URL.createObjectURL(file)} 
+                          alt={`Selected file ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                     ) : (
-                      <div>
-                        <Video />
+                      <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
+                        <Video className="w-8 h-8 text-gray-500" />
+                        <span className="ml-2 text-sm text-gray-600 truncate">{file.name}</span>
                       </div>
                     )}
-                    <Button onClick={() => removeFile(index)}>
-                      <X />
+                    <Button 
+                      onClick={() => removeFile(index)}
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-1 right-1 w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3" />
                     </Button>
                   </div>
                 ))}
@@ -105,17 +115,41 @@ export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDia
             </div>
           )}
 
-          <div>
-            <Button onClick={() => document.getElementById('image-upload')?.click()}>
-              <Image />
+          <div className="flex gap-2">
+            <Button 
+              type="button"
+              variant="outline" 
+              onClick={() => document.getElementById('image-upload')?.click()}
+              className="flex-1"
+            >
+              <Image className="w-4 h-4 mr-2" />
               Add Image
             </Button>
-            <Button onClick={() => document.getElementById('video-upload')?.click()}>
-              <Video />
+            <Button 
+              type="button"
+              variant="outline"
+              onClick={() => document.getElementById('video-upload')?.click()}
+              className="flex-1"
+            >
+              <Video className="w-4 h-4 mr-2" />
               Add Video
             </Button>
-            <input type="file" id="image-upload" hidden accept="image/*" onChange={handleFileSelect} />
-            <input type="file" id="video-upload" hidden accept="video/*" onChange={handleFileSelect} />
+            <input 
+              type="file" 
+              id="image-upload" 
+              hidden 
+              accept="image/*" 
+              onChange={handleFileSelect}
+              multiple
+            />
+            <input 
+              type="file" 
+              id="video-upload" 
+              hidden 
+              accept="video/*" 
+              onChange={handleFileSelect}
+              multiple
+            />
           </div>
 
           <DialogFooter>

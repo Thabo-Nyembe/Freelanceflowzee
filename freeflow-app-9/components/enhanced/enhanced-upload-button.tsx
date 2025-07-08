@@ -23,7 +23,7 @@ export function EnhancedUploadButton({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
   const [files, setFiles] = useState<File[]>([]);
-  const fileInputRef =<HTMLInputElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Context7 drag-and-drop handler
   const handleDragOver = useCallback((e: React.DragEvent) => {

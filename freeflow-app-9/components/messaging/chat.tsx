@@ -126,10 +126,19 @@ const Chat = () => {
                 <Card
                   key={chat.id}
                   data-testid={`chat-item-${chat.id}`}
-                  className={`cursor-pointer hover:bg-accent ${
+                  className={`cursor-pointer hover:bg-accent focus-within:bg-accent focus-within:ring-2 focus-within:ring-ring transition-colors ${
                     selectedChat?.id === chat.id ? 'bg-accent' : ''
                   }`}
                   onClick={() => handleChatSelect(chat)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      handleChatSelect(chat)
+                    }
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Chat with ${chat.name}`}
                 >
                   <CardContent className="p-4 flex items-center space-x-4">
                     <img
@@ -203,7 +212,13 @@ const Chat = () => {
                 placeholder="Type a message..."
                 value={newMessage}
                 onChange={handleMessageChange}
-                onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSendMessage()
+                  }
+                }}
+                aria-label="Type your message"
               />
               <Button data-testid="send-button" onClick={handleSendMessage}>
                 Send

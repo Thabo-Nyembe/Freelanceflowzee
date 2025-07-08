@@ -14,11 +14,22 @@ export default function DashboardLayoutClient({
 }: DashboardLayoutClientProps) {
   return (
     <div className="flex h-screen overflow-hidden">
-      <div className="w-64 flex-shrink-0">
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block w-64 flex-shrink-0">
         <Sidebar />
       </div>
+      
+      {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto p-6">
+        {/* Mobile Header with Sidebar Toggle */}
+        <div className="lg:hidden sticky top-0 z-40 bg-background border-b px-4 py-3">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-semibold">FreeflowZee</h1>
+            {/* Mobile menu will be handled by MobileNav in global header */}
+          </div>
+        </div>
+        
+        <div className="container mx-auto p-4 lg:p-6">
           {children}
         </div>
       </main>

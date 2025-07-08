@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Command } from 'cmdk'
 import {
@@ -99,6 +99,17 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
     onClose?.()
   }, [router, onClose])
 
+  const filteredGroups = useMemo(() => {
+    if (!search.trim()) return groups
+    
+    return groups.map(group => ({
+      ...group,
+      items: group.items.filter(item =>
+        item.name.toLowerCase().includes(search.toLowerCase())
+      )
+    })).filter(group => group.items.length > 0)
+  }, [search])
+
   return (
     <>
       <Button
@@ -138,7 +149,7 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
               <Command.Empty className="py-6 text-center text-sm">
                 No results found.
               </Command.Empty>
-              {groups.map((group) => (
+              {filteredGroups.map((group) => (
                 <Command.Group key={group.name} heading={group.name}>
                   {group.items.map((item) => (
                     <Command.Item

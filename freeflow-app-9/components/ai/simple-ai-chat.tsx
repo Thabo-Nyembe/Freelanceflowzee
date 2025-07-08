@@ -193,7 +193,7 @@ export default function SimpleAIChat() {
                 }));
               }
             } catch (e) {
-              console.log('Failed to parse JSON: ', line);
+              console.error('Failed to parse JSON: ', line, e);
             }
           }
         }

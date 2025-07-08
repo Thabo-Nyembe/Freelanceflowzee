@@ -18,6 +18,8 @@ import {
   Lock,
   Eye,
   BarChart,
+  DollarSign,
+  Zap,
 } from 'lucide-react'
 import {
   Dialog,
@@ -33,7 +35,6 @@ import { useToast } from '@/components/ui/use-toast'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { Zap } from 'lucide-react'
 
 interface FileData {
   id: string
@@ -78,6 +79,7 @@ export function SmartDownloadButton({
     totalShares: 0,
     platformBreakdown: { twitter: 0, facebook: 0, linkedin: 0, email: 0, social: 0 },
     revenueGenerated: 0,
+    conversionRate: 0,
   })
   const { toast } = useToast()
 

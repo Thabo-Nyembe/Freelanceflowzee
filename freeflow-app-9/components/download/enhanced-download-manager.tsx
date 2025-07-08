@@ -1,6 +1,10 @@
 "use client"
 
 import { useReducer, useCallback } from 'react'
+import { cn } from '@/lib/utils'
+import { useToast } from '@/components/ui/use-toast'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
@@ -9,7 +13,36 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Download, Share2, MoreHorizontal, Copy, Lock, Unlock, ShieldCheck, ArrowRight, FileText, BarChart2, DollarSign } from 'lucide-react'
+import { 
+  Download, 
+  Share2, 
+  MoreHorizontal, 
+  Copy, 
+  Lock, 
+  Unlock, 
+  ShieldCheck, 
+  ArrowRight, 
+  FileText, 
+  BarChart2, 
+  DollarSign,
+  Image,
+  Video,
+  Music,
+  Archive,
+  Shield,
+  TrendingUp,
+  Play,
+  Pause,
+  RotateCcw,
+  Eye,
+  Trash2,
+  AlertCircle,
+  CreditCard,
+  Check,
+  CheckCircle,
+  Heart,
+  Zap
+} from 'lucide-react'
 
 // Define interfaces for the component state and props
 interface DownloadItem {
@@ -20,7 +53,7 @@ interface DownloadItem {
     downloadUrl: string;
     shareUrl: string;
     progress: number;
-    status: 'downloading' | 'completed' | 'paused' | 'error' | 'pending' | 'escrow_locked';
+    status: 'downloading' | 'completed' | 'paused' | 'error' | 'pending' | 'escrow_locked' | 'cancelled';
     speed: number;
     timeRemaining: number;
     completedTime?: Date;
@@ -33,6 +66,7 @@ interface DownloadItem {
     escrowProtected: boolean;
     escrowAmount: number;
     escrowStatus: 'pending' | 'secured' | 'released' | 'disputed';
+    error?: string;
     accessLevel: 'public' | 'private' | 'escrow';
     unlockPrice: number;
     paymentRequired: boolean;
@@ -44,13 +78,18 @@ interface EscrowTransaction {
     id: string;
     downloadId: string;
     amount: number;
-    status: 'pending' | 'completed' | 'failed';
-    timestamp: Date;
+    currency?: string;
+    status: 'pending' | 'completed' | 'failed' | 'processing';
+    timestamp?: Date;
+    clientName?: string;
+    projectTitle?: string;
+    createdAt?: Date;
+    completedAt?: Date;
 }
 
 interface DownloadState {
     downloads: DownloadItem[];
-    filter: 'all' | 'downloading' | 'completed' | 'escrow';
+    filter: 'all' | 'downloading' | 'completed' | 'escrow' | 'error' | 'escrow_locked';
     selectedItems: string[];
     copiedLinks: Set<string>;
     escrowTransactions: EscrowTransaction[];

@@ -38,6 +38,16 @@ export default function UserButton({ user }: UserButtonProps) {
         .toUpperCase()
     : '?'
 
+  const handleLogout = () => {
+    // Clear authentication data
+    localStorage.removeItem('auth-token')
+    localStorage.removeItem('user-data')
+    localStorage.removeItem('session-data')
+    
+    // Redirect to homepage
+    window.location.href = '/'
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -89,7 +99,10 @@ export default function UserButton({ user }: UserButtonProps) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="flex items-center text-red-600 focus:text-red-600">
+        <DropdownMenuItem 
+          className="flex items-center text-red-600 focus:text-red-600 cursor-pointer"
+          onClick={handleLogout}
+        >
           <LogOut className="mr-2 h-4 w-4" />
           Log out
         </DropdownMenuItem>

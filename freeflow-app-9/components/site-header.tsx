@@ -87,9 +87,9 @@ export function SiteHeader({ user }: SiteHeaderProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'transition-colors hover:text-foreground/80',
+                  'transition-all duration-200 ease-in-out hover:text-foreground/80 hover:scale-105',
                   pathname === item.href
-                    ? 'text-foreground'
+                    ? 'text-foreground font-semibold'
                     : 'text-foreground/60'
                 )}
               >
