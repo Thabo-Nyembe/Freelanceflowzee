@@ -1,18 +1,29 @@
-"use client";
+"use client"
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react"
+import CommunityHub from "@/components/hubs/community-hub"
 
 export default function CommunityHubPage() {
-  const router = useRouter();
+  const [posts, setPosts] = useState<any[]>([])
+  const [connections, setConnections] = useState<string[]>([])
   
-  useEffect(() => {
-    router.replace("/dashboard/community");
-  }, [router]);
-
+  const handlePostCreate = (post: any) => {
+    setPosts(prev => [post, ...prev])
+    console.log('Post created:', post)
+  }
+  
+  const handleMemberConnect = (memberId: string) => {
+    setConnections(prev => [...prev, memberId])
+    console.log('Connected to member:', memberId)
+  }
+  
   return (
     <div className="p-6">
-      <p>Redirecting to Community...</p>
+      <CommunityHub
+        currentUserId="current-user"
+        onPostCreate={handlePostCreate}
+        onMemberConnect={handleMemberConnect}
+      />
     </div>
-  );
+  )
 }

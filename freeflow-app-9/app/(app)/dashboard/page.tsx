@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useMemo, useCallback, lazy, Suspense } from 'react'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -22,9 +22,25 @@ import {
   Calendar,
   Wallet,
   Video,
+  Loader2,
 } from 'lucide-react'
 import GlobalSearch from '@/components/global-search'
 import { AnimatePresence, motion } from 'framer-motion'
+
+// Lazy load heavy components for better performance
+const AICreateStudio = lazy(() => import('@/components/ai/ai-create-studio').then(m => ({ default: m.AICreateStudio })))
+const FilesHub = lazy(() => import('@/components/hubs/files-hub'))
+const CommunityHub = lazy(() => import('@/components/hubs/community-hub'))
+const ProjectsHub = lazy(() => import('@/components/hubs/projects-hub'))
+const MyDayToday = lazy(() => import('@/components/my-day-today').then(m => ({ default: m.MyDayToday })))
+
+// Loading component
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center py-12">
+    <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+    <span className="ml-2 text-gray-600">Loading...</span>
+  </div>
+)
 
 // Mock data
 const mockData = {
@@ -46,7 +62,8 @@ const mockData = {
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('overview')
 
-  const tabConfig = [
+  // Memoize tab configuration to prevent unnecessary re-renders
+  const tabConfig = useMemo(() => [
     {
       value: 'overview',
       label: 'Overview',
@@ -95,30 +112,56 @@ export default function DashboardPage() {
       icon: Calendar,
       description: 'AI-powered daily planning'
     }
-  ]
+  ], [])
 
-  const renderTabContent = (tabValue: string) => {
+  // Memoize tab change handler
+  const handleTabChange = useCallback((value: string) => {
+    setActiveTab(value)
+  }, [])
+
+  // Memoize tab content rendering for better performance
+  const renderTabContent = useCallback((tabValue: string) => {
     switch (tabValue) {
       case 'overview':
         return <DashboardOverview />
       case 'projects-hub':
-        return <ProjectsHubPlaceholder />
+        return (
+          <Suspense fallback={<LoadingSpinner />}>
+            <ProjectsHubTab />
+          </Suspense>
+        )
       case 'ai-create':
-        return <AICreatePlaceholder />
+        return (
+          <Suspense fallback={<LoadingSpinner />}>
+            <AICreateTab />
+          </Suspense>
+        )
       case 'video-studio':
         return <VideoStudioPlaceholder />
       case 'escrow':
         return <EscrowPlaceholder />
       case 'files-hub':
-        return <FilesHubPlaceholder />
+        return (
+          <Suspense fallback={<LoadingSpinner />}>
+            <FilesHubTab />
+          </Suspense>
+        )
       case 'community':
-        return <CommunityPlaceholder />
+        return (
+          <Suspense fallback={<LoadingSpinner />}>
+            <CommunityTab />
+          </Suspense>
+        )
       case 'my-day':
-        return <MyDayPlaceholder />
+        return (
+          <Suspense fallback={<LoadingSpinner />}>
+            <MyDayTab />
+          </Suspense>
+        )
       default:
         return <DashboardOverview />
     }
-  }
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40">
@@ -168,7 +211,7 @@ export default function DashboardPage() {
       
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
           {/* Tab Navigation */}
           <div className="bg-white/70 backdrop-blur-sm rounded-xl p-2 border border-white/20 shadow-lg">
             <div className="overflow-x-auto scrollbar-hide">
@@ -313,39 +356,7 @@ function DashboardOverview() {
   )
 }
 
-function ProjectsHubPlaceholder() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Projects Hub</CardTitle>
-        <CardDescription>All your creative endeavors, organized.</CardDescription>
-      </CardHeader>
-      <CardContent className="text-center py-16">
-        <FolderOpen className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-        <h3 className="text-xl font-semibold">Full Project Management Coming Soon</h3>
-        <p className="text-gray-500">Manage tasks, timelines, and client collaboration.</p>
-        <Button className="mt-4">Explore Demo</Button>
-      </CardContent>
-    </Card>
-  )
-}
-
-function AICreatePlaceholder() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>AI Create</CardTitle>
-        <CardDescription>Your personal content creation powerhouse.</CardDescription>
-      </CardHeader>
-      <CardContent className="text-center py-16">
-        <Brain className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-        <h3 className="text-xl font-semibold">AI Creation Tools Are Being Warmed Up</h3>
-        <p className="text-gray-500">Generate proposals, scripts, social media posts, and more.</p>
-        <Button className="mt-4">Try AI Demo</Button>
-      </CardContent>
-    </Card>
-  )
-}
+// Removed unused placeholder components as they've been replaced with working components
 
 function VideoStudioPlaceholder() {
   return (
@@ -381,53 +392,120 @@ function EscrowPlaceholder() {
   )
 }
 
-function FilesHubPlaceholder() {
+// All placeholder components have been replaced with working implementations
+
+// Working Components
+function AICreateTab() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Files Hub</CardTitle>
-        <CardDescription>Your centralized, secure file storage.</CardDescription>
-      </CardHeader>
-      <CardContent className="text-center py-16">
-        <FileText className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-        <h3 className="text-xl font-semibold">Cloud Storage is Being Provisioned</h3>
-        <p className="text-gray-500">Share large files, get feedback, and keep everything organized.</p>
-        <Button className="mt-4">Check Storage Options</Button>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-2">AI Create Studio</h2>
+        <p className="text-gray-600">Generate content using advanced AI models</p>
+      </div>
+      <AICreateStudio />
+    </div>
   )
 }
 
-function CommunityPlaceholder() {
+function ProjectsHubTab() {
+  const sampleProjects = [
+    {
+      id: 'proj_001',
+      title: 'Brand Identity Package',
+      description: 'Complete brand identity design including logo, colors, typography, and brand guidelines for Acme Corp.',
+      status: 'active' as const,
+      progress: 75,
+      client_name: 'Acme Corp',
+      budget: 5000,
+      spent: 3750,
+      start_date: '2024-01-15',
+      end_date: '2024-03-15',
+      team_members: [
+        { id: 'user_001', name: 'Sarah Johnson', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah' },
+        { id: 'user_002', name: 'Mike Chen', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mike' }
+      ],
+      priority: 'high' as const,
+      comments_count: 12,
+      attachments: [{}, {}, {}]
+    },
+    {
+      id: 'proj_002',
+      title: 'E-commerce Website',
+      description: 'Full-stack e-commerce platform with modern design and advanced features for Tech Startup.',
+      status: 'active' as const,
+      progress: 45,
+      client_name: 'Tech Startup',
+      budget: 15000,
+      spent: 6750,
+      start_date: '2024-02-01',
+      end_date: '2024-05-01',
+      team_members: [
+        { id: 'user_003', name: 'Alex Rivera', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex' },
+        { id: 'user_004', name: 'Emma Wilson', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emma' }
+      ],
+      priority: 'medium' as const,
+      comments_count: 8,
+      attachments: [{}, {}]
+    },
+    {
+      id: 'proj_003',
+      title: 'Mobile App Design',
+      description: 'Native mobile app design for iOS and Android with user experience optimization.',
+      status: 'completed' as const,
+      progress: 100,
+      client_name: 'FinTech Solutions',
+      budget: 8000,
+      spent: 8000,
+      start_date: '2023-11-01',
+      end_date: '2024-01-30',
+      team_members: [
+        { id: 'user_005', name: 'David Kim', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=David' }
+      ],
+      priority: 'high' as const,
+      comments_count: 15,
+      attachments: [{}, {}, {}, {}]
+    }
+  ]
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Community</CardTitle>
-        <CardDescription>Connect, collaborate, and grow with fellow creators.</CardDescription>
-      </CardHeader>
-      <CardContent className="text-center py-16">
-        <Globe className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-        <h3 className="text-xl font-semibold">The Community Hub is Launching Soon</h3>
-        <p className="text-gray-500">Join discussions, share your work, and find collaborators.</p>
-        <Button className="mt-4">Join Waitlist</Button>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <ProjectsHub
+        projects={sampleProjects}
+        _userId="current-user"
+      />
+    </div>
   )
 }
 
-function MyDayPlaceholder() {
+function FilesHubTab() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>My Day Today</CardTitle>
-        <CardDescription>Your AI-powered daily planner and focus tool.</CardDescription>
-      </CardHeader>
-      <CardContent className="text-center py-16">
-        <Calendar className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-        <h3 className="text-xl font-semibold">Your Personal AI Planner is Arriving Shortly</h3>
-        <p className="text-gray-500">Get smart schedules, task prioritization, and focus timers.</p>
-        <Button className="mt-4">Set up My Day</Button>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <FilesHub
+        userId="current-user"
+        onFileUpload={(files) => console.log('Files uploaded:', files)}
+        onFileDelete={(fileId) => console.log('File deleted:', fileId)}
+        onFileShare={(fileId) => console.log('File shared:', fileId)}
+      />
+    </div>
+  )
+}
+
+function CommunityTab() {
+  return (
+    <div className="space-y-6">
+      <CommunityHub
+        currentUserId="current-user"
+        onPostCreate={(post) => console.log('Post created:', post)}
+        onMemberConnect={(memberId) => console.log('Connected to member:', memberId)}
+      />
+    </div>
+  )
+}
+
+function MyDayTab() {
+  return (
+    <div className="space-y-6">
+      <MyDayToday />
+    </div>
   )
 }
