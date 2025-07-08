@@ -247,7 +247,7 @@ export function InteractiveContactSystem({
   };
 
   // Context7 Pattern: Form submission handler
-  const handleFormSubmit = async (e: React.FormEvent) => {
+  const _handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     dispatch({ type: 'SET_SUBMITTING', submitting: true });
     
@@ -351,7 +351,7 @@ export function InteractiveContactSystem({
                     <div>
                         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Get in Touch</h2>
                         <p className="mt-2 text-gray-600 dark:text-gray-300">
-                            We're here to help. Reach out to us through any of the methods below.
+                            We&apos;re here to help. Reach out to us through any of the methods below.
                         </p>
                     </div>
 

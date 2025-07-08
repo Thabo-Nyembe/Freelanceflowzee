@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, Copy, Share2, Facebook, Twitter, Linkedin, Instagram, Mail, Link, Download } from 'lucide-react';
 
 interface SharingModalProps {
@@ -89,7 +89,7 @@ export function EnhancedSharingModal({
 
   const handleSocialShare = (platform: typeof socialPlatforms[0]) => {
     if (platform.name === 'Instagram') {
-      // Instagram doesn't support direct URL sharing, show instructions
+      // Instagram doesn&apos;t support direct URL sharing, show instructions
       alert('To share on Instagram, save the image and post it manually with the link in your bio or story.');
       return;
     }

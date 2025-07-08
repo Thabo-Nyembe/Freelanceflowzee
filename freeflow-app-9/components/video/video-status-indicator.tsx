@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { useVideoStatus } from '@/hooks/useVideoStatus';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -150,7 +149,7 @@ export function VideoStatusBadge({ videoId, className }: { videoId: string; clas
     pollingInterval: 5000, // Slower polling for badges
   });
 
-  if (isReady) return null; // Don't show badge for ready videos
+  if (isReady) return null; // Don&apos;t show badge for ready videos
 
   const getBadgeContent = () => {
     if (hasError) return { text: 'Error', variant: 'destructive' as const };

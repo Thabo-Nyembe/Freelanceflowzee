@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useReducer, useState, useCallback } from 'react'
+import { useReducer, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -233,7 +233,7 @@ export function AIDesignAssistant({
       const aiResponse: AIMessage = {
         id: `msg_${Date.now() + 1}`,
         role: 'assistant',
-        content: `Based on your question about "${state.userInput}", I recommend focusing on the design principles we've identified. Here are some specific suggestions:`,
+        content: `Based on your question about "${state.userInput}", I recommend focusing on the design principles we&apos;ve identified. Here are some specific suggestions:`,
         timestamp: new Date().toISOString(),
         suggestions: mockSuggestions.slice(0, 2)
       }

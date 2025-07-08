@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect, useRef, useReducer } from 'react'
+import React, { useState, useEffect, useReducer } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -167,7 +167,7 @@ const initialState: RecordingState = {
       id: 'trans-1',
       startTime: 0,
       endTime: 5.2,
-      text: "Welcome to FreeflowZee! Today I'll show you how to create your first project.",
+      text: "Welcome to FreeflowZee! Today I&apos;ll show you how to create your first project.",
       confidence: 0.98,
       speaker: 'Sarah Chen',
       keywords: ['welcome', 'project', 'create']
@@ -185,7 +185,7 @@ const initialState: RecordingState = {
       id: 'trans-3',
       startTime: 12.8,
       endTime: 18.5,
-      text: "You'll see all your projects listed here with their current status and progress indicators.",
+      text: "You&apos;ll see all your projects listed here with their current status and progress indicators.",
       confidence: 0.97,
       speaker: 'Sarah Chen',
       keywords: ['projects', 'status', 'progress']
@@ -330,8 +330,8 @@ export function AIVideoRecordingSystem({
   className = ''
 }: AIVideoRecordingSystemProps) {
   const [state, dispatch] = useReducer(recordingReducer, initialState)
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const videoRef =<HTMLVideoElement>(null)
+  const mediaRecorderRef =<MediaRecorder | null>(null)
   const [isAddingAnnotation, setIsAddingAnnotation] = useState(false)
   const [newAnnotationPos, setNewAnnotationPos] = useState<{ x: number; y: number } | null>(null)
 
@@ -402,7 +402,7 @@ export function AIVideoRecordingSystem({
         id: 'new-trans-1',
         startTime: 0,
         endTime: 8.3,
-        text: "In this recording, I'll demonstrate the new features of our platform.",
+        text: "In this recording, I&apos;ll demonstrate the new features of our platform.",
         confidence: 0.96,
         speaker: currentUser.name,
         keywords: ['recording', 'demonstrate', 'features', 'platform']
@@ -411,7 +411,7 @@ export function AIVideoRecordingSystem({
         id: 'new-trans-2',
         startTime: 8.3,
         endTime: 15.7,
-        text: "First, let's look at the improved user interface and navigation system.",
+        text: "First, let&apos;s look at the improved user interface and navigation system.",
         confidence: 0.94,
         speaker: currentUser.name,
         keywords: ['interface', 'navigation', 'system', 'improved']
@@ -736,7 +736,7 @@ export function AIVideoRecordingSystem({
                   <CardContent className="p-4">
                     <h4 className="font-medium text-purple-800 mb-2">Add Video Annotation</h4>
                     <Textarea
-                      placeholder="Describe what's happening at this moment..."
+                      placeholder="Describe what&apos;s happening at this moment..."
                       className="mb-3"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {

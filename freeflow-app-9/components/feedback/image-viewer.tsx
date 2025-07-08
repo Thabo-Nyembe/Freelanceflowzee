@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import { MessageSquare, Edit, Trash2 } from 'lucide-react'
 
 interface Comment {
@@ -38,7 +38,7 @@ export function ImageViewer({
   const [newComment, setNewComment] = useState('')
   const [selectedPriority, setSelectedPriority] = useState<'low' | 'medium' | 'high' | 'critical'>('medium')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const imageRef = useRef<HTMLDivElement>(null)
+  const imageRef =<HTMLDivElement>(null)
 
   // Safely filter and display comments
   const validComments = comments?.filter(comment => 

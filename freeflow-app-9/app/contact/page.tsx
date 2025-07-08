@@ -22,7 +22,7 @@ export default function ContactPage() {
               Contact Us
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Have questions about FreeFlow? Need support? We're here to help you succeed in your freelance journey.
+              Have questions about FreeFlow? Need support? We&apos;re here to help you succeed in your freelance journey.
             </p>
           </div>
 
@@ -32,7 +32,7 @@ export default function ContactPage() {
               <CardHeader>
                 <CardTitle className="text-2xl">Send us a message</CardTitle>
                 <CardDescription>
-                  Fill out the form below and we'll get back to you within 24 hours.
+                  Fill out the form below and we&apos;ll get back to you within 24 hours.
                 </CardDescription>
               </CardHeader>
               <CardContent>

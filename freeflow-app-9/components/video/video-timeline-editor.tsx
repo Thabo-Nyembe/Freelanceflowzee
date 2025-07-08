@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -66,7 +66,7 @@ export default function VideoTimelineEditor({
   onExport,
   className
 }: VideoTimelineEditorProps) {
-  const timelineRef = useRef<HTMLDivElement>(null);
+  const timelineRef =<HTMLDivElement>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -81,7 +81,7 @@ export default function VideoTimelineEditor({
 
   // Timeline scale calculations
   const timelineWidth = 800;
-  const pixelsPerSecond = (timelineWidth * zoomLevel) / duration;
+  const _pixelsPerSecond = (timelineWidth * zoomLevel) / duration;
 
   const formatTime = useCallback((seconds: number) => {
     const minutes = Math.floor(seconds / 60);

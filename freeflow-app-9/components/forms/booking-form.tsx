@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { format, addDays, startOfDay } from 'date-fns'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -173,7 +173,7 @@ export function BookingForm({ service, className = "" }: BookingFormProps) {
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Booking Confirmed!</h2>
           <p className="text-gray-600 mb-4">
-            Your appointment has been successfully booked. You'll receive a confirmation email shortly.
+            Your appointment has been successfully booked. You&apos;ll receive a confirmation email shortly.
           </p>
           <Button onClick={() => window.location.href = '/'}>
             Return to Home

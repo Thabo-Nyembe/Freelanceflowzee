@@ -1,4 +1,4 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import { } from 'react'
 import Link from 'next/link'

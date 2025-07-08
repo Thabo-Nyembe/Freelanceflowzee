@@ -40,7 +40,7 @@ const newsletterArchive = [
     id: 2,
     title: "Collaboration Best Practices for Remote Teams",
     date: "January 8, 2024",
-    preview: "Remote work doesn't have to mean isolated work. Learn strategies for effective team collaboration...",
+    preview: "Remote work doesn&apos;t have to mean isolated work. Learn strategies for effective team collaboration...",
     readTime: "6 min read",
     subscribers: 2450,
     openRate: "72%",
@@ -50,7 +50,7 @@ const newsletterArchive = [
     id: 3,
     title: "2024 Design Trends & Predictions",
     date: "January 1, 2024",
-    preview: "As we enter 2024, let's explore the design trends that will shape the creative landscape this year...",
+    preview: "As we enter 2024, let&apos;s explore the design trends that will shape the creative landscape this year...",
     readTime: "10 min read",
     subscribers: 2600,
     openRate: "75%",
@@ -276,7 +276,7 @@ export default function NewsletterPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 text-sm mb-4">
-                    Don't miss out on the latest creative insights and industry updates.
+                    Don&apos;t miss out on the latest creative insights and industry updates.
                   </p>
                   {!isSubscribed ? (
                     <form onSubmit={handleSubscribe} className="space-y-3">
@@ -295,7 +295,7 @@ export default function NewsletterPage() {
                   ) : (
                     <div className="text-center py-4">
                       <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                      <p className="text-green-600 font-medium">You're subscribed!</p>
+                      <p className="text-green-600 font-medium">You&apos;re subscribed!</p>
                     </div>
                   )}
                 </CardContent>

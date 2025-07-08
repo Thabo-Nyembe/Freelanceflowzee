@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -74,7 +74,7 @@ export function StandaloneDemo() {
     {
       id: "client",
       title: "Client Presentation",
-      description: "Showcase our platform's capabilities to potential clients",
+      description: "Showcase our platform&apos;s capabilities to potential clients",
       icon: Users,
       color: "bg-blue-500",
       audience: "Business clients, decision makers",

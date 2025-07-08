@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, MouseEvent } from 'react';
+import React, { useState, MouseEvent } from 'react';
 import CommentPopover from './CommentPopover';
 
 interface ImageViewerProps {
@@ -20,7 +20,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ imageUrl, onAddComment }) => 
   const [region, setRegion] = useState<Region | null>(null);
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
   const [showPopover, setShowPopover] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef =<HTMLDivElement>(null);
 
   const getCoords = (e: MouseEvent): { x: number, y: number } => {
     if (!containerRef.current) return { x: 0, y: 0 };

@@ -66,7 +66,7 @@ export default function CommunityPage() {
         <CardHeader>
           <CardTitle className="text-2xl mb-4">Enhanced Community Features Coming Soon</CardTitle>
           <CardDescription className="text-lg max-w-2xl mx-auto">
-            We're building an amazing community experience with creator marketplace, 
+            We&apos;re building an amazing community experience with creator marketplace, 
             social feeds, collaboration tools, and much more. Stay tuned!
           </CardDescription>
         </CardHeader>

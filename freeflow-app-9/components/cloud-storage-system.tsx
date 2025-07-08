@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useReducer, useState, useRef } from 'react'
+import React, { useReducer, useState } from 'react'
 import {
   Upload,
   Star,
@@ -261,7 +261,7 @@ export function CloudStorageSystem() {
   const [state, dispatch] = useReducer(storageReducer, initialState)
   const [showUpload, setShowUpload] = useState(false)
   const [showSubscription, setShowSubscription] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef =<HTMLInputElement>(null)
 
   const currentPlan = SUBSCRIPTION_PLANS[state.currentPlan]
   const storageUsedPercent = (state.usedStorage / state.totalStorage) * 100

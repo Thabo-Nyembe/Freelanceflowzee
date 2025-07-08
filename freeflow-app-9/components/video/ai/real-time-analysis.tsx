@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
@@ -70,7 +70,7 @@ export function RealTimeAnalysis({
     priority: 'high' | 'medium' | 'low'
   }[]>([])
 
-  const aiServiceRef = useRef<RealTimeAIService | null>(null)
+  const aiServiceRef =<RealTimeAIService | null>(null)
 
   // Initialize AI service
   useEffect(() => {
@@ -194,7 +194,7 @@ export function RealTimeAnalysis({
   }, [isRecording])
 
   const generateInsight = (insight: VideoInsight) => {
-    // Only add new insights if they're different from recent ones
+    // Only add new insights if they&apos;re different from recent ones
     const recentSimilarInsight = insights.find(
       i => i.type === insight.type && Date.now() - i.timestamp < 10000
     )

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { VideoStatusMonitor } from '@/components/video/video-status-monitor';
 import { VideoStatusIndicator, VideoStatusBadge } from '@/components/video/video-status-indicator';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,7 +41,7 @@ export default function VideoStatusDemoPage() {
           <h1 className="text-4xl font-bold">Video Status Polling System</h1>
         </div>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Real-time video processing status updates inspired by Cap.so's implementation.
+          Real-time video processing status updates inspired by Cap.so&apos;s implementation.
           Experience live polling, progress tracking, and status synchronization.
         </p>
         

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useReducer } from 'react'
+import { useState, useReducer } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'

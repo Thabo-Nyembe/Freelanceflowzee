@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import {, useTransition } from 'react';
 import { Video } from '@/lib/types/video';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -61,7 +61,7 @@ export function AiInsights({ video }: AiInsightsProps) {
       <Sparkles className="h-8 w-8 text-muted-foreground mb-4" />
       <CardTitle className="mb-2">Unlock AI Insights</CardTitle>
       <p className="text-sm text-muted-foreground mb-4">
-        Generate a summary and relevant tags from your video's transcript automatically.
+        Generate a summary and relevant tags from your video&apos;s transcript automatically.
       </p>
       <Button onClick={handleGenerate} disabled={isPending}>
         {isPending ? (

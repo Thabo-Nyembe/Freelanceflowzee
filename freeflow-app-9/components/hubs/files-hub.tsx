@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useReducer, useCallback, useRef } from 'react'
+import React, { useState, useReducer, useCallback } from 'react'
 import {
   Folder,
   File as FileIcon,
@@ -238,7 +238,7 @@ interface FilesHubProps {
 export default function FilesHub({ projects, userId }: FilesHubProps) {
   const [state, dispatch] = useReducer(fileReducer, initialState)
   const [_activeTab, setActiveTab] = useState('files')
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef =<HTMLInputElement>(null)
   const [_isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
   const [_isNewFolderDialogOpen, setIsNewFolderDialogOpen] = useState(false)
   const [_newFolderName, setNewFolderName] = useState('')

@@ -1,6 +1,5 @@
 'use client'
 
-import React from 'react';
 import { useDemoContent } from './demo-content-provider';
 import { Menu, Search, Bell, Settings } from 'lucide-react';
 

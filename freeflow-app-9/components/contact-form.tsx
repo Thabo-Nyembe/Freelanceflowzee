@@ -38,7 +38,7 @@ export function ContactForm() {
       {isSuccess ? (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
           <p className="text-green-800 font-medium">Message sent successfully!</p>
-          <p className="text-green-600 text-sm">We'll get back to you soon.</p>
+          <p className="text-green-600 text-sm">We&apos;ll get back to you soon.</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">

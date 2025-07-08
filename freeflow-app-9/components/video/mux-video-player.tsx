@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import MuxPlayer from '@mux/mux-player-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -70,8 +70,8 @@ export default function MuxVideoPlayer({
   onError,
   videoId,
 }: MuxVideoPlayerProps) {
-  const playerRef = useRef<any>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const playerRef =<any>(null);
+  const containerRef =<HTMLDivElement>(null);
   
   const [state, setState] = useState<PlayerState>({
     isPlaying: false,

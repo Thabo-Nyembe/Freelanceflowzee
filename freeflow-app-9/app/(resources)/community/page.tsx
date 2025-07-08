@@ -146,7 +146,7 @@ export default function CommunityPage() {
                                 How to optimize AI-generated content for better engagement?
                               </h3>
                               <p className="text-gray-600 text-sm mb-3">
-                                I've been experimenting with AI content generation and looking for best practices...
+                                I&apos;ve been experimenting with AI content generation and looking for best practices...
                               </p>
                               <div className="flex items-center gap-4 text-sm text-gray-500">
                                 <div className="flex items-center">
@@ -187,7 +187,7 @@ export default function CommunityPage() {
                           <div className="p-6">
                             <h3 className="font-semibold text-gray-900 mb-2">Amazing AI Art Project</h3>
                             <p className="text-gray-600 text-sm mb-3">
-                              Created this stunning piece using FreeflowZee's AI tools...
+                              Created this stunning piece using FreeflowZee&apos;s AI tools...
                             </p>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">

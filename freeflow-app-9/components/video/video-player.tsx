@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import MuxPlayer from '@mux/mux-player-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -69,7 +69,7 @@ export default function VideoPlayer({
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef =<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleFullscreenChange = () => {

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, use } from 'react'
+import { useState, use } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -31,13 +31,13 @@ const blogPosts = [
       <p>Artificial Intelligence has revolutionized the way we create content. From generating ideas to polishing final drafts, AI tools can significantly enhance your creative workflow.</p>
       
       <h2>Why AI Content Creation Matters</h2>
-      <p>In today's fast-paced digital landscape, content creators need to produce high-quality material consistently. AI content creation tools help by:</p>
+      <p>In today&apos;s fast-paced digital landscape, content creators need to produce high-quality material consistently. AI content creation tools help by:</p>
       
       <ul>
         <li>Accelerating the ideation process</li>
         <li>Providing writing assistance and suggestions</li>
         <li>Offering different perspectives and styles</li>
-        <li>Helping overcome writer's block</li>
+        <li>Helping overcome writer&apos;s block</li>
       </ul>
       
       <h2>Best Practices for AI-Assisted Content</h2>
@@ -56,7 +56,7 @@ const blogPosts = [
     title: 'Building Effective Collaborative Design Workflows',
     excerpt: 'Discover strategies for seamless collaboration in creative projects.',
     content: `
-      <p>Effective collaboration is the backbone of successful creative projects. In this guide, we'll explore proven strategies for building workflows that enhance team productivity.</p>
+      <p>Effective collaboration is the backbone of successful creative projects. In this guide, we&apos;ll explore proven strategies for building workflows that enhance team productivity.</p>
       
       <h2>Setting Up Your Collaborative Environment</h2>
       <p>The foundation of good collaboration starts with the right tools and processes.</p>

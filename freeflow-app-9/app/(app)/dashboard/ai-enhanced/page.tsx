@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -23,7 +23,7 @@ import {
 import SimpleAIChat from '@/components/ai/simple-ai-chat';
 
 export default function AIEnhancedPage() {
-  const [activeDemo, setActiveDemo] = useState<string | null>(null);
+  const [_activeDemo, setActiveDemo] = useState<string | null>(null);
 
   const aiFeatures = [
     {
@@ -192,7 +192,7 @@ export default function AIEnhancedPage() {
                   setActiveDemo(feature.id);
                 }}
               >
-                Try: '{feature.demoPrompt}'
+                Try: &apos;{feature.demoPrompt}&apos;
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </CardContent>

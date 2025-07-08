@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import {, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { VideoRecordingSystem } from './video-recording-system'
 import { AIVideoAnalysis } from './ai/ai-video-analysis'
@@ -72,7 +72,7 @@ export function AIEnhancedVideoRecording({
   const [isProcessing, setIsProcessing] = useState(false)
   const [realtimeInsights, setRealtimeInsights] = useState<string[]>([])
   const [highlights, setHighlights] = useState<HighlightSegment[]>([])
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const videoRef =<HTMLVideoElement>(null)
 
   const {
     audioLevel: aiAudioLevel = 0,

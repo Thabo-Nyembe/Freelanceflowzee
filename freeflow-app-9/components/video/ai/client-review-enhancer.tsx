@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { VideoInsights } from './video-insights';
 import { SmartChapters } from './smart-chapters';
 import { RealTimeAnalysis } from './real-time-analysis';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useSupabase } from '@/components/providers/index';
 
 interface ReviewSession {
   id: string;
@@ -24,7 +24,7 @@ export const ClientReviewEnhancer = ({ projectId }: { projectId: string }) => {
   const [sessions, setSessions] = useState<ReviewSession[]>([]);
   const [activeSession, setActiveSession] = useState<ReviewSession | null>(null);
   const [isRecording, setIsRecording] = useState(false);
-  const supabase = useSupabaseClient();
+  const supabase = useSupabase();
 
   useEffect(() => {
     loadReviewSessions();
@@ -75,10 +75,10 @@ export const ClientReviewEnhancer = ({ projectId }: { projectId: string }) => {
   };
 
   const getStatusBadge = (status: ReviewSession['status']) => {
-    const variants = {
+    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
       pending: 'default',
       in_review: 'secondary',
-      approved: 'success',
+      approved: 'default',
       needs_changes: 'destructive',
     };
 

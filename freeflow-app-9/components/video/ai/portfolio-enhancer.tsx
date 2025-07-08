@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { VideoInsights } from './video-insights';
 import { SmartChapters } from './smart-chapters';
 import { VideoTranscription } from './video-transcription';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useSupabase } from '@/components/providers/index';
 
 interface PortfolioVideo {
   id: string;
@@ -28,7 +28,7 @@ interface PortfolioVideo {
 export const PortfolioEnhancer = () => {
   const [videos, setVideos] = useState<PortfolioVideo[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<PortfolioVideo | null>(null);
-  const supabase = useSupabaseClient();
+  const supabase = useSupabase();
 
   const handleVideoUpload = async (file: File) => {
     // Upload to storage

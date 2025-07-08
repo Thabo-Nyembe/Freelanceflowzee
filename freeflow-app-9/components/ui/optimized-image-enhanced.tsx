@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useRef, memo } from 'react'
+import React, { useState, useEffect, memo } from 'react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
@@ -70,8 +70,8 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
   const [hasError, setHasError] = useState(false)
   const [currentSrc, setCurrentSrc] = useState(src)
   const [isInView, setIsInView] = useState(false)
-  const imgRef = useRef<HTMLDivElement>(null)
-  const observerRef = useRef<IntersectionObserver | null>(null)
+  const imgRef =<HTMLDivElement>(null)
+  const observerRef =<IntersectionObserver | null>(null)
 
   // Intersection Observer for lazy loading
   useEffect(() => {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,8 +27,8 @@ import { VideoAIPanel } from '@/components/video/ai/video-ai-panel'
 import { EnterpriseVideoStudio } from '@/components/collaboration/enterprise-video-studio'
 
 export default function VideoStudioPage() {
-  const [currentVideoId, setCurrentVideoId] = useState<string | null>(null)
-  const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(null)
+  const [currentVideoId, setCurrentVideoId] =<string | null>(null)
+  const [currentVideoUrl, setCurrentVideoUrl] =<string | null>(null)
 
   const handleRecordingComplete = (videoId: string, videoUrl: string) => {
     setCurrentVideoId(videoId)

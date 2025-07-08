@@ -1,7 +1,7 @@
 // Context7 Enhanced Smart Download Button with External Links & Monetization
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Download,

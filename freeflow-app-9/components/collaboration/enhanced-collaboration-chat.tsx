@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef, useReducer, useEffect } from 'react'
+import React, { useState, useReducer, useEffect } from 'react'
 import NextImage from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -138,7 +138,7 @@ export function EnhancedCollaborationChat({
   })
 
   // Timer for call duration
-  const callTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const callTimerRef =<NodeJS.Timeout | null>(null)
 
   // Call duration effect
   useEffect(() => {

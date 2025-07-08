@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useReducer, useState, useCallback, useEffect, useRef } from 'react'
+import React, { useReducer, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -608,8 +608,8 @@ const assetGenerationReducer = (state: AssetGenerationState, action: AssetGenera
 
 export default function AICreate() {
   // Available AI Models (kept for backward compatibility)
-  const [availableModels] = useState<AIModel[]>(AI_MODELS)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [availableModels] =<AIModel[]>(AI_MODELS)
+  const fileInputRef =<HTMLInputElement>(null)
 
   const [state, dispatch] = useReducer(assetGenerationReducer, initialState)
 
@@ -711,7 +711,7 @@ export default function AICreate() {
   // Handle actual file downloads
   const handleDownloadAsset = useCallback(async (asset: GeneratedAsset) => {
     try {
-      // For demo purposes, we'll simulate download
+      // For demo purposes, we&apos;ll simulate download
       toast.success(`Downloading ${asset.name}...`)
       
       // In a real implementation, this would trigger the actual download
@@ -1904,7 +1904,7 @@ export default function AICreate() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Finding Your API Key</DialogTitle>
-            <DialogDescription>API keys can usually be found in your provider's dashboard under "API" or "Settings".</DialogDescription>
+            <DialogDescription>API keys can usually be found in your provider&apos;s dashboard under "API" or "Settings".</DialogDescription>
           </DialogHeader>
           {/* Add provider-specific instructions here */}
           <DialogFooter>

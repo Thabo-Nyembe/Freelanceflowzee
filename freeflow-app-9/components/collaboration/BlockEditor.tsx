@@ -98,7 +98,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({ isSuggestionMode = false }) =
   }, [isSuggestionMode, editor, addSuggestion]);
 
 
-  const handleComment = async (comment: string) => {
+  const _handleComment = async (comment: string) => {
     if (!editor) return;
     const { from, to } = editor.state.selection;
     const selectedText = editor.state.doc.textBetween(from, to);
@@ -124,7 +124,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({ isSuggestionMode = false }) =
       editor.chain().focus().deleteRange({ from, to }).run();
     }
     editor.chain().focus().unsetInsertion().unsetDeletion().run();
-    console.log("Suggestion accepted. In a real app, we'd call updateSuggestionStatus here.");
+    console.log("Suggestion accepted. In a real app, we&apos;d call updateSuggestionStatus here.");
   };
 
   const handleRejectSuggestion = () => {
@@ -134,7 +134,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({ isSuggestionMode = false }) =
         editor.chain().focus().deleteRange({ from, to }).run();
     }
     editor.chain().focus().unsetInsertion().unsetDeletion().run();
-    console.log("Suggestion rejected. In a real app, we'd call updateSuggestionStatus here.");
+    console.log("Suggestion rejected. In a real app, we&apos;d call updateSuggestionStatus here.");
   };
 
   return (

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -25,8 +25,8 @@ export function BulkOperations({
   onCancel,
 }: BulkOperationsProps) {
   const { createBulkOperation, subscribeToBulkOperation, isLoading } = useBulkOperations();
-  const [operation, setOperation] = useState<BulkOperation | null>(null);
-  const [selectedOperation, setSelectedOperation] = useState<BulkOperationType>('delete');
+  const [operation, setOperation] =<BulkOperation | null>(null);
+  const [selectedOperation, setSelectedOperation] =<BulkOperationType>('delete');
 
   const handleOperationStart = async () => {
     try {

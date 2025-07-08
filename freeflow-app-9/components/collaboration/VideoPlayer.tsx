@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, SyntheticEvent } from 'react';
+import React, { useState, SyntheticEvent } from 'react';
 import CommentPopover from './CommentPopover';
 
 interface VideoPlayerProps {
@@ -12,7 +12,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, onAddComment }) => 
   const [isPaused, setIsPaused] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [showPopover, setShowPopover] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef =<HTMLVideoElement>(null);
 
   const handleTimeUpdate = (e: SyntheticEvent<HTMLVideoElement>) => {
     setCurrentTime(e.currentTarget.currentTime);

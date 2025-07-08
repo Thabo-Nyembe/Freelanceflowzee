@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -303,7 +303,7 @@ export function EnterpriseDashboard() {
                   Service Utilization
                 </CardTitle>
                 <CardDescription>
-                  How efficiently you're using your paid plans
+                  How efficiently you&apos;re using your paid plans
                 </CardDescription>
               </CardHeader>
               <CardContent className= "space-y-4">

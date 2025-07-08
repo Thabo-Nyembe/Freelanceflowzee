@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from "react"
+import { } from "react"
 import Link from "next/link"
 
 export default function EnhancedNavigationSystem() {

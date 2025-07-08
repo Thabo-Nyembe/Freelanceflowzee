@@ -3,12 +3,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { PortfolioEnhancer } from '../video/ai/portfolio-enhancer';
 import { ClientReviewEnhancer } from '../video/ai/client-review-enhancer';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useSupabase } from '@/components/providers/index';
 import { Button } from '../ui/button';
 import { PlusCircle, Video, Users, FileText, BarChart } from 'lucide-react';
 
 export const FreelancerDashboard = () => {
-  const supabase = useSupabaseClient();
+  const supabase = useSupabase();
   const [activeProject, setActiveProject] = React.useState<any>(null);
   const [stats, setStats] = React.useState({
     totalEarnings: 0,
@@ -139,7 +139,7 @@ export const FreelancerDashboard = () => {
 
 // Projects List Component
 const ProjectsList = ({ onProjectSelect }: { onProjectSelect: (project: any) => void }) => {
-  const supabase = useSupabaseClient();
+  const supabase = useSupabase();
   const [projects, setProjects] = React.useState<any[]>([]);
 
   React.useEffect(() => {

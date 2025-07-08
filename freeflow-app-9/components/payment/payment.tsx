@@ -1,4 +1,4 @@
-// import React, {} from 'react'
+// import {} from 'react'
 import { useSupabase } from '../../__mocks__/supabase-provider'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 // import { Input } from '@/components/ui/input'

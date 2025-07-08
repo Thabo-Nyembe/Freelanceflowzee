@@ -7,7 +7,6 @@
 import React, {
   useState,
   useReducer,
-  useRef,
 } from 'react'
 
 /* ------------------------------------------------------------------
@@ -292,8 +291,8 @@ export function EnterpriseVideoStudio({
 }: EnterpriseVideoStudioProps) {
   const [state, dispatch] = useReducer(videoStudioReducer, initialState)
 
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const videoRef =<HTMLVideoElement>(null)
+  const mediaRecorderRef =<MediaRecorder | null>(null)
   const [isClient, setIsClient] = useState(false)
 
   React.useEffect(() => {
@@ -331,7 +330,7 @@ export function EnterpriseVideoStudio({
     }
   };
 
-  const startRecording = async () => {
+  const _startRecording = async () => {
     const stream = await navigator.mediaDevices.getDisplayMedia({
       video: true,
       audio: true
@@ -342,7 +341,7 @@ export function EnterpriseVideoStudio({
     dispatch({ type: 'START_RECORDING' });
   };
 
-  const stopRecording = () => {
+  const _stopRecording = () => {
     if (mediaRecorderRef.current) {
       mediaRecorderRef.current.stop();
       dispatch({ type: 'STOP_RECORDING' });

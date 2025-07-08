@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -317,7 +317,7 @@ export function StartupCostDashboard() {
                 Annual Savings: ${(1200 - (costData.currentSpend * 12)).toFixed(0)}
               </div>
               <div className= "text-sm text-blue-600">
-                That's {Math.round(((1200 - (costData.currentSpend * 12)) / 1200) * 100)}% 
+                That&apos;s {Math.round(((1200 - (costData.currentSpend * 12)) / 1200) * 100)}% 
                 savings compared to standard cloud costs!
               </div>
             </div>

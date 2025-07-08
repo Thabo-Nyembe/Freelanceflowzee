@@ -3,10 +3,10 @@
 /**
  * Screen Recorder Component
  * Professional screen recording with audio capture
- * Integrated with FreeFlow's video upload infrastructure
+ * Integrated with FreeFlow&apos;s video upload infrastructure
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -70,7 +70,7 @@ export default function ScreenRecorder({
   const [isUploading, setIsUploading] = useState(false);
 
   // Preview refs
-  const previewRef = useRef<HTMLVideoElement>(null);
+  const previewRef =<HTMLVideoElement>(null);
 
   // Use the screen recorder hook
   const {

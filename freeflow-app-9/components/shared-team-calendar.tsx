@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useReducer, useState } from 'react'
+import { useReducer, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'

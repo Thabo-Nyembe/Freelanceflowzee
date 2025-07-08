@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useReducer, useCallback } from 'react'
+import React, { useState, useEffect, useReducer } from 'react'
 import {
   PlusCircle,
   GripVertical,
@@ -386,7 +386,7 @@ export function BlockBasedContentEditor({
   const [state, dispatch] = useReducer(editorReducer, initialState)
   const [showBlockMenu, setShowBlockMenu] = useState(false)
   const [blockMenuPosition, setBlockMenuPosition] = useState({ x: 0, y: 0 })
-  const editorRef = useRef<HTMLDivElement>(null)
+  const editorRef =<HTMLDivElement>(null)
 
   // Block types configuration
   const blockTypes = [
@@ -773,13 +773,13 @@ export function BlockBasedContentEditor({
   )
 
   const CardComponent = Card as any;
-  const CardHeaderComponent = CardHeader as any;
-  const CardTitleComponent = CardTitle as any;
-  const CardContentComponent = CardContent as any;
+  const _CardHeaderComponent = CardHeader as any;
+  const _CardTitleComponent = CardTitle as any;
+  const _CardContentComponent = CardContent as any;
   const ButtonComponent = Button as any;
-  const TextareaComponent = Textarea as any;
-  const InputComponent = Input as any;
-  const HeadingTagComponent = 'h1' as any; // Placeholder
+  const _TextareaComponent = Textarea as any;
+  const _InputComponent = Input as any;
+  const _HeadingTagComponent = 'h1' as any; // Placeholder
   const DndContextComponent = DndContext as any;
   const SortableContextComponent = SortableContext as any;
   const DragOverlayComponent = DragOverlay as any;

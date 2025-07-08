@@ -2,7 +2,7 @@
 
 import type React from 'react'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { ZoomIn, ZoomOut, MessageSquare, Pen, Square } from 'lucide-react'
 import { CommentDialog } from './comment-dialog'
@@ -18,7 +18,7 @@ export function ScreenshotViewer({ file, comments, onAddComment }: ScreenshotVie
   const [tool, setTool] = useState<"comment" | "pen" | "rectangle">("comment")
   const [showCommentDialog, setShowCommentDialog] = useState(false)
   const [clickPosition, setClickPosition] = useState<{ x: number; y: number } | null>(null)
-  const imageRef = useRef<HTMLDivElement>(null)
+  const imageRef =<HTMLDivElement>(null)
 
   const handleImageClick = (e: React.MouseEvent) => {
     if (tool !== "comment" || !imageRef.current) return

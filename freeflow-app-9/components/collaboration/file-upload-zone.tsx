@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -39,7 +39,7 @@ export default function FileUploadZone({
   onRemove,
   onRetry,
 }: FileUploadZoneProps) {
-  const [uploads, setUploads] = useState<FileUpload[]>([])
+  const [uploads, setUploads] =<FileUpload[]>([])
 
   const handleDrop = useCallback(
     async (acceptedFiles: File[]) => {

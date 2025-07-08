@@ -45,10 +45,10 @@ interface AnalyticsData {
   };
 }
 
-export const FreelancerAnalytics = () => {
+export const _FreelancerAnalytics = () => {
   const supabase = useSupabaseClient();
-  const [data, setData] = React.useState<AnalyticsData | null>(null);
-  const [timeframe, setTimeframe] = React.useState<'daily' | 'monthly' | 'yearly'>('monthly');
+  const [data, setData] = React.<AnalyticsData | null>(null);
+  const [timeframe, setTimeframe] = React.<'daily' | 'monthly' | 'yearly'>('monthly');
 
   React.useEffect(() => {
     loadAnalyticsData();

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -116,7 +116,7 @@ export default function ClientReviewPanel({
   const currentStageApprovals = review.approvals.filter(approval => approval.stage_id === review.current_stage);
   const pendingApprovals = currentStageApprovals.filter(approval => approval.status === 'pending');
   const approvedCount = currentStageApprovals.filter(approval => approval.status === 'approved').length;
-  const rejectedCount = currentStageApprovals.filter(approval => approval.status === 'rejected').length;
+  const _rejectedCount = currentStageApprovals.filter(approval => approval.status === 'rejected').length;
 
   const getStatusColor = (status: string) => {
     switch (status) {

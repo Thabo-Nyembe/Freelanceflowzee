@@ -1,13 +1,13 @@
 'use client'
 
-import React, { useState } from 'react';
+import { } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { FileText, Users, BarChart3, DollarSign, Calendar, Zap, Eye, Play, ArrowRight } from 'lucide-react';
 
 export function DemoFeatureShowcase() {
-  const [activeDemo, setActiveDemo] = useState<string | null>(null);
+  const [activeDemo, setActiveDemo] =<string | null>(null);
 
   const features = [
     {
@@ -71,7 +71,7 @@ export function DemoFeatureShowcase() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold">Feature Showcase</h2>
-          <p className="text-gray-600">Experience FreeflowZee's powerful features with live demo data</p>
+          <p className="text-gray-600">Experience FreeflowZee&apos;s powerful features with live demo data</p>
         </div>
         <Badge variant="secondary" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
           🎭 Interactive Demos Available

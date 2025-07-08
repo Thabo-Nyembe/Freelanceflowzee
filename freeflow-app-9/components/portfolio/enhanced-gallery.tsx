@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useReducer, useState, useCallback, useEffect } from 'react'
+import { useReducer, useState, useCallback, useEffect } from 'react'
 import {
   Card,
   CardContent,

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
@@ -29,7 +29,7 @@ export function GestureRecognitionControls({
   const [isEnabled, setIsEnabled] = useState(false)
   const [gestureService, setGestureService] = useState<GestureRecognitionService | null>(null)
   const [lastGesture, setLastGesture] = useState<GestureEvent | null>(null)
-  const animationFrameRef = useRef<number>()
+  const animationFrameRef =<number>()
 
   // Initialize gesture service
   useEffect(() => {

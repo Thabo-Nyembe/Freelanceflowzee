@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -123,7 +123,7 @@ export function SmartRecordingTips({
   contentQuality,
   recordingDuration
 }: SmartRecordingTipsProps) {
-  const [activeTips, setActiveTips] = useState<Tip[]>([])
+  const [activeTips, setActiveTips] =<Tip[]>([])
 
   // Update active tips based on current conditions
   useEffect(() => {

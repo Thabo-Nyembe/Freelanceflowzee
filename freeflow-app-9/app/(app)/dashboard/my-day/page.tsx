@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useReducer, useEffect } from 'react'
+import { useState, useReducer, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -142,7 +142,7 @@ const mockAIInsights: AIInsight[] = [
     id: 'insight_3',
     type: 'health',
     title: 'Break Reminder',
-    description: "You've been working for 2.5 hours. Take a 15-minute break to maintain productivity.",
+    description: "You&apos;ve been working for 2.5 hours. Take a 15-minute break to maintain productivity.",
     actionable: true,
     priority: 'high'
   }
@@ -418,7 +418,7 @@ export default function MyDayPage() {
                   <div>
                     <p className="text-sm font-medium text-gray-600">Focus Time</p>
                     <p className="text-3xl font-bold text-gray-900">{focusHours}h {focusMinutes}m</p>
-                    <p className="text-sm text-gray-500">Today's work</p>
+                    <p className="text-sm text-gray-500">Today&apos;s work</p>
                   </div>
                   <div className="p-3 bg-blue-100 rounded-xl">
                     <Timer className="h-6 w-6 text-blue-600" />
@@ -499,7 +499,7 @@ export default function MyDayPage() {
           <TabsList className="grid w-full grid-cols-4 bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl p-2 shadow-xl">
             <TabsTrigger value="today" className="flex items-center gap-2 rounded-2xl">
               <Calendar className="h-4 w-4" />
-              Today's Tasks
+              Today&apos;s Tasks
             </TabsTrigger>
             <TabsTrigger value="schedule" className="flex items-center gap-2 rounded-2xl">
               <Clock className="h-4 w-4" />
@@ -518,7 +518,7 @@ export default function MyDayPage() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Today's Tasks Tab */}
+          {/* Today&apos;s Tasks Tab */}
           <TabsContent value="today" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Tasks List */}
@@ -528,7 +528,7 @@ export default function MyDayPage() {
                     <CardTitle className="flex items-center justify-between">
                       <span className="flex items-center gap-2">
                         <Target className="h-5 w-5" />
-                        Today's Tasks
+                        Today&apos;s Tasks
                       </span>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">
@@ -768,7 +768,7 @@ export default function MyDayPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="h-5 w-5" />
-                  Today's Schedule
+                  Today&apos;s Schedule
                 </CardTitle>
               </CardHeader>
               <CardContent>

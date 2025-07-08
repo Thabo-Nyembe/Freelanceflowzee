@@ -4,7 +4,6 @@ import React, {
   createContext,
   useContext,
   useEffect,
-  useRef,
   useState,
   ReactNode
 } from 'react'
@@ -57,7 +56,7 @@ export function CollaborationProvider({
   const [isConnected, setIsConnected] = useState(false)
   const [lastSynced, setLastSynced] = useState<string | null>(null)
 
-  const blockRefs = useRef<{ [key: string]: HTMLElement }>({})
+  const blockRefs =<{ [key: string]: HTMLElement }>({})
 
   const api = useCollaboration({
     projectId,

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useDashboardMetrics, useDemoContent } from '@/components/dashboard/demo-content-provider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 
 export function ClientPresentationDemo() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const dashboardMetrics = useDashboardMetrics();
+  const _dashboardMetrics = useDashboardMetrics();
   const { content } = useDemoContent();
   const projects = content?.projects;
   const users = content?.users;

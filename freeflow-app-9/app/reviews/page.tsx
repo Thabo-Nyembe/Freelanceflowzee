@@ -1,4 +1,3 @@
-import React from 'react';
 import { Metadata } from 'next';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
@@ -26,7 +25,7 @@ async function getReviewData(userId: string) {
   const supabase = createServerComponentClient({ cookies });
   
   try {
-    // Get user's reviews
+    // Get user&apos;s reviews
     const { data: reviews, error: reviewsError } = await supabase
       .from('client_reviews')
       .select(`

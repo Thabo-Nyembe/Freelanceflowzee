@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useReducer } from 'react'
+import { useReducer } from 'react'
 import { 
   Lock, Unlock, Download, Heart, Eye, CheckCircle, XCircle, Clock, Grid, List, Search,
   CreditCard, ShieldCheck, ArrowRight

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Upload, FileIcon, CheckCircle, AlertCircle } from 'lucide-react';
@@ -23,7 +23,7 @@ export function EnhancedUploadButton({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
   const [files, setFiles] = useState<File[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef =<HTMLInputElement>(null);
 
   // Context7 drag-and-drop handler
   const handleDragOver = useCallback((e: React.DragEvent) => {

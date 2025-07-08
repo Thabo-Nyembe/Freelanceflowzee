@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useReducer, useCallback, useRef } from 'react'
+import React, { useReducer, useCallback } from 'react'
 import { Shield, Upload, Image, Video, Music, FileText, Archive, Check, Unlock, X, Copy, Eye, Lock, Globe, Clock, Star, Download, Share2, Heart, TrendingUp, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -239,7 +239,7 @@ export function EnhancedUploadProgress({
     }
   })
   
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef =<HTMLInputElement>(null)
   const { toast } = useToast()
 
   // Generate SEO optimized metadata

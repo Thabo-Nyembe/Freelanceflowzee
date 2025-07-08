@@ -76,7 +76,7 @@ export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDia
               id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="What's on your mind?"
+              placeholder="What&apos;s on your mind?"
               rows={4}
             />
           </div>

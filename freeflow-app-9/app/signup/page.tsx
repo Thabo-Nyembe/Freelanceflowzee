@@ -25,7 +25,7 @@ export default function SignUpPage() {
                   Start Your Freelance Success Story
                 </h1>
                 <p className="text-xl text-gray-600 mb-8">
-                  Join thousands of freelancers who've transformed their business with FreeFlow's AI-powered platform.
+                  Join thousands of freelancers who&apos;ve transformed their business with FreeFlow&apos;s AI-powered platform.
                 </p>
               </div>
 

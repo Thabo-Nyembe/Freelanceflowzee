@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Brain, 
   Play, 
@@ -46,17 +46,17 @@ const DEMO_VIDEO = {
 
 const DEMO_TRANSCRIPTION = {
   id: 'demo-transcript-1',
-  text: `Welcome to this comprehensive tutorial on building a React video player. Today we're going to cover everything from basic setup to advanced features like custom controls and analytics tracking. 
+  text: `Welcome to this comprehensive tutorial on building a React video player. Today we&apos;re going to cover everything from basic setup to advanced features like custom controls and analytics tracking. 
 
-First, let's start with the basic HTML5 video element and how to integrate it with React. We'll be using modern React hooks like useState and useEffect to manage our player state.
+First, let&apos;s start with the basic HTML5 video element and how to integrate it with React. We&apos;ll be using modern React hooks like useState and to manage our player state.
 
-The key components we'll build include the video display area, play/pause controls, a progress bar with seeking functionality, volume controls, and fullscreen capabilities. We'll also implement keyboard shortcuts for better user experience.
+The key components we&apos;ll build include the video display area, play/pause controls, a progress bar with seeking functionality, volume controls, and fullscreen capabilities. We&apos;ll also implement keyboard shortcuts for better user experience.
 
-For the backend, we'll integrate with a video hosting service to handle different video formats and streaming optimization. This ensures our player works across all devices and connection speeds.
+For the backend, we&apos;ll integrate with a video hosting service to handle different video formats and streaming optimization. This ensures our player works across all devices and connection speeds.
 
-Finally, we'll add analytics tracking to understand user engagement patterns and optimize the viewing experience. This includes tracking play events, seek positions, and completion rates.
+Finally, we&apos;ll add analytics tracking to understand user engagement patterns and optimize the viewing experience. This includes tracking play events, seek positions, and completion rates.
 
-By the end of this tutorial, you'll have a production-ready video player that you can customize for your specific needs.`,
+By the end of this tutorial, you&apos;ll have a production-ready video player that you can customize for your specific needs.`,
   language: 'en',
   duration_seconds: 1247,
   confidence_score: 0.96,
@@ -73,14 +73,14 @@ By the end of this tutorial, you'll have a production-ready video player that yo
       id: 2,
       start: 15,
       end: 32,
-      text: "Today we're going to cover everything from basic setup to advanced features like custom controls and analytics tracking.",
+      text: "Today we&apos;re going to cover everything from basic setup to advanced features like custom controls and analytics tracking.",
       confidence: 0.97
     },
     {
       id: 3,
       start: 32,
       end: 58,
-      text: "First, let's start with the basic HTML5 video element and how to integrate it with React. We'll be using modern React hooks like useState and useEffect to manage our player state.",
+      text: "First, let&apos;s start with the basic HTML5 video element and how to integrate it with React. We&apos;ll be using modern React hooks like useState and to manage our player state.",
       confidence: 0.95
     }
   ]

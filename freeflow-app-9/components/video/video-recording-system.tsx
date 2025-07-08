@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { MediaStreamComposer } from '@api.video/media-stream-composer'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -40,8 +40,8 @@ export function VideoRecordingSystem({
   const [isRecording, setIsRecording] = useState(false)
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null)
-  const internalVideoRef = useRef<HTMLVideoElement>(null)
-  const chunksRef = useRef<Blob[]>([])
+  const internalVideoRef =<HTMLVideoElement>(null)
+  const chunksRef =<Blob[]>([])
 
   const videoElementRef = externalVideoRef || internalVideoRef
 

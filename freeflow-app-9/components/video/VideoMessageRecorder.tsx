@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { MediaStreamComposer } from '@api.video/media-stream-composer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,8 +26,8 @@ export default function VideoMessageRecorder({
   const [hasCamera, setHasCamera] = useState(false);
   const [hasScreen, setHasScreen] = useState(false);
   
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const _videoRef =<HTMLVideoElement>(null);
+  const _containerRef =<HTMLDivElement>(null);
 
   useEffect(() => {
     return () => {

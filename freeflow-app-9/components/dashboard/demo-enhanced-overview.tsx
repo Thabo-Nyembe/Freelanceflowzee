@@ -1,6 +1,5 @@
 'use client'
 
-import React from 'react';
 import { useDashboardMetrics, useCommunityMetrics } from './demo-content-provider';
 import { DollarSign, FileText, Users, TrendingUp, Clock, Star } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useReducer, useCallback, useEffect } from 'react'
+import { useReducer, useCallback, useEffect } from 'react'
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, Users, DollarSign, Briefcase, Check, X, MoreHorizontal, PlusCircle, Filter, BarChart2 } from 'lucide-react'
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, getDay, isToday } from 'date-fns'
 import { Button } from '@/components/ui/button'

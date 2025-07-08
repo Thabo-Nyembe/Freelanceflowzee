@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useReducer, useCallback, useEffect } from 'react'
+import { useReducer, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
