@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.glass-card {
+  @apply bg-white/60 backdrop-blur-xl border border-white/20 shadow-lg rounded-xl;
+}
+
+.glass-button {
+  @apply bg-white/60 backdrop-blur-xl border border-white/20 shadow-md hover:bg-white/80 transition-all duration-200 rounded-lg;
+}

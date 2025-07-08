@@ -5,7 +5,7 @@ import { ThemeProvider } from '@/components/providers/theme-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 import { Context7Provider } from '@/components/providers/context7-provider'
 import { Providers } from '@/components/providers'
-import '../styles/globals.css'
+// import './globals.css' // Temporarily disabled due to webpack CSS parsing issue
 
 const inter = Inter({ subsets: ['latin'] })
 
