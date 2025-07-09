@@ -1,0 +1,8 @@
+.btn-cta {
+  background: linear-gradient(90deg, #6E4BFF, #23E6B5);
+  background-size: 200% 100%;
+  transition: background-position 0.4s ease;
+}
+.btn-cta:hover {
+  background-position: 100% 0;
+}

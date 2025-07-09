@@ -11,11 +11,11 @@ import '../styles/globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'FreeFlowZee - Modern Freelance Management Platform',
-  description: 'AI-powered freelance management platform with video collaboration and real-time document editing',
+  title: 'KAZI - Enterprise Freelance Management Platform',
+  description: 'AI-powered freelance management platform with video collaboration, real-time document editing, and secure payment systems',
   viewport: 'width=device-width, initial-scale=1',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/kazi-brand/glyph-dark.png',
     apple: '/apple-touch-icon.png',
   },
 }

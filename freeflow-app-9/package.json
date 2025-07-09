@@ -1,11 +1,11 @@
 {
-  "name": "freeflow-app",
+  "name": "kazi-platform",
   "version": "0.1.0",
   "private": true,
   "engines": {
     "node": ">=18.17.0"
   },
-  "description": "Modern FreeFlow - Framework7-inspired Freelance Management Platform",
+  "description": "KAZI - Enterprise Freelance Management Platform with AI-powered tools, real-time collaboration, and secure payment systems",
   "scripts": {
     "preinstall": "npx npm-force-resolutions",
     "dev": "NODE_OPTIONS='--max-old-space-size=16384' next dev -p 9323",

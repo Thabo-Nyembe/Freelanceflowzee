@@ -1,4 +1,4 @@
-# 🚀 FreeFlow - Enterprise Freelance Management Platform
+# 🚀 KAZI - Enterprise Freelance Management Platform
 
 **A comprehensive, AI-powered platform for freelancers and clients to collaborate, create, and grow their businesses.**
 
@@ -27,9 +27,9 @@
 
 ## 🎯 Overview
 
-FreeFlow is an enterprise-grade freelance management platform that combines cutting-edge AI technology with professional collaboration tools. Built for freelancers, agencies, and clients who demand the best in project management, creative tools, and secure payment processing.
+KAZI is an enterprise-grade freelance management platform that combines cutting-edge AI technology with professional collaboration tools. Built for freelancers, agencies, and clients who demand the best in project management, creative tools, and secure payment processing.
 
-### ✨ **What Makes FreeFlow Special?**
+### ✨ **What Makes KAZI Special?**
 
 - 🤖 **AI-Powered Everything** - Multi-model AI integration (OpenAI, Anthropic, Google AI)
 - 🎥 **Professional Video Studio** - Complete editing suite with AI enhancement
@@ -211,7 +211,7 @@ FreeFlow is an enterprise-grade freelance management platform that combines cutt
 ## 📁 Project Structure
 
 ```
-freeflow-app-9/
+kazi-platform/
 ├── 📁 app/                    # Next.js App Router
 │   ├── (app)/dashboard/       # Protected dashboard routes
 │   ├── (marketing)/           # Public marketing pages
@@ -227,7 +227,9 @@ freeflow-app-9/
 ├── 📁 hooks/                  # Custom React hooks
 ├── 📁 docs/                   # Documentation
 ├── 📁 __tests__/              # Test suites
-└── 📁 public/                 # Static assets
+├── 📁 public/                 # Static assets
+│   └── kazi-brand/           # KAZI brand assets
+└── 📁 kazi_assets/           # Original brand assets
 ```
 
 For detailed structure, see [Project Structure Guide](COMPREHENSIVE_PROJECT_STRUCTURE.md).
@@ -254,6 +256,9 @@ npm run test:watch   # Run tests in watch mode
 # Database
 npm run db:reset     # Reset database
 npm run db:seed      # Seed database with demo data
+
+# Documentation
+./scripts/update-documentation.sh  # Update all documentation
 ```
 
 ### **Development Workflow**
@@ -402,10 +407,10 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 ### **Key Metrics**
 
-- **Components**: 150+ React components
-- **Test Coverage**: 20+ comprehensive test suites
-- **API Endpoints**: 50+ backend services
-- **Database Tables**: 19+ optimized data models
+- **Components: 304+ React components
+- **Test Coverage: 365+ comprehensive test suites
+- **API Endpoints: 46+ backend services
+- **Database Tables: 18+ optimized data models
 - **Documentation**: 10+ detailed guides
 
 ---
@@ -427,7 +432,7 @@ This project is proprietary software. All rights reserved.
 
 <div align="center">
 
-**Built with ❤️ by the FreeFlow Team**
+**Built with ❤️ by the KAZI Team**
 
 [🌐 Website](https://freeflow-app-9.vercel.app) • [📚 Docs](USER_MANUAL.md) • [🐛 Issues](https://github.com/Thabo-Nyembe/Freelanceflowzee/issues) • [💬 Discussions](https://github.com/Thabo-Nyembe/Freelanceflowzee/discussions)
 
