@@ -6,8 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 
 export const metadata: Metadata = {
-  title: 'Pricing | FreeFlow - Choose Your Perfect Plan',
-  description: 'Simple, transparent pricing for freelancers. Start free and scale as you grow with FreeFlow.',
+  title: 'Pricing | KAZI - Choose Your Perfect Plan',
+  description: 'Simple, transparent pricing for freelancers. Start free and scale as you grow with KAZI\'s enterprise features.',
+  keywords: 'KAZI pricing, freelance software cost, AI platform pricing, enterprise features'
 }
 
 export default function PricingPage() {
@@ -89,8 +90,9 @@ export default function PricingPage() {
             <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
               Simple, Transparent Pricing
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-              Start free and scale as you grow. No hidden fees, no surprises. Cancel anytime.
+            <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+              Join thousands of successful freelancers using KAZI to build thriving creative businesses 
+              with AI-powered tools, universal feedback systems, and secure payment protection.
             </p>
             
             {/* Billing Toggle */}

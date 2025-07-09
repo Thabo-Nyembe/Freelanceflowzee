@@ -42,46 +42,31 @@ const apiSections = [
 
 const codeExamples = {
   authentication: {
-    curl: `curl -X POST https://api.freeflowzee.com/auth/login \\
+    curl: `curl -X POST https://api.kazi-platform.com/auth/login \\
   -H "Content-Type: application/json" \\
-  -d '{"email": "user@example.com", "password": "your_password"}'`,
-    javascript: `const response = await fetch('https://api.freeflowzee.com/auth/login', {
+  -d '{"email": "user@example.com", "password": "password"}'`,
+    javascript: `const response = await fetch('https://api.kazi-platform.com/auth/login', {
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    email: 'user@example.com',
-    password: 'your_password'
-  })
-})
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email: 'user@example.com', password: 'password' })
+});`,
+    python: `import requests
 
-const data = await response.json()`,
-    python: `
-response = requests.post('https://api.freeflowzee.com/auth/login', 
-  json={'email': 'user@example.com', 'password': 'your_password'})
-  
-data = response.json()`
+response = requests.post('https://api.kazi-platform.com/auth/login',
+  json={'email': 'user@example.com', 'password': 'password'})`
   },
   projects: {
-    curl: `curl -X GET https://api.freeflowzee.com/projects \\
-  -H "Authorization: Bearer your_access_token" \\
-  -H "Content-Type: application/json"`,
-    javascript: `const response = await fetch('https://api.freeflowzee.com/projects', {
-  headers: {
-    'Authorization': 'Bearer your_access_token',
-    'Content-Type': 'application/json'
-  }
-})
+    curl: `curl -X GET https://api.kazi-platform.com/projects \\
+  -H "Authorization: Bearer YOUR_TOKEN"`,
+    javascript: `const response = await fetch('https://api.kazi-platform.com/projects', {
+  headers: { 'Authorization': 'Bearer YOUR_TOKEN' }
+});
 
-const projects = await response.json()`,
-    python: `
-headers = {
-  'Authorization': 'Bearer your_access_token',
-  'Content-Type': 'application/json'
-}
+const projects = await response.json();`,
+    python: `import requests
 
-response = requests.get('https://api.freeflowzee.com/projects', headers=headers)
+headers = {'Authorization': 'Bearer YOUR_TOKEN'}
+response = requests.get('https://api.kazi-platform.com/projects', headers=headers)
 projects = response.json()`
   }
 }
@@ -168,8 +153,9 @@ export default function ApiDocsPage() {
         <div className="max-w-7xl mx-auto px-4 py-12">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">API Documentation</h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Comprehensive API reference for integrating FreeflowZee into your applications
+            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+              Comprehensive API reference for integrating KAZI into your applications. 
+              Access AI models, collaboration tools, file storage, and payment systems.
             </p>
           </div>
 

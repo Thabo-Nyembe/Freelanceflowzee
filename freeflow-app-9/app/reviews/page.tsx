@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { InfoIcon } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Client Review Management | FreeFlow',
+  title: 'Client Review Management | KAZI',
   description: 'Manage client review workflows and approval processes for your video projects',
 };
 

@@ -24,7 +24,9 @@ export function JavaScriptDisabledFallback() {
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>JavaScript is Required</AlertTitle>
             <AlertDescription>
-              Please enable JavaScript in your browser to use all features of FreeflowZee.
+              <p className="text-lg text-gray-600 mb-4">
+                Please enable JavaScript in your browser to use all features of KAZI.
+              </p>
               <div className="mt-4">
                 <h3 className="font-semibold">Limited Functionality Available:</h3>
                 <ul className="list-disc list-inside mt-2">

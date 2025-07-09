@@ -14,44 +14,56 @@ export function ClientPresentationDemo() {
   const projects = content?.projects;
   const users = content?.users;
 
-  const slides = [
+  const presentationSlides = [
     {
-      title: "FreeflowZee: Your Complete Freelance Solution",
-      content: "overview",
-      description: 'Comprehensive platform for project management and collaboration'
+      id: 'intro',
+      title: "KAZI: Your Complete Creative Platform",
+      subtitle: "AI-Powered • Universal Feedback • Secure Payments",
+      content: "Enterprise-grade platform with 304+ components, multi-model AI studio, real-time collaboration, and comprehensive business management tools.",
+      bgColor: 'bg-gradient-to-br from-purple-600 to-blue-600'
     },
     {
+      id: 'metrics',
       title: "Proven Results & Success Metrics",
-      content: "metrics",
-      description: 'Real performance data from our thriving community'
+      subtitle: "Real performance data from our thriving community",
+      content: "Platform Performance",
+      bgColor: 'bg-gradient-to-br from-green-600 to-blue-600'
     },
     {
+      id: 'portfolio',
       title: "Project Portfolio Showcase",
-      content: "portfolio",
-      description: 'Successful projects delivered through our platform'
+      subtitle: "Successful projects delivered through our platform",
+      content: "Featured Projects",
+      bgColor: 'bg-gradient-to-br from-blue-600 to-purple-600'
     },
     {
+      id: 'testimonials',
       title: "Client Success Stories",
-      content: "testimonials",
-      description: 'What our clients say about working with our freelancers'
+      subtitle: "What our clients say about working with our freelancers",
+      content: "What Our Clients Say",
+      bgColor: 'bg-gradient-to-br from-purple-600 to-pink-600'
     },
     {
+      id: 'cta',
       title: "Ready to Get Started?",
+      subtitle: "Join thousands of satisfied clients and freelancers",
       content: "cta",
-      description: 'Join thousands of satisfied clients and freelancers'
+      bgColor: 'bg-gradient-to-br from-pink-600 to-purple-600'
     }
   ];
 
   const renderSlideContent = () => {
-    const slide = slides[currentSlide];
+    const slide = presentationSlides[currentSlide];
 
-    switch (slide.content) {
-      case 'overview':
+    switch (slide.id) {
+      case 'intro':
         return (
           <div className="text-center space-y-6">
-            <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-8 rounded-xl">
-              <h2 className="text-3xl font-bold mb-4">Welcome to FreeflowZee</h2>
-              <p className="text-xl opacity-90">The premier platform connecting clients with top-tier freelancers</p>
+            <div className={`${slide.bgColor} text-white p-8 rounded-xl`}>
+              <h2 className="text-3xl font-bold mb-4">Welcome to KAZI</h2>
+              <p className="text-xl opacity-90 mb-8">
+                The enterprise creative platform trusted by thousands of professionals worldwide
+              </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card>
@@ -158,7 +170,7 @@ export function ClientPresentationDemo() {
                       <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
-                  <p className="italic mb-4">"FreeflowZee helped us find the perfect freelancer for our web development project. The quality exceeded our expectations!"</p>
+                  <p className="italic mb-4">"KAZI helped us find the perfect freelancer for our web development project. The AI tools and universal feedback system made collaboration seamless!"</p>
                   <div className="font-semibold">- Sarah Johnson, Tech Startup CEO</div>
                 </CardContent>
               </Card>
@@ -182,7 +194,7 @@ export function ClientPresentationDemo() {
           <div className="text-center space-y-6">
             <div className="bg-gradient-to-r from-purple-500 to-blue-600 text-white p-8 rounded-xl">
               <h2 className="text-3xl font-bold mb-4">Ready to Start Your Next Project?</h2>
-              <p className="text-xl opacity-90 mb-6">Join thousands of satisfied clients who trust FreeflowZee</p>
+              <p className="text-xl opacity-90 mb-6">Join thousands of satisfied clients who trust KAZI</p>
               <div className="space-y-4">
                 <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100">
                   Start Your Project Today
@@ -218,13 +230,13 @@ export function ClientPresentationDemo() {
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex justify-between text-sm text-gray-500 mb-2">
-            <span>Slide {currentSlide + 1} of {slides.length}</span>
-            <span>{slides[currentSlide].title}</span>
+            <span>Slide {currentSlide + 1} of {presentationSlides.length}</span>
+            <span>{presentationSlides[currentSlide].title}</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
               className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
+              style={{ width: `${((currentSlide + 1) / presentationSlides.length) * 100}%` }}
             ></div>
           </div>
         </div>
@@ -245,7 +257,7 @@ export function ClientPresentationDemo() {
           </Button>
           
           <div className="flex space-x-2">
-            {slides.map((_, index) => (
+            {presentationSlides.map((_, index) => (
               <button
                 key={index}
                 className={`w-3 h-3 rounded-full transition-colors ${
@@ -257,8 +269,8 @@ export function ClientPresentationDemo() {
           </div>
 
           <Button 
-            onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))}
-            disabled={currentSlide === slides.length - 1}
+            onClick={() => setCurrentSlide(Math.min(presentationSlides.length - 1, currentSlide + 1))}
+            disabled={currentSlide === presentationSlides.length - 1}
           >
             Next
             <ArrowRight className="ml-2 h-4 w-4" />

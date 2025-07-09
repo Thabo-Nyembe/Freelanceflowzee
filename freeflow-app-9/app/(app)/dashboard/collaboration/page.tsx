@@ -30,11 +30,12 @@ export default function CollaborationPage() {
             <Users className="h-6 w-6 text-white" />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Collaboration Hub
+            Universal Collaboration Hub
           </h1>
         </div>
         <p className="text-lg text-gray-600">
-          Real-time collaboration tools for seamless project management
+          Revolutionary multi-media commenting, real-time collaboration, and AI-powered feedback analysis 
+          with live cursor tracking, voice notes, and instant synchronization across all project types.
         </p>
       </div>
 

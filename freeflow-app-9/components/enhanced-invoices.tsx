@@ -204,7 +204,7 @@ const sampleInvoices: Invoice[] = [
       },
       paymentTerms: 'Net 15',
       headerText: 'Professional Design Services',
-      footerText: 'Thank you for choosing FreeflowZee'
+      footerText: 'Thank you for choosing KAZI'
     }
   }
 ]

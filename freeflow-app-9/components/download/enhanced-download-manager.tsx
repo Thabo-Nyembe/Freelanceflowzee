@@ -207,7 +207,7 @@ export function EnhancedDownloadManager({
   onEscrowPayment,
   enableAnalytics = true,
   enableEscrow = true,
-  brandName = 'FreeflowZee'
+  brandName = 'KAZI'
 }: EnhancedDownloadManagerProps) {
 
   // Context7 Pattern: Central State Management

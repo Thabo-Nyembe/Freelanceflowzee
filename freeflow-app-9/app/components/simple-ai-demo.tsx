@@ -75,8 +75,8 @@ export function SimpleAIDemo() {
         textAlign: 'center',
         marginBottom: '30px'
       }}>
-        <h1 style={{ margin: '0 0 10px 0', fontSize: '32px' }}>
-          🤖 FreeflowZee AI Assistant
+        <h1 className="text-2xl font-bold mb-4">
+          🤖 KAZI AI Assistant
         </h1>
         <p style={{ margin: '0', fontSize: '18px', opacity: 0.9 }}>
           AI SDK v5 Integration • Business Optimization • Smart Analytics

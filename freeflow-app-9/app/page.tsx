@@ -20,83 +20,119 @@ import {
 const features = [
   {
     title: 'AI Create Studio',
-    description: 'Revolutionary AI-powered asset generation for all creative fields with premium model access.',
-    icon: Zap,
-    href: '/ai-demo',
+    description: 'Multi-model AI platform with GPT-4o, Claude, DALL-E, and Google AI for instant content generation across 6+ creative fields.',
+    icon: Brain,
+    href: '/dashboard/ai-create',
     benefits: [
-      'Generate assets for 6+ creative fields instantly',
-      'Access to premium AI models (GPT-4o, Claude, DALL-E)',
-      'Free trials of expensive premium models',
-      'Photography, Design, Music, Video & more'
+      'Access to 4 premium AI models (GPT-4o, Claude, DALL-E, Google AI)',
+      'Generate images, copy, code, and multimedia content instantly',
+      'Industry-specific templates for design, photography, music & video',
+      'Cost-optimized AI usage with intelligent model switching'
     ]
   },
   {
-    title: 'Files & Escrow System',
-    description: 'Professional file sharing with WeTransfer-like experience plus secure payment protection.',
-    icon: Upload,
-    href: '/video-studio',
-    benefits: [
-      'WeTransfer-style professional file sharing',
-      'Secure escrow payment protection',
-      'Real-time upload/download progress',
-      'SEO-optimized sharing pages with social integration'
-    ]
-  },
-  {
-    title: 'Video Studio Pro',
-    description: 'Complete video editing suite with AI-powered features and professional templates.',
-    icon: Video,
-    href: '/video-studio',
-    benefits: [
-      'Professional video editing tools',
-      'AI-powered video enhancement',
-      'Template library and effects',
-      'Direct client collaboration on videos'
-    ]
-  },
-  {
-    title: 'Community Hub',
-    description: 'Connect, collaborate, and grow with a thriving community of creative professionals.',
-    icon: Users,
-    href: '/community',
-    benefits: [
-      'Network with 10,000+ creatives worldwide',
-      'Share projects and get feedback',
-      'Collaborative project opportunities',
-      'Professional networking and referrals'
-    ]
-  },
-  {
-    title: 'Smart Project Tracker',
-    description: 'AI-enhanced project management with milestone tracking and automated client updates.',
+    title: 'Universal Pinpoint Feedback',
+    description: 'Revolutionary multi-media commenting system with AI analysis, voice notes, and pixel-perfect annotations.',
     icon: Target,
-    href: '/dashboard/projects-hub',
+    href: '/dashboard/collaboration',
     benefits: [
-      'Visual progress tracking with analytics',
-      'Automated client milestone notifications',
-      'AI-powered project insights',
-      'Integrated payment milestone triggers'
+      'Comment on images, videos, PDFs, code files with precise positioning',
+      'AI-powered feedback categorization and priority assessment',
+      'Voice recording with waveform visualization and transcription',
+      'Real-time collaboration with @mentions and emoji reactions'
     ]
   },
   {
-    title: 'Global Payment System',
-    description: 'Instant payments, automated invoicing, and multi-currency support with escrow protection.',
-    icon: CreditCard,
-    href: '/dashboard/financial-hub',
+    title: 'Professional Video Studio',
+    description: 'Complete video editing suite with AI transcription, chapters, screen recording, and client collaboration.',
+    icon: Video,
+    href: '/dashboard/video-studio',
     benefits: [
-      'Instant global payment processing',
-      'Automated invoice generation',
-      'Multi-currency and tax handling',
-      'Secure escrow for project protection'
+      'Timeline-based editing with effects, transitions, and filters',
+      'AI-powered auto-transcription and smart chapter generation',
+      'Screen recording with webcam overlay and annotation tools',
+      'Timestamp-based commenting and approval workflows'
+    ]
+  },
+  {
+    title: 'Multi-Cloud Storage System',
+    description: 'Enterprise-grade file management with 70% cost savings through intelligent Supabase + Wasabi routing.',
+    icon: Upload,
+    href: '/dashboard/files-hub',
+    benefits: [
+      'Hybrid cloud storage (Supabase + Wasabi S3) with smart routing',
+      '70% cost optimization with automated file tier management',
+      'Professional file sharing with WeTransfer-like experience',
+      'Version control, permissions, and comprehensive analytics'
+    ]
+  },
+  {
+    title: 'Escrow Payment System',
+    description: 'Secure milestone-based payment protection with automated invoicing and multi-currency support.',
+    icon: Shield,
+    href: '/dashboard/escrow',
+    benefits: [
+      'Milestone-based escrow with automatic release triggers',
+      'Stripe integration with global payment processing',
+      'Professional invoice generation with tax calculations',
+      'Real-time payment tracking and comprehensive analytics'
+    ]
+  },
+  {
+    title: 'Creator Community Hub',
+    description: 'Thriving marketplace with 2,800+ active creators, social features, and collaboration opportunities.',
+    icon: Users,
+    href: '/dashboard/community',
+    benefits: [
+      'Access to 2,800+ verified creative professionals worldwide',
+      'Instagram-like social wall with posts, videos, and audio',
+      'Creator marketplace with portfolios and skill matching',
+      'Real-time messaging and project collaboration tools'
+    ]
+  },
+  {
+    title: 'AI Daily Planning',
+    description: 'Intelligent task management with productivity optimization, time estimates, and automated scheduling.',
+    icon: Zap,
+    href: '/dashboard/my-day',
+    benefits: [
+      'AI-powered daily schedule optimization and task prioritization',
+      'Smart time estimates with productivity pattern analysis',
+      'Automated client meeting scheduling across time zones',
+      'Progress tracking with insights and efficiency recommendations'
+    ]
+  },
+  {
+    title: 'Real-Time Collaboration',
+    description: 'Live multi-user editing with cursors, selections, presence indicators, and instant synchronization.',
+    icon: Users,
+    href: '/dashboard/collaboration',
+    benefits: [
+      'Live cursor tracking and user presence indicators',
+      'Real-time document editing with conflict resolution',
+      'Instant messaging with file sharing and screen sharing',
+      'Multi-step approval workflows with automated notifications'
+    ]
+  },
+  {
+    title: 'Advanced Analytics Suite',
+    description: 'Comprehensive business intelligence with revenue tracking, performance metrics, and cost optimization.',
+    icon: TrendingUp,
+    href: '/dashboard/analytics',
+    benefits: [
+      'Real-time revenue and project performance dashboards',
+      'Cost optimization insights with storage and AI usage analytics',
+      'Client satisfaction metrics and project success predictions',
+      'Custom reporting with automated weekly/monthly summaries'
     ]
   }
 ]
 
 const stats = [
-  { value: '100K+', label: 'AI Assets Generated', growth: '+156%' },
-  { value: '2M+', label: 'Files Shared Securely', growth: '+89%' },
-  { value: '25,000+', label: 'Creative Professionals', growth: '+67%' },
-  { value: '$5M+', label: 'Escrow Transactions', growth: '+234%' }
+  { value: '304+', label: 'React Components', growth: 'Production Ready' },
+  { value: '46+', label: 'API Endpoints', growth: 'Enterprise Grade' },
+  { value: '365+', label: 'Test Files', growth: 'A+++ Quality' },
+  { value: '2,800+', label: 'Active Creators', growth: '+127% Growth' }
 ]
 
 export const metadata: Metadata = {
@@ -152,16 +188,16 @@ export default function HomePage() {
           </div>
           
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-            AI-Powered Creative Platform
+            Enterprise Freelance Management Platform
           </h1>
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
-            For Modern Professionals
+            AI-Powered • Real-Time Collaboration • Secure Payments
           </h2>
           
           <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
-            Generate creative assets with AI, share files like WeTransfer, manage projects 
-            with escrow payments, and build your creative business - all in one 
-            revolutionary platform.
+            The complete platform for creative professionals featuring multi-model AI studio, 
+            universal pinpoint feedback system, real-time collaboration, multi-cloud storage 
+            with 70% cost savings, and secure escrow payments - all in one revolutionary platform.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
@@ -222,11 +258,12 @@ export default function HomePage() {
       {/* Features Grid */}
       <section className="container mx-auto px-4 py-16 bg-gray-50">
         <h2 className="text-4xl font-bold text-center text-gray-900 mb-4">
-          Everything You Need to Succeed
+          Complete Enterprise Feature Suite
         </h2>
         <p className="text-xl text-gray-600 text-center mb-16 max-w-3xl mx-auto">
-          From AI-powered asset generation to secure payment processing, 
-          KAZI provides all the tools modern creatives need to thrive.
+          From multi-model AI studio to universal feedback systems, real-time collaboration 
+          to secure escrow payments - KAZI provides 304+ components and 46+ APIs for 
+          comprehensive creative business management.
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

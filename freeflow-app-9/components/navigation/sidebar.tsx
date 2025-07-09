@@ -150,8 +150,14 @@ export function Sidebar() {
   return (
     <div className="flex flex-col h-full bg-gray-50 border-r border-gray-200">
       <div className="p-6 bg-white border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-900">FreeflowZee</h1>
-        <h2 className="text-sm text-gray-600">Enterprise Dashboard</h2>
+          <div className="flex items-center gap-3 mb-8">
+            <img 
+              src="/kazi-brand/logo.svg" 
+              alt="KAZI" 
+              className="h-8 w-auto"
+            />
+            <h1 className="text-2xl font-bold text-gray-900">KAZI</h1>
+          </div>
       </div>
       
       <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">

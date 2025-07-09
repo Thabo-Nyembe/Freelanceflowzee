@@ -231,7 +231,7 @@ export function InteractiveContactSystem({
   const handleDirectAction = (action: string, value: string) => {
     switch (action) {
       case 'email':
-        window.location.href = `mailto:${value}?subject=Contact from FreeflowZee Website`;
+        window.location.href = `mailto:${value}?subject=Contact from KAZI Website`;
         break;
       case 'phone':
         window.location.href = `tel:${value}`;
@@ -359,8 +359,8 @@ export function InteractiveContactSystem({
                         <ContactMethod
                             icon={Mail}
                             title="General Inquiries"
-                            value="support@freeflow.com"
-                            action={() => handleDirectAction('email', 'support@freeflow.com')}
+                            value="support@kazi-platform.com"
+                            action={() => handleDirectAction('email', 'support@kazi-platform.com')}
                             description="For general questions and support."
                         />
                         <ContactMethod

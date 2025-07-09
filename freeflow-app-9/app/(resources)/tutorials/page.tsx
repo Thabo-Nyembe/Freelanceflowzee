@@ -21,14 +21,13 @@ const tutorialCategories = [
 const featuredTutorials = [
   {
     id: 1,
-    title: 'Complete Guide to Setting Up Your FreeflowZee Account',
-    description: 'Learn how to optimize your profile, set up your services, and get your first client',
-    duration: '15 min',
-    level: 'Beginner',
-    views: '12.4k',
-    rating: 4.9,
-    thumbnail: '/images/tutorials/setup-guide.jpg',
-    category: 'getting-started'
+    title: 'Complete Guide to Setting Up Your KAZI Account',
+    description: 'Get started with KAZI in minutes. Learn how to set up your profile, connect AI models, configure multi-cloud storage, and start your first project.',
+    category: 'Getting Started',
+    duration: '10 min read',
+    difficulty: 'Beginner',
+    image: '/images/tutorials/getting-started.jpg',
+    url: '/tutorials/getting-started'
   },
   {
     id: 2,
@@ -107,12 +106,12 @@ export default function TutorialsPage() {
       <main className="container mx-auto px-4 py-8">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            FreeflowZee Tutorials
+          <h1 className="text-4xl font-bold mb-4">
+            KAZI Tutorials
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Master your freelance business with our comprehensive video tutorials. 
-            From setup to advanced strategies, learn everything you need to succeed.
+          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            Master KAZI's powerful features with step-by-step guides, video tutorials, 
+            and expert tips. From AI content creation to universal feedback systems.
           </p>
         </div>
 
@@ -278,9 +277,9 @@ export default function TutorialsPage() {
 
         {/* Learning Path CTA */}
         <div className="mt-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Master FreeflowZee?</h2>
-          <p className="text-xl mb-6 opacity-90">
-            Follow our structured learning paths designed for your success level
+          <h2 className="text-3xl font-bold mb-4">Ready to Master KAZI?</h2>
+          <p className="text-xl text-gray-600 mb-8">
+            Start with our comprehensive tutorial series and become a KAZI expert in no time.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100">

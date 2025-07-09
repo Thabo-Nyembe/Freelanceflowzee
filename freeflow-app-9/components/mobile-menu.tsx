@@ -38,13 +38,14 @@ export function MobileMenu({ items, children }: MobileMenuProps) {
       </SheetTrigger>
       <SheetContent side="left" className="pl-1 pr-0">
         <div className="px-7">
-          <Link
-            href="/"
-            className="flex items-center"
-            onClick={() => setOpen(false)}
-          >
-            <span className="font-bold">FreeFlowZee</span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <img 
+              src="/kazi-brand/logo.svg" 
+              alt="KAZI" 
+              className="h-6 w-auto"
+            />
+            <span className="font-bold">KAZI</span>
+          </div>
         </div>
         <ScrollArea className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
           <div className="pl-1 pr-7">

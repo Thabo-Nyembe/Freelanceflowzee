@@ -19,92 +19,92 @@ import {
 
 const features = [
   {
-    title: 'AI-Powered Asset Generation',
+    title: 'Multi-Model AI Studio',
     description:
-      'Generate images, copy and video transcripts with a single prompt. Powered by the latest OpenAI & Anthropic models.',
+      'Access 4 premium AI models (GPT-4o, Claude, DALL-E, Google AI) for instant content generation across creative fields.',
     icon: Brain,
     href: '/dashboard/ai-create',
     color: 'bg-purple-500/10 text-purple-500',
   },
   {
-    title: 'Secure Escrow Payments',
+    title: 'Universal Pinpoint Feedback',
     description:
-      'Built-in escrow keeps funds safe until milestones are approved – no plugins required.',
-    icon: Shield,
-    href: '/dashboard/escrow',
-    color: 'bg-blue-500/10 text-blue-500',
-  },
-  {
-    title: 'Smart Document Management',
-    description:
-      'Organize, share, and collaborate on documents with version control and real-time editing.',
-    icon: FileText,
-    href: '/dashboard/documents',
-    color: 'bg-yellow-500/10 text-yellow-500',
+      'Revolutionary multi-media commenting on images, videos, PDFs, and code with AI analysis and voice notes.',
+    icon: MessageSquare,
+    href: '/dashboard/collaboration',
+    color: 'bg-pink-500/10 text-pink-500',
   },
   {
     title: 'Professional Video Studio',
     description:
-      'Record, edit, and share high-quality videos with our built-in studio. Includes screen recording and webcam.',
+      'Complete video editing with AI transcription, screen recording, timestamp comments, and client collaboration.',
     icon: Video,
     href: '/dashboard/video-studio',
     color: 'bg-red-500/10 text-red-500',
   },
   {
-    title: 'Team Collaboration',
+    title: 'Multi-Cloud Storage System',
     description:
-      'Work together seamlessly with real-time chat, file sharing, and task management.',
-    icon: Users,
-    href: '/dashboard/team',
-    color: 'bg-green-500/10 text-green-500',
-  },
-  {
-    title: 'Global Creator Network',
-    description:
-      'Connect with talented creators worldwide. Find the perfect match for your project.',
-    icon: Globe,
-    href: '/dashboard/creators',
-    color: 'bg-indigo-500/10 text-indigo-500',
-  },
-  {
-    title: 'Smart Scheduling',
-    description:
-      'AI-powered calendar that automatically finds the best meeting times across time zones.',
-    icon: Calendar,
-    href: '/dashboard/calendar',
-    color: 'bg-orange-500/10 text-orange-500',
-  },
-  {
-    title: 'Universal Feedback System',
-    description:
-      'Leave contextual feedback on any type of content – video timestamps, image regions, or text.',
-    icon: MessageSquare,
-    href: '/dashboard/feedback',
-    color: 'bg-pink-500/10 text-pink-500',
-  },
-  {
-    title: 'Automated Invoicing',
-    description:
-      'Generate and send professional invoices automatically. Track payments and expenses.',
-    icon: DollarSign,
-    href: '/dashboard/invoices',
-    color: 'bg-emerald-500/10 text-emerald-500',
-  },
-  {
-    title: 'Multi-Cloud Storage',
-    description:
-      'Store files across multiple cloud providers for maximum reliability and cost savings.',
+      'Enterprise storage with 70% cost savings through intelligent Supabase + Wasabi routing and version control.',
     icon: Cloud,
-    href: '/dashboard/storage',
+    href: '/dashboard/files-hub',
     color: 'bg-cyan-500/10 text-cyan-500',
   },
   {
-    title: 'Performance Analytics',
+    title: 'Secure Escrow Payments',
     description:
-      'Track project metrics, team productivity, and financial performance in real-time.',
+      'Milestone-based payment protection with Stripe integration, automated invoicing, and global processing.',
+    icon: Shield,
+    href: '/dashboard/escrow',
+    color: 'bg-blue-500/10 text-blue-500',
+  },
+  {
+    title: 'Real-Time Collaboration',
+    description:
+      'Live multi-user editing with cursor tracking, instant messaging, presence indicators, and conflict resolution.',
+    icon: Users,
+    href: '/dashboard/collaboration',
+    color: 'bg-green-500/10 text-green-500',
+  },
+  {
+    title: 'Creator Community Hub',
+    description:
+      'Connect with 2,800+ verified creators through marketplace, social wall, and professional networking.',
+    icon: Globe,
+    href: '/dashboard/community',
+    color: 'bg-indigo-500/10 text-indigo-500',
+  },
+  {
+    title: 'AI Daily Planning',
+    description:
+      'Intelligent task management with productivity optimization, time estimates, and automated scheduling.',
+    icon: Calendar,
+    href: '/dashboard/my-day',
+    color: 'bg-orange-500/10 text-orange-500',
+  },
+  {
+    title: 'Professional Invoicing',
+    description:
+      'Automated invoice generation with multiple templates, tax calculations, and comprehensive financial tracking.',
+    icon: DollarSign,
+    href: '/dashboard/financial-hub',
+    color: 'bg-emerald-500/10 text-emerald-500',
+  },
+  {
+    title: 'Advanced Analytics Suite',
+    description:
+      'Real-time business intelligence with revenue tracking, cost optimization, and performance predictions.',
     icon: Zap,
     href: '/dashboard/analytics',
     color: 'bg-rose-500/10 text-rose-500',
+  },
+  {
+    title: 'Client Zone Galleries',
+    description:
+      'Professional client portals with secure file access, watermarked previews, and approval workflows.',
+    icon: FileText,
+    href: '/dashboard/client-zone',
+    color: 'bg-yellow-500/10 text-yellow-500',
   },
 ];
 
@@ -113,14 +113,15 @@ export default function FeaturesPage() {
     <div className="container py-12 md:py-20">
       <div className="mx-auto max-w-3xl text-center">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-          Everything you need to{' '}
+          Enterprise Features for{' '}
           <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            succeed
+            Modern Creatives
           </span>
         </h1>
         <p className="mt-6 text-lg text-muted-foreground">
-          Our platform combines powerful tools with intuitive design to help you
-          work smarter, not harder. Start your journey today.
+          KAZI provides a complete suite of enterprise-grade tools including multi-model AI studio, 
+          universal feedback systems, real-time collaboration, and secure payment processing. 
+          Built for professionals who demand the best.
         </p>
         <div className="mt-8 flex justify-center gap-4">
           <Button asChild size="lg">

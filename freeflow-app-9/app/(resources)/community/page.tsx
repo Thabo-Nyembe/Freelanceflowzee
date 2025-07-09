@@ -34,9 +34,10 @@ export default function CommunityPage() {
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
           <div className="max-w-7xl mx-auto px-4 py-16">
             <div className="text-center">
-              <h1 className="text-4xl font-bold mb-4">FreeflowZee Community</h1>
-              <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-                Connect with creators, share your work, and collaborate on amazing projects
+              <h1 className="text-4xl font-bold mb-4">KAZI Community</h1>
+              <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                Connect with 2,800+ verified creative professionals worldwide. Share your work, 
+                get feedback, find collaborators, and grow your business in our thriving community.
               </p>
               <div className="flex justify-center gap-4">
                 <Button 
@@ -187,7 +188,7 @@ export default function CommunityPage() {
                           <div className="p-6">
                             <h3 className="font-semibold text-gray-900 mb-2">Amazing AI Art Project</h3>
                             <p className="text-gray-600 text-sm mb-3">
-                              Created this stunning piece using FreeflowZee&apos;s AI tools...
+                              Created this stunning piece using KAZI's multi-model AI tools! The GPT-4o integration made the creative process so much smoother. ✨
                             </p>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">

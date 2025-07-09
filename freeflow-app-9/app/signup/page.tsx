@@ -8,8 +8,9 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 
 export const metadata: Metadata = {
-  title: 'Sign Up | FreeFlow - Start Your Freelance Journey',
-  description: 'Join FreeFlow today and transform how you manage your freelance business with AI-powered tools.',
+  title: 'Sign Up | KAZI - Start Your Creative Journey',
+  description: 'Join KAZI today and transform how you manage your creative business with AI-powered tools, universal feedback, and secure payments.',
+  keywords: 'KAZI signup, creative platform registration, AI tools, freelance management'
 }
 
 export default function SignUpPage() {
@@ -24,8 +25,10 @@ export default function SignUpPage() {
                 <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
                   Start Your Freelance Success Story
                 </h1>
-                <p className="text-xl text-gray-600 mb-8">
-                  Join thousands of freelancers who&apos;ve transformed their business with FreeFlow&apos;s AI-powered platform.
+                <p className="text-lg text-gray-600 mb-6">
+                  Join thousands of freelancers who've transformed their business with KAZI's 
+                  AI-powered platform featuring multi-model studio, universal feedback, 
+                  real-time collaboration, and secure payment protection.
                 </p>
               </div>
 

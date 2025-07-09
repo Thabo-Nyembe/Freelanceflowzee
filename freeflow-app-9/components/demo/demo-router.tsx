@@ -74,8 +74,11 @@ export function DemoRouter() {
     <div className="demo-router p-6 bg-gray-50 min-h-screen">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-4">FreeflowZee Demo Center</h1>
-          <p className="text-gray-600 text-lg">Choose your demo scenario based on your audience</p>
+          <h1 className="text-3xl font-bold mb-4">KAZI Demo Center</h1>
+          <p className="text-lg text-gray-600 mb-8">
+            Experience KAZI's powerful features with interactive demos showcasing 
+            AI content creation, universal feedback, real-time collaboration, and more.
+          </p>
           <Badge className="mt-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
             🎭 Interactive Demos Available
           </Badge>

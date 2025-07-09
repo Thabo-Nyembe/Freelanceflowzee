@@ -196,7 +196,7 @@ export function EnhancedUploadProgress({
   enableSEO = true,
   enableAnalytics = true,
   enableEscrow = true,
-  brandName = 'FreeflowZee',
+  brandName = 'KAZI',
   projectId
 }: EnhancedUploadProgressProps) {
 

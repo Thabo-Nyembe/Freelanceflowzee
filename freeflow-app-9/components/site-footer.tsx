@@ -33,17 +33,17 @@ const footerNav = {
 const socialLinks = [
   {
     name: 'GitHub',
-    href: 'https://github.com/freeflowzee',
+    href: 'https://github.com/kazi-platform',
     icon: Github,
   },
   {
     name: 'Twitter',
-    href: 'https://twitter.com/freeflowzee',
+    href: 'https://twitter.com/kaziplatform',
     icon: Twitter,
   },
   {
     name: 'LinkedIn',
-    href: 'https://linkedin.com/company/freeflowzee',
+    href: 'https://linkedin.com/company/kazi-platform',
     icon: Linkedin,
   },
 ]
@@ -116,8 +116,16 @@ export function SiteFooter() {
         </div>
         <div className="mt-12 border-t pt-8">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <span>© {new Date().getFullYear()} FreeFlowZee. All rights reserved.</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <img 
+                  src="/kazi-brand/logo-light.png" 
+                  alt="KAZI" 
+                  className="h-6 w-auto"
+                />
+                <span className="font-bold text-white">KAZI</span>
+              </div>
+              <span>© {new Date().getFullYear()} KAZI. All rights reserved.</span>
             </div>
             <div className="flex items-center space-x-4">
               {socialLinks.map((item) => {

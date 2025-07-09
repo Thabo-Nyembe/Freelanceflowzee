@@ -263,11 +263,12 @@ export default function AIDemoPage() {
               </div>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              FreeFlow <span className="text-yellow-300">AI</span> Demo
+              KAZI <span className="text-yellow-300">AI Studio</span> Demo
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
-              Experience the future of video content analysis with automated transcription, 
-              intelligent insights, and smart categorization.
+              Experience the power of multi-model AI with GPT-4o, Claude, DALL-E, and Google AI 
+              for instant content generation across creative fields. See how AI transforms 
+              video analysis with automated transcription and intelligent insights.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
@@ -607,8 +608,9 @@ export default function AIDemoPage() {
       <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Videos?</h2>
-          <p className="text-xl mb-8 text-blue-100">
-            Join thousands of creators using FreeFlow AI to unlock the full potential of their video content.
+          <p className="text-xl text-blue-100 max-w-3xl mx-auto mb-8">
+            Join thousands of creators using KAZI AI to unlock the full potential of their creative content 
+            with multi-model AI analysis, universal feedback systems, and intelligent automation.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 

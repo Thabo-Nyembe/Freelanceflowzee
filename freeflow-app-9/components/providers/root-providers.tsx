@@ -24,7 +24,7 @@ export function RootProviders({ children }: { children: React.ReactNode }) {
       <ThemeProvider
         attribute="class"
         defaultTheme="system"
-        storageKey="freeflowzee-ui-theme"
+        storageKey="kazi-ui-theme"
         enableSystem
       >
         {children}

@@ -52,7 +52,7 @@ const demoData = {
   ],
   testimonials: [
     {
-      text: "FreeflowZee helped us find the perfect freelancer for our web development project. The quality exceeded our expectations!",
+      text: "KAZI helped us find the perfect freelancer for our web development project. The AI tools and universal feedback system exceeded our expectations!",
       author: "Sarah Johnson",
       role: "Tech Startup CEO",
       rating: 5
@@ -73,8 +73,8 @@ export function StandaloneDemo() {
   const demoTypes = [
     {
       id: "client",
-      title: "Client Presentation",
-      description: "Showcase our platform&apos;s capabilities to potential clients",
+      title: "KAZI: Your Complete Creative Platform",
+      subtitle: "AI-Powered • Universal Feedback • Secure Payments",
       icon: Users,
       color: "bg-blue-500",
       audience: "Business clients, decision makers",
@@ -180,7 +180,7 @@ export function StandaloneDemo() {
         return (
           <div className="text-center space-y-6">
             <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-8 rounded-xl">
-              <h2 className="text-3xl font-bold mb-4">Welcome to FreeflowZee</h2>
+              <h2 className="text-3xl font-bold mb-4">Welcome to KAZI</h2>
               <p className="text-xl opacity-90">The premier platform connecting clients with top-tier freelancers</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -294,7 +294,7 @@ export function StandaloneDemo() {
           <div className="text-center space-y-6">
             <div className="bg-gradient-to-r from-purple-500 to-blue-600 text-white p-8 rounded-xl">
               <h2 className="text-3xl font-bold mb-4">Ready to Start Your Next Project?</h2>
-              <p className="text-xl opacity-90 mb-6">Join thousands of satisfied clients who trust FreeflowZee</p>
+              <p className="text-xl opacity-90 mb-6">Join thousands of satisfied clients who trust KAZI</p>
               <div className="space-y-4">
                 <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100">
                   Start Your Project Today

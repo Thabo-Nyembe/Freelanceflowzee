@@ -16,18 +16,18 @@ interface SEOProps {
 }
 
 export function DynamicSEO({
-  title = 'FreeflowZee - Professional Freelance Management Platform',
-  description = 'Upload, share & monetize files with external links, payment processing, and real-time analytics. The WeTransfer alternative for professionals.',
-  keywords = ['freelance management', 'file sharing', 'WeTransfer alternative'],
+  title = 'KAZI - Enterprise Freelance Management Platform',
+  description = 'AI-powered creative platform with multi-model studio, universal feedback, real-time collaboration, and secure payments.',
+  keywords = 'KAZI, AI creative platform, freelance management, universal feedback, real-time collaboration',
   canonical,
-  ogImage = '/images/homepage-mockup.jpg',
+  ogImage = '/kazi-brand/logo-transparent.png',
   ogType = 'website',
   structuredData,
   noIndex = false,
   alternateUrls = []
 }: SEOProps) {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freeflow-app-9-6egesbwif-thabo-5265s-projects.vercel.app'
-  const fullTitle = title.includes('FreeflowZee') ? title : `${title} | FreeflowZee`
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kazi-platform.vercel.app'
+  const fullTitle = title.includes('KAZI') ? title : `${title} | KAZI`
   const fullCanonical = canonical || baseUrl
   const fullOgImage = ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`
 
@@ -84,21 +84,18 @@ export function DynamicSEO({
       <meta property= "og:image:width" content= "1200" />
       <meta property= "og:image:height" content= "630" />
       <meta property= "og:image:alt" content={title} />
-      <meta property= "og:site_name" content= "FreeflowZee" />
+      <meta property= "og:site_name" content= "KAZI" />
       <meta property= "og:locale" content= "en_US" />
       
-      {/* Twitter */}
-      <meta property= "twitter:card" content= "summary_large_image" />
-      <meta property= "twitter:url" content={fullCanonical} />
-      <meta property= "twitter:title" content={fullTitle} />
-      <meta property= "twitter:description" content={description} />
-      <meta property= "twitter:image" content={fullOgImage} />
-      <meta property= "twitter:creator" content= "@freeflowzee" />
-      <meta property= "twitter:site" content= "@freeflowzee" />
-      
+      {/* Twitter Card tags */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta property="twitter:domain" content="kazi-platform.com" />
+      <meta property="twitter:creator" content="@kaziplatform" />
+      <meta property="twitter:site" content="@kaziplatform" />
+
       {/* Additional Meta Tags */}
-      <meta name= "author" content= "FreeflowZee Team" />
-      <meta name= "publisher" content= "FreeflowZee" />
+      <meta name="author" content="KAZI Team" />
+      <meta name="publisher" content="KAZI" />
       <meta name= "robots" content={noIndex ? 'noindex, nofollow' : 'index, follow'} />
       <meta name= "googlebot" content={noIndex ? 'noindex, nofollow' : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'} />
       
@@ -135,13 +132,13 @@ export function generateArticleStructuredData(article: {
   image?: string
   url: string
 }) {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freeflow-app-9-6egesbwif-thabo-5265s-projects.vercel.app'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kazi-platform.vercel.app'
   
   return {
     "@context": "https://schema.org", "@type": "Article", "headline": article.title, "description": article.description, "image": article.image || `${baseUrl}/images/homepage-mockup.jpg`, "author": {
       "@type": "Person", "name": article.author
     }, "publisher": {
-      "@type": "Organization", "name": "FreeflowZee", "logo": {
+      "@type": "Organization", "name": "KAZI", "logo": {
         "@type": "ImageObject", "url": `${baseUrl}/images/logo-preview.jpg`
       }
     }, "datePublished": article.datePublished, "dateModified": article.dateModified || article.datePublished, "mainEntityOfPage": {
@@ -161,16 +158,48 @@ export function generateProductStructuredData(product: {
   rating?: number
   reviewCount?: number
 }) {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://freeflow-app-9-6egesbwif-thabo-5265s-projects.vercel.app'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kazi-platform.vercel.app'
   
   return {
     "@context": "https://schema.org", "@type": "Product", "name": product.name, "description": product.description, "image": product.image || `${baseUrl}/images/homepage-mockup.jpg`, "brand": {
-      "@type": "Brand", "name": 'FreeflowZee'
+      "@type": "Brand", "name": 'KAZI'
     }, "offers": {
       "@type": "Offer", "price": product.price || "0",
       "priceCurrency": product.currency || "USD", "availability": `https://schema.org/${product.availability || 'InStock'}`
     }, "aggregateRating": product.rating ? {
       "@type": "AggregateRating", "ratingValue": product.rating, "reviewCount": product.reviewCount || 1
     } : undefined
+  }
+} 
+
+// Utility function to generate organization structured data
+export function generateOrganizationStructuredData() {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kazi-platform.vercel.app'
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization", "name": "KAZI", "logo": {
+      "@type": "ImageObject",
+      "url": `${baseUrl}/kazi-brand/logo-transparent.png`
+    },
+    "url": baseUrl,
+    "sameAs": [
+      "https://twitter.com/kaziplatform",
+      "https://linkedin.com/company/kazi-platform"
+    ]
+  }
+}
+
+// Product schema for features/product pages
+export function generateProductSchema(product: {
+  name: string
+  description: string
+  price?: string
+}) {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kazi-platform.vercel.app'
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Brand", "name": 'KAZI'
   }
 } 

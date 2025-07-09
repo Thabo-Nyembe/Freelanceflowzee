@@ -76,10 +76,13 @@ export function SiteHeader({ user }: SiteHeaderProps) {
           </div>
         </MobileNav>
         <div className="mr-4 hidden md:flex">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="hidden font-bold sm:inline-block">
-              FreeFlowZee
-            </span>
+          <Link href="/" className="flex items-center gap-2">
+            <img 
+              src="/kazi-brand/logo.svg" 
+              alt="KAZI" 
+              className="h-8 w-auto"
+            />
+            <span className="text-xl font-bold text-purple-600">KAZI</span>
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
             {mainNav.map((item) => (

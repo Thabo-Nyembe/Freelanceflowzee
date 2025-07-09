@@ -112,8 +112,9 @@ export default function DocsPage() {
           <div className="max-w-7xl mx-auto px-4 py-16">
             <div className="text-center">
               <h1 className="text-4xl font-bold mb-4">Documentation</h1>
-              <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-                Everything you need to know about using FreeflowZee effectively
+              <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                Everything you need to know about using KAZI effectively. From getting started 
+                with AI tools to mastering universal feedback and real-time collaboration.
               </p>
               
               {/* Search Bar */}
@@ -290,7 +291,7 @@ export default function DocsPage() {
           <div className="mt-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 text-white text-center">
             <h3 className="text-2xl font-bold mb-4">Ready to Get Started?</h3>
             <p className="text-blue-100 mb-6">
-              Follow our step-by-step guides to make the most of FreeflowZee
+              Follow our step-by-step guides to make the most of KAZI's enterprise features
             </p>
             <Button 
               size="lg" 
@@ -307,7 +308,7 @@ export default function DocsPage() {
       <DemoModal 
         isOpen={showDemoModal} 
         onClose={() => setShowDemoModal(false)} 
-        title="Get Started with FreeflowZee"
+        title="Get Started with KAZI"
         description="Access tutorials, documentation, and support resources"
       />
     </div>

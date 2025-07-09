@@ -68,49 +68,49 @@ export default function DashboardPage() {
       value: 'overview',
       label: 'Overview',
       icon: LayoutDashboard,
-      description: 'Dashboard overview and stats'
+      description: 'Enterprise dashboard with analytics and insights'
     },
     {
       value: 'projects-hub', 
       label: 'Projects Hub',
       icon: FolderOpen,
-      description: 'Manage all your projects'
+      description: 'Complete project lifecycle management system'
     },
     {
       value: 'ai-create',
       label: 'AI Create',
       icon: Brain,
-      description: 'AI-powered content creation'
+      description: 'Multi-model AI studio (GPT-4o, Claude, DALL-E, Google AI)'
     },
     {
       value: 'video-studio',
       label: 'Video Studio', 
       icon: Video,
-      description: 'Professional video creation'
+      description: 'Professional editing with AI transcription and collaboration'
     },
     {
       value: 'escrow',
       label: 'Escrow',
       icon: Shield,
-      description: 'Secure payment management'
+      description: 'Secure milestone-based payment protection system'
     },
     {
       value: 'files-hub',
       label: 'Files Hub',
       icon: FileText,
-      description: 'File sharing and storage'
+      description: 'Multi-cloud storage with 70% cost optimization'
     },
     {
       value: 'community',
       label: 'Community',
       icon: Globe,
-      description: 'Connect with other creators'
+      description: 'Connect with 2,800+ verified creative professionals'
     },
     {
       value: 'my-day',
       label: 'My Day Today',
       icon: Calendar,
-      description: 'AI-powered daily planning'
+      description: 'AI-powered daily planning and productivity optimization'
     }
   ], [])
 

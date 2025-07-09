@@ -122,7 +122,14 @@ export function UnifiedSidebar() {
   return (
     <div className="flex flex-col h-full bg-background border-r">
       <div className="p-6">
-        <h1 className="text-2xl font-bold">FreeflowZee</h1>
+        <div className="flex items-center gap-3 mb-8">
+            <img 
+              src="/kazi-brand/logo.svg" 
+              alt="KAZI" 
+              className="h-8 w-auto"
+            />
+            <h1 className="text-2xl font-bold">KAZI</h1>
+          </div>
         <h2 className="text-lg text-muted-foreground">Enterprise Dashboard</h2>
       </div>
       

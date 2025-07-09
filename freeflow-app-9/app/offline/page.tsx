@@ -7,13 +7,13 @@ export default function OfflinePage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full text-center space-y-6">
         {/* Logo/Brand */}
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-            <FileText className="w-6 h-6 text-white" />
-          </div>
-          <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            FreeflowZee
-          </span>
+        <div className="flex items-center gap-3 mb-6">
+          <img 
+            src="/kazi-brand/logo.svg" 
+            alt="KAZI" 
+            className="h-8 w-auto"
+          />
+          <span className="text-2xl font-bold text-purple-600">KAZI</span>
         </div>
 
         <Card>

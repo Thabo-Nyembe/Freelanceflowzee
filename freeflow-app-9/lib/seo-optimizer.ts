@@ -1,38 +1,23 @@
 import { Metadata } from 'next'
 
 // Context7 Pattern: Centralized SEO Configuration
-export const SEO_CONFIG = {
+const SEO_CONFIG = {
   site: {
-    name: 'FreeflowZee',
-    tagline: 'Professional Freelance Management Platform',
-    description: 'The ultimate freelance management platform for creators, agencies, and clients. Streamline projects, collaborate seamlessly, and get paid faster with FreeflowZee.',
-    url: 'https://freeflowzee.com',
-    image: '/images/og-image.jpg',
-    creator: '@freeflowzee',
-    publisher: 'FreeflowZee Inc.',
-    locale: 'en_US',
-    alternateLocales: ['es_ES', 'fr_FR', 'de_DE'],
-    type: 'website'
-  },
-  contact: {
-    email: 'hello@freeflowzee.com',
-    phone: '+1-555-FREEFLOW',
-    address: '123 Creative Street, San Francisco, CA 94103',
-    social: {
-      twitter: 'https://twitter.com/freeflowzee',
-      linkedin: 'https://linkedin.com/company/freeflowzee',
-      github: 'https://github.com/freeflowzee',
-      instagram: 'https://instagram.com/freeflowzee'
-    }
-  },
-  features: {
-    primary: ['Project Management', 'Client Collaboration', 'Payment Processing', 'Time Tracking', 'File Sharing', 'Team Management'],
-    benefits: ['Increase productivity by 40%', 'Reduce project turnaround time', 'Streamline client communication', 'Automate invoicing and payments', 'Secure file collaboration', 'Real-time project tracking']
+    name: 'KAZI',
+    tagline: 'Enterprise Freelance Management Platform',
+    description: 'AI-powered creative platform with multi-model studio, universal feedback, real-time collaboration, and secure payments for modern professionals.',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://kazi-platform.vercel.app',
+    logo: '/kazi-brand/logo-transparent.png',
+    favicon: '/kazi-brand/favicon.ico'
   },
   keywords: {
-    primary: 'freelance management, project collaboration, client portal, payment processing',
-    secondary: 'creative workflow, team collaboration, invoice automation, file sharing, time tracking',
-    longTail: 'best freelance management software 2024, client collaboration platform for designers, automated invoicing for freelancers'
+    primary: 'KAZI, AI creative platform, freelance management, universal feedback, real-time collaboration',
+    secondary: 'multi-model AI, secure payments, enterprise features, creative professionals, project management'
+  },
+  social: {
+    twitter: '@kaziplatform',
+    linkedin: 'kazi-platform',
+    github: 'kazi-platform'
   }
 }
 
@@ -46,14 +31,14 @@ export const SEO_TEMPLATES = {
   },
   features: {
     title: `Features - ${SEO_CONFIG.site.name}`,
-    description: 'Discover powerful features that make FreeflowZee the best freelance management platform. From project tracking to client collaboration, we have everything you need.',
-    keywords: `${SEO_CONFIG.keywords.primary}, feature list, platform capabilities`,
+    description: 'Discover powerful enterprise features that make KAZI the best creative platform. Multi-model AI studio, universal feedback, real-time collaboration, and secure payments.',
+    keywords: `${SEO_CONFIG.keywords.primary}, feature list, platform capabilities, AI tools`,
     schema: 'Product'
   },
   pricing: {
     title: `Pricing Plans - ${SEO_CONFIG.site.name}`,
-    description: 'Choose the perfect plan for your freelance business. Transparent pricing, no hidden fees. Start free and scale as you grow.',
-    keywords: 'freelance software pricing, subscription plans, free trial',
+    description: 'Choose the perfect plan for your creative business. Transparent pricing, no hidden fees. Start free and scale with KAZI\'s enterprise features.',
+    keywords: 'KAZI pricing, creative software pricing, subscription plans, free trial',
     schema: 'Offer'
   },
   blog: {
