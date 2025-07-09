@@ -13,6 +13,13 @@ module.exports = {
     },
     extend: {
       colors: {
+        // Kazi Brand Colors
+        'jet-black': '#0E0E11',
+        'violet-bolt': '#6E4BFF',
+        'electric-turquoise': '#23E6B5',
+        'soft-ivory': '#F8F7F4',
+        
+        // Shadcn/UI Colors (keeping for compatibility)
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -53,6 +60,11 @@ module.exports = {
           4: "hsl(var(--chart-4))",
           5: "hsl(var(--chart-5))",
         },
+      },
+      fontFamily: {
+        'headline': ['Neue Haas Grotesk', 'sans-serif'],
+        'body': ['Inter', 'sans-serif'],
+        'special': ['Kazi Serif', 'serif'],
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -1,3 +1,274 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Kazi Brand Typography */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Kazi Brand Color Scheme */
+:root {
+  --kazi-jet-black: #0E0E11;
+  --kazi-violet-bolt: #6E4BFF;
+  --kazi-electric-turquoise: #23E6B5;
+  --kazi-soft-ivory: #F8F7F4;
+}
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 3.9%;
+  --primary: 240 5.9% 10%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 240 4.8% 95.9%;
+  --secondary-foreground: 240 5.9% 10%;
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --ring: 240 5.9% 10%;
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 0 0% 98%;
+  --primary-foreground: 240 5.9% 10%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 240 4.9% 83.9%;
+}
+
+* {
+  @apply border-neutral-200;
+}
+
+@layer base {
+  * {
+    @apply border-neutral-200;
+  }
+  body {
+    @apply bg-white text-neutral-900;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    min-height: 100vh;
+  }
+}
+
+/* Glass morphism styles */
+.glass-nav {
+  @apply bg-white/60 backdrop-blur-xl border-b border-[hsl(var(--border))] shadow-sm;
+}
+
+.glass-card {
+  @apply bg-white/60 backdrop-blur-xl border border-[hsl(var(--border))] rounded-2xl shadow-lg;
+}
+
+.gradient-bg {
+  @apply bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40;
+}
+
+/* Kazi Brand Button Styles */
+.btn-kazi-primary {
+  @apply relative overflow-hidden rounded-lg px-6 py-3 transition-all duration-300 ease-in-out;
+  background: linear-gradient(120deg, #6E4BFF, #23E6B5);
+  color: #F8F7F4;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
+
+.btn-kazi-primary:hover {
+  @apply transform scale-105;
+  box-shadow: 0 8px 25px rgba(110, 75, 255, 0.3);
+}
+
+.btn-kazi-secondary {
+  @apply relative overflow-hidden rounded-lg px-6 py-3 transition-all duration-300 ease-in-out;
+  background: transparent;
+  border: 2px solid #6E4BFF;
+  color: #6E4BFF;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
+
+.btn-kazi-secondary:hover {
+  @apply transform scale-105;
+  background: #6E4BFF;
+  color: #F8F7F4;
+}
+
+/* Dark mode button variations */
+.dark .btn-kazi-secondary {
+  border-color: #6E4BFF;
+  color: #6E4BFF;
+}
+
+.dark .btn-kazi-secondary:hover {
+  background: #6E4BFF;
+  color: #F8F7F4;
+}
+
+/* Responsive layout grid */
+.responsive-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6;
+}
+
+/* Enhanced form inputs */
+.input-enhanced {
+  @apply w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 
+         focus:ring-2 focus:ring-indigo-500 focus:border-transparent
+         bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm;
+}
+
+/* Navigation styles */
+.nav-item {
+  @apply px-4 py-2 rounded-lg transition-all duration-200
+         hover:bg-gray-100 dark:hover:bg-gray-800
+         focus:outline-none focus:ring-2 focus:ring-indigo-500;
+}
+
+.nav-item.active {
+  @apply bg-indigo-500 text-white;
+}
+
+/* Kazi Brand Styles */
+.kazi-bg-dark {
+  background-color: var(--kazi-jet-black);
+}
+
+.kazi-bg-light {
+  background-color: var(--kazi-soft-ivory);
+}
+
+.kazi-text-primary {
+  color: var(--kazi-violet-bolt);
+}
+
+.kazi-text-accent {
+  color: var(--kazi-electric-turquoise);
+}
+
+.kazi-text-dark {
+  color: var(--kazi-jet-black);
+}
+
+.kazi-text-light {
+  color: var(--kazi-soft-ivory);
+}
+
+/* Kazi Typography Classes */
+.kazi-headline {
+  font-family: 'Neue Haas Grotesk', 'Inter', sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.kazi-body {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.kazi-body-medium {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+/* Kazi Gradient Backgrounds */
+.kazi-gradient-primary {
+  background: linear-gradient(120deg, var(--kazi-violet-bolt), var(--kazi-electric-turquoise));
+}
+
+.kazi-gradient-dark {
+  background: linear-gradient(135deg, var(--kazi-jet-black), #1a1a1f);
+}
+
+.kazi-gradient-light {
+  background: linear-gradient(135deg, var(--kazi-soft-ivory), #ffffff);
+}
+
+/* Kazi Card Styles */
+.kazi-card {
+  @apply rounded-xl shadow-lg transition-all duration-300 hover:shadow-2xl;
+  background: var(--kazi-soft-ivory);
+  border: 1px solid rgba(110, 75, 255, 0.1);
+}
+
+.dark .kazi-card {
+  background: var(--kazi-jet-black);
+  border: 1px solid rgba(110, 75, 255, 0.2);
+}
+
+/* Kazi Interactive Elements */
+.kazi-hover-scale {
+  @apply transition-transform duration-300 ease-in-out;
+}
+
+.kazi-hover-scale:hover {
+  transform: scale(1.05);
+}
+
+/* Kazi Ripple Effect */
+.kazi-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.kazi-ripple::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(35, 230, 181, 0.3);
+  transition: width 0.4s, height 0.4s, top 0.4s, left 0.4s;
+  transform: translate(-50%, -50%);
+}
+
+.kazi-ripple:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Kazi Accessibility Focus Styles */
+.kazi-focus:focus {
+  outline: 2px solid var(--kazi-electric-turquoise);
+  outline-offset: 2px;
+}
+
+/* Kazi Animation Classes */
+.kazi-fade-in {
+  animation: kaziFadeIn 0.6s ease-out;
+}
+
+@keyframes kaziFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
