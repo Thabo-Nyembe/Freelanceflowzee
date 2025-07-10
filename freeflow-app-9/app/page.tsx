@@ -377,7 +377,52 @@ export default function Home() {
       {/* Footer */}
       <footer className="kazi-bg-dark text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <img 
+                  src="/kazi-brand/logo.svg" 
+                  alt="KAZI" 
+                  className="h-8 w-auto"
+                />
+                <span className="text-xl font-bold kazi-text-primary kazi-headline">KAZI</span>
+              </div>
+              <p className="text-gray-300 kazi-body">
+                All-in-one workspace for freelancers and agencies
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-semibold mb-4 kazi-headline">Product</h3>
+              <div className="space-y-2">
+                <Link href="/features" className="block text-gray-300 hover:text-white kazi-body">Features</Link>
+                <Link href="/pricing" className="block text-gray-300 hover:text-white kazi-body">Pricing</Link>
+                <Link href="/demo-features" className="block text-gray-300 hover:text-white kazi-body">Demo</Link>
+                <Link href="/dashboard" className="block text-gray-300 hover:text-white kazi-body">Dashboard</Link>
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-semibold mb-4 kazi-headline">Resources</h3>
+              <div className="space-y-2">
+                <Link href="/blog" className="block text-gray-300 hover:text-white kazi-body">Blog</Link>
+                <Link href="/docs" className="block text-gray-300 hover:text-white kazi-body">Documentation</Link>
+                <Link href="/tutorials" className="block text-gray-300 hover:text-white kazi-body">Tutorials</Link>
+                <Link href="/community" className="block text-gray-300 hover:text-white kazi-body">Community</Link>
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-semibold mb-4 kazi-headline">Company</h3>
+              <div className="space-y-2">
+                <Link href="/contact" className="block text-gray-300 hover:text-white kazi-body">Contact</Link>
+                <Link href="/signup" className="block text-gray-300 hover:text-white kazi-body">Sign Up</Link>
+                <Link href="/login" className="block text-gray-300 hover:text-white kazi-body">Login</Link>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-700 pt-8 text-center">
             <p className="text-gray-300 kazi-body">
               Proudly engineered in South Africa • Serving freelancers, startups, and creative teams in 40+ countries worldwide.
             </p>
