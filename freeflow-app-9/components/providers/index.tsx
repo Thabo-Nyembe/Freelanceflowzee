@@ -13,7 +13,7 @@ const SupabaseContext = createContext<SupabaseClient<Database> | null>(null)
 
 export const useSupabase = () => {
   const context = useContext(SupabaseContext)
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useSupabase must be used within a SupabaseProvider')
   }
   return context
@@ -30,10 +30,16 @@ export function Providers({ children }: ProvidersProps) {
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error('Supabase environment variables are not set')
+      console.warn('Supabase environment variables are not set, using fallback')
+      return null
     }
 
-    return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey)
+    try {
+      return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey)
+    } catch (error) {
+      console.warn('Failed to create Supabase client:', error)
+      return null
+    }
   })
 
   return (

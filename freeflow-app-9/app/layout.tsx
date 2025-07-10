@@ -34,14 +34,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Providers>
-            <AnalyticsProvider>
-              <Context7Provider>
-                {children}
-                <Toaster />
-              </Context7Provider>
-            </AnalyticsProvider>
-          </Providers>
+          {children}
         </ThemeProvider>
         <Analytics />
       </body>
