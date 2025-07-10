@@ -87,20 +87,20 @@ export function DemoContentProvider({ children }: { children: React.ReactNode })
     return content?.transactions?.filter(t => t.status === status) || [];
   };
 
-  const getTopCreators = (limit = 10: unknown) => {
+  const getTopCreators = (limit = 10) => {
     return content?.users
       ?.filter(u => u.isVerified)
       ?.sort((a, b) => b.rating - a.rating)
       ?.slice(0, limit) || [];
   };
 
-  const getRecentFiles = (limit = 10: unknown) => {
+  const getRecentFiles = (limit = 10) => {
     return content?.files
       ?.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
       ?.slice(0, limit) || [];
   };
 
-  const getTrendingPosts = (limit = 20: unknown) => {
+  const getTrendingPosts = (limit = 20) => {
     return content?.posts
       ?.sort((a, b) => (b.likes + b.views) - (a.likes + a.views))
       ?.slice(0, limit) || [];

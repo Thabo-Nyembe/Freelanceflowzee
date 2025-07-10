@@ -137,7 +137,8 @@ export function ClientPresentationDemo() {
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-center mb-6">Featured Projects</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              { projects?.slice(0, 4).map((project } className="hover:shadow-lg transition-shadow">
+              {projects?.slice(0, 4).map((project) => (
+                <Card key={project.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <CardTitle className="text-lg">{project.title}</CardTitle>
