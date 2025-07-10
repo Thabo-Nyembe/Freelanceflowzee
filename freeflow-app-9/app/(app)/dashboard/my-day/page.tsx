@@ -1,15 +1,13 @@
 'use client'
 
-import { useState, useReducer, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { Clock, CheckCircle, PlayCircle, PauseCircle, Plus, Target, Brain, Calendar, Timer, Zap, TrendingUp, AlertCircle, ArrowRight, Play, Pause, BarChart3, Trash2, MessageSquare, Briefcase, Lightbulb, Activity } from 'lucide-react'
+import { Clock, CheckCircle, PlayCircle, Plus, Target, Calendar, Timer, Activity } from 'lucide-react'
 
 // Type definitions
 interface Task {

@@ -265,7 +265,7 @@ export function EnhancedCollaborationChat({
                 <div className="flex -space-x-2">
                   {callState.participants.slice(0, 3).map(user => (
                     <Avatar key={user.id} className="border-2 border-white h-8 w-8">
-                      <AvatarImage src={user.avatar} />
+                      <AvatarImage src={user.avatar} alt={user.name} />
                       <AvatarFallback className="text-xs bg-green-100">
                         {user.name.charAt(0)}
                       </AvatarFallback>
@@ -454,7 +454,7 @@ export function EnhancedCollaborationChat({
                 return (
                   <div key={message.id} className="flex items-start gap-3">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.avatar} />
+                      <AvatarImage src={user.avatar} alt={user.name} />
                       <AvatarFallback className="text-xs">{user.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">

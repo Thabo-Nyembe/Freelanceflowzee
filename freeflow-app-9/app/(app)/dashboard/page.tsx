@@ -164,16 +164,16 @@ export default function DashboardPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40">
+    <div className="min-h-screen kazi-bg-light dark:kazi-bg-dark">
       {/* Header */}
-      <div className="border-b border-white/20 bg-white/60 backdrop-blur-xl">
+      <div className="border-b border-gray-200 dark:border-gray-700 kazi-bg-light dark:kazi-bg-dark">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-bold luxury-text-gradient mb-2">
-                Welcome to FreeflowZee
+              <h1 className="text-4xl font-bold kazi-text-dark dark:kazi-text-light mb-2 kazi-headline">
+                Welcome to KAZI
               </h1>
-              <p className="text-lg text-gray-600">
+              <p className="text-lg text-gray-600 dark:text-gray-300 kazi-body">
                 Your complete creative business platform
               </p>
             </div>
@@ -184,22 +184,22 @@ export default function DashboardPage() {
                 <GlobalSearch />
               </div>
               <div className="flex gap-3 order-1 sm:order-2">
-                <Card className="glass-card p-3 sm:p-4 flex-1 sm:flex-initial">
+                <Card className="kazi-card p-3 sm:p-4 flex-1 sm:flex-initial kazi-hover-scale">
                   <div className="flex items-center gap-2">
-                    <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+                    <Wallet className="h-4 w-4 sm:h-5 sm:w-5 kazi-text-accent" />
                     <div className="min-w-0">
-                      <p className="text-xs sm:text-sm text-gray-600">Earnings</p>
-                      <p className="font-bold text-green-600 text-sm sm:text-base">${mockData.earnings.toLocaleString()}</p>
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 kazi-body">Earnings</p>
+                      <p className="font-bold kazi-text-accent text-sm sm:text-base kazi-body-medium">${mockData.earnings.toLocaleString()}</p>
                     </div>
                   </div>
                 </Card>
                 
-                <Card className="glass-card p-3 sm:p-4 flex-1 sm:flex-initial">
+                <Card className="kazi-card p-3 sm:p-4 flex-1 sm:flex-initial kazi-hover-scale">
                   <div className="flex items-center gap-2">
-                    <FolderOpen className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                    <FolderOpen className="h-4 w-4 sm:h-5 sm:w-5 kazi-text-primary" />
                     <div className="min-w-0">
-                      <p className="text-xs sm:text-sm text-gray-600">Active Projects</p>
-                      <p className="font-bold text-blue-600 text-sm sm:text-base">{mockData.activeProjects}</p>
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 kazi-body">Active Projects</p>
+                      <p className="font-bold kazi-text-primary text-sm sm:text-base kazi-body-medium">{mockData.activeProjects}</p>
                     </div>
                   </div>
                 </Card>

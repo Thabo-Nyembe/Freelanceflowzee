@@ -337,7 +337,7 @@ export default function ClientReviewPanel({
                   currentStageApprovals.map(approval => (
                     <div key={approval.id} className="flex items-center gap-4 p-3 border rounded-lg">
                       <Avatar className="w-8 h-8">
-                        <AvatarImage src={approval.user_avatar} />
+                        <AvatarImage src={approval.user_avatar} alt={approval.user_name} />
                         <AvatarFallback>
                           {approval.user_name.charAt(0).toUpperCase()}
                         </AvatarFallback>
@@ -468,7 +468,7 @@ export default function ClientReviewPanel({
                     <div key={approval.id} className="border-l-4 border-muted pl-4 py-2">
                       <div className="flex items-center gap-2 mb-2">
                         <Avatar className="w-6 h-6">
-                          <AvatarImage src={approval.user_avatar} />
+                          <AvatarImage src={approval.user_avatar} alt={approval.user_name} />
                           <AvatarFallback className="text-xs">
                             {approval.user_name.charAt(0).toUpperCase()}
                           </AvatarFallback>
@@ -513,7 +513,7 @@ export default function ClientReviewPanel({
                     <div key={approval.id} className="flex items-center gap-3 p-3 bg-muted rounded-lg">
                       <div className={cn("w-2 h-2 rounded-full", getStatusColor(approval.status))} />
                       <Avatar className="w-6 h-6">
-                        <AvatarImage src={approval.user_avatar} />
+                        <AvatarImage src={approval.user_avatar} alt={approval.user_name} />
                         <AvatarFallback className="text-xs">
                           {approval.user_name.charAt(0).toUpperCase()}
                         </AvatarFallback>

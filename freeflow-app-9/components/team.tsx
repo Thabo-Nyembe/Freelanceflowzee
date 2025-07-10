@@ -96,7 +96,7 @@ export default function Team({
             <div className="flex items-center gap-4">
               <div className="relative">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={member.avatar} />
+                  <AvatarImage src={member.avatar} alt={member.name} />
                   <AvatarFallback>{member.name[0]}</AvatarFallback>
                 </Avatar>
                 <div

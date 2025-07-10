@@ -55,25 +55,25 @@ const sidebarItems: SidebarItem[] = [
     description: 'Professional video editing suite'
   },
   {
-    name: 'Canvas Collaboration',
-    href: '/dashboard/canvas-collaboration',
+    name: 'Collaboration',
+    href: '/dashboard/collaboration',
     icon: Palette,
     badge: 'A+++',
     description: 'Real-time design collaboration'
   },
   {
-    name: 'Community',
-    href: '/dashboard/community',
+    name: 'Community Hub',
+    href: '/dashboard/community-hub',
     icon: Users,
     badge: 'A+++',
     description: 'Connect with creators worldwide'
   },
   {
-    name: 'AI Assistant',
-    href: '/dashboard/ai-assistant',
+    name: 'AI Design',
+    href: '/dashboard/ai-design',
     icon: Bot,
     badge: 'A+++',
-    description: 'AI-powered workflow optimization'
+    description: 'AI-powered design tools'
   },
   {
     name: 'AI Create',
@@ -90,8 +90,8 @@ const sidebarItems: SidebarItem[] = [
     description: 'Daily tasks and schedule management'
   },
   {
-    name: 'Escrow',
-    href: '/dashboard/escrow',
+    name: 'Financial Hub',
+    href: '/dashboard/financial',
     icon: Shield,
     badge: 'A+++',
     description: 'Secure payment protection'
@@ -104,8 +104,8 @@ const sidebarItems: SidebarItem[] = [
     description: 'Professional file management'
   },
   {
-    name: 'Collaboration',
-    href: '/dashboard/collaboration',
+    name: 'Messages',
+    href: '/dashboard/messages',
     icon: MessageSquare,
     description: 'Team communication tools'
   },
@@ -122,10 +122,22 @@ const sidebarItems: SidebarItem[] = [
     description: 'Client portal and management'
   },
   {
-    name: 'Financial Hub',
-    href: '/dashboard/financial-hub',
-    icon: DollarSign,
-    description: 'Invoicing and payments'
+    name: 'Calendar',
+    href: '/dashboard/calendar',
+    icon: Calendar,
+    description: 'Schedule and appointments'
+  },
+  {
+    name: 'CV Portfolio',
+    href: '/dashboard/cv-portfolio',
+    icon: FileText,
+    description: 'Professional portfolio showcase'
+  },
+  {
+    name: 'Settings',
+    href: '/dashboard/settings',
+    icon: Settings,
+    description: 'Account and system settings'
   },
   {
     name: 'Notifications',
@@ -148,15 +160,15 @@ export function Sidebar() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 border-r border-gray-200">
-      <div className="p-6 bg-white border-b border-gray-200">
+    <div className="flex flex-col h-full kazi-bg-light dark:kazi-bg-dark border-r border-gray-200 dark:border-gray-700">
+      <div className="p-6 kazi-bg-light dark:kazi-bg-dark border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3 mb-8">
             <img 
               src="/kazi-brand/logo.svg" 
               alt="KAZI" 
               className="h-8 w-auto"
             />
-            <h1 className="text-2xl font-bold text-gray-900">KAZI</h1>
+            <h1 className="text-2xl font-bold kazi-text-dark dark:kazi-text-light kazi-headline">KAZI</h1>
           </div>
       </div>
       
@@ -168,16 +180,16 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 px-4 py-3 rounded-lg group hover:bg-white hover:shadow-sm transition-all duration-200',
-                isActive && 'bg-white shadow-sm border border-gray-200'
+                'flex items-center gap-3 px-4 py-3 rounded-lg group hover:bg-white dark:hover:bg-gray-800 hover:shadow-sm transition-all duration-200 kazi-hover-scale',
+                isActive && 'bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700'
               )}
             >
-              <item.icon className="w-5 h-5 text-gray-600" />
+              <item.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               <div className="flex-1">
-                <span className="block text-gray-900 font-medium">{item.name}</span>
+                <span className="block kazi-text-dark dark:kazi-text-light font-medium kazi-body-medium">{item.name}</span>
               </div>
               {item.badge && (
-                <span className="px-3 py-1 text-xs font-medium rounded-full bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-sm">
+                <span className="px-3 py-1 text-xs font-medium rounded-full kazi-gradient-primary text-white shadow-sm kazi-body">
                   {item.badge}
                 </span>
               )}
@@ -187,11 +199,11 @@ export function Sidebar() {
       </nav>
       
       {/* Logout Button */}
-      <div className="p-4 border-t">
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
         <button
           onClick={handleLogout}
           data-testid="logout"
-          className="flex items-center gap-3 px-3 py-2 rounded-lg w-full hover:bg-red-50 hover:text-red-600 transition-colors text-left"
+          className="flex items-center gap-3 px-3 py-2 rounded-lg w-full hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-colors text-left kazi-focus"
         >
           <LogOut className="w-5 h-5" />
           <span>Log out</span>

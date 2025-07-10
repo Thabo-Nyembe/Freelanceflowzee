@@ -376,7 +376,7 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-xs text-gray-500">
               <Avatar className="w-4 h-4">
-                <AvatarImage src={file.uploadedBy.avatar} />
+                <AvatarImage src={file.uploadedBy.avatar} alt={file.uploadedBy.name} />
                 <AvatarFallback>{file.uploadedBy.name[0]}</AvatarFallback>
               </Avatar>
               <span>{file.uploadedBy.name}</span>

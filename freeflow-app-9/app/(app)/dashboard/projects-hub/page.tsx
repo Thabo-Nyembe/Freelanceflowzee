@@ -6,50 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
-import {
-  FolderOpen,
-  Plus,
-  Search,
-  Filter,
-  Calendar,
-  Clock,
-  DollarSign,
-  Users,
-  FileText,
-  MessageSquare,
-  Settings,
-  MoreHorizontal,
-  Play,
-  Pause,
-  CheckCircle,
-  AlertCircle,
-  Star,
-  Eye,
-  Edit3,
-  Trash2,
-  Download,
-  Upload,
-  Share2,
-  Target,
-  TrendingUp,
-  BarChart3,
-  Zap,
-  Award,
-  Calendar as CalendarIcon,
-  MapPin,
-  Phone,
-  Mail,
-  Globe,
-  Briefcase,
-  Activity,
-  Archive
-} from 'lucide-react'
+import { FolderOpen, Plus, Search, DollarSign, Users, CheckCircle, Activity } from 'lucide-react'
 
 interface Project {
   id: string
@@ -218,7 +176,7 @@ export default function ProjectsHubPage() {
   }, [])
 
   useEffect(() => {
-    let filtered = projects.filter(project => {
+    const filtered = projects.filter(project => {
       const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            project.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            project.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -615,7 +573,7 @@ export default function ProjectsHubPage() {
                       <div className="flex -space-x-2">
                         {project.team_members.slice(0, 3).map((member, index) => (
                           <Avatar key={member.id} className="w-6 h-6 border-2 border-white">
-                            <AvatarImage src={member.avatar} />
+                            <AvatarImage src={member.avatar} alt={member.name} />
                             <AvatarFallback className="text-xs">
                               {member.name.split(' ').map(n => n[0]).join('')}
                             </AvatarFallback>

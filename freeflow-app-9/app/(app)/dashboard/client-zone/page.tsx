@@ -1,4 +1,6 @@
 
+'use client'
+
 export default function ClientZonePage() {
   return (
     <div className="p-8">
@@ -6,4 +8,4 @@ export default function ClientZonePage() {
       <p>Client zone UI coming soon.</p>
     </div>
   );
-} 
+}

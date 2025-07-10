@@ -107,7 +107,7 @@ export function VideoComments({
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={comment.user.avatar_url} />
+            <AvatarImage src={comment.user.avatar_url} alt={comment.user.display_name || 'User'} />
             <AvatarFallback>
               {comment.user.display_name?.charAt(0) || <User className="h-4 w-4" />}
             </AvatarFallback>

@@ -348,7 +348,7 @@ export default function SettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="flex flex-col items-center space-y-4">
                     <Avatar className="w-24 h-24">
-                      <AvatarImage src={profile.avatar} />
+                      <AvatarImage src={profile.avatar} alt={profile.name} />
                       <AvatarFallback className="text-lg">
                         {profile.firstName.charAt(0)}{profile.lastName.charAt(0)}
                       </AvatarFallback>

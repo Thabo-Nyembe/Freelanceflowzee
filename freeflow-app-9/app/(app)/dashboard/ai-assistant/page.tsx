@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -16,20 +15,13 @@ import {
   Brain,
   Lightbulb,
   TrendingUp,
-  FileText,
   BarChart3,
   Target,
   Clock,
   CheckCircle,
   AlertCircle,
-  Zap,
   MessageSquare,
   Settings,
-  Download,
-  Upload,
-  Copy,
-  Trash2,
-  Star,
   ThumbsUp,
   ThumbsDown,
   RefreshCw,
@@ -37,14 +29,13 @@ import {
   MicOff,
   Volume2,
   VolumeX,
-  Play,
-  Pause,
   Users,
-  Calendar,
   DollarSign,
   Eye,
   Bookmark,
-  Share2
+  Copy,
+  Zap,
+  Star
 } from 'lucide-react'
 
 interface Message {
@@ -74,7 +65,7 @@ interface AIInsight {
   category: 'productivity' | 'business' | 'optimization' | 'opportunity'
   priority: 'high' | 'medium' | 'low'
   action: string
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
 }
 
 interface ProjectAnalysis {
@@ -267,7 +258,7 @@ export default function AIAssistantPage() {
     }, 1500)
   }
 
-  const generateAIResponse = (input: string): string => {
+  const generateAIResponse = (_input: string): string => {
     const responses = [
       "Based on your current project portfolio, I can see some excellent opportunities for optimization. Your video editing projects are performing particularly well with higher profit margins. Here's what I recommend...",
       "I've analyzed your workflow patterns and found that you're most productive between 9-11 AM. Consider scheduling your most complex tasks during this window to maximize efficiency...",
@@ -277,7 +268,7 @@ export default function AIAssistantPage() {
     return responses[Math.floor(Math.random() * responses.length)]
   }
 
-  const generateSuggestions = (input: string): string[] => {
+  const generateSuggestions = (_input: string): string[] => {
     const suggestions = [
       ['Show me detailed project analytics', 'Help with time tracking', 'Suggest productivity tools'],
       ['Create a pricing strategy', 'Analyze competitor rates', 'Calculate project ROI'],
@@ -430,14 +421,14 @@ export default function AIAssistantPage() {
                         <Avatar className="w-8 h-8 flex-shrink-0">
                           {message.type === 'assistant' ? (
                             <>
-                              <AvatarImage src="/ai-avatar.png" />
+                              <AvatarImage src="/ai-avatar.png" alt="AI Assistant" />
                               <AvatarFallback className="bg-purple-100 text-purple-600">
                                 <Bot className="w-4 h-4" />
                               </AvatarFallback>
                             </>
                           ) : (
                             <>
-                              <AvatarImage src="/user-avatar.jpg" />
+                              <AvatarImage src="/user-avatar.jpg" alt="User" />
                               <AvatarFallback>You</AvatarFallback>
                             </>
                           )}

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useReducer, useCallback } from 'react'
+import React, { useReducer, useCallback, useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -608,8 +608,8 @@ const assetGenerationReducer = (state: AssetGenerationState, action: AssetGenera
 
 export default function AICreate() {
   // Available AI Models (kept for backward compatibility)
-  const [availableModels] =<AIModel[]>(AI_MODELS)
-  const fileInputRef =<HTMLInputElement>(null)
+  const [availableModels] = useState<AIModel[]>(AI_MODELS)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [state, dispatch] = useReducer(assetGenerationReducer, initialState)
 

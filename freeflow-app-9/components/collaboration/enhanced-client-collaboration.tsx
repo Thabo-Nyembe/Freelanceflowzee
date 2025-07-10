@@ -723,7 +723,7 @@ export function EnhancedClientCollaboration({
                 <div key={comment.id} className="border border-slate-200 rounded-lg p-3 space-y-3">
                   <div className="flex items-start gap-3">
                     <Avatar className="w-8 h-8">
-                      <AvatarImage src={comment.userAvatar} />
+                      <AvatarImage src={comment.userAvatar} alt={comment.userName} />
                       <AvatarFallback>{comment.userName[0]}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 space-y-2">

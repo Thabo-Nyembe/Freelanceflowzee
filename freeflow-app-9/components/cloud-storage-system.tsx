@@ -261,7 +261,7 @@ export function CloudStorageSystem() {
   const [state, dispatch] = useReducer(storageReducer, initialState)
   const [showUpload, setShowUpload] = useState(false)
   const [showSubscription, setShowSubscription] = useState(false)
-  const fileInputRef =<HTMLInputElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const currentPlan = SUBSCRIPTION_PLANS[state.currentPlan]
   const storageUsedPercent = (state.usedStorage / state.totalStorage) * 100

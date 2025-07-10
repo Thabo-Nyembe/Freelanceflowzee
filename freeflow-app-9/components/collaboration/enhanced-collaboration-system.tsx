@@ -149,7 +149,7 @@ export default function EnhancedCollaborationSystem({
             <div className="flex items-center gap-3">
               <div className="relative">
                 <Avatar>
-                  <AvatarImage src={participant.avatar} />
+                  <AvatarImage src={participant.avatar} alt={participant.name} />
                   <AvatarFallback>{participant.name[0]}</AvatarFallback>
                 </Avatar>
                 <div

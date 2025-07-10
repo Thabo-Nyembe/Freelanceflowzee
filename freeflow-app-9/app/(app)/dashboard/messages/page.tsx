@@ -45,7 +45,7 @@ export default function MessagesPage() {
   const handleSendMessage = () => {
     if (newMessage.trim() && selectedChat) {
       // Add message to chat
-      const message: Message = {
+      const _message: Message = {
         id: mockMessages.length + 1,
         text: newMessage,
         sender: 'You',

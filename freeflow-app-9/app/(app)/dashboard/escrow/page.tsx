@@ -26,34 +26,12 @@ import {
   FileText,
   Eye,
   Plus,
-  Settings,
-  CreditCard,
-  TrendingUp,
   Activity,
-  BarChart3,
-  MessageSquare,
-  Star,
-  Copy,
-  Share2,
-  Edit3,
-  Trash2,
-  Filter,
   Search,
-  MoreHorizontal,
-  Banknote,
   Receipt,
-  Wallet,
-  RefreshCw,
-  ExternalLink,
   Mail,
-  Phone,
-  Building,
-  MapPin,
-  Globe,
-  Briefcase,
   Target,
-  Award,
-  Zap
+  Trash2
 } from 'lucide-react'
 
 interface EscrowMilestone {
@@ -205,7 +183,7 @@ export default function EscrowPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [releasePassword, setReleasePassword] = useState('')
   const [showPasswordForm, setShowPasswordForm] = useState<string | null>(null)
-  const [selectedDeposit, setSelectedDeposit] = useState<EscrowDeposit | null>(null)
+  const [_selectedDeposit, _setSelectedDeposit] = useState<EscrowDeposit | null>(null)
   const [newDeposit, setNewDeposit] = useState({
     projectTitle: '',
     clientName: '',
@@ -447,7 +425,7 @@ export default function EscrowPage() {
 
   useEffect(() => {
     dispatch({ type: 'SET_DEPOSITS', deposits: mockDeposits })
-  }, [])
+  }, [mockDeposits])
 
   const filteredDeposits = state.deposits.filter(deposit => {
     const matchesFilter = state.filter === 'all' || deposit.status === state.filter
@@ -849,7 +827,7 @@ export default function EscrowPage() {
                     <div key={deposit.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center gap-4">
                         <Avatar className="w-10 h-10">
-                          <AvatarImage src={deposit.clientAvatar} />
+                          <AvatarImage src={deposit.clientAvatar} alt={deposit.clientName} />
                           <AvatarFallback>{deposit.clientName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                         </Avatar>
                         <div>
@@ -912,7 +890,7 @@ export default function EscrowPage() {
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-4">
                           <Avatar className="w-12 h-12">
-                            <AvatarImage src={deposit.clientAvatar} />
+                            <AvatarImage src={deposit.clientAvatar} alt={deposit.clientName} />
                             <AvatarFallback>{deposit.clientName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                           </Avatar>
                           <div>

@@ -106,7 +106,7 @@ export default function CommunityShowcase({
       <div className="p-4">
         <div className="flex items-center gap-2 mb-3">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={item.author.avatar} />
+            <AvatarImage src={item.author.avatar} alt={item.author.name} />
             <AvatarFallback>{item.author.name[0]}</AvatarFallback>
           </Avatar>
           <div>

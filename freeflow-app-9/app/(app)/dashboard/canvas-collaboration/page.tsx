@@ -6,14 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Palette,
-  Users,
   Share2,
   Download,
-  Upload,
   Undo,
   Redo,
   Move,
@@ -25,21 +22,17 @@ import {
   ZoomIn,
   ZoomOut,
   Grid,
-  Layers,
   Eye,
   EyeOff,
   Lock,
   Unlock,
-  MessageSquare,
   Video,
   Mic,
   MicOff,
   VideoOff,
-  Settings,
   Save,
   Plus,
   Trash2,
-  Copy,
   MousePointer2,
   Hand,
   Sparkles
@@ -376,7 +369,7 @@ export default function CanvasCollaboration() {
     }
   }
 
-  const clearCanvas = () => {
+  const _clearCanvas = () => {
     const canvas = canvasRef.current
     const ctx = canvas?.getContext('2d')
     if (!canvas || !ctx) return
@@ -451,7 +444,7 @@ export default function CanvasCollaboration() {
                 {collaborators.map(collaborator => (
                   <div key={collaborator.id} className="relative">
                     <Avatar className="w-8 h-8 border-2 border-white">
-                      <AvatarImage src={collaborator.avatar} />
+                      <AvatarImage src={collaborator.avatar} alt={collaborator.name} />
                       <AvatarFallback>{collaborator.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     {collaborator.isActive && (
@@ -627,7 +620,7 @@ export default function CanvasCollaboration() {
                       <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
                       <span className="text-xs font-medium text-yellow-800">Sarah Chen</span>
                     </div>
-                    <p className="text-xs text-yellow-700">Let's adjust the logo size here</p>
+                    <p className="text-xs text-yellow-700">Let&apos;s adjust the logo size here</p>
                   </div>
                 </div>
                 

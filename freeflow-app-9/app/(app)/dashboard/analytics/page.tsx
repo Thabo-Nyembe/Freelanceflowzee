@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -8,27 +8,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   BarChart3,
-  TrendingUp,
-  TrendingDown,
   DollarSign,
   Users,
   Clock,
-  Eye,
   Download,
-  Share2,
-  Calendar,
   Target,
-  Zap,
   Award,
   FileText,
-  MessageSquare,
   Star,
-  ThumbsUp,
   Activity,
   PieChart,
   LineChart,
   RefreshCw,
-  Filter,
   ArrowUpRight,
   ArrowDownRight
 } from 'lucide-react'
@@ -38,11 +29,11 @@ interface MetricCard {
   value: string
   change: string
   trend: 'up' | 'down'
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
   color: string
 }
 
-interface ChartData {
+interface _ChartData {
   name: string
   value: number
   color: string

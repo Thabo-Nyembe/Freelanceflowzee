@@ -15,7 +15,6 @@ import {
   Image, 
   Play, 
   PinIcon,
-  Clock,
   CheckCircle
 } from "lucide-react";
 
@@ -129,7 +128,7 @@ export default function CollaborationPage() {
                   <h3 className="font-semibold">Supported Media Types</h3>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 border rounded-lg text-center">
-                      <Image className="h-6 w-6 mx-auto mb-2 text-blue-600" />
+                      <Image className="h-6 w-6 mx-auto mb-2 text-blue-600" alt="Images icon" />
                       <p className="text-sm">Images</p>
                     </div>
                     <div className="p-3 border rounded-lg text-center">
@@ -192,7 +191,7 @@ export default function CollaborationPage() {
             <CardContent>
               <div className="text-center py-12">
                 <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Image className="h-8 w-8 text-white" />
+                  <Image className="h-8 w-8 text-white" alt="Media preview icon" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2">Enhanced Media Preview</h3>
                 <p className="text-gray-600 mb-6">Coming soon with advanced preview capabilities</p>

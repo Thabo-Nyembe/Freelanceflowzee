@@ -590,7 +590,7 @@ export function SharedTeamCalendar() {
                   <div key={member.id} className="flex items-center space-x-3">
                     <div className="relative">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={member.avatar} />
+                        <AvatarImage src={member.avatar} alt={member.name} />
                         <AvatarFallback className="bg-blue-100 text-blue-600 text-sm">
                           {member.name.split(' ').map(n => n[0]).join('')}
                         </AvatarFallback>
@@ -800,7 +800,7 @@ export function SharedTeamCalendar() {
                       const attendee = state.teamMembers.find(m => m.id === attendeeId)
                       return attendee ? (
                         <Avatar key={attendee.id} className="h-8 w-8 border-2 border-white">
-                          <AvatarImage src={attendee.avatar} />
+                          <AvatarImage src={attendee.avatar} alt={attendee.name} />
                           <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">
                             {attendee.name.split(' ').map(n => n[0]).join('')}
                           </AvatarFallback>

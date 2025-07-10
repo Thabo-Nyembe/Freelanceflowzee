@@ -342,7 +342,7 @@ export default function ProjectsHub({ projects, _userId }: ProjectsHubProps) {
               <div className="flex -space-x-2">
                 {project.team_members.slice(0, 3).map((member) => (
                   <Avatar key={member.id} className="h-6 w-6 border-2 border-white">
-                    <AvatarImage src={member.avatar} />
+                    <AvatarImage src={member.avatar} alt={member.name} />
                     <AvatarFallback className="text-xs">
                       {member.name.split(' ').map((n: string) => n[0]).join('')}
                     </AvatarFallback>

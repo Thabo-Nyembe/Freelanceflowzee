@@ -493,7 +493,7 @@ export default function ReviewManagementDashboard({
                         <span className="text-sm text-muted-foreground">Latest:</span>
                         {review.approvals.slice(-3).map(approval => (
                           <Avatar key={approval.id} className="w-6 h-6">
-                            <AvatarImage src={approval.user_avatar} />
+                            <AvatarImage src={approval.user_avatar} alt={approval.user_name} />
                             <AvatarFallback className="text-xs">
                               {approval.user_name.charAt(0).toUpperCase()}
                             </AvatarFallback>

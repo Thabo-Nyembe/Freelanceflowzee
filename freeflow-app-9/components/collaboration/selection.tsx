@@ -46,7 +46,7 @@ export function Selection({ user, blockElement }: SelectionProps) {
     // Calculate selection range
     let currentPos = 0
     const rects: DOMRect[] = []
-    let inSelection = false
+    const inSelection = false
 
     textNodes.forEach(node => {
       const text = node.textContent || ''

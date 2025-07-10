@@ -432,7 +432,7 @@ export default function CommunityHub({ currentUserId, onPostCreate, onMemberConn
                       <div className="flex items-center gap-3">
                         <div className="relative">
                           <Avatar className="h-12 w-12">
-                            <AvatarImage src={post.author.avatar} />
+                            <AvatarImage src={post.author.avatar} alt={post.author.name} />
                             <AvatarFallback>{post.author.name[0]}</AvatarFallback>
                           </Avatar>
                           {post.author.online && (
@@ -584,7 +584,7 @@ export default function CommunityHub({ currentUserId, onPostCreate, onMemberConn
                     <div className="flex items-start gap-3">
                       <div className="relative">
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={member.avatar} />
+                          <AvatarImage src={member.avatar} alt={member.name} />
                           <AvatarFallback>{member.name[0]}</AvatarFallback>
                         </Avatar>
                         {member.online && (
@@ -795,7 +795,7 @@ export default function CommunityHub({ currentUserId, onPostCreate, onMemberConn
                       
                       <div className="flex items-center gap-2 pt-2 border-t">
                         <Avatar className="w-6 h-6">
-                          <AvatarImage src={event.organizer.avatar} />
+                          <AvatarImage src={event.organizer.avatar} alt={event.organizer.name} />
                           <AvatarFallback>{event.organizer.name[0]}</AvatarFallback>
                         </Avatar>
                         <span className="text-sm text-gray-600">by {event.organizer.name}</span>
