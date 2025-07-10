@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from 'react'
+import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -18,10 +18,6 @@ import {
   CheckCircle,
   AlertCircle,
   FileText,
-  Image,
-  Video,
-  Archive,
-  Folder,
   Plus,
   BarChart3,
   TrendingUp,
@@ -30,7 +26,6 @@ import {
 } from 'lucide-react'
 
 export default function CloudStoragePage() {
-  const [selectedProvider, setSelectedProvider] = useState('all')
 
   // Mock cloud storage data
   const cloudProviders = [

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useReducer, useEffect } from 'react'
+import React, { useState, useReducer, useEffect, useMemo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -1105,22 +1105,27 @@ export default function CommunityHubPage() {
     }
   ]
 
+  const memoizedMockMembers = useMemo(() => mockMembers, [])
+  const memoizedMockPosts = useMemo(() => mockPosts, [])
+  const memoizedMockEvents = useMemo(() => mockEvents, [])
+  const memoizedMockGroups = useMemo(() => mockGroups, [])
+
   useEffect(() => {
     const loadData = async () => {
       dispatch({ type: 'SET_LOADING', payload: true })
       
       setTimeout(() => {
-        dispatch({ type: 'SET_MEMBERS', payload: mockMembers })
-        dispatch({ type: 'SET_POSTS', payload: mockPosts })
-        dispatch({ type: 'SET_EVENTS', payload: mockEvents })
-        dispatch({ type: 'SET_GROUPS', payload: mockGroups })
-        dispatch({ type: 'SET_CURRENT_USER', payload: mockMembers[0] })
+        dispatch({ type: 'SET_MEMBERS', payload: memoizedMockMembers })
+        dispatch({ type: 'SET_POSTS', payload: memoizedMockPosts })
+        dispatch({ type: 'SET_EVENTS', payload: memoizedMockEvents })
+        dispatch({ type: 'SET_GROUPS', payload: memoizedMockGroups })
+        dispatch({ type: 'SET_CURRENT_USER', payload: memoizedMockMembers[0] })
         dispatch({ type: 'SET_LOADING', payload: false })
       }, 1000)
     }
     
     loadData()
-  }, [mockMembers, mockPosts, mockEvents, mockGroups])
+  }, [memoizedMockMembers, memoizedMockPosts, memoizedMockEvents, memoizedMockGroups])
 
   const filteredMembers = state.members.filter(member => {
     const matchesSearch = member.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||

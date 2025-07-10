@@ -1,10 +1,9 @@
 "use client"
 
-import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import React, { useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   File, 
   FolderOpen, 
@@ -17,23 +16,14 @@ import {
   MoreHorizontal,
   Star,
   Share2,
-  Trash2,
   Eye,
-  Edit,
-  Copy,
-  Move,
   Archive,
   FileText,
   Image,
   Video,
-  Music,
   FileCode,
   FileSpreadsheet,
-  Calendar,
-  User,
   HardDrive,
-  Cloud,
-  Folder,
   Plus
 } from 'lucide-react'
 
@@ -41,7 +31,6 @@ export default function FilesPage() {
   const [viewMode, setViewMode] = useState('grid')
   const [selectedFolder, setSelectedFolder] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedFiles, setSelectedFiles] = useState([])
 
   // Mock files data
   const files = [
@@ -343,7 +332,7 @@ export default function FilesPage() {
                               <div className="relative">
                                 <img 
                                   src={file.thumbnail} 
-                                  alt={file.name}
+                                  alt={`Thumbnail for ${file.name}`}
                                   className="w-10 h-10 rounded object-cover"
                                 />
                                 {file.type === 'video' && (
@@ -403,7 +392,7 @@ export default function FilesPage() {
                         {file.thumbnail ? (
                           <img 
                             src={file.thumbnail} 
-                            alt={file.name}
+                            alt={`Thumbnail for ${file.name}`}
                             className="w-8 h-8 rounded object-cover"
                           />
                         ) : (

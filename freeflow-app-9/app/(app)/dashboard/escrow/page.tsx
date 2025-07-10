@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useReducer, useEffect } from 'react'
+import React, { useState, useReducer, useEffect, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -423,9 +423,11 @@ export default function EscrowPage() {
     }
   ]
 
+  const memoizedMockDeposits = useMemo(() => mockDeposits, [])
+
   useEffect(() => {
-    dispatch({ type: 'SET_DEPOSITS', deposits: mockDeposits })
-  }, [mockDeposits])
+    dispatch({ type: 'SET_DEPOSITS', deposits: memoizedMockDeposits })
+  }, [memoizedMockDeposits])
 
   const filteredDeposits = state.deposits.filter(deposit => {
     const matchesFilter = state.filter === 'all' || deposit.status === state.filter
