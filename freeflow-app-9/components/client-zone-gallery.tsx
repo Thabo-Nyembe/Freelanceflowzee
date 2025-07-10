@@ -126,7 +126,7 @@ const mockGalleries: ClientGallery[] = [
     paidAmount: 2500,
     createdAt: '2024-02-01',
     expiresAt: '2024-12-31',
-    downloadPassword: 'WEDDING2024!',
+    downloadPassword: process.env.DEMO_PASSWORD || 'demo-password',
     watermarkEnabled: false,
     downloadLimit: 100,
     analytics: {
@@ -138,7 +138,7 @@ const mockGalleries: ClientGallery[] = [
     },
     unlockMethods: [
       { type: 'escrow_release', isEnabled: true },
-      { type: 'password', isEnabled: true, password: 'WEDDING2024!' }
+      { type: 'password', isEnabled: true, password: process.env.DEMO_PASSWORD || 'demo-password' }
     ],
     images: [
       {

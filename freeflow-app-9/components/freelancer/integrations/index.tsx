@@ -19,7 +19,7 @@ interface Integration {
   id: string;
   name: string;
   description: string;
-  icon: any;
+  icon: unknown;
   enabled: boolean;
   status: 'active' | 'pending' | 'error';
   lastSync?: string;

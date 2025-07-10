@@ -18,7 +18,7 @@ export interface FileItem {
   views: number
   folder?: string
   tags: string[]
-  metadata?: any
+  metadata?: unknown
 }
 
 export interface FileUploadResponse {

@@ -409,22 +409,11 @@ export class VideoThumbnailGenerator {
 export const thumbnailGenerator = new VideoThumbnailGenerator();
 
 // Utility functions for common use cases
-export const generateVideoThumbnail = (
-  playbackId: string,
-  options?: ThumbnailOptions
-) => thumbnailGenerator.generateMuxThumbnail(playbackId, options);
+export const generateVideoThumbnail = (playbackId: string, options?: ThumbnailOptions) => thumbnailGenerator.generateMuxThumbnail(playbackId, options);
 
-export const generateResponsiveThumbnails = (
-  playbackId: string,
-  options?: ThumbnailOptions
-) => thumbnailGenerator.generateResponsiveThumbnails(playbackId, options);
+export const generateResponsiveThumbnails = (playbackId: string, options?: ThumbnailOptions) => thumbnailGenerator.generateResponsiveThumbnails(playbackId, options);
 
-export const getOptimizedThumbnailUrl = (
-  playbackId: string,
-  displayWidth: number,
-  displayHeight?: number,
-  options?: Partial<ThumbnailOptions>
-) => thumbnailGenerator.getOptimizedThumbnailUrl(playbackId, displayWidth, displayHeight, options);
+export const getOptimizedThumbnailUrl = (playbackId: string, displayWidth: number, displayHeight?: number, options?: Partial<ThumbnailOptions>) => thumbnailGenerator.getOptimizedThumbnailUrl(playbackId, displayWidth, displayHeight, options);
 
 export const getFallbackGradient = (videoId: string) => 
   thumbnailGenerator.generateFallbackGradient(videoId); 

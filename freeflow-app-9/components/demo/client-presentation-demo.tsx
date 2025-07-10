@@ -8,7 +8,7 @@ import { Users, CheckCircle, Award, DollarSign, TrendingUp, Star, ArrowRight } f
 import { Badge } from '@/components/ui/badge';
 
 export function ClientPresentationDemo() {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState<any>(0);
   const _dashboardMetrics = useDashboardMetrics();
   const { content } = useDemoContent();
   const projects = content?.projects;
@@ -137,8 +137,7 @@ export function ClientPresentationDemo() {
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-center mb-6">Featured Projects</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {projects?.slice(0, 4).map((project: any, index: number) => (
-                <Card key={index} className="hover:shadow-lg transition-shadow">
+              { projects?.slice(0, 4).map((project } className="hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <CardTitle className="text-lg">{project.title}</CardTitle>

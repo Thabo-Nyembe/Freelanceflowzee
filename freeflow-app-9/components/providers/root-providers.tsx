@@ -8,8 +8,8 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
 
 export function RootProviders({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient())
-  const [_supabaseClient] = useState(() => {
+  const [queryClient] = useState<any>(() => new QueryClient())
+  const [_supabaseClient] = useState<any>(() => {
     if (typeof window !== 'undefined') {
       return createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,

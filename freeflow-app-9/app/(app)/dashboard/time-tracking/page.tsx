@@ -36,8 +36,8 @@ export default function TimeTrackingPage() {
   const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([])
   const [selectedProject, setSelectedProject] = useState<string>('')
   const [selectedTask, setSelectedTask] = useState<string>('')
-  const [description, setDescription] = useState('')
-  const [elapsedTime, setElapsedTime] = useState(0)
+  const [description, setDescription] = useState<any>('')
+  const [elapsedTime, setElapsedTime] = useState<any>(0)
 
   // Mock data - replace with real data from your API
   const projects: Project[] = [

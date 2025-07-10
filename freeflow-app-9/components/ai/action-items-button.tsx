@@ -20,11 +20,11 @@ const priorityVariantMap: { [key: string]: 'destructive' | 'secondary' | 'outlin
 };
 
 export function ActionItemsButton({ projectId }: ActionItemsButtonProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState<any>(false);
+  const [loading, setLoading] = useState<any>(false);
   const [error, setError] = useState<string | null>(null);
   const [actionItems, setActionItems] = useState<{ task: string; priority: string; }[]>([]);
-  const [hasCopied, setHasCopied] = useState(false);
+  const [hasCopied, setHasCopied] = useState<any>(false);
 
   const handleDetectActionItems = async () => {
     setIsOpen(true);

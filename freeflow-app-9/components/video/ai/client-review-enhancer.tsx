@@ -15,15 +15,15 @@ interface ReviewSession {
   videoUrl: string;
   status: 'pending' | 'in_review' | 'approved' | 'needs_changes';
   clientFeedback: string[];
-  aiInsights: any;
-  chapters: any[];
+  aiInsights: unknown;
+  chapters: unknown[];
   created_at: string;
 }
 
 export const ClientReviewEnhancer = ({ projectId }: { projectId: string }) => {
   const [sessions, setSessions] = useState<ReviewSession[]>([]);
   const [activeSession, setActiveSession] = useState<ReviewSession | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
+  const [isRecording, setIsRecording] = useState<any>(false);
   const supabase = useSupabase();
 
   useEffect(() => {

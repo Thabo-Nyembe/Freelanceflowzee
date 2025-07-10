@@ -24,9 +24,9 @@ import { Copy, Link, Send } from 'lucide-react';
 
 export function VideoShareDialog({ videoId }: { videoId: string }) {
   const { grantPermission, createShareLink, isLoading } = useVideoSecurity(videoId);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState<any>('');
   const [permission, setPermission] = useState<PermissionLevel>('view');
-  const [shareUrl, setShareUrl] = useState('');
+  const [shareUrl, setShareUrl] = useState<any>('');
 
   const handleGrantPermission = async () => {
     if (!email) return;

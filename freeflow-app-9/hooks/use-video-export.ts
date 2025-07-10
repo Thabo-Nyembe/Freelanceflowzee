@@ -21,7 +21,7 @@ export function useVideoExport(videoId?: string) {
   const supabase = useSupabase();
   const [exports, setExports] = useState<VideoExport[]>([]);
   const [presets, setPresets] = useState<ExportPreset[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<any>(false);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch exports for a video

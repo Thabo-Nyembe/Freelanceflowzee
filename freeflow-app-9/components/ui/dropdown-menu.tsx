@@ -169,8 +169,7 @@ const DropdownMenuSeparator = React.forwardRef<
 DropdownMenuSeparator.displayName = DropdownMenuPrimitive.Separator.displayName
 
 const DropdownMenuShortcut = ({
-  className,
-  ...props
+  className: unknown, ...props
 }: React.HTMLAttributes<HTMLSpanElement>) => {
   return (
     <span

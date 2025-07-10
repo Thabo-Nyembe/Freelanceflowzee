@@ -30,9 +30,9 @@ import {
 } from 'lucide-react'
 
 export default function TeamHubPage() {
-  const [selectedMember, setSelectedMember] = useState(null)
-  const [activeTab, setActiveTab] = useState('overview')
-  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedMember, setSelectedMember] = useState<any>(null)
+  const [activeTab, setActiveTab] = useState<any>('overview')
+  const [searchTerm, setSearchTerm] = useState<any>('')
 
   // Mock team data
   const teamMembers = [
@@ -162,7 +162,7 @@ export default function TeamHubPage() {
     averageRating: teamMembers.reduce((sum, m) => sum + m.rating, 0) / teamMembers.length
   }
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: unknown) => {
     switch (status) {
       case 'online': return 'bg-green-500'
       case 'busy': return 'bg-yellow-500'

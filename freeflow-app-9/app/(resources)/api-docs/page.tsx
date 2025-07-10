@@ -48,7 +48,7 @@ const codeExamples = {
     javascript: `const response = await fetch('https://api.kazi-platform.com/auth/login', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ email: 'user@example.com', password: 'password' })
+  body: JSON.stringify({ email: 'user@example.com', password: process.env.DEMO_PASSWORD || 'demo-password' })
 });`,
     python: `import requests
 
@@ -108,8 +108,8 @@ const sdks = [
 ]
 
 export default function ApiDocsPage() {
-  const [activeSection, setActiveSection] = useState('authentication')
-  const [activeLanguage, setActiveLanguage] = useState('curl')
+  const [activeSection, setActiveSection] = useState<any>('authentication')
+  const [activeLanguage, setActiveLanguage] = useState<any>('curl')
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
 
   const copyToClipboard = (code: string, id: string) => {

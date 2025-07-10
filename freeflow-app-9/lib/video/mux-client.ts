@@ -31,7 +31,7 @@ export const createVideoAsset = async (options: {
 }) => {
   const mux = getMuxClient();
   
-  const assetOptions: any = {
+  const assetOptions: unknown = {
     input: options.url || { upload_id: options.uploadId },
     playback_policy: ['public'],
     encoding_tier: 'smart',
@@ -203,7 +203,7 @@ export const getVideoAnalytics = async (options: {
   const mux = getMuxClient();
 
   try {
-    const filters: any[] = [];
+    const filters: unknown[] = [];
     if (options.assetId) filters.push(`asset_id:${options.assetId}` as any);
     if (options.playbackId) filters.push(`playback_id:${options.playbackId}` as any);
 
@@ -278,7 +278,7 @@ export const verifyWebhookSignature = (
 };
 
 // Process webhook events
-export const processWebhookEvent = (event: any) => {
+export const processWebhookEvent = (event: unknown) => {
   const { type, data } = event;
   
   switch (type) {

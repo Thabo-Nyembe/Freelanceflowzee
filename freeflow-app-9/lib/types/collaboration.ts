@@ -69,7 +69,7 @@ export interface CollaborationEvent {
   type: 'cursor' | 'selection' | 'edit' | 'comment' | 'reaction' | 'presence'
   userId: string
   timestamp: string
-  data: any
+  data: unknown
 }
 
 export interface CollaborationComment {
@@ -117,7 +117,7 @@ export interface CollaborationOptions {
 export interface CollaborationMessage {
   type: 'cursor' | 'selection' | 'edit' | 'comment' | 'reaction' | 'presence'
   userId: string
-  data: any
+  data: unknown
 }
 
 export interface CollaborationApi {

@@ -18,11 +18,7 @@ interface TableBlockProps {
 }
 
 export function TableBlock({
-  id,
-  content,
-  properties,
-  onUpdate,
-  isSelected
+  id: unknown, content: unknown, properties: unknown, onUpdate: unknown, isSelected
 }: TableBlockProps) {
   const [hoveredCell, setHoveredCell] = useState<[number, number] | null>(null)
 

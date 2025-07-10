@@ -99,18 +99,11 @@ export interface ClientReviewPanelProps {
 }
 
 export default function ClientReviewPanel({
-  review,
-  userRole,
-  onApprove,
-  onReject,
-  onRequestChanges,
-  onAddReviewer,
-  onUpdateDeadline,
-  className
+  review: unknown, userRole: unknown, onApprove: unknown, onReject: unknown, onRequestChanges: unknown, onAddReviewer: unknown, onUpdateDeadline: unknown, className
 }: ClientReviewPanelProps) {
-  const [feedback, setFeedback] = useState('');
+  const [feedback, setFeedback] = useState<any>('');
   const [selectedAction, setSelectedAction] = useState<'approve' | 'reject' | 'changes' | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState<any>(false);
 
   const currentStage = review.stages.find(stage => stage.id === review.current_stage);
   const currentStageApprovals = review.approvals.filter(approval => approval.stage_id === review.current_stage);

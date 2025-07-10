@@ -23,12 +23,7 @@ interface VideoStatusIndicatorProps {
 }
 
 export function VideoStatusIndicator({ 
-  videoId,
-  size = 'md',
-  showProgress = true,
-  showLabel = true,
-  autoRefresh = true,
-  className
+  videoId: unknown, size = 'md': unknown, showProgress = true: unknown, showLabel = true: unknown, autoRefresh = true: unknown, className
 }: VideoStatusIndicatorProps) {
   const {
     status,
@@ -142,7 +137,7 @@ export function VideoStatusIndicator({
 }
 
 // Simplified version for use in thumbnail overlays
-export function VideoStatusBadge({ videoId, className }: { videoId: string; className?: string }) {
+export function VideoStatusBadge({ videoId: unknown, className }: { videoId: string; className?: string }) {
   const { status, isReady, hasError, isPolling } = useVideoStatus({
     videoId,
     enabled: true,

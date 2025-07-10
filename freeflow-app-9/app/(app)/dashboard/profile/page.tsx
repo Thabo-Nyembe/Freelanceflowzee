@@ -34,8 +34,8 @@ import {
 } from 'lucide-react'
 
 export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState('overview')
-  const [isEditing, setIsEditing] = useState(false)
+  const [activeTab, setActiveTab] = useState<any>('overview')
+  const [isEditing, setIsEditing] = useState<any>(false)
 
   // Mock user profile data
   const userProfile = {

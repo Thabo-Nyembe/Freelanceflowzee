@@ -1,6 +1,6 @@
 'use client'
 
-import { } from 'react'
+
 import { Button } from '@/components/ui/button'
 
 export function HomePageClient() {

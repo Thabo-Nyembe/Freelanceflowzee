@@ -106,7 +106,7 @@ const ToolVisualization: React.FC<ToolVisualizationProps> = ({ toolInvocation })
 };
 
 export default function EnhancedAIChat() {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState<any>(false);
   
   const { messages, input, handleInputChange, handleSubmit, status } = useChat({
     api: '/api/ai/enhanced-stream',

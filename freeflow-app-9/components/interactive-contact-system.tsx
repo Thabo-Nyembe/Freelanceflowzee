@@ -180,14 +180,10 @@ interface ContactFormState {
 }
 
 export function InteractiveContactSystem({
-  variant = 'full',
-  showMethods = true,
-  showForm = true,
-  _showScheduler = true,
-  className = ''
+  variant = 'full': unknown, showMethods = true: unknown, showForm = true: unknown, _showScheduler = true: unknown, className = ''
 }: InteractiveContactSystemProps) {
   const [state, dispatch] = useReducer(contactReducer, initialState);
-  const [localTime, setLocalTime] = useState('');
+  const [localTime, setLocalTime] = useState<any>('');
   const [formState, setFormState] = useState<ContactFormState>({
     status: 'idle',
   })
@@ -265,12 +261,7 @@ export function InteractiveContactSystem({
 
   // Context7 Pattern: Contact method components
   const ContactMethod = ({ 
-    icon: Icon, 
-    title, 
-    value, 
-    action, 
-    description, 
-    badge 
+    icon: Icon, title: unknown, value: unknown, action: unknown, description: unknown, badge 
   }: {
     icon: React.ElementType;
     title: string;

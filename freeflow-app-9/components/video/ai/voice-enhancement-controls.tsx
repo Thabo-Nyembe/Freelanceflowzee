@@ -21,17 +21,16 @@ interface VoiceEnhancementControlsProps {
 }
 
 export function VoiceEnhancementControls({
-  audioStream,
-  onEnhancedStream
+  audioStream: unknown, onEnhancedStream
 }: VoiceEnhancementControlsProps) {
-  const [isEnabled, setIsEnabled] = useState(false)
+  const [isEnabled, setIsEnabled] = useState<any>(false)
   const [voiceService, setVoiceService] = useState<VoiceEnhancementService | null>(null)
-  const [metrics, setMetrics] = useState({
+  const [metrics, setMetrics] = useState<any>({
     volume: 0,
     noiseLevel: 0,
     clarity: 0
   })
-  const [settings, setSettings] = useState({
+  const [settings, setSettings] = useState<any>({
     gainLevel: 1,
     compressionRatio: 12,
     noiseThreshold: 0.01,
@@ -87,10 +86,7 @@ export function VoiceEnhancementControls({
     voiceService.updateSettings(settings)
   }, [settings, voiceService, isEnabled])
 
-  const handleSettingChange = (
-    setting: keyof typeof settings,
-    value: number | number[]
-  ) => {
+  const handleSettingChange = (setting: keyof typeof settings, value: number | number[]) => {
     setSettings(prev => ({
       ...prev,
       [setting]: Array.isArray(value) ? value[0] : value

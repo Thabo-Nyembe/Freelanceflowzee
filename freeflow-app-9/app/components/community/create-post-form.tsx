@@ -17,13 +17,13 @@ interface CreatePostFormProps {
   isLoading?: boolean
 }
 
-export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
-  const [title, setTitle] = useState('')
-  const [content, setContent] = useState('')
-  const [category, setCategory] = useState('general')
+export function CreatePostForm({ onSubmit: unknown, isLoading }: CreatePostFormProps) {
+  const [title, setTitle] = useState<any>('')
+  const [content, setContent] = useState<any>('')
+  const [category, setCategory] = useState<any>('general')
   const [mediaUrls, setMediaUrls] = useState<string[]>([])
   const [mediaType, setMediaType] = useState<'image' | 'video' | 'link'>('image')
-  const [mediaUrl, setMediaUrl] = useState('')
+  const [mediaUrl, setMediaUrl] = useState<any>('')
 
   const handleAddMedia = () => {
     if (mediaUrl && !mediaUrls.includes(mediaUrl)) {

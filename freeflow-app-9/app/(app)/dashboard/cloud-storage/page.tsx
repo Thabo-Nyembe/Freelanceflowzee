@@ -122,7 +122,7 @@ export default function CloudStoragePage() {
     totalProviders: cloudProviders.length
   }
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: unknown) => {
     switch (status) {
       case 'active': return 'bg-green-100 text-green-800'
       case 'syncing': return 'bg-blue-100 text-blue-800'
@@ -132,7 +132,7 @@ export default function CloudStoragePage() {
     }
   }
 
-  const getStatusIcon = (status) => {
+  const getStatusIcon = (status: unknown) => {
     switch (status) {
       case 'active': return <CheckCircle className="h-4 w-4" />
       case 'syncing': return <RefreshCw className="h-4 w-4 animate-spin" />

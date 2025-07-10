@@ -234,7 +234,7 @@ export const supabase = createClient(supabaseUrl, supabaseKey)`,
 // Sign up
 const { data, error } = await supabase.auth.signUp({
   email: 'user@example.com',
-  password: 'password'
+  password: process.env.DEMO_PASSWORD || 'demo-password'
 })
 
 // Sign in

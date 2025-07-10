@@ -223,7 +223,7 @@ const initialState: CalendarState = {
 
 export function SharedTeamCalendar() {
   const [state, dispatch] = useReducer(calendarReducer, initialState)
-  const [newEvent, setNewEvent] = useState({
+  const [newEvent, setNewEvent] = useState<any>({
     title: '',
     type: 'meeting' as const,
     date: '',

@@ -10,21 +10,13 @@ interface SEOProps {
   canonical?: string
   ogImage?: string
   ogType?: string
-  structuredData?: any
+  structuredData?: unknown
   noIndex?: boolean
   alternateUrls?: Array<{ href: string, hrefLang: string }>
 }
 
 export function DynamicSEO({
-  title = 'KAZI - Enterprise Freelance Management Platform',
-  description = 'AI-powered creative platform with multi-model studio, universal feedback, real-time collaboration, and secure payments.',
-  keywords = 'KAZI, AI creative platform, freelance management, universal feedback, real-time collaboration',
-  canonical,
-  ogImage = '/kazi-brand/logo-transparent.png',
-  ogType = 'website',
-  structuredData,
-  noIndex = false,
-  alternateUrls = []
+  title = 'KAZI - Enterprise Freelance Management Platform': unknown, description = 'AI-powered creative platform with multi-model studio: unknown, universal feedback: unknown, real-time collaboration: unknown, and secure payments.': unknown, keywords = 'KAZI: unknown, AI creative platform: unknown, freelance management: unknown, universal feedback: unknown, real-time collaboration': unknown, canonical: unknown, ogImage = '/kazi-brand/logo-transparent.png': unknown, ogType = 'website': unknown, structuredData: unknown, noIndex = false: unknown, alternateUrls = []
 }: SEOProps) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kazi-platform.vercel.app'
   const fullTitle = title.includes('KAZI') ? title : `${title} | KAZI`

@@ -114,7 +114,7 @@ export function AdvancedGallerySystem() {
       settings: {
         isPublic: false,
         passwordProtected: true,
-        password: 'sarah2024',
+        password: process.env.DEMO_PASSWORD || 'demo-password',
         downloadEnabled: true,
         favoritesEnabled: true,
         commentsEnabled: true,
@@ -184,8 +184,8 @@ export function AdvancedGallerySystem() {
 
   const [selectedCollection, setSelectedCollection] = useState<GalleryCollection | null>(collections[0])
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [activeTab, setActiveTab] = useState('gallery')
-  const [sharingPanelOpen, setSharingPanelOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<any>('gallery')
+  const [sharingPanelOpen, setSharingPanelOpen] = useState<any>(false)
   const [copiedText, setCopiedText] = useState<string | null>(null)
 
   const copyToClipboard = async (text: string, type: string) => {

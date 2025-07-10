@@ -11,7 +11,7 @@ interface ExportListProps {
 
 export function ExportList({ videoId }: ExportListProps) {
   const [exports, setExports] = useState<VideoExport[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<any>(true);
   const supabase = useSupabase();
 
   useEffect(() => {

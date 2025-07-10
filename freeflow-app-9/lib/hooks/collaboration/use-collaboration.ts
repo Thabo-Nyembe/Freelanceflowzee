@@ -46,7 +46,7 @@ export function useCollaboration(documentId: string) {
     selections: {},
     comments: [],
   })
-  const [isConnected, setIsConnected] = useState(false)
+  const [isConnected, setIsConnected] = useState<any>(false)
 
   // Set up real-time subscription
   useEffect(() => {
@@ -58,7 +58,7 @@ export function useCollaboration(documentId: string) {
     presenceChannel
       .on('presence', { event: 'sync' }, () => {
         const state = presenceChannel.presenceState()
-        const users = Object.values(state).flat().map((p: any) => ({
+        const users = Object.values(state).flat().map((p: unknown) => ({
           id: p.user_id,
           name: p.username,
           avatar: p.avatar_url,

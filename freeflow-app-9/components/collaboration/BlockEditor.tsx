@@ -146,7 +146,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({ isSuggestionMode = false }) =
                 {/* Suggestion Action BubbleMenu */}
                 <BubbleMenu
                     editor={editor}
-                    tippyOptions={{ duration: 100, placement: 'top' }}
+                    tippyOptions={{ duration: 100, placement: 'top'  }}
                     shouldShow={({ editor }) => editor.isActive('insertion') || editor.isActive('deletion')}
                 >
                     <SuggestionActionPopover

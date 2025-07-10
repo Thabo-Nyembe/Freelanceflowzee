@@ -23,10 +23,9 @@ interface GestureRecognitionControlsProps {
 }
 
 export function GestureRecognitionControls({
-  videoElement,
-  onGestureDetected
+  videoElement: unknown, onGestureDetected
 }: GestureRecognitionControlsProps) {
-  const [isEnabled, setIsEnabled] = useState(false)
+  const [isEnabled, setIsEnabled] = useState<any>(false)
   const [gestureService, setGestureService] = useState<GestureRecognitionService | null>(null)
   const [lastGesture, setLastGesture] = useState<GestureEvent | null>(null)
   const animationFrameRef =<number>()

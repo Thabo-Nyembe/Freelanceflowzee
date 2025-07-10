@@ -8,7 +8,7 @@ interface Context7ProviderProps {
 }
 
 export function Context7Provider({ children }: Context7ProviderProps) {
-  const [isContext7Visible, setIsContext7Visible] = useState(false);
+  const [isContext7Visible, setIsContext7Visible] = useState<any>(false);
   
   // Only show Context7 helper in development mode
   const isDevelopment = process.env.NODE_ENV === 'development';

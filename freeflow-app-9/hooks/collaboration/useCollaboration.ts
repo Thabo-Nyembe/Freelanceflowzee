@@ -42,7 +42,7 @@ export function useCollaboration(assetId: string) {
       }))
 
       return newComment
-    } catch (err: any) {
+    } catch (err: unknown) {
       setState(prev => ({ ...prev, error: err.message, loading: false }))
       return null
     }
@@ -53,7 +53,7 @@ export function useCollaboration(assetId: string) {
       setState(prev => ({ ...prev, loading: true, error: null }))
       // Mock implementation for now
       setState(prev => ({ ...prev, loading: false }))
-    } catch (err: any) {
+    } catch (err: unknown) {
       setState(prev => ({ ...prev, error: err.message, loading: false }))
     }
   }

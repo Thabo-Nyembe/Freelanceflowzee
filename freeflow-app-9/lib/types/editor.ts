@@ -1,7 +1,7 @@
 export interface ContentBlock {
   id: string
   type: 'heading' | 'text' | 'checklist' | 'image' | 'table' | 'list' | 'quote' | 'code' | 'database' | 'file' | 'video'
-  content: any
+  content: unknown
   position: number
   properties: {
     alignment: 'left' | 'center' | 'right'
@@ -97,6 +97,6 @@ export interface BlockBasedContentEditorProps {
     avatar?: string
   }
   onSave?: (blocks: ContentBlock[]) => void
-  onShare?: (options: any) => void
+  onShare?: (options: unknown) => void
   className?: string
 } 

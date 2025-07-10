@@ -71,9 +71,9 @@ const iconCategories = {
   ],
 } as const
 
-export function IconPicker({ onChange, value, className }: IconPickerProps) {
-  const [open, setOpen] = React.useState(false)
-  const [search, setSearch] = React.useState('')
+export function IconPicker({ onChange: unknown, value: unknown, className }: IconPickerProps) {
+  const [open, setOpen] = React.useState<any>(false)
+  const [search, setSearch] = React.useState<any>('')
   const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null)
 
   const SelectedIcon = value ? Icons[value] : Icons.Image

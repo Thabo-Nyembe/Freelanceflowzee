@@ -6,7 +6,7 @@ import { useToast } from '@/components/ui/use-toast';
 export function useBulkOperations() {
   const { supabase } = useSupabase();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<any>(false);
 
   const createBulkOperation = async (input: CreateBulkOperationInput) => {
     try {
@@ -72,9 +72,7 @@ export function useBulkOperations() {
     }
   };
 
-  const subscribeToBulkOperation = (
-    id: string,
-    callback: (operation: BulkOperation) => void
+  const subscribeToBulkOperation = (id: string, callback: (operation: BulkOperation) => void
   ) => {
     const subscription = supabase
       .channel(`bulk-operation-${id}`)

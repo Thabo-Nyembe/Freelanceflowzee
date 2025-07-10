@@ -14,16 +14,10 @@ interface SharingModalProps {
 }
 
 export function EnhancedSharingModal({ 
-  isOpen, 
-  onClose, 
-  title, 
-  description, 
-  url, 
-  imageUrl,
-  type 
+  isOpen: unknown, onClose: unknown, title: unknown, description: unknown, url: unknown, imageUrl: unknown, type 
 }: SharingModalProps) {
-  const [copied, setCopied] = useState(false);
-  const [embedCopied, setEmbedCopied] = useState(false);
+  const [copied, setCopied] = useState<any>(false);
+  const [embedCopied, setEmbedCopied] = useState<any>(false);
 
   if (!isOpen) return null;
 

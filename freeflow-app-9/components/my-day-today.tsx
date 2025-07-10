@@ -231,7 +231,7 @@ const typeIcons = {
 
 export function MyDayToday() {
   const [state, dispatch] = useReducer(myDayReducer, initialState)
-  const [newReminder, setNewReminder] = useState({
+  const [newReminder, setNewReminder] = useState<any>({
     title: '',
     description: '',
     time: '',
@@ -240,7 +240,7 @@ export function MyDayToday() {
     project: '',
     type: 'task' as const
   })
-  const [newEmail, setNewEmail] = useState({
+  const [newEmail, setNewEmail] = useState<any>({
     to: '',
     subject: '',
     content: '',

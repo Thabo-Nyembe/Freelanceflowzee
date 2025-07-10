@@ -166,10 +166,7 @@ export function generateSalesPageSEO(sales: SalesPageSEO): Metadata {
 }
 
 // Context7 Pattern: Dynamic SEO Metadata Generator
-export function generatePageSEO(
-  page: keyof typeof SEO_TEMPLATES,
-  customData?: Partial<Metadata>
-): Metadata {
+export function generatePageSEO(page: keyof typeof SEO_TEMPLATES, customData?: Partial<Metadata>): Metadata {
   const template = SEO_TEMPLATES[page]
   const baseMetadata: Metadata = {
     title: template.title,
@@ -225,10 +222,7 @@ export function generatePageSEO(
 }
 
 // Context7 Pattern: Structured Data Generator
-export function generateStructuredData(
-  type: 'Organization' | 'Product' | 'Article' | 'Blog' | 'ContactPage' | 'Offer' | 'SoftwareApplication',
-  data?: Record<string, unknown>
-) {
+export function generateStructuredData(type: 'Organization' | 'Product' | 'Article' | 'Blog' | 'ContactPage' | 'Offer' | 'SoftwareApplication', data?: Record<string, unknown>: unknown) {
   const baseOrganization = {
     "@context": "https://schema.org", "@type": "Organization", "name": SEO_CONFIG.site.name, "description": SEO_CONFIG.site.description, "url": SEO_CONFIG.site.url, "logo": `${SEO_CONFIG.site.url}/images/logo.png`, "contactPoint": {
       "@type": "ContactPoint", "telephone": SEO_CONFIG.contact.phone, "contactType": "customer service", "email": SEO_CONFIG.contact.email

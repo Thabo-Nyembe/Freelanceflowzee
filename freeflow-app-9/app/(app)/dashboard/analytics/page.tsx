@@ -50,8 +50,8 @@ interface Project {
 }
 
 export default function AnalyticsPage() {
-  const [timeRange, setTimeRange] = useState('30d')
-  const [activeTab, setActiveTab] = useState('overview')
+  const [timeRange, setTimeRange] = useState<any>('30d')
+  const [activeTab, setActiveTab] = useState<any>('overview')
 
   const metrics: MetricCard[] = [
     {

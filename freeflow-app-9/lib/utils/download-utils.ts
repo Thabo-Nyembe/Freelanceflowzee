@@ -104,7 +104,7 @@ export async function downloadFiles(files: DownloadableFile[], onProgress?: (com
 /**
  * Enhanced document generation with support for different types
  */
-export async function downloadDocument(type: string, data: Record<string, unknown>, filename: string): Promise<void> {
+export async function downloadDocument(type: string, data: Record<string, unknown>: unknown, filename: string): Promise<void> {
   try {
     const response = await fetch(`/api/documents/generate`, {
       method: 'POST',
@@ -134,11 +134,7 @@ export async function downloadDocument(type: string, data: Record<string, unknow
 /**
  * Download analytics/reports with enhanced error handling
  */
-export async function downloadReport(
-  type: 'csv' | 'json' | 'pdf',
-  endpoint: string,
-  filename: string
-): Promise<void> {
+export async function downloadReport(type: 'csv' | 'json' | 'pdf', endpoint: string, filename: string): Promise<void> {
   try {
     const response = await fetch(`${endpoint}?format=${type}`)
     
@@ -158,7 +154,7 @@ export async function downloadReport(
 /**
  * Enhanced invoice PDF download with receipt generation
  */
-export async function downloadInvoice(invoiceId: string, invoiceData: Record<string, unknown>): Promise<void> {
+export async function downloadInvoice(invoiceId: string, invoiceData: Record<string, unknown>: unknown): Promise<void> {
   try {
     const response = await fetch('/api/invoices/generate-pdf', {
       method: 'POST',
@@ -187,11 +183,7 @@ export async function downloadInvoice(invoiceId: string, invoiceData: Record<str
 /**
  * Gallery item download with license support
  */
-export async function downloadGalleryItem(
-  itemId: string, 
-  license: 'digital' | 'print' | 'commercial' = 'digital',
-  galleryId?: string
-): Promise<void> {
+export async function downloadGalleryItem(itemId: string, license: 'digital' | 'print' | 'commercial' = 'digital', galleryId?: string): Promise<void> {
   try {
     const response = await fetch('/api/gallery/download', {
       method: 'POST',
@@ -425,9 +417,7 @@ export function validateDownloadPermissions(_file: DownloadableFile, _userRole: 
 /**
  * Universal download handler to simplify various download types
  */
-export async function handleUniversalDownload(
-  file: DownloadableFile | string,
-  options: {
+export async function handleUniversalDownload(file: DownloadableFile | string, options: {
     type?: 'file' | 'invoice' | 'report' | 'gallery'
     license?: 'digital' | 'print' | 'commercial'
     password?: string

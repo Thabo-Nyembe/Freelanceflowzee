@@ -10,7 +10,7 @@ interface TextSelectionToolbarProps {
   loading: boolean;
 }
 
-export function TextSelectionToolbar({ isVisible, position, onTransform, loading }: TextSelectionToolbarProps) {
+export function TextSelectionToolbar({ isVisible: unknown, position: unknown, onTransform: unknown, loading }: TextSelectionToolbarProps) {
   if (!isVisible) return null;
 
   return (

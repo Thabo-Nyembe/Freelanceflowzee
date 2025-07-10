@@ -609,7 +609,7 @@ Ready to get started? Let's schedule a call to discuss next steps!`;
       // Parse the response into structured data
       const chapters = JSON.parse(response.content[0].text || '[]')
 
-      return chapters.map((chapter: any) => ({
+      return chapters.map((chapter: unknown) => ({
         title: chapter.title,
         start: chapter.start,
         end: chapter.end,
@@ -622,7 +622,7 @@ Ready to get started? Let's schedule a call to discuss next steps!`;
     }
   }
 
-  async generateInsights(videoUrl: string, analysis: any) {
+  async generateInsights(videoUrl: string, analysis: unknown) {
     try {
       if (!this.checkRateLimit('insights')) {
         throw new Error(aiConfig.errorMessages.rateLimitExceeded)

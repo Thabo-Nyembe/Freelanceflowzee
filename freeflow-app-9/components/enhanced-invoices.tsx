@@ -271,7 +271,7 @@ const initialState: InvoiceState = {
 
 export function EnhancedInvoices() {
   const [state, dispatch] = useReducer(invoiceReducer, initialState)
-  const [newInvoice, setNewInvoice] = useState({
+  const [newInvoice, setNewInvoice] = useState<any>({
     client: { name: '', email: '', company: '', address: '' },
     project: '',
     dueDate: '',

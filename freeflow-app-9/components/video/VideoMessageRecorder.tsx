@@ -13,18 +13,16 @@ interface VideoMessageRecorderProps {
 }
 
 export default function VideoMessageRecorder({ 
-  onRecordingComplete, 
-  assetId,
-  className = '' 
+  onRecordingComplete: unknown, assetId: unknown, className = '' 
 }: VideoMessageRecorderProps) {
-  const [isRecording, setIsRecording] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isRecording, setIsRecording] = useState<any>(false);
+  const [isProcessing, setIsProcessing] = useState<any>(false);
   const [recordedVideoUrl, setRecordedVideoUrl] = useState<string | null>(null);
   const [recordedVideoId, setRecordedVideoId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [composer, setComposer] = useState<MediaStreamComposer | null>(null);
-  const [hasCamera, setHasCamera] = useState(false);
-  const [hasScreen, setHasScreen] = useState(false);
+  const [hasCamera, setHasCamera] = useState<any>(false);
+  const [hasScreen, setHasScreen] = useState<any>(false);
   
   const _videoRef = useRef<HTMLVideoElement>(null);
   const _containerRef = useRef<HTMLDivElement>(null);
@@ -62,7 +60,7 @@ export default function VideoMessageRecorder({
       setComposer(newComposer);
       
       // Set up event listeners
-      newComposer.addEventListener('upload.success', (event: any) => {
+      newComposer.addEventListener('upload.success', (event: unknown) => {
         const videoId = event.detail.videoId;
         const videoUrl = `https://vod.api.video/vod/${videoId}/hls/manifest.m3u8`;
         
@@ -81,7 +79,7 @@ export default function VideoMessageRecorder({
         }
       });
       
-      newComposer.addEventListener('upload.error', (event: any) => {
+      newComposer.addEventListener('upload.error', (event: unknown) => {
         console.error('Upload error:', event.detail);
         setError('Failed to upload recording');
         setIsProcessing(false);

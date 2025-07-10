@@ -188,9 +188,9 @@ const DEMO_AI_DATA = {
 };
 
 export default function AIDemoPage() {
-  const [activeFeature, setActiveFeature] = useState('overview');
-  const [demoProgress, setDemoProgress] = useState(0);
-  const [isSimulating, setIsSimulating] = useState(false);
+  const [activeFeature, setActiveFeature] = useState<any>('overview');
+  const [demoProgress, setDemoProgress] = useState<any>(0);
+  const [isSimulating, setIsSimulating] = useState<any>(false);
 
   // Simulate AI processing
   const simulateProcessing = async () => {

@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [matches, setMatches] = useState<any>(false);
+  const [mounted, setMounted] = useState<any>(false);
 
   useEffect(() => {
     setMounted(true);

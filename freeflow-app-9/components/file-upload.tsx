@@ -12,11 +12,9 @@ interface FileUploadProps {
 }
 
 export function FileUpload({ 
-  onUpload, 
-  accept = '*/*', 
-  maxSize = 10 * 1024 * 1024 // 10MB default
+  onUpload: unknown, accept = '*/*': unknown, maxSize = 10 * 1024 * 1024 // 10MB default
 }: FileUploadProps) {
-  const [isDragging, setIsDragging] = useState(false)
+  const [isDragging, setIsDragging] = useState<any>(false)
   const [error, setError] = useState<string | null>(null)
 
   const validateFile = (file: File): boolean => {

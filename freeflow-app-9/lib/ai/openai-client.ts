@@ -79,15 +79,12 @@ function getOpenAIClient(): OpenAI {
 /**
  * Transcribe audio from video using OpenAI Whisper
  */
-export async function transcribeVideo(
-  audioFile: File | Buffer,
-  options: {
+export async function transcribeVideo(audioFile: File | Buffer, options: {
     language?: string;
     prompt?: string;
     response_format?: 'json' | 'text' | 'srt' | 'verbose_json' | 'vtt';
     temperature?: number;
-  } = {}
-): Promise<TranscriptionResult> {
+  } = {}): Promise<TranscriptionResult> {
   if (!isTranscriptionEnabled()) {
     throw new Error('Transcription service not available');
   }
@@ -96,7 +93,7 @@ export async function transcribeVideo(
     const client = getOpenAIClient();
     
     // Convert Buffer to File-like object if necessary
-    let fileToUpload: any;
+    let fileToUpload: unknown;
     if (audioFile instanceof Buffer) {
       fileToUpload = new File([audioFile], 'audio.mp3', { type: 'audio/mpeg' });
     } else {
@@ -136,14 +133,11 @@ export async function transcribeVideo(
 /**
  * Analyze video content using GPT
  */
-export async function analyzeVideoContent(
-  transcription: string,
-  metadata: {
+export async function analyzeVideoContent(transcription: string, metadata: {
     title?: string;
     description?: string;
     duration?: number;
-  } = {}
-): Promise<ContentAnalysis> {
+  } = {}): Promise<ContentAnalysis> {
   if (!isContentAnalysisEnabled()) {
     throw new Error('Content analysis service not available');
   }
@@ -198,14 +192,11 @@ ${transcription}`;
 /**
  * Generate smart tags for video
  */
-export async function generateSmartTags(
-  transcription: string,
-  metadata: {
+export async function generateSmartTags(transcription: string, metadata: {
     title?: string;
     description?: string;
     category?: string;
-  } = {}
-): Promise<string[]> {
+  } = {}): Promise<string[]> {
   if (!isContentAnalysisEnabled()) {
     throw new Error('Smart tagging service not available');
   }
@@ -261,10 +252,7 @@ ${transcription.slice(0, 3000)}...`; // Limit transcription length
 /**
  * Generate video chapters from transcription
  */
-export async function generateVideoChapters(
-  transcription: string,
-  duration: number
-): Promise<VideoChapter[]> {
+export async function generateVideoChapters(transcription: string, duration: number): Promise<VideoChapter[]> {
   if (!isContentAnalysisEnabled()) {
     throw new Error('Chapter generation service not available');
   }
@@ -317,10 +305,7 @@ ${transcription}`;
 /**
  * Generate title suggestions
  */
-export async function generateTitleSuggestions(
-  transcription: string,
-  currentTitle: string
-): Promise<string[]> {
+export async function generateTitleSuggestions(transcription: string, currentTitle: string): Promise<string[]> {
   if (!isContentAnalysisEnabled()) {
     throw new Error('Title suggestion service not available');
   }

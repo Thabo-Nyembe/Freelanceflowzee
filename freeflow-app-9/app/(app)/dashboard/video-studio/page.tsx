@@ -107,22 +107,22 @@ interface VideoAsset {
 }
 
 export default function VideoStudioPage() {
-  const [activeTab, setActiveTab] = useState('projects')
+  const [activeTab, setActiveTab] = useState<any>('projects')
   const [selectedProject, setSelectedProject] = useState<VideoProject | null>(null)
-  const [isRecording, setIsRecording] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [isMuted, setIsMuted] = useState(false)
-  const [volume, setVolume] = useState([80])
-  const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(300)
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const [recordingType, setRecordingType] = useState('screen')
+  const [isRecording, setIsRecording] = useState<any>(false)
+  const [isPlaying, setIsPlaying] = useState<any>(false)
+  const [isMuted, setIsMuted] = useState<any>(false)
+  const [volume, setVolume] = useState<any>([80])
+  const [currentTime, setCurrentTime] = useState<any>(0)
+  const [duration, setDuration] = useState<any>(300)
+  const [isFullscreen, setIsFullscreen] = useState<any>(false)
+  const [recordingType, setRecordingType] = useState<any>('screen')
   const [selectedTemplate, setSelectedTemplate] = useState<VideoTemplate | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterCategory, setFilterCategory] = useState('all')
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [newProject, setNewProject] = useState({
+  const [searchTerm, setSearchTerm] = useState<any>('')
+  const [filterCategory, setFilterCategory] = useState<any>('all')
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState<any>(false)
+  const [newProject, setNewProject] = useState<any>({
     title: '',
     description: '',
     resolution: '1920x1080',

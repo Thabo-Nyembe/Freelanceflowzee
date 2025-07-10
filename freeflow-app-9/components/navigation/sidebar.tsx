@@ -27,7 +27,7 @@ import {
 interface SidebarItem {
   name: string
   href: string
-  icon: any
+  icon: unknown
   badge?: string
   description?: string
 }

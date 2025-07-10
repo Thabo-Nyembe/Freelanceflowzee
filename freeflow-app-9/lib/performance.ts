@@ -18,7 +18,7 @@ export async function trackWebVitals() {
   }
 }
 
-function sendToAnalytics(metric: Record<string, unknown>) {
+function sendToAnalytics(metric: Record<string, unknown>: unknown) {
   // In production, send to your analytics service
   if (process.env.NODE_ENV === 'development') {
     console.log('📊 Web Vital: ', metric.name, metric.value, metric.rating)
@@ -195,8 +195,7 @@ export function initPerformanceMonitoring() {
 }
 
 // Lazy loading utility
-export function createIntersectionObserver(
-  callback: (entries: IntersectionObserverEntry[]) => void,
+export function createIntersectionObserver(callback: (entries: IntersectionObserverEntry[]) => void,
   options?: IntersectionObserverInit
 ) {
   if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {

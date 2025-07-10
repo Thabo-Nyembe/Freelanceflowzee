@@ -18,10 +18,10 @@ export function PaymentForm() {
   const elements = useElements()
   const router = useRouter()
   
-  const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+  const [email, setEmail] = useState<any>('')
+  const [loading, setLoading] = useState<any>(false)
+  const [error, setError] = useState<any>('')
+  const [success, setSuccess] = useState<any>('')
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()

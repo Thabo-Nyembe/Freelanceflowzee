@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useReducer } from 'react'
+import React, { useState, useEffect, useReducer, useRef } from 'react'
 import {
   PlusCircle,
   GripVertical,
@@ -386,7 +386,7 @@ export function BlockBasedContentEditor({
   const [state, dispatch] = useReducer(editorReducer, initialState)
   const [showBlockMenu, setShowBlockMenu] = useState(false)
   const [blockMenuPosition, setBlockMenuPosition] = useState({ x: 0, y: 0 })
-  const editorRef =<HTMLDivElement>(null)
+  const editorRef = useRef<HTMLDivElement>(null)
 
   // Block types configuration
   const blockTypes = [

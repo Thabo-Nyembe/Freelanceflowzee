@@ -27,9 +27,9 @@ import {
 } from 'lucide-react'
 
 export default function CreateProjectPage() {
-  const [selectedTemplate, setSelectedTemplate] = useState(null)
-  const [projectType, setProjectType] = useState('custom')
-  const [formData, setFormData] = useState({
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null)
+  const [projectType, setProjectType] = useState<any>('custom')
+  const [formData, setFormData] = useState<any>({
     name: '',
     description: '',
     client: '',
@@ -113,11 +113,11 @@ export default function CreateProjectPage() {
     { value: 'urgent', label: 'Urgent', color: 'bg-red-100 text-red-800' }
   ]
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: unknown, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleTemplateSelect = (template) => {
+  const handleTemplateSelect = (template: unknown) => {
     setSelectedTemplate(template)
     setProjectType(template.id)
     setFormData(prev => ({ 

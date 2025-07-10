@@ -12,15 +12,15 @@ interface ExportPresetsProps {
 }
 
 export function ExportPresets({ onSelect }: ExportPresetsProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<any>(false);
   const [presets, setPresets] = useState<ExportPreset[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<any>(false);
   const supabase = useSupabase();
 
-  const [name, setName] = useState('');
+  const [name, setName] = useState<any>('');
   const [format, setFormat] = useState<VideoExportFormat>('mp4');
   const [quality, setQuality] = useState<VideoExportQuality>('high');
-  const [isDefault, setIsDefault] = useState(false);
+  const [isDefault, setIsDefault] = useState<any>(false);
 
   const handleCreate = async () => {
     try {

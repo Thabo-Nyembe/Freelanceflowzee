@@ -68,7 +68,7 @@ const demoData = {
 
 export function StandaloneDemo() {
   const [currentDemo, setCurrentDemo] = useState<string | null>(null);
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState<any>(0);
 
   const demoTypes = [
     {

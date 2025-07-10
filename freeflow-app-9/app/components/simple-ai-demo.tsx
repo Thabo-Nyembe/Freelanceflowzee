@@ -16,9 +16,9 @@ interface AIResponse {
 }
 
 export function SimpleAIDemo() {
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState<any>('')
   const [response, setResponse] = useState<AIResponse | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState<any>(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {

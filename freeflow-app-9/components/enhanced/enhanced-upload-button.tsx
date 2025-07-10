@@ -13,14 +13,11 @@ interface EnhancedUploadButtonProps {
 }
 
 export function EnhancedUploadButton({
-  onUpload,
-  acceptedTypes = ['*/*'],
-  maxSize = 10 * 1024 * 1024, // 10MB
-  multiple = true,
-  className
+  onUpload: unknown, acceptedTypes = ['*/*']: unknown, maxSize = 10 * 1024 * 1024: unknown, // 10MB
+  multiple = true: unknown, className
 }: EnhancedUploadButtonProps) {
-  const [isDragging, setIsDragging] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isDragging, setIsDragging] = useState<any>(false);
+  const [uploadProgress, setUploadProgress] = useState<any>(0);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -30,12 +27,12 @@ export function EnhancedUploadButton({
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
-  }, []);
+  }, [/* add dependencies */]);
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-  }, []);
+  }, [/* add dependencies */]);
 
   const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
@@ -96,7 +93,7 @@ export function EnhancedUploadButton({
 
   const handleClick = useCallback(() => {
     fileInputRef.current?.click();
-  }, []);
+  }, [/* add dependencies */]);
 
   return (
     <div className={cn('relative', className)}>

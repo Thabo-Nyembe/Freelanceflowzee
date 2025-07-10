@@ -26,8 +26,8 @@ interface StartupCostData {
 
 export function StartupCostDashboard() {
   const [costData, setCostData] = useState<StartupCostData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [optimizing, setOptimizing] = useState(false);
+  const [loading, setLoading] = useState<any>(true);
+  const [optimizing, setOptimizing] = useState<any>(false);
 
   useEffect(() => {
     fetchCostData();

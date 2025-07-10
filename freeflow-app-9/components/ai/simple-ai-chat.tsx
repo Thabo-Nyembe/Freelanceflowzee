@@ -57,8 +57,8 @@ const quickActions = [
 
 export default function SimpleAIChat() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [input, setInput] = useState<any>('');
+  const [isLoading, setIsLoading] = useState<any>(false);
   const [metrics, setMetrics] = useState<PerformanceMetrics>({
     sessionDuration: 0,
     messageCount: 0,

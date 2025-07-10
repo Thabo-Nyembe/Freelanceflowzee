@@ -1,5 +1,7 @@
 import { Metadata } from "next";
 import Link from 'next/link'
+import React, { Suspense } from 'react'
+import { ErrorBoundary } from "@/components/error-boundary"
 import { 
   Zap, 
   Upload, 
@@ -112,7 +114,9 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <div className="min-h-screen kazi-bg-light dark:kazi-bg-dark">
+    <Suspense fallback={<div>Loading...</div>}>
+      <ErrorBoundary fallback={<div>Something went wrong</div>}>
+        <div className="min-h-screen kazi-bg-light dark:kazi-bg-dark">
       {/* Navigation Header */}
       <nav className="fixed top-0 w-full z-50 glass-nav">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -430,5 +434,7 @@ export default function Home() {
         </div>
       </footer>
     </div>
-  )
-}
+          </ErrorBoundary>
+      </Suspense>
+    )
+  }

@@ -17,8 +17,8 @@ interface PortfolioVideo {
   url: string;
   thumbnailUrl: string;
   duration: number;
-  insights: any;
-  chapters: any[];
+  insights: unknown;
+  chapters: unknown[];
   transcription: string;
   category: string;
   skills: string[];

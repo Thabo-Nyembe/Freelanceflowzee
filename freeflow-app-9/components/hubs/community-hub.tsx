@@ -192,15 +192,15 @@ const MOCK_POSTS: Post[] = [
   }
 ]
 
-export default function CommunityHub({ currentUserId, onPostCreate, onMemberConnect }: CommunityHubProps) {
+export default function CommunityHub({ currentUserId: unknown, onPostCreate: unknown, onMemberConnect }: CommunityHubProps) {
   const [posts, setPosts] = useState<Post[]>(MOCK_POSTS)
   const [members, setMembers] = useState<CommunityMember[]>(MOCK_MEMBERS)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState<any>('')
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'projects' | 'questions' | 'events' | 'jobs'>('all')
-  const [newPostContent, setNewPostContent] = useState('')
+  const [newPostContent, setNewPostContent] = useState<any>('')
   const [newPostType, setNewPostType] = useState<Post['type']>('text')
-  const [newPostTags, setNewPostTags] = useState('')
-  const [showCreatePost, setShowCreatePost] = useState(false)
+  const [newPostTags, setNewPostTags] = useState<any>('')
+  const [showCreatePost, setShowCreatePost] = useState<any>(false)
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)

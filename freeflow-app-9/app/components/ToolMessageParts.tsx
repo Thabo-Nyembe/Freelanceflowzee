@@ -18,7 +18,7 @@ interface ToolMessagePartsProps {
   onResponse: (response: string) => void
 }
 
-export function ToolMessageParts({ tool, onResponse }: ToolMessagePartsProps) {
+export function ToolMessageParts({ tool: unknown, onResponse }: ToolMessagePartsProps) {
   const handleWeatherRequest = async (location: string, units: string = 'metric') => {
     try {
       // In a real app, you would make an API call to a weather service
@@ -33,12 +33,7 @@ export function ToolMessageParts({ tool, onResponse }: ToolMessagePartsProps) {
     }
   }
 
-  const handleConfirmation = (
-    message: string,
-    confirmed: boolean,
-    confirmText?: string,
-    cancelText?: string
-  ) => {
+  const handleConfirmation = (message: string, confirmed: boolean, confirmText?: string, cancelText?: string) => {
     onResponse(
       confirmed
         ? `User confirmed: ${message}`

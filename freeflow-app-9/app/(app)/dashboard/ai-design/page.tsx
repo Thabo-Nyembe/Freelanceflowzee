@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 
 export default function AIDesignPage() {
-  const [activeTab, setActiveTab] = useState('tools')
+  const [activeTab, setActiveTab] = useState<any>('tools')
 
   const designTools = [
     {

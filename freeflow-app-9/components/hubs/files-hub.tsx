@@ -71,7 +71,7 @@ interface FileItem {
   views: number
   folder?: string
   tags: string[]
-  metadata?: any
+  metadata?: unknown
 }
 
 interface FilesHubProps {
@@ -189,15 +189,15 @@ const MOCK_FILES: FileItem[] = [
   }
 ]
 
-export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileShare }: FilesHubProps) {
+export default function FilesHub({ userId: unknown, onFileUpload: unknown, onFileDelete: unknown, onFileShare }: FilesHubProps) {
   const [files, setFiles] = useState<FileItem[]>(MOCK_FILES)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState<any>('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<'name' | 'date' | 'size' | 'downloads'>('date')
   const [filterType, setFilterType] = useState<string>('all')
-  const [uploadProgress, setUploadProgress] = useState(0)
-  const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState<any>(0)
+  const [uploading, setUploading] = useState<any>(false)
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
 
   const formatFileSize = (bytes: number) => {

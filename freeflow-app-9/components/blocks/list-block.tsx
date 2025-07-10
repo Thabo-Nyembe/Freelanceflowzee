@@ -39,7 +39,7 @@ interface SortableItemProps {
   onRemove: () => void
 }
 
-function SortableItem({ id, value, onChange, onRemove }: SortableItemProps) {
+function SortableItem({ id: unknown, value: unknown, onChange: unknown, onRemove }: SortableItemProps) {
   const {
     attributes,
     listeners,
@@ -86,11 +86,7 @@ function SortableItem({ id, value, onChange, onRemove }: SortableItemProps) {
 }
 
 export function ListBlock({
-  id,
-  content,
-  properties,
-  onUpdate,
-  isSelected
+  id: unknown, content: unknown, properties: unknown, onUpdate: unknown, isSelected
 }: ListBlockProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),

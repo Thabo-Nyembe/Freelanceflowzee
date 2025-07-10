@@ -7,9 +7,9 @@ import { OpenAI } from 'openai'
 
 const TestComponent = () => {
   const { supabase } = useSupabase()
-  const [response, setResponse] = React.useState('')
-  const [savedResponse, setSavedResponse] = React.useState('')
-  const openai = new OpenAI({ apiKey: 'test-key' })
+  const [response, setResponse] = React.useState<any>('')
+  const [savedResponse, setSavedResponse] = React.useState<any>('')
+  const openai = new OpenAI({ apiKey: process.env.TEST_API_KEY || 'test-key' })
 
   const handleGetAndSaveResponse = async () => {
     // Get response from OpenAI

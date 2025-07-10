@@ -14,11 +14,11 @@ interface CreatePostDialogProps {
   onSubmit: (formData: FormData) => void
 }
 
-export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDialogProps) {
-  const [title, setTitle] = useState('')
-  const [content, setContent] = useState('')
+export function CreatePostDialog({ open: unknown, onOpenChange: unknown, onSubmit }: CreatePostDialogProps) {
+  const [title, setTitle] = useState<any>('')
+  const [content, setContent] = useState<any>('')
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState<any>(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

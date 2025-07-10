@@ -25,9 +25,9 @@ const Chat = () => {
   const { supabase } = useSupabase()
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
-  const [newMessage, setNewMessage] = useState('')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [isTyping, setIsTyping] = useState(false)
+  const [newMessage, setNewMessage] = useState<any>('')
+  const [searchQuery, setSearchQuery] = useState<any>('')
+  const [isTyping, setIsTyping] = useState<any>(false)
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null)
   const [chats] = useState<Chat[]>([
     {

@@ -23,8 +23,8 @@ interface Project {
 
 const Portfolio = () => {
   const { supabase: _supabase } = useSupabase()
-  const [isEditingAbout, setIsEditingAbout] = useState(false)
-  const [aboutText, setAboutText] = useState('I am a passionate developer with experience in web development...')
+  const [isEditingAbout, setIsEditingAbout] = useState<any>(false)
+  const [aboutText, setAboutText] = useState<any>('I am a passionate developer with experience in web development...')
   const [skills, setSkills] = useState<Skill[]>([
     { id: 1, name: 'JavaScript', level: 'Expert' },
     { id: 2, name: 'React', level: 'Advanced' },
@@ -39,13 +39,13 @@ const Portfolio = () => {
       image: 'https://api.dicebear.com/7.x/shapes/svg?seed=portfolio'
     }
   ])
-  const [newSkill, setNewSkill] = useState({ name: '', level: '' })
-  const [newProject, setNewProject] = useState({ title: '', description: '', link: '' })
-  const [showAddSkill, setShowAddSkill] = useState(false)
-  const [showAddProject, setShowAddProject] = useState(false)
+  const [newSkill, setNewSkill] = useState<any>({ name: '', level: '' })
+  const [newProject, setNewProject] = useState<any>({ title: '', description: '', link: '' })
+  const [showAddSkill, setShowAddSkill] = useState<any>(false)
+  const [showAddProject, setShowAddProject] = useState<any>(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [successMessage, setSuccessMessage] = useState('')
-  const [sections, setSections] = useState(['about', 'skills', 'projects'])
+  const [successMessage, setSuccessMessage] = useState<any>('')
+  const [sections, setSections] = useState<any>(['about', 'skills', 'projects'])
 
   const handleSaveAbout = async () => {
     // In a real app, we would save to the database here

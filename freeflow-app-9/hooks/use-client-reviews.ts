@@ -31,7 +31,7 @@ export interface ReviewStats {
 
 export function useClientReviews() {
   const [reviews, setReviews] = useState<ClientReview[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<any>(true);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClientComponentClient();
   const { toast } = useToast();
@@ -282,7 +282,7 @@ export function useClientReviews() {
 }
 
 export function useReviewApprovals(reviewId: string, videoId: string) {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<any>(false);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClientComponentClient();
   const { toast } = useToast();
@@ -373,7 +373,7 @@ export function useReviewApprovals(reviewId: string, videoId: string) {
 
 export function useReviewTemplates() {
   const [templates, setTemplates] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<any>(true);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClientComponentClient();
 

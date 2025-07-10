@@ -138,8 +138,8 @@ afterAll(() => {
 
 // Set up environment variables
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
-process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-key';
-process.env.STRIPE_PUBLISHABLE_KEY = 'test-key';
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.TEST_API_KEY || 'test-key';
+process.env.STRIPE_PUBLISHABLE_KEY = process.env.TEST_API_KEY || 'test-key';
 
 // Mock Next.js router
 jest.mock('next/router', () => ({

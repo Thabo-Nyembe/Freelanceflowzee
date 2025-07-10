@@ -29,9 +29,9 @@ import {
 } from 'lucide-react'
 
 export default function TeamPage() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedRole, setSelectedRole] = useState('all')
-  const [viewMode, setViewMode] = useState('grid')
+  const [searchTerm, setSearchTerm] = useState<any>('')
+  const [selectedRole, setSelectedRole] = useState<any>('all')
+  const [viewMode, setViewMode] = useState<any>('grid')
 
   // Mock team data
   const teamMembers = [
@@ -160,7 +160,7 @@ export default function TeamPage() {
     { value: 'qa', label: 'QA Engineer' }
   ]
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: unknown) => {
     switch (status) {
       case 'online': return 'bg-green-500'
       case 'busy': return 'bg-yellow-500'
@@ -170,7 +170,7 @@ export default function TeamPage() {
     }
   }
 
-  const getStatusIcon = (status) => {
+  const getStatusIcon = (status: unknown) => {
     switch (status) {
       case 'online': return <CheckCircle className="h-4 w-4" />
       case 'busy': return <AlertCircle className="h-4 w-4" />

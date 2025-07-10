@@ -36,19 +36,16 @@ interface VideoBlockProps {
 }
 
 export function VideoBlock({
-  id,
-  properties,
-  onUpdate,
-  isSelected
+  id: unknown, properties: unknown, onUpdate: unknown, isSelected
 }: VideoBlockProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [isMuted, setIsMuted] = useState(false)
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const [volume, setVolume] = useState(1)
-  const [showControls, setShowControls] = useState(false)
+  const [isPlaying, setIsPlaying] = useState<any>(false)
+  const [isMuted, setIsMuted] = useState<any>(false)
+  const [isFullscreen, setIsFullscreen] = useState<any>(false)
+  const [currentTime, setCurrentTime] = useState<any>(0)
+  const [duration, setDuration] = useState<any>(0)
+  const [volume, setVolume] = useState<any>(1)
+  const [showControls, setShowControls] = useState<any>(false)
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0]

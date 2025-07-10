@@ -8,10 +8,7 @@ interface VideoThumbnailProps {
 }
 
 export function VideoThumbnail({
-  thumbnailUrl,
-  title,
-  className,
-}: VideoThumbnailProps) {
+  thumbnailUrl: unknown, title: unknown, className: unknown, }: VideoThumbnailProps) {
   return (
     <div className={cn('relative aspect-video w-full overflow-hidden rounded-lg', className)}>
       <Image

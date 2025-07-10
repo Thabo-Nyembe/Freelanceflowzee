@@ -78,8 +78,8 @@ interface GlobalSearchProps {
 
 export default function GlobalSearch({ onClose }: GlobalSearchProps) {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
-  const [search, setSearch] = useState('')
+  const [open, setOpen] = useState<any>(false)
+  const [search, setSearch] = useState<any>('')
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {

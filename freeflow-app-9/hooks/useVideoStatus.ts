@@ -8,8 +8,8 @@ export interface VideoStatus {
   mux_playback_id?: string;
   transcript?: string;
   ai_summary?: string;
-  ai_action_items?: any[];
-  ai_insights?: any;
+  ai_action_items?: unknown[];
+  ai_insights?: unknown;
   thumbnail_path?: string;
   duration_seconds?: number;
   resolution?: string;
@@ -54,18 +54,13 @@ export interface UseVideoStatusReturn {
 }
 
 export function useVideoStatus({
-  videoId,
-  enabled = true,
-  pollingInterval = 2000, // Poll every 2 seconds
-  maxPollingDuration = 300000, // Stop polling after 5 minutes
-  onStatusChange,
-  onProcessingComplete,
-  onError,
-}: UseVideoStatusOptions): UseVideoStatusReturn {
+  videoId: unknown, enabled = true: unknown, pollingInterval = 2000: unknown, // Poll every 2 seconds
+  maxPollingDuration = 300000: unknown, // Stop polling after 5 minutes
+  onStatusChange: unknown, onProcessingComplete: unknown, onError: unknown, }: UseVideoStatusOptions): UseVideoStatusReturn {
   const [status, setStatus] = useState<VideoStatus | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<any>(false);
   const [error, setError] = useState<Error | null>(null);
-  const [isPolling, setIsPolling] = useState(false);
+  const [isPolling, setIsPolling] = useState<any>(false);
   
   const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pollingStartTimeRef = useRef<number | null>(null);

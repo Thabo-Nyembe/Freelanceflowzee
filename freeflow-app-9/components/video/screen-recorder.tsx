@@ -40,16 +40,13 @@ import { formatDuration } from '@/lib/video/config';
 
 interface ScreenRecorderProps {
   projectId?: string;
-  onRecordingComplete?: (videoBlob: Blob, metadata: any) => void;
+  onRecordingComplete?: (videoBlob: Blob, metadata: unknown) => void;
   onUploadComplete?: (videoId: string) => void;
   className?: string;
 }
 
 export default function ScreenRecorder({ 
-  projectId, 
-  onRecordingComplete, 
-  onUploadComplete,
-  className 
+  projectId: unknown, onRecordingComplete: unknown, onUploadComplete: unknown, className 
 }: ScreenRecorderProps) {
   // Recording options
   const [options, setOptions] = useState<RecordingOptions>({
@@ -66,8 +63,8 @@ export default function ScreenRecorder({
   });
 
   // Upload state
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<any>(0);
+  const [isUploading, setIsUploading] = useState<any>(false);
 
   // Preview refs
   const previewRef =<HTMLVideoElement>(null);
@@ -205,7 +202,7 @@ export default function ScreenRecorder({
                 <Label htmlFor="quality">Quality</Label>
                 <Select 
                   value={options.video.quality} 
-                  onValueChange={(value: any) => setOptions(prev => ({ 
+                  onValueChange={(value: unknown) => setOptions(prev => ({ 
                     ...prev, 
                     video: { ...prev.video, quality: value }
                   }))}
@@ -227,7 +224,7 @@ export default function ScreenRecorder({
                 <Label htmlFor="source">Source</Label>
                 <Select 
                   value={options.video.mediaSource} 
-                  onValueChange={(value: any) => setOptions(prev => ({ 
+                  onValueChange={(value: unknown) => setOptions(prev => ({ 
                     ...prev, 
                     video: { ...prev.video, mediaSource: value }
                   }))}

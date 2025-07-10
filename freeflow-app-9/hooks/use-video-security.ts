@@ -12,7 +12,7 @@ export function useVideoSecurity(videoId: string) {
   const { toast } = useToast();
   const [permissions, setPermissions] = useState<VideoPermission[]>([]);
   const [shareTokens, setShareTokens] = useState<SecureShareToken[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<any>(false);
 
   const fetchPermissions = async () => {
     // ... logic to fetch permissions for the video

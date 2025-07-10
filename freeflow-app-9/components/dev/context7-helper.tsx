@@ -15,11 +15,11 @@ interface Context7HelperProps {
   onToggle?: () => void;
 }
 
-export function Context7Helper({ isVisible = false, onToggle }: Context7HelperProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedLibrary, setSelectedLibrary] = useState('next.js');
+export function Context7Helper({ isVisible = false: unknown, onToggle }: Context7HelperProps) {
+  const [searchQuery, setSearchQuery] = useState<any>('');
+  const [selectedLibrary, setSelectedLibrary] = useState<any>('next.js');
   const [libraryDoc, setLibraryDoc] = useState<LibraryDoc | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<any>(false);
   const [quickHelp, setQuickHelp] = useState<CodeSnippet[]>([]);
 
   const libraries = ['next.js', 'react', 'supabase', 'tailwindcss', '@radix-ui/react-dialog', 'react-hook-form', 'zod'];

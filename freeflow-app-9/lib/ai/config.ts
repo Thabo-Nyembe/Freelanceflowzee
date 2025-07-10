@@ -87,7 +87,7 @@ export const AI_ERROR_MESSAGES = {
   processingError: 'Error processing your request. Please try again.',
   unsupportedLanguage: 'The specified language is not supported.',
   videoTooLong: 'Video duration exceeds the maximum allowed length.',
-  missingApiKey: 'API key not configured for the selected AI provider.',
+  missingApiKey: process.env.API_KEY || 'demo-key',
 }
 
 // Prompt templates

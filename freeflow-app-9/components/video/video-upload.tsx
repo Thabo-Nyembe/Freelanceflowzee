@@ -1,3 +1,5 @@
+'use client'
+
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useMediaQuery } from '@/hooks/use-media-query';
@@ -14,12 +16,10 @@ interface VideoUploadProps {
 }
 
 export function VideoUpload({
-  onUpload,
-  maxSize = 1024 * 1024 * 100, // 100MB default
-  accept = ['video/mp4', 'video/quicktime', 'video/webm'],
-  className
+  onUpload: unknown, maxSize = 1024 * 1024 * 100: unknown, // 100MB default
+  accept = ['video/mp4': unknown, 'video/quicktime': unknown, 'video/webm']: unknown, className
 }: VideoUploadProps) {
-  const [uploading, setUploading] = useState(false);
+  const [uploading, setUploading] = useState<any>(false);
   const [preview, setPreview] = useState<string | null>(null);
   const isMobile = useMediaQuery('(max-width: 768px)');
 

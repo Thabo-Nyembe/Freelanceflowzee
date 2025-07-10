@@ -247,7 +247,7 @@ export async function dailyStartupOptimization() {
 }
 
 // BUDGET ALERT SYSTEM for startups
-async function sendBudgetAlert(budgetStatus: Record<string, unknown>) {
+async function sendBudgetAlert(budgetStatus: Record<string, unknown>: unknown) {
   console.log('🚨 BUDGET ALERT: Storage costs need attention!');
   console.log('Recommendations:', budgetStatus.recommendations.join('\n'));
   

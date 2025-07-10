@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 import GlobalSearch from '@/components/global-search'
 import { AnimatePresence, motion } from 'framer-motion'
+import { ErrorBoundary } from 'react-error-boundary'
 
 // Lazy load heavy components for better performance
 const AICreateStudio = lazy(() => import('@/components/ai/ai-create-studio').then(m => ({ default: m.AICreateStudio })))
@@ -126,9 +127,11 @@ export default function DashboardPage() {
         return <DashboardOverview />
       case 'projects-hub':
         return (
-          <Suspense fallback={<LoadingSpinner />}>
-            <ProjectsHubTab />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<div>Loading...</div>}>
+              <ProjectsHubTab />
+            </Suspense>
+          </ErrorBoundary>
         )
       case 'ai-create':
         return (

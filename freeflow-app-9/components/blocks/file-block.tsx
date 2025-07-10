@@ -50,10 +50,7 @@ function formatFileSize(bytes: number) {
 }
 
 export function FileBlock({
-  id,
-  properties,
-  onUpdate,
-  isSelected
+  id: unknown, properties: unknown, onUpdate: unknown, isSelected
 }: FileBlockProps) {
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0]

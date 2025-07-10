@@ -40,7 +40,7 @@ interface WorkflowNode {
   type: 'trigger' | 'action' | 'condition' | 'delay'
   title: string
   description: string
-  icon: any
+  icon: unknown
   position: { x: number; y: number }
   data: Record<string, any>
   connected: string[]
@@ -73,12 +73,12 @@ interface Workflow {
 }
 
 export default function WorkflowBuilderPage() {
-  const [activeTab, setActiveTab] = useState('workflows')
+  const [activeTab, setActiveTab] = useState<any>('workflows')
   const [selectedWorkflow, setSelectedWorkflow] = useState<string | null>(null)
-  const [isBuilderOpen, setIsBuilderOpen] = useState(false)
+  const [isBuilderOpen, setIsBuilderOpen] = useState<any>(false)
   const [currentWorkflow, setCurrentWorkflow] = useState<Workflow | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('all')
+  const [searchQuery, setSearchQuery] = useState<any>('')
+  const [selectedCategory, setSelectedCategory] = useState<any>('all')
 
   const workflowTemplates: WorkflowTemplate[] = [
     {

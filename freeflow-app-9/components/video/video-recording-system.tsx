@@ -29,15 +29,9 @@ interface VideoRecordingSystemProps {
 }
 
 export function VideoRecordingSystem({
-  projectId,
-  onRecordingComplete,
-  onRecordingStart,
-  onRecordingStop,
-  enhancedAudioStream,
-  processedVideoStream,
-  videoRef: externalVideoRef
+  projectId: unknown, onRecordingComplete: unknown, onRecordingStart: unknown, onRecordingStop: unknown, enhancedAudioStream: unknown, processedVideoStream: unknown, videoRef: externalVideoRef
 }: VideoRecordingSystemProps) {
-  const [isRecording, setIsRecording] = useState(false)
+  const [isRecording, setIsRecording] = useState<any>(false)
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null)
   const internalVideoRef =<HTMLVideoElement>(null)

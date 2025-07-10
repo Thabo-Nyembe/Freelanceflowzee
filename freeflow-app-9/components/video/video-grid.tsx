@@ -19,7 +19,7 @@ interface VideoGridProps {
   onVideoClick?: (videoId: string) => void;
 }
 
-export function VideoGrid({ videos, className, onVideoClick }: VideoGridProps) {
+export function VideoGrid({ videos: unknown, className: unknown, onVideoClick }: VideoGridProps) {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const isTablet = useMediaQuery('(max-width: 1024px)');
 

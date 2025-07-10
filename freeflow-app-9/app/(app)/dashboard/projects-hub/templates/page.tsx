@@ -27,9 +27,9 @@ import {
 } from 'lucide-react'
 
 export default function ProjectTemplatesPage() {
-  const [selectedCategory, setSelectedCategory] = useState('all')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [viewMode, setViewMode] = useState('grid')
+  const [selectedCategory, setSelectedCategory] = useState<any>('all')
+  const [searchTerm, setSearchTerm] = useState<any>('')
+  const [viewMode, setViewMode] = useState<any>('grid')
 
   // Mock template data
   const templates = [

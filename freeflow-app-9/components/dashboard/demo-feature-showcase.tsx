@@ -1,13 +1,13 @@
 'use client'
 
-import { } from 'react';
+;
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { FileText, Users, BarChart3, DollarSign, Calendar, Zap, Eye, Play, ArrowRight } from 'lucide-react';
 
 export function DemoFeatureShowcase() {
-  const [activeDemo, setActiveDemo] =<string | null>(null);
+  const [activeDemo, setActiveDemo] = useState<string | null>(null);
 
   const features = [
     {

@@ -16,13 +16,11 @@ interface TranscriptSearchProps {
 }
 
 export function TranscriptSearch({
-  videoId,
-  onTimestampClick,
-  className
+  videoId: unknown, onTimestampClick: unknown, className
 }: TranscriptSearchProps) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState<any>('');
   const [segments, setSegments] = useState<TranscriptSegment[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const [isSearching, setIsSearching] = useState<any>(false);
   const { searchTranscript } = useVideoSearch();
   const debouncedQuery = useDebounce(query, 300);
 

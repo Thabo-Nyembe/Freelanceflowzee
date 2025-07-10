@@ -9,22 +9,22 @@ import {
   FileText, 
   Plus, 
   Search,
-  Filter,
+  _Filter,
   Download,
   Eye,
   Edit,
   Trash2,
-  Calendar,
+  _Calendar,
   DollarSign,
-  Clock,
+  _Clock,
   CheckCircle,
   XCircle,
-  AlertCircle
+  _AlertCircle
 } from 'lucide-react'
 
 export default function InvoicesPage() {
-  const [selectedStatus, setSelectedStatus] = useState('all')
-  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState<any>('all')
+  const [searchTerm, setSearchTerm] = useState<any>('')
 
   // Mock invoice data
   const invoices = [

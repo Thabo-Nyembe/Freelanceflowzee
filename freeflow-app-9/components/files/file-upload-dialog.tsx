@@ -14,9 +14,9 @@ interface FileUploadDialogProps {
   onUploadComplete: (files: Record<string, unknown>[]) => void
 }
 
-export function FileUploadDialog({ isOpen, onClose, onUploadComplete }: FileUploadDialogProps) {
+export function FileUploadDialog({ isOpen: unknown, onClose: unknown, onUploadComplete }: FileUploadDialogProps) {
   const [files, setFiles] = useState<File[]>([])
-  const [uploading, setUploading] = useState(false)
+  const [uploading, setUploading] = useState<any>(false)
   const [progress, setProgress] = useState<{ [key: string]: number }>({})
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
@@ -25,7 +25,7 @@ export function FileUploadDialog({ isOpen, onClose, onUploadComplete }: FileUplo
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  const onDrop = useCallback((acceptedFiles: File[/* add dependencies */]) => {
     setFiles(prev => [...prev, ...acceptedFiles])
   }, [])
 

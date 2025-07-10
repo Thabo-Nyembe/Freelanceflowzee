@@ -28,9 +28,9 @@ import {
 } from 'lucide-react'
 
 export default function FilesPage() {
-  const [viewMode, setViewMode] = useState('grid')
-  const [selectedFolder, setSelectedFolder] = useState('all')
-  const [searchTerm, setSearchTerm] = useState('')
+  const [viewMode, setViewMode] = useState<any>('grid')
+  const [selectedFolder, setSelectedFolder] = useState<any>('all')
+  const [searchTerm, setSearchTerm] = useState<any>('')
 
   // Mock files data
   const files = [
@@ -151,7 +151,7 @@ export default function FilesPage() {
     { name: 'shared', label: 'Shared', count: files.filter(f => f.shared).length, icon: Share2 }
   ]
 
-  const getFileIcon = (type) => {
+  const getFileIcon = (type: unknown) => {
     switch (type) {
       case 'pdf': return <FileText className="h-8 w-8 text-red-500" />
       case 'figma': return <FileCode className="h-8 w-8 text-purple-500" />

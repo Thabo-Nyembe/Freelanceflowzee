@@ -12,7 +12,7 @@ interface ProjectCreationFormProps {
   loading?: boolean
 }
 
-export function ProjectCreationForm({ onSubmit, loading = false }: ProjectCreationFormProps) {
+export function ProjectCreationForm({ onSubmit: unknown, loading = false }: ProjectCreationFormProps) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)

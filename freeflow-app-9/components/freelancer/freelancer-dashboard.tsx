@@ -10,7 +10,7 @@ import { PlusCircle, Video, Users, FileText, BarChart } from 'lucide-react';
 export const FreelancerDashboard = () => {
   const supabase = useSupabase();
   const [activeProject, setActiveProject] = React.useState<any>(null);
-  const [stats, setStats] = React.useState({
+  const [stats, setStats] = React.useState<any>({
     totalEarnings: 0,
     activeProjects: 0,
     pendingReviews: 0,
@@ -138,7 +138,7 @@ export const FreelancerDashboard = () => {
 };
 
 // Projects List Component
-const ProjectsList = ({ onProjectSelect }: { onProjectSelect: (project: any) => void }) => {
+const ProjectsList = ({ onProjectSelect }: { onProjectSelect: (project: unknown) => void }) => {
   const supabase = useSupabase();
   const [projects, setProjects] = React.useState<any[]>([]);
 

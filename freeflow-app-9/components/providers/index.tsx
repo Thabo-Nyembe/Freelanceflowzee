@@ -24,8 +24,8 @@ interface ProvidersProps {
 }
 
 export function Providers({ children }: ProvidersProps) {
-  const [queryClient] = useState(() => new QueryClient())
-  const [supabase] = useState(() => {
+  const [queryClient] = useState<any>(() => new QueryClient())
+  const [supabase] = useState<any>(() => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 

@@ -14,7 +14,7 @@ const sampleCode = `import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 
 function MyComponent() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState<any>(0)
   
   return (
     <div>
@@ -28,9 +28,9 @@ function MyComponent() {
 
 export default MyComponent`
 
-export function CodeViewer({ file, comments, onAddComment }: CodeViewerProps) {
+export function CodeViewer({ file: unknown, comments: unknown, onAddComment }: CodeViewerProps) {
   const [selectedLine, setSelectedLine] = useState<number | null>(null)
-  const [showCommentDialog, setShowCommentDialog] = useState(false)
+  const [showCommentDialog, setShowCommentDialog] = useState<any>(false)
 
   const lines = sampleCode.split('\n')
 

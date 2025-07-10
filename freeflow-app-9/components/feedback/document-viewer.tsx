@@ -32,10 +32,10 @@ This document outlines the comprehensive brand identity redesign project for our
 ## Timeline
 The project will be completed over 6 weeks with regular check-ins and feedback sessions.`
 
-export function DocumentViewer({ file, comments, onAddComment }: DocumentViewerProps) {
-  const [zoom, setZoom] = useState(1)
-  const [selectedText, setSelectedText] = useState("")
-  const [showCommentDialog, setShowCommentDialog] = useState(false)
+export function DocumentViewer({ file: unknown, comments: unknown, onAddComment }: DocumentViewerProps) {
+  const [zoom, setZoom] = useState<any>(1)
+  const [selectedText, setSelectedText] = useState<any>("")
+  const [showCommentDialog, setShowCommentDialog] = useState<any>(false)
 
   const handleTextSelection = () => {
     const selection = window.getSelection()

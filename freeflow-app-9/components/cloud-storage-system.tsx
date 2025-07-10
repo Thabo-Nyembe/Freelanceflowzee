@@ -259,8 +259,8 @@ const canShareFile = (file: CloudFile, plan: string): boolean => {
 
 export function CloudStorageSystem() {
   const [state, dispatch] = useReducer(storageReducer, initialState)
-  const [showUpload, setShowUpload] = useState(false)
-  const [showSubscription, setShowSubscription] = useState(false)
+  const [showUpload, setShowUpload] = useState<any>(false)
+  const [showSubscription, setShowSubscription] = useState<any>(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const currentPlan = SUBSCRIPTION_PLANS[state.currentPlan]

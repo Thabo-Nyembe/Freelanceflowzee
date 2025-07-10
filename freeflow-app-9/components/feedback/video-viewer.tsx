@@ -24,22 +24,16 @@ interface VideoViewerProps {
 }
 
 export function VideoViewer({ 
-  src, 
-  title, 
-  comments = [], 
-  onCommentAdd, 
-  onCommentEdit, 
-  onCommentDelete, 
-  className = "" 
+  src: unknown, title: unknown, comments = []: unknown, onCommentAdd: unknown, onCommentEdit: unknown, onCommentDelete: unknown, className = "" 
 }: VideoViewerProps) {
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [isMuted, setIsMuted] = useState(false)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const [showCommentDialog, setShowCommentDialog] = useState(false)
+  const [isPlaying, setIsPlaying] = useState<any>(false)
+  const [isMuted, setIsMuted] = useState<any>(false)
+  const [currentTime, setCurrentTime] = useState<any>(0)
+  const [duration, setDuration] = useState<any>(0)
+  const [showCommentDialog, setShowCommentDialog] = useState<any>(false)
   const [clickPosition, setClickPosition] = useState<{ x?: number; y?: number; timestamp?: number } | null>(null)
   const [editingComment, setEditingComment] = useState<Comment | null>(null)
-  const [newComment, setNewComment] = useState('')
+  const [newComment, setNewComment] = useState<any>('')
   const [selectedPriority, setSelectedPriority] = useState<'low' | 'medium' | 'high' | 'critical'>('medium')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   

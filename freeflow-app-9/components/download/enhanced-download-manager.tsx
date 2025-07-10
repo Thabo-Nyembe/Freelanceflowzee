@@ -201,13 +201,7 @@ interface EnhancedDownloadManagerProps {
 }
 
 export function EnhancedDownloadManager({
-  downloads: initialDownloads = [],
-  onDownloadComplete,
-  onShare,
-  onEscrowPayment,
-  enableAnalytics = true,
-  enableEscrow = true,
-  brandName = 'KAZI'
+  downloads: initialDownloads = [], onDownloadComplete: unknown, onShare: unknown, onEscrowPayment: unknown, enableAnalytics = true: unknown, enableEscrow = true: unknown, brandName = 'KAZI'
 }: EnhancedDownloadManagerProps) {
 
   // Context7 Pattern: Central State Management
@@ -315,7 +309,7 @@ export function EnhancedDownloadManager({
     if (type.startsWith('audio/')) return Music
     if (type.includes('zip') || type.includes('rar')) return Archive
     return FileText
-  }, [])
+  }, [/* add dependencies */])
 
   const formatFileSize = useCallback((bytes: number) => {
     if (bytes === 0) return '0 Bytes'
@@ -323,7 +317,7 @@ export function EnhancedDownloadManager({
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }, [])
+  }, [/* add dependencies */])
 
   const formatSpeed = useCallback((bytesPerSecond: number) => {
     return `${formatFileSize(bytesPerSecond)}/s`

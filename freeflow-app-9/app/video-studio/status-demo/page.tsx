@@ -23,8 +23,8 @@ import {
 import { useVideoStatus, VideoStatus } from '@/hooks/useVideoStatus';
 
 export default function VideoStatusDemoPage() {
-  const [demoVideoId, setDemoVideoId] = useState('');
-  const [mockVideoIds] = useState([
+  const [demoVideoId, setDemoVideoId] = useState<any>('');
+  const [mockVideoIds] = useState<any>([
     'demo-uploading-001',
     'demo-processing-002', 
     'demo-transcribing-003',

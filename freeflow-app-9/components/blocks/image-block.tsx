@@ -21,10 +21,7 @@ interface ImageBlockProps {
 }
 
 export function ImageBlock({
-  id,
-  properties,
-  onUpdate,
-  isSelected
+  id: unknown, properties: unknown, onUpdate: unknown, isSelected
 }: ImageBlockProps) {
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0]

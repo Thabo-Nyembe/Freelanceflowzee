@@ -79,7 +79,7 @@ type Project = {
     team_members: { id: string; name: string; avatar: string }[];
     priority: 'low' | 'medium' | 'high' | 'urgent';
     comments_count: number;
-    attachments: any[];
+    attachments: unknown[];
 };
 
 // props
@@ -88,19 +88,19 @@ interface ProjectsHubProps {
   _userId: string;
 }
 
-export default function ProjectsHub({ projects, _userId }: ProjectsHubProps) {
-  const [viewMode, setViewMode] = useState('grid')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [sortBy, setSortBy] = useState('end_date')
-  const [filterByStatus, setFilterByStatus] = useState('all')
-  const [filterByPriority, setFilterByPriority] = useState('all')
+export default function ProjectsHub({ projects: unknown, _userId }: ProjectsHubProps) {
+  const [viewMode, setViewMode] = useState<any>('grid')
+  const [searchQuery, setSearchQuery] = useState<any>('')
+  const [sortBy, setSortBy] = useState<any>('end_date')
+  const [filterByStatus, setFilterByStatus] = useState<any>('all')
+  const [filterByPriority, setFilterByPriority] = useState<any>('all')
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
-  const [isQuickStartDialogOpen, setIsQuickStartDialogOpen] = useState(false)
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [priorityFilter, setPriorityFilter] = useState('all')
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<any>(false)
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState<any>(false)
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState<any>(false)
+  const [isQuickStartDialogOpen, setIsQuickStartDialogOpen] = useState<any>(false)
+  const [statusFilter, setStatusFilter] = useState<any>('all')
+  const [priorityFilter, setPriorityFilter] = useState<any>('all')
 
   const router = useRouter()
 

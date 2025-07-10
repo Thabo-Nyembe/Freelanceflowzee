@@ -23,11 +23,7 @@ interface HeadingBlockProps {
 }
 
 export function HeadingBlock({
-  id,
-  content,
-  properties,
-  onUpdate,
-  isSelected
+  id: unknown, content: unknown, properties: unknown, onUpdate: unknown, isSelected
 }: HeadingBlockProps) {
   const inputRef = useRef<HTMLInputElement>(null)
 

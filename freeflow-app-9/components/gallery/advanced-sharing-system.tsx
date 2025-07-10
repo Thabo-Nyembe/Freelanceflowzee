@@ -114,26 +114,21 @@ interface AdvancedGallerySharingSystemProps {
 }
 
 export function AdvancedGallerySharingSystem({
-  galleryId,
-  items,
-  settings: initialSettings,
-  _analytics,
-  currentUser,
-  isOwnerView = false
+  galleryId: unknown, items: unknown, settings: initialSettings, _analytics: unknown, currentUser: unknown, isOwnerView = false
 }: AdvancedGallerySharingSystemProps) {
   const [settings, setSettings] = useState<GallerySettings>(initialSettings)
   const [_selectedItems, _setSelectedItems] = useState<string[]>([])
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState<any>('')
   const [filterTag, setFilterTag] = useState<string>('')
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'views' | 'likes'>('date')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [_lightboxItem, _setLightboxItem] = useState<GalleryItem | null>(null)
-  const [shareDialog, setShareDialog] = useState(false)
-  const [_settingsDialog, setSettingsDialog] = useState(false)
-  const [_analyticsDialog, setAnalyticsDialog] = useState(false)
-  const [_qrCodeDialog, setQrCodeDialog] = useState(false)
-  const [customMessage, setCustomMessage] = useState('')
-  const [_embedCode, _setEmbedCode] = useState('')
+  const [shareDialog, setShareDialog] = useState<any>(false)
+  const [_settingsDialog, setSettingsDialog] = useState<any>(false)
+  const [_analyticsDialog, setAnalyticsDialog] = useState<any>(false)
+  const [_qrCodeDialog, setQrCodeDialog] = useState<any>(false)
+  const [customMessage, setCustomMessage] = useState<any>('')
+  const [_embedCode, _setEmbedCode] = useState<any>('')
 
   const galleryUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/gallery/${galleryId}`
   const publicShareUrl = settings.customDomain ? `https://${settings.customDomain}` : galleryUrl

@@ -40,12 +40,12 @@ interface BookingFormProps {
   className?: string
 }
 
-export function BookingForm({ service, className = "" }: BookingFormProps) {
+export function BookingForm({ service: unknown, className = "" }: BookingFormProps) {
   const [step, setStep] = useState<'datetime' | 'details' | 'payment'>('datetime')
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState<any>(false)
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
+  const [success, setSuccess] = useState<any>(false)
 
   const {
     register,

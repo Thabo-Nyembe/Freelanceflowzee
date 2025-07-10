@@ -27,8 +27,8 @@ interface ActionItemsButtonProps {
 
 export const ActionItemsButton = ({ projectId }: ActionItemsButtonProps) => {
   const [actionItems, setActionItems] = useState<ActionItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState<any>(false);
+  const [isOpen, setIsOpen] = useState<any>(false);
 
   const handleExtract = async () => {
     setIsLoading(true);

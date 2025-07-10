@@ -92,5 +92,5 @@ export interface AIVideoData {
   chapters: SmartChaptersData
   analysis: VideoAnalysisData
   insights: VideoInsightData
-  realtimeInsights?: any[]
+  realtimeInsights?: unknown[]
 } 

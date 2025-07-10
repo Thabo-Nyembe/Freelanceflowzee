@@ -39,18 +39,13 @@ interface TeamStats {
 interface TeamHubProps {
   activities: TeamActivity[]
   stats: TeamStats
-  teamMembers: any[] // Using the TeamMember type from Team component
+  teamMembers: unknown[] // Using the TeamMember type from Team component
   onActivityClick?: (activityId: string) => void
   onMemberAction?: (memberId: string, action: string) => void
 }
 
 export default function TeamHub({
-  activities,
-  stats,
-  teamMembers,
-  onActivityClick,
-  onMemberAction,
-}: TeamHubProps) {
+  activities: unknown, stats: unknown, teamMembers: unknown, onActivityClick: unknown, onMemberAction: unknown, }: TeamHubProps) {
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

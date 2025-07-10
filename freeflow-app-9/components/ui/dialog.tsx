@@ -54,8 +54,7 @@ const DialogContent = React.forwardRef<
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
 const DialogHeader = ({
-  className,
-  ...props
+  className: unknown, ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
@@ -68,8 +67,7 @@ const DialogHeader = ({
 DialogHeader.displayName = "DialogHeader"
 
 const DialogFooter = ({
-  className,
-  ...props
+  className: unknown, ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(

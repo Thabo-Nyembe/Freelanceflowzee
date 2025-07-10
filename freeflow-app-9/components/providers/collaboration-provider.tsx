@@ -31,11 +31,10 @@ interface CollaborationProviderProps {
 }
 
 export function CollaborationProvider({
-  documentId,
-  children
+  documentId: unknown, children
 }: CollaborationProviderProps) {
   const collaboration = useCollaboration(documentId)
-  const [mounted, setMounted] = useState(false)
+  const [mounted, setMounted] = useState<any>(false)
 
   useEffect(() => {
     setMounted(true)

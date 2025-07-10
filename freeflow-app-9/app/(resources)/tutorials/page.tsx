@@ -88,9 +88,9 @@ const allTutorials = [
 ]
 
 export default function TutorialsPage() {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('all')
-  const [selectedLevel, setSelectedLevel] = useState('all')
+  const [searchQuery, setSearchQuery] = useState<any>('')
+  const [selectedCategory, setSelectedCategory] = useState<any>('all')
+  const [selectedLevel, setSelectedLevel] = useState<any>('all')
 
   const filteredTutorials = allTutorials.filter(tutorial => {
     const matchesSearch = tutorial.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

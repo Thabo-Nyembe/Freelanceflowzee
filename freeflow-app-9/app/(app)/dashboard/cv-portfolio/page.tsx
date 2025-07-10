@@ -21,7 +21,7 @@ import {
 } from 'lucide-react'
 
 export default function CVPortfolioPage() {
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeTab, setActiveTab] = useState<any>('overview')
 
   const profileData = {
     name: 'Thabo Nkanyane',

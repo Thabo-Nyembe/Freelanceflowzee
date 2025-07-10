@@ -10,26 +10,26 @@ import {
   TrendingUp, 
   TrendingDown, 
   CreditCard, 
-  Wallet, 
+  _Wallet, 
   FileText,
-  Calendar,
+  _Calendar,
   ArrowUpRight,
   ArrowDownRight,
-  PieChart,
-  BarChart3,
+  _PieChart,
+  _BarChart3,
   Target,
   Receipt,
   Building,
   Users,
-  Clock,
-  AlertCircle,
+  _Clock,
+  _AlertCircle,
   CheckCircle,
   XCircle
 } from 'lucide-react'
 
 export default function FinancialHubPage() {
-  const [selectedPeriod, setSelectedPeriod] = useState('monthly')
-  const [activeTab, setActiveTab] = useState('overview')
+  const [_selectedPeriod, setSelectedPeriod] = useState<any>('monthly')
+  const [activeTab, setActiveTab] = useState<any>('overview')
 
   // Mock comprehensive financial data
   const financialData = {

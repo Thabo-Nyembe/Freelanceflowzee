@@ -7,7 +7,7 @@ interface Props {
   engagementByType: Record<string, number>;
 }
 
-export default function ClientCharts({ viewsByDay, engagementByType }: Props) {
+export default function ClientCharts({ viewsByDay: unknown, engagementByType }: Props) {
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <div className="h-[300px]">

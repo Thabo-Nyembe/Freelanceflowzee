@@ -23,7 +23,7 @@ interface AICreateProps {
 export function AICreate({ onSaveKeys }: AICreateProps) {
   const [apiKeys, setApiKeys] = useState<Partial<Record<AIProvider, string>>>({})
   const [selectedProvider, setSelectedProvider] = useState<AIProvider>('openai')
-  const [saving, setSaving] = useState(false)
+  const [saving, setSaving] = useState<any>(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleSave = async () => {

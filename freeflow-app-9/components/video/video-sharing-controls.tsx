@@ -63,15 +63,7 @@ interface ShareLink {
 }
 
 export function VideoSharingControls({
-  videoId,
-  title = 'Untitled Video',
-  description = '',
-  isPublic = false,
-  passwordProtected = false,
-  allowEmbedding = true,
-  allowDownload = false,
-  onSettingsChange,
-  className
+  videoId: unknown, title = 'Untitled Video': unknown, description = '': unknown, isPublic = false: unknown, passwordProtected = false: unknown, allowEmbedding = true: unknown, allowDownload = false: unknown, onSettingsChange: unknown, className
 }: VideoSharingControlsProps) {
   const [settings, setSettings] = useState<VideoSharingSettings>({
     isPublic,
@@ -84,7 +76,7 @@ export function VideoSharingControls({
   });
   
   const [copyStates, setCopyStates] = useState<Record<string, boolean>>({});
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving] = useState<any>(false);
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://freeflow.app';
 

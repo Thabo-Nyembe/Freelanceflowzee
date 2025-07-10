@@ -4,7 +4,7 @@ import * as React from 'react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { type ThemeProviderProps } from 'next-themes/dist/types'
 
-export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+export function ThemeProvider({ children: unknown, ...props }: ThemeProviderProps) {
   return (
     <NextThemesProvider
       attribute="class"
@@ -77,8 +77,8 @@ export function withTheme<T extends object>(
   }
 }
 
-export function useThemeTransition(duration = 200) {
-  const [isTransitioning, setIsTransitioning] = React.useState(false)
+export function useThemeTransition(duration = 200: unknown) {
+  const [isTransitioning, setIsTransitioning] = React.useState<any>(false)
   const { setTheme } = useTheme()
 
   const toggleTheme = React.useCallback((newTheme: string) => {

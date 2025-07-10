@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, MouseEvent } from 'react';
+import React, { useState, useRef, MouseEvent } from 'react';
 import CommentPopover from './CommentPopover';
 
 interface ImageViewerProps {
@@ -20,7 +20,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ imageUrl, onAddComment }) => 
   const [region, setRegion] = useState<Region | null>(null);
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
   const [showPopover, setShowPopover] = useState(false);
-  const containerRef =<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const getCoords = (e: MouseEvent): { x: number, y: number } => {
     if (!containerRef.current) return { x: 0, y: 0 };
@@ -74,29 +74,27 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ imageUrl, onAddComment }) => 
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      style={{ cursor: 'crosshair' }}
+      style={{ cursor: 'crosshair'  }}
     >
       <img src={imageUrl} alt="design-proof" className="select-none" />
 
       {region && (
         <div
           className="absolute border-2 border-red-500 bg-red-500 bg-opacity-30"
-          style={{
-            left: region.x,
+          style={{ left: region.x,
             top: region.y,
             width: region.width,
             height: region.height,
-          }}
+           }}
         />
       )}
 
       {showPopover && region && (
         <div
           className="absolute"
-          style={{
-            left: region.x + region.width + 5,
+          style={{ left: region.x + region.width + 5,
             top: region.y,
-          }}
+           }}
         >
           <CommentPopover onComment={handleCommentSubmit} />
         </div>

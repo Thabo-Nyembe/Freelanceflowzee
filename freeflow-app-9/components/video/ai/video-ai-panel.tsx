@@ -29,10 +29,10 @@ import TranscriptionViewer from './transcription-viewer';
 import AIInsightsDashboard from './ai-insights-dashboard';
 
 interface VideoAIData {
-  transcription?: any;
-  analysis?: any;
-  tags?: any[];
-  chapters?: any[];
+  transcription?: unknown;
+  analysis?: unknown;
+  tags?: unknown[];
+  chapters?: unknown[];
   status: {
     overall: 'pending' | 'processing' | 'completed' | 'failed' | 'disabled';
     startedAt?: string;
@@ -52,33 +52,26 @@ interface VideoAIPanelProps {
   videoDuration?: number;
   aiData?: VideoAIData;
   isLoading?: boolean;
-  onProcessAI?: (features: any, options: any) => Promise<void>;
+  onProcessAI?: (features: unknown, options: unknown) => Promise<void>;
   onSeekTo?: (timestamp: number) => void;
   className?: string;
 }
 
 export function VideoAIPanel({
-  videoId,
-  videoTitle,
-  videoDuration,
-  aiData,
-  isLoading = false,
-  onProcessAI,
-  onSeekTo,
-  className
+  videoId: unknown, videoTitle: unknown, videoDuration: unknown, aiData: unknown, isLoading = false: unknown, onProcessAI: unknown, onSeekTo: unknown, className
 }: VideoAIPanelProps) {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedFeatures, setSelectedFeatures] = useState({
+  const [isProcessing, setIsProcessing] = useState<any>(false);
+  const [selectedFeatures, setSelectedFeatures] = useState<any>({
     transcription: true,
     analysis: true,
     tagging: true,
     chapters: true
   });
-  const [processingOptions, setProcessingOptions] = useState({
+  const [processingOptions, setProcessingOptions] = useState<any>({
     language: 'auto',
     force: false
   });
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState<any>('overview');
 
   // Auto-refresh AI data while processing
   useEffect(() => {
@@ -440,7 +433,7 @@ export function VideoAIPanel({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {aiData.chapters.map((chapter: any, index: number) => (
+                    {aiData.chapters.map((chapter: unknown, index: number) => (
                       <div
                         key={chapter.id}
                         className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-gray-50"

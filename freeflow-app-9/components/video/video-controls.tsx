@@ -35,24 +35,10 @@ interface VideoControlsProps {
 }
 
 export function VideoControls({
-  playing,
-  muted,
-  volume,
-  currentTime,
-  duration,
-  playbackRate,
-  quality,
-  qualities,
-  onPlayPause,
-  onMute,
-  onVolumeChange,
-  onSeek,
-  onPlaybackRateChange,
-  onQualityChange,
-  className
+  playing: unknown, muted: unknown, volume: unknown, currentTime: unknown, duration: unknown, playbackRate: unknown, quality: unknown, qualities: unknown, onPlayPause: unknown, onMute: unknown, onVolumeChange: unknown, onSeek: unknown, onPlaybackRateChange: unknown, onQualityChange: unknown, className
 }: VideoControlsProps) {
-  const [showControls, setShowControls] = useState(true);
-  const [showSettings, setShowSettings] = useState(false);
+  const [showControls, setShowControls] = useState<any>(true);
+  const [showSettings, setShowSettings] = useState<any>(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   // Auto-hide controls after inactivity

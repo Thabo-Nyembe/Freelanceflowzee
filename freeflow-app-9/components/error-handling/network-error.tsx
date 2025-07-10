@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export function NetworkErrorHandler() {
-  const [isOnline, setIsOnline] = useState(true)
-  const [retryCount, setRetryCount] = useState(0)
+  const [isOnline, setIsOnline] = useState<any>(true)
+  const [retryCount, setRetryCount] = useState<any>(0)
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true)

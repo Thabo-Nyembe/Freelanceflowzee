@@ -16,14 +16,8 @@ interface VerificationReminderProps {
 }
 
 export default function VerificationReminder({
-  type = 'email',
-  userEmail,
-  profileCompletion = 0,
-  onDismiss,
-  onVerify,
-  onCompleteProfile,
-}: VerificationReminderProps) {
-  const [isVisible, setIsVisible] = useState(true)
+  type = 'email': unknown, userEmail: unknown, profileCompletion = 0: unknown, onDismiss: unknown, onVerify: unknown, onCompleteProfile: unknown, }: VerificationReminderProps) {
+  const [isVisible, setIsVisible] = useState<any>(true)
 
   const handleDismiss = () => {
     setIsVisible(false)

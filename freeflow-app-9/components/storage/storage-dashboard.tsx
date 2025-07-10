@@ -48,8 +48,8 @@ interface StorageDashboardProps {
 export function StorageDashboard({ className }: StorageDashboardProps) {
   const [analytics, setAnalytics] = useState<StorageAnalytics | null>(null);
   const [healthCheck, setHealthCheck] = useState<HealthCheck | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [optimizing, setOptimizing] = useState(false);
+  const [loading, setLoading] = useState<any>(true);
+  const [optimizing, setOptimizing] = useState<any>(false);
   const [files, setFiles] = useState<unknown[]>([]);
 
   // Format bytes to human readable format

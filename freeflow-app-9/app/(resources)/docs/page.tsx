@@ -92,8 +92,8 @@ const popularDocs = [
 ]
 
 export default function DocsPage() {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [showDemoModal, setShowDemoModal] = useState(false)
+  const [searchQuery, setSearchQuery] = useState<any>('')
+  const [showDemoModal, setShowDemoModal] = useState<any>(false)
 
   const getTypeColor = (type: string) => {
     switch (type) {

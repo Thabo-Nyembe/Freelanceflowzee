@@ -6,8 +6,7 @@ export const metadata: Metadata = {
 };
 
 export default function VideoStudioLayout({
-  children,
-}: {
+  children: unknown, }: {
   children: React.ReactNode;
 }) {
   return children;

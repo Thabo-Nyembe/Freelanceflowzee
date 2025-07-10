@@ -1,9 +1,6 @@
 import { VideoAnalysisData } from '@/lib/types/ai'
 
-export async function processVideoWithAI(
-  videoId: string,
-  videoUrl: string
-): Promise<VideoAnalysisData> {
+export async function processVideoWithAI(videoId: string, videoUrl: string): Promise<VideoAnalysisData> {
   try {
     // Call the API endpoint for video analysis
     const response = await fetch('/api/video/analyze', {

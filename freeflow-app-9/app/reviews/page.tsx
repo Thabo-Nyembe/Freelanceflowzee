@@ -143,7 +143,7 @@ function calculateReviewStats(reviews: Review[]) {
   return stats;
 }
 
-export default async function ReviewsPage() {
+ function ReviewsPage() {
   const supabase = createServerComponentClient({ cookies });
   
   const {

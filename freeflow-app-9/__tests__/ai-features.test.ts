@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { aiConfig } from '@/app/config/ai'
 
 describe('AI Features', () => {
-  let supabase: any
+  let supabase: unknown
 
   beforeAll(() => {
     supabase = createClient(

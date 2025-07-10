@@ -49,7 +49,7 @@ export interface VideoEditorProps {
 export interface VideoEdit {
   id: string;
   type: 'timeline' | 'effect' | 'filter' | 'overlay' | 'audio';
-  data: any;
+  data: unknown;
   timestamp: string;
 }
 
@@ -77,23 +77,19 @@ export interface VideoEffect {
 }
 
 export default function VideoEditor({
-  video,
-  onSave,
-  onExport,
-  onShare,
-  className
+  video: unknown, onSave: unknown, onExport: unknown, onShare: unknown, className
 }: VideoEditorProps) {
-  const [activeTab, setActiveTab] = useState('timeline');
+  const [activeTab, setActiveTab] = useState<any>('timeline');
   const [edits, setEdits] = useState<VideoEdit[]>([]);
-  const [videoMetadata, setVideoMetadata] = useState({
+  const [videoMetadata, setVideoMetadata] = useState<any>({
     title: video.title,
     description: video.description || '',
     tags: video.tags || [],
     project_id: video.project_id || ''
   });
   const [appliedEffects, setAppliedEffects] = useState<VideoEffect[]>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [processingProgress, setProcessingProgress] = useState(0);
+  const [isProcessing, setIsProcessing] = useState<any>(false);
+  const [processingProgress, setProcessingProgress] = useState<any>(0);
 
   const handleTimelineEdits = useCallback((timelineEdits: TimelineEdit[]) => {
     const newEdits: VideoEdit[] = timelineEdits.map(edit => ({
@@ -122,7 +118,7 @@ export default function VideoEditor({
   const handleRemoveEffect = useCallback((effectId: string) => {
     setAppliedEffects(prev => prev.filter(e => e.id !== effectId));
     setEdits(prev => prev.filter(e => !(e.type === 'effect' && e.data.id === effectId)));
-  }, []);
+  }, [/* add dependencies */]);
 
   const handleSave = useCallback(async () => {
     setIsProcessing(true);

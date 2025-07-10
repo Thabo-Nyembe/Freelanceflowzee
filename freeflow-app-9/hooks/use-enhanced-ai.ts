@@ -8,22 +8,22 @@ interface UseEnhancedAIOptions {
 interface AIResponse {
   success: boolean;
   text: string;
-  sources?: any[];
-  usage?: any;
+  sources?: unknown[];
+  usage?: unknown;
   finishReason?: string;
-  toolCalls?: any[];
+  toolCalls?: unknown[];
   error?: string;
   details?: string;
 }
 
 export function useEnhancedAI(options: UseEnhancedAIOptions = {}) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<any>(false);
   const [response, setResponse] = useState<AIResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const generateText = async (
     prompt: string,
-    messages?: any[],
+    messages?: unknown[],
     customOptions?: UseEnhancedAIOptions
   ) => {
     setIsLoading(true);
@@ -63,15 +63,15 @@ export function useEnhancedAI(options: UseEnhancedAIOptions = {}) {
     }
   };
 
-  const generateWithWebSearch = (prompt: string, messages?: any[]) => {
+  const generateWithWebSearch = (prompt: string, messages?: unknown[]) => {
     return generateText(prompt, messages, { useWebSearch: true });
   };
 
-  const generateWithFileSearch = (prompt: string, messages?: any[]) => {
+  const generateWithFileSearch = (prompt: string, messages?: unknown[]) => {
     return generateText(prompt, messages, { useFileSearch: true });
   };
 
-  const generateWithBothTools = (prompt: string, messages?: any[]) => {
+  const generateWithBothTools = (prompt: string, messages?: unknown[]) => {
     return generateText(prompt, messages, { 
       useWebSearch: true, 
       useFileSearch: true 

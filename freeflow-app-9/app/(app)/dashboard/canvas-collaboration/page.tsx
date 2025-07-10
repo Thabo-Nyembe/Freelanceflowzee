@@ -68,19 +68,19 @@ interface CanvasProject {
 
 export default function CanvasCollaboration() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [selectedTool, setSelectedTool] = useState('select')
-  const [brushSize, setBrushSize] = useState(5)
-  const [selectedColor, setSelectedColor] = useState('#000000')
-  const [zoom, setZoom] = useState(100)
-  const [isGridVisible, setIsGridVisible] = useState(true)
-  const [activeTab, setActiveTab] = useState('canvas')
-  const [isVideoCallActive, setIsVideoCallActive] = useState(false)
-  const [isMuted, setIsMuted] = useState(false)
-  const [isVideoOff, setIsVideoOff] = useState(false)
-  const [isDrawing, setIsDrawing] = useState(false)
-  const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 })
+  const [selectedTool, setSelectedTool] = useState<any>('select')
+  const [brushSize, setBrushSize] = useState<any>(5)
+  const [selectedColor, setSelectedColor] = useState<any>('#000000')
+  const [zoom, setZoom] = useState<any>(100)
+  const [isGridVisible, setIsGridVisible] = useState<any>(true)
+  const [activeTab, setActiveTab] = useState<any>('canvas')
+  const [isVideoCallActive, setIsVideoCallActive] = useState<any>(false)
+  const [isMuted, setIsMuted] = useState<any>(false)
+  const [isVideoOff, setIsVideoOff] = useState<any>(false)
+  const [isDrawing, setIsDrawing] = useState<any>(false)
+  const [lastPosition, setLastPosition] = useState<any>({ x: 0, y: 0 })
   const [canvasHistory, setCanvasHistory] = useState<string[]>([])
-  const [historyStep, setHistoryStep] = useState(-1)
+  const [historyStep, setHistoryStep] = useState<any>(-1)
 
   const [layers, setLayers] = useState<CanvasLayer[]>([
     { id: '1', name: 'Background', visible: true, locked: false, opacity: 100, type: 'drawing' },

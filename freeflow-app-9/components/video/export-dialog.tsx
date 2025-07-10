@@ -12,8 +12,8 @@ interface ExportDialogProps {
   onExportStart?: () => void;
 }
 
-export function ExportDialog({ videoId, onExportStart }: ExportDialogProps) {
-  const [open, setOpen] = useState(false);
+export function ExportDialog({ videoId: unknown, onExportStart }: ExportDialogProps) {
+  const [open, setOpen] = useState<any>(false);
   const [format, setFormat] = useState<VideoExportFormat>('mp4');
   const [quality, setQuality] = useState<VideoExportQuality>('high');
   const { startExport, isLoading } = useVideoExport();

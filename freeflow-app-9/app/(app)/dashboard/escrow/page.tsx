@@ -179,12 +179,12 @@ export default function EscrowPage() {
     searchTerm: ''
   })
 
-  const [activeTab, setActiveTab] = useState('overview')
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [releasePassword, setReleasePassword] = useState('')
+  const [activeTab, setActiveTab] = useState<any>('overview')
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState<any>(false)
+  const [releasePassword, setReleasePassword] = useState<any>('')
   const [showPasswordForm, setShowPasswordForm] = useState<string | null>(null)
   const [_selectedDeposit, _setSelectedDeposit] = useState<EscrowDeposit | null>(null)
-  const [newDeposit, setNewDeposit] = useState({
+  const [newDeposit, setNewDeposit] = useState<any>({
     projectTitle: '',
     clientName: '',
     clientEmail: '',
@@ -206,7 +206,7 @@ export default function EscrowPage() {
       currency: 'USD',
       status: 'active',
       createdAt: '2024-01-15T10:00:00Z',
-      completionPassword: 'ECR2024!',
+      completionPassword: process.env.DEMO_PASSWORD || 'demo-password',
       progressPercentage: 75,
       clientAvatar: '/avatars/sarah.jpg',
       paymentMethod: 'Stripe',

@@ -24,8 +24,8 @@ import {
 } from 'lucide-react'
 
 export default function CommunityPage() {
-  const [showDemoModal, setShowDemoModal] = useState(false)
-  const [activeTab, setActiveTab] = useState('discussions')
+  const [showDemoModal, setShowDemoModal] = useState<any>(false)
+  const [activeTab, setActiveTab] = useState<any>('discussions')
 
   return (
     <div className="min-h-screen bg-gray-50">

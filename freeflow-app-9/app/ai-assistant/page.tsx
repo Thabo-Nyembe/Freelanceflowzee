@@ -8,7 +8,7 @@ import SimpleAIChat from '@/components/ai/simple-ai-chat'
 import { AICreateStudio } from '@/components/ai/ai-create-studio'
 
 export default function AIAssistantPage() {
-  const [activeTab, setActiveTab] = useState('chat')
+  const [activeTab, setActiveTab] = useState<any>('chat')
 
   return (
     <div className="container mx-auto px-4 py-8">

@@ -7,31 +7,31 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { _ScrollArea } from '@/components/ui/scroll-area'
 import { Label } from '@/components/ui/label'
 import { 
   Bell, 
   Search, 
-  Filter, 
+  _Filter, 
   CheckCircle, 
   X, 
   Check,
   Archive,
   Trash2,
-  Volume2,
-  VolumeX,
+  _Volume2,
+  _VolumeX,
   Settings,
-  Mail,
+  _Mail,
   MessageSquare,
   DollarSign,
-  Clock,
-  User,
+  _Clock,
+  _User,
   FileText,
   AlertTriangle,
   Info,
   Target,
   Zap,
-  Calendar,
+  _Calendar,
   Star,
   Eye,
   EyeOff,
@@ -131,7 +131,7 @@ function notificationReducer(state: NotificationState, action: NotificationActio
 
 export default function NotificationsPage() {
   const [state, dispatch] = useReducer(notificationReducer, initialState)
-  const [activeTab, setActiveTab] = useState('inbox')
+  const [activeTab, setActiveTab] = useState<any>('inbox')
 
   useEffect(() => {
     const mockNotifications: Notification[] = [

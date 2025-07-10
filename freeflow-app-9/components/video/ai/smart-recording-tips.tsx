@@ -117,11 +117,7 @@ const tips: Tip[] = [
 ]
 
 export function SmartRecordingTips({
-  isRecording,
-  audioLevel,
-  noiseLevel,
-  contentQuality,
-  recordingDuration
+  isRecording: unknown, audioLevel: unknown, noiseLevel: unknown, contentQuality: unknown, recordingDuration
 }: SmartRecordingTipsProps) {
   const [activeTips, setActiveTips] =<Tip[]>([])
 

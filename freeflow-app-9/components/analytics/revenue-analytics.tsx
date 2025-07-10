@@ -167,7 +167,7 @@ export function RevenueAnalytics({
   // Format number with commas
   const formatNumber = useCallback((num: number) => {
     return new Intl.NumberFormat('en-US').format(num)
-  }, [])
+  }, [/* add dependencies */])
 
   // Realtime updates simulation
   useEffect(() => {

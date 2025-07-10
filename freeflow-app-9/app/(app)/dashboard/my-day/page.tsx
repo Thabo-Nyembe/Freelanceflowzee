@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { Clock, CheckCircle, PlayCircle, Plus, Target, Calendar, Timer, Activity } from 'lucide-react'
+import { Clock, CheckCircle, PlayCircle, Plus, Target, Calendar, Timer, Activity, ArrowRight, TrendingUp, Brain, Play, Pause, BarChart3, Trash2, Zap, MessageSquare, Briefcase, Lightbulb } from 'lucide-react'
 
 // Type definitions
 interface Task {
@@ -187,11 +187,11 @@ const mockTimeBlocks: TimeBlock[] = [
 
 export default function MyDayPage() {
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState('today')
-  const [newTaskTitle, setNewTaskTitle] = useState('')
-  const [newTaskDescription, setNewTaskDescription] = useState('')
+  const [activeTab, setActiveTab] = useState<any>('today')
+  const [newTaskTitle, setNewTaskTitle] = useState<any>('')
+  const [newTaskDescription, setNewTaskDescription] = useState<any>('')
   const [newTaskPriority, setNewTaskPriority] = useState<'low' | 'medium' | 'high' | 'urgent'>('medium')
-  const [isAddingTask, setIsAddingTask] = useState(false)
+  const [isAddingTask, setIsAddingTask] = useState<any>(false)
 
   // Initialize state with mock data
   const initialState: TaskState = {

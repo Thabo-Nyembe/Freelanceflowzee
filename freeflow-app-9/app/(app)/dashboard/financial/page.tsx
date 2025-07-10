@@ -3,23 +3,23 @@
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
+import { _Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   DollarSign, 
   TrendingUp, 
   TrendingDown, 
   CreditCard, 
-  Wallet, 
-  PieChart,
+  _Wallet, 
+  _PieChart,
   FileText,
-  Calendar,
+  _Calendar,
   ArrowUpRight,
   ArrowDownRight 
 } from 'lucide-react'
 
 export default function FinancialPage() {
-  const [selectedPeriod, setSelectedPeriod] = useState('monthly')
+  const [_selectedPeriod, setSelectedPeriod] = useState<any>('monthly')
 
   // Mock financial data
   const financialData = {

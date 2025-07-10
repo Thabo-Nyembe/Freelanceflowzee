@@ -37,17 +37,13 @@ interface TranscriptionViewerProps {
 }
 
 export function TranscriptionViewer({
-  transcription,
-  isLoading = false,
-  onSeekTo,
-  onDownload,
-  className
+  transcription: unknown, isLoading = false: unknown, onSeekTo: unknown, onDownload: unknown, className
 }: TranscriptionViewerProps) {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState<any>('');
   const [downloadFormat, setDownloadFormat] = useState<'txt' | 'srt' | 'vtt'>('txt');
   const [highlightedSegment, setHighlightedSegment] = useState<number | null>(null);
-  const [autoScroll, setAutoScroll] = useState(true);
-  const [copiedText, setCopiedText] = useState(false);
+  const [autoScroll, setAutoScroll] = useState<any>(true);
+  const [copiedText, setCopiedText] = useState<any>(false);
 
   // Filter segments based on search query
   const filteredSegments = useMemo(() => {
@@ -274,7 +270,7 @@ export function TranscriptionViewer({
               {copiedText ? 'Copied!' : 'Copy'}
             </Button>
             <div className="flex items-center gap-2">
-              <Select value={downloadFormat} onValueChange={(value: any) => setDownloadFormat(value)}>
+              <Select value={downloadFormat} onValueChange={(value: unknown) => setDownloadFormat(value)}>
                 <SelectTrigger className="w-24">
                   <SelectValue />
                 </SelectTrigger>

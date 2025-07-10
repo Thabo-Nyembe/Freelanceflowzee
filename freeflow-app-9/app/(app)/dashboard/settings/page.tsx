@@ -90,9 +90,9 @@ interface AppearanceSettings {
 }
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState('profile')
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState<any>('profile')
+  const [showPassword, setShowPassword] = useState<any>(false)
+  const [isLoading, setIsLoading] = useState<any>(false)
 
   const [profile, setProfile] = useState<UserProfile>({
     firstName: 'John',

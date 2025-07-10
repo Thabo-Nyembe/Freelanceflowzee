@@ -20,10 +20,10 @@ interface SummarizeButtonProps {
 }
 
 export const SummarizeButton = ({ projectId }: SummarizeButtonProps) => {
-  const [summary, setSummary] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const [hasCopied, setHasCopied] = useState(false);
+  const [summary, setSummary] = useState<any>('');
+  const [isLoading, setIsLoading] = useState<any>(false);
+  const [isOpen, setIsOpen] = useState<any>(false);
+  const [hasCopied, setHasCopied] = useState<any>(false);
 
   const handleSummarize = async () => {
     setIsLoading(true);

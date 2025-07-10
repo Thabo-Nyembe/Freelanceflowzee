@@ -75,9 +75,9 @@ const benefits = [
 ]
 
 export default function NewsletterPage() {
-  const [email, setEmail] = useState('')
-  const [isSubscribed, setIsSubscribed] = useState(false)
-  const [showDemoModal, setShowDemoModal] = useState(false)
+  const [email, setEmail] = useState<any>('')
+  const [isSubscribed, setIsSubscribed] = useState<any>(false)
+  const [showDemoModal, setShowDemoModal] = useState<any>(false)
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault()

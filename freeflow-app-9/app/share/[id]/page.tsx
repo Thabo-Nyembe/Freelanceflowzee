@@ -93,7 +93,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function PublicVideoPage({ params }: PageProps) {
+ function PublicVideoPage({ params }: PageProps) {
   const { id } = await params;
   const supabase = await createClient();
 

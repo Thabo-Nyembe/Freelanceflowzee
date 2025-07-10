@@ -15,14 +15,13 @@ interface FileUploadProps {
 }
 
 export function FileUpload({ 
-  onUploadComplete, 
-  maxSize = 100 * 1024 * 1024, // 100MB default
-  allowedTypes = ['image/*', 'application/pdf', 'video/*']
+  onUploadComplete: unknown, maxSize = 100 * 1024 * 1024: unknown, // 100MB default
+  allowedTypes = ['image/*': unknown, 'application/pdf': unknown, 'video/*']
 }: FileUploadProps) {
   const [file, setFile] = useState<File | null>(null)
-  const [progress, setProgress] = useState(0)
+  const [progress, setProgress] = useState<any>(0)
   const [error, setError] = useState<string | null>(null)
-  const [uploading, setUploading] = useState(false)
+  const [uploading, setUploading] = useState<any>(false)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]

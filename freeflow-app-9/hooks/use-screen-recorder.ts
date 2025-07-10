@@ -24,11 +24,11 @@ export interface RecordingState {
 }
 
 interface UseScreenRecorderProps {
-  onRecordingComplete?: (videoBlob: Blob, metadata: any) => void;
+  onRecordingComplete?: (videoBlob: Blob, metadata: unknown) => void;
   onUploadComplete?: (videoId: string) => void;
 }
 
-export function useScreenRecorder({ onRecordingComplete, onUploadComplete }: UseScreenRecorderProps = {}) {
+export function useScreenRecorder({ onRecordingComplete: unknown, onUploadComplete }: UseScreenRecorderProps = {}) {
   // Recording state
   const [recordingState, setRecordingState] = useState<RecordingState>({
     status: 'idle',
@@ -48,7 +48,7 @@ export function useScreenRecorder({ onRecordingComplete, onUploadComplete }: Use
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   // Browser capabilities
-  const [capabilities, setCapabilities] = useState({
+  const [capabilities, setCapabilities] = useState<any>({
     screenCapture: false,
     audioCapture: false,
     systemAudio: false

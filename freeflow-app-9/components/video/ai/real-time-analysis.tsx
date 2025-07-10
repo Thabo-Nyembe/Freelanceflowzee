@@ -38,16 +38,14 @@ interface VideoInsight {
 }
 
 export function RealTimeAnalysis({
-  isRecording,
-  audioStream,
-  onInsightGenerated
+  isRecording: unknown, audioStream: unknown, onInsightGenerated
 }: RealTimeAnalysisProps) {
   const [insights, setInsights] = useState<VideoInsight[]>([])
-  const [audioLevel, setAudioLevel] = useState(0)
-  const [noiseLevel, setNoiseLevel] = useState(0)
-  const [speechClarity, setSpeechClarity] = useState(0)
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [transcription, setTranscription] = useState('')
+  const [audioLevel, setAudioLevel] = useState<any>(0)
+  const [noiseLevel, setNoiseLevel] = useState<any>(0)
+  const [speechClarity, setSpeechClarity] = useState<any>(0)
+  const [isAnalyzing, setIsAnalyzing] = useState<any>(false)
+  const [transcription, setTranscription] = useState<any>('')
   const [sentiment, setSentiment] = useState<{
     positive: number
     neutral: number

@@ -1,6 +1,6 @@
 'use client'
 
-import { } from 'react';
+;
 import { Button } from '@/components/ui/button';
 import { ClientPresentationDemo } from './client-presentation-demo';
 import { InvestorDemo } from './investor-demo';
@@ -11,7 +11,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 export function DemoRouter() {
-  const [activeDemo, setActiveDemo] =<any>(null);
+  const [activeDemo, setActiveDemo] = useState<any>(null);
 
   const demoScenarios = [
     {
@@ -59,13 +59,11 @@ export function DemoRouter() {
   if (activeDemo) {
     const DemoComponent = activeDemo.component;
     return (
-      <div className="min-h-screen">
+    <div className="min-h-screen">
         <div className="p-4 bg-gray-100 border-b">
           <Button variant="outline" onClick={() => setActiveDemo(null)}>
             ← Back to Demo Selection
-          </Button>
-        </div>
-        <DemoComponent />
+          </Button></div><DemoComponent />
       </div>
     );
   }
@@ -78,63 +76,26 @@ export function DemoRouter() {
           <p className="text-lg text-gray-600 mb-8">
             Experience KAZI's powerful features with interactive demos showcasing 
             AI content creation, universal feedback, real-time collaboration, and more.
-          </p>
-          <Badge className="mt-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+          </p><Badge className="mt-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
             🎭 Interactive Demos Available
-          </Badge>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {demoScenarios.map((scenario) => (
-            <Card key={scenario.id} className="hover:shadow-xl transition-all cursor-pointer group">
-              <CardHeader>
-                <div className="flex items-center gap-4">
+          </Badge></div><div className="grid grid-cols-1 md:grid-cols-2 gap-6">{demoScenarios.map((scenario) => (
+            }<Card key={scenario.id} className="hover:shadow-xl transition-all cursor-pointer group">
+              <CardHeader><div className="flex items-center gap-4">
                   <div className={`p-3 rounded-lg ${scenario.color}`}>
                     <scenario.icon className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-xl">{scenario.title}</CardTitle>
-                    <p className="text-gray-600">{scenario.description}</p>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div>
-                    <div className="text-sm font-medium text-gray-700">Target Audience:</div>
-                    <div className="text-sm text-gray-600">{scenario.audience}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-700">Duration:</div>
-                    <div className="text-sm text-gray-600">{scenario.duration}</div>
-                  </div>
-                  <Button
-                    className="w-full group-hover:bg-primary group-hover:text-white transition-colors"
+                  </div><div><CardTitle className="text-xl">{scenario.title}</CardTitle><p className="text-gray-600">{scenario.description}</p></div></div></CardHeader><CardContent><div className="space-y-3">
+                  <div><div className="text-sm font-medium text-gray-700">Target Audience:</div><div className="text-sm text-gray-600">{scenario.audience}</div></div><div><div className="text-sm font-medium text-gray-700">Duration:</div><div className="text-sm text-gray-600">{scenario.duration}</div></div><Button className="w-full group-hover:bg-primary group-hover:text-white transition-colors">
                     variant="outline"
                     onClick={() => setActiveDemo(scenario)}
                   >
                     Start Demo
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  </Button></div></CardContent></Card>
           ))}
-        </div>
-
-        <div className="mt-12 text-center">
+        </div><div className="mt-12 text-center">
           <Card className="bg-blue-50 border-blue-200">
             <CardContent className="p-6">
               <h3 className="font-bold text-blue-900 mb-2">Demo Tips</h3>
               <div className="text-blue-700 text-sm space-y-1">
-                <p>• Each demo uses real data from our content population system</p>
-                <p>• Demos are optimized for different audience types and use cases</p>
-                <p>• All metrics and showcased features are based on actual platform capabilities</p>
-                <p>• Use the navigation controls to pace your presentation effectively</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
+                <p>• Each demo uses real data from our content population system</p><p>• Demos are optimized for different audience types and use cases</p><p>• All metrics and showcased features are based on actual platform capabilities</p><p>• Use the navigation controls to pace your presentation effectively</p></div></CardContent></Card></div></div></div>
   );
 }

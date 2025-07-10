@@ -53,31 +53,24 @@ export interface TimelineEdit {
   type: 'trim' | 'cut' | 'chapter' | 'effect';
   startTime: number;
   endTime?: number;
-  data?: any;
+  data?: unknown;
 }
 
 export default function VideoTimelineEditor({
-  videoId,
-  playbackId,
-  title,
-  duration,
-  chapters = [],
-  onSave,
-  onExport,
-  className
+  videoId: unknown, playbackId: unknown, title: unknown, duration: unknown, chapters = []: unknown, onSave: unknown, onExport: unknown, className
 }: VideoTimelineEditorProps) {
   const timelineRef = useRef<HTMLDivElement>(null);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(1);
+  const [currentTime, setCurrentTime] = useState<any>(0);
+  const [isPlaying, setIsPlaying] = useState<any>(false);
+  const [zoomLevel, setZoomLevel] = useState<any>(1);
   const [selectedSegment, setSelectedSegment] = useState<TimelineSegment | null>(null);
-  const [trimStart, setTrimStart] = useState(0);
-  const [trimEnd, setTrimEnd] = useState(duration);
+  const [trimStart, setTrimStart] = useState<any>(0);
+  const [trimEnd, setTrimEnd] = useState<any>(duration);
   const [cuts, setCuts] = useState<number[]>([]);
   const [videoChapters, setVideoChapters] = useState<VideoChapter[]>(chapters);
   const [editHistory, setEditHistory] = useState<TimelineEdit[]>([]);
-  const [isEditingChapter, setIsEditingChapter] = useState(false);
-  const [newChapterTitle, setNewChapterTitle] = useState('');
+  const [isEditingChapter, setIsEditingChapter] = useState<any>(false);
+  const [newChapterTitle, setNewChapterTitle] = useState<any>('');
 
   // Timeline scale calculations
   const timelineWidth = 800;
@@ -119,7 +112,7 @@ export default function VideoTimelineEditor({
 
   const removeCut = useCallback((cutTime: number) => {
     setCuts(prev => prev.filter(cut => cut !== cutTime));
-  }, []);
+  }, [/* add dependencies */]);
 
   const addChapter = useCallback(() => {
     if (!newChapterTitle.trim()) return;
@@ -144,7 +137,7 @@ export default function VideoTimelineEditor({
 
   const removeChapter = useCallback((chapterId: string) => {
     setVideoChapters(prev => prev.filter(chapter => chapter.id !== chapterId));
-  }, []);
+  }, [/* add dependencies */]);
 
   const handleTrimChange = useCallback((type: 'start' | 'end', value: number) => {
     if (type === 'start') {

@@ -39,7 +39,7 @@ export default function FileUploadZone({
   onRemove,
   onRetry,
 }: FileUploadZoneProps) {
-  const [uploads, setUploads] =<FileUpload[]>([])
+  const [uploads, setUploads] = useState<FileUpload[]>([])
 
   const handleDrop = useCallback(
     async (acceptedFiles: File[]) => {

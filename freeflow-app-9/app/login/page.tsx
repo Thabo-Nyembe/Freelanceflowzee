@@ -12,9 +12,9 @@ interface Props {
 
 export default function LoginPage({ searchParams }: Props) {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState<any>('');
+  const [password, setPassword] = useState<any>('');
+  const [isLoading, setIsLoading] = useState<any>(false);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

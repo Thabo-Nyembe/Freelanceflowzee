@@ -1,5 +1,5 @@
 'use client';
-import { } from 'react';
+;
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { cn } from '@/lib/utils';
 import { Filter, ChevronDown } from 'lucide-react';
@@ -33,14 +33,11 @@ const defaultFilters: LocalVideoFilters = {
   status: 'any',
 };
 
-export function VideoFilters({ onFilterChange, className }: VideoFiltersProps) {
+export function VideoFilters({ onFilterChange: unknown, className }: VideoFiltersProps) {
   const [filters, setFilters] = useState<LocalVideoFilters>(defaultFilters);
   const isMobile = useMediaQuery('(max-width: 768px)');
 
-  const handleFilterChange = (
-    key: keyof LocalVideoFilters,
-    value: LocalVideoFilters[keyof LocalVideoFilters]
-  ) => {
+  const handleFilterChange = (key: keyof LocalVideoFilters, value: LocalVideoFilters[keyof LocalVideoFilters]) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
     onFilterChange(newFilters);

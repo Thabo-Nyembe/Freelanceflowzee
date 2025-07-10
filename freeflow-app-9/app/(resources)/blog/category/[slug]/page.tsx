@@ -80,9 +80,9 @@ interface BlogCategoryPageProps {
 
 export default function BlogCategoryPage({ params }: BlogCategoryPageProps) {
   const { slug } = use(params)
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchTerm, setSearchTerm] = useState<any>('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [showDemoModal, setShowDemoModal] = useState(false)
+  const [showDemoModal, setShowDemoModal] = useState<any>(false)
   
   const category = categories.find(c => c.slug === slug)
   

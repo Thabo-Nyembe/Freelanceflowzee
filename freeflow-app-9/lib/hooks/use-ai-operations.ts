@@ -50,7 +50,7 @@ interface AIData {
 }
 
 export function useAIOperations() {
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState<any>(false)
   const [error, setError] = useState<string | null>(null)
   const [aiData, setAIData] = useState<AIData>({})
 

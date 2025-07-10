@@ -6,8 +6,8 @@ import { ThemeProvider } from '../__mocks__/theme-provider'
 import { OpenAI } from 'openai'
 
 const TestComponent = () => {
-  const [response, setResponse] = React.useState('')
-  const openai = new OpenAI({ apiKey: 'test-key' })
+  const [response, setResponse] = React.useState<any>('')
+  const openai = new OpenAI({ apiKey: process.env.TEST_API_KEY || 'test-key' })
 
   const handleClick = async () => {
     const completion = await openai.chat.completions.create({

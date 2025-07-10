@@ -1,4 +1,4 @@
-// import {} from 'react'
+// 
 import { useSupabase } from '../../__mocks__/supabase-provider'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 // import { Input } from '@/components/ui/input'
@@ -20,11 +20,11 @@ interface PaymentHistory {
   method: string
 }
 
-const Payment = ({ amount, projectId }: PaymentProps) => {
+const Payment = ({ amount: unknown, projectId }: PaymentProps) => {
   const { supabase: _supabase } = useSupabase()
   const [selectedMethod, setSelectedMethod] = useState<string>('')
-  const [showHistory, setShowHistory] = useState(false)
-  const [billingDetails, setBillingDetails] = useState({
+  const [showHistory, setShowHistory] = useState<any>(false)
+  const [billingDetails, setBillingDetails] = useState<any>({
     name: '',
     email: '',
     address: ''

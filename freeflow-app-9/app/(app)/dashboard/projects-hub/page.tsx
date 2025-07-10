@@ -39,13 +39,13 @@ interface ProjectStats {
 export default function ProjectsHubPage() {
   const [projects, setProjects] = useState<Project[]>([])
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([])
-  const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('overview')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [priorityFilter, setPriorityFilter] = useState('all')
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [newProject, setNewProject] = useState({
+  const [loading, setLoading] = useState<any>(true)
+  const [activeTab, setActiveTab] = useState<any>('overview')
+  const [searchTerm, setSearchTerm] = useState<any>('')
+  const [statusFilter, setStatusFilter] = useState<any>('all')
+  const [priorityFilter, setPriorityFilter] = useState<any>('all')
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState<any>(false)
+  const [newProject, setNewProject] = useState<any>({
     title: '',
     description: '',
     client_name: '',

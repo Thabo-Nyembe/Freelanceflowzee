@@ -278,7 +278,7 @@ export type UploadStatus = 'pending' | 'uploading' | 'processing' | 'completed' 
 export interface VideoWebhookEvent {
   id: string;
   type: string;
-  data: any;
+  data: unknown;
   timestamp: string;
   signature?: string;
   processed: boolean;
@@ -530,5 +530,5 @@ export interface UseVideoPlayerReturn {
   toggleFullscreen: () => void;
   
   // Analytics
-  trackEvent: (event: AnalyticsEventType, data?: any) => void;
+  trackEvent: (event: AnalyticsEventType, data?: unknown) => void;
 } 

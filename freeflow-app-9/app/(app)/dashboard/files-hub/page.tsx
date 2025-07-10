@@ -67,7 +67,7 @@ interface FileItem {
   shareUrl?: string
   description?: string
   category?: string
-  metadata?: any
+  metadata?: unknown
 }
 
 interface CloudStorage {
@@ -246,12 +246,12 @@ function filesReducer(state: FilesState, action: FilesAction): FilesState {
 
 export default function FilesHubPage() {
   const [state, dispatch] = useReducer(filesReducer, initialState)
-  const [activeTab, setActiveTab] = useState('files')
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
-  const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false)
-  const [newFolderName, setNewFolderName] = useState('')
+  const [activeTab, setActiveTab] = useState<any>('files')
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState<any>(false)
+  const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState<any>(false)
+  const [newFolderName, setNewFolderName] = useState<any>('')
   const [uploadFiles, setUploadFiles] = useState<FileList | null>(null)
-  const [dragOver, setDragOver] = useState(false)
+  const [dragOver, setDragOver] = useState<any>(false)
 
   const mockCloudStorages: CloudStorage[] = [
     {
@@ -516,8 +516,8 @@ export default function FilesHubPage() {
   })
 
   const sortedFiles = [...filteredFiles].sort((a, b) => {
-    let aValue: any = a[state.sortBy]
-    let bValue: any = b[state.sortBy]
+    let aValue: unknown = a[state.sortBy]
+    let bValue: unknown = b[state.sortBy]
     
     if (state.sortBy === 'size') {
       aValue = a.size

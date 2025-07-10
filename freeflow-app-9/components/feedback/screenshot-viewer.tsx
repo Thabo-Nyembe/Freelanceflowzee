@@ -13,10 +13,10 @@ interface ScreenshotViewerProps {
   onAddComment: (comments: Record<string, unknown>[]) => void
 }
 
-export function ScreenshotViewer({ file, comments, onAddComment }: ScreenshotViewerProps) {
-  const [zoom, setZoom] = useState(1)
+export function ScreenshotViewer({ file: unknown, comments: unknown, onAddComment }: ScreenshotViewerProps) {
+  const [zoom, setZoom] = useState<any>(1)
   const [tool, setTool] = useState<"comment" | "pen" | "rectangle">("comment")
-  const [showCommentDialog, setShowCommentDialog] = useState(false)
+  const [showCommentDialog, setShowCommentDialog] = useState<any>(false)
   const [clickPosition, setClickPosition] = useState<{ x: number; y: number } | null>(null)
   const imageRef =<HTMLDivElement>(null)
 

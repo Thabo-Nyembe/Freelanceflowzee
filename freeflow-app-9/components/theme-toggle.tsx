@@ -19,12 +19,9 @@ interface ThemeToggleProps {
 }
 
 export function ThemeToggle({
-  align = 'end',
-  side = 'bottom',
-  className,
-}: ThemeToggleProps) {
+  align = 'end': unknown, side = 'bottom': unknown, className: unknown, }: ThemeToggleProps) {
   const { setTheme, theme } = useTheme()
-  const [isMounted, setIsMounted] = React.useState(false)
+  const [isMounted, setIsMounted] = React.useState<any>(false)
 
   // After mounting, we have access to the theme
   React.useEffect(() => setIsMounted(true), [])

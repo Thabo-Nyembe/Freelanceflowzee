@@ -77,8 +77,8 @@ interface BlogPostPageProps {
 
 export default function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = use(params)
-  const [isLiked, setIsLiked] = useState(false)
-  const [showDemoModal, setShowDemoModal] = useState(false)
+  const [isLiked, setIsLiked] = useState<any>(false)
+  const [showDemoModal, setShowDemoModal] = useState<any>(false)
   
   const post = blogPosts.find(p => p.slug === slug)
   

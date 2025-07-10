@@ -16,10 +16,10 @@ export function useVideoSearch(initialFilters: Partial<VideoSearchFilters> = {})
   });
 
   const [results, setResults] = useState<VideoSearchResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<any>(false);
   const [error, setError] = useState<Error | null>(null);
-  const [totalResults, setTotalResults] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
+  const [totalResults, setTotalResults] = useState<any>(0);
+  const [hasMore, setHasMore] = useState<any>(false);
 
   const debouncedQuery = useDebounce(filters.query, 300);
 

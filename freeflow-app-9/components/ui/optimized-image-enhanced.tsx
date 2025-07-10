@@ -66,10 +66,10 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
   overlay = false,
   overlayContent
 }) => {
-  const [isLoaded, setIsLoaded] = useState(false)
-  const [hasError, setHasError] = useState(false)
-  const [currentSrc, setCurrentSrc] = useState(src)
-  const [isInView, setIsInView] = useState(false)
+  const [isLoaded, setIsLoaded] = useState<any>(false)
+  const [hasError, setHasError] = useState<any>(false)
+  const [currentSrc, setCurrentSrc] = useState<any>(src)
+  const [isInView, setIsInView] = useState<any>(false)
   const imgRef =<HTMLDivElement>(null)
   const observerRef =<IntersectionObserver | null>(null)
 
@@ -357,18 +357,13 @@ export const ImageAnalyzer = {
 
 // Example helper function to dynamically generate image sources
 // This might be used to switch between different CDN providers or image services
-// function buildSrc(
-//   basePath: string,
-//   {
-//     width,
-//     quality,
-//     format,
-//   }: {
+// function buildSrc(//   basePath: string, //   {
+//     width: unknown, //     quality: unknown, //     format: unknown, //   }: {
 //     width: number
 //     quality?: number
 //     format?: 'webp' | 'avif' | 'jpeg'
 //   }
-// ): string {
+//): string {
 //   const params = new URLSearchParams()
 //   params.set('w', width.toString())
 //   if (quality) {

@@ -30,10 +30,7 @@ export interface FileUploadOptions {
 /**
  * Upload a file to S3-compatible storage
  */
-export async function uploadFile(
-  file: Buffer | Uint8Array | string,
-  options: FileUploadOptions = {}
-): Promise<UploadResult> {
+export async function uploadFile(file: Buffer | Uint8Array | string, options: FileUploadOptions = {}): Promise<UploadResult> {
   const {
     folder = 'uploads',
     filename = `file-${Date.now()}`,
@@ -68,11 +65,7 @@ export async function uploadFile(
 /**
  * Generate a presigned URL for file upload
  */
-export async function getUploadPresignedUrl(
-  key: string,
-  contentType: string = 'application/octet-stream',
-  expiresIn: number = 3600 // 1 hour
-): Promise<string> {
+export async function getUploadPresignedUrl(key: string, contentType: string = 'application/octet-stream', expiresIn: number = 3600 // 1 hour): Promise<string> {
   try {
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,
@@ -90,10 +83,7 @@ export async function getUploadPresignedUrl(
 /**
  * Generate a presigned URL for file download
  */
-export async function getDownloadPresignedUrl(
-  key: string,
-  expiresIn: number = 3600 // 1 hour
-): Promise<string> {
+export async function getDownloadPresignedUrl(key: string, expiresIn: number = 3600 // 1 hour): Promise<string> {
   try {
     const command = new GetObjectCommand({
       Bucket: BUCKET_NAME,
@@ -128,10 +118,7 @@ export async function deleteFile(key: string): Promise<boolean> {
 /**
  * List files in a folder
  */
-export async function listFiles(
-  prefix: string = '',
-  maxKeys: number = 100
-): Promise<Array<{ key: string; size: number; lastModified: Date }>> {
+export async function listFiles(prefix: string = '', maxKeys: number = 100): Promise<Array<{ key: string; size: number; lastModified: Date }>> {
   try {
     const command = new ListObjectsV2Command({
       Bucket: BUCKET_NAME,

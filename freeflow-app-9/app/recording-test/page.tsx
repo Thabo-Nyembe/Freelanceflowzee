@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import VideoMessageRecorder from '@/components/video/VideoMessageRecorder'
 
 export default function RecordingTestPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState<any>(false)
 
   const handleRecordingComplete = (videoUrl: string, videoId: string) => {
     console.log('Recording complete:', { videoUrl, videoId })

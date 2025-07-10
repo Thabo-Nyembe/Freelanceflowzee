@@ -18,7 +18,7 @@ export interface Project {
   }>
   priority: 'low' | 'medium' | 'high' | 'urgent'
   comments_count: number
-  attachments: any[]
+  attachments: unknown[]
   tags?: string[]
   tasks?: {
     total: number

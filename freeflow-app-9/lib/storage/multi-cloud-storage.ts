@@ -661,12 +661,7 @@ class MultiCloudStorage {
 export const multiCloudStorage = new MultiCloudStorage();
 
 // Convenience functions
-export async function uploadFile(
-  file: Buffer | Uint8Array | File,
-  filename: string,
-  mimeType: string,
-  options?: UploadOptions
-) {
+export async function uploadFile(file: Buffer | Uint8Array | File, filename: string, mimeType: string, options?: UploadOptions) {
   return multiCloudStorage.upload(file, filename, mimeType, options);
 }
 

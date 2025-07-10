@@ -13,9 +13,9 @@ interface DemoModalProps {
   videoUrl?: string
 }
 
-export function DemoModal({ isOpen, onClose, title, description, videoUrl }: DemoModalProps) {
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [volume, setVolume] = useState(50)
+export function DemoModal({ isOpen: unknown, onClose: unknown, title: unknown, description: unknown, videoUrl }: DemoModalProps) {
+  const [isPlaying, setIsPlaying] = useState<any>(false)
+  const [volume, setVolume] = useState<any>(50)
 
   if (!isOpen) return null
 

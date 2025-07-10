@@ -110,7 +110,7 @@ export const safeLocalStorage = {
 /**
  * Store data with automatic timestamp for cleanup
  */
-export const storeWithTimestamp = (key: string, data: any): boolean => {
+export const storeWithTimestamp = (key: string, data: unknown): boolean => {
   const dataWithTimestamp = {
     ...data,
     timestamp: Date.now()

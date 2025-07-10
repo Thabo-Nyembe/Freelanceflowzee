@@ -33,20 +33,19 @@ interface AICreateStudioProps {
 
 type ContentType = keyof typeof CONTENT_TYPES
 
-export function AICreateStudio({
-  onGenerate,
-  defaultModel = 'gpt-4o-mini'
+export const AICreateStudio = memo(function AICreateStudio({
+  onGenerate: unknown, defaultModel = 'gpt-4o-mini'
 }: AICreateStudioProps) {
-  const [prompt, setPrompt] = useState('')
-  const [generating, setGenerating] = useState(false)
+  const [prompt, setPrompt] = useState<any>('')
+  const [generating, setGenerating] = useState<any>(false)
   const [result, setResult] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [selectedModel, setSelectedModel] = useState<keyof typeof MODELS>(defaultModel)
   const [contentType, setContentType] = useState<ContentType>('text')
-  const [temperature, setTemperature] = useState([0.7])
-  const [maxTokens, setMaxTokens] = useState([1000])
+  const [temperature, setTemperature] = useState<any>([0.7])
+  const [maxTokens, setMaxTokens] = useState<any>([1000])
   const [history, setHistory] = useState<Array<{prompt: string, result: string, timestamp: Date}>>([])
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState<any>(false)
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return
@@ -192,4 +191,4 @@ export function AICreateStudio({
       </Card>
     </div>
   )
-} 
+})

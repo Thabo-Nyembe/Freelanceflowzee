@@ -1,4 +1,4 @@
-import { } from 'react';
+;
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -20,10 +20,7 @@ interface BulkOperationsProps {
 }
 
 export function BulkOperations({
-  selectedVideos,
-  onComplete,
-  onCancel,
-}: BulkOperationsProps) {
+  selectedVideos: unknown, onComplete: unknown, onCancel: unknown, }: BulkOperationsProps) {
   const { createBulkOperation, subscribeToBulkOperation, isLoading } = useBulkOperations();
   const [operation, setOperation] =<BulkOperation | null>(null);
   const [selectedOperation, setSelectedOperation] =<BulkOperationType>('delete');

@@ -4,7 +4,7 @@ export function generateBlockId(): string {
   return `block-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
 }
 
-export function createBlock(type: ContentBlock['type'], content: any = null): ContentBlock {
+export function createBlock(type: ContentBlock['type'], content: unknown = null): ContentBlock {
   return {
     id: generateBlockId(),
     type,
@@ -85,11 +85,7 @@ export function findBlockById(blocks: ContentBlock[], id: string): ContentBlock 
   return blocks.find(block => block.id === id)
 }
 
-export function updateBlockContent(
-  blocks: ContentBlock[],
-  blockId: string,
-  content: any
-): ContentBlock[] {
+export function updateBlockContent(blocks: ContentBlock[], blockId: string, content: unknown): ContentBlock[] {
   return blocks.map(block =>
     block.id === blockId
       ? { ...block, content, updatedAt: new Date().toISOString() }
@@ -97,11 +93,7 @@ export function updateBlockContent(
   )
 }
 
-export function moveBlock(
-  blocks: ContentBlock[],
-  fromIndex: number,
-  toIndex: number
-): ContentBlock[] {
+export function moveBlock(blocks: ContentBlock[], fromIndex: number, toIndex: number): ContentBlock[] {
   const newBlocks = [...blocks]
   const [movedBlock] = newBlocks.splice(fromIndex, 1)
   newBlocks.splice(toIndex, 0, movedBlock)

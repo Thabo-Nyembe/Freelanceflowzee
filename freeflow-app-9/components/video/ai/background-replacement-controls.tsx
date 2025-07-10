@@ -19,14 +19,13 @@ interface BackgroundReplacementControlsProps {
 }
 
 export function BackgroundReplacementControls({
-  videoStream,
-  onProcessedStream
+  videoStream: unknown, onProcessedStream
 }: BackgroundReplacementControlsProps) {
-  const [isEnabled, setIsEnabled] = useState(false)
-  const [isBlur, setIsBlur] = useState(true)
+  const [isEnabled, setIsEnabled] = useState<any>(false)
+  const [isBlur, setIsBlur] = useState<any>(true)
   const [backgroundService, setBackgroundService] = useState<BackgroundReplacementService | null>(null)
   const [selectedBackground, setSelectedBackground] = useState<string | null>(null)
-  const [isProcessing, setIsProcessing] = useState(false)
+  const [isProcessing, setIsProcessing] = useState<any>(false)
 
   // Initialize background service
   useEffect(() => {

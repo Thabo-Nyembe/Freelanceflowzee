@@ -38,16 +38,12 @@ interface VideoCommentsProps {
 }
 
 export function VideoComments({ 
-  videoId, 
-  currentUserId, 
-  currentTime = 0,
-  onSeekToTimestamp,
-  className 
+  videoId: unknown, currentUserId: unknown, currentTime = 0: unknown, onSeekToTimestamp: unknown, className 
 }: VideoCommentsProps) {
   const [comments, setComments] = useState<VideoComment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [newComment, setNewComment] = useState('');
-  const [useTimestamp, setUseTimestamp] = useState(false);
+  const [loading, setLoading] = useState<any>(true);
+  const [newComment, setNewComment] = useState<any>('');
+  const [useTimestamp, setUseTimestamp] = useState<any>(false);
 
   useEffect(() => {
     loadComments();

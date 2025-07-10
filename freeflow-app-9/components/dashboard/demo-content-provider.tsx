@@ -30,7 +30,7 @@ const DemoContentContext = createContext<DemoContentContextType | undefined>(und
 
 export function DemoContentProvider({ children }: { children: React.ReactNode }) {
   const [content, setContent] = useState<DemoContent | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<any>(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadContent = async () => {
@@ -87,20 +87,20 @@ export function DemoContentProvider({ children }: { children: React.ReactNode })
     return content?.transactions?.filter(t => t.status === status) || [];
   };
 
-  const getTopCreators = (limit = 10) => {
+  const getTopCreators = (limit = 10: unknown) => {
     return content?.users
       ?.filter(u => u.isVerified)
       ?.sort((a, b) => b.rating - a.rating)
       ?.slice(0, limit) || [];
   };
 
-  const getRecentFiles = (limit = 10) => {
+  const getRecentFiles = (limit = 10: unknown) => {
     return content?.files
       ?.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
       ?.slice(0, limit) || [];
   };
 
-  const getTrendingPosts = (limit = 20) => {
+  const getTrendingPosts = (limit = 20: unknown) => {
     return content?.posts
       ?.sort((a, b) => (b.likes + b.views) - (a.likes + a.views))
       ?.slice(0, limit) || [];

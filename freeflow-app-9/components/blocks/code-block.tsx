@@ -50,13 +50,9 @@ const SUPPORTED_LANGUAGES = [
 ]
 
 export function CodeBlock({
-  id,
-  content,
-  properties,
-  onUpdate,
-  isSelected
+  id: unknown, content: unknown, properties: unknown, onUpdate: unknown, isSelected
 }: CodeBlockProps) {
-  const [copied, setCopied] = React.useState(false)
+  const [copied, setCopied] = React.useState<any>(false)
 
   const copyToClipboard = async () => {
     try {

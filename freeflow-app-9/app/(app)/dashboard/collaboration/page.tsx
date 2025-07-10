@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 
 export default function CollaborationPage() {
-  const [activeTab, setActiveTab] = useState("chat");
+  const [activeTab, setActiveTab] = useState<any>("chat");
 
   return (
     <div className="p-6 max-w-7xl mx-auto">

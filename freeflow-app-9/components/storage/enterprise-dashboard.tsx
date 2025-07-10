@@ -38,9 +38,9 @@ interface EnterpriseMetrics {
 
 export function EnterpriseDashboard() {
   const [metrics, setMetrics] = useState<EnterpriseMetrics | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [optimizing, setOptimizing] = useState(false);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [loading, setLoading] = useState<any>(true);
+  const [optimizing, setOptimizing] = useState<any>(false);
+  const [activeTab, setActiveTab] = useState<any>('overview');
 
   useEffect(() => {
     fetchEnterpriseMetrics();

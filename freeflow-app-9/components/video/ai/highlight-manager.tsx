@@ -26,15 +26,14 @@ interface HighlightManagerProps {
 }
 
 export function HighlightManager({
-  videoStream,
-  onHighlightsGenerated
+  videoStream: unknown, onHighlightsGenerated
 }: HighlightManagerProps) {
   const [highlightService, setHighlightService] = useState<HighlightDetectionService | null>(null)
   const [highlights, setHighlights] = useState<HighlightSegment[]>([])
   const [selectedHighlight, setSelectedHighlight] = useState<HighlightSegment | null>(null)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [confidenceThreshold, setConfidenceThreshold] = useState(0.5)
+  const [isPlaying, setIsPlaying] = useState<any>(false)
+  const [currentTime, setCurrentTime] = useState<any>(0)
+  const [confidenceThreshold, setConfidenceThreshold] = useState<any>(0.5)
 
   useEffect(() => {
     if (!videoStream) return

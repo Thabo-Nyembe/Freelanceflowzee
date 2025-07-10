@@ -6,14 +6,14 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 
 export function ContactForm() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<any>({
     name: '',
     email: '',
     message: ''
   })
   const [errors, setErrors] = useState<{[key: string]: string}>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSuccess, setIsSuccess] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState<any>(false)
+  const [isSuccess, setIsSuccess] = useState<any>(false)
 
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {}

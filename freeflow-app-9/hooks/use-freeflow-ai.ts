@@ -38,8 +38,8 @@ export interface AIMessage {
   content: string;
   toolInvocations?: Array<{
     toolName: string;
-    args: any;
-    result?: any;
+    args: unknown;
+    result?: unknown;
   }>;
   timestamp: number;
 }
@@ -55,10 +55,10 @@ export interface StreamingMetadata {
 interface AIResponse {
   text: string;
   reasoning?: string;
-  sources?: any[];
-  usage?: any;
+  sources?: unknown[];
+  usage?: unknown;
   finishReason?: string;
-  toolCalls?: any[];
+  toolCalls?: unknown[];
 }
 
 interface AIOptions {
@@ -71,7 +71,7 @@ interface AIOptions {
 
 export function useFreeflowAI() {
   const [messages, setMessages] = useState<AIMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<any>(false);
   const [error, setError] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<StreamingMetadata>({
     startTime: Date.now(),

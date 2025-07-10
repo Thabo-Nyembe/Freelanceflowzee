@@ -20,16 +20,9 @@ interface QuoteBlockProps {
 }
 
 export function QuoteBlock({
-  id,
-  content,
-  properties,
-  onUpdate,
-  isSelected
+  id: unknown, content: unknown, properties: unknown, onUpdate: unknown, isSelected
 }: QuoteBlockProps) {
-  const updateContent = (
-    field: keyof typeof content,
-    value: string
-  ) => {
+  const updateContent = (field: keyof typeof content, value: string) => {
     onUpdate?.(id, {
       content: { ...content, [field]: value }
     })

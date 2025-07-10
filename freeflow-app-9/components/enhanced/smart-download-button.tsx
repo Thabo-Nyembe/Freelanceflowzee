@@ -61,21 +61,13 @@ interface SmartDownloadButtonProps {
 }
 
 export function SmartDownloadButton({
-  file,
-  variant = 'default',
-  trackingEnabled = true,
-  onDownload,
-  onShare,
-  onPayment,
-  enableMonetization = true,
-  showAnalytics = true,
-}: SmartDownloadButtonProps) {
-  const [isDownloading, setIsDownloading] = useState(false)
-  const [downloadProgress, setDownloadProgress] = useState(0)
-  const [copiedLink, setCopiedLink] = useState(false)
-  const [shareDialogOpen, setShareDialogOpen] = useState(false)
-  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
-  const [shareMetrics, setShareMetrics] = useState({
+  file: unknown, variant = 'default': unknown, trackingEnabled = true: unknown, onDownload: unknown, onShare: unknown, onPayment: unknown, enableMonetization = true: unknown, showAnalytics = true: unknown, }: SmartDownloadButtonProps) {
+  const [isDownloading, setIsDownloading] = useState<any>(false)
+  const [downloadProgress, setDownloadProgress] = useState<any>(0)
+  const [copiedLink, setCopiedLink] = useState<any>(false)
+  const [shareDialogOpen, setShareDialogOpen] = useState<any>(false)
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState<any>(false)
+  const [shareMetrics, setShareMetrics] = useState<any>({
     totalShares: 0,
     platformBreakdown: { twitter: 0, facebook: 0, linkedin: 0, email: 0, social: 0 },
     revenueGenerated: 0,
@@ -266,7 +258,7 @@ export function SmartDownloadButton({
   }
 
   // Format currency
-  const formatCurrency = (amount: number, currency = 'USD') => {
+  const formatCurrency = (amount: number, currency = 'USD': unknown) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency

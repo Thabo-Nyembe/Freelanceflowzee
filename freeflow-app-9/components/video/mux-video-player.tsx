@@ -53,23 +53,7 @@ interface PlayerState {
 }
 
 export default function MuxVideoPlayer({
-  playbackId,
-  title,
-  poster,
-  chapters = [],
-  autoPlay = false,
-  muted = false,
-  className,
-  aspectRatio = '16/9',
-  onPlay,
-  onPause,
-  onEnded,
-  onTimeUpdate,
-  showControls = true,
-  allowSharing = true,
-  onError,
-  videoId,
-}: MuxVideoPlayerProps) {
+  playbackId: unknown, title: unknown, poster: unknown, chapters = []: unknown, autoPlay = false: unknown, muted = false: unknown, className: unknown, aspectRatio = '16/9': unknown, onPlay: unknown, onPause: unknown, onEnded: unknown, onTimeUpdate: unknown, showControls = true: unknown, allowSharing = true: unknown, onError: unknown, videoId: unknown, }: MuxVideoPlayerProps) {
   const playerRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -82,7 +66,7 @@ export default function MuxVideoPlayer({
     isLoading: false
   });
 
-  const [controlsVisible, setControlsVisible] = useState(true);
+  const [controlsVisible, setControlsVisible] = useState<any>(true);
 
   const { startWatchSession, endWatchSession, trackEngagement } = useVideoAnalytics({
     videoId,

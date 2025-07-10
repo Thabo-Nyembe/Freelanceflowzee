@@ -11,7 +11,7 @@ interface ShareContent {
 }
 
 export function useSharingModal() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState<any>(false);
   const [shareContent, setShareContent] = useState<ShareContent | null>(null);
 
   const openSharingModal = useCallback((content: ShareContent) => {

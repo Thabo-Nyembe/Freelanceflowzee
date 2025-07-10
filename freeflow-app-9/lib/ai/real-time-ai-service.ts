@@ -2,7 +2,7 @@ import { EnhancedAIService } from './enhanced-ai-service'
 
 interface RealTimeAnalysisResult {
   type: 'speech' | 'sentiment' | 'quality' | 'suggestion'
-  data: any
+  data: unknown
   timestamp: number
 }
 
@@ -101,7 +101,7 @@ export class RealTimeAIService {
     }
   }
 
-  private async generateSuggestions(text: string, quality: any) {
+  private async generateSuggestions(text: string, quality: unknown) {
     try {
       const response = await fetch('/api/ai/generate-suggestions', {
         method: 'POST',

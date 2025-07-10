@@ -19,29 +19,29 @@ import { format } from 'date-fns';
 
 interface AnalyticsData {
   earnings: {
-    daily: any[];
-    monthly: any[];
-    yearly: any[];
+    daily: unknown[];
+    monthly: unknown[];
+    yearly: unknown[];
   };
   projects: {
-    completion: any[];
-    categoryDistribution: any[];
-    statusDistribution: any[];
+    completion: unknown[];
+    categoryDistribution: unknown[];
+    statusDistribution: unknown[];
   };
   clients: {
-    satisfaction: any[];
-    retention: any[];
-    geography: any[];
+    satisfaction: unknown[];
+    retention: unknown[];
+    geography: unknown[];
   };
   skills: {
-    demand: any[];
-    revenue: any[];
-    growth: any[];
+    demand: unknown[];
+    revenue: unknown[];
+    growth: unknown[];
   };
   videoMetrics: {
-    views: any[];
-    engagement: any[];
-    portfolioPerformance: any[];
+    views: unknown[];
+    engagement: unknown[];
+    portfolioPerformance: unknown[];
   };
 }
 
@@ -88,7 +88,7 @@ export const _FreelancerAnalytics = () => {
     setData(processedData);
   };
 
-  const processEarningsData = (earnings: any[]) => {
+  const processEarningsData = (earnings: unknown[]) => {
     // Process earnings data for different timeframes
     return {
       daily: groupDataByTimeframe(earnings, 'day'),
@@ -97,7 +97,7 @@ export const _FreelancerAnalytics = () => {
     };
   };
 
-  const groupDataByTimeframe = (data: any[], timeframe: 'day' | 'month' | 'year') => {
+  const groupDataByTimeframe = (data: unknown[], timeframe: 'day' | 'month' | 'year') => {
     // Group and aggregate data based on timeframe
     return data.reduce((acc, curr) => {
       const date = new Date(curr.created_at);
@@ -118,7 +118,7 @@ export const _FreelancerAnalytics = () => {
     <div className="space-y-8">
       {/* Time Range Selector */}
       <div className="flex justify-end">
-        <Tabs value={timeframe} onValueChange={(v: any) => setTimeframe(v)}>
+        <Tabs value={timeframe} onValueChange={(v: unknown) => setTimeframe(v)}>
           <TabsList>
             <TabsTrigger value="daily">Daily</TabsTrigger>
             <TabsTrigger value="monthly">Monthly</TabsTrigger>

@@ -53,9 +53,9 @@ interface AnalyticsData {
 
 export default function AnalyticsDashboard() {
   const [data, setData] = useState<AnalyticsData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [timeRange, setTimeRange] = useState('day')
-  const [autoRefresh, setAutoRefresh] = useState(true)
+  const [loading, setLoading] = useState<any>(true)
+  const [timeRange, setTimeRange] = useState<any>('day')
+  const [autoRefresh, setAutoRefresh] = useState<any>(true)
 
   const fetchAnalytics = async () => {
     try {

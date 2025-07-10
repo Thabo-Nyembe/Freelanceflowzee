@@ -189,15 +189,8 @@ interface EnhancedUploadProgressProps {
 }
 
 export function EnhancedUploadProgress({
-  onUploadComplete,
-  maxFiles = 10,
-  maxSize = 100 * 1024 * 1024, // 100MB
-  allowedTypes = ['image/*', 'video/*', 'audio/*', 'application/*', 'text/*'],
-  enableSEO = true,
-  enableAnalytics = true,
-  enableEscrow = true,
-  brandName = 'KAZI',
-  projectId
+  onUploadComplete: unknown, maxFiles = 10: unknown, maxSize = 100 * 1024 * 1024: unknown, // 100MB
+  allowedTypes = ['image/*': unknown, 'video/*': unknown, 'audio/*': unknown, 'application/*': unknown, 'text/*']: unknown, enableSEO = true: unknown, enableAnalytics = true: unknown, enableEscrow = true: unknown, brandName = 'KAZI': unknown, projectId
 }: EnhancedUploadProgressProps) {
 
   // Context7 Pattern: Central State Management

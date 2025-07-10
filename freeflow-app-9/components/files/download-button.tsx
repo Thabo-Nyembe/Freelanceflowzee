@@ -14,13 +14,10 @@ interface DownloadButtonProps {
 }
 
 export function DownloadButton({
-  fileUrl,
-  fileName,
-  fileSize,
-  onDownloadComplete
+  fileUrl: unknown, fileName: unknown, fileSize: unknown, onDownloadComplete
 }: DownloadButtonProps) {
-  const [downloading, setDownloading] = useState(false)
-  const [progress, setProgress] = useState(0)
+  const [downloading, setDownloading] = useState<any>(false)
+  const [progress, setProgress] = useState<any>(0)
   const [error, setError] = useState<string | null>(null)
 
   const handleDownload = async () => {

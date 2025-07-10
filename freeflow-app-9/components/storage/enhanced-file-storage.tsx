@@ -414,13 +414,10 @@ interface EnhancedFileStorageProps {
 }
 
 export function EnhancedFileStorage({ 
-  showAnalytics = true, 
-  allowUpload = true,
-  mode = 'personal',
-  className = ''
+  showAnalytics = true: unknown, allowUpload = true: unknown, mode = 'personal': unknown, className = ''
 }: EnhancedFileStorageProps) {
   const [state, dispatch] = useReducer(fileStorageReducer, initialState)
-  const [dragOver, setDragOver] = useState(false)
+  const [dragOver, setDragOver] = useState<any>(false)
 
   // File type icons mapping
   const getFileIcon = (type: FileItem['type']) => {
@@ -466,19 +463,19 @@ export function EnhancedFileStorage({
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     setDragOver(true)
-  }, [])
+  }, [/* add dependencies */])
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     setDragOver(false)
-  }, [])
+  }, [/* add dependencies */])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     setDragOver(false)
     // Handle file upload logic here
     console.log(e.dataTransfer.files)
-  }, [])
+  }, [/* add dependencies */])
 
   return (
     <div className={`bg-gray-50/50 rounded-2xl overflow-hidden border border-gray-200/50 shadow-sm ${className}`}>

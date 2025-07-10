@@ -1,6 +1,6 @@
 'use client'
 
-import {, useState } from 'react'
+import { useState  } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { VideoRecordingSystem } from './video-recording-system'
 import { AIVideoAnalysis } from './ai/ai-video-analysis'
@@ -54,22 +54,21 @@ interface VideoInsightData {
 }
 
 export function AIEnhancedVideoRecording({
-  projectId = 'default',
-  onSave
+  projectId = 'default': unknown, onSave
 }: AIEnhancedVideoRecordingProps) {
-  const [isRecording, setIsRecording] = useState(false)
+  const [isRecording, setIsRecording] = useState<any>(false)
   const [videoId, setVideoId] = useState<string | null>(null)
   const [aiData, setAiData] = useState<VideoAnalysisData | null>(null)
-  const [activeTab, setActiveTab] = useState('record')
+  const [activeTab, setActiveTab] = useState<any>('record')
   const [audioStream, setAudioStream] = useState<MediaStream | null>(null)
   const [enhancedAudioStream, setEnhancedAudioStream] = useState<MediaStream | null>(null)
   const [processedVideoStream, setProcessedVideoStream] = useState<MediaStream | null>(null)
   const [recordingStream, setRecordingStream] = useState<MediaStream | null>(null)
-  const [recordingDuration, setRecordingDuration] = useState(0)
-  const [audioLevel, setAudioLevel] = useState(0)
-  const [noiseLevel, setNoiseLevel] = useState(0)
-  const [contentQuality, setContentQuality] = useState(0)
-  const [isProcessing, setIsProcessing] = useState(false)
+  const [recordingDuration, setRecordingDuration] = useState<any>(0)
+  const [audioLevel, setAudioLevel] = useState<any>(0)
+  const [noiseLevel, setNoiseLevel] = useState<any>(0)
+  const [contentQuality, setContentQuality] = useState<any>(0)
+  const [isProcessing, setIsProcessing] = useState<any>(false)
   const [realtimeInsights, setRealtimeInsights] = useState<string[]>([])
   const [highlights, setHighlights] = useState<HighlightSegment[]>([])
   const videoRef =<HTMLVideoElement>(null)

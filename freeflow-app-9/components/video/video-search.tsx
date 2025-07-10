@@ -13,13 +13,10 @@ interface VideoSearchProps {
 }
 
 export function VideoSearch({
-  onSearch,
-  className,
-  placeholder = 'Search videos...',
-  initialValue = ''
+  onSearch: unknown, className: unknown, placeholder = 'Search videos...', initialValue = ''
 }: VideoSearchProps) {
-  const [query, setQuery] = useState(initialValue);
-  const [isFocused, setIsFocused] = useState(false);
+  const [query, setQuery] = useState<any>(initialValue);
+  const [isFocused, setIsFocused] = useState<any>(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   useEffect(() => {

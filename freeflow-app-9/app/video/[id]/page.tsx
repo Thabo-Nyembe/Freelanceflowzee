@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: VideoPageProps): Promise<Meta
   };
 }
 
-export default async function VideoPage({ params }: VideoPageProps) {
+ function VideoPage({ params }: VideoPageProps) {
   const supabase = createServerComponentClient({ cookies });
 
   // RLS will enforce security, ensuring only authorized users can fetch the video.

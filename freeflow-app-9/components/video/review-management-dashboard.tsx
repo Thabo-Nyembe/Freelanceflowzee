@@ -64,19 +64,13 @@ export interface ReviewManagementDashboardProps {
 }
 
 export default function ReviewManagementDashboard({
-  reviews,
-  templates,
-  stats,
-  onCreateReview,
-  onUpdateReview,
-  onDeleteReview,
-  className
+  reviews: unknown, templates: unknown, stats: unknown, onCreateReview: unknown, onUpdateReview: unknown, onDeleteReview: unknown, className
 }: ReviewManagementDashboardProps) {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState<any>('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState<any>(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
-  const [newReview, setNewReview] = useState({
+  const [newReview, setNewReview] = useState<any>({
     title: '',
     description: '',
     deadline: '',

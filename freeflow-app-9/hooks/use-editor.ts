@@ -150,9 +150,7 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
   }
 }
 
-export function useEditor(
-  initialBlocks: ContentBlock[] = [],
-  onSave?: (blocks: ContentBlock[]) => void
+export function useEditor(initialBlocks: ContentBlock[] = [], onSave?: (blocks: ContentBlock[]) => void
 ) {
   const [state, dispatch] = useReducer(editorReducer, {
     ...initialState,

@@ -24,18 +24,12 @@ interface ImageViewerProps {
 }
 
 export function ImageViewer({ 
-  src, 
-  alt, 
-  comments = [], 
-  onCommentAdd, 
-  onCommentEdit, 
-  onCommentDelete, 
-  className = "" 
+  src: unknown, alt: unknown, comments = []: unknown, onCommentAdd: unknown, onCommentEdit: unknown, onCommentDelete: unknown, className = "" 
 }: ImageViewerProps) {
-  const [showCommentDialog, setShowCommentDialog] = useState(false)
+  const [showCommentDialog, setShowCommentDialog] = useState<any>(false)
   const [clickPosition, setClickPosition] = useState<{ x: number; y: number } | null>(null)
   const [editingComment, setEditingComment] = useState<Comment | null>(null)
-  const [newComment, setNewComment] = useState('')
+  const [newComment, setNewComment] = useState<any>('')
   const [selectedPriority, setSelectedPriority] = useState<'low' | 'medium' | 'high' | 'critical'>('medium')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const imageRef =<HTMLDivElement>(null)

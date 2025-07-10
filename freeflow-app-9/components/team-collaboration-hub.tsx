@@ -65,7 +65,7 @@ interface Project {
   name: string
   description: string
   status: "active" | "completed" | "archived"
-  members: any[]
+  members: unknown[]
   tasks: number
   progress: number
   dueDate: string
@@ -265,7 +265,7 @@ const initialState: TeamState = {
 
 export function TeamCollaborationHub() {
   const [state, dispatch] = useReducer(teamReducer, initialState)
-  const [newMember, setNewMember] = useState({ name: '', email: '', title: '' })
+  const [newMember, setNewMember] = useState<any>({ name: '', email: '', title: '' })
 
   const teamStats: TeamStats = {
     totalMembers: state.members.length,

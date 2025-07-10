@@ -10,7 +10,7 @@ import {
   Video, 
   Upload, 
   Search,
-  Filter,
+  _Filter,
   Grid,
   List,
   Eye,
@@ -19,16 +19,16 @@ import {
   Heart,
   MessageCircle,
   Folder,
-  Calendar,
-  User,
+  _Calendar,
+  _User,
   Star,
   Play
 } from 'lucide-react'
 
 export default function GalleryPage() {
-  const [viewMode, setViewMode] = useState('grid')
-  const [selectedCategory, setSelectedCategory] = useState('all')
-  const [searchTerm, setSearchTerm] = useState('')
+  const [viewMode, setViewMode] = useState<any>('grid')
+  const [selectedCategory, setSelectedCategory] = useState<any>('all')
+  const [searchTerm, setSearchTerm] = useState<any>('')
 
   // Mock gallery data
   const galleryItems = [

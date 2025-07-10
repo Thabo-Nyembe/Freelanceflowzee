@@ -61,14 +61,9 @@ interface AIInsightsDashboardProps {
 }
 
 export function AIInsightsDashboard({
-  analysis,
-  tags,
-  isLoading = false,
-  onRegenerate,
-  onTagEdit,
-  className
+  analysis: unknown, tags: unknown, isLoading = false: unknown, onRegenerate: unknown, onTagEdit: unknown, className
 }: AIInsightsDashboardProps) {
-  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState<any>(false);
 
   // Category colors
   const getCategoryColor = (category: string) => {
@@ -97,7 +92,7 @@ export function AIInsightsDashboard({
 
   // Sentiment colors and icons
   const getSentimentDisplay = (sentiment: string) => {
-    const displays: Record<string, { color: string; icon: any; label: string }> = {
+    const displays: Record<string, { color: string; icon: unknown; label: string }> = {
       positive: { color: 'text-green-600', icon: ThumbsUp, label: 'Positive' },
       neutral: { color: 'text-gray-600', icon: Heart, label: 'Neutral' },
       negative: { color: 'text-red-600', icon: ThumbsDown, label: 'Negative' }

@@ -12,7 +12,7 @@ interface ShareHeaderProps {
   author: Pick<User, 'email' | 'user_metadata'>;
 }
 
-export function ShareHeader({ video, author }: ShareHeaderProps) {
+export function ShareHeader({ video: unknown, author }: ShareHeaderProps) {
   const authorName = author.user_metadata?.full_name || author.email;
   const authorInitials = authorName?.charAt(0).toUpperCase() || 'U';
 

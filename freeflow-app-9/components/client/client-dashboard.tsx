@@ -1,4 +1,4 @@
-// import {} from 'react'
+// 
 import { useSupabase } from '../../__mocks__/supabase-provider'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -19,10 +19,10 @@ interface Project {
 
 const ClientDashboard = () => {
   const { supabase } = useSupabase()
-  const [statusFilter, setStatusFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState<any>('all')
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
-  const [showNewProjectDialog, setShowNewProjectDialog] = useState(false)
-  const [successMessage, setSuccessMessage] = useState('')
+  const [showNewProjectDialog, setShowNewProjectDialog] = useState<any>(false)
+  const [successMessage, setSuccessMessage] = useState<any>('')
   const [projects, setProjects] = useState<Project[]>([
     {
       id: 1,
@@ -44,7 +44,7 @@ const ClientDashboard = () => {
     }
   ])
 
-  const [newProject, setNewProject] = useState({
+  const [newProject, setNewProject] = useState<any>({
     title: '',
     description: '',
     budget: ''

@@ -24,9 +24,9 @@ import {
 } from 'lucide-react'
 
 export default function ProjectImportPage() {
-  const [importStatus, setImportStatus] = useState('idle') // idle, importing, success, error
-  const [selectedFiles, setSelectedFiles] = useState([])
-  const [importProgress, setImportProgress] = useState(0)
+  const [importStatus, setImportStatus] = useState<any>('idle') // idle, importing, success, error
+  const [selectedFiles, setSelectedFiles] = useState<any>([])
+  const [importProgress, setImportProgress] = useState<any>(0)
 
   // Mock import history data
   const importHistory = [
@@ -117,7 +117,7 @@ export default function ProjectImportPage() {
     }
   ]
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: unknown) => {
     switch (status) {
       case 'success': return 'bg-green-100 text-green-800'
       case 'failed': return 'bg-red-100 text-red-800'
@@ -126,7 +126,7 @@ export default function ProjectImportPage() {
     }
   }
 
-  const getStatusIcon = (status) => {
+  const getStatusIcon = (status: unknown) => {
     switch (status) {
       case 'success': return <CheckCircle className="h-4 w-4" />
       case 'failed': return <XCircle className="h-4 w-4" />
@@ -135,7 +135,7 @@ export default function ProjectImportPage() {
     }
   }
 
-  const handleFileUpload = (event) => {
+  const handleFileUpload = (event: unknown) => {
     const files = Array.from(event.target.files)
     setSelectedFiles(files)
   }

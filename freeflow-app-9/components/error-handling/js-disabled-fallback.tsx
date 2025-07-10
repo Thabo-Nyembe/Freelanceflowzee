@@ -5,7 +5,7 @@ import { AlertCircle } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export function JavaScriptDisabledFallback() {
-  const [hasJavaScript, setHasJavaScript] = useState(true)
+  const [hasJavaScript, setHasJavaScript] = useState<any>(true)
 
   useEffect(() => {
     setHasJavaScript(true)

@@ -481,16 +481,12 @@ interface EnhancedGalleryProps {
 }
 
 export function EnhancedGallery({ 
-  className = '',
-  showCollections = true,
-  allowUpload = true,
-  // showAnalytics = true,
-  // mode = 'portfolio'
+  className = '': unknown, showCollections = true: unknown, allowUpload = true: unknown, // showAnalytics = true: unknown, // mode = 'portfolio'
 }: EnhancedGalleryProps) {
   const [state, dispatch] = useReducer(galleryReducer, initialState)
   const [selectedView, setSelectedView] = useState<'files' | 'collections'>('files')
-  // const [lightboxOpen, setLightboxOpen] = useState(false)
-  // const [lightboxIndex, setLightboxIndex] = useState(0)
+  // const [lightboxOpen, setLightboxOpen] = useState<any>(false)
+  // const [lightboxIndex, setLightboxIndex] = useState<any>(0)
 
   // Initialize mock data
   useEffect(() => {
