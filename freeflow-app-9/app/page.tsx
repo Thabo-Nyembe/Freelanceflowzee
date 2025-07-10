@@ -113,6 +113,29 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <div className="min-h-screen kazi-bg-light dark:kazi-bg-dark">
+      {/* Navigation Header */}
+      <nav className="fixed top-0 w-full z-50 glass-nav">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-3">
+              <img 
+                src="/kazi-brand/logo.svg" 
+                alt="KAZI" 
+                className="h-8 w-auto"
+              />
+              <span className="text-xl font-bold kazi-text-primary kazi-headline">KAZI</span>
+            </div>
+            <div className="hidden md:flex items-center space-x-8">
+              <Link href="/features" className="nav-item kazi-body-medium">Features</Link>
+              <Link href="/pricing" className="nav-item kazi-body-medium">Pricing</Link>
+              <Link href="/demo-features" className="nav-item kazi-body-medium">Demo</Link>
+              <Link href="/login" className="btn-kazi-secondary px-4 py-2">Login</Link>
+              <Link href="/signup" className="btn-kazi-primary px-4 py-2">Sign Up</Link>
+            </div>
+          </div>
+        </div>
+      </nav>
+
       {/* JSON-LD Structured Data */}
       <script
         type="application/ld+json"
@@ -146,7 +169,7 @@ export default function Home() {
       />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden kazi-fade-in">
+      <section className="relative overflow-hidden kazi-fade-in pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
             <div className="inline-flex items-center px-4 py-2 bg-violet-bolt/10 dark:bg-violet-bolt/20 rounded-full kazi-text-primary text-sm font-medium mb-8 kazi-hover-scale">
@@ -163,14 +186,18 @@ export default function Home() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="btn-kazi-primary kazi-ripple kazi-focus">
-                Start Free Trial
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </button>
-              <button className="btn-kazi-secondary kazi-ripple kazi-focus">
-                <Play className="mr-2 w-5 h-5" />
-                Watch Demo
-              </button>
+              <Link href="/login">
+                <button className="btn-kazi-primary kazi-ripple kazi-focus">
+                  Start Free Trial
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </button>
+              </Link>
+              <Link href="/dashboard/video-studio">
+                <button className="btn-kazi-secondary kazi-ripple kazi-focus">
+                  <Play className="mr-2 w-5 h-5" />
+                  Watch Demo
+                </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -338,10 +365,12 @@ export default function Home() {
           <p className="text-xl mb-8 max-w-2xl mx-auto kazi-body" style={{ color: '#F8F7F4', opacity: 0.9 }}>
             Join thousands of freelancers and agencies who've streamlined their work with Kazi
           </p>
-          <button className="bg-soft-ivory kazi-text-primary hover:bg-white px-8 py-4 text-lg font-semibold rounded-lg kazi-ripple kazi-focus kazi-hover-scale transition-all duration-300">
-            Start Your Free Trial
-            <ArrowRight className="ml-2 w-5 h-5 inline" />
-          </button>
+          <Link href="/login">
+            <button className="bg-soft-ivory kazi-text-primary hover:bg-white px-8 py-4 text-lg font-semibold rounded-lg kazi-ripple kazi-focus kazi-hover-scale transition-all duration-300">
+              Start Your Free Trial
+              <ArrowRight className="ml-2 w-5 h-5 inline" />
+            </button>
+          </Link>
         </div>
       </section>
 
