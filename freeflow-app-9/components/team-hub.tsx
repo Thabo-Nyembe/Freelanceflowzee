@@ -45,7 +45,7 @@ interface TeamHubProps {
 }
 
 export default function TeamHub({
-  activities: unknown, stats: unknown, teamMembers: unknown, onActivityClick: unknown, onMemberAction: unknown, }: TeamHubProps) {
+  activities, stats, teamMembers, onActivityClick, onMemberAction, }: TeamHubProps) {
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

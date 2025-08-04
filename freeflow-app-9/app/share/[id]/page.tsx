@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import MuxVideoPlayer from '@/components/video/mux-video-player';
 import { VideoStatusIndicator } from '@/components/video/video-status-indicator';
+import { VideoShareActions } from '@/components/video/video-share-actions';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -93,7 +94,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
- function PublicVideoPage({ params }: PageProps) {
+export default async function PublicVideoPage({ params }: PageProps) {
   const { id } = await params;
   const supabase = await createClient();
 
@@ -317,59 +318,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
                   Share Video
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => {
-                    navigator.clipboard.writeText(window.location.href);
-                  }}
-                >
-                  Copy Link
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => {
-                    const embedCode = `<iframe src="${process.env.NEXT_PUBLIC_APP_URL}/embed/${video.id}" width="640" height="360" frameborder="0" allowfullscreen></iframe>`;
-                    navigator.clipboard.writeText(embedCode);
-                  }}
-                >
-                  Copy Embed Code
-                </Button>
-
-                <div className="flex gap-2">
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    className="flex-1"
-                    asChild
-                  >
-                    <a 
-                      href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(video.title || 'Check out this video')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Twitter
-                    </a>
-                  </Button>
-                  
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    className="flex-1"
-                    asChild
-                  >
-                    <a 
-                      href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      LinkedIn
-                    </a>
-                  </Button>
-                </div>
+              <CardContent>
+                <VideoShareActions
+                  videoId={video.id}
+                  currentUrl={`${process.env.NEXT_PUBLIC_APP_URL}/share/${video.id}`}
+                  embedUrl={`${process.env.NEXT_PUBLIC_APP_URL}/embed/${video.id}`}
+                  title={video.title || 'Untitled Video'}
+                />
               </CardContent>
             </Card>
 

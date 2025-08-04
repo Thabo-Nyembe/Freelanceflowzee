@@ -138,7 +138,7 @@ export const FreelancerDashboard = () => {
 };
 
 // Projects List Component
-const ProjectsList = ({ onProjectSelect }: { onProjectSelect: (project: unknown) => void }) => {
+const ProjectsList = ({ onProjectSelect }: { onProjectSelect: (project) => void }) => {
   const supabase = useSupabase();
   const [projects, setProjects] = React.useState<any[]>([]);
 

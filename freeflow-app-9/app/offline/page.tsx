@@ -1,6 +1,11 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { WifiOff, RefreshCw, FileText } from 'lucide-react'
+import { WifiOff, RefreshCw } from 'lucide-react'
+
+// Force static generation for this page
+export const dynamic = 'force-static'
 
 export default function OfflinePage() {
   return (

@@ -372,7 +372,7 @@ interface BlockBasedContentEditorProps {
     avatar: string
   }
   onSave?: (blocks: ContentBlock[]) => void
-  onShare?: (shareData: unknown) => void
+  onShare?: (shareData) => void
   className?: string
 }
 

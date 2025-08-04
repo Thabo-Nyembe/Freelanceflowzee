@@ -117,9 +117,9 @@ const tips: Tip[] = [
 ]
 
 export function SmartRecordingTips({
-  isRecording: unknown, audioLevel: unknown, noiseLevel: unknown, contentQuality: unknown, recordingDuration
+  isRecording, audioLevel, noiseLevel, contentQuality, recordingDuration
 }: SmartRecordingTipsProps) {
-  const [activeTips, setActiveTips] =<Tip[]>([])
+  const [activeTips, setActiveTips] = useState<Tip[]>([])
 
   // Update active tips based on current conditions
   useEffect(() => {

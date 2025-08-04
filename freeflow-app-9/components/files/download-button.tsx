@@ -14,7 +14,7 @@ interface DownloadButtonProps {
 }
 
 export function DownloadButton({
-  fileUrl: unknown, fileName: unknown, fileSize: unknown, onDownloadComplete
+  fileUrl, fileName, fileSize, onDownloadComplete
 }: DownloadButtonProps) {
   const [downloading, setDownloading] = useState<any>(false)
   const [progress, setProgress] = useState<any>(0)

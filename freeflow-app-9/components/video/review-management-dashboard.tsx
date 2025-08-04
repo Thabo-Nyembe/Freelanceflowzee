@@ -64,7 +64,7 @@ export interface ReviewManagementDashboardProps {
 }
 
 export default function ReviewManagementDashboard({
-  reviews: unknown, templates: unknown, stats: unknown, onCreateReview: unknown, onUpdateReview: unknown, onDeleteReview: unknown, className
+  reviews, templates, stats, onCreateReview, onUpdateReview, onDeleteReview, className
 }: ReviewManagementDashboardProps) {
   const [searchQuery, setSearchQuery] = useState<any>('');
   const [statusFilter, setStatusFilter] = useState<string>('all');

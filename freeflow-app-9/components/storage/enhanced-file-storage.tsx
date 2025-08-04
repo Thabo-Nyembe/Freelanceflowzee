@@ -414,7 +414,7 @@ interface EnhancedFileStorageProps {
 }
 
 export function EnhancedFileStorage({ 
-  showAnalytics = true: unknown, allowUpload = true: unknown, mode = 'personal': unknown, className = ''
+  showAnalytics = true, allowUpload = true, mode = 'personal', className = ''
 }: EnhancedFileStorageProps) {
   const [state, dispatch] = useReducer(fileStorageReducer, initialState)
   const [dragOver, setDragOver] = useState<any>(false)

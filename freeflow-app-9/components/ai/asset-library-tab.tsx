@@ -39,7 +39,7 @@ const getAssetIcon = (type: Asset['type']) => {
   }
 }
 
-export function AssetLibraryTab({ assets: unknown, onExportAll }: AssetLibraryTabProps) {
+export function AssetLibraryTab({ assets, onExportAll }: AssetLibraryTabProps) {
   const [searchQuery, setSearchQuery] = useState<any>('')
 
   const filteredAssets = assets.filter(asset =>

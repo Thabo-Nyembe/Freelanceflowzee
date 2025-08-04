@@ -39,7 +39,7 @@ export const AccessibleButton = forwardRef(({
 AccessibleButton.displayName = 'AccessibleButton'
 
 // Accessible image with proper alt text
-export function AccessibleImage({ src: unknown, alt: unknown, decorative = false: unknown, ...props }) {
+export function AccessibleImage({ src, alt, decorative = false, ...props }) {
   return (
     <img
       src={src}
@@ -52,7 +52,7 @@ export function AccessibleImage({ src: unknown, alt: unknown, decorative = false
 
 // Accessible form input with proper labeling
 export function AccessibleInput({ 
-  label: unknown, id: unknown, error: unknown, required = false: unknown, description: unknown, ...props 
+  label, id, error, required = false, description, ...props 
 }) {
   const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`
   const descriptionId = description ? `${inputId}-description` : undefined

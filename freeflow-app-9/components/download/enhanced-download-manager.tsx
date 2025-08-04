@@ -201,7 +201,7 @@ interface EnhancedDownloadManagerProps {
 }
 
 export function EnhancedDownloadManager({
-  downloads: initialDownloads = [], onDownloadComplete: unknown, onShare: unknown, onEscrowPayment: unknown, enableAnalytics = true: unknown, enableEscrow = true: unknown, brandName = 'KAZI'
+  downloads: initialDownloads = [], onDownloadComplete, onShare, onEscrowPayment, enableAnalytics = true, enableEscrow = true, brandName = 'KAZI'
 }: EnhancedDownloadManagerProps) {
 
   // Context7 Pattern: Central State Management
@@ -650,7 +650,7 @@ export function EnhancedDownloadManager({
             <div className= "flex items-center gap-2">
               <Select 
                 value={state.filter} 
-                onValueChange={(value: unknown) => dispatch({ type: 'SET_FILTER', payload: value })}
+                onValueChange={(value) => dispatch({ type: 'SET_FILTER', payload: value })}
               >
                 <SelectTrigger className= "w-40">
                   <SelectValue />

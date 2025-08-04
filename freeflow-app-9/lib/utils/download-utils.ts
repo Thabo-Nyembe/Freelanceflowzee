@@ -104,7 +104,7 @@ export async function downloadFiles(files: DownloadableFile[], onProgress?: (com
 /**
  * Enhanced document generation with support for different types
  */
-export async function downloadDocument(type: string, data: Record<string, unknown>: unknown, filename: string): Promise<void> {
+export async function downloadDocument(type: string, data: Record<string, unknown>, filename: string): Promise<void> {
   try {
     const response = await fetch(`/api/documents/generate`, {
       method: 'POST',
@@ -154,7 +154,7 @@ export async function downloadReport(type: 'csv' | 'json' | 'pdf', endpoint: str
 /**
  * Enhanced invoice PDF download with receipt generation
  */
-export async function downloadInvoice(invoiceId: string, invoiceData: Record<string, unknown>: unknown): Promise<void> {
+export async function downloadInvoice(invoiceId: string, invoiceData: Record<string, unknown>): Promise<void> {
   try {
     const response = await fetch('/api/invoices/generate-pdf', {
       method: 'POST',

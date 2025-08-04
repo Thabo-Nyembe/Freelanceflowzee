@@ -1,6 +1,6 @@
 'use client'
 
-import { useState  } from 'react'
+import { useState, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { VideoRecordingSystem } from './video-recording-system'
 import { AIVideoAnalysis } from './ai/ai-video-analysis'
@@ -54,7 +54,7 @@ interface VideoInsightData {
 }
 
 export function AIEnhancedVideoRecording({
-  projectId = 'default': unknown, onSave
+  projectId = 'default', onSave
 }: AIEnhancedVideoRecordingProps) {
   const [isRecording, setIsRecording] = useState<any>(false)
   const [videoId, setVideoId] = useState<string | null>(null)
@@ -71,7 +71,7 @@ export function AIEnhancedVideoRecording({
   const [isProcessing, setIsProcessing] = useState<any>(false)
   const [realtimeInsights, setRealtimeInsights] = useState<string[]>([])
   const [highlights, setHighlights] = useState<HighlightSegment[]>([])
-  const videoRef =<HTMLVideoElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   const {
     audioLevel: aiAudioLevel = 0,

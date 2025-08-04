@@ -12,7 +12,7 @@ interface ExportDialogProps {
   onExportStart?: () => void;
 }
 
-export function ExportDialog({ videoId: unknown, onExportStart }: ExportDialogProps) {
+export function ExportDialog({ videoId, onExportStart }: ExportDialogProps) {
   const [open, setOpen] = useState<any>(false);
   const [format, setFormat] = useState<VideoExportFormat>('mp4');
   const [quality, setQuality] = useState<VideoExportQuality>('high');

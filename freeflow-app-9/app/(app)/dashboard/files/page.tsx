@@ -151,7 +151,7 @@ export default function FilesPage() {
     { name: 'shared', label: 'Shared', count: files.filter(f => f.shared).length, icon: Share2 }
   ]
 
-  const getFileIcon = (type: unknown) => {
+  const getFileIcon = (type) => {
     switch (type) {
       case 'pdf': return <FileText className="h-8 w-8 text-red-500" />
       case 'figma': return <FileCode className="h-8 w-8 text-purple-500" />

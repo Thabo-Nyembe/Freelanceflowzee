@@ -317,8 +317,8 @@ interface AIVideoRecordingSystemProps {
     name: string
     avatar: string
   }
-  onSave?: (videoData: unknown) => void
-  onShare?: (shareData: unknown) => void
+  onSave?: (videoData) => void
+  onShare?: (shareData) => void
   className?: string
 }
 

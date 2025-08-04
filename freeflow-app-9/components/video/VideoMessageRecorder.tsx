@@ -13,7 +13,7 @@ interface VideoMessageRecorderProps {
 }
 
 export default function VideoMessageRecorder({ 
-  onRecordingComplete: unknown, assetId: unknown, className = '' 
+  onRecordingComplete, assetId, className = '' 
 }: VideoMessageRecorderProps) {
   const [isRecording, setIsRecording] = useState<any>(false);
   const [isProcessing, setIsProcessing] = useState<any>(false);
@@ -60,7 +60,7 @@ export default function VideoMessageRecorder({
       setComposer(newComposer);
       
       // Set up event listeners
-      newComposer.addEventListener('upload.success', (event: unknown) => {
+      newComposer.addEventListener('upload.success', (event) => {
         const videoId = event.detail.videoId;
         const videoUrl = `https://vod.api.video/vod/${videoId}/hls/manifest.m3u8`;
         
@@ -79,7 +79,7 @@ export default function VideoMessageRecorder({
         }
       });
       
-      newComposer.addEventListener('upload.error', (event: unknown) => {
+      newComposer.addEventListener('upload.error', (event) => {
         console.error('Upload error:', event.detail);
         setError('Failed to upload recording');
         setIsProcessing(false);

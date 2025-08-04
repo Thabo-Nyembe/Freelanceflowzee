@@ -161,9 +161,9 @@ function AnalyticsContent({
   );
 }
 
- function VideoAnalyticsPage({
-  params: unknown, }: {
-  params: { id: string };
+ export default async function VideoAnalyticsPage({
+ params, }: {
+ params: { id: string };
 }) {
   const data = await getVideoAnalytics(params.id);
   

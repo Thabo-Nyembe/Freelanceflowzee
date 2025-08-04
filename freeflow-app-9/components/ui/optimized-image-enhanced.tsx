@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, memo } from 'react'
+import React, { useState, useEffect, memo, useRef } from 'react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
@@ -70,8 +70,8 @@ const OptimizedImageEnhanced = memo<OptimizedImageProps>(({
   const [hasError, setHasError] = useState<any>(false)
   const [currentSrc, setCurrentSrc] = useState<any>(src)
   const [isInView, setIsInView] = useState<any>(false)
-  const imgRef =<HTMLDivElement>(null)
-  const observerRef =<IntersectionObserver | null>(null)
+  const imgRef = useRef<HTMLDivElement>(null)
+  const observerRef = useRef<IntersectionObserver | null>(null)
 
   // Intersection Observer for lazy loading
   useEffect(() => {
@@ -358,7 +358,7 @@ export const ImageAnalyzer = {
 // Example helper function to dynamically generate image sources
 // This might be used to switch between different CDN providers or image services
 // function buildSrc(//   basePath: string, //   {
-//     width: unknown, //     quality: unknown, //     format: unknown, //   }: {
+//     width, //     quality, //     format, //   }: {
 //     width: number
 //     quality?: number
 //     format?: 'webp' | 'avif' | 'jpeg'

@@ -77,7 +77,7 @@ export interface VideoEffect {
 }
 
 export default function VideoEditor({
-  video: unknown, onSave: unknown, onExport: unknown, onShare: unknown, className
+  video, onSave, onExport, onShare, className
 }: VideoEditorProps) {
   const [activeTab, setActiveTab] = useState<any>('timeline');
   const [edits, setEdits] = useState<VideoEdit[]>([]);

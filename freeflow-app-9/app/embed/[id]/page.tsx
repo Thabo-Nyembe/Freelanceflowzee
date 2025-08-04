@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
- function EmbedVideoPage({ params }: PageProps) {
+export default async function EmbedVideoPage({ params }: PageProps) {
   const { id } = await params;
   const supabase = await createClient();
 

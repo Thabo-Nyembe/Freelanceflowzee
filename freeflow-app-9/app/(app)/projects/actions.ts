@@ -36,12 +36,12 @@ export async function getProjectById(id: string) {
   return null
 }
 
-export async function createProject(data: unknown) {
+export async function createProject(data) {
   // Mock implementation for now
   return { id: Date.now().toString(), ...data }
 }
 
-export async function updateProject(id: string, data: unknown) {
+export async function updateProject(id: string, data) {
   // Mock implementation for now
   return { id, ...data }
 }

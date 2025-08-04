@@ -6,7 +6,7 @@
  * Integrated with FreeFlow&apos;s video upload infrastructure
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -40,13 +40,13 @@ import { formatDuration } from '@/lib/video/config';
 
 interface ScreenRecorderProps {
   projectId?: string;
-  onRecordingComplete?: (videoBlob: Blob, metadata: unknown) => void;
+  onRecordingComplete?: (videoBlob: Blob, metadata) => void;
   onUploadComplete?: (videoId: string) => void;
   className?: string;
 }
 
 export default function ScreenRecorder({ 
-  projectId: unknown, onRecordingComplete: unknown, onUploadComplete: unknown, className 
+  projectId, onRecordingComplete, onUploadComplete, className 
 }: ScreenRecorderProps) {
   // Recording options
   const [options, setOptions] = useState<RecordingOptions>({
@@ -67,7 +67,7 @@ export default function ScreenRecorder({
   const [isUploading, setIsUploading] = useState<any>(false);
 
   // Preview refs
-  const previewRef =<HTMLVideoElement>(null);
+  const previewRef = useRef<HTMLVideoElement>(null);
 
   // Use the screen recorder hook
   const {
@@ -202,7 +202,7 @@ export default function ScreenRecorder({
                 <Label htmlFor="quality">Quality</Label>
                 <Select 
                   value={options.video.quality} 
-                  onValueChange={(value: unknown) => setOptions(prev => ({ 
+                  onValueChange={(value) => setOptions(prev => ({ 
                     ...prev, 
                     video: { ...prev.video, quality: value }
                   }))}
@@ -224,7 +224,7 @@ export default function ScreenRecorder({
                 <Label htmlFor="source">Source</Label>
                 <Select 
                   value={options.video.mediaSource} 
-                  onValueChange={(value: unknown) => setOptions(prev => ({ 
+                  onValueChange={(value) => setOptions(prev => ({ 
                     ...prev, 
                     video: { ...prev.video, mediaSource: value }
                   }))}

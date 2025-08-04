@@ -180,7 +180,7 @@ interface ContactFormState {
 }
 
 export function InteractiveContactSystem({
-  variant = 'full': unknown, showMethods = true: unknown, showForm = true: unknown, _showScheduler = true: unknown, className = ''
+  variant = 'full', showMethods = true, showForm = true, _showScheduler = true, className = ''
 }: InteractiveContactSystemProps) {
   const [state, dispatch] = useReducer(contactReducer, initialState);
   const [localTime, setLocalTime] = useState<any>('');
@@ -261,7 +261,7 @@ export function InteractiveContactSystem({
 
   // Context7 Pattern: Contact method components
   const ContactMethod = ({ 
-    icon: Icon, title: unknown, value: unknown, action: unknown, description: unknown, badge 
+    icon: Icon, title, value, action, description, badge 
   }: {
     icon: React.ElementType;
     title: string;

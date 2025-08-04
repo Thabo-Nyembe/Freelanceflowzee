@@ -24,11 +24,11 @@ export interface RecordingState {
 }
 
 interface UseScreenRecorderProps {
-  onRecordingComplete?: (videoBlob: Blob, metadata: unknown) => void;
+  onRecordingComplete?: (videoBlob: Blob, metadata) => void;
   onUploadComplete?: (videoId: string) => void;
 }
 
-export function useScreenRecorder({ onRecordingComplete: unknown, onUploadComplete }: UseScreenRecorderProps = {}) {
+export function useScreenRecorder({ onRecordingComplete, onUploadComplete }: UseScreenRecorderProps = {}) {
   // Recording state
   const [recordingState, setRecordingState] = useState<RecordingState>({
     status: 'idle',

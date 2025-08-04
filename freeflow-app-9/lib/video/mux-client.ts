@@ -278,7 +278,7 @@ export const verifyWebhookSignature = (
 };
 
 // Process webhook events
-export const processWebhookEvent = (event: unknown) => {
+export const processWebhookEvent = (event) => {
   const { type, data } = event;
   
   switch (type) {

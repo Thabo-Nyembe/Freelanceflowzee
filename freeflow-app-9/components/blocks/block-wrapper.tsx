@@ -24,7 +24,7 @@ interface BlockWrapperProps {
 }
 
 export function BlockWrapper({
-  block: unknown, onUpdate: unknown, onDelete: unknown, isSelected: unknown, className
+  block, onUpdate, onDelete, isSelected, className
 }: BlockWrapperProps) {
   const {
     attributes,

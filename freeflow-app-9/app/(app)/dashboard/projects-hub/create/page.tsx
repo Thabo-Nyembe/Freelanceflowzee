@@ -113,11 +113,11 @@ export default function CreateProjectPage() {
     { value: 'urgent', label: 'Urgent', color: 'bg-red-100 text-red-800' }
   ]
 
-  const handleInputChange = (field: unknown, value: unknown) => {
+  const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleTemplateSelect = (template: unknown) => {
+  const handleTemplateSelect = (template) => {
     setSelectedTemplate(template)
     setProjectType(template.id)
     setFormData(prev => ({ 

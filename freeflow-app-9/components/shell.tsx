@@ -9,7 +9,7 @@ interface ShellProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function Shell({
-  children: unknown, layout = 'default': unknown, className: unknown, ...props
+  children, layout = 'default', className, ...props
 }: ShellProps) {
   return (
     <div

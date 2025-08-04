@@ -23,7 +23,7 @@ interface TextBlockProps {
 }
 
 export function TextBlock({
-  id: unknown, content: unknown, properties: unknown, onUpdate: unknown, isSelected
+  id, content, properties, onUpdate, isSelected
 }: TextBlockProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 

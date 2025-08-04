@@ -253,7 +253,7 @@ interface EnhancedButtonProps {
 }
 
 export function EnhancedButton({ 
-  id: unknown, children: unknown, variant = 'default': unknown, size = 'default': unknown, href: unknown, onClick: unknown, disabled = false: unknown, loading = false: unknown, className = '': unknown, testId: unknown, trackingData: unknown, external = false: unknown, download
+  id, children, variant = 'default', size = 'default', href, onClick, disabled = false, loading = false, className = '', testId, trackingData, external = false, download
 }: EnhancedButtonProps) {
   const [state, dispatch] = useReducer(interactiveReducer, initialState)
   const router = useRouter()
@@ -390,7 +390,7 @@ interface EnhancedNavigationProps {
 }
 
 export function EnhancedNavigation({
-  routes: unknown, variant = 'header': unknown, activeRoute: unknown, // onRouteChange: unknown, className = ''
+  routes, variant = 'header', activeRoute, // onRouteChange, className = ''
 }: EnhancedNavigationProps) {
   const pathname = usePathname()
   // const [state, dispatch] = useReducer(interactiveReducer, initialState)
@@ -516,7 +516,7 @@ interface EnhancedCardProps {
 }
 
 export function EnhancedCard({
-  id: unknown, title: unknown, description: unknown, children: unknown, href: unknown, onClick: unknown, actions = []: unknown, className = '': unknown, testId: unknown, interactive = true: unknown, badge: unknown, status: unknown, }: EnhancedCardProps) {
+  id, title, description, children, href, onClick, actions = [], className = '', testId, interactive = true, badge, status, }: EnhancedCardProps) {
   const router = useRouter()
 
   const handleCardClick = (e: React.MouseEvent) => {
@@ -605,7 +605,7 @@ interface EnhancedInteractiveSystemProps {
 }
 
 export function EnhancedInteractiveSystem({ 
-  children: unknown, enableTracking = true: unknown, enableToasts = true: unknown, className = ''
+  children, enableTracking = true, enableToasts = true, className = ''
 }: EnhancedInteractiveSystemProps) {
   const [state, dispatch] = useReducer(interactiveReducer, initialState)
   

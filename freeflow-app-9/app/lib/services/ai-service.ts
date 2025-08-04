@@ -110,7 +110,7 @@ export class AIService {
     }
   }
 
-  private handleError(error: unknown, context: string, provider?: string): never {
+  private handleError(error, context: string, provider?: string): never {
     console.error(`${context} error:`, error)
 
     if (typeof error === 'object' && error !== null) {
@@ -168,7 +168,7 @@ export class AIService {
         .getPublicUrl(data!.path)
         
       return publicUrl
-    } catch (error: unknown) {
+    } catch (error) {
       this.handleError(error, 'File upload', 'supabase-storage')
     }
   }
@@ -228,7 +228,7 @@ export class AIService {
                 throw new Error('No image URL returned from DALL-E')
               }
               output = imageUrl
-            } catch (error: unknown) {
+            } catch (error) {
               this.handleError(error, 'DALL-E image generation', 'openai')
             }
           } else if (settings.model === 'stable-diffusion-xl' && this.replicate) {
@@ -253,7 +253,7 @@ export class AIService {
                   `Unexpected image generation output format from Replicate: ${JSON.stringify(response)}`, 'replicate'
                 )
               }
-            } catch (error: unknown) {
+            } catch (error) {
               this.handleError(error, 'Stable Diffusion image generation', 'replicate')
             }
           }
@@ -278,7 +278,7 @@ export class AIService {
               if (response.content[0].type === 'text') {
                 output = response.content[0].text
               }
-            } catch (error: unknown) {
+            } catch (error) {
               this.handleError(error, 'Anthropic code generation', 'anthropic')
             }
           } else if (settings.model.startsWith('gpt') && this.openai) {
@@ -297,7 +297,7 @@ export class AIService {
                 ],
               })
               output = response.choices[0].message?.content || ''
-            } catch (error: unknown) {
+            } catch (error) {
               this.handleError(error, 'OpenAI code generation', 'openai')
             }
           } else if (settings.model.startsWith('gemini') && this.gemini) {
@@ -306,7 +306,7 @@ export class AIService {
               const result = await model.generateContent(prompt)
               const response = await result.response
               output = response.text()
-            } catch (error: unknown) {
+            } catch (error) {
               this.handleError(error, 'Gemini code generation', 'gemini')
             }
           }
@@ -326,7 +326,7 @@ export class AIService {
               const result = await model.generateContent(prompt)
               const response = await result.response
               output = response.text()
-            } catch (error: unknown) {
+            } catch (error) {
               this.handleError(error, 'Gemini text generation', 'gemini')
             }
           } else if (settings.model.startsWith('claude') && this.anthropic) {
@@ -340,7 +340,7 @@ export class AIService {
               if (contentBlock.type === 'text') {
                 output = contentBlock.text;
               }
-            } catch (error: unknown) {
+            } catch (error) {
               this.handleError(error, 'Text generation', 'anthropic')
             }
           } else if (this.openai) {
@@ -351,7 +351,7 @@ export class AIService {
                 temperature: settings.creativity,
               })
               output = response.choices[0].message?.content || ''
-            } catch (error: unknown) {
+            } catch (error) {
               this.handleError(error, 'Text generation', 'openai')
             }
           }
@@ -382,7 +382,7 @@ export class AIService {
                 `Unexpected audio generation output format from Replicate: ${JSON.stringify(response)}`, 'replicate'
               )
             }
-          } catch (error: unknown) {
+          } catch (error) {
             this.handleError(error, 'Audio generation', 'replicate')
           }
           break
@@ -417,7 +417,7 @@ export class AIService {
                 'replicate'
               )
             }
-          } catch (error: unknown) {
+          } catch (error) {
             this.handleError(error, 'Video generation', 'replicate')
           }
           break
@@ -442,7 +442,7 @@ export class AIService {
         )
       }
       return updatedGeneration
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Error in AI generation: ', error)
       
       // Update record with error status
@@ -607,7 +607,7 @@ Provide general analysis including:
             ]
           });
           return response.choices[0].message?.content || ''
-        } catch (error: unknown) {
+        } catch (error) {
           this.handleError(error, 'OpenAI analysis', 'openai')
         }
       } else if (this.anthropic) {
@@ -626,11 +626,11 @@ Provide general analysis including:
             return contentBlock.text;
           }
           return '';
-        } catch (error: unknown) {
+        } catch (error) {
           this.handleError(error, 'Anthropic analysis', 'anthropic')
         }
       }
-    } catch (error: unknown) {
+    } catch (error) {
       this.handleError(error, 'Content analysis', 'AI Provider');
     }
 
@@ -726,7 +726,7 @@ Provide general analysis including:
         )
       }
       return updatedAnalysis;
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Error in file analysis: ', error)
       
       // Update record with error status

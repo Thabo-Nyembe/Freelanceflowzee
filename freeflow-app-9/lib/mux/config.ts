@@ -53,7 +53,7 @@ export const UPLOAD_SETTINGS = {
 };
 
 // Helper functions
-export async function createMuxAsset(url: string, options?: unknown) {
+export async function createMuxAsset(url: string, options?) {
   try {
     const asset = await mux.video.assets.create({
       input: url,

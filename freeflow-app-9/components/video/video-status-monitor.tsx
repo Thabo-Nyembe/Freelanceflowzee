@@ -40,7 +40,7 @@ interface ProcessingStep {
 }
 
 export function VideoStatusMonitor({ 
-  videoId: unknown, showDebugInfo = false: unknown, autoStart = true: unknown, className 
+  videoId, showDebugInfo = false, autoStart = true, className 
 }: VideoStatusMonitorProps) {
   const {
     status,

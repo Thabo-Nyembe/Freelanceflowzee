@@ -13,7 +13,7 @@ interface VideoSearchProps {
 }
 
 export function VideoSearch({
-  onSearch: unknown, className: unknown, placeholder = 'Search videos...', initialValue = ''
+  onSearch, className, placeholder = 'Search videos...', initialValue = ''
 }: VideoSearchProps) {
   const [query, setQuery] = useState<any>(initialValue);
   const [isFocused, setIsFocused] = useState<any>(false);

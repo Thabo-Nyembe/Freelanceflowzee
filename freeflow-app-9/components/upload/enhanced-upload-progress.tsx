@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useReducer, useCallback } from 'react'
+import React, { useReducer, useCallback, useRef } from 'react'
 import { Shield, Upload, Image, Video, Music, FileText, Archive, Check, Unlock, X, Copy, Eye, Lock, Globe, Clock, Star, Download, Share2, Heart, TrendingUp, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -189,8 +189,8 @@ interface EnhancedUploadProgressProps {
 }
 
 export function EnhancedUploadProgress({
-  onUploadComplete: unknown, maxFiles = 10: unknown, maxSize = 100 * 1024 * 1024: unknown, // 100MB
-  allowedTypes = ['image/*': unknown, 'video/*': unknown, 'audio/*': unknown, 'application/*': unknown, 'text/*']: unknown, enableSEO = true: unknown, enableAnalytics = true: unknown, enableEscrow = true: unknown, brandName = 'KAZI': unknown, projectId
+  onUploadComplete, maxFiles = 10, maxSize = 100 * 1024 * 1024, // 100MB
+  allowedTypes = ['image/*', 'video/*', 'audio/*', 'application/*', 'text/*'], enableSEO = true, enableAnalytics = true, enableEscrow = true, brandName = 'KAZI', projectId
 }: EnhancedUploadProgressProps) {
 
   // Context7 Pattern: Central State Management
@@ -232,7 +232,7 @@ export function EnhancedUploadProgress({
     }
   })
   
-  const fileInputRef =<HTMLInputElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const { toast } = useToast()
 
   // Generate SEO optimized metadata

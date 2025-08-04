@@ -14,7 +14,7 @@ interface CreatePostDialogProps {
   onSubmit: (formData: FormData) => void
 }
 
-export function CreatePostDialog({ open: unknown, onOpenChange: unknown, onSubmit }: CreatePostDialogProps) {
+export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDialogProps) {
   const [title, setTitle] = useState<any>('')
   const [content, setContent] = useState<any>('')
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])

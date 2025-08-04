@@ -162,7 +162,7 @@ export default function TeamHubPage() {
     averageRating: teamMembers.reduce((sum, m) => sum + m.rating, 0) / teamMembers.length
   }
 
-  const getStatusColor = (status: unknown) => {
+  const getStatusColor = (status) => {
     switch (status) {
       case 'online': return 'bg-green-500'
       case 'busy': return 'bg-yellow-500'

@@ -192,7 +192,7 @@ const MOCK_POSTS: Post[] = [
   }
 ]
 
-export default function CommunityHub({ currentUserId: unknown, onPostCreate: unknown, onMemberConnect }: CommunityHubProps) {
+export default function CommunityHub({ currentUserId, onPostCreate, onMemberConnect }: CommunityHubProps) {
   const [posts, setPosts] = useState<Post[]>(MOCK_POSTS)
   const [members, setMembers] = useState<CommunityMember[]>(MOCK_MEMBERS)
   const [searchQuery, setSearchQuery] = useState<any>('')

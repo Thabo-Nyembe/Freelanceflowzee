@@ -254,7 +254,7 @@ class AnalyticsClient {
     }
   }
 
-  public trackUserAction(action: string, element?: string, value?: unknown) {
+  public trackUserAction(action: string, element?: string, value?) {
     this.trackEvent('user_action', action, {
       element,
       value,
@@ -310,7 +310,7 @@ class AnalyticsClient {
     }
   }
 
-  private async sendWithFetch(payload: unknown) {
+  private async sendWithFetch(payload) {
     try {
       await fetch('/api/analytics/events', {
         method: 'POST',
@@ -378,7 +378,7 @@ export function useAnalytics() {
     }
   }, [])
 
-  const trackUserAction = useCallback((action: string, element?: string, value?: unknown) => {
+  const trackUserAction = useCallback((action: string, element?: string, value?) => {
     const analytics = getAnalytics()
     if (analytics) {
       analytics.trackUserAction(action, element, value)
@@ -462,7 +462,7 @@ export const analytics = {
     }
   },
   
-  trackUserAction: (action: string, element?: string, value?: unknown) => {
+  trackUserAction: (action: string, element?: string, value?) => {
     const instance = getAnalytics()
     if (instance) {
       instance.trackUserAction(action, element, value)

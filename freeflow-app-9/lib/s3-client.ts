@@ -65,7 +65,7 @@ export async function uploadFile(file: Buffer | Uint8Array | string, options: Fi
 /**
  * Generate a presigned URL for file upload
  */
-export async function getUploadPresignedUrl(key: string, contentType: string = 'application/octet-stream', expiresIn: number = 3600 // 1 hour): Promise<string> {
+export async function getUploadPresignedUrl(key: string, contentType: string = 'application/octet-stream', expiresIn: number = 3600): Promise<string> { // 1 hour
   try {
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,
@@ -83,7 +83,7 @@ export async function getUploadPresignedUrl(key: string, contentType: string = '
 /**
  * Generate a presigned URL for file download
  */
-export async function getDownloadPresignedUrl(key: string, expiresIn: number = 3600 // 1 hour): Promise<string> {
+export async function getDownloadPresignedUrl(key: string, expiresIn: number = 3600): Promise<string> { // 1 hour
   try {
     const command = new GetObjectCommand({
       Bucket: BUCKET_NAME,

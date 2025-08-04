@@ -47,8 +47,8 @@ interface AnalyticsData {
 
 export const _FreelancerAnalytics = () => {
   const supabase = useSupabaseClient();
-  const [data, setData] = React.<AnalyticsData | null>(null);
-  const [timeframe, setTimeframe] = React.<'daily' | 'monthly' | 'yearly'>('monthly');
+  const [data, setData] = React.useState<AnalyticsData | null>(null);
+  const [timeframe, setTimeframe] = React.useState<'daily' | 'monthly' | 'yearly'>('monthly');
 
   React.useEffect(() => {
     loadAnalyticsData();
@@ -118,7 +118,7 @@ export const _FreelancerAnalytics = () => {
     <div className="space-y-8">
       {/* Time Range Selector */}
       <div className="flex justify-end">
-        <Tabs value={timeframe} onValueChange={(v: unknown) => setTimeframe(v)}>
+        <Tabs value={timeframe} onValueChange={(v) => setTimeframe(v)}>
           <TabsList>
             <TabsTrigger value="daily">Daily</TabsTrigger>
             <TabsTrigger value="monthly">Monthly</TabsTrigger>

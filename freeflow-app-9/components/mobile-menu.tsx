@@ -21,7 +21,7 @@ interface MobileMenuProps {
   children?: React.ReactNode
 }
 
-export function MobileMenu({ items: unknown, children }: MobileMenuProps) {
+export function MobileMenu({ items, children }: MobileMenuProps) {
   const [open, setOpen] = React.useState<any>(false)
   const pathname = usePathname()
 
@@ -97,7 +97,7 @@ interface MobileSubMenuProps {
   }[]
 }
 
-export function MobileSubMenu({ title: unknown, items }: MobileSubMenuProps) {
+export function MobileSubMenu({ title, items }: MobileSubMenuProps) {
   const pathname = usePathname()
 
   return (
@@ -129,7 +129,7 @@ interface MobileNavProps {
   children?: React.ReactNode
 }
 
-export function MobileNav({ items: unknown, children }: MobileNavProps) {
+export function MobileNav({ items, children }: MobileNavProps) {
   return (
     <div className="lg:hidden">
       <MobileMenu items={items}>{children}</MobileMenu>

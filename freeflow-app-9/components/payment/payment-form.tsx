@@ -106,7 +106,7 @@ export function PaymentForm() {
         }, 2000)
       }
 
-    } catch (err: unknown) {
+    } catch (err) {
       console.error('Payment error:', err)
       if (err instanceof Error) {
         setError(err.message)

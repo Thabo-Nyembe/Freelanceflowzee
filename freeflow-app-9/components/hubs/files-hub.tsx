@@ -189,7 +189,7 @@ const MOCK_FILES: FileItem[] = [
   }
 ]
 
-export default function FilesHub({ userId: unknown, onFileUpload: unknown, onFileDelete: unknown, onFileShare }: FilesHubProps) {
+export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileShare }: FilesHubProps) {
   const [files, setFiles] = useState<FileItem[]>(MOCK_FILES)
   const [searchQuery, setSearchQuery] = useState<any>('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')

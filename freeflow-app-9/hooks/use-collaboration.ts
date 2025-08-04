@@ -26,7 +26,7 @@ const COLORS = [
 ]
 
 export function useCollaboration({
-  projectId: unknown, userId: unknown, userName: unknown, userEmail: unknown, userAvatar: unknown, onUserJoin: unknown, onUserLeave: unknown, onCursorMove: unknown, onSelectionChange: unknown, onComment: unknown, onCommentResolved: unknown, onReaction: unknown, onConnectionStateChange: unknown, onError
+  projectId, userId, userName, userEmail, userAvatar, onUserJoin, onUserLeave, onCursorMove, onSelectionChange, onComment, onCommentResolved, onReaction, onConnectionStateChange, onError
 }: CollaborationOptions): CollaborationApi {
   const [state, setState] = useState<CollaborationState>({
     users: [],
@@ -66,14 +66,14 @@ export function useCollaboration({
       channel.current
         .on('presence', { event: 'sync' }, () => {
           const presenceState = channel.current.presenceState()
-          const users = Object.values(presenceState).flat().map((p: unknown) => ({
+          const users = Object.values(presenceState).flat().map((p) => ({
             ...p,
             lastActive: new Date().toISOString()
           }))
           setState(prev => ({ ...prev, users }))
         })
-        .on('presence', { event: 'join' }, ({ newPresences }: unknown) => {
-          const newUsers = newUsers.map((p: unknown) => ({
+        .on('presence', { event: 'join' }, ({ newPresences }) => {
+          const newUsers = newUsers.map((p) => ({
             ...p,
             lastActive: new Date().toISOString()
           }))
@@ -85,18 +85,18 @@ export function useCollaboration({
             onUserJoin?.(user)
           })
         })
-        .on('presence', { event: 'leave' }, ({ leftPresences }: unknown) => {
+        .on('presence', { event: 'leave' }, ({ leftPresences }) => {
           setState(prev => ({
             ...prev,
             users: prev.users.filter(u => 
-              !leftPresences.find((p: unknown) => p.id === u.id)
+              !leftPresences.find((p) => p.id === u.id)
             )
           }))
           leftPresences.forEach((user: CollaborationUser) => {
             onUserLeave?.(user)
           })
         })
-        .on('broadcast', { event: 'cursor' }, ({ payload }: unknown) => {
+        .on('broadcast', { event: 'cursor' }, ({ payload }) => {
           setState(prev => ({
             ...prev,
             users: prev.users.map(u => 
@@ -110,7 +110,7 @@ export function useCollaboration({
             onCursorMove?.({ ...user, cursor: payload.data })
           }
         })
-        .on('broadcast', { event: 'selection' }, ({ payload }: unknown) => {
+        .on('broadcast', { event: 'selection' }, ({ payload }) => {
           setState(prev => ({
             ...prev,
             users: prev.users.map(u => 
@@ -124,14 +124,14 @@ export function useCollaboration({
             onSelectionChange?.({ ...user, selection: payload.data })
           }
         })
-        .on('broadcast', { event: 'comment' }, ({ payload }: unknown) => {
+        .on('broadcast', { event: 'comment' }, ({ payload }) => {
           setState(prev => ({
             ...prev,
             comments: [...prev.comments, payload.data]
           }))
           onComment?.(payload.data)
         })
-        .on('broadcast', { event: 'resolve' }, ({ payload }: unknown) => {
+        .on('broadcast', { event: 'resolve' }, ({ payload }) => {
           setState(prev => ({
             ...prev,
             comments: prev.comments.map(c => 
@@ -150,7 +150,7 @@ export function useCollaboration({
             })
           }
         })
-        .on('broadcast', { event: 'reaction' }, ({ payload }: unknown) => {
+        .on('broadcast', { event: 'reaction' }, ({ payload }) => {
           setState(prev => ({
             ...prev,
             comments: prev.comments.map(c => 

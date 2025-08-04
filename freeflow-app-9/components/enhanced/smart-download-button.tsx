@@ -61,7 +61,7 @@ interface SmartDownloadButtonProps {
 }
 
 export function SmartDownloadButton({
-  file: unknown, variant = 'default': unknown, trackingEnabled = true: unknown, onDownload: unknown, onShare: unknown, onPayment: unknown, enableMonetization = true: unknown, showAnalytics = true: unknown, }: SmartDownloadButtonProps) {
+  file, variant = 'default', trackingEnabled = true, onDownload, onShare, onPayment, enableMonetization = true, showAnalytics = true }: SmartDownloadButtonProps) {
   const [isDownloading, setIsDownloading] = useState<any>(false)
   const [downloadProgress, setDownloadProgress] = useState<any>(0)
   const [copiedLink, setCopiedLink] = useState<any>(false)
@@ -208,7 +208,7 @@ export function SmartDownloadButton({
   }
 
   // Track events for analytics
-  const trackEvent = async (eventName: string, data: unknown) => {
+  const trackEvent = async (eventName: string, data) => {
     if (!trackingEnabled) return;
     try {
       await fetch('/api/analytics/track-event', {
@@ -258,7 +258,7 @@ export function SmartDownloadButton({
   }
 
   // Format currency
-  const formatCurrency = (amount: number, currency = 'USD': unknown) => {
+  const formatCurrency = (amount: number, currency = 'USD') => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency

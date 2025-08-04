@@ -6,7 +6,7 @@ import * as ResizablePrimitive from 'react-resizable-panels'
 import { cn } from "@/lib/utils"
 
 const ResizablePanelGroup = ({
-  className: unknown, ...props
+  className, ...props
 }: React.ComponentProps<typeof ResizablePrimitive.PanelGroup>) => (
   <ResizablePrimitive.PanelGroup
     className={cn(
@@ -20,7 +20,7 @@ const ResizablePanelGroup = ({
 const ResizablePanel = ResizablePrimitive.Panel
 
 const ResizableHandle = ({
-  withHandle: unknown, className: unknown, ...props
+  withHandle, className, ...props
 }: React.ComponentProps<typeof ResizablePrimitive.PanelResizeHandle> & {
   withHandle?: boolean
 }) => (

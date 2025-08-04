@@ -32,14 +32,14 @@ interface DatabaseBlockProps {
 }
 
 export function DatabaseBlock({
-  id: unknown, content: unknown, properties: unknown, onUpdate: unknown, isSelected
+  id, content, properties, onUpdate, isSelected
 }: DatabaseBlockProps) {
   const [isLoading, setIsLoading] = useState<any>(false)
   const [databases] = useState<DatabaseSource[]>(defaultDatabases)
 
   const selectedSource = databases.find(db => db.id === content.sourceId)
 
-  const updateContent = (field: keyof typeof content, value: unknown) => {
+  const updateContent = (field: keyof typeof content, value) => {
     onUpdate?.(id, {
       content: { ...content, [field]: value }
     })

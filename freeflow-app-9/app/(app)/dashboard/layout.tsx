@@ -1,7 +1,7 @@
 import DashboardLayoutClient from "./dashboard-layout-client"
 
 export default function DashboardLayout({
-  children: unknown, }: {
+  children, }: {
   children: React.ReactNode
 }) {
   // Mock user for testing

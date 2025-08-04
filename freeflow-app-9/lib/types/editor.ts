@@ -97,6 +97,6 @@ export interface BlockBasedContentEditorProps {
     avatar?: string
   }
   onSave?: (blocks: ContentBlock[]) => void
-  onShare?: (options: unknown) => void
+  onShare?: (options) => void
   className?: string
 } 

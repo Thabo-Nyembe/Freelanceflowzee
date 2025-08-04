@@ -160,7 +160,7 @@ export default function TeamPage() {
     { value: 'qa', label: 'QA Engineer' }
   ]
 
-  const getStatusColor = (status: unknown) => {
+  const getStatusColor = (status) => {
     switch (status) {
       case 'online': return 'bg-green-500'
       case 'busy': return 'bg-yellow-500'
@@ -170,7 +170,7 @@ export default function TeamPage() {
     }
   }
 
-  const getStatusIcon = (status: unknown) => {
+  const getStatusIcon = (status) => {
     switch (status) {
       case 'online': return <CheckCircle className="h-4 w-4" />
       case 'busy': return <AlertCircle className="h-4 w-4" />

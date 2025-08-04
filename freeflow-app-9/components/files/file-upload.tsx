@@ -15,8 +15,8 @@ interface FileUploadProps {
 }
 
 export function FileUpload({ 
-  onUploadComplete: unknown, maxSize = 100 * 1024 * 1024: unknown, // 100MB default
-  allowedTypes = ['image/*': unknown, 'application/pdf': unknown, 'video/*']
+  onUploadComplete, maxSize = 100 * 1024 * 1024, // 100MB default
+  allowedTypes = ['image/*', 'application/pdf', 'video/*']
 }: FileUploadProps) {
   const [file, setFile] = useState<File | null>(null)
   const [progress, setProgress] = useState<any>(0)

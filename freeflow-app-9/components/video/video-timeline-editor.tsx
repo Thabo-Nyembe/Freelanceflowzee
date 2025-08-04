@@ -57,7 +57,7 @@ export interface TimelineEdit {
 }
 
 export default function VideoTimelineEditor({
-  videoId: unknown, playbackId: unknown, title: unknown, duration: unknown, chapters = []: unknown, onSave: unknown, onExport: unknown, className
+  videoId, playbackId, title, duration, chapters = [], onSave, onExport, className
 }: VideoTimelineEditorProps) {
   const timelineRef = useRef<HTMLDivElement>(null);
   const [currentTime, setCurrentTime] = useState<any>(0);

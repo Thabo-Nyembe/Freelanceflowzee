@@ -33,7 +33,7 @@ const defaultFilters: LocalVideoFilters = {
   status: 'any',
 };
 
-export function VideoFilters({ onFilterChange: unknown, className }: VideoFiltersProps) {
+export function VideoFilters({ onFilterChange, className }: VideoFiltersProps) {
   const [filters, setFilters] = useState<LocalVideoFilters>(defaultFilters);
   const isMobile = useMediaQuery('(max-width: 768px)');
 

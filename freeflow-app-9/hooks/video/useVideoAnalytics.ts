@@ -14,7 +14,7 @@ interface EngagementData {
   code?: number;
 }
 
-export function useVideoAnalytics({ videoId: unknown, onError }: VideoAnalyticsProps) {
+export function useVideoAnalytics({ videoId, onError }: VideoAnalyticsProps) {
   const [sessionId, setSessionId] = useState<string | null>(null);
 
   const handleError = useCallback((error: Error) => {

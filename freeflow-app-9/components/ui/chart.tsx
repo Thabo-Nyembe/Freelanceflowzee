@@ -67,7 +67,7 @@ const ChartContainer = React.forwardRef<
 })
 ChartContainer.displayName = "ChartContainer"
 
-const ChartStyle = ({ id: unknown, config }: { id: string; config: ChartConfig }) => {
+const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
     ([_, config]) => config.theme || config.color
   )
@@ -76,7 +76,7 @@ const ChartStyle = ({ id: unknown, config }: { id: string; config: ChartConfig }
     return null
   }
 
-  const generateThemeCss = (theme: keyof typeof THEMES, prefix: string, chartId: string, colorConfig: [string, ChartConfig[keyof ChartConfig]][]: unknown) => {
+  const generateThemeCss = (theme: keyof typeof THEMES, prefix: string, chartId: string, colorConfig: [string, ChartConfig[keyof ChartConfig]][]) => {
     const css = colorConfig
       .map(([key, itemConfig]) => {
         const color =
@@ -327,7 +327,7 @@ const ChartLegendContent = React.forwardRef<
 ChartLegendContent.displayName = "ChartLegendContent"
 
 // Helper to extract item config from a payload.
-function getPayloadConfigFromPayload(config: ChartConfig, payload: unknown, key: string) {
+function getPayloadConfigFromPayload(config: ChartConfig, payload, key: string) {
   if (typeof payload !== "object" || payload === null) {
     return undefined
   }

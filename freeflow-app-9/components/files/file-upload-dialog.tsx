@@ -14,7 +14,7 @@ interface FileUploadDialogProps {
   onUploadComplete: (files: Record<string, unknown>[]) => void
 }
 
-export function FileUploadDialog({ isOpen: unknown, onClose: unknown, onUploadComplete }: FileUploadDialogProps) {
+export function FileUploadDialog({ isOpen, onClose, onUploadComplete }: FileUploadDialogProps) {
   const [files, setFiles] = useState<File[]>([])
   const [uploading, setUploading] = useState<any>(false)
   const [progress, setProgress] = useState<{ [key: string]: number }>({})
@@ -88,7 +88,7 @@ export function FileUploadDialog({ isOpen: unknown, onClose: unknown, onUploadCo
 
           uploadedFiles.push(fileRecord)
           setProgress(prev => ({ ...prev, [file.name]: 100 }))
-        } catch (error: unknown) {
+        } catch (error) {
           console.error(`Error uploading ${file.name}:`, error)
           const errorMessage = error instanceof Error ? error.message : 'Upload failed'
           setErrors(prev => ({ ...prev, [file.name]: errorMessage }))

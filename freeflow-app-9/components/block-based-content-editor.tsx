@@ -48,12 +48,12 @@ interface BlockBasedContentEditorProps {
     avatar?: string
   }
   onSave?: (blocks: ContentBlock[]) => void
-  onShare?: (options: unknown) => void
+  onShare?: (options) => void
   className?: string
 }
 
 export function BlockBasedContentEditor({
-  projectId: unknown, currentUser: unknown, onSave: unknown, onShare: unknown, className
+  projectId, currentUser, onSave, onShare, className
 }: BlockBasedContentEditorProps) {
   const {
     state,

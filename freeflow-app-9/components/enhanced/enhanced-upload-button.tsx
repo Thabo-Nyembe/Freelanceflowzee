@@ -13,8 +13,8 @@ interface EnhancedUploadButtonProps {
 }
 
 export function EnhancedUploadButton({
-  onUpload: unknown, acceptedTypes = ['*/*']: unknown, maxSize = 10 * 1024 * 1024: unknown, // 10MB
-  multiple = true: unknown, className
+  onUpload, acceptedTypes = ['*/*'], maxSize = 10 * 1024 * 1024, // 10MB
+  multiple = true, className
 }: EnhancedUploadButtonProps) {
   const [isDragging, setIsDragging] = useState<any>(false);
   const [uploadProgress, setUploadProgress] = useState<any>(0);

@@ -101,7 +101,7 @@ export class RealTimeAIService {
     }
   }
 
-  private async generateSuggestions(text: string, quality: unknown) {
+  private async generateSuggestions(text: string, quality) {
     try {
       const response = await fetch('/api/ai/generate-suggestions', {
         method: 'POST',

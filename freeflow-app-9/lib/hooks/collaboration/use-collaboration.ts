@@ -58,7 +58,7 @@ export function useCollaboration(documentId: string) {
     presenceChannel
       .on('presence', { event: 'sync' }, () => {
         const state = presenceChannel.presenceState()
-        const users = Object.values(state).flat().map((p: unknown) => ({
+        const users = Object.values(state).flat().map((p) => ({
           id: p.user_id,
           name: p.username,
           avatar: p.avatar_url,

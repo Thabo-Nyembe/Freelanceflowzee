@@ -44,7 +44,7 @@ export interface VideoPlayerProps {
 }
 
 export default function VideoPlayer({
-  playbackId: unknown, title: unknown, poster: unknown, autoPlay = false: unknown, muted = false: unknown, loop = false: unknown, className: unknown, onPlay: unknown, onPause: unknown, onEnded: unknown, onTimeUpdate: unknown, onDurationChange: unknown, showControls = true: unknown, showChapters = false: unknown, showSettings = true: unknown, watermark: unknown, startTime: unknown, }: VideoPlayerProps) {
+  playbackId, title, poster, autoPlay = false, muted = false, loop = false, className, onPlay, onPause, onEnded, onTimeUpdate, onDurationChange, showControls = true, showChapters = false, showSettings = true, watermark, startTime, }: VideoPlayerProps) {
   const [isPlaying, setIsPlaying] = useState<any>(false);
   const [isMuted, setIsMuted] = useState<any>(muted);
   const [isFullscreen, setIsFullscreen] = useState<any>(false);

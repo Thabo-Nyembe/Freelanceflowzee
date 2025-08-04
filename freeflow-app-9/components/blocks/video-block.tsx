@@ -36,7 +36,7 @@ interface VideoBlockProps {
 }
 
 export function VideoBlock({
-  id: unknown, properties: unknown, onUpdate: unknown, isSelected
+  id, properties, onUpdate, isSelected
 }: VideoBlockProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState<any>(false)

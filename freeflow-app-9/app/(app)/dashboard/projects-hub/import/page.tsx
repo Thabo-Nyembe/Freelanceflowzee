@@ -117,7 +117,7 @@ export default function ProjectImportPage() {
     }
   ]
 
-  const getStatusColor = (status: unknown) => {
+  const getStatusColor = (status) => {
     switch (status) {
       case 'success': return 'bg-green-100 text-green-800'
       case 'failed': return 'bg-red-100 text-red-800'
@@ -126,7 +126,7 @@ export default function ProjectImportPage() {
     }
   }
 
-  const getStatusIcon = (status: unknown) => {
+  const getStatusIcon = (status) => {
     switch (status) {
       case 'success': return <CheckCircle className="h-4 w-4" />
       case 'failed': return <XCircle className="h-4 w-4" />
@@ -135,7 +135,7 @@ export default function ProjectImportPage() {
     }
   }
 
-  const handleFileUpload = (event: unknown) => {
+  const handleFileUpload = (event) => {
     const files = Array.from(event.target.files)
     setSelectedFiles(files)
   }

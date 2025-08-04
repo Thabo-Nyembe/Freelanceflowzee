@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Play, Pause, Volume2, VolumeX, MessageSquare, Edit, Trash2 } from 'lucide-react'
 
 interface Comment {
@@ -24,7 +24,7 @@ interface VideoViewerProps {
 }
 
 export function VideoViewer({ 
-  src: unknown, title: unknown, comments = []: unknown, onCommentAdd: unknown, onCommentEdit: unknown, onCommentDelete: unknown, className = "" 
+  src, title, comments = [], onCommentAdd, onCommentEdit, onCommentDelete, className = "" 
 }: VideoViewerProps) {
   const [isPlaying, setIsPlaying] = useState<any>(false)
   const [isMuted, setIsMuted] = useState<any>(false)
@@ -37,8 +37,8 @@ export function VideoViewer({
   const [selectedPriority, setSelectedPriority] = useState<'low' | 'medium' | 'high' | 'critical'>('medium')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   
-  const videoRef =<HTMLVideoElement>(null)
-  const containerRef =<HTMLDivElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   // Safely filter and display comments
   const validComments = comments?.filter(comment => 

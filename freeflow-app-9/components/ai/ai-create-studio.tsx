@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -34,7 +34,7 @@ interface AICreateStudioProps {
 type ContentType = keyof typeof CONTENT_TYPES
 
 export const AICreateStudio = memo(function AICreateStudio({
-  onGenerate: unknown, defaultModel = 'gpt-4o-mini'
+  onGenerate, defaultModel = 'gpt-4o-mini'
 }: AICreateStudioProps) {
   const [prompt, setPrompt] = useState<any>('')
   const [generating, setGenerating] = useState<any>(false)

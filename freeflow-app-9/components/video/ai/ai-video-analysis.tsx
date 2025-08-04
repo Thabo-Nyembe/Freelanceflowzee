@@ -12,7 +12,7 @@ interface AIVideoAnalysisProps {
   isLoading?: boolean
 }
 
-export function AIVideoAnalysis({ data: unknown, isLoading }: AIVideoAnalysisProps) {
+export function AIVideoAnalysis({ data, isLoading }: AIVideoAnalysisProps) {
   if (isLoading) {
     return (
       <Card>

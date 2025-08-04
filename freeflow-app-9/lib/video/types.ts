@@ -530,5 +530,5 @@ export interface UseVideoPlayerReturn {
   toggleFullscreen: () => void;
   
   // Analytics
-  trackEvent: (event: AnalyticsEventType, data?: unknown) => void;
+  trackEvent: (event: AnalyticsEventType, data?) => void;
 } 

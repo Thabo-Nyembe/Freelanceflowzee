@@ -63,7 +63,7 @@ interface ShareLink {
 }
 
 export function VideoSharingControls({
-  videoId: unknown, title = 'Untitled Video': unknown, description = '': unknown, isPublic = false: unknown, passwordProtected = false: unknown, allowEmbedding = true: unknown, allowDownload = false: unknown, onSettingsChange: unknown, className
+  videoId, title = 'Untitled Video', description = '', isPublic = false, passwordProtected = false, allowEmbedding = true, allowDownload = false, onSettingsChange, className
 }: VideoSharingControlsProps) {
   const [settings, setSettings] = useState<VideoSharingSettings>({
     isPublic,

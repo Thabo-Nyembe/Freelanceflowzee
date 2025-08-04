@@ -222,7 +222,7 @@ export function generatePageSEO(page: keyof typeof SEO_TEMPLATES, customData?: P
 }
 
 // Context7 Pattern: Structured Data Generator
-export function generateStructuredData(type: 'Organization' | 'Product' | 'Article' | 'Blog' | 'ContactPage' | 'Offer' | 'SoftwareApplication', data?: Record<string, unknown>: unknown) {
+export function generateStructuredData(type: 'Organization' | 'Product' | 'Article' | 'Blog' | 'ContactPage' | 'Offer' | 'SoftwareApplication', data?: Record<string, unknown>) {
   const baseOrganization = {
     "@context": "https://schema.org", "@type": "Organization", "name": SEO_CONFIG.site.name, "description": SEO_CONFIG.site.description, "url": SEO_CONFIG.site.url, "logo": `${SEO_CONFIG.site.url}/images/logo.png`, "contactPoint": {
       "@type": "ContactPoint", "telephone": SEO_CONFIG.contact.phone, "contactType": "customer service", "email": SEO_CONFIG.contact.email

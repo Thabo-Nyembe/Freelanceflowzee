@@ -249,7 +249,7 @@ export async function createSubscription(params: {
   priceId: string
   trialDays?: number
   metadata?: Record<string, string>
-}: unknown) {
+}) {
   try {
     const subscription = await stripe.subscriptions.create({
       customer: params.customerId,
@@ -285,7 +285,7 @@ export async function createRefund(params: {
   amount?: number
   reason?: Stripe.RefundCreateParams.Reason
   metadata?: Record<string, string>
-}: unknown) {
+}) {
   try {
     const refund = await stripe.refunds.create({
       payment_intent: params.paymentIntentId,
@@ -302,22 +302,22 @@ export async function createRefund(params: {
 }
 
 // Mock database operations (replace with actual database calls)
-async function updateProjectAccess(projectId: string, data: Record<string, unknown>: unknown) {
+async function updateProjectAccess(projectId: string, data: Record<string, unknown>) {
   console.log(`Updating project access for ${projectId}:`, data);
   // Implement actual database update
 }
 
-async function createSubscriptionRecord(data: Record<string, unknown>: unknown) {
+async function createSubscriptionRecord(data: Record<string, unknown>) {
   console.log('Creating subscription record: ', data);
   // Implement actual database insert
 }
 
-async function updateSubscriptionRecord(subscriptionId: string, data: Record<string, unknown>: unknown) {
+async function updateSubscriptionRecord(subscriptionId: string, data: Record<string, unknown>) {
   console.log(`Updating subscription ${subscriptionId}:`, data);
   // Implement actual database update
 }
 
-async function processInvoicePayment(data: Record<string, unknown>: unknown) {
+async function processInvoicePayment(data: Record<string, unknown>) {
   console.log('Processing invoice payment: ', data);
   // Implement actual invoice processing
 }

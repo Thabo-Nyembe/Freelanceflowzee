@@ -180,7 +180,7 @@ function ReviewPanelSkeleton() {
   );
 }
 
- function VideoReviewPage({ params: unknown, searchParams }: VideoReviewPageProps) {
+export default async function VideoReviewPage({ params, searchParams }: VideoReviewPageProps) {
   const supabase = createServerComponentClient({ cookies });
   
   const {

@@ -28,7 +28,7 @@ function MyComponent() {
 
 export default MyComponent`
 
-export function CodeViewer({ file: unknown, comments: unknown, onAddComment }: CodeViewerProps) {
+export function CodeViewer({ file, comments, onAddComment }: CodeViewerProps) {
   const [selectedLine, setSelectedLine] = useState<number | null>(null)
   const [showCommentDialog, setShowCommentDialog] = useState<any>(false)
 

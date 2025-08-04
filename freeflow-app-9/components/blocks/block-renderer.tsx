@@ -21,7 +21,7 @@ interface BlockRendererProps {
 }
 
 export function BlockRenderer({
-  block: unknown, onUpdate: unknown, isSelected
+  block, onUpdate, isSelected
 }: BlockRendererProps) {
   const commonProps = {
     id: block.id,

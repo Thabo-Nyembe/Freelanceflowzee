@@ -17,7 +17,7 @@ interface VideoEditorPageProps {
   };
 }
 
- function VideoEditorPage({ params }: VideoEditorPageProps) {
+export default async function VideoEditorPage({ params }: VideoEditorPageProps) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 

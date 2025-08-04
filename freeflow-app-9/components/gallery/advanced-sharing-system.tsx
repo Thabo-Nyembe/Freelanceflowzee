@@ -114,7 +114,7 @@ interface AdvancedGallerySharingSystemProps {
 }
 
 export function AdvancedGallerySharingSystem({
-  galleryId: unknown, items: unknown, settings: initialSettings, _analytics: unknown, currentUser: unknown, isOwnerView = false
+  galleryId, items, settings: initialSettings, _analytics, currentUser, isOwnerView = false
 }: AdvancedGallerySharingSystemProps) {
   const [settings, setSettings] = useState<GallerySettings>(initialSettings)
   const [_selectedItems, _setSelectedItems] = useState<string[]>([])

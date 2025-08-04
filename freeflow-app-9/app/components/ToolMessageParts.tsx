@@ -18,7 +18,7 @@ interface ToolMessagePartsProps {
   onResponse: (response: string) => void
 }
 
-export function ToolMessageParts({ tool: unknown, onResponse }: ToolMessagePartsProps) {
+export function ToolMessageParts({ tool, onResponse }: ToolMessagePartsProps) {
   const handleWeatherRequest = async (location: string, units: string = 'metric') => {
     try {
       // In a real app, you would make an API call to a weather service

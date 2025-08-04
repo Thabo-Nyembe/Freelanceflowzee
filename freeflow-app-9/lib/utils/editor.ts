@@ -85,7 +85,7 @@ export function findBlockById(blocks: ContentBlock[], id: string): ContentBlock 
   return blocks.find(block => block.id === id)
 }
 
-export function updateBlockContent(blocks: ContentBlock[], blockId: string, content: unknown): ContentBlock[] {
+export function updateBlockContent(blocks: ContentBlock[], blockId: string, content): ContentBlock[] {
   return blocks.map(block =>
     block.id === blockId
       ? { ...block, content, updatedAt: new Date().toISOString() }

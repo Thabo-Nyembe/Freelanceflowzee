@@ -16,8 +16,8 @@ interface VideoUploadProps {
 }
 
 export function VideoUpload({
-  onUpload: unknown, maxSize = 1024 * 1024 * 100: unknown, // 100MB default
-  accept = ['video/mp4': unknown, 'video/quicktime': unknown, 'video/webm']: unknown, className
+  onUpload, maxSize = 1024 * 1024 * 100, // 100MB default
+  accept = ['video/mp4', 'video/quicktime', 'video/webm'], className
 }: VideoUploadProps) {
   const [uploading, setUploading] = useState<any>(false);
   const [preview, setPreview] = useState<string | null>(null);

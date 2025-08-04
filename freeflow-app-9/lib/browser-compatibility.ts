@@ -47,7 +47,7 @@ export const browserSupport = {
 };
 
 // Safe feature usage
-export function safeOptionalChaining(obj: unknown, path: unknown, fallback = undefined: unknown) {
+export function safeOptionalChaining(obj, path, fallback = undefined) {
   if (browserSupport.supportsOptionalChaining) {
     try {
       return eval(`obj${path}`);

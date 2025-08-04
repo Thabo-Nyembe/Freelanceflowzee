@@ -88,7 +88,7 @@ interface ProjectsHubProps {
   _userId: string;
 }
 
-export default function ProjectsHub({ projects: unknown, _userId }: ProjectsHubProps) {
+export default function ProjectsHub({ projects, _userId }: ProjectsHubProps) {
   const [viewMode, setViewMode] = useState<any>('grid')
   const [searchQuery, setSearchQuery] = useState<any>('')
   const [sortBy, setSortBy] = useState<any>('end_date')

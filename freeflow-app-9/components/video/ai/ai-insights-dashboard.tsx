@@ -61,7 +61,7 @@ interface AIInsightsDashboardProps {
 }
 
 export function AIInsightsDashboard({
-  analysis: unknown, tags: unknown, isLoading = false: unknown, onRegenerate: unknown, onTagEdit: unknown, className
+  analysis, tags, isLoading = false, onRegenerate, onTagEdit, className
 }: AIInsightsDashboardProps) {
   const [isRegenerating, setIsRegenerating] = useState<any>(false);
 

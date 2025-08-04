@@ -22,7 +22,7 @@ interface VideoListProps {
   onVideoClick?: (videoId: string) => void;
 }
 
-export function VideoList({ videos: unknown, className: unknown, onVideoClick }: VideoListProps) {
+export function VideoList({ videos, className, onVideoClick }: VideoListProps) {
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   const formatDate = (dateString: string) => {

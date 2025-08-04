@@ -19,7 +19,7 @@ interface ChecklistBlockProps {
 }
 
 export function ChecklistBlock({
-  id: unknown, content: unknown, properties: unknown, onUpdate: unknown, isSelected
+  id, content, properties, onUpdate, isSelected
 }: ChecklistBlockProps) {
   const addItem = () => {
     onUpdate?.(id, {

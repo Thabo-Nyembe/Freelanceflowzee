@@ -1,4 +1,6 @@
-;
+"use client";
+
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -20,10 +22,10 @@ interface BulkOperationsProps {
 }
 
 export function BulkOperations({
-  selectedVideos: unknown, onComplete: unknown, onCancel: unknown, }: BulkOperationsProps) {
+  selectedVideos, onComplete, onCancel, }: BulkOperationsProps) {
   const { createBulkOperation, subscribeToBulkOperation, isLoading } = useBulkOperations();
-  const [operation, setOperation] =<BulkOperation | null>(null);
-  const [selectedOperation, setSelectedOperation] =<BulkOperationType>('delete');
+  const [operation, setOperation] = useState<BulkOperation | null>(null);
+  const [selectedOperation, setSelectedOperation] = useState<BulkOperationType>('delete');
 
   const handleOperationStart = async () => {
     try {

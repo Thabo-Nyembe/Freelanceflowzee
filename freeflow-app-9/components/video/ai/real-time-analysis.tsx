@@ -38,7 +38,7 @@ interface VideoInsight {
 }
 
 export function RealTimeAnalysis({
-  isRecording: unknown, audioStream: unknown, onInsightGenerated
+  isRecording, audioStream, onInsightGenerated
 }: RealTimeAnalysisProps) {
   const [insights, setInsights] = useState<VideoInsight[]>([])
   const [audioLevel, setAudioLevel] = useState<any>(0)

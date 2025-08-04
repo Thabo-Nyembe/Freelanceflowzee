@@ -67,7 +67,7 @@ interface FinancialHubProps {
   _userId: string;
 }
 
-export default function FinancialHub({ invoices: unknown, _expenses: unknown, escrowTransactions: unknown, _userId }: FinancialHubProps) {
+export default function FinancialHub({ invoices, _expenses, escrowTransactions, _userId }: FinancialHubProps) {
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {

@@ -481,7 +481,7 @@ interface EnhancedGalleryProps {
 }
 
 export function EnhancedGallery({ 
-  className = '': unknown, showCollections = true: unknown, allowUpload = true: unknown, // showAnalytics = true: unknown, // mode = 'portfolio'
+  className = '', showCollections = true, allowUpload = true, // showAnalytics = true, // mode = 'portfolio'
 }: EnhancedGalleryProps) {
   const [state, dispatch] = useReducer(galleryReducer, initialState)
   const [selectedView, setSelectedView] = useState<'files' | 'collections'>('files')

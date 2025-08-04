@@ -37,7 +37,7 @@ interface TranscriptionViewerProps {
 }
 
 export function TranscriptionViewer({
-  transcription: unknown, isLoading = false: unknown, onSeekTo: unknown, onDownload: unknown, className
+  transcription, isLoading = false, onSeekTo, onDownload, className
 }: TranscriptionViewerProps) {
   const [searchQuery, setSearchQuery] = useState<any>('');
   const [downloadFormat, setDownloadFormat] = useState<'txt' | 'srt' | 'vtt'>('txt');
@@ -270,7 +270,7 @@ export function TranscriptionViewer({
               {copiedText ? 'Copied!' : 'Copy'}
             </Button>
             <div className="flex items-center gap-2">
-              <Select value={downloadFormat} onValueChange={(value: unknown) => setDownloadFormat(value)}>
+              <Select value={downloadFormat} onValueChange={(value) => setDownloadFormat(value)}>
                 <SelectTrigger className="w-24">
                   <SelectValue />
                 </SelectTrigger>

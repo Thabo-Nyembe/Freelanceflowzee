@@ -42,7 +42,7 @@ const INITIAL_BLOCKS = [
 export default function DocumentsPage() {
   const [blocks, setBlocks] = useState<any>(INITIAL_BLOCKS)
 
-  const handleBlockUpdate = (blockId: string, newContent: unknown) => {
+  const handleBlockUpdate = (blockId: string, newContent) => {
     setBlocks(blocks.map(block => 
       block.id === blockId ? { ...block, ...newContent } : block
     ))

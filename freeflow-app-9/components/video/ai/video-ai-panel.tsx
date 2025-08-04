@@ -52,13 +52,13 @@ interface VideoAIPanelProps {
   videoDuration?: number;
   aiData?: VideoAIData;
   isLoading?: boolean;
-  onProcessAI?: (features: unknown, options: unknown) => Promise<void>;
+  onProcessAI?: (features, options) => Promise<void>;
   onSeekTo?: (timestamp: number) => void;
   className?: string;
 }
 
 export function VideoAIPanel({
-  videoId: unknown, videoTitle: unknown, videoDuration: unknown, aiData: unknown, isLoading = false: unknown, onProcessAI: unknown, onSeekTo: unknown, className
+  videoId, videoTitle, videoDuration, aiData, isLoading = false, onProcessAI, onSeekTo, className
 }: VideoAIPanelProps) {
   const [isProcessing, setIsProcessing] = useState<any>(false);
   const [selectedFeatures, setSelectedFeatures] = useState<any>({
@@ -433,7 +433,7 @@ export function VideoAIPanel({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {aiData.chapters.map((chapter: unknown, index: number) => (
+                    {aiData.chapters.map((chapter, index: number) => (
                       <div
                         key={chapter.id}
                         className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-gray-50"

@@ -21,7 +21,7 @@ interface OptimizedImageProps {
 }
 
 export function OptimizedImage({
-  src: unknown, alt: unknown, width: unknown, height: unknown, className: unknown, priority = false: unknown, quality = 75: unknown, sizes: unknown, fill = false: unknown, placeholder = 'empty': unknown, blurDataURL: unknown, onLoad: unknown, onError: unknown, ...props
+  src, alt, width, height, className, priority = false, quality = 75, sizes, fill = false, placeholder = 'empty', blurDataURL, onLoad, onError, ...props
 }: OptimizedImageProps) {
   const [isLoading, setIsLoading] = useState<any>(true)
   const [hasError, setHasError] = useState<any>(false)
@@ -125,13 +125,13 @@ export function OptimizedImage({
 
 // Avatar-specific optimized component
 export function OptimizedAvatar({
-  src: unknown, alt: unknown, size = 40: unknown, className: unknown, ...props
+  src, alt, size = 40, className, ...props
 }: {
   src: string
   alt: string
   size?: number
   className?: string
-} & Omit<OptimizedImageProps, 'width' | 'height'>: unknown) {
+} & Omit<OptimizedImageProps, 'width' | 'height'>) {
   return (
     <OptimizedImage
       src={src}
@@ -149,12 +149,12 @@ export function OptimizedAvatar({
 
 // Hero image component with optimized loading
 export function OptimizedHeroImage({
-  src: unknown, alt: unknown, className: unknown, ...props
+  src, alt, className, ...props
 }: {
   src: string
   alt: string
   className?: string
-} & Omit<OptimizedImageProps, 'priority' | 'sizes'>: unknown) {
+} & Omit<OptimizedImageProps, 'priority' | 'sizes'>) {
   return (
     <OptimizedImage
       src={src}

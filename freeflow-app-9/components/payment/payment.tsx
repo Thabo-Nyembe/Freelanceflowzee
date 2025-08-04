@@ -20,7 +20,7 @@ interface PaymentHistory {
   method: string
 }
 
-const Payment = ({ amount: unknown, projectId }: PaymentProps) => {
+const Payment = ({ amount, projectId }: PaymentProps) => {
   const { supabase: _supabase } = useSupabase()
   const [selectedMethod, setSelectedMethod] = useState<string>('')
   const [showHistory, setShowHistory] = useState<any>(false)

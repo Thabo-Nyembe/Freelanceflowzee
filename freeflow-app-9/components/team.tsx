@@ -52,7 +52,7 @@ const statusColors = {
 }
 
 export default function Team({
-  members: unknown, onInviteMember: unknown, onContactMember: unknown, onToggleFavorite: unknown, onToggleAdmin: unknown, }: TeamProps) {
+  members, onInviteMember, onContactMember, onToggleFavorite, onToggleAdmin, }: TeamProps) {
   const sortedMembers = [...members].sort((a, b) => {
     // Sort by admin status first
     if (a.isAdmin && !b.isAdmin) return -1

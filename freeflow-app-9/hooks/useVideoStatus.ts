@@ -54,9 +54,9 @@ export interface UseVideoStatusReturn {
 }
 
 export function useVideoStatus({
-  videoId: unknown, enabled = true: unknown, pollingInterval = 2000: unknown, // Poll every 2 seconds
-  maxPollingDuration = 300000: unknown, // Stop polling after 5 minutes
-  onStatusChange: unknown, onProcessingComplete: unknown, onError: unknown, }: UseVideoStatusOptions): UseVideoStatusReturn {
+  videoId, enabled = true, pollingInterval = 2000, // Poll every 2 seconds
+  maxPollingDuration = 300000, // Stop polling after 5 minutes
+  onStatusChange, onProcessingComplete, onError, }: UseVideoStatusOptions): UseVideoStatusReturn {
   const [status, setStatus] = useState<VideoStatus | null>(null);
   const [isLoading, setIsLoading] = useState<any>(false);
   const [error, setError] = useState<Error | null>(null);

@@ -13,7 +13,7 @@ export const useSupabase = () => {
 export const SupabaseProvider = ({ children }: { children: React.ReactNode }) => {
   const mockSupabase = {
     from: (table: string) => ({
-      insert: (data: unknown) => ({
+      insert: (data) => ({
         select: () => ({
           single: () => Promise.resolve({
             data: { id: 'mock-id', content: data[0].content },

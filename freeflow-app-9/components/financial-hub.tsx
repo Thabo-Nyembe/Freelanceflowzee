@@ -10,7 +10,7 @@ interface FinancialHubProps {
   onNavigate?: (screen: string, subTab?: string) => void
 }
 
-export function FinancialHub({ onNavigate = (: unknown) => {} }: FinancialHubProps) {
+export function FinancialHub({ onNavigate = () => {} }: FinancialHubProps) {
   const [activeTab, setActiveTab] = useState<any>("escrow")
 
   return (

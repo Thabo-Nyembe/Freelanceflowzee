@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useState } from 'react'
 import { MessageSquare, Edit, Trash2 } from 'lucide-react'
@@ -24,7 +24,7 @@ interface ImageViewerProps {
 }
 
 export function ImageViewer({ 
-  src: unknown, alt: unknown, comments = []: unknown, onCommentAdd: unknown, onCommentEdit: unknown, onCommentDelete: unknown, className = "" 
+  src, alt, comments = [], onCommentAdd, onCommentEdit, onCommentDelete, className = "" 
 }: ImageViewerProps) {
   const [showCommentDialog, setShowCommentDialog] = useState<any>(false)
   const [clickPosition, setClickPosition] = useState<{ x: number; y: number } | null>(null)
@@ -32,7 +32,7 @@ export function ImageViewer({
   const [newComment, setNewComment] = useState<any>('')
   const [selectedPriority, setSelectedPriority] = useState<'low' | 'medium' | 'high' | 'critical'>('medium')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const imageRef =<HTMLDivElement>(null)
+  const imageRef = React.useRef<HTMLDivElement>(null)
 
   // Safely filter and display comments
   const validComments = comments?.filter(comment => 

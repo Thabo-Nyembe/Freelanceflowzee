@@ -257,7 +257,7 @@ Provide a comprehensive quality analysis with specific, actionable recommendatio
 }
 
 // Generate project insights
-async function generateProjectInsights(openai: OpenAI, projectData: unknown) {
+async function generateProjectInsights(openai: OpenAI, projectData) {
   const systemPrompt = `You are a FreelanceFlow project analytics AI. Generate insights about project progress, team collaboration effectiveness, and areas for improvement.
 
 Focus on:
@@ -290,7 +290,7 @@ Focus on:
 }
 
 // Smart categorization
-async function smartCategorization(openai: OpenAI, data: unknown) {
+async function smartCategorization(openai: OpenAI, data) {
   const systemPrompt = `Automatically categorize and tag content for better organization in FreelanceFlow.
 
 Categories: Design, Development, Content, Strategy, Feedback, Technical, Creative
@@ -314,7 +314,7 @@ Tags: urgent, minor, enhancement, bug, suggestion, praise, concern`
 }
 
 // Generate client report
-async function generateClientReport(openai: OpenAI, reportData: unknown) {
+async function generateClientReport(openai: OpenAI, reportData) {
   const systemPrompt = `Create a professional client report for FreelanceFlow projects. Include progress updates, completed milestones, feedback incorporation, and next steps.
 
 Tone: Professional, clear, positive, and transparent.

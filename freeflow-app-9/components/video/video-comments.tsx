@@ -38,7 +38,7 @@ interface VideoCommentsProps {
 }
 
 export function VideoComments({ 
-  videoId: unknown, currentUserId: unknown, currentTime = 0: unknown, onSeekToTimestamp: unknown, className 
+  videoId, currentUserId, currentTime = 0, onSeekToTimestamp, className 
 }: VideoCommentsProps) {
   const [comments, setComments] = useState<VideoComment[]>([]);
   const [loading, setLoading] = useState<any>(true);

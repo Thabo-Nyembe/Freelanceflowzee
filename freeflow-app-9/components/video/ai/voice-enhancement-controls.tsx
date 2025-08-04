@@ -21,7 +21,7 @@ interface VoiceEnhancementControlsProps {
 }
 
 export function VoiceEnhancementControls({
-  audioStream: unknown, onEnhancedStream
+  audioStream, onEnhancedStream
 }: VoiceEnhancementControlsProps) {
   const [isEnabled, setIsEnabled] = useState<any>(false)
   const [voiceService, setVoiceService] = useState<VoiceEnhancementService | null>(null)

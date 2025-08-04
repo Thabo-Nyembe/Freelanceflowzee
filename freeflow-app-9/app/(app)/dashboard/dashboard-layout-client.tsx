@@ -9,7 +9,7 @@ interface DashboardLayoutClientProps {
 }
 
 export default function DashboardLayoutClient({
-  children: unknown, user: _user
+  children, user: _user
 }: DashboardLayoutClientProps) {
   return (
     <div className="flex h-screen overflow-hidden kazi-bg-light dark:kazi-bg-dark">

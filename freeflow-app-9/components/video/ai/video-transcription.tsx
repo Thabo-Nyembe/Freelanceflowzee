@@ -15,7 +15,7 @@ interface VideoTranscriptionProps {
   isLoading?: boolean
 }
 
-export function VideoTranscription({ data: unknown, isLoading }: VideoTranscriptionProps) {
+export function VideoTranscription({ data, isLoading }: VideoTranscriptionProps) {
   const [searchQuery, setSearchQuery] = useState<any>('')
   const [selectedLanguage, setSelectedLanguage] = useState<any>('en')
 

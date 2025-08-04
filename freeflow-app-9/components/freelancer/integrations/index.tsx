@@ -27,7 +27,7 @@ interface Integration {
 
 export const _FreelancerIntegrations = () => {
   const supabase = useSupabaseClient();
-  const [integrations, setIntegrations] = React.<Integration[]>([
+  const [integrations, setIntegrations] = React.useState<Integration[]>([
     {
       id: 'calendar',
       name: 'Calendar Integration',

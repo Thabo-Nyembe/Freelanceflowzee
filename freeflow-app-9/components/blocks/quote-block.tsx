@@ -20,7 +20,7 @@ interface QuoteBlockProps {
 }
 
 export function QuoteBlock({
-  id: unknown, content: unknown, properties: unknown, onUpdate: unknown, isSelected
+  id, content, properties, onUpdate, isSelected
 }: QuoteBlockProps) {
   const updateContent = (field: keyof typeof content, value: string) => {
     onUpdate?.(id, {

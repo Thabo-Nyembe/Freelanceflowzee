@@ -75,7 +75,7 @@ const SheetContent = React.forwardRef<
 SheetContent.displayName = SheetPrimitive.Content.displayName
 
 const SheetHeader = ({
-  className: unknown, ...props
+  className, ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
@@ -88,7 +88,7 @@ const SheetHeader = ({
 SheetHeader.displayName = "SheetHeader"
 
 const SheetFooter = ({
-  className: unknown, ...props
+  className, ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(

@@ -26,7 +26,7 @@ interface HighlightManagerProps {
 }
 
 export function HighlightManager({
-  videoStream: unknown, onHighlightsGenerated
+  videoStream, onHighlightsGenerated
 }: HighlightManagerProps) {
   const [highlightService, setHighlightService] = useState<HighlightDetectionService | null>(null)
   const [highlights, setHighlights] = useState<HighlightSegment[]>([])

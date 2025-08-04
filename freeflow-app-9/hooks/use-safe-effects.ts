@@ -3,7 +3,7 @@
 import { useEffect, useRef, useCallback } from 'react'
 
 // Safe interval hook that auto-cleans
-export function useSafeInterval(callback: unknown, delay: unknown) {
+export function useSafeInterval(callback, delay) {
   const savedCallback = useRef(callback)
   
   useEffect(() => {
@@ -19,7 +19,7 @@ export function useSafeInterval(callback: unknown, delay: unknown) {
 }
 
 // Safe timeout hook that auto-cleans
-export function useSafeTimeout(callback: unknown, delay: unknown) {
+export function useSafeTimeout(callback, delay) {
   const savedCallback = useRef(callback)
   
   useEffect(() => {
@@ -35,7 +35,7 @@ export function useSafeTimeout(callback: unknown, delay: unknown) {
 }
 
 // Safe event listener hook with automatic cleanup
-export function useSafeEventListener(eventName: unknown, handler: unknown, element = window: unknown, options: unknown) {
+export function useSafeEventListener(eventName, handler, element = window, options) {
   const savedHandler = useRef<any>()
   
   useEffect(() => {
@@ -46,7 +46,7 @@ export function useSafeEventListener(eventName: unknown, handler: unknown, eleme
     const isSupported = element && element.addEventListener
     if (!isSupported) return
     
-    const eventListener = (event: unknown) => savedHandler.current?.(event)
+    const eventListener = (event) => savedHandler.current?.(event)
     element.addEventListener(eventName, eventListener, options)
     
     return () => {
@@ -56,7 +56,7 @@ export function useSafeEventListener(eventName: unknown, handler: unknown, eleme
 }
 
 // Safe subscription hook with automatic cleanup
-export function useSafeSubscription(subscribe: unknown, dependencies = []: unknown) {
+export function useSafeSubscription(subscribe, dependencies = []) {
   useEffect(() => {
     const subscription = subscribe()
     

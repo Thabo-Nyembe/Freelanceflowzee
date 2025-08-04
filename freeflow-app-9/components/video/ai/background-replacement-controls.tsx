@@ -19,7 +19,7 @@ interface BackgroundReplacementControlsProps {
 }
 
 export function BackgroundReplacementControls({
-  videoStream: unknown, onProcessedStream
+  videoStream, onProcessedStream
 }: BackgroundReplacementControlsProps) {
   const [isEnabled, setIsEnabled] = useState<any>(false)
   const [isBlur, setIsBlur] = useState<any>(true)

@@ -261,7 +261,7 @@ describe('MyDayToday', () => {
     
     expect(screen.getByText('Finalize the logo variations and prepare for client presentation')).toBeInTheDocument()
     expect(screen.getByText('Update wireframes based on client feedback from yesterday')).toBeInTheDocument()
-    expect(screen.getByText('Organize presentation materials for tomorrow\\'s client meeting')).toBeInTheDocument()
+    expect(screen.getByText("Organize presentation materials for tomorrow's client meeting")).toBeInTheDocument()
   })
 
   it('handles email scheduling times', () => {
