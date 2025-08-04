@@ -16,11 +16,15 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata = {
   title: 'KAZI - Enterprise Freelance Management Platform',
   description: 'AI-powered freelance management platform with video collaboration, real-time document editing, and secure payment systems',
-  viewport: 'width=device-width, initial-scale=1',
   icons: {
     icon: '/kazi-brand/glyph-dark.png',
     apple: '/apple-touch-icon.png',
   },
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({

@@ -9,7 +9,14 @@ const nextConfig = {
   experimental: {
     forceSwcTransforms: true,
     externalDir: true,
+    // Optimize build performance
+    cpus: Math.max(1, require('os').cpus().length - 1),
   },
+  
+  // Build optimization
+  staticPageGenerationTimeout: 90,
+  compress: true,
+  swcMinify: true,
   
   // Webpack configuration for production
   webpack: (config, { isServer, dev }) => {
