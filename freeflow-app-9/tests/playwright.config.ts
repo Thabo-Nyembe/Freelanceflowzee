@@ -5,7 +5,7 @@ import { defineConfig, devices } from '@playwright/test';
  * Enhanced for complete feature coverage and edge case testing
  */
 export default defineConfig({
-  testDir: './tests/e2e',
+  testDir: './e2e',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -93,8 +93,8 @@ export default defineConfig({
   },
 
   /* Global setup */
-  globalSetup: require.resolve('./tests/global-setup.ts'),
-  globalTeardown: require.resolve('./tests/global-teardown.ts'),
+  globalSetup: require.resolve('./global-setup.ts'),
+  globalTeardown: require.resolve('./global-teardown.ts'),
 
   /* Test timeout */
   timeout: 60000,
