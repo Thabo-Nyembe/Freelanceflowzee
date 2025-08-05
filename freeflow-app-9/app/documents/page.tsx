@@ -26,7 +26,8 @@ const INITIAL_BLOCKS = [
   {
     id: 'text-1',
     type: 'text',
-    content: 'This is a collaborative document editor with real-time editing and AI assistance.'
+    content: 'This is a collaborative document editor with real-time editing and AI assistance.',
+    level: 1
   },
   {
     id: 'checklist-1',
