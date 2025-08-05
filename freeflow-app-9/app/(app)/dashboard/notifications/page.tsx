@@ -131,7 +131,7 @@ function notificationReducer(state: NotificationState, action: NotificationActio
 
 export default function NotificationsPage() {
   const [state, dispatch] = useReducer(notificationReducer, initialState)
-  const [activeTab, setActiveTab] = useState<any>('inbox')
+  const [activeTab, setActiveTab] = useState<string>('inbox')
 
   useEffect(() => {
     const mockNotifications: Notification[] = [

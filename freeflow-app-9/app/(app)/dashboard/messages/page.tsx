@@ -35,8 +35,8 @@ const mockMessages: Message[] = [
 
 export default function MessagesPage() {
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null)
-  const [newMessage, setNewMessage] = useState<any>('')
-  const [searchTerm, setSearchTerm] = useState<any>('')
+  const [newMessage, setNewMessage] = useState<string>('')
+  const [searchTerm, setSearchTerm] = useState<string>('')
 
   const filteredChats = mockChats.filter(chat => 
     chat.name.toLowerCase().includes(searchTerm.toLowerCase())

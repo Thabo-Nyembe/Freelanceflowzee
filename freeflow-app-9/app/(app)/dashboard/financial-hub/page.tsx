@@ -28,8 +28,8 @@ import {
 } from 'lucide-react'
 
 export default function FinancialHubPage() {
-  const [_selectedPeriod, setSelectedPeriod] = useState<any>('monthly')
-  const [activeTab, setActiveTab] = useState<any>('overview')
+  const [_selectedPeriod, setSelectedPeriod] = useState<string>('monthly')
+  const [activeTab, setActiveTab] = useState<string>('overview')
 
   // Mock comprehensive financial data
   const financialData = {

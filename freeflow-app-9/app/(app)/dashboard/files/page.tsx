@@ -28,9 +28,9 @@ import {
 } from 'lucide-react'
 
 export default function FilesPage() {
-  const [viewMode, setViewMode] = useState<any>('grid')
-  const [selectedFolder, setSelectedFolder] = useState<any>('all')
-  const [searchTerm, setSearchTerm] = useState<any>('')
+  const [viewMode, setViewMode] = useState<string>('grid')
+  const [selectedFolder, setSelectedFolder] = useState<string>('all')
+  const [searchTerm, setSearchTerm] = useState<string>('')
 
   // Mock files data
   const files = [

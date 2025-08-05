@@ -93,12 +93,12 @@ export default function AIAssistantPage() {
     }
   ])
   
-  const [inputMessage, setInputMessage] = useState<any>('')
-  const [isLoading, setIsLoading] = useState<any>(false)
-  const [activeTab, setActiveTab] = useState<any>('chat')
-  const [selectedModel, setSelectedModel] = useState<any>('anthropic')
-  const [isVoiceMode, setIsVoiceMode] = useState<any>(false)
-  const [isListening, setIsListening] = useState<any>(false)
+  const [inputMessage, setInputMessage] = useState<string>('')
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [activeTab, setActiveTab] = useState<string>('chat')
+  const [selectedModel, setSelectedModel] = useState<string>('anthropic')
+  const [isVoiceMode, setIsVoiceMode] = useState<boolean>(false)
+  const [isListening, setIsListening] = useState<boolean>(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const [conversations] = useState<Conversation[]>([

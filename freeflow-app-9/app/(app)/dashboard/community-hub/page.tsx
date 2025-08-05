@@ -689,7 +689,7 @@ function communityReducer(state: CommunityState, action: CommunityAction): Commu
 
 export default function CommunityHubPage() {
   const [state, dispatch] = useReducer(communityReducer, initialState)
-  const [activeTab, setActiveTab] = useState<any>('feed')
+  const [activeTab, setActiveTab] = useState<string>('feed')
 
   const mockMembers: CommunityMember[] = [
     {

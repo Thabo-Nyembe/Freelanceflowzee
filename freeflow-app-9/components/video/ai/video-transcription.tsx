@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { VideoTranscriptionData } from '@/lib/types/ai'
 import { Badge } from '@/components/ui/badge'
-import { FileText, Languages } from 'lucide-react'
+import { FileText, Languages, Search } from 'lucide-react'
 
 interface VideoTranscriptionProps {
   data?: VideoTranscriptionData

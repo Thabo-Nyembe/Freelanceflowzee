@@ -12,9 +12,9 @@ interface Props {
 
 export default function LoginPage({ searchParams }: Props) {
   const router = useRouter();
-  const [email, setEmail] = useState<any>('');
-  const [password, setPassword] = useState<any>('');
-  const [isLoading, setIsLoading] = useState<any>(false);
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +28,7 @@ export default function LoginPage({ searchParams }: Props) {
       const redirect = typeof searchParams?.redirect === 'string' ? searchParams.redirect : '/dashboard';
       router.push(redirect);
     } else {
-      alert('Please enter valid credentials');
+      console.error('Please enter valid credentials');
     }
     
     setIsLoading(false);

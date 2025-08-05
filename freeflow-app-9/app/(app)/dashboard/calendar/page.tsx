@@ -19,8 +19,8 @@ import {
 } from 'lucide-react'
 
 export default function CalendarPage() {
-  const [currentDate, setCurrentDate] = useState<any>(new Date())
-  const [view, setView] = useState<any>('month')
+  const [currentDate, setCurrentDate] = useState<Date>(new Date())
+  const [view, setView] = useState<'month' | 'week' | 'day'>('month')
 
   const events = [
     {

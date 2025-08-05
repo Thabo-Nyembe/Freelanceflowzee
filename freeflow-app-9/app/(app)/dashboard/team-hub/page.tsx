@@ -31,8 +31,8 @@ import {
 
 export default function TeamHubPage() {
   const [selectedMember, setSelectedMember] = useState<any>(null)
-  const [activeTab, setActiveTab] = useState<any>('overview')
-  const [searchTerm, setSearchTerm] = useState<any>('')
+  const [activeTab, setActiveTab] = useState<string>('overview')
+  const [searchTerm, setSearchTerm] = useState<string>('')
 
   // Mock team data
   const teamMembers = [

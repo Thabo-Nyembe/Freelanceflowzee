@@ -29,9 +29,9 @@ import {
 } from 'lucide-react'
 
 export default function TeamPage() {
-  const [searchTerm, setSearchTerm] = useState<any>('')
-  const [selectedRole, setSelectedRole] = useState<any>('all')
-  const [viewMode, setViewMode] = useState<any>('grid')
+  const [searchTerm, setSearchTerm] = useState<string>('')
+  const [selectedRole, setSelectedRole] = useState<string>('all')
+  const [viewMode, setViewMode] = useState<string>('grid')
 
   // Mock team data
   const teamMembers = [
