@@ -9,17 +9,17 @@ import {
   FileText, 
   Plus, 
   Search,
-  _Filter,
+  Filter,
   Download,
   Eye,
   Edit,
   Trash2,
-  _Calendar,
+  Calendar,
   DollarSign,
-  _Clock,
+  Clock,
   CheckCircle,
   XCircle,
-  _AlertCircle
+  AlertCircle
 } from 'lucide-react'
 
 export default function InvoicesPage() {

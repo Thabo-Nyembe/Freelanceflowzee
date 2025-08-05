@@ -3,17 +3,17 @@
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { _Progress } from '@/components/ui/progress'
+import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   DollarSign, 
   TrendingUp, 
   TrendingDown, 
   CreditCard, 
-  _Wallet, 
-  _PieChart,
+  Wallet, 
+  PieChart,
   FileText,
-  _Calendar,
+  Calendar,
   ArrowUpRight,
   ArrowDownRight 
 } from 'lucide-react'

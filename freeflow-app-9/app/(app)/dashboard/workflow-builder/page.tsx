@@ -28,6 +28,7 @@ import {
   MoreHorizontal,
   Eye,
   Edit3,
+  Users,
   Sparkles,
   Wand2,
   Save,

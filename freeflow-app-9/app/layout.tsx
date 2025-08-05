@@ -3,13 +3,11 @@ import { Inter } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
 import { Toaster } from 'sonner'
 import { Analytics } from '@vercel/analytics/react'
-import { AnalyticsProvider } from '@/components/providers/analytics-provider'
+
 import { Context7Provider } from '@/components/providers/context7-provider'
 import { Providers } from '@/components/providers'
 import '../styles/globals.css'
-import { StagewiseToolbar } from '@stagewise/toolbar-next'
-import { ErrorBoundary } from "@/components/error-boundary"
-import ReactPlugin from '@stagewise-plugins/react'
+import { ErrorBoundary } from "react-error-boundary"
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -34,23 +32,20 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ErrorBoundary>
-        <ThemeProvider
+                <ErrorBoundary fallback={<div>Something went wrong</div>}>
+          <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
           <Providers>
-            <AnalyticsProvider>
-              <Context7Provider>
-                <Toaster />
-                {children}
-              </Context7Provider>
-            </AnalyticsProvider>
+            <Context7Provider>
+              <Toaster />
+              {children}
+            </Context7Provider>
           </Providers>
           <Analytics />
-          <StagewiseToolbar config={{ plugins: [ReactPlugin] }} />
         </ThemeProvider>
         </ErrorBoundary>
       </body>

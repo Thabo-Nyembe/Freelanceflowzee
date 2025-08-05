@@ -10,7 +10,7 @@ import {
   Video, 
   Upload, 
   Search,
-  _Filter,
+  Filter,
   Grid,
   List,
   Eye,
@@ -19,8 +19,8 @@ import {
   Heart,
   MessageCircle,
   Folder,
-  _Calendar,
-  _User,
+  Calendar,
+  User,
   Star,
   Play
 } from 'lucide-react'

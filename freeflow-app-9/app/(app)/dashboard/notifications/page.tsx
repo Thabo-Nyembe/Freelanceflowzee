@@ -7,31 +7,31 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
-import { _ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Label } from '@/components/ui/label'
 import { 
   Bell, 
   Search, 
-  _Filter, 
+  Filter, 
   CheckCircle, 
   X, 
   Check,
   Archive,
   Trash2,
-  _Volume2,
-  _VolumeX,
+  Volume2,
+  VolumeX,
   Settings,
-  _Mail,
+  Mail,
   MessageSquare,
   DollarSign,
-  _Clock,
-  _User,
+  Clock,
+  User,
   FileText,
   AlertTriangle,
   Info,
   Target,
   Zap,
-  _Calendar,
+  Calendar,
   Star,
   Eye,
   EyeOff,
