@@ -1,5 +1,4 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { jest } from '@jest/globals'
 import FilesHub from '@/components/hubs/files-hub'
 
 // Mock file API for testing

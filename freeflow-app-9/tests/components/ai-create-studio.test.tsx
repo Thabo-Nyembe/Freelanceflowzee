@@ -1,5 +1,4 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { jest } from '@jest/globals'
 import { AICreateStudio } from '@/components/ai/ai-create-studio'
 
 // Mock fetch for API calls

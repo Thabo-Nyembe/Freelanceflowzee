@@ -42,7 +42,7 @@ test.describe('Navigation System Tests', () => {
       expect(response?.status()).toBe(200);
       
       // Verify page loads without errors
-      await expect(page.locator('h1')).toBeVisible();
+      await expect(page.locator('h1').first()).toBeVisible();
       
       // Check for React error boundaries
       await expect(page.locator('text=Something went wrong')).not.toBeVisible();
@@ -66,7 +66,7 @@ test.describe('Navigation System Tests', () => {
       expect(page.url()).toContain(link.url);
       
       // Verify page content loads
-      await expect(page.locator('h1')).toBeVisible();
+      await expect(page.locator('h1').first()).toBeVisible();
     }
   });
 
@@ -81,15 +81,18 @@ test.describe('Navigation System Tests', () => {
       await page.goto(pageUrl);
       
       // Check for interactive elements
-      await expect(page.locator('button')).toHaveCount.greaterThan(0);
+      const buttonCount = await page.locator('button').count();
+      expect(buttonCount).toBeGreaterThan(0);
       
       // Check for proper card components
-      await expect(page.locator('[class*="card"]')).toHaveCount.greaterThan(0);
+      const cardCount = await page.locator('[class*="card"]').count();
+      expect(cardCount).toBeGreaterThan(0);
       
       // Check for tabs if present
       const tabsCount = await page.locator('[role="tablist"]').count();
       if (tabsCount > 0) {
-        await expect(page.locator('[role="tab"]')).toHaveCount.greaterThan(0);
+        const tabCount = await page.locator('[role="tab"]').count();
+        expect(tabCount).toBeGreaterThan(0);
       }
     }
   });
