@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { EnhancedCard, EnhancedCardContent, EnhancedCardHeader, EnhancedCardTitle } from '@/components/ui/enhanced-card'
 import { BlockRenderer } from '@/components/blocks/block-renderer'
 import { BlockWrapper } from '@/components/blocks/block-wrapper'
 import { ChecklistBlock } from '@/components/blocks/checklist-block'
@@ -75,12 +76,13 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Document Editor</CardTitle>
-        </CardHeader>
-        <CardContent>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 py-8">
+        <EnhancedCard>
+          <EnhancedCardHeader>
+            <EnhancedCardTitle>Document Editor</EnhancedCardTitle>
+          </EnhancedCardHeader>
+        <EnhancedCardContent>
           <div className="space-y-4">
             {blocks.map((block, index) => (
               <BlockWrapper
@@ -111,8 +113,9 @@ export default function DocumentsPage() {
               </BlockWrapper>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </EnhancedCardContent>
+        </EnhancedCard>
+      </div>
     </div>
   )
 } 

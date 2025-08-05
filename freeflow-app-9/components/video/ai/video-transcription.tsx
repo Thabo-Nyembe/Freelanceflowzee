@@ -62,6 +62,73 @@ export function VideoTranscription({ data, isLoading }: VideoTranscriptionProps)
     }
   }
 
+  const handleCopyText = () => {
+    const text = segments.map(segment => 
+      segment.speaker ? `${segment.speaker}: ${segment.text}` : segment.text
+    ).join('\n\n')
+    navigator.clipboard.writeText(text)
+  }
+
+  const generateSRT = () => {
+    let srt = ''
+    segments.forEach((segment, index) => {
+      const startTime = formatSRTTime(segment.start)
+      const endTime = formatSRTTime(segment.end)
+      srt += `${index + 1}\n${startTime} --> ${endTime}\n${segment.text}\n\n`
+    })
+    return srt
+  }
+
+  const generateVTT = () => {
+    let vtt = 'WEBVTT\n\n'
+    segments.forEach((segment) => {
+      const startTime = formatVTTTime(segment.start)
+      const endTime = formatVTTTime(segment.end)
+      vtt += `${startTime} --> ${endTime}\n${segment.text}\n\n`
+    })
+    return vtt
+  }
+
+  const formatSRTTime = (seconds: number) => {
+    const date = new Date(seconds * 1000)
+    const hours = Math.floor(seconds / 3600).toString().padStart(2, '0')
+    const minutes = date.getUTCMinutes().toString().padStart(2, '0')
+    const secs = date.getUTCSeconds().toString().padStart(2, '0')
+    const ms = date.getUTCMilliseconds().toString().padStart(3, '0')
+    return `${hours}:${minutes}:${secs},${ms}`
+  }
+
+  const formatVTTTime = (seconds: number) => {
+    const date = new Date(seconds * 1000)
+    const hours = Math.floor(seconds / 3600).toString().padStart(2, '0')
+    const minutes = date.getUTCMinutes().toString().padStart(2, '0')
+    const secs = date.getUTCSeconds().toString().padStart(2, '0')
+    const ms = date.getUTCMilliseconds().toString().padStart(3, '0')
+    return `${hours}:${minutes}:${secs}.${ms}`
+  }
+
+  const downloadFile = (content: string, filename: string, mimeType: string) => {
+    const blob = new Blob([content], { type: mimeType })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
+  const handleDownloadSRT = () => {
+    const srt = generateSRT()
+    downloadFile(srt, 'transcription.srt', 'text/plain')
+  }
+
+  const handleDownloadVTT = () => {
+    const vtt = generateVTT()
+    downloadFile(vtt, 'transcription.vtt', 'text/vtt')
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -84,6 +151,16 @@ export function VideoTranscription({ data, isLoading }: VideoTranscriptionProps)
             <Badge variant="outline">
               {Math.round(confidence * 100)}% confidence
             </Badge>
+          </div>
+
+          <div className="relative">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search transcription..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
           </div>
 
           <ScrollArea className="h-[400px] rounded-md border p-4">
@@ -115,13 +192,13 @@ export function VideoTranscription({ data, isLoading }: VideoTranscriptionProps)
           </ScrollArea>
 
           <div className="flex justify-end space-x-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleCopyText}>
               Copy Text
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleDownloadSRT}>
               Download SRT
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleDownloadVTT}>
               Download VTT
             </Button>
           </div>

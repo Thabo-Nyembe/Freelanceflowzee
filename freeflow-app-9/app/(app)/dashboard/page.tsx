@@ -7,6 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
+import { EnhancedCard, EnhancedCardContent, EnhancedCardHeader, EnhancedCardTitle } from '@/components/ui/enhanced-card'
+import { EnhancedButton } from '@/components/ui/enhanced-button'
+import { EnhancedBadge } from '@/components/ui/enhanced-badge'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { 
   LayoutDashboard,
@@ -392,37 +396,38 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30">
       {/* Floating decorative elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 -right-4 w-96 h-96 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-700"></div>
+        <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-blue-400/10 to-purple-400/10 dark:from-blue-400/5 dark:to-purple-400/5 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 -right-4 w-96 h-96 bg-gradient-to-r from-purple-400/10 to-pink-400/10 dark:from-purple-400/5 dark:to-pink-400/5 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-700"></div>
       </div>
 
       <div className="relative min-h-screen flex flex-col">
         {/* Header - Fixed */}
-        <div className="border-b border-white/20 bg-white/30 backdrop-blur-xl sticky top-0 z-50">
+        <div className="border-b border-white/20 dark:border-gray-700/50 bg-white/30 dark:bg-gray-900/30 backdrop-blur-xl sticky top-0 z-50">
           <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent mb-2">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 dark:from-gray-100 dark:via-blue-100 dark:to-purple-100 bg-clip-text text-transparent mb-2">
                   Welcome to KAZI
                 </h1>
-                <p className="text-sm sm:text-base lg:text-lg text-gray-600 font-light">
+                <p className="text-sm sm:text-base lg:text-lg text-secondary font-light">
                   Your complete creative business platform with 25+ integrated tools
                 </p>
               </div>
               
               <div className="flex items-center gap-4">
-                <Card className="bg-white/70 backdrop-blur-sm border-white/40 p-3">
+                <EnhancedCard variant="glass" className="p-3">
                   <div className="flex items-center gap-2">
                     <Star className="h-4 w-4 text-yellow-500" />
                     <div>
-                      <p className="text-xs text-gray-600">Platform Status</p>
-                      <p className="text-sm font-semibold text-green-600">All Systems Operational</p>
+                      <p className="text-xs text-secondary">Platform Status</p>
+                      <p className="text-sm font-semibold text-green-600 dark:text-green-400">All Systems Operational</p>
                     </div>
                   </div>
-                </Card>
+                </EnhancedCard>
+                <ThemeToggle />
               </div>
             </div>
           </div>

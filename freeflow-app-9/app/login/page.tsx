@@ -1,102 +1,97 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useEffect } from 'react';
 
-interface Props {
-  searchParams?: { [key: string]: string | string[] | undefined };
-}
-
-export default function LoginPage({ searchParams }: Props) {
-  const router = useRouter();
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+export default function LoginPage() {
+  useEffect(() => {
+    console.log('useEffect running...');
     
-    // Simulate login for testing
-    if (email.includes('@') && password.length > 0) {
-      localStorage.setItem('kazi-auth', 'true');
-      localStorage.setItem('kazi-user', JSON.stringify({ email, name: 'Test User' }));
+    // Add vanilla JavaScript event handler after component mounts
+    const button = document.getElementById('login-btn');
+    console.log('Button found in useEffect:', !!button);
+    
+    const handleClick = () => {
+      console.log('Button clicked!');
+      const emailInput = document.getElementById('email') as HTMLInputElement;
+      const passwordInput = document.getElementById('password') as HTMLInputElement;
+      const email = emailInput?.value;
+      const password = passwordInput?.value;
       
-      const redirect = typeof searchParams?.redirect === 'string' ? searchParams.redirect : '/dashboard';
-      router.push(redirect);
-    } else {
-      console.error('Please enter valid credentials');
-    }
+      console.log('Direct login attempt:', { email, password: password ? '***' : 'empty' });
+      
+      if (email?.includes('@') && password?.length > 0) {
+        console.log('Setting localStorage...');
+        localStorage.setItem('kazi-auth', 'true');
+        localStorage.setItem('kazi-user', JSON.stringify({ email, name: 'Test User' }));
+        console.log('Redirecting to dashboard...');
+        window.location.href = '/dashboard';
+      } else {
+        alert('Please enter valid email and password');
+      }
+    };
     
-    setIsLoading(false);
-  };
+    if (button) {
+      console.log('Adding event listener...');
+      button.addEventListener('click', handleClick);
+      return () => {
+        console.log('Removing event listener...');
+        button.removeEventListener('click', handleClick);
+      };
+    } else {
+      console.log('Button not found, retrying...');
+      const timer = setTimeout(() => {
+        const retryButton = document.getElementById('login-btn');
+        if (retryButton) {
+          console.log('Retry successful, adding event listener...');
+          retryButton.addEventListener('click', handleClick);
+        }
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   return (
-    <div className="min-h-screen kazi-bg-light dark:kazi-bg-dark flex items-center justify-center p-4">
-      <Card className="w-full max-w-md kazi-card">
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <img 
-              src="/kazi-brand/logo.svg" 
-              alt="KAZI" 
-              className="h-8 w-auto"
-            />
-            <h1 className="text-2xl font-bold kazi-text-primary kazi-headline">KAZI</h1>
-          </div>
-          <CardTitle className="kazi-headline">Welcome Back</CardTitle>
-          <CardDescription className="kazi-body">
-            Sign in to your KAZI workspace
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium kazi-text-dark dark:kazi-text-light kazi-body-medium">
-                Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="thabo@kaleidocraft.co.za"
-                className="mt-1 kazi-focus"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium kazi-text-dark dark:kazi-text-light kazi-body-medium">
-                Password
-              </label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                className="mt-1 kazi-focus"
-                required
-              />
-            </div>
-            <Button 
-              type="submit" 
-              className="w-full btn-kazi-primary kazi-ripple kazi-focus"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Signing in...' : 'Sign In'}
-            </Button>
-          </form>
-          
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400 kazi-body">
-              Test credentials: thabo@kaleidocraft.co.za / password1234
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+    <div style={{ padding: '50px', maxWidth: '400px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
+      <h1>KAZI Login</h1>
+      <div>
+        <div style={{ marginBottom: '20px' }}>
+          <label>Email:</label>
+          <input
+            id="email"
+            type="email"
+            placeholder="thabo@kaleidocraft.co.za"
+            style={{ width: '100%', padding: '10px', marginTop: '5px', border: '1px solid #ccc' }}
+          />
+        </div>
+        <div style={{ marginBottom: '20px' }}>
+          <label>Password:</label>
+          <input
+            id="password"
+            type="password"
+            placeholder="password1234"
+            style={{ width: '100%', padding: '10px', marginTop: '5px', border: '1px solid #ccc' }}
+          />
+        </div>
+        <button 
+          id="login-btn"
+          style={{ 
+            width: '100%', 
+            padding: '10px', 
+            backgroundColor: '#007bff', 
+            color: 'white', 
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '16px'
+          }}
+        >
+          Sign In
+        </button>
+      </div>
+      <div style={{ marginTop: '20px', fontSize: '14px', color: '#666' }}>
+        <p>Test credentials:</p>
+        <p>Email: thabo@kaleidocraft.co.za</p>
+        <p>Password: password1234</p>
+      </div>
     </div>
   );
-} 
+}

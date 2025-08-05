@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import {
   BarChart3,
@@ -151,13 +152,37 @@ export function Sidebar() {
   const pathname = usePathname()
 
   const handleLogout = () => {
+    console.log('Logout function called');
     // Clear authentication token from localStorage
+    localStorage.removeItem('kazi-auth')
+    localStorage.removeItem('kazi-user')
     localStorage.removeItem('auth-token')
     localStorage.removeItem('user-data')
     localStorage.removeItem('session-data')
+    console.log('LocalStorage cleared, redirecting...');
     // Redirect to homepage
     window.location.href = '/'
   }
+
+  // Add vanilla JavaScript event handler to ensure it works
+  useEffect(() => {
+    const logoutBtn = document.querySelector('[data-testid="logout"]');
+    if (logoutBtn) {
+      console.log('Adding logout event listener');
+      const handleClick = () => {
+        console.log('Logout clicked via event listener');
+        localStorage.removeItem('kazi-auth');
+        localStorage.removeItem('kazi-user');
+        localStorage.removeItem('auth-token');
+        localStorage.removeItem('user-data');
+        localStorage.removeItem('session-data');
+        window.location.href = '/';
+      };
+      
+      logoutBtn.addEventListener('click', handleClick);
+      return () => logoutBtn.removeEventListener('click', handleClick);
+    }
+  }, []);
 
   return (
     <div className="flex flex-col h-full kazi-bg-light dark:kazi-bg-dark border-r border-gray-200 dark:border-gray-700">

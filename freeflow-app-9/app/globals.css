@@ -64,22 +64,39 @@
 
 @layer base {
   * {
-    @apply border-neutral-200;
+    @apply border-neutral-200 dark:border-neutral-700;
   }
   body {
-    @apply bg-white text-neutral-900;
+    @apply bg-white dark:bg-gray-900 text-neutral-900 dark:text-neutral-100;
     font-feature-settings: "rlig" 1, "calt" 1;
     min-height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  /* Ensure proper font rendering across all devices */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 }
 
-/* Glass morphism styles */
+/* Glass morphism styles - Enhanced for dark mode */
 .glass-nav {
-  @apply bg-white/60 backdrop-blur-xl border-b border-[hsl(var(--border))] shadow-sm;
+  @apply bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl border-b border-[hsl(var(--border))] shadow-sm;
 }
 
 .glass-card {
-  @apply bg-white/60 backdrop-blur-xl border border-[hsl(var(--border))] rounded-2xl shadow-lg;
+  @apply bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl border border-[hsl(var(--border))] rounded-2xl shadow-lg;
+}
+
+/* Dark mode glass morphism */
+.dark .glass-nav {
+  @apply bg-gray-900/80 border-gray-700;
+}
+
+.dark .glass-card {
+  @apply bg-gray-900/80 border-gray-700;
 }
 
 .gradient-bg {
@@ -131,11 +148,18 @@
   @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6;
 }
 
-/* Enhanced form inputs */
+/* Enhanced form inputs with better contrast */
 .input-enhanced {
-  @apply w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 
+  @apply w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 
          focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-         bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm;
+         bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm
+         text-gray-900 dark:text-gray-100
+         placeholder:text-gray-500 dark:placeholder:text-gray-400
+         transition-all duration-200;
+}
+
+.input-enhanced:focus {
+  @apply bg-white dark:bg-gray-800 shadow-lg;
 }
 
 /* Navigation styles */
@@ -271,4 +295,181 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ===== COMPREHENSIVE DARK MODE FIXES ===== */
+
+/* Text visibility improvements */
+.text-primary {
+  @apply text-gray-900 dark:text-gray-100;
+}
+
+.text-secondary {
+  @apply text-gray-600 dark:text-gray-300;
+}
+
+.text-muted {
+  @apply text-gray-500 dark:text-gray-400;
+}
+
+.text-accent {
+  @apply text-blue-600 dark:text-blue-400;
+}
+
+/* Card improvements */
+.card-enhanced {
+  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg;
+  @apply text-gray-900 dark:text-gray-100;
+  transition: all 0.3s ease;
+}
+
+.card-enhanced:hover {
+  @apply shadow-xl border-gray-300 dark:border-gray-600;
+}
+
+/* Button improvements */
+.btn-enhanced {
+  @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
+  @apply bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600;
+  @apply text-white border-0;
+  @apply focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800;
+}
+
+.btn-secondary-enhanced {
+  @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
+  @apply bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600;
+  @apply text-gray-900 dark:text-gray-100;
+  @apply border border-gray-300 dark:border-gray-600;
+}
+
+/* Navigation improvements */
+.nav-enhanced {
+  @apply bg-white/95 dark:bg-gray-900/95 backdrop-blur-md;
+  @apply border-b border-gray-200 dark:border-gray-700;
+  @apply text-gray-900 dark:text-gray-100;
+}
+
+.nav-link-enhanced {
+  @apply px-3 py-2 rounded-md text-sm font-medium transition-all duration-200;
+  @apply text-gray-700 dark:text-gray-300;
+  @apply hover:text-gray-900 dark:hover:text-gray-100;
+  @apply hover:bg-gray-100 dark:hover:bg-gray-800;
+}
+
+.nav-link-enhanced.active {
+  @apply bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300;
+}
+
+/* Dashboard specific styles */
+.dashboard-grid {
+  @apply grid gap-6 p-6;
+  @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+}
+
+.dashboard-card {
+  @apply bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700;
+  @apply p-6 transition-all duration-300 hover:shadow-xl;
+  @apply text-gray-900 dark:text-gray-100;
+}
+
+.dashboard-card:hover {
+  @apply transform scale-105 border-gray-300 dark:border-gray-600;
+}
+
+/* Tab improvements */
+.tabs-enhanced .tabs-list {
+  @apply bg-gray-100 dark:bg-gray-800 p-1 rounded-lg;
+}
+
+.tabs-enhanced .tabs-trigger {
+  @apply px-4 py-2 rounded-md text-sm font-medium transition-all duration-200;
+  @apply text-gray-600 dark:text-gray-400;
+  @apply hover:text-gray-900 dark:hover:text-gray-100;
+  @apply data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700;
+  @apply data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-100;
+  @apply data-[state=active]:shadow-sm;
+}
+
+/* Badge improvements */
+.badge-enhanced {
+  @apply px-2.5 py-0.5 rounded-full text-xs font-medium;
+  @apply bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200;
+}
+
+.badge-success {
+  @apply bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200;
+}
+
+.badge-warning {
+  @apply bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200;
+}
+
+.badge-danger {
+  @apply bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-200;
+}
+
+/* Progress bar improvements */
+.progress-enhanced {
+  @apply w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2;
+}
+
+.progress-enhanced .progress-bar {
+  @apply bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-300;
+}
+
+/* Modal/Dialog improvements */
+.modal-enhanced {
+  @apply bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700;
+  @apply text-gray-900 dark:text-gray-100;
+}
+
+.modal-overlay {
+  @apply bg-black/50 dark:bg-black/70 backdrop-blur-sm;
+}
+
+/* Scrollbar improvements */
+.scrollbar-enhanced {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(156 163 175) transparent;
+}
+
+.dark .scrollbar-enhanced {
+  scrollbar-color: rgb(75 85 99) transparent;
+}
+
+.scrollbar-enhanced::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-enhanced::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.scrollbar-enhanced::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 dark:bg-gray-600 rounded-full;
+}
+
+.scrollbar-enhanced::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500 dark:bg-gray-500;
+}
+
+/* Loading state improvements */
+.loading-skeleton {
+  @apply bg-gray-200 dark:bg-gray-700 animate-pulse rounded;
+}
+
+/* Focus improvements for accessibility */
+.focus-enhanced:focus {
+  @apply outline-none ring-2 ring-blue-500 dark:ring-blue-400 ring-offset-2 dark:ring-offset-gray-800;
+}
+
+/* Text selection improvements */
+::selection {
+  @apply bg-blue-200 dark:bg-blue-800 text-gray-900 dark:text-gray-100;
+}
+
+/* Tooltip improvements */
+.tooltip-enhanced {
+  @apply bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900;
+  @apply px-2 py-1 rounded text-xs font-medium shadow-lg;
 }
