@@ -107,23 +107,35 @@ interface VideoAsset {
   tags: string[]
 }
 
+type TabType = 'projects' | 'templates' | 'assets' | 'analytics'
+type RecordingType = 'screen' | 'webcam' | 'both' | 'audio'
+type FilterType = 'all' | 'product' | 'training' | 'marketing' | 'social'
+
+interface NewProjectForm {
+  title: string
+  description: string
+  resolution: string
+  format: string
+  client: string
+}
+
 export default function VideoStudioPage() {
-  const [activeTab, setActiveTab] = useState<any>('projects')
+  const [activeTab, setActiveTab] = useState<TabType>('projects')
   const [selectedProject, setSelectedProject] = useState<VideoProject | null>(null)
-  const [isRecording, setIsRecording] = useState<any>(false)
-  const [isPlaying, setIsPlaying] = useState<any>(false)
-  const [isMuted, setIsMuted] = useState<any>(false)
-  const [volume, setVolume] = useState<any>([80])
-  const [currentTime, setCurrentTime] = useState<any>(0)
-  const [duration, setDuration] = useState<any>(300)
-  const [isFullscreen, setIsFullscreen] = useState<any>(false)
-  const [recordingType, setRecordingType] = useState<any>('screen')
+  const [isRecording, setIsRecording] = useState<boolean>(false)
+  const [isPlaying, setIsPlaying] = useState<boolean>(false)
+  const [isMuted, setIsMuted] = useState<boolean>(false)
+  const [volume, setVolume] = useState<number[]>([80])
+  const [currentTime, setCurrentTime] = useState<number>(0)
+  const [duration, setDuration] = useState<number>(300)
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false)
+  const [recordingType, setRecordingType] = useState<RecordingType>('screen')
   const [selectedTemplate, setSelectedTemplate] = useState<VideoTemplate | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [searchTerm, setSearchTerm] = useState<any>('')
-  const [filterCategory, setFilterCategory] = useState<any>('all')
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState<any>(false)
-  const [newProject, setNewProject] = useState<any>({
+  const [searchTerm, setSearchTerm] = useState<string>('')
+  const [filterCategory, setFilterCategory] = useState<FilterType>('all')
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false)
+  const [newProject, setNewProject] = useState<NewProjectForm>({
     title: '',
     description: '',
     resolution: '1920x1080',
@@ -312,50 +324,71 @@ export default function VideoStudioPage() {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
-  const handleStartRecording = () => {
-    setIsRecording(true)
-    alert('Recording started! (Simulated)')
+  const handleStartRecording = async () => {
+    try {
+      setIsRecording(true)
+      // In a real implementation, you would start actual recording here
+      console.log('Recording started with type:', recordingType)
+    } catch (error) {
+      console.error('Failed to start recording:', error)
+      setIsRecording(false)
+    }
   }
 
-  const handleStopRecording = () => {
-    setIsRecording(false)
-    alert('Recording stopped and saved!')
+  const handleStopRecording = async () => {
+    try {
+      setIsRecording(false)
+      // In a real implementation, you would stop recording and save the file
+      console.log('Recording stopped and processing...')
+    } catch (error) {
+      console.error('Failed to stop recording:', error)
+    }
   }
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying)
   }
 
-  const handleCreateProject = () => {
-    const project: VideoProject = {
-      id: Date.now().toString(),
-      title: newProject.title,
-      description: newProject.description,
-      duration: 0,
-      resolution: newProject.resolution,
-      format: newProject.format,
-      size: '0 MB',
-      created: new Date(),
-      modified: new Date(),
-      status: 'draft',
-      thumbnail: '/video-thumbnails/default.jpg',
-      views: 0,
-      likes: 0,
-      comments: 0,
-      client: newProject.client,
-      tags: []
+  const handleCreateProject = async () => {
+    if (!newProject.title.trim()) {
+      console.error('Project title is required')
+      return
     }
-    
-    // In a real app, this would be saved to the backend
-    alert('Project created successfully!')
-    setIsCreateModalOpen(false)
-    setNewProject({
-      title: '',
-      description: '',
-      resolution: '1920x1080',
-      format: 'mp4',
-      client: ''
-    })
+
+    try {
+      const project: VideoProject = {
+        id: Date.now().toString(),
+        title: newProject.title,
+        description: newProject.description,
+        duration: 0,
+        resolution: newProject.resolution,
+        format: newProject.format,
+        size: '0 MB',
+        created: new Date(),
+        modified: new Date(),
+        status: 'draft',
+        thumbnail: '/video-thumbnails/default.jpg',
+        views: 0,
+        likes: 0,
+        comments: 0,
+        client: newProject.client,
+        tags: []
+      }
+      
+      // In a real app, this would be saved to the backend
+      console.log('Creating project:', project)
+      
+      setIsCreateModalOpen(false)
+      setNewProject({
+        title: '',
+        description: '',
+        resolution: '1920x1080',
+        format: 'mp4',
+        client: ''
+      })
+    } catch (error) {
+      console.error('Failed to create project:', error)
+    }
   }
 
   const filteredProjects = mockProjects.filter(project => {
@@ -373,7 +406,11 @@ export default function VideoStudioPage() {
 
   const filteredAssets = mockAssets.filter(asset => {
     const matchesSearch = asset.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesFilter = filterCategory === 'all' || asset.type === filterCategory
+    const matchesFilter = filterCategory === 'all' || 
+                         (filterCategory === 'video' && asset.type === 'video') ||
+                         (filterCategory === 'audio' && asset.type === 'audio') ||
+                         (filterCategory === 'image' && asset.type === 'image') ||
+                         (filterCategory === 'transition' && asset.type === 'transition')
     return matchesSearch && matchesFilter
   })
 
@@ -580,7 +617,7 @@ export default function VideoStudioPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => alert('Settings opened!')}
+                      onClick={() => console.log('Settings opened')}
                     >
                       <Settings className="w-4 h-4" />
                     </Button>
@@ -696,7 +733,7 @@ export default function VideoStudioPage() {
                         variant="outline"
                         size="sm"
                         className="flex-1"
-                        onClick={() => alert(`Editing project: ${project.title}`)}
+                        onClick={() => console.log(`Editing project: ${project.title}`)}
                       >
                         <Edit3 className="w-4 h-4 mr-1" />
                         Edit
@@ -705,7 +742,7 @@ export default function VideoStudioPage() {
                         variant="outline"
                         size="sm"
                         className="flex-1"
-                        onClick={() => alert(`Sharing project: ${project.title}`)}
+                        onClick={() => console.log(`Sharing project: ${project.title}`)}
                       >
                         <Share2 className="w-4 h-4 mr-1" />
                         Share
@@ -749,7 +786,7 @@ export default function VideoStudioPage() {
                         variant="outline"
                         size="sm"
                         className="flex-1"
-                        onClick={() => alert(`Previewing template: ${template.name}`)}
+                        onClick={() => console.log(`Previewing template: ${template.name}`)}
                       >
                         <Eye className="w-4 h-4 mr-1" />
                         Preview
@@ -757,7 +794,7 @@ export default function VideoStudioPage() {
                       <Button
                         size="sm"
                         className="flex-1"
-                        onClick={() => alert(`Using template: ${template.name}`)}
+                        onClick={() => console.log(`Using template: ${template.name}`)}
                       >
                         Use Template
                       </Button>
@@ -773,7 +810,7 @@ export default function VideoStudioPage() {
               <Button
                 variant="outline"
                 className="p-6 h-auto flex-col gap-2"
-                onClick={() => alert('Upload video assets')}
+                onClick={() => console.log('Upload video assets')}
               >
                 <Video className="w-8 h-8 text-purple-600" />
                 <span className="text-sm">Upload Video</span>
@@ -782,7 +819,7 @@ export default function VideoStudioPage() {
               <Button
                 variant="outline"
                 className="p-6 h-auto flex-col gap-2"
-                onClick={() => alert('Upload audio assets')}
+                onClick={() => console.log('Upload audio assets')}
               >
                 <Volume2 className="w-8 h-8 text-purple-600" />
                 <span className="text-sm">Upload Audio</span>
@@ -791,7 +828,7 @@ export default function VideoStudioPage() {
               <Button
                 variant="outline"
                 className="p-6 h-auto flex-col gap-2"
-                onClick={() => alert('Upload images')}
+                onClick={() => console.log('Upload images')}
               >
                 <Image className="w-8 h-8 text-purple-600" />
                 <span className="text-sm">Upload Images</span>
@@ -800,7 +837,7 @@ export default function VideoStudioPage() {
               <Button
                 variant="outline"
                 className="p-6 h-auto flex-col gap-2"
-                onClick={() => alert('Browse stock assets')}
+                onClick={() => console.log('Browse stock assets')}
               >
                 <Folder className="w-8 h-8 text-purple-600" />
                 <span className="text-sm">Stock Assets</span>
@@ -850,7 +887,7 @@ export default function VideoStudioPage() {
                         variant="outline"
                         size="sm"
                         className="flex-1 text-xs"
-                        onClick={() => alert(`Using asset: ${asset.name}`)}
+                        onClick={() => console.log(`Using asset: ${asset.name}`)}
                       >
                         Use
                       </Button>
@@ -858,7 +895,7 @@ export default function VideoStudioPage() {
                         variant="outline"
                         size="sm"
                         className="flex-1 text-xs"
-                        onClick={() => alert(`Downloading asset: ${asset.name}`)}
+                        onClick={() => console.log(`Downloading asset: ${asset.name}`)}
                       >
                         <Download className="w-3 h-3" />
                       </Button>

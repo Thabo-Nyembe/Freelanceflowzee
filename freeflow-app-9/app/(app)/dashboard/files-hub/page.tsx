@@ -244,14 +244,16 @@ function filesReducer(state: FilesState, action: FilesAction): FilesState {
   }
 }
 
+type TabType = 'files' | 'storage' | 'sync' | 'settings'
+
 export default function FilesHubPage() {
   const [state, dispatch] = useReducer(filesReducer, initialState)
-  const [activeTab, setActiveTab] = useState<any>('files')
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState<any>(false)
-  const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState<any>(false)
-  const [newFolderName, setNewFolderName] = useState<any>('')
+  const [activeTab, setActiveTab] = useState<TabType>('files')
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false)
+  const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState<boolean>(false)
+  const [newFolderName, setNewFolderName] = useState<string>('')
   const [uploadFiles, setUploadFiles] = useState<FileList | null>(null)
-  const [dragOver, setDragOver] = useState<any>(false)
+  const [dragOver, setDragOver] = useState<boolean>(false)
 
   const mockCloudStorages: CloudStorage[] = [
     {
@@ -516,8 +518,8 @@ export default function FilesHubPage() {
   })
 
   const sortedFiles = [...filteredFiles].sort((a, b) => {
-    let aValue: unknown = a[state.sortBy]
-    let bValue: unknown = b[state.sortBy]
+    let aValue: string | number = ''
+    let bValue: string | number = ''
     
     if (state.sortBy === 'size') {
       aValue = a.size
@@ -525,9 +527,12 @@ export default function FilesHubPage() {
     } else if (state.sortBy === 'date') {
       aValue = new Date(a.modifiedAt).getTime()
       bValue = new Date(b.modifiedAt).getTime()
-    } else {
-      aValue = String(aValue).toLowerCase()
-      bValue = String(bValue).toLowerCase()
+    } else if (state.sortBy === 'name') {
+      aValue = a.name.toLowerCase()
+      bValue = b.name.toLowerCase()
+    } else if (state.sortBy === 'type') {
+      aValue = a.mimeType.toLowerCase()
+      bValue = b.mimeType.toLowerCase()
     }
     
     if (state.sortOrder === 'asc') {
@@ -576,21 +581,22 @@ export default function FilesHubPage() {
     }
   }
 
-  const handleFileUpload = () => {
-    if (uploadFiles) {
+  const handleFileUpload = async () => {
+    if (!uploadFiles) return
+
+    try {
       dispatch({ type: 'SET_UPLOAD_PROGRESS', payload: 0 })
       
       const interval = setInterval(() => {
-        dispatch({ type: 'SET_UPLOAD_PROGRESS', payload: prev => {
-          if (prev >= 100) {
-            clearInterval(interval)
-            setIsUploadModalOpen(false)
-            setUploadFiles(null)
-            alert('Files uploaded successfully!')
-            return 0
-          }
-          return prev + 10
-        }})
+        dispatch({ type: 'SET_UPLOAD_PROGRESS', payload: state.uploadProgress + 10 })
+        
+        if (state.uploadProgress >= 100) {
+          clearInterval(interval)
+          setIsUploadModalOpen(false)
+          setUploadFiles(null)
+          console.log('Files uploaded successfully!')
+          dispatch({ type: 'SET_UPLOAD_PROGRESS', payload: 0 })
+        }
       }, 200)
       
       Array.from(uploadFiles).forEach((file, index) => {
@@ -619,11 +625,19 @@ export default function FilesHubPage() {
           dispatch({ type: 'ADD_FILE', payload: newFile })
         }, 2000)
       })
+    } catch (error) {
+      console.error('Failed to upload files:', error)
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to upload files' })
     }
   }
 
-  const handleCreateFolder = () => {
-    if (newFolderName.trim()) {
+  const handleCreateFolder = async () => {
+    if (!newFolderName.trim()) {
+      console.error('Folder name is required')
+      return
+    }
+
+    try {
       const newFolder: FileItem = {
         id: `folder_${Date.now()}`,
         name: newFolderName.trim(),
@@ -638,7 +652,7 @@ export default function FilesHubPage() {
         isLocked: false,
         owner: 'You',
         permissions: 'admin',
-        cloudProvider: state.activeProvider,
+        cloudProvider: state.activeProvider as 'google' | 'dropbox' | 'onedrive' | 'aws' | 'local',
         syncStatus: 'synced',
         tags: [],
         version: 1,
@@ -648,7 +662,10 @@ export default function FilesHubPage() {
       dispatch({ type: 'ADD_FILE', payload: newFolder })
       setNewFolderName('')
       setIsCreateFolderModalOpen(false)
-      alert('Folder created successfully!')
+      console.log('Folder created successfully!')
+    } catch (error) {
+      console.error('Failed to create folder:', error)
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to create folder' })
     }
   }
 
@@ -696,7 +713,7 @@ export default function FilesHubPage() {
         dispatch({ type: 'SET_PREVIEW', payload: { show: true, item: file } })
         break
       case 'download':
-        alert(`Downloading: ${file.name}`)
+        console.log(`Downloading: ${file.name}`)
         break
       default:
         break
@@ -1127,7 +1144,7 @@ export default function FilesHubPage() {
                         variant="outline" 
                         size="sm" 
                         className="flex-1"
-                        onClick={() => alert(`Configuring ${storage.name}...`)}
+                        onClick={() => console.log(`Configuring ${storage.name}...`)}
                       >
                         <Settings className="w-4 h-4 mr-1" />
                         Configure
@@ -1136,7 +1153,7 @@ export default function FilesHubPage() {
                         variant="outline" 
                         size="sm" 
                         className="flex-1"
-                        onClick={() => alert(`Syncing ${storage.name}...`)}
+                        onClick={() => console.log(`Syncing ${storage.name}...`))
                         disabled={!storage.connected}
                       >
                         <RefreshCw className="w-4 h-4 mr-1" />
