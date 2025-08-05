@@ -1,119 +1,87 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # Dependencies
-/node_modules
-/.pnpm
-/pnpm-lock.yaml
-yarn.lock
-package-lock.json
+node_modules/
+.pnpm-debug.log*
 
-# Build outputs
-/.next/
-/out/
-/build
+# Next.js
+.next/
+out/
+build/
 
-# Static exports
-/export
-
-# Local environment variables
+# Environment variables
+.env
 .env.local
 .env.development.local
-.env.production.local
 .env.test.local
+.env.production.local
 
-# IDEs and editors
-/.idea
-/.vscode/*
-!/.vscode/settings.json
-!/.vscode/tasks.json
-!/.vscode/launch.json
-!/.vscode/extensions.json
-*.sublime-project
-*.sublime-workspace
+# Vercel
+.vercel
 
-# OS-specific
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# IDE
+.vscode/
+*.code-workspace
+.idea/
+
+# OS
 .DS_Store
+.localized
 Thumbs.db
 
-# Log files
+# Logs
+logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-dev.log
-dev_startup.log
-build.log
 
-# Temporary files and directories
-/tmp
-.tmp
-/temp
-/.vercel
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
 
-# Test outputs
-/coverage
-/test-results/
-/test-reports/
-/playwright-report/
-/playwright/.cache/
-test-results.json
-junit.xml
-*.spec.ts.snap
-*.test.ts.snap
-debug-screenshots/
+# Coverage directory used by tools like istanbul
+coverage/
 
-# Backup and temporary env files
-*.local.backup
-*.local.backup.*
-*.local.broken
-*.local.original
-
-# Generated documentation
-/docs/_build
-
-# Miscellaneous
-*.pem
-*.swp
-
-# Auto-generated reports and summaries
-*.md
-!README.md
-!ROADMAP.md
-!docs/**/*.md
-*.json
-!package.json
-!package-lock.json
-!tsconfig.json
-!components.json
-!babel.config.json
-!next.config.json
-!postcss.config.json
-!launch.json
-!jest.config.json
-!eslintrc.json
-!tsconfig.jest.json
-
-# One-off scripts
-check-db.js
-comprehensive-syntax-fix.js
-consolidated-tab-test-report.js
-create-working-ai-apis.js
-debug-tab-structure.js
-deploy-production.js
-final-syntax-fix.js
-fix-remaining-syntax.js
-fix-syntax-errors.js
-targeted-syntax-fix.js
-test-comprehensive-interactive-system.js
-test-interactive-buttons.js
-test-tabs-comprehensive.js
-quick-fix-dashboard-tests.sh
-start-server.sh
-
-# Other
-NODE_OPTIONS=--max-old-space-size=8192
-freeflowt@0.1.0
-test-ai.html
-*.tsbuildinfo
+# Archive and temp files
 archive/
-.vercel
+*.zip
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+*.webp
+
+# Build directories
+build/
+dist/
+
+# Backup and old versions
+*copy/
+*old*/
+*backup*/
+*screenshots*/
+*assets*/
+
+# Documentation that's not needed in repo
+docs/
+README.md
+
+# External dependencies
+Adobe/
+Cap-main/
+api.video-*/
+notion-clone-*/
+claudia/
+
+# Specific files
+INV-*.pdf
+dms*.png
+"Take It Eazy Consulting branding/"
