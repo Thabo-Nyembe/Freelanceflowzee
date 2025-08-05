@@ -33,6 +33,7 @@ import {
   Upload,
   Edit3,
   Scissors,
+  Plus,
   Image,
   FileText,
   Settings,
