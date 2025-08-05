@@ -232,12 +232,84 @@ export default function AIDesignPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12">
-                  <Sparkles className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Templates Coming Soon</h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Explore hundreds of AI-generated design templates
-                  </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[
+                    {
+                      id: '1',
+                      name: 'Modern Business Card',
+                      category: 'Business',
+                      thumbnail: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=300&h=200&fit=crop',
+                      downloads: 1234,
+                      rating: 4.8
+                    },
+                    {
+                      id: '2',
+                      name: 'Social Media Post',
+                      category: 'Social',
+                      thumbnail: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=300&h=200&fit=crop',
+                      downloads: 892,
+                      rating: 4.6
+                    },
+                    {
+                      id: '3',
+                      name: 'Website Hero Section',
+                      category: 'Web',
+                      thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=300&h=200&fit=crop',
+                      downloads: 567,
+                      rating: 4.9
+                    },
+                    {
+                      id: '4',
+                      name: 'Brand Logo Design',
+                      category: 'Branding',
+                      thumbnail: 'https://images.unsplash.com/photo-1559028006-448665bd7c7f?w=300&h=200&fit=crop',
+                      downloads: 2341,
+                      rating: 4.7
+                    },
+                    {
+                      id: '5',
+                      name: 'Presentation Slide',
+                      category: 'Presentation',
+                      thumbnail: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=300&h=200&fit=crop',
+                      downloads: 445,
+                      rating: 4.5
+                    },
+                    {
+                      id: '6',
+                      name: 'Email Newsletter',
+                      category: 'Marketing',
+                      thumbnail: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=300&h=200&fit=crop',
+                      downloads: 678,
+                      rating: 4.4
+                    }
+                  ].map(template => (
+                    <Card key={template.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+                      <div className="relative">
+                        <img 
+                          src={template.thumbnail} 
+                          alt={template.name}
+                          className="w-full h-32 object-cover rounded-t-lg"
+                        />
+                        <Badge className="absolute top-2 right-2" variant="secondary">
+                          {template.category}
+                        </Badge>
+                      </div>
+                      <CardContent className="p-4">
+                        <h3 className="font-semibold mb-2">{template.name}</h3>
+                        <div className="flex items-center justify-between text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2">
+                            <span>★ {template.rating}</span>
+                            <span>•</span>
+                            <span>{template.downloads} downloads</span>
+                          </div>
+                        </div>
+                        <Button className="w-full mt-3" size="sm">
+                          <Wand2 className="w-4 h-4 mr-2" />
+                          Use Template
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </CardContent>
             </Card>

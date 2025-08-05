@@ -1341,7 +1341,10 @@ export default function AICreate() {
                             variant="outline"
                             size= "sm"
                             className="flex-1"
-                            onClick={() => console.log('Preview asset: ', asset.id)}
+                            onClick={() => {
+                              toast.info(`Previewing ${asset.name}`)
+                              // Open asset preview modal or navigate to preview
+                            }}
                             data-testid="preview-asset-btn"
                           >
                             <Eye className= "w-4 h-4 mr-1" />

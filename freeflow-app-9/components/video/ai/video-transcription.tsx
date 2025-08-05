@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { VideoTranscriptionData } from '@/lib/types/ai'
 import { Badge } from '@/components/ui/badge'
-import { FileText, Languages, Search } from 'lucide-react'
+import { FileText, Languages, Search, Copy, Download } from 'lucide-react'
 
 interface VideoTranscriptionProps {
   data?: VideoTranscriptionData
@@ -16,8 +16,9 @@ interface VideoTranscriptionProps {
 }
 
 export function VideoTranscription({ data, isLoading }: VideoTranscriptionProps) {
-  const [searchQuery, setSearchQuery] = useState<any>('')
-  const [selectedLanguage, setSelectedLanguage] = useState<any>('en')
+  const [searchQuery, setSearchQuery] = useState<string>('')
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('en')
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'copying' | 'success' | 'error'>('idle')
 
   if (isLoading) {
     return (
@@ -43,6 +44,22 @@ export function VideoTranscription({ data, isLoading }: VideoTranscriptionProps)
 
   const { segments, languages, confidence } = data
 
+  if (!segments || segments.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Transcription
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">No transcription data available.</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
   const filteredSegments = segments.filter((segment) =>
     segment.text.toLowerCase().includes(searchQuery.toLowerCase())
   )
@@ -62,32 +79,50 @@ export function VideoTranscription({ data, isLoading }: VideoTranscriptionProps)
     }
   }
 
-  const handleCopyText = () => {
-    const text = segments.map(segment => 
-      segment.speaker ? `${segment.speaker}: ${segment.text}` : segment.text
-    ).join('\n\n')
-    navigator.clipboard.writeText(text)
-  }
+  const handleCopyText = useCallback(async () => {
+    if (!segments || segments.length === 0) return
+    
+    setCopyStatus('copying')
+    try {
+      const text = segments.map(segment => 
+        segment.speaker ? `${segment.speaker}: ${segment.text}` : segment.text
+      ).join('\n\n')
+      
+      await navigator.clipboard.writeText(text)
+      setCopyStatus('success')
+      setTimeout(() => setCopyStatus('idle'), 2000)
+    } catch (error) {
+      console.error('Failed to copy text:', error)
+      setCopyStatus('error')
+      setTimeout(() => setCopyStatus('idle'), 2000)
+    }
+  }, [segments])
 
-  const generateSRT = () => {
+  const generateSRT = useCallback(() => {
+    if (!segments || segments.length === 0) return ''
+    
     let srt = ''
     segments.forEach((segment, index) => {
       const startTime = formatSRTTime(segment.start)
       const endTime = formatSRTTime(segment.end)
-      srt += `${index + 1}\n${startTime} --> ${endTime}\n${segment.text}\n\n`
+      const text = segment.speaker ? `${segment.speaker}: ${segment.text}` : segment.text
+      srt += `${index + 1}\n${startTime} --> ${endTime}\n${text}\n\n`
     })
     return srt
-  }
+  }, [segments])
 
-  const generateVTT = () => {
+  const generateVTT = useCallback(() => {
+    if (!segments || segments.length === 0) return ''
+    
     let vtt = 'WEBVTT\n\n'
     segments.forEach((segment) => {
       const startTime = formatVTTTime(segment.start)
       const endTime = formatVTTTime(segment.end)
-      vtt += `${startTime} --> ${endTime}\n${segment.text}\n\n`
+      const text = segment.speaker ? `${segment.speaker}: ${segment.text}` : segment.text
+      vtt += `${startTime} --> ${endTime}\n${text}\n\n`
     })
     return vtt
-  }
+  }, [segments])
 
   const formatSRTTime = (seconds: number) => {
     const date = new Date(seconds * 1000)
@@ -119,15 +154,31 @@ export function VideoTranscription({ data, isLoading }: VideoTranscriptionProps)
     URL.revokeObjectURL(url)
   }
 
-  const handleDownloadSRT = () => {
-    const srt = generateSRT()
-    downloadFile(srt, 'transcription.srt', 'text/plain')
-  }
+  const handleDownloadSRT = useCallback(() => {
+    try {
+      const srt = generateSRT()
+      if (!srt) {
+        console.error('No transcription data available for SRT export')
+        return
+      }
+      downloadFile(srt, 'transcription.srt', 'text/plain')
+    } catch (error) {
+      console.error('Failed to download SRT:', error)
+    }
+  }, [generateSRT])
 
-  const handleDownloadVTT = () => {
-    const vtt = generateVTT()
-    downloadFile(vtt, 'transcription.vtt', 'text/vtt')
-  }
+  const handleDownloadVTT = useCallback(() => {
+    try {
+      const vtt = generateVTT()
+      if (!vtt) {
+        console.error('No transcription data available for VTT export')
+        return
+      }
+      downloadFile(vtt, 'transcription.vtt', 'text/vtt')
+    } catch (error) {
+      console.error('Failed to download VTT:', error)
+    }
+  }, [generateVTT])
 
   return (
     <Card>
@@ -191,14 +242,40 @@ export function VideoTranscription({ data, isLoading }: VideoTranscriptionProps)
             </div>
           </ScrollArea>
 
+          {filteredSegments.length === 0 && searchQuery && (
+            <div className="text-center py-8 text-muted-foreground">
+              No results found for "{searchQuery}"
+            </div>
+          )}
+
           <div className="flex justify-end space-x-2">
-            <Button variant="outline" size="sm" onClick={handleCopyText}>
-              Copy Text
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleCopyText}
+              disabled={segments.length === 0 || copyStatus === 'copying'}
+            >
+              <Copy className="h-4 w-4 mr-2" />
+              {copyStatus === 'copying' ? 'Copying...' : 
+               copyStatus === 'success' ? 'Copied!' : 
+               copyStatus === 'error' ? 'Failed' : 'Copy Text'}
             </Button>
-            <Button variant="outline" size="sm" onClick={handleDownloadSRT}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleDownloadSRT}
+              disabled={segments.length === 0}
+            >
+              <Download className="h-4 w-4 mr-2" />
               Download SRT
             </Button>
-            <Button variant="outline" size="sm" onClick={handleDownloadVTT}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleDownloadVTT}
+              disabled={segments.length === 0}
+            >
+              <Download className="h-4 w-4 mr-2" />
               Download VTT
             </Button>
           </div>

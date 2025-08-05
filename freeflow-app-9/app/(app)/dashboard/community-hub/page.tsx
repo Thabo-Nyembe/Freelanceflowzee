@@ -37,7 +37,10 @@ import {
   ExternalLink,
   CheckCircle,
   BarChart3,
-  List
+  List,
+  Building,
+  DollarSign,
+  Bookmark
 } from 'lucide-react'
 
 interface CommunityMember {
@@ -1835,33 +1838,303 @@ export default function CommunityHubPage() {
           </TabsContent>
           
           <TabsContent value="events" className="space-y-6">
-            <Card>
-              <CardContent className="p-12 text-center">
-                <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Events Coming Soon</h3>
-                <p className="text-gray-600">Community events and workshops will be available here</p>
-              </CardContent>
-            </Card>
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Community Events</h2>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Event
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                {
+                  id: '1',
+                  title: 'Freelancer Networking Meetup',
+                  date: '2024-02-15',
+                  time: '6:00 PM',
+                  location: 'Virtual',
+                  attendees: 47,
+                  type: 'networking',
+                  image: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=400&h=200&fit=crop'
+                },
+                {
+                  id: '2',
+                  title: 'Web Development Workshop',
+                  date: '2024-02-20',
+                  time: '2:00 PM',
+                  location: 'San Francisco, CA',
+                  attendees: 23,
+                  type: 'workshop',
+                  image: 'https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?w=400&h=200&fit=crop'
+                },
+                {
+                  id: '3',
+                  title: 'Design Portfolio Review',
+                  date: '2024-02-25',
+                  time: '1:00 PM',
+                  location: 'Virtual',
+                  attendees: 31,
+                  type: 'review',
+                  image: 'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=400&h=200&fit=crop'
+                }
+              ].map(event => (
+                <Card key={event.id} className="hover:shadow-lg transition-shadow">
+                  <div className="relative">
+                    <img src={event.image} alt={event.title} className="w-full h-32 object-cover rounded-t-lg" />
+                    <Badge className="absolute top-2 right-2" variant="secondary">
+                      {event.type}
+                    </Badge>
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold mb-2">{event.title}</h3>
+                    <div className="space-y-2 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        {event.date} at {event.time}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4" />
+                        {event.location}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4" />
+                        {event.attendees} attending
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-4">
+                      <Button size="sm" className="flex-1">Join Event</Button>
+                      <Button size="sm" variant="outline">
+                        <Heart className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </TabsContent>
           
           <TabsContent value="groups" className="space-y-6">
-            <Card>
-              <CardContent className="p-12 text-center">
-                <Users className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Groups Coming Soon</h3>
-                <p className="text-gray-600">Community groups and discussions will be available here</p>
-              </CardContent>
-            </Card>
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Community Groups</h2>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Group
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                {
+                  id: '1',
+                  name: 'React Developers',
+                  description: 'Share tips, tricks, and best practices for React development',
+                  members: 1247,
+                  category: 'Development',
+                  isPrivate: false,
+                  avatar: 'https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=100&h=100&fit=crop',
+                  posts: 234,
+                  activity: 'Very Active'
+                },
+                {
+                  id: '2',
+                  name: 'UI/UX Designers',
+                  description: 'A community for designers to showcase work and get feedback',
+                  members: 892,
+                  category: 'Design',
+                  isPrivate: false,
+                  avatar: 'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=100&h=100&fit=crop',
+                  posts: 156,
+                  activity: 'Active'
+                },
+                {
+                  id: '3',
+                  name: 'Freelancer Success',
+                  description: 'Tips and strategies for building a successful freelance career',
+                  members: 2341,
+                  category: 'Business',
+                  isPrivate: false,
+                  avatar: 'https://images.unsplash.com/photo-1560472355-536de3962603?w=100&h=100&fit=crop',
+                  posts: 423,
+                  activity: 'Very Active'
+                }
+              ].map(group => (
+                <Card key={group.id} className="hover:shadow-lg transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3 mb-3">
+                      <img 
+                        src={group.avatar} 
+                        alt={group.name}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold">{group.name}</h3>
+                          {!group.isPrivate && (
+                            <Badge variant="outline" className="text-xs">Public</Badge>
+                          )}
+                        </div>
+                        <Badge variant="secondary" className="text-xs mt-1">
+                          {group.category}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                      {group.description}
+                    </p>
+                    
+                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1">
+                          <Users className="w-4 h-4" />
+                          {group.members.toLocaleString()}
+                        </div>
+                        <div>{group.posts} posts</div>
+                      </div>
+                      <Badge 
+                        variant={group.activity === 'Very Active' ? 'default' : 'secondary'}
+                        className="text-xs"
+                      >
+                        {group.activity}
+                      </Badge>
+                    </div>
+                    
+                    <Button className="w-full" size="sm">
+                      Join Group
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </TabsContent>
           
           <TabsContent value="jobs" className="space-y-6">
-            <Card>
-              <CardContent className="p-12 text-center">
-                <Briefcase className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Job Board Coming Soon</h3>
-                <p className="text-gray-600">Find and post freelance opportunities here</p>
-              </CardContent>
-            </Card>
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Job Board</h2>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Post Job
+              </Button>
+            </div>
+            
+            <div className="space-y-4">
+              {[
+                {
+                  id: '1',
+                  title: 'Senior React Developer',
+                  company: 'TechStart Inc.',
+                  location: 'Remote',
+                  type: 'Full-time',
+                  budget: '$80-120/hour',
+                  posted: '2 hours ago',
+                  description: 'Looking for an experienced React developer to join our growing team. Must have 5+ years of experience with React, TypeScript, and modern frontend tools.',
+                  skills: ['React', 'TypeScript', 'Node.js', 'GraphQL'],
+                  applications: 12,
+                  verified: true,
+                  urgent: false
+                },
+                {
+                  id: '2',
+                  title: 'UI/UX Designer for SaaS Platform',
+                  company: 'Design Co.',
+                  location: 'New York, NY',
+                  type: 'Contract',
+                  budget: '$60-80/hour',
+                  posted: '1 day ago',
+                  description: 'We need a talented designer to redesign our SaaS platform. The ideal candidate should have experience with B2B applications and modern design systems.',
+                  skills: ['Figma', 'User Research', 'Prototyping', 'Design Systems'],
+                  applications: 8,
+                  verified: true,
+                  urgent: true
+                },
+                {
+                  id: '3',
+                  title: 'Full-Stack Developer - E-commerce',
+                  company: 'ShopFlow',
+                  location: 'San Francisco, CA',
+                  type: 'Part-time',
+                  budget: '$70-90/hour',
+                  posted: '3 days ago',
+                  description: 'Join our team to build next-generation e-commerce solutions. Experience with React, Node.js, and payment integrations required.',
+                  skills: ['React', 'Node.js', 'PostgreSQL', 'Stripe'],
+                  applications: 23,
+                  verified: false,
+                  urgent: false
+                }
+              ].map(job => (
+                <Card key={job.id} className="hover:shadow-lg transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="text-lg font-semibold">{job.title}</h3>
+                          {job.verified && (
+                            <Badge variant="default" className="text-xs">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Verified
+                            </Badge>
+                          )}
+                          {job.urgent && (
+                            <Badge variant="destructive" className="text-xs">
+                              Urgent
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                          <div className="flex items-center gap-1">
+                            <Building className="w-4 h-4" />
+                            {job.company}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <MapPin className="w-4 h-4" />
+                            {job.location}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Briefcase className="w-4 h-4" />
+                            {job.type}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <DollarSign className="w-4 h-4" />
+                            {job.budget}
+                          </div>
+                        </div>
+                        
+                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                          {job.description}
+                        </p>
+                        
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {job.skills.map(skill => (
+                            <Badge key={skill} variant="outline" className="text-xs">
+                              {skill}
+                            </Badge>
+                          ))}
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span>{job.applications} applications</span>
+                            <span>Posted {job.posted}</span>
+                          </div>
+                          
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm">
+                              <Bookmark className="w-4 h-4 mr-1" />
+                              Save
+                            </Button>
+                            <Button size="sm">
+                              Apply Now
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </TabsContent>
         </Tabs>
       </div>

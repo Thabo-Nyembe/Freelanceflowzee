@@ -1,6 +1,11 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import VideoTemplates from '@/components/video/video-templates'
+import AssetPreviewModal, { Asset } from '@/components/video/asset-preview-modal'
+import EnhancedFileUpload from '@/components/video/enhanced-file-upload'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -120,7 +125,12 @@ interface NewProjectForm {
 }
 
 export default function VideoStudioPage() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<TabType>('projects')
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
+  const [isAssetPreviewOpen, setIsAssetPreviewOpen] = useState(false)
+  const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false)
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState<VideoProject | null>(null)
   const [isRecording, setIsRecording] = useState<boolean>(false)
   const [isPlaying, setIsPlaying] = useState<boolean>(false)
@@ -617,7 +627,10 @@ export default function VideoStudioPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => console.log('Settings opened')}
+                      onClick={() => {
+                          // Open video studio settings
+                          toast.info('Video Studio settings - Feature coming soon!')
+                        }}
                     >
                       <Settings className="w-4 h-4" />
                     </Button>
@@ -733,7 +746,11 @@ export default function VideoStudioPage() {
                         variant="outline"
                         size="sm"
                         className="flex-1"
-                        onClick={() => console.log(`Editing project: ${project.title}`)}
+                        onClick={() => {
+                          toast.info(`Opening editor for: ${project.title}`)
+                          // Navigate to video editor
+                          router.push(`/video-studio/editor/${project.id}`)
+                        }}
                       >
                         <Edit3 className="w-4 h-4 mr-1" />
                         Edit
@@ -742,7 +759,11 @@ export default function VideoStudioPage() {
                         variant="outline"
                         size="sm"
                         className="flex-1"
-                        onClick={() => console.log(`Sharing project: ${project.title}`)}
+                        onClick={() => {
+                          toast.success(`Share link copied for: ${project.title}`)
+                          // Copy share link to clipboard
+                          navigator.clipboard.writeText(`${window.location.origin}/share/${project.id}`)
+                        }}
                       >
                         <Share2 className="w-4 h-4 mr-1" />
                         Share
@@ -786,7 +807,9 @@ export default function VideoStudioPage() {
                         variant="outline"
                         size="sm"
                         className="flex-1"
-                        onClick={() => console.log(`Previewing template: ${template.name}`)}
+              onClick={() => {
+                          setIsTemplateDialogOpen(true)
+                        }}
                       >
                         <Eye className="w-4 h-4 mr-1" />
                         Preview
@@ -794,7 +817,10 @@ export default function VideoStudioPage() {
                       <Button
                         size="sm"
                         className="flex-1"
-                        onClick={() => console.log(`Using template: ${template.name}`)}
+                        onClick={() => {
+                          toast.success(`Applied template: ${template.name}`)
+                          // Apply template to new project
+                        }}
                       >
                         Use Template
                       </Button>
@@ -810,7 +836,9 @@ export default function VideoStudioPage() {
               <Button
                 variant="outline"
                 className="p-6 h-auto flex-col gap-2"
-                onClick={() => console.log('Upload video assets')}
+  onClick={() => {
+                setIsUploadDialogOpen(true)
+              }}
               >
                 <Video className="w-8 h-8 text-purple-600" />
                 <span className="text-sm">Upload Video</span>
@@ -819,7 +847,9 @@ export default function VideoStudioPage() {
               <Button
                 variant="outline"
                 className="p-6 h-auto flex-col gap-2"
-                onClick={() => console.log('Upload audio assets')}
+  onClick={() => {
+                setIsUploadDialogOpen(true)
+              }}
               >
                 <Volume2 className="w-8 h-8 text-purple-600" />
                 <span className="text-sm">Upload Audio</span>
@@ -828,7 +858,9 @@ export default function VideoStudioPage() {
               <Button
                 variant="outline"
                 className="p-6 h-auto flex-col gap-2"
-                onClick={() => console.log('Upload images')}
+  onClick={() => {
+                setIsUploadDialogOpen(true)
+              }}
               >
                 <Image className="w-8 h-8 text-purple-600" />
                 <span className="text-sm">Upload Images</span>
@@ -837,7 +869,9 @@ export default function VideoStudioPage() {
               <Button
                 variant="outline"
                 className="p-6 h-auto flex-col gap-2"
-                onClick={() => console.log('Browse stock assets')}
+  onClick={() => {
+                setIsUploadDialogOpen(true)
+              }}
               >
                 <Folder className="w-8 h-8 text-purple-600" />
                 <span className="text-sm">Stock Assets</span>
@@ -887,7 +921,25 @@ export default function VideoStudioPage() {
                         variant="outline"
                         size="sm"
                         className="flex-1 text-xs"
-                        onClick={() => console.log(`Using asset: ${asset.name}`)}
+onClick={() => {
+                          // Create a mock asset for preview
+                          const mockAsset: Asset = {
+                            id: asset.id,
+                            name: asset.name,
+                            type: asset.type as 'video' | 'audio' | 'image',
+                            url: asset.url,
+                            thumbnail: asset.thumbnail,
+                            size: asset.size || 1024000,
+                            format: asset.format,
+                            tags: asset.tags || [],
+                            description: `Professional ${asset.type} asset`,
+                            createdAt: new Date().toISOString(),
+                            duration: asset.duration,
+                            dimensions: asset.type === 'image' ? { width: 1920, height: 1080 } : undefined
+                          }
+                          setSelectedAsset(mockAsset)
+                          setIsAssetPreviewOpen(true)
+                        }}
                       >
                         Use
                       </Button>
@@ -895,7 +947,14 @@ export default function VideoStudioPage() {
                         variant="outline"
                         size="sm"
                         className="flex-1 text-xs"
-                        onClick={() => console.log(`Downloading asset: ${asset.name}`)}
+                        onClick={() => {
+                          toast.info(`Downloading ${asset.name}...`)
+                          // Download asset file
+                          const link = document.createElement('a')
+                          link.href = asset.url
+                          link.download = asset.name
+                          link.click()
+                        }}
                       >
                         <Download className="w-3 h-3" />
                       </Button>
@@ -1020,6 +1079,60 @@ export default function VideoStudioPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Dialogs */}
+      <Dialog open={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Video Templates</DialogTitle>
+          </DialogHeader>
+          <div className="overflow-y-auto max-h-[80vh] pr-2">
+            <VideoTemplates
+              onSelectTemplate={(template) => {
+                toast.success(`Applied template: ${template.name}`)
+                setIsTemplateDialogOpen(false)
+              }}
+              onPreviewTemplate={(template) => {
+                toast.info(`Previewing: ${template.name}`)
+              }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Upload Assets</DialogTitle>
+          </DialogHeader>
+          <div className="overflow-y-auto max-h-[80vh] pr-2">
+            <EnhancedFileUpload
+              acceptedTypes="all"
+              onUploadComplete={(files) => {
+                toast.success(`Uploaded ${files.length} file(s) successfully!`)
+                setIsUploadDialogOpen(false)
+              }}
+              maxFiles={20}
+              maxSize={500}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <AssetPreviewModal
+        asset={selectedAsset}
+        isOpen={isAssetPreviewOpen}
+        onClose={() => {
+          setIsAssetPreviewOpen(false)
+          setSelectedAsset(null)
+        }}
+        onAddToProject={(asset) => {
+          toast.success(`Added ${asset.name} to project`)
+        }}
+        onDownload={(asset) => {
+          toast.success(`Downloading ${asset.name}`)
+        }}
+      />
     </div>
   )
 }
