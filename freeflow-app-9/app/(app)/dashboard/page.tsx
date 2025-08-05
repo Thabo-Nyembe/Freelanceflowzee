@@ -1,10 +1,13 @@
 "use client"
 
-import { useState, useMemo, useCallback, lazy, Suspense } from 'react'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
+import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { 
   LayoutDashboard,
   FolderOpen,
@@ -22,187 +25,393 @@ import {
   Calendar,
   Wallet,
   Video,
-  Loader2,
+  Bell,
+  User,
+  Clock,
+  Briefcase,
+  Image,
+  Cloud,
+  Palette,
+  Target,
+  ArrowRight,
+  Activity,
+  Star,
+  CheckCircle,
+  Building,
+  ChevronLeft,
+  ChevronRight,
+  Workflow,
+  Receipt,
+  UserCheck,
+  Archive,
+  Monitor,
+  Headphones
 } from 'lucide-react'
-import GlobalSearch from '@/components/global-search'
-import { AnimatePresence, motion } from 'framer-motion'
-import { ErrorBoundary } from 'react-error-boundary'
-
-// Lazy load heavy components for better performance
-const AICreateStudio = lazy(() => import('@/components/ai/ai-create-studio').then(m => ({ default: m.AICreateStudio })))
-const FilesHub = lazy(() => import('@/components/hubs/files-hub'))
-const CommunityHub = lazy(() => import('@/components/hubs/community-hub'))
-const ProjectsHub = lazy(() => import('@/components/hubs/projects-hub'))
-const MyDayToday = lazy(() => import('@/components/my-day-today').then(m => ({ default: m.MyDayToday })))
-
-// Loading component
-const LoadingSpinner = () => (
-  <div className="flex items-center justify-center py-12">
-    <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-    <span className="ml-2 text-gray-600">Loading...</span>
-  </div>
-)
+import { cn } from '@/lib/utils'
 
 // Mock data
 const mockData = {
   earnings: 45231,
   activeProjects: 12,
   completedProjects: 48,
-  pendingPayments: 3,
+  totalClients: 156,
+  hoursThisMonth: 187,
   recentActivities: [
-    { id: 1, type: 'project', message: 'New project "Brand Identity" started', time: '2 hours ago' },
-    { id: 2, type: 'payment', message: 'Payment received from John Doe', time: '4 hours ago' },
-    { id: 3, type: 'feedback', message: 'Client feedback on "Website Design"', time: '1 day ago' }
+    { id: 1, type: 'project', message: 'New project "Brand Identity" started', time: '2 hours ago', status: 'success' },
+    { id: 2, type: 'payment', message: 'Payment received from John Doe', time: '4 hours ago', status: 'success' },
+    { id: 3, type: 'feedback', message: 'Client feedback on "Website Design"', time: '1 day ago', status: 'info' }
   ],
   projects: [
-    { id: 1, name: 'Brand Identity Package', client: 'Acme Corp', progress: 85, status: 'In Progress', value: 2500 },
-    { id: 2, name: 'Mobile App Design', client: 'Tech Startup', progress: 40, status: 'In Progress', value: 5000 }
+    { id: 1, name: 'Brand Identity Package', client: 'Acme Corp', progress: 85, status: 'In Progress', value: 2500, priority: 'high' },
+    { id: 2, name: 'Mobile App Design', client: 'Tech Startup', progress: 40, status: 'In Progress', value: 5000, priority: 'urgent' }
   ]
 }
 
 export default function DashboardPage() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('overview')
 
-  // Memoize tab configuration to prevent unnecessary re-renders
-  const tabConfig = useMemo(() => [
-    {
-      value: 'overview',
-      label: 'Overview',
-      icon: LayoutDashboard,
-      description: 'Enterprise dashboard with analytics and insights'
-    },
-    {
-      value: 'projects-hub', 
-      label: 'Projects Hub',
-      icon: FolderOpen,
-      description: 'Complete project lifecycle management system'
-    },
-    {
-      value: 'ai-create',
-      label: 'AI Create',
-      icon: Brain,
-      description: 'Multi-model AI studio (GPT-4o, Claude, DALL-E, Google AI)'
-    },
-    {
-      value: 'video-studio',
-      label: 'Video Studio', 
-      icon: Video,
-      description: 'Professional editing with AI transcription and collaboration'
-    },
-    {
-      value: 'escrow',
-      label: 'Escrow',
-      icon: Shield,
-      description: 'Secure milestone-based payment protection system'
-    },
-    {
-      value: 'files-hub',
-      label: 'Files Hub',
-      icon: FileText,
-      description: 'Multi-cloud storage with 70% cost optimization'
-    },
-    {
-      value: 'community',
-      label: 'Community',
-      icon: Globe,
-      description: 'Connect with 2,800+ verified creative professionals'
-    },
-    {
-      value: 'my-day',
-      label: 'My Day Today',
-      icon: Calendar,
-      description: 'AI-powered daily planning and productivity optimization'
-    }
-  ], [])
+  const navigateToPage = (path: string) => {
+    router.push(`/dashboard/${path}`)
+  }
 
-  // Memoize tab change handler
-  const handleTabChange = useCallback((value: string) => {
-    setActiveTab(value)
-  }, [])
-
-  // Memoize tab content rendering for better performance
-  const renderTabContent = useCallback((tabValue: string) => {
-    switch (tabValue) {
-      case 'overview':
-        return <DashboardOverview />
-      case 'projects-hub':
-        return (
-          <ErrorBoundary>
-            <Suspense fallback={<div>Loading...</div>}>
-              <ProjectsHubTab />
-            </Suspense>
-          </ErrorBoundary>
-        )
-      case 'ai-create':
-        return (
-          <Suspense fallback={<LoadingSpinner />}>
-            <AICreateTab />
-          </Suspense>
-        )
-      case 'video-studio':
-        return <VideoStudioPlaceholder />
-      case 'escrow':
-        return <EscrowPlaceholder />
-      case 'files-hub':
-        return (
-          <Suspense fallback={<LoadingSpinner />}>
-            <FilesHubTab />
-          </Suspense>
-        )
-      case 'community':
-        return (
-          <Suspense fallback={<LoadingSpinner />}>
-            <CommunityTab />
-          </Suspense>
-        )
-      case 'my-day':
-        return (
-          <Suspense fallback={<LoadingSpinner />}>
-            <MyDayTab />
-          </Suspense>
-        )
-      default:
-        return <DashboardOverview />
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'in progress': return 'bg-blue-100 text-blue-800'
+      case 'review': return 'bg-yellow-100 text-yellow-800'
+      case 'completed': return 'bg-green-100 text-green-800'
+      default: return 'bg-gray-100 text-gray-800'
     }
-  }, [])
+  }
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority.toLowerCase()) {
+      case 'urgent': return 'bg-red-500'
+      case 'high': return 'bg-orange-500'
+      case 'medium': return 'bg-yellow-500'
+      case 'low': return 'bg-green-500'
+      default: return 'bg-gray-500'
+    }
+  }
+
+  // All available features organized by category - EXPANDED LIST
+  const features = {
+    core: [
+      { name: 'My Day', path: 'my-day', icon: Calendar, description: 'AI-powered daily planning and productivity optimization' },
+      { name: 'Projects Hub', path: 'projects-hub', icon: FolderOpen, description: 'Complete project lifecycle management system' },
+      { name: 'Analytics', path: 'analytics', icon: TrendingUp, description: 'Advanced business intelligence and reporting' },
+      { name: 'Time Tracking', path: 'time-tracking', icon: Clock, description: 'Advanced time tracking and productivity metrics' }
+    ],
+    ai: [
+      { name: 'AI Create', path: 'ai-create', icon: Brain, description: 'Multi-model AI studio (GPT-4o, Claude, DALL-E)' },
+      { name: 'AI Design', path: 'ai-design', icon: Palette, description: 'AI-powered design generation and optimization' },
+      { name: 'AI Assistant', path: 'ai-assistant', icon: Zap, description: 'Personal AI assistant for workflow automation' },
+      { name: 'AI Enhanced', path: 'ai-enhanced', icon: Star, description: 'Enhanced AI features and capabilities' }
+    ],
+    creative: [
+      { name: 'Video Studio', path: 'video-studio', icon: Video, description: 'Professional video editing with AI transcription' },
+      { name: 'Canvas', path: 'canvas', icon: Monitor, description: 'Interactive design and collaboration canvas' },
+      { name: 'Canvas Collaboration', path: 'canvas-collaboration', icon: Users, description: 'Real-time canvas collaboration' },
+      { name: 'Gallery', path: 'gallery', icon: Image, description: 'Portfolio showcase and asset management' },
+      { name: 'CV & Portfolio', path: 'cv-portfolio', icon: User, description: 'Professional portfolio and resume builder' }
+    ],
+    business: [
+      { name: 'Financial Hub', path: 'financial-hub', icon: DollarSign, description: 'Complete financial management and reporting' },
+      { name: 'Financial', path: 'financial', icon: Wallet, description: 'Financial tracking and budgeting' },
+      { name: 'Invoices', path: 'invoices', icon: Receipt, description: 'Invoice generation and payment tracking' },
+      { name: 'Escrow', path: 'escrow', icon: Shield, description: 'Secure milestone-based payment protection' },
+      { name: 'Bookings', path: 'bookings', icon: Calendar, description: 'Appointment and meeting scheduling system' },
+      { name: 'Booking', path: 'booking', icon: Calendar, description: 'Simple booking management' }
+    ],
+    communication: [
+      { name: 'Messages', path: 'messages', icon: MessageSquare, description: 'Integrated communication hub' },
+      { name: 'Collaboration', path: 'collaboration', icon: Users, description: 'Real-time project collaboration tools' },
+      { name: 'Team Hub', path: 'team-hub', icon: Building, description: 'Team management and coordination' },
+      { name: 'Team', path: 'team', icon: Users, description: 'Team member management' },
+      { name: 'Client Zone', path: 'client-zone', icon: UserCheck, description: 'Client portal and project sharing' },
+      { name: 'Clients', path: 'clients', icon: Users, description: 'Client relationship management' }
+    ],
+    storage: [
+      { name: 'Files Hub', path: 'files-hub', icon: FileText, description: 'Multi-cloud storage with optimization' },
+      { name: 'Files', path: 'files', icon: Archive, description: 'File management and organization' },
+      { name: 'Cloud Storage', path: 'cloud-storage', icon: Cloud, description: 'Advanced cloud storage management' },
+      { name: 'Storage', path: 'storage', icon: Archive, description: 'Storage management and analytics' }
+    ],
+    productivity: [
+      { name: 'Workflow Builder', path: 'workflow-builder', icon: Workflow, description: 'Custom workflow automation and templates' },
+      { name: 'Notifications', path: 'notifications', icon: Bell, description: 'Smart notification management center' },
+      { name: 'Calendar', path: 'calendar', icon: Calendar, description: 'Advanced calendar and scheduling' }
+    ],
+    community: [
+      { name: 'Community Hub', path: 'community-hub', icon: Globe, description: 'Connect with 2,800+ creative professionals' },
+      { name: 'Community', path: 'community', icon: Globe, description: 'Community features and networking' }
+    ],
+    settings: [
+      { name: 'Settings', path: 'settings', icon: Settings, description: 'Platform configuration and preferences' },
+      { name: 'Profile', path: 'profile', icon: User, description: 'Personal profile and account management' }
+    ]
+  }
+
+  const renderOverviewTab = () => (
+    <ScrollArea className="h-[calc(100vh-300px)]">
+      <div className="space-y-8 pr-4">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Earnings</p>
+                  <p className="text-3xl font-bold text-gray-900">${mockData.earnings.toLocaleString()}</p>
+                  <p className="text-sm text-green-600">+12% from last month</p>
+                </div>
+                <div className="p-3 bg-green-100 rounded-xl">
+                  <DollarSign className="h-6 w-6 text-green-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Active Projects</p>
+                  <p className="text-3xl font-bold text-gray-900">{mockData.activeProjects}</p>
+                  <p className="text-sm text-blue-600">{mockData.completedProjects} completed</p>
+                </div>
+                <div className="p-3 bg-blue-100 rounded-xl">
+                  <FolderOpen className="h-6 w-6 text-blue-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Clients</p>
+                  <p className="text-3xl font-bold text-gray-900">{mockData.totalClients}</p>
+                  <p className="text-sm text-purple-600">+8 this month</p>
+                </div>
+                <div className="p-3 bg-purple-100 rounded-xl">
+                  <Users className="h-6 w-6 text-purple-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Hours This Month</p>
+                  <p className="text-3xl font-bold text-gray-900">{mockData.hoursThisMonth}</p>
+                  <p className="text-sm text-orange-600">23h this week</p>
+                </div>
+                <div className="p-3 bg-orange-100 rounded-xl">
+                  <Clock className="h-6 w-6 text-orange-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Active Projects */}
+        <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Briefcase className="h-5 w-5" />
+                Active Projects
+              </CardTitle>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigateToPage('projects-hub')}
+                className="gap-2"
+              >
+                View All
+                <ArrowRight className="h-3 w-3" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {mockData.projects.map(project => (
+              <div key={project.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <h4 className="font-medium text-gray-900">{project.name}</h4>
+                    <Badge variant="outline" className={getStatusColor(project.status)}>
+                      {project.status}
+                    </Badge>
+                    <div className={cn("w-2 h-2 rounded-full", getPriorityColor(project.priority))} />
+                  </div>
+                  <span className="font-medium text-green-600">${project.value.toLocaleString()}</span>
+                </div>
+                <p className="text-sm text-gray-600 mb-3">Client: {project.client}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 mr-4">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Progress</span>
+                      <span>{project.progress}%</span>
+                    </div>
+                    <Progress value={project.progress} className="h-2" />
+                  </div>
+                  <Button size="sm" variant="outline">View</Button>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions */}
+        <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Zap className="h-5 w-5" />
+              Quick Actions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Button 
+                className="h-auto p-4 flex-col gap-2" 
+                variant="outline"
+                onClick={() => navigateToPage('projects-hub')}
+              >
+                <Plus className="h-5 w-5" />
+                New Project
+              </Button>
+              <Button 
+                className="h-auto p-4 flex-col gap-2" 
+                variant="outline"
+                onClick={() => navigateToPage('ai-create')}
+              >
+                <Brain className="h-5 w-5" />
+                AI Create
+              </Button>
+              <Button 
+                className="h-auto p-4 flex-col gap-2" 
+                variant="outline"
+                onClick={() => navigateToPage('my-day')}
+              >
+                <Calendar className="h-5 w-5" />
+                My Day
+              </Button>
+              <Button 
+                className="h-auto p-4 flex-col gap-2" 
+                variant="outline"
+                onClick={() => navigateToPage('messages')}
+              >
+                <MessageSquare className="h-5 w-5" />
+                Messages
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </ScrollArea>
+  )
+
+  const renderFeatureGrid = (categoryKey: string) => {
+    const categoryFeatures = features[categoryKey]
+    if (!categoryFeatures) return null
+
+    const categoryNames = {
+      core: 'Core Features',
+      ai: 'AI Tools',
+      creative: 'Creative Suite',
+      business: 'Business Tools',
+      communication: 'Communication',
+      storage: 'Storage & Files',
+      productivity: 'Productivity',
+      community: 'Community',
+      settings: 'Settings'
+    }
+
+    return (
+      <ScrollArea className="h-[calc(100vh-300px)]">
+        <div className="space-y-6 pr-4">
+          <div className="text-center">
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">{categoryNames[categoryKey]}</h3>
+            <p className="text-gray-600">Explore our comprehensive {categoryNames[categoryKey].toLowerCase()}</p>
+            <Badge variant="outline" className="mt-2">
+              {categoryFeatures.length} tools available
+            </Badge>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {categoryFeatures.map(feature => {
+              const Icon = feature.icon
+              return (
+                <Card 
+                  key={feature.path} 
+                  className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full"
+                  onClick={() => navigateToPage(feature.path)}
+                >
+                  <CardContent className="p-4 h-full flex flex-col">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg group-hover:scale-110 transition-transform">
+                        <Icon className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors text-sm truncate">
+                          {feature.name}
+                        </h4>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-3 flex-1 line-clamp-3">
+                      {feature.description}
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full gap-2 group-hover:bg-blue-50 group-hover:border-blue-200 text-xs"
+                    >
+                      Open
+                      <ArrowRight className="h-3 w-3" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        </div>
+      </ScrollArea>
+    )
+  }
 
   return (
-    <div className="min-h-screen kazi-bg-light dark:kazi-bg-dark">
-      {/* Header */}
-      <div className="border-b border-gray-200 dark:border-gray-700 kazi-bg-light dark:kazi-bg-dark">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 className="text-4xl font-bold kazi-text-dark dark:kazi-text-light mb-2 kazi-headline">
-                Welcome to KAZI
-              </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-300 kazi-body">
-                Your complete creative business platform
-              </p>
-            </div>
-            
-            {/* Quick Stats */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
-              <div className="order-2 sm:order-1">
-                <GlobalSearch />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40">
+      {/* Floating decorative elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 -right-4 w-96 h-96 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-700"></div>
+      </div>
+
+      <div className="relative min-h-screen flex flex-col">
+        {/* Header - Fixed */}
+        <div className="border-b border-white/20 bg-white/30 backdrop-blur-xl sticky top-0 z-50">
+          <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent mb-2">
+                  Welcome to KAZI
+                </h1>
+                <p className="text-sm sm:text-base lg:text-lg text-gray-600 font-light">
+                  Your complete creative business platform with 25+ integrated tools
+                </p>
               </div>
-              <div className="flex gap-3 order-1 sm:order-2">
-                <Card className="kazi-card p-3 sm:p-4 flex-1 sm:flex-initial kazi-hover-scale">
+              
+              <div className="flex items-center gap-4">
+                <Card className="bg-white/70 backdrop-blur-sm border-white/40 p-3">
                   <div className="flex items-center gap-2">
-                    <Wallet className="h-4 w-4 sm:h-5 sm:w-5 kazi-text-accent" />
-                    <div className="min-w-0">
-                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 kazi-body">Earnings</p>
-                      <p className="font-bold kazi-text-accent text-sm sm:text-base kazi-body-medium">${mockData.earnings.toLocaleString()}</p>
-                    </div>
-                  </div>
-                </Card>
-                
-                <Card className="kazi-card p-3 sm:p-4 flex-1 sm:flex-initial kazi-hover-scale">
-                  <div className="flex items-center gap-2">
-                    <FolderOpen className="h-4 w-4 sm:h-5 sm:w-5 kazi-text-primary" />
-                    <div className="min-w-0">
-                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 kazi-body">Active Projects</p>
-                      <p className="font-bold kazi-text-primary text-sm sm:text-base kazi-body-medium">{mockData.activeProjects}</p>
+                    <Star className="h-4 w-4 text-yellow-500" />
+                    <div>
+                      <p className="text-xs text-gray-600">Platform Status</p>
+                      <p className="text-sm font-semibold text-green-600">All Systems Operational</p>
                     </div>
                   </div>
                 </Card>
@@ -210,305 +419,74 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-      </div>
-      
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-          {/* Tab Navigation */}
-          <div className="bg-white/70 backdrop-blur-sm rounded-xl p-2 border border-white/20 shadow-lg">
-            <div className="overflow-x-auto scrollbar-hide">
-              <TabsList className="flex w-max md:grid md:w-full md:grid-cols-8 bg-transparent gap-1 min-w-max">
-                {tabConfig.map((tab) => {
-                const IconComponent = tab.icon
-                return (
-                  <TabsTrigger
-                    key={tab.value}
-                    value={tab.value}
-                    className={`flex-shrink-0 min-w-[120px] md:flex-1 group rounded-lg transition-all duration-300 ease-in-out h-20 md:h-24 flex flex-col items-center justify-center gap-1 md:gap-2 px-3 ${
-                      activeTab === tab.value
-                        ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg scale-105'
-                        : 'text-gray-600 hover:bg-white/80 hover:shadow-md hover:scale-105'
-                    }`}
-                  >
-                    <IconComponent className={`h-5 w-5 md:h-6 md:w-6 transition-all ${activeTab === tab.value ? 'text-white' : 'text-gray-400 group-hover:text-blue-500'}`} />
-                    <span className="font-semibold text-xs md:text-sm text-center leading-tight">{tab.label}</span>
+
+        {/* Main Content - Flexible */}
+        <div className="flex-1 container mx-auto px-4 sm:px-6 py-4 sm:py-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+            {/* Scrollable Tab List */}
+            <div className="mb-6">
+              <ScrollArea className="w-full">
+                <TabsList className="inline-flex h-12 items-center justify-start rounded-3xl bg-white/60 backdrop-blur-xl border border-white/30 p-1 shadow-xl min-w-max">
+                  <TabsTrigger value="overview" className="flex items-center gap-2 rounded-2xl px-4 py-2 whitespace-nowrap">
+                    <LayoutDashboard className="h-4 w-4" />
+                    <span>Overview</span>
                   </TabsTrigger>
-                )
-              })}
-              </TabsList>
+                  <TabsTrigger value="core" className="flex items-center gap-2 rounded-2xl px-4 py-2 whitespace-nowrap">
+                    <Target className="h-4 w-4" />
+                    <span>Core</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="ai" className="flex items-center gap-2 rounded-2xl px-4 py-2 whitespace-nowrap">
+                    <Brain className="h-4 w-4" />
+                    <span>AI Tools</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="creative" className="flex items-center gap-2 rounded-2xl px-4 py-2 whitespace-nowrap">
+                    <Palette className="h-4 w-4" />
+                    <span>Creative</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="business" className="flex items-center gap-2 rounded-2xl px-4 py-2 whitespace-nowrap">
+                    <DollarSign className="h-4 w-4" />
+                    <span>Business</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="communication" className="flex items-center gap-2 rounded-2xl px-4 py-2 whitespace-nowrap">
+                    <MessageSquare className="h-4 w-4" />
+                    <span>Communication</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="storage" className="flex items-center gap-2 rounded-2xl px-4 py-2 whitespace-nowrap">
+                    <Cloud className="h-4 w-4" />
+                    <span>Storage</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="productivity" className="flex items-center gap-2 rounded-2xl px-4 py-2 whitespace-nowrap">
+                    <Clock className="h-4 w-4" />
+                    <span>Productivity</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="community" className="flex items-center gap-2 rounded-2xl px-4 py-2 whitespace-nowrap">
+                    <Globe className="h-4 w-4" />
+                    <span>Community</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="settings" className="flex items-center gap-2 rounded-2xl px-4 py-2 whitespace-nowrap">
+                    <Settings className="h-4 w-4" />
+                    <span>Settings</span>
+                  </TabsTrigger>
+                </TabsList>
+              </ScrollArea>
             </div>
-          </div>
-          
-          {/* Tab Content */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              {renderTabContent(activeTab)}
-            </motion.div>
-          </AnimatePresence>
-        </Tabs>
-      </div>
-    </div>
-  )
-}
 
-// Placeholder Components for each tab
-function DashboardOverview() {
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-      {/* Left Column */}
-      <div className="lg:col-span-2 space-y-4 lg:space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-4">
-              {mockData.recentActivities.map(activity => (
-                <li key={activity.id} className="flex items-center gap-4">
-                  <div className="p-2 bg-slate-100 rounded-full">
-                    {activity.type === 'project' && <FolderOpen className="h-5 w-5 text-blue-500" />}
-                    {activity.type === 'payment' && <DollarSign className="h-5 w-5 text-green-500" />}
-                    {activity.type === 'feedback' && <MessageSquare className="h-5 w-5 text-yellow-500" />}
-                  </div>
-                  <div>
-                    <p>{activity.message}</p>
-                    <p className="text-sm text-gray-500">{activity.time}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Active Projects</CardTitle>
-            <Button size="sm">View All</Button>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {mockData.projects.map(project => (
-                <div key={project.id} className="p-4 border rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold">{project.name}</h3>
-                    <p className="text-sm text-gray-500">{project.client}</p>
-                  </div>
-                  <Progress value={project.progress} className="w-full" />
-                  <div className="flex items-center justify-between mt-2 text-sm">
-                    <span>{project.progress}% complete</span>
-                    <span>${project.value.toLocaleString()}</span>
-                  </div>
-                </div>
-              ))}
+            {/* Tab Content - Scrollable */}
+            <div className="flex-1">
+              <TabsContent value="overview" className="mt-0 h-full">{renderOverviewTab()}</TabsContent>
+              <TabsContent value="core" className="mt-0 h-full">{renderFeatureGrid('core')}</TabsContent>
+              <TabsContent value="ai" className="mt-0 h-full">{renderFeatureGrid('ai')}</TabsContent>
+              <TabsContent value="creative" className="mt-0 h-full">{renderFeatureGrid('creative')}</TabsContent>
+              <TabsContent value="business" className="mt-0 h-full">{renderFeatureGrid('business')}</TabsContent>
+              <TabsContent value="communication" className="mt-0 h-full">{renderFeatureGrid('communication')}</TabsContent>
+              <TabsContent value="storage" className="mt-0 h-full">{renderFeatureGrid('storage')}</TabsContent>
+              <TabsContent value="productivity" className="mt-0 h-full">{renderFeatureGrid('productivity')}</TabsContent>
+              <TabsContent value="community" className="mt-0 h-full">{renderFeatureGrid('community')}</TabsContent>
+              <TabsContent value="settings" className="mt-0 h-full">{renderFeatureGrid('settings')}</TabsContent>
             </div>
-          </CardContent>
-        </Card>
+          </Tabs>
+        </div>
       </div>
-
-      {/* Right Column */}
-      <div className="space-y-4 lg:space-y-6">
-        <Card className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
-          <CardHeader>
-            <CardTitle>AI Assistant</CardTitle>
-            <CardDescription className="text-blue-100">Your creative co-pilot</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p>What would you like to do today?</p>
-            <Button variant="secondary" className="w-full justify-start gap-2">
-              <Zap className="h-4 w-4" /> Generate Ideas
-            </Button>
-            <Button variant="secondary" className="w-full justify-start gap-2">
-              <FileText className="h-4 w-4" /> Draft a Proposal
-            </Button>
-            <Button variant="secondary" className="w-full justify-start gap-2">
-              <TrendingUp className="h-4 w-4" /> Optimize my Week
-            </Button>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-3">
-            <Button variant="outline" className="flex flex-col h-20 sm:h-24 items-center justify-center gap-1 sm:gap-2 p-2">
-              <Plus className="h-5 w-5 sm:h-6 sm:w-6" />
-              <span className="text-xs sm:text-sm">New Project</span>
-            </Button>
-            <Button variant="outline" className="flex flex-col h-20 sm:h-24 items-center justify-center gap-1 sm:gap-2 p-2">
-              <Users className="h-5 w-5 sm:h-6 sm:w-6" />
-              <span className="text-xs sm:text-sm">Add Client</span>
-            </Button>
-            <Button variant="outline" className="flex flex-col h-20 sm:h-24 items-center justify-center gap-1 sm:gap-2 p-2">
-              <FileText className="h-5 w-5 sm:h-6 sm:w-6" />
-              <span className="text-xs sm:text-sm">New Invoice</span>
-            </Button>
-            <Button variant="outline" className="flex flex-col h-20 sm:h-24 items-center justify-center gap-1 sm:gap-2 p-2">
-              <Settings className="h-5 w-5 sm:h-6 sm:w-6" />
-              <span className="text-xs sm:text-sm">Settings</span>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  )
-}
-
-// Removed unused placeholder components as they've been replaced with working components
-
-function VideoStudioPlaceholder() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Video Studio</CardTitle>
-        <CardDescription>From recording to final cut, all in one place.</CardDescription>
-      </CardHeader>
-      <CardContent className="text-center py-16">
-        <Video className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-        <h3 className="text-xl font-semibold">The Studio is Under Construction</h3>
-        <p className="text-gray-500">Record, edit, and collaborate on professional videos.</p>
-        <Button className="mt-4">See a Preview</Button>
-      </CardContent>
-    </Card>
-  )
-}
-
-function EscrowPlaceholder() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Secure Escrow</CardTitle>
-        <CardDescription>Peace of mind for you and your clients.</CardDescription>
-      </CardHeader>
-      <CardContent className="text-center py-16">
-        <Shield className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-        <h3 className="text-xl font-semibold">Secure Payments on the Way</h3>
-        <p className="text-gray-500">Protect your projects with milestone-based payments.</p>
-        <Button className="mt-4">Learn More</Button>
-      </CardContent>
-    </Card>
-  )
-}
-
-// All placeholder components have been replaced with working implementations
-
-// Working Components
-function AICreateTab() {
-  return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold mb-2">AI Create Studio</h2>
-        <p className="text-gray-600">Generate content using advanced AI models</p>
-      </div>
-      <AICreateStudio />
-    </div>
-  )
-}
-
-function ProjectsHubTab() {
-  const sampleProjects = [
-    {
-      id: 'proj_001',
-      title: 'Brand Identity Package',
-      description: 'Complete brand identity design including logo, colors, typography, and brand guidelines for Acme Corp.',
-      status: 'active' as const,
-      progress: 75,
-      client_name: 'Acme Corp',
-      budget: 5000,
-      spent: 3750,
-      start_date: '2024-01-15',
-      end_date: '2024-03-15',
-      team_members: [
-        { id: 'user_001', name: 'Sarah Johnson', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah' },
-        { id: 'user_002', name: 'Mike Chen', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mike' }
-      ],
-      priority: 'high' as const,
-      comments_count: 12,
-      attachments: [{}, {}, {}]
-    },
-    {
-      id: 'proj_002',
-      title: 'E-commerce Website',
-      description: 'Full-stack e-commerce platform with modern design and advanced features for Tech Startup.',
-      status: 'active' as const,
-      progress: 45,
-      client_name: 'Tech Startup',
-      budget: 15000,
-      spent: 6750,
-      start_date: '2024-02-01',
-      end_date: '2024-05-01',
-      team_members: [
-        { id: 'user_003', name: 'Alex Rivera', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex' },
-        { id: 'user_004', name: 'Emma Wilson', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emma' }
-      ],
-      priority: 'medium' as const,
-      comments_count: 8,
-      attachments: [{}, {}]
-    },
-    {
-      id: 'proj_003',
-      title: 'Mobile App Design',
-      description: 'Native mobile app design for iOS and Android with user experience optimization.',
-      status: 'completed' as const,
-      progress: 100,
-      client_name: 'FinTech Solutions',
-      budget: 8000,
-      spent: 8000,
-      start_date: '2023-11-01',
-      end_date: '2024-01-30',
-      team_members: [
-        { id: 'user_005', name: 'David Kim', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=David' }
-      ],
-      priority: 'high' as const,
-      comments_count: 15,
-      attachments: [{}, {}, {}, {}]
-    }
-  ]
-
-  return (
-    <div className="space-y-6">
-      <ProjectsHub
-        projects={sampleProjects}
-        _userId="current-user"
-      />
-    </div>
-  )
-}
-
-function FilesHubTab() {
-  return (
-    <div className="space-y-6">
-      <FilesHub
-        userId="current-user"
-        onFileUpload={(files) => console.log('Files uploaded:', files)}
-        onFileDelete={(fileId) => console.log('File deleted:', fileId)}
-        onFileShare={(fileId) => console.log('File shared:', fileId)}
-      />
-    </div>
-  )
-}
-
-function CommunityTab() {
-  return (
-    <div className="space-y-6">
-      <CommunityHub
-        currentUserId="current-user"
-        onPostCreate={(post) => console.log('Post created:', post)}
-        onMemberConnect={(memberId) => console.log('Connected to member:', memberId)}
-      />
-    </div>
-  )
-}
-
-function MyDayTab() {
-  return (
-    <div className="space-y-6">
-      <MyDayToday />
     </div>
   )
 }

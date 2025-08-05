@@ -1,657 +1,521 @@
 'use client'
 
-import React, { useState } from 'react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import {
-  BarChart3,
-  DollarSign,
-  Users,
-  Clock,
-  Download,
+import { Progress } from '@/components/ui/progress'
+import { 
+  TrendingUp, 
+  DollarSign, 
+  Users, 
+  FolderOpen, 
+  Clock, 
   Target,
-  Award,
-  FileText,
-  Star,
-  Activity,
+  BarChart3,
   PieChart,
-  LineChart,
-  RefreshCw,
-  ArrowUpRight,
-  ArrowDownRight
+  Activity,
+  Calendar,
+  ArrowRight,
+  ArrowUp,
+  ArrowDown,
+  Eye,
+  MousePointer,
+  Download,
+  Share
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
-interface MetricCard {
-  title: string
-  value: string
-  change: string
-  trend: 'up' | 'down'
-  icon: React.ComponentType<{ className?: string }>
-  color: string
-}
-
-interface _ChartData {
-  name: string
-  value: number
-  color: string
-}
-
-interface Project {
-  id: string
-  name: string
-  status: string
-  completion: number
-  revenue: number
-  client: string
-  timeline: string
+interface AnalyticsData {
+  revenue: {
+    current: number
+    previous: number
+    change: number
+  }
+  projects: {
+    total: number
+    active: number
+    completed: number
+    cancelled: number
+  }
+  clients: {
+    total: number
+    new: number
+    returning: number
+  }
+  time: {
+    totalHours: number
+    billableHours: number
+    efficiency: number
+  }
 }
 
 export default function AnalyticsPage() {
-  const [timeRange, setTimeRange] = useState<any>('30d')
-  const [activeTab, setActiveTab] = useState<any>('overview')
+  const router = useRouter()
+  const [activeTab, setActiveTab] = useState('overview')
+  const [loading, setLoading] = useState(true)
+  const [dateRange, setDateRange] = useState('30d')
 
-  const metrics: MetricCard[] = [
-    {
-      title: 'Total Revenue',
-      value: '$45,240',
-      change: '+12.5%',
-      trend: 'up',
-      icon: DollarSign,
-      color: 'text-green-600'
+  // Mock analytics data
+  const analyticsData: AnalyticsData = {
+    revenue: {
+      current: 45231,
+      previous: 38920,
+      change: 16.2
     },
-    {
-      title: 'Active Projects',
-      value: '24',
-      change: '+3',
-      trend: 'up',
-      icon: FileText,
-      color: 'text-blue-600'
+    projects: {
+      total: 68,
+      active: 12,
+      completed: 48,
+      cancelled: 8
     },
-    {
-      title: 'Client Satisfaction',
-      value: '96%',
-      change: '+2.1%',
-      trend: 'up',
-      icon: Star,
-      color: 'text-purple-600'
+    clients: {
+      total: 156,
+      new: 23,
+      returning: 133
     },
-    {
-      title: 'Avg Response Time',
-      value: '2.4h',
-      change: '-15min',
-      trend: 'up',
-      icon: Clock,
-      color: 'text-orange-600'
-    },
-    {
-      title: 'Total Clients',
-      value: '48',
-      change: '+6',
-      trend: 'up',
-      icon: Users,
-      color: 'text-cyan-600'
-    },
-    {
-      title: 'Completion Rate',
-      value: '94%',
-      change: '+1.8%',
-      trend: 'up',
-      icon: Target,
-      color: 'text-emerald-600'
-    }
-  ]
-
-  const revenueData = [
-    { name: 'Jan', value: 3200, color: '#8B5CF6' },
-    { name: 'Feb', value: 4100, color: '#8B5CF6' },
-    { name: 'Mar', value: 3800, color: '#8B5CF6' },
-    { name: 'Apr', value: 4500, color: '#8B5CF6' },
-    { name: 'May', value: 5200, color: '#8B5CF6' },
-    { name: 'Jun', value: 4800, color: '#8B5CF6' }
-  ]
-
-  const projectTypes = [
-    { name: 'Web Development', value: 35, color: '#8B5CF6' },
-    { name: 'Design', value: 25, color: '#06B6D4' },
-    { name: 'Video Editing', value: 20, color: '#10B981' },
-    { name: 'Content Creation', value: 15, color: '#F59E0B' },
-    { name: 'Other', value: 5, color: '#EF4444' }
-  ]
-
-  const topProjects: Project[] = [
-    {
-      id: '1',
-      name: 'E-commerce Redesign',
-      status: 'In Progress',
-      completion: 75,
-      revenue: 8500,
-      client: 'TechCorp Inc.',
-      timeline: '3 weeks'
-    },
-    {
-      id: '2',
-      name: 'Brand Identity Package',
-      status: 'Review',
-      completion: 90,
-      revenue: 6200,
-      client: 'StartupXYZ',
-      timeline: '1 week'
-    },
-    {
-      id: '3',
-      name: 'Video Campaign',
-      status: 'Completed',
-      completion: 100,
-      revenue: 4800,
-      client: 'Marketing Pro',
-      timeline: 'Delivered'
-    },
-    {
-      id: '4',
-      name: 'Mobile App UI',
-      status: 'Planning',
-      completion: 25,
-      revenue: 12000,
-      client: 'InnovateLabs',
-      timeline: '6 weeks'
-    }
-  ]
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Completed': return 'bg-green-100 text-green-800'
-      case 'In Progress': return 'bg-blue-100 text-blue-800'
-      case 'Review': return 'bg-yellow-100 text-yellow-800'
-      case 'Planning': return 'bg-gray-100 text-gray-800'
-      default: return 'bg-gray-100 text-gray-800'
+    time: {
+      totalHours: 1247,
+      billableHours: 1089,
+      efficiency: 87.3
     }
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <BarChart3 className="w-6 h-6 text-purple-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
-              <Badge className="bg-gradient-to-r from-purple-500 to-violet-600 text-white">A+++</Badge>
-            </div>
-            <div className="flex items-center gap-2">
-              <Activity className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-600">Real-time insights</span>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <Select value={timeRange} onValueChange={setTimeRange}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7d">Last 7 days</SelectItem>
-                <SelectItem value="30d">Last 30 days</SelectItem>
-                <SelectItem value="90d">Last 90 days</SelectItem>
-                <SelectItem value="1y">Last year</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Button variant="outline" size="sm" onClick={() => alert('Exporting analytics data...')}>
-              <Download className="w-4 h-4 mr-2" />
-              Export
-            </Button>
-            
-            <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
-            </Button>
-          </div>
+  const monthlyRevenue = [
+    { month: 'Jan', revenue: 32000, projects: 8 },
+    { month: 'Feb', revenue: 35000, projects: 10 },
+    { month: 'Mar', revenue: 28000, projects: 7 },
+    { month: 'Apr', revenue: 42000, projects: 12 },
+    { month: 'May', revenue: 38000, projects: 9 },
+    { month: 'Jun', revenue: 45231, projects: 11 }
+  ]
+
+  const topClients = [
+    { name: 'TechCorp Inc.', revenue: 12500, projects: 3, status: 'active' },
+    { name: 'Creative Agency', revenue: 9800, projects: 2, status: 'active' },
+    { name: 'Startup Ventures', revenue: 8200, projects: 4, status: 'completed' },
+    { name: 'Digital Solutions', revenue: 7500, projects: 2, status: 'active' },
+    { name: 'Innovation Labs', revenue: 6900, projects: 1, status: 'active' }
+  ]
+
+  const projectCategories = [
+    { category: 'Web Development', count: 28, revenue: 18500, color: 'bg-blue-500' },
+    { category: 'Mobile Apps', count: 15, revenue: 12800, color: 'bg-green-500' },
+    { category: 'Branding', count: 12, revenue: 8200, color: 'bg-purple-500' },
+    { category: 'UI/UX Design', count: 8, revenue: 4200, color: 'bg-orange-500' },
+    { category: 'Marketing', count: 5, revenue: 1530, color: 'bg-pink-500' }
+  ]
+
+  useEffect(() => {
+    // Simulate loading
+    setTimeout(() => setLoading(false), 1000)
+  }, [])
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount)
+  }
+
+  const getChangeColor = (change: number) => {
+    return change >= 0 ? 'text-green-600' : 'text-red-600'
+  }
+
+  const getChangeIcon = (change: number) => {
+    return change >= 0 ? ArrowUp : ArrowDown
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading analytics...</p>
         </div>
       </div>
+    )
+  }
 
-      <div className="p-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="revenue">Revenue</TabsTrigger>
-            <TabsTrigger value="projects">Projects</TabsTrigger>
-            <TabsTrigger value="clients">Clients</TabsTrigger>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="overview" className="space-y-6">
-            {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {metrics.map((metric, index) => (
-                <Card key={index}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">{metric.title}</p>
-                        <p className="text-2xl font-bold text-gray-900">{metric.value}</p>
-                        <div className="flex items-center gap-1 mt-1">
-                          {metric.trend === 'up' ? (
-                            <ArrowUpRight className="w-4 h-4 text-green-500" />
-                          ) : (
-                            <ArrowDownRight className="w-4 h-4 text-red-500" />
-                          )}
-                          <span className={`text-sm font-medium ${
-                            metric.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                          }`}>
-                            {metric.change}
-                          </span>
-                          <span className="text-sm text-gray-500">vs last month</span>
-                        </div>
-                      </div>
-                      <div className={`p-3 rounded-lg bg-gray-50`}>
-                        <metric.icon className={`w-6 h-6 ${metric.color}`} />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6">
+      {/* Floating decorative elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 -left-4 w-72 h-72 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 -right-4 w-72 h-72 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-700"></div>
+      </div>
+
+      <div className="relative max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent mb-2">
+                Analytics Dashboard
+              </h1>
+              <p className="text-lg text-gray-600 font-light">
+                Comprehensive business intelligence and performance metrics 📊
+              </p>
             </div>
+            
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2"
+                onClick={() => router.push('/dashboard')}
+              >
+                <ArrowRight className="h-4 w-4 rotate-180" />
+                Back to Dashboard
+              </Button>
+              
+              <select
+                value={dateRange}
+                onChange={(e) => setDateRange(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="7d">Last 7 days</option>
+                <option value="30d">Last 30 days</option>
+                <option value="90d">Last 90 days</option>
+                <option value="1y">Last year</option>
+              </select>
+              
+              <Button size="sm" className="gap-2">
+                <Download className="h-4 w-4" />
+                Export Report
+              </Button>
+            </div>
+          </div>
 
-            {/* Charts Row */}
+          {/* Key Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                    <p className="text-3xl font-bold text-gray-900">
+                      {formatCurrency(analyticsData.revenue.current)}
+                    </p>
+                    <div className="flex items-center gap-1 mt-1">
+                      {React.createElement(getChangeIcon(analyticsData.revenue.change), {
+                        className: cn("h-3 w-3", getChangeColor(analyticsData.revenue.change))
+                      })}
+                      <span className={cn("text-sm font-medium", getChangeColor(analyticsData.revenue.change))}>
+                        {Math.abs(analyticsData.revenue.change)}%
+                      </span>
+                      <span className="text-sm text-gray-500">vs last period</span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-green-100 rounded-xl">
+                    <DollarSign className="h-6 w-6 text-green-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Active Projects</p>
+                    <p className="text-3xl font-bold text-gray-900">{analyticsData.projects.active}</p>
+                    <p className="text-sm text-gray-500">{analyticsData.projects.total} total projects</p>
+                  </div>
+                  <div className="p-3 bg-blue-100 rounded-xl">
+                    <FolderOpen className="h-6 w-6 text-blue-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Clients</p>
+                    <p className="text-3xl font-bold text-gray-900">{analyticsData.clients.total}</p>
+                    <p className="text-sm text-blue-600">{analyticsData.clients.new} new this month</p>
+                  </div>
+                  <div className="p-3 bg-purple-100 rounded-xl">
+                    <Users className="h-6 w-6 text-purple-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Efficiency</p>
+                    <p className="text-3xl font-bold text-gray-900">{analyticsData.time.efficiency}%</p>
+                    <p className="text-sm text-gray-500">{analyticsData.time.billableHours}h billable</p>
+                  </div>
+                  <div className="p-3 bg-orange-100 rounded-xl">
+                    <Target className="h-6 w-6 text-orange-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          <TabsList className="grid w-full grid-cols-4 bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl p-2 shadow-xl">
+            <TabsTrigger value="overview" className="flex items-center gap-2 rounded-2xl">
+              <BarChart3 className="h-4 w-4" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="revenue" className="flex items-center gap-2 rounded-2xl">
+              <DollarSign className="h-4 w-4" />
+              Revenue
+            </TabsTrigger>
+            <TabsTrigger value="projects" className="flex items-center gap-2 rounded-2xl">
+              <FolderOpen className="h-4 w-4" />
+              Projects
+            </TabsTrigger>
+            <TabsTrigger value="clients" className="flex items-center gap-2 rounded-2xl">
+              <Users className="h-4 w-4" />
+              Clients
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Revenue Trend */}
-              <Card>
+              <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <LineChart className="w-5 h-5" />
+                    <TrendingUp className="h-5 w-5" />
                     Revenue Trend
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64 flex items-end justify-between gap-2">
-                    {revenueData.map((item, index) => (
-                      <div key={index} className="flex flex-col items-center gap-2">
-                        <div
-                          className="w-8 bg-purple-500 rounded-t"
-                          style={{ height: `${(item.value / 5200) * 200}px` }}
-                        />
-                        <span className="text-xs text-gray-600">{item.name}</span>
+                  <div className="space-y-4">
+                    {monthlyRevenue.map((month, index) => (
+                      <div key={month.month} className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-medium w-8">{month.month}</span>
+                          <div className="flex-1">
+                            <div className="bg-gray-200 rounded-full h-2 w-32">
+                              <div 
+                                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                                style={{ width: `${(month.revenue / 50000) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium">{formatCurrency(month.revenue)}</p>
+                          <p className="text-xs text-gray-500">{month.projects} projects</p>
+                        </div>
                       </div>
                     ))}
-                  </div>
-                  <div className="mt-4 text-center">
-                    <p className="text-sm text-gray-600">Monthly Revenue Growth</p>
-                    <p className="text-lg font-semibold text-green-600">+18.2% this quarter</p>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Project Types */}
-              <Card>
+              {/* Project Categories */}
+              <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <PieChart className="w-5 h-5" />
-                    Project Distribution
+                    <PieChart className="h-5 w-5" />
+                    Project Categories
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    {projectTypes.map((type, index) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: type.color }}
-                          />
-                          <span className="text-sm text-gray-600">{type.name}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-20 h-2 bg-gray-200 rounded-full">
-                            <div
-                              className="h-2 rounded-full"
-                              style={{
-                                width: `${type.value}%`,
-                                backgroundColor: type.color
-                              }}
-                            />
+                  <div className="space-y-4">
+                    {projectCategories.map(category => (
+                      <div key={category.category} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={cn("w-3 h-3 rounded-full", category.color)} />
+                            <span className="text-sm font-medium">{category.category}</span>
                           </div>
-                          <span className="text-sm font-medium">{type.value}%</span>
+                          <div className="text-right">
+                            <p className="text-sm font-medium">{formatCurrency(category.revenue)}</p>
+                            <p className="text-xs text-gray-500">{category.count} projects</p>
+                          </div>
                         </div>
+                        <Progress 
+                          value={(category.revenue / 20000) * 100} 
+                          className="h-2" 
+                        />
                       </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
             </div>
-
-            {/* Top Projects */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="w-5 h-5" />
-                  Top Performing Projects
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 font-medium text-gray-600">Project</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-600">Client</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-600">Status</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-600">Progress</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-600">Revenue</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-600">Timeline</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {topProjects.map((project) => (
-                        <tr key={project.id} className="border-b border-gray-100 hover:bg-gray-50">
-                          <td className="py-3 px-4">
-                            <span className="font-medium text-gray-900">{project.name}</span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className="text-gray-600">{project.client}</span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <Badge className={getStatusColor(project.status)}>
-                              {project.status}
-                            </Badge>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-2">
-                              <div className="w-16 h-2 bg-gray-200 rounded-full">
-                                <div
-                                  className="h-2 bg-purple-500 rounded-full"
-                                  style={{ width: `${project.completion}%` }}
-                                />
-                              </div>
-                              <span className="text-sm text-gray-600">{project.completion}%</span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className="font-medium text-green-600">
-                              ${project.revenue.toLocaleString()}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className="text-gray-600">{project.timeline}</span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
-          
+
+          {/* Revenue Tab */}
           <TabsContent value="revenue" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="lg:col-span-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
                 <CardHeader>
-                  <CardTitle>Revenue Analytics</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-80">
-                    <div className="h-full flex flex-col">
-                      <div className="mb-4">
-                        <h3 className="font-semibold mb-2">Monthly Revenue Trend</h3>
-                        <div className="h-64 flex items-end justify-between gap-2 px-4">
-                          {[
-                            { month: 'Jul', amount: 3200, height: 45 },
-                            { month: 'Aug', amount: 4100, height: 58 },
-                            { month: 'Sep', amount: 3800, height: 53 },
-                            { month: 'Oct', amount: 4500, height: 64 },
-                            { month: 'Nov', amount: 5200, height: 74 },
-                            { month: 'Dec', amount: 4800, height: 68 }
-                          ].map((item, index) => (
-                            <div key={index} className="flex flex-col items-center gap-2 flex-1">
-                              <div className="text-xs font-medium text-gray-700">
-                                ${(item.amount / 1000).toFixed(1)}k
-                              </div>
-                              <div
-                                className="w-full bg-gradient-to-t from-purple-600 to-purple-400 rounded-t transition-all duration-300 hover:from-purple-700 hover:to-purple-500 cursor-pointer"
-                                style={{ height: `${item.height}%` }}
-                                title={`${item.month}: $${item.amount.toLocaleString()}`}
-                              />
-                              <span className="text-xs text-gray-600 font-medium">{item.month}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="mt-auto text-center p-4 bg-gray-50 rounded">
-                        <p className="text-sm text-gray-600">Total Revenue Growth</p>
-                        <p className="text-lg font-semibold text-green-600">+25.4% vs last quarter</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Revenue Breakdown</CardTitle>
+                  <CardTitle>Monthly Breakdown</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600">This Month</span>
-                      <span className="font-semibold">$12,450</span>
+                      <span className="text-sm text-gray-600">Gross Revenue</span>
+                      <span className="font-medium">{formatCurrency(analyticsData.revenue.current)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Last Month</span>
-                      <span className="font-semibold">$10,230</span>
+                      <span className="text-sm text-gray-600">Platform Fees</span>
+                      <span className="font-medium text-red-600">-${(analyticsData.revenue.current * 0.05).toFixed(0)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Growth</span>
-                      <span className="font-semibold text-green-600">+21.7%</span>
+                      <span className="text-sm text-gray-600">Payment Processing</span>
+                      <span className="font-medium text-red-600">-${(analyticsData.revenue.current * 0.029).toFixed(0)}</span>
                     </div>
+                    <div className="border-t pt-2">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">Net Revenue</span>
+                        <span className="font-bold text-green-600">
+                          {formatCurrency(analyticsData.revenue.current * 0.921)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+                <CardHeader>
+                  <CardTitle>Payment Status</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Paid Invoices</span>
+                      <span className="font-medium text-green-600">{formatCurrency(38200)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Pending</span>
+                      <span className="font-medium text-yellow-600">{formatCurrency(5800)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Overdue</span>
+                      <span className="font-medium text-red-600">{formatCurrency(1231)}</span>
+                    </div>
+                    <div className="border-t pt-2">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">Collection Rate</span>
+                        <span className="font-bold">84.5%</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+                <CardHeader>
+                  <CardTitle>Forecasting</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Next Month Est.</span>
+                      <span className="font-medium">{formatCurrency(48500)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Quarter Goal</span>
+                      <span className="font-medium">{formatCurrency(150000)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Progress</span>
+                      <span className="font-medium">76%</span>
+                    </div>
+                    <Progress value={76} className="h-2" />
                   </div>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
-          
+
+          {/* Projects Tab */}
           <TabsContent value="projects" className="space-y-6">
-            <Card>
+            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
               <CardHeader>
-                <CardTitle>Project Analytics</CardTitle>
+                <CardTitle>Project Performance</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <h3 className="text-2xl font-bold text-blue-600">24</h3>
-                      <p className="text-sm text-blue-700">Active Projects</p>
-                      <div className="mt-2 text-xs text-blue-600">+3 this month</div>
-                    </div>
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <h3 className="text-2xl font-bold text-green-600">94%</h3>
-                      <p className="text-sm text-green-700">On-Time Delivery</p>
-                      <div className="mt-2 text-xs text-green-600">+2% improvement</div>
-                    </div>
-                    <div className="text-center p-4 bg-purple-50 rounded-lg">
-                      <h3 className="text-2xl font-bold text-purple-600">$185K</h3>
-                      <p className="text-sm text-purple-700">Total Project Value</p>
-                      <div className="mt-2 text-xs text-purple-600">+18% growth</div>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <p className="text-2xl font-bold text-blue-600">{analyticsData.projects.active}</p>
+                    <p className="text-sm text-gray-600">Active</p>
                   </div>
-                  
-                  <div className="space-y-3">
-                    <h3 className="font-semibold">Project Status Distribution</h3>
-                    {[
-                      { status: 'Completed', count: 12, color: 'bg-green-500', percentage: 50 },
-                      { status: 'In Progress', count: 8, color: 'bg-blue-500', percentage: 33 },
-                      { status: 'Planning', count: 3, color: 'bg-yellow-500', percentage: 12 },
-                      { status: 'On Hold', count: 1, color: 'bg-gray-500', percentage: 5 }
-                    ].map((item, index) => (
-                      <div key={index} className="flex items-center gap-3">
-                        <div className={`w-3 h-3 rounded-full ${item.color}`} />
-                        <span className="text-sm font-medium min-w-[80px]">{item.status}</span>
-                        <div className="flex-1 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className={`h-2 rounded-full ${item.color}`}
-                            style={{ width: `${item.percentage}%` }}
-                          />
-                        </div>
-                        <span className="text-sm text-gray-600 min-w-[60px] text-right">
-                          {item.count} projects
-                        </span>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <p className="text-2xl font-bold text-green-600">{analyticsData.projects.completed}</p>
+                    <p className="text-sm text-gray-600">Completed</p>
+                  </div>
+                  <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                    <p className="text-2xl font-bold text-yellow-600">8</p>
+                    <p className="text-sm text-gray-600">In Review</p>
+                  </div>
+                  <div className="text-center p-4 bg-red-50 rounded-lg">
+                    <p className="text-2xl font-bold text-red-600">{analyticsData.projects.cancelled}</p>
+                    <p className="text-sm text-gray-600">Cancelled</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="font-medium text-gray-900">Project Categories Performance</h4>
+                  {projectCategories.map(category => (
+                    <div key={category.category} className="p-4 border border-gray-200 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <h5 className="font-medium">{category.category}</h5>
+                        <Badge variant="outline">{category.count} projects</Badge>
                       </div>
-                    ))}
-                  </div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-gray-600">Average Revenue</span>
+                        <span className="font-medium">{formatCurrency(category.revenue / category.count)}</span>
+                      </div>
+                      <Progress value={(category.revenue / 20000) * 100} className="h-2" />
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
-          
+
+          {/* Clients Tab */}
           <TabsContent value="clients" className="space-y-6">
-            <Card>
+            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
               <CardHeader>
-                <CardTitle>Client Analytics</CardTitle>
+                <CardTitle>Top Clients</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h3 className="font-semibold mb-3">Client Distribution</h3>
-                      <div className="space-y-3">
-                        {[
-                          { type: 'Enterprise', count: 8, color: 'bg-purple-500', revenue: '$124K' },
-                          { type: 'SMB', count: 15, color: 'bg-blue-500', revenue: '$68K' },
-                          { type: 'Startups', count: 12, color: 'bg-green-500', revenue: '$42K' },
-                          { type: 'Individual', count: 13, color: 'bg-orange-500', revenue: '$18K' }
-                        ].map((client, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-4 h-4 rounded-full ${client.color}`} />
-                              <div>
-                                <p className="font-medium">{client.type}</p>
-                                <p className="text-sm text-gray-600">{client.count} clients</p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-semibold text-green-600">{client.revenue}</p>
-                              <p className="text-xs text-gray-500">avg revenue</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h3 className="font-semibold mb-3">Client Satisfaction</h3>
-                      <div className="space-y-4">
-                        <div className="text-center p-6 bg-green-50 rounded-lg">
-                          <div className="text-3xl font-bold text-green-600 mb-2">96%</div>
-                          <div className="text-sm text-green-700">Overall Satisfaction</div>
-                          <div className="mt-2 text-xs text-green-600">+2.1% this month</div>
+                <div className="space-y-4">
+                  {topClients.map((client, index) => (
+                    <div key={client.name} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                      <div className="flex items-center gap-4">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                          {index + 1}
                         </div>
-                        
-                        <div className="space-y-2">
-                          {[
-                            { metric: 'Communication', score: 98 },
-                            { metric: 'Quality', score: 96 },
-                            { metric: 'Timeliness', score: 94 },
-                            { metric: 'Value', score: 92 }
-                          ].map((item, index) => (
-                            <div key={index} className="flex items-center justify-between">
-                              <span className="text-sm">{item.metric}</span>
-                              <div className="flex items-center gap-2">
-                                <div className="w-16 h-2 bg-gray-200 rounded-full">
-                                  <div 
-                                    className="h-2 bg-green-500 rounded-full"
-                                    style={{ width: `${item.score}%` }}
-                                  />
-                                </div>
-                                <span className="text-sm font-medium">{item.score}%</span>
-                              </div>
-                            </div>
-                          ))}
+                        <div>
+                          <h4 className="font-medium text-gray-900">{client.name}</h4>
+                          <p className="text-sm text-gray-600">{client.projects} projects</p>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="performance" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Performance Metrics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {[
-                      { label: 'Productivity Score', value: '92%', trend: '+5%', color: 'text-green-600' },
-                      { label: 'Efficiency Rating', value: '8.7/10', trend: '+0.3', color: 'text-blue-600' },
-                      { label: 'Task Completion', value: '94%', trend: '+2%', color: 'text-purple-600' },
-                      { label: 'Client Response', value: '2.4h', trend: '-15min', color: 'text-orange-600' }
-                    ].map((metric, index) => (
-                      <div key={index} className="text-center p-4 border rounded-lg">
-                        <div className={`text-2xl font-bold ${metric.color}`}>{metric.value}</div>
-                        <div className="text-sm text-gray-600 mb-1">{metric.label}</div>
-                        <div className={`text-xs ${metric.color}`}>{metric.trend} vs last month</div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h3 className="font-semibold mb-3">Weekly Performance</h3>
-                      <div className="space-y-3">
-                        {[
-                          { day: 'Monday', hours: 8.5, efficiency: 89 },
-                          { day: 'Tuesday', hours: 7.8, efficiency: 92 },
-                          { day: 'Wednesday', hours: 8.2, efficiency: 95 },
-                          { day: 'Thursday', hours: 8.0, efficiency: 88 },
-                          { day: 'Friday', hours: 7.5, efficiency: 91 }
-                        ].map((day, index) => (
-                          <div key={index} className="flex items-center justify-between p-2 border rounded">
-                            <span className="font-medium">{day.day}</span>
-                            <div className="flex items-center gap-4">
-                              <span className="text-sm text-gray-600">{day.hours}h</span>
-                              <div className="w-16 h-2 bg-gray-200 rounded-full">
-                                <div 
-                                  className="h-2 bg-purple-500 rounded-full"
-                                  style={{ width: `${day.efficiency}%` }}
-                                />
-                              </div>
-                              <span className="text-sm font-medium">{day.efficiency}%</span>
-                            </div>
-                          </div>
-                        ))}
+                      <div className="text-right">
+                        <p className="font-medium">{formatCurrency(client.revenue)}</p>
+                        <Badge 
+                          variant="outline" 
+                          className={client.status === 'active' ? 'text-green-600 border-green-300' : 'text-gray-600'}
+                        >
+                          {client.status}
+                        </Badge>
                       </div>
                     </div>
-                    
-                    <div>
-                      <h3 className="font-semibold mb-3">Performance Insights</h3>
-                      <div className="space-y-2">
-                        {[
-                          { insight: 'Peak productivity: 9-11 AM', type: 'success' },
-                          { insight: 'Avg break time: 15 min optimal', type: 'info' },
-                          { insight: 'Focus sessions: 85% completion', type: 'success' },
-                          { insight: 'Distraction rate: 12% (improving)', type: 'warning' }
-                        ].map((item, index) => (
-                          <div key={index} className={`p-3 rounded-lg ${
-                            item.type === 'success' ? 'bg-green-50 border-green-200' :
-                            item.type === 'warning' ? 'bg-yellow-50 border-yellow-200' :
-                            'bg-blue-50 border-blue-200'
-                          } border`}>
-                            <p className={`text-sm ${
-                              item.type === 'success' ? 'text-green-700' :
-                              item.type === 'warning' ? 'text-yellow-700' :
-                              'text-blue-700'
-                            }`}>{item.insight}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>

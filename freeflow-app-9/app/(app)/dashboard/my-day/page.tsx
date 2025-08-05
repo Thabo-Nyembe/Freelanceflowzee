@@ -1,13 +1,34 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useReducer } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Progress } from '@/components/ui/progress'
-import { Clock, CheckCircle, PlayCircle, Plus, Target, Calendar, Timer, Activity, ArrowRight, TrendingUp, Brain, Play, Pause, BarChart3, Trash2, Zap, MessageSquare, Briefcase, Lightbulb } from 'lucide-react'
+import { 
+  Clock, 
+  CheckCircle, 
+  Plus, 
+  Target, 
+  Calendar, 
+  Timer, 
+  Activity, 
+  ArrowRight, 
+  TrendingUp, 
+  Brain, 
+  Play, 
+  Pause, 
+  BarChart3, 
+  Trash2, 
+  Zap, 
+  MessageSquare, 
+  Briefcase, 
+  Lightbulb 
+} from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 // Type definitions
 interface Task {
@@ -140,7 +161,7 @@ const mockAIInsights: AIInsight[] = [
     id: 'insight_3',
     type: 'health',
     title: 'Break Reminder',
-    description: "You&apos;ve been working for 2.5 hours. Take a 15-minute break to maintain productivity.",
+    description: "You've been working for 2.5 hours. Take a 15-minute break to maintain productivity.",
     actionable: true,
     priority: 'high'
   }
@@ -187,11 +208,11 @@ const mockTimeBlocks: TimeBlock[] = [
 
 export default function MyDayPage() {
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<any>('today')
-  const [newTaskTitle, setNewTaskTitle] = useState<any>('')
-  const [newTaskDescription, setNewTaskDescription] = useState<any>('')
+  const [activeTab, setActiveTab] = useState('today')
+  const [newTaskTitle, setNewTaskTitle] = useState('')
+  const [newTaskDescription, setNewTaskDescription] = useState('')
   const [newTaskPriority, setNewTaskPriority] = useState<'low' | 'medium' | 'high' | 'urgent'>('medium')
-  const [isAddingTask, setIsAddingTask] = useState<any>(false)
+  const [isAddingTask, setIsAddingTask] = useState(false)
 
   // Initialize state with mock data
   const initialState: TaskState = {
@@ -265,7 +286,7 @@ export default function MyDayPage() {
     timerStartTime: null,
     elapsedTime: 0,
     totalFocusTime: 210, // 3.5 hours in minutes
-    completedTasks: 2,
+    completedTasks: 1,
     insights: mockAIInsights
   }
 
@@ -344,7 +365,6 @@ export default function MyDayPage() {
   // Calculate progress metrics
   const totalTasks = state.tasks.length
   const completionRate = totalTasks > 0 ? Math.round((state.completedTasks / totalTasks) * 100) : 0
-  const totalEstimatedTime = state.tasks.reduce((acc, task) => acc + task.estimatedTime, 0)
   const focusHours = Math.floor(state.totalFocusTime / 60)
   const focusMinutes = state.totalFocusTime % 60
   const targetHours = 8 * 60 // 8 hours in minutes
@@ -416,7 +436,7 @@ export default function MyDayPage() {
                   <div>
                     <p className="text-sm font-medium text-gray-600">Focus Time</p>
                     <p className="text-3xl font-bold text-gray-900">{focusHours}h {focusMinutes}m</p>
-                    <p className="text-sm text-gray-500">Today&apos;s work</p>
+                    <p className="text-sm text-gray-500">Today's work</p>
                   </div>
                   <div className="p-3 bg-blue-100 rounded-xl">
                     <Timer className="h-6 w-6 text-blue-600" />
@@ -497,7 +517,7 @@ export default function MyDayPage() {
           <TabsList className="grid w-full grid-cols-4 bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl p-2 shadow-xl">
             <TabsTrigger value="today" className="flex items-center gap-2 rounded-2xl">
               <Calendar className="h-4 w-4" />
-              Today&apos;s Tasks
+              Today's Tasks
             </TabsTrigger>
             <TabsTrigger value="schedule" className="flex items-center gap-2 rounded-2xl">
               <Clock className="h-4 w-4" />
@@ -516,7 +536,7 @@ export default function MyDayPage() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Today&apos;s Tasks Tab */}
+          {/* Today's Tasks Tab */}
           <TabsContent value="today" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Tasks List */}
@@ -526,7 +546,7 @@ export default function MyDayPage() {
                     <CardTitle className="flex items-center justify-between">
                       <span className="flex items-center gap-2">
                         <Target className="h-5 w-5" />
-                        Today&apos;s Tasks
+                        Today's Tasks
                       </span>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">
@@ -535,7 +555,7 @@ export default function MyDayPage() {
                         <Button 
                           data-testid="add-task-btn"
                           size="sm" 
-                          onClick={addTask}
+                          onClick={() => setIsAddingTask(true)}
                           className="gap-2"
                         >
                           <Plus className="h-3 w-3" />
@@ -707,24 +727,6 @@ export default function MyDayPage() {
                       <Briefcase className="h-4 w-4" />
                       View Projects
                     </Button>
-                    
-                    <Button 
-                      className="w-full justify-start gap-2"
-                      variant="outline"
-                      onClick={() => router.push('/dashboard/time-tracking')}
-                    >
-                      <Clock className="h-4 w-4" />
-                      Time Tracking
-                    </Button>
-                    
-                    <Button 
-                      className="w-full justify-start gap-2"
-                      variant="outline"
-                      onClick={() => router.push('/dashboard/escrow')}
-                    >
-                      <Target className="h-4 w-4" />
-                      Check Escrow
-                    </Button>
                   </CardContent>
                 </Card>
 
@@ -766,7 +768,7 @@ export default function MyDayPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="h-5 w-5" />
-                  Today&apos;s Schedule
+                  Today's Schedule
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -987,8 +989,4 @@ export default function MyDayPage() {
       </div>
     </div>
   )
-}
-
-function cn(...classes: (string | undefined | boolean)[]): string {
-  return classes.filter(Boolean).join(' ')
 }
