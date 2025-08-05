@@ -32,6 +32,7 @@ const INITIAL_BLOCKS = [
   {
     id: 'checklist-1',
     type: 'checklist',
+    level: 1,
     items: [
       { id: 'check-1', text: 'Create a new document', checked: true },
       { id: 'check-2', text: 'Add different block types', checked: false },
@@ -53,7 +54,8 @@ export default function DocumentsPage() {
     const newBlock = {
       id: `${type}-${Date.now()}`,
       type,
-      content: ''
+      content: '',
+      level: 1
     }
     
     const newBlocks = [...blocks]
