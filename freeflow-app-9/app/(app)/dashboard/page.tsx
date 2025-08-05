@@ -149,6 +149,13 @@ export default function DashboardPage() {
     settings: [
       { name: 'Settings', path: 'settings', icon: Settings, description: 'Platform configuration and preferences' },
       { name: 'Profile', path: 'profile', icon: User, description: 'Personal profile and account management' }
+    ],
+    advanced: [
+      { name: 'Team Management', path: 'team-management', icon: Users, description: 'Advanced team management and performance tracking' },
+      { name: 'Project Templates', path: 'project-templates', icon: FileText, description: 'Pre-built project templates and workflows' },
+      { name: 'Client Portal', path: 'client-portal', icon: UserCheck, description: 'Client access management and collaboration' },
+      { name: 'Resource Library', path: 'resource-library', icon: Archive, description: 'Centralized resource and asset management' },
+      { name: 'Performance Analytics', path: 'performance-analytics', icon: TrendingUp, description: 'Advanced analytics and performance insights' }
     ]
   }
 
@@ -328,7 +335,8 @@ export default function DashboardPage() {
       storage: 'Storage & Files',
       productivity: 'Productivity',
       community: 'Community',
-      settings: 'Settings'
+      settings: 'Settings',
+      advanced: 'Advanced Tools'
     }
 
     return (
@@ -467,6 +475,10 @@ export default function DashboardPage() {
                     <Settings className="h-4 w-4" />
                     <span>Settings</span>
                   </TabsTrigger>
+                  <TabsTrigger value="advanced" className="flex items-center gap-2 rounded-2xl px-4 py-2 whitespace-nowrap">
+                    <Zap className="h-4 w-4" />
+                    <span>Advanced</span>
+                  </TabsTrigger>
                 </TabsList>
               </ScrollArea>
             </div>
@@ -483,6 +495,7 @@ export default function DashboardPage() {
               <TabsContent value="productivity" className="mt-0 h-full">{renderFeatureGrid('productivity')}</TabsContent>
               <TabsContent value="community" className="mt-0 h-full">{renderFeatureGrid('community')}</TabsContent>
               <TabsContent value="settings" className="mt-0 h-full">{renderFeatureGrid('settings')}</TabsContent>
+              <TabsContent value="advanced" className="mt-0 h-full">{renderFeatureGrid('advanced')}</TabsContent>
             </div>
           </Tabs>
         </div>
