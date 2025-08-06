@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, use } from 'react'
+import React, { useState, use } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-
+import { SiteHeader } from '@/components/site-header'
+import { SiteFooter } from '@/components/site-footer'
 import { DemoModal } from '@/components/demo-modal'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -31,13 +32,13 @@ const blogPosts = [
       <p>Artificial Intelligence has revolutionized the way we create content. From generating ideas to polishing final drafts, AI tools can significantly enhance your creative workflow.</p>
       
       <h2>Why AI Content Creation Matters</h2>
-      <p>In today&apos;s fast-paced digital landscape, content creators need to produce high-quality material consistently. AI content creation tools help by:</p>
+      <p>In today's fast-paced digital landscape, content creators need to produce high-quality material consistently. AI content creation tools help by:</p>
       
       <ul>
         <li>Accelerating the ideation process</li>
         <li>Providing writing assistance and suggestions</li>
         <li>Offering different perspectives and styles</li>
-        <li>Helping overcome writer&apos;s block</li>
+        <li>Helping overcome writer's block</li>
       </ul>
       
       <h2>Best Practices for AI-Assisted Content</h2>
@@ -56,7 +57,7 @@ const blogPosts = [
     title: 'Building Effective Collaborative Design Workflows',
     excerpt: 'Discover strategies for seamless collaboration in creative projects.',
     content: `
-      <p>Effective collaboration is the backbone of successful creative projects. In this guide, we&apos;ll explore proven strategies for building workflows that enhance team productivity.</p>
+      <p>Effective collaboration is the backbone of successful creative projects. In this guide, we'll explore proven strategies for building workflows that enhance team productivity.</p>
       
       <h2>Setting Up Your Collaborative Environment</h2>
       <p>The foundation of good collaboration starts with the right tools and processes.</p>
@@ -77,8 +78,8 @@ interface BlogPostPageProps {
 
 export default function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = use(params)
-  const [isLiked, setIsLiked] = useState<any>(false)
-  const [showDemoModal, setShowDemoModal] = useState<any>(false)
+  const [isLiked, setIsLiked] = useState(false)
+  const [showDemoModal, setShowDemoModal] = useState(false)
   
   const post = blogPosts.find(p => p.slug === slug)
   
@@ -90,6 +91,8 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SiteHeader />
+      
       <main className="pt-16">
         {/* Hero Section */}
         <article className="bg-white">
@@ -245,14 +248,13 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             </div>
           </section>
         )}
-              </main>
-        
-        <DemoModal 
-          isOpen={showDemoModal} 
-          onClose={() => setShowDemoModal(false)}
-          title="Read Full Article"
-          description="Access the complete article and more resources!"
-        />
-      </div>
+      </main>
+
+      <SiteFooter />
+      <DemoModal 
+        isOpen={showDemoModal} 
+        onClose={() => setShowDemoModal(false)} 
+      />
+    </div>
   )
 }
