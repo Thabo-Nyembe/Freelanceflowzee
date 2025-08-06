@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { 
   Palette, 
+  Monitor,
   Users, 
   Layers, 
   Zap, 
@@ -52,7 +53,7 @@ export default function CanvasPage() {
       <PageHeader
         title="Canvas Collaboration"
         description="Professional design and prototyping workspace with real-time collaboration"
-        icon={Palette}
+        icon={Monitor}
         badge={{ text: 'Coming Soon', variant: 'secondary' }}
         breadcrumbs={[
           { label: 'Dashboard', href: '/dashboard' },

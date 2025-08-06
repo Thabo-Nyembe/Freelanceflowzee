@@ -324,7 +324,10 @@ export default function AIAssistantPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <Bot className="w-6 h-6 text-purple-600" />
+              {/* Added Zap icon in gradient container */}
+              <div className="p-2 bg-gradient-to-r from-purple-500 to-violet-600 rounded-lg">
+                <Zap className="h-6 w-6 text-white" />
+              </div>
               <h1 className="text-2xl font-bold text-gray-900">AI Assistant</h1>
               <Badge className="bg-gradient-to-r from-purple-500 to-violet-600 text-white">A+++</Badge>
             </div>

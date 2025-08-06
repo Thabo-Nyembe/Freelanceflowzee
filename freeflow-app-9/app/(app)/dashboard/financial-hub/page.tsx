@@ -101,9 +101,20 @@ export default function FinancialHubPage() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        {/* Title + Icon */}
         <div>
-          <h1 className="text-3xl font-bold kazi-text-dark dark:kazi-text-light">Financial Hub</h1>
-          <p className="text-gray-600 dark:text-gray-300">Comprehensive financial management and analytics</p>
+          <div className="flex items-center gap-3">
+            {/* Gradient icon container */}
+            <div className="p-2 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg">
+              <DollarSign className="h-6 w-6 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold kazi-text-dark dark:kazi-text-light">
+              Financial Hub
+            </h1>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300">
+            Comprehensive financial management and analytics
+          </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm">

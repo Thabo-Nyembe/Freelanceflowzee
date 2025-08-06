@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Send, Search, Filter } from 'lucide-react'
+import { Send, Search, Filter, MessageSquare } from 'lucide-react'
 
 interface Message {
   id: number
@@ -68,7 +68,10 @@ export default function MessagesPage() {
         <Card className="h-full rounded-none border-0">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center justify-between">
-              Messages
+              <span className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-primary" />
+                Messages
+              </span>
               <Button variant="ghost" size="sm">
                 <Filter className="h-4 w-4" />
               </Button>

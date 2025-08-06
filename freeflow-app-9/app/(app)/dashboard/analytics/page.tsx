@@ -31,9 +31,15 @@ export default function AnalyticsPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent mb-2">
-                Analytics Dashboard
-              </h1>
+              <div className="flex items-center gap-3 mb-2">
+                {/* Gradient icon container */}
+                <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg">
+                  <TrendingUp className="h-6 w-6 text-white" />
+                </div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+                  Analytics Dashboard
+                </h1>
+              </div>
               <p className="text-lg text-gray-600 font-light">
                 Comprehensive business intelligence and performance metrics 📊
               </p>
