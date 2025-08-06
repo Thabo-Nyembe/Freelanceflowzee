@@ -150,7 +150,7 @@ export default function FilesHubPage() {
       <PageHeader
         title="Files Hub"
         description="Organize, share, and manage all your project files in one place"
-        icon={FolderOpen}
+        icon={FileText}
         actions={
           <>
             <Button variant="outline" onClick={handleCreateFolder}>

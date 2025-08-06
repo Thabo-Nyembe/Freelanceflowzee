@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, MessageCircle, TrendingUp, Star, Search, ArrowRight } from "lucide-react";
+import { Users, MessageCircle, TrendingUp, Star, Search, ArrowRight, Globe } from "lucide-react";
 
 export default function CommunityPage() {
   return (
@@ -10,7 +10,7 @@ export default function CommunityPage() {
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
           <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg">
-            <Users className="h-6 w-6 text-white" />
+            <Globe className="h-6 w-6 text-white" />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             Community Hub

@@ -187,7 +187,7 @@ export default function PerformanceAnalyticsPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
-              <BarChart3 className="h-8 w-8" />
+              <TrendingUp className="h-8 w-8" />
             </div>
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">

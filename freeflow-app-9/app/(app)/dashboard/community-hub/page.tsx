@@ -40,7 +40,8 @@ import {
   List,
   Building,
   DollarSign,
-  Bookmark
+  Bookmark,
+  Globe
 } from 'lucide-react'
 
 interface CommunityMember {
@@ -1581,7 +1582,7 @@ export default function CommunityHubPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <Users className="w-6 h-6 text-purple-600" />
+              <Globe className="w-6 h-6 text-purple-600" />
               <h1 className="text-2xl font-bold text-gray-900">Community Hub</h1>
               <Badge className="bg-gradient-to-r from-purple-500 to-violet-600 text-white">KAZI</Badge>
             </div>
