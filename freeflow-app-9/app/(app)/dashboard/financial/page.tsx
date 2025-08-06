@@ -193,9 +193,38 @@ export default function FinancialPage() {
               <CardDescription>Complete transaction history</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <PieChart className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-                <p className="text-gray-500">Transaction history coming soon</p>
+              <div className="space-y-4">
+                {financialData.recentTransactions.map((transaction) => (
+                  <div key={transaction.id} className="flex items-center justify-between p-3 rounded-lg kazi-bg-secondary">
+                    <div className="flex items-center space-x-3">
+                      <div className={`p-2 rounded-full ${
+                        transaction.type === 'income' 
+                          ? 'bg-green-100 dark:bg-green-900/20' 
+                          : 'bg-red-100 dark:bg-red-900/20'
+                      }`}>
+                        {transaction.type === 'income' ? (
+                          <ArrowUpRight className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        ) : (
+                          <ArrowDownRight className="h-4 w-4 text-red-600 dark:text-red-400" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium kazi-text-primary">{transaction.description}</p>
+                        <p className="text-sm kazi-text-tertiary">{transaction.date}</p>
+                      </div>
+                    </div>
+                    <span className={`font-semibold ${
+                      transaction.type === 'income' 
+                        ? 'text-green-600 dark:text-green-400' 
+                        : 'text-red-600 dark:text-red-400'
+                    }`}>
+                      {transaction.type === 'income' ? '+' : ''}${Math.abs(transaction.amount).toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+                <Button variant="outline" className="w-full mt-4">
+                  View All Transactions
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -208,9 +237,44 @@ export default function FinancialPage() {
               <CardDescription>Create and manage invoices</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <FileText className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-                <p className="text-gray-500">Invoice management coming soon</p>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="font-medium kazi-text-primary">Upcoming Payments</h3>
+                    <p className="text-sm kazi-text-tertiary">Invoices awaiting payment</p>
+                  </div>
+                  <Button size="sm">Create Invoice</Button>
+                </div>
+                
+                <div className="space-y-3">
+                  {financialData.upcomingPayments.map((payment) => (
+                    <div key={payment.id} className="flex items-center justify-between p-4 border rounded-lg kazi-border">
+                      <div className="flex items-center space-x-3">
+                        <FileText className="h-5 w-5 kazi-text-secondary" />
+                        <div>
+                          <p className="font-medium kazi-text-primary">{payment.client}</p>
+                          <p className="text-sm kazi-text-tertiary">Due: {payment.dueDate}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <span className="font-semibold kazi-text-primary">
+                          ${payment.amount.toLocaleString()}
+                        </span>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          payment.status === 'overdue' 
+                            ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                        }`}>
+                          {payment.status}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <Button variant="outline" className="w-full">
+                  View All Invoices
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -223,9 +287,89 @@ export default function FinancialPage() {
               <CardDescription>Generate detailed financial reports</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <TrendingUp className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-                <p className="text-gray-500">Financial reports coming soon</p>
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="kazi-card p-4">
+                    <div className="flex items-center space-x-3">
+                      <TrendingUp className="h-8 w-8 text-green-600 dark:text-green-400" />
+                      <div>
+                        <p className="text-sm kazi-text-tertiary">Monthly Growth</p>
+                        <p className="text-lg font-semibold text-green-600 dark:text-green-400">
+                          +{financialData.monthlyGrowth}%
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="kazi-card p-4">
+                    <div className="flex items-center space-x-3">
+                      <FileText className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                      <div>
+                        <p className="text-sm kazi-text-tertiary">Pending Invoices</p>
+                        <p className="text-lg font-semibold kazi-text-primary">
+                          {financialData.pendingInvoices}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="kazi-card p-4">
+                    <div className="flex items-center space-x-3">
+                      <Calendar className="h-8 w-8 text-red-600 dark:text-red-400" />
+                      <div>
+                        <p className="text-sm kazi-text-tertiary">Overdue</p>
+                        <p className="text-lg font-semibold text-red-600 dark:text-red-400">
+                          {financialData.overdueInvoices}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <h3 className="font-medium kazi-text-primary">Quick Reports</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <Button variant="outline" className="justify-start h-auto p-4">
+                      <div className="flex items-center space-x-3">
+                        <PieChart className="h-5 w-5" />
+                        <div className="text-left">
+                          <p className="font-medium">Profit & Loss</p>
+                          <p className="text-sm kazi-text-tertiary">Monthly P&L statement</p>
+                        </div>
+                      </div>
+                    </Button>
+                    
+                    <Button variant="outline" className="justify-start h-auto p-4">
+                      <div className="flex items-center space-x-3">
+                        <TrendingUp className="h-5 w-5" />
+                        <div className="text-left">
+                          <p className="font-medium">Cash Flow</p>
+                          <p className="text-sm kazi-text-tertiary">Income vs expenses</p>
+                        </div>
+                      </div>
+                    </Button>
+                    
+                    <Button variant="outline" className="justify-start h-auto p-4">
+                      <div className="flex items-center space-x-3">
+                        <FileText className="h-5 w-5" />
+                        <div className="text-left">
+                          <p className="font-medium">Tax Summary</p>
+                          <p className="text-sm kazi-text-tertiary">Quarterly tax overview</p>
+                        </div>
+                      </div>
+                    </Button>
+                    
+                    <Button variant="outline" className="justify-start h-auto p-4">
+                      <div className="flex items-center space-x-3">
+                        <Wallet className="h-5 w-5" />
+                        <div className="text-left">
+                          <p className="font-medium">Expense Report</p>
+                          <p className="text-sm kazi-text-tertiary">Detailed expenses</p>
+                        </div>
+                      </div>
+                    </Button>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

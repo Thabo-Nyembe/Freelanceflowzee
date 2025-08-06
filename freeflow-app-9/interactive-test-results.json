@@ -1,0 +1,239 @@
+{
+  "timestamp": "2025-07-10T21:12:07.301Z",
+  "tests": [
+    {
+      "name": "Component structure - components/ui",
+      "status": "passed",
+      "details": "56 files found",
+      "timestamp": "2025-07-10T21:12:07.302Z"
+    },
+    {
+      "name": "Component structure - components/collaboration",
+      "status": "passed",
+      "details": "37 files found",
+      "timestamp": "2025-07-10T21:12:07.302Z"
+    },
+    {
+      "name": "Component structure - components/dashboard",
+      "status": "passed",
+      "details": "6 files found",
+      "timestamp": "2025-07-10T21:12:07.302Z"
+    },
+    {
+      "name": "Component structure - components/ai",
+      "status": "passed",
+      "details": "18 files found",
+      "timestamp": "2025-07-10T21:12:07.303Z"
+    },
+    {
+      "name": "Component structure - components/video",
+      "status": "passed",
+      "details": "34 files found",
+      "timestamp": "2025-07-10T21:12:07.303Z"
+    },
+    {
+      "name": "Component structure - components/navigation",
+      "status": "passed",
+      "details": "4 files found",
+      "timestamp": "2025-07-10T21:12:07.303Z"
+    },
+    {
+      "name": "Component structure - components/forms",
+      "status": "passed",
+      "details": "2 files found",
+      "timestamp": "2025-07-10T21:12:07.303Z"
+    },
+    {
+      "name": "UI Component - components/ui/button.tsx",
+      "status": "passed",
+      "details": "Non-interactive component",
+      "timestamp": "2025-07-10T21:12:07.303Z"
+    },
+    {
+      "name": "UI Component - components/ui/dialog.tsx",
+      "status": "passed",
+      "details": "Non-interactive component",
+      "timestamp": "2025-07-10T21:12:07.303Z"
+    },
+    {
+      "name": "UI Component - components/ui/dropdown-menu.tsx",
+      "status": "passed",
+      "details": "Non-interactive component",
+      "timestamp": "2025-07-10T21:12:07.303Z"
+    },
+    {
+      "name": "UI Component - components/ui/tabs.tsx",
+      "status": "passed",
+      "details": "Non-interactive component",
+      "timestamp": "2025-07-10T21:12:07.303Z"
+    },
+    {
+      "name": "UI Component - components/ui/form.tsx",
+      "status": "passed",
+      "details": "Non-interactive component",
+      "timestamp": "2025-07-10T21:12:07.303Z"
+    },
+    {
+      "name": "UI Component - components/ui/input.tsx",
+      "status": "passed",
+      "details": "Non-interactive component",
+      "timestamp": "2025-07-10T21:12:07.303Z"
+    },
+    {
+      "name": "UI Component - components/ui/textarea.tsx",
+      "status": "passed",
+      "details": "Non-interactive component",
+      "timestamp": "2025-07-10T21:12:07.303Z"
+    },
+    {
+      "name": "UI Component - components/ui/checkbox.tsx",
+      "status": "passed",
+      "details": "Non-interactive component",
+      "timestamp": "2025-07-10T21:12:07.303Z"
+    },
+    {
+      "name": "UI Component - components/ui/select.tsx",
+      "status": "passed",
+      "details": "Non-interactive component",
+      "timestamp": "2025-07-10T21:12:07.303Z"
+    },
+    {
+      "name": "UI Component - components/ui/switch.tsx",
+      "status": "passed",
+      "details": "Non-interactive component",
+      "timestamp": "2025-07-10T21:12:07.303Z"
+    },
+    {
+      "name": "Dashboard - components/dashboard/enhanced-interactive-dashboard.tsx",
+      "status": "passed",
+      "details": "Static component",
+      "timestamp": "2025-07-10T21:12:07.303Z"
+    },
+    {
+      "name": "Dashboard - components/dashboard-nav.tsx",
+      "status": "passed",
+      "details": "Static component",
+      "timestamp": "2025-07-10T21:12:07.303Z"
+    },
+    {
+      "name": "Dashboard - components/dashboard-header.tsx",
+      "status": "passed",
+      "details": "Static component",
+      "timestamp": "2025-07-10T21:12:07.303Z"
+    },
+    {
+      "name": "Dashboard - app/(app)/dashboard/page.tsx",
+      "status": "passed",
+      "details": "Interactive with tab switching",
+      "timestamp": "2025-07-10T21:12:07.303Z"
+    },
+    {
+      "name": "AI - components/ai/ai-assistant.tsx",
+      "status": "passed",
+      "details": "Static component",
+      "timestamp": "2025-07-10T21:12:07.304Z"
+    },
+    {
+      "name": "AI - components/ai/ai-create.tsx",
+      "status": "passed",
+      "details": "Interactive with input handling",
+      "timestamp": "2025-07-10T21:12:07.304Z"
+    },
+    {
+      "name": "AI - components/ai/enhanced-ai-chat.tsx",
+      "status": "passed",
+      "details": "Interactive with form submission",
+      "timestamp": "2025-07-10T21:12:07.304Z"
+    },
+    {
+      "name": "AI - components/ai/ai-create-studio.tsx",
+      "status": "passed",
+      "details": "Interactive with input handling",
+      "timestamp": "2025-07-10T21:12:07.304Z"
+    },
+    {
+      "name": "Video - components/video/video-player.tsx",
+      "status": "passed",
+      "details": "Interactive with video controls",
+      "timestamp": "2025-07-10T21:12:07.304Z"
+    },
+    {
+      "name": "Video - components/video/video-controls.tsx",
+      "status": "passed",
+      "details": "Interactive with video controls",
+      "timestamp": "2025-07-10T21:12:07.304Z"
+    },
+    {
+      "name": "Video - components/video/video-upload.tsx",
+      "status": "passed",
+      "details": "Interactive with upload handling",
+      "timestamp": "2025-07-10T21:12:07.304Z"
+    },
+    {
+      "name": "Video - components/video/screen-recorder.tsx",
+      "status": "passed",
+      "details": "Interactive with upload handling",
+      "timestamp": "2025-07-10T21:12:07.304Z"
+    },
+    {
+      "name": "Navigation - components/navigation.tsx",
+      "status": "passed",
+      "details": "Static component",
+      "timestamp": "2025-07-10T21:12:07.304Z"
+    },
+    {
+      "name": "Navigation - components/site-header.tsx",
+      "status": "passed",
+      "details": "Interactive with routing",
+      "timestamp": "2025-07-10T21:12:07.304Z"
+    },
+    {
+      "name": "Navigation - components/mobile-menu.tsx",
+      "status": "passed",
+      "details": "Interactive with menu toggle",
+      "timestamp": "2025-07-10T21:12:07.304Z"
+    },
+    {
+      "name": "Navigation - components/app-navigation.tsx",
+      "status": "passed",
+      "details": "Static component",
+      "timestamp": "2025-07-10T21:12:07.304Z"
+    },
+    {
+      "name": "Forms - components/forms/booking-form.tsx",
+      "status": "passed",
+      "details": "Interactive with form submission",
+      "timestamp": "2025-07-10T21:12:07.304Z"
+    },
+    {
+      "name": "Forms - components/forms/project-creation-form.tsx",
+      "status": "passed",
+      "details": "Interactive with form submission",
+      "timestamp": "2025-07-10T21:12:07.304Z"
+    },
+    {
+      "name": "Forms - components/contact-form.tsx",
+      "status": "passed",
+      "details": "Interactive with form submission",
+      "timestamp": "2025-07-10T21:12:07.304Z"
+    },
+    {
+      "name": "Forms - components/payment/payment-form.tsx",
+      "status": "passed",
+      "details": "Interactive with form submission",
+      "timestamp": "2025-07-10T21:12:07.304Z"
+    },
+    {
+      "name": "Client Components",
+      "status": "passed",
+      "details": "331 client components found",
+      "timestamp": "2025-07-10T21:12:07.315Z"
+    }
+  ],
+  "summary": {
+    "total": 38,
+    "passed": 38,
+    "failed": 0,
+    "warnings": 0
+  }
+}

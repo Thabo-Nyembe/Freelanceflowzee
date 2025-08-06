@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "@api.video/nodejs-client": "npm:@api.video/nodejs-client@1.2.5"
+  }
+} 

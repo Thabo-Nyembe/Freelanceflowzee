@@ -14,7 +14,7 @@ import {
   FileText, 
   Image, 
   Play, 
-  PinIcon,
+  Pin,
   CheckCircle
 } from "lucide-react";
 
@@ -98,7 +98,7 @@ export default function CollaborationPage() {
                       <div className="bg-gray-100 rounded-lg p-3">
                         <p className="text-sm">Added some pinpoint feedback on the homepage layout. Check it out!</p>
                         <Badge variant="outline" className="mt-2">
-                          <PinIcon className="h-3 w-3 mr-1" />
+                          <Pin className="h-3 w-3 mr-1" />
                           Image Comment
                         </Badge>
                       </div>
@@ -115,7 +115,7 @@ export default function CollaborationPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <PinIcon className="h-5 w-5" />
+                <Pin className="h-5 w-5" />
                 Universal Pinpoint Feedback
               </CardTitle>
               <CardDescription>

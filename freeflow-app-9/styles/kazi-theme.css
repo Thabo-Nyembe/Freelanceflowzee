@@ -1,0 +1,246 @@
+/* KAZI Brand Theme System */
+@layer base {
+  :root {
+    /* KAZI Brand Colors */
+    --kazi-primary: 247 146 86; /* Orange */
+    --kazi-primary-dark: 234 124 56;
+    --kazi-primary-light: 255 168 108;
+    
+    --kazi-secondary: 110 75 255; /* Purple */
+    --kazi-secondary-dark: 88 60 204;
+    --kazi-secondary-light: 132 107 255;
+    
+    --kazi-accent: 35 230 181; /* Teal */
+    --kazi-accent-dark: 28 184 145;
+    --kazi-accent-light: 42 255 205;
+    
+    /* Light Theme Colors */
+    --kazi-bg-light: 255 255 255;
+    --kazi-bg-light-secondary: 249 250 251;
+    --kazi-bg-light-tertiary: 243 244 246;
+    
+    --kazi-text-primary: 17 24 39;
+    --kazi-text-secondary: 71 85 105;
+    --kazi-text-tertiary: 148 163 184;
+    
+    --kazi-border-light: 229 231 235;
+    --kazi-border-light-secondary: 209 213 219;
+  }
+
+  .dark {
+    /* Dark Theme Colors */
+    --kazi-bg-dark: 15 23 42;
+    --kazi-bg-dark-secondary: 30 41 59;
+    --kazi-bg-dark-tertiary: 51 65 85;
+    
+    --kazi-text-primary-dark: 248 250 252;
+    --kazi-text-secondary-dark: 203 213 225;
+    --kazi-text-tertiary-dark: 148 163 184;
+    
+    --kazi-border-dark: 51 65 85;
+    --kazi-border-dark-secondary: 71 85 105;
+  }
+}
+
+@layer components {
+  /* Background Classes */
+  .kazi-bg-light {
+    @apply bg-white dark:bg-slate-900;
+  }
+  
+  .kazi-bg-secondary {
+    @apply bg-gray-50 dark:bg-slate-800;
+  }
+  
+  .kazi-bg-tertiary {
+    @apply bg-gray-100 dark:bg-slate-700;
+  }
+
+  /* Text Classes */
+  .kazi-text-primary {
+    @apply text-gray-900 dark:text-slate-100;
+  }
+  
+  .kazi-text-secondary {
+    @apply text-gray-700 dark:text-slate-300;
+  }
+  
+  .kazi-text-tertiary {
+    @apply text-gray-500 dark:text-slate-400;
+  }
+  
+  .kazi-text-muted {
+    @apply text-gray-400 dark:text-slate-500;
+  }
+
+  /* Border Classes */
+  .kazi-border {
+    @apply border-gray-200 dark:border-slate-700;
+  }
+  
+  .kazi-border-secondary {
+    @apply border-gray-300 dark:border-slate-600;
+  }
+
+  /* Typography Classes */
+  .kazi-headline {
+    @apply font-bold tracking-tight kazi-text-primary;
+  }
+  
+  .kazi-title {
+    @apply font-semibold kazi-text-primary;
+  }
+  
+  .kazi-body {
+    @apply font-normal kazi-text-secondary;
+  }
+  
+  .kazi-body-medium {
+    @apply font-medium kazi-text-secondary;
+  }
+  
+  .kazi-caption {
+    @apply text-sm kazi-text-tertiary;
+  }
+
+  /* Brand Gradient Classes */
+  .kazi-gradient-primary {
+    background: linear-gradient(135deg, rgb(var(--kazi-primary)), rgb(var(--kazi-secondary)));
+  }
+  
+  .kazi-gradient-accent {
+    background: linear-gradient(135deg, rgb(var(--kazi-accent)), rgb(var(--kazi-primary)));
+  }
+  
+  .kazi-text-gradient {
+    background: linear-gradient(135deg, rgb(var(--kazi-primary)), rgb(var(--kazi-secondary)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Card Classes */
+  .kazi-card {
+    @apply kazi-bg-light kazi-border border rounded-lg shadow-sm;
+  }
+  
+  .kazi-card-elevated {
+    @apply kazi-card shadow-lg;
+  }
+  
+  .kazi-card-interactive {
+    @apply kazi-card transition-all duration-200 hover:shadow-md hover:scale-[1.01] cursor-pointer;
+  }
+
+  /* Button Classes */
+  .btn-kazi-primary {
+    @apply kazi-gradient-primary text-white font-medium px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2;
+    focus-ring-color: rgb(var(--kazi-primary) / 0.5);
+  }
+  
+  .btn-kazi-secondary {
+    @apply bg-white dark:bg-slate-800 kazi-text-primary kazi-border border font-medium px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2;
+    focus-ring-color: rgb(var(--kazi-primary) / 0.5);
+  }
+  
+  .btn-kazi-ghost {
+    @apply kazi-text-secondary font-medium px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+    focus-ring-color: rgb(var(--kazi-primary) / 0.5);
+  }
+
+  /* Interactive States */
+  .kazi-focus {
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200;
+    focus-ring-color: rgb(var(--kazi-primary) / 0.5);
+  }
+  
+  .kazi-hover {
+    @apply hover:bg-gray-50 dark:hover:bg-slate-800 transition-all duration-200;
+  }
+
+  /* Animation Classes */
+  .kazi-animate-fade-in {
+    animation: kazi-fade-in 0.3s ease-out;
+  }
+  
+  .kazi-animate-slide-up {
+    animation: kazi-slide-up 0.3s ease-out;
+  }
+  
+  .kazi-animate-scale-in {
+    animation: kazi-scale-in 0.2s ease-out;
+  }
+}
+
+/* Animations */
+@keyframes kazi-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes kazi-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes kazi-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive Font Sizes */
+.kazi-responsive-text {
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+}
+
+.kazi-responsive-title {
+  font-size: clamp(1.125rem, 3vw, 1.5rem);
+}
+
+.kazi-responsive-headline {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+  .kazi-animate-fade-in,
+  .kazi-animate-slide-up,
+  .kazi-animate-scale-in,
+  .btn-kazi-primary,
+  .btn-kazi-secondary,
+  .btn-kazi-ghost,
+  .kazi-card-interactive,
+  .kazi-hover,
+  .kazi-focus {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .kazi-text-tertiary,
+  .kazi-text-muted {
+    @apply text-gray-800 dark:text-slate-200;
+  }
+  
+  .kazi-border {
+    @apply border-gray-400 dark:border-slate-500;
+  }
+}

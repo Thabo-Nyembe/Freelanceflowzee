@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, MessageCircle, TrendingUp, Star, Search } from "lucide-react";
+import { Users, MessageCircle, TrendingUp, Star, Search, ArrowRight } from "lucide-react";
 
 export default function CommunityPage() {
   return (
@@ -72,8 +72,14 @@ export default function CommunityPage() {
         </CardHeader>
         <CardContent>
           <div className="flex justify-center gap-4">
-            <Button>Join Waitlist</Button>
-            <Button variant="outline">Learn More</Button>
+            <Button className="gap-2">
+              Join Waitlist
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" className="gap-2">
+              Learn More
+              <ArrowRight className="h-4 w-4" />
+            </Button>
           </div>
           <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
             <div className="p-4 bg-gray-50 rounded-lg">

@@ -186,11 +186,27 @@ export default function TeamHubPage() {
           <p className="text-gray-600 dark:text-gray-300">Manage your team members and collaboration</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              console.log('Opening team settings')
+              alert('Opening team settings')
+            }}
+          >
             <Settings className="h-4 w-4 mr-2" />
             Settings
           </Button>
-          <Button size="sm">
+          <Button 
+            size="sm"
+            onClick={() => {
+              console.log('Adding new team member')
+              const memberName = prompt('Enter new member name:')
+              if (memberName) {
+                alert(`Invitation sent to ${memberName}`)
+              }
+            }}
+          >
             <UserPlus className="h-4 w-4 mr-2" />
             Add Member
           </Button>
@@ -304,19 +320,47 @@ export default function TeamHubPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-3">
-                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
+                    onClick={() => {
+                      console.log('Opening team chat')
+                      alert('Opening team chat interface')
+                    }}
+                  >
                     <MessageSquare className="h-5 w-5" />
                     <span className="text-sm">Team Chat</span>
                   </Button>
-                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
+                    onClick={() => {
+                      console.log('Opening schedule')
+                      alert('Opening team schedule')
+                    }}
+                  >
                     <Calendar className="h-5 w-5" />
                     <span className="text-sm">Schedule</span>
                   </Button>
-                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
+                    onClick={() => {
+                      console.log('Starting video call')
+                      alert('Starting team video call')
+                    }}
+                  >
                     <Video className="h-5 w-5" />
                     <span className="text-sm">Video Call</span>
                   </Button>
-                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
+                    onClick={() => {
+                      console.log('Generating reports')
+                      alert('Generating team reports')
+                    }}
+                  >
                     <FileText className="h-5 w-5" />
                     <span className="text-sm">Reports</span>
                   </Button>
@@ -340,7 +384,14 @@ export default function TeamHubPage() {
                   className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  console.log('Opening filter options')
+                  alert('Filter options: All, Online, By Department, By Role')
+                }}
+              >
                 <Filter className="h-4 w-4 mr-2" />
                 Filter
               </Button>
@@ -392,14 +443,38 @@ export default function TeamHubPage() {
                     </div>
                   </div>
                   <div className="mt-4 flex gap-2">
-                    <Button size="sm" variant="outline" className="flex-1">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="flex-1 hover:bg-blue-50 hover:border-blue-200 transition-colors"
+                      onClick={() => {
+                        console.log(`Starting chat with ${member.name}`)
+                        alert(`Opening chat with ${member.name}`)
+                      }}
+                    >
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Chat
                     </Button>
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="hover:bg-green-50 hover:border-green-200 transition-colors"
+                      onClick={() => {
+                        console.log(`Sending email to ${member.email}`)
+                        window.open(`mailto:${member.email}`, '_blank')
+                      }}
+                    >
                       <Mail className="h-4 w-4" />
                     </Button>
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="hover:bg-yellow-50 hover:border-yellow-200 transition-colors"
+                      onClick={() => {
+                        console.log(`Calling ${member.phone}`)
+                        window.open(`tel:${member.phone}`, '_blank')
+                      }}
+                    >
                       <Phone className="h-4 w-4" />
                     </Button>
                   </div>
@@ -458,9 +533,106 @@ export default function TeamHubPage() {
               <CardDescription>Performance metrics and insights</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <TrendingUp className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-                <p className="text-gray-500">Team analytics and reporting coming soon</p>
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="kazi-card p-4">
+                    <div className="flex items-center space-x-3">
+                      <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                      <div>
+                        <p className="text-sm kazi-text-tertiary">Total Members</p>
+                        <p className="text-xl font-bold kazi-text-primary">{teamMembers.length}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="kazi-card p-4">
+                    <div className="flex items-center space-x-3">
+                      <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+                      <div>
+                        <p className="text-sm kazi-text-tertiary">Active Projects</p>
+                        <p className="text-xl font-bold kazi-text-primary">
+                          {teamMembers.reduce((acc, member) => acc + member.projects, 0)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="kazi-card p-4">
+                    <div className="flex items-center space-x-3">
+                      <Trophy className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                      <div>
+                        <p className="text-sm kazi-text-tertiary">Avg Performance</p>
+                        <p className="text-xl font-bold kazi-text-primary">
+                          {Math.round(teamMembers.reduce((acc, member) => acc + member.performance, 0) / teamMembers.length)}%
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="kazi-card p-4">
+                    <div className="flex items-center space-x-3">
+                      <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
+                      <div>
+                        <p className="text-sm kazi-text-tertiary">Growth Rate</p>
+                        <p className="text-xl font-bold text-green-600 dark:text-green-400">+12%</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="font-semibold kazi-text-primary">Top Performers</h3>
+                  <div className="space-y-3">
+                    {teamMembers
+                      .sort((a, b) => b.performance - a.performance)
+                      .slice(0, 3)
+                      .map((member, index) => (
+                      <div key={member.id} className="flex items-center justify-between p-3 rounded-lg kazi-bg-secondary">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white ${
+                            index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : 'bg-amber-600'
+                          }`}>
+                            {index + 1}
+                          </div>
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={member.avatar} />
+                            <AvatarFallback>{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium kazi-text-primary">{member.name}</p>
+                            <p className="text-sm kazi-text-tertiary">{member.role}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold kazi-text-primary">{member.performance}%</p>
+                          <p className="text-sm kazi-text-tertiary">{member.projects} projects</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Button variant="outline" className="justify-start h-auto p-4">
+                    <div className="flex items-center space-x-3">
+                      <FileText className="h-5 w-5" />
+                      <div className="text-left">
+                        <p className="font-medium">Generate Report</p>
+                        <p className="text-sm kazi-text-tertiary">Export team analytics</p>
+                      </div>
+                    </div>
+                  </Button>
+                  
+                  <Button variant="outline" className="justify-start h-auto p-4">
+                    <div className="flex items-center space-x-3">
+                      <Target className="h-5 w-5" />
+                      <div className="text-left">
+                        <p className="font-medium">Set Goals</p>
+                        <p className="text-sm kazi-text-tertiary">Define team objectives</p>
+                      </div>
+                    </div>
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

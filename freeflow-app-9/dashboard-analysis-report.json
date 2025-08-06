@@ -1,0 +1,248 @@
+{
+  "timestamp": "2025-07-08T16:59:30.172Z",
+  "dashboardAnalysis": {
+    "components": {
+      "mainDashboard": {
+        "exists": true,
+        "hasTabNavigation": true,
+        "hasOverview": true,
+        "hasProjectsHub": true,
+        "hasAICreate": true,
+        "hasVideoStudio": true,
+        "hasFilesHub": true,
+        "hasCommunity": true,
+        "hasMyDay": true,
+        "hasEscrow": true,
+        "hasGlobalSearch": true,
+        "hasAnimations": true,
+        "hasMockData": true,
+        "hasInteractiveElements": true
+      },
+      "aiCreate": {
+        "exists": true,
+        "hasAPIKeyInput": true,
+        "hasProviderTabs": true,
+        "hasValidation": true,
+        "hasErrorHandling": true,
+        "hasLoadingState": true,
+        "hasTestIds": true
+      },
+      "globalSearch": {
+        "exists": true,
+        "hasKeyboardShortcuts": false,
+        "hasDialog": true,
+        "hasSearch": true,
+        "hasFiltering": true,
+        "hasNavigation": true
+      },
+      "videoStudio": {
+        "exists": true,
+        "hasRecording": true,
+        "hasEditing": true,
+        "hasSharing": true,
+        "hasExport": true
+      }
+    },
+    "pages": {
+      "projects-hub": {
+        "exists": true,
+        "hasContent": false,
+        "hasInteractivity": false,
+        "hasDataLoading": false,
+        "hasErrorHandling": false,
+        "isPlaceholder": false
+      },
+      "ai-create": {
+        "exists": true,
+        "hasContent": true,
+        "hasInteractivity": false,
+        "hasDataLoading": false,
+        "hasErrorHandling": false,
+        "isPlaceholder": false
+      },
+      "video-studio": {
+        "exists": true,
+        "hasContent": true,
+        "hasInteractivity": true,
+        "hasDataLoading": false,
+        "hasErrorHandling": false,
+        "isPlaceholder": false
+      },
+      "files-hub": {
+        "exists": true,
+        "hasContent": true,
+        "hasInteractivity": false,
+        "hasDataLoading": false,
+        "hasErrorHandling": false,
+        "isPlaceholder": true
+      },
+      "community-hub": {
+        "exists": true,
+        "hasContent": true,
+        "hasInteractivity": false,
+        "hasDataLoading": true,
+        "hasErrorHandling": false,
+        "isPlaceholder": false
+      },
+      "my-day": {
+        "exists": true,
+        "hasContent": true,
+        "hasInteractivity": true,
+        "hasDataLoading": true,
+        "hasErrorHandling": false,
+        "isPlaceholder": false
+      },
+      "escrow": {
+        "exists": true,
+        "hasContent": true,
+        "hasInteractivity": true,
+        "hasDataLoading": false,
+        "hasErrorHandling": false,
+        "isPlaceholder": true
+      }
+    },
+    "functionality": {
+      "apiRoutes": [
+        "ai",
+        "analytics",
+        "auth",
+        "bookings",
+        "chat",
+        "collaboration",
+        "demo",
+        "enhanced",
+        "generate-title",
+        "log-hydration-error",
+        "mock",
+        "openai-collaboration",
+        "payment",
+        "payments",
+        "project-unlock",
+        "projects",
+        "robots",
+        "stripe"
+      ],
+      "hasAPIIntegration": true,
+      "hasSupabase": false,
+      "hasDatabase": true,
+      "hasStorage": false,
+      "uiComponents": [
+        "accordion",
+        "alert-dialog",
+        "alert",
+        "aspect-ratio",
+        "avatar",
+        "badge",
+        "breadcrumb",
+        "button",
+        "calendar",
+        "card",
+        "carousel",
+        "chart",
+        "checkbox",
+        "collapsible",
+        "command",
+        "context-menu",
+        "date-picker",
+        "dialog",
+        "drawer",
+        "dropdown-menu",
+        "enhanced-interactive-system",
+        "enhanced-sharing-modal",
+        "form",
+        "hover-card",
+        "input-otp",
+        "input",
+        "label",
+        "luxury-card",
+        "menubar",
+        "navigation-menu",
+        "optimized-image-enhanced",
+        "optimized-image",
+        "pagination",
+        "popover",
+        "progress",
+        "radio-group",
+        "resizable",
+        "scroll-area",
+        "select",
+        "separator",
+        "sheet",
+        "sidebar",
+        "skeleton",
+        "slider",
+        "sonner",
+        "switch",
+        "table",
+        "tabs",
+        "textarea",
+        "toast",
+        "toaster",
+        "toggle-group",
+        "toggle",
+        "tooltip",
+        "use-mobile"
+      ],
+      "hasButtons": true,
+      "hasModals": true,
+      "hasForms": true,
+      "hasTabs": true,
+      "hooks": [
+        "use-analytics.ts",
+        "use-bulk-operations.ts",
+        "use-client-reviews.ts",
+        "use-collaboration.ts",
+        "use-debounce.ts",
+        "use-editor.ts",
+        "use-enhanced-ai.ts",
+        "use-freeflow-ai.ts",
+        "use-media-query.ts",
+        "use-mobile.tsx",
+        "use-screen-recorder.ts",
+        "use-sharing-modal.ts",
+        "use-toast.ts",
+        "use-video-export.ts",
+        "use-video-search.ts",
+        "use-video-security.ts",
+        "useVideoStatus.ts"
+      ],
+      "hasCustomHooks": true
+    },
+    "issues": [
+      "Dashboard lacks error handling",
+      "Dashboard uses mock/hardcoded data",
+      "Missing or placeholder pages: files-hub, escrow"
+    ],
+    "status": {
+      "totalPages": 7,
+      "workingPages": 5,
+      "placeholderPages": 2,
+      "completionRate": 71,
+      "totalIssues": 3,
+      "hasMainDashboard": true,
+      "hasTabNavigation": true,
+      "hasInteractiveElements": true,
+      "hasAPIIntegration": true,
+      "hasDatabaseIntegration": true
+    }
+  },
+  "findings": {
+    "workingFeatures": [
+      "projects-hub",
+      "ai-create",
+      "video-studio",
+      "community-hub",
+      "my-day"
+    ],
+    "brokenFeatures": [],
+    "placeholderFeatures": [
+      "files-hub",
+      "escrow"
+    ],
+    "recommendations": [
+      "Complete placeholder page implementations",
+      "Fix identified issues: Dashboard lacks error handling, Dashboard uses mock/hardcoded data, Missing or placeholder pages: files-hub, escrow",
+      "Replace mock data with real data sources"
+    ]
+  }
+}

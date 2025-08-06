@@ -1,513 +1,959 @@
-import { onINP, onCLS, onFCP, onLCP, onTTFB } from 'web-vitals'
+import { Analytics } from '@vercel/analytics/react';
+import { inject } from '@vercel/analytics';
+import { metric, ReportCallback, Metric } from 'web-vitals';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
-// Enhanced analytics service with AI capabilities
-class AnalyticsService {
-  private apiKey: string
-  private isInitialized: boolean = false
-  private sessionId: string
-  private userId?: string
-  private eventQueue: AnalyticsEvent[] = []
-  private aiInsights: AIInsight[] = []
+// ==========================================================
+// TYPES AND INTERFACES
+// ==========================================================
 
-  constructor() {
-    this.apiKey = process.env.NEXT_PUBLIC_ANALYTICS_KEY || ''
-    this.sessionId = this.generateSessionId()
-    this.initializeWebVitals()
-    this.initializePerformanceObserver()
-    this.startSessionTracking()
-  }
+/**
+ * Core Web Vitals metrics
+ */
+export interface CoreWebVitals {
+  LCP: number; // Largest Contentful Paint
+  FID: number; // First Input Delay
+  CLS: number; // Cumulative Layout Shift
+  FCP: number; // First Contentful Paint
+  TTFB: number; // Time to First Byte
+  INP: number; // Interaction to Next Paint
+}
 
-  // Initialize analytics service
-  async initialize(userId?: string) {
-    this.userId = userId
-    this.isInitialized = true
-    
-    // Load AI models for insights
-    await this.loadAIModels()
-    
-    // Start background processes
-    this.startEventProcessing()
-    this.startAIAnalysis()
-    
-    console.log('🧠 Enhanced analytics with AI initialized')
-  }
+/**
+ * SLA monitoring configuration
+ */
+export interface SLAConfig {
+  targetUptime: number; // e.g. 99.9
+  checkIntervalMs: number;
+  alertThreshold: number; // percentage below target that triggers alert
+  endpoints: string[];
+}
 
-  // Track user events with enhanced context
-  track(event: string, properties: Record<string, any> = {}) {
-    const analyticsEvent: AnalyticsEvent = {
-      id: this.generateEventId(),
-      event,
-      properties: {
-        ...properties,
-        timestamp: new Date().toISOString(),
-        sessionId: this.sessionId,
-        userId: this.userId,
-        url: window.location.href,
-        referrer: document.referrer,
-        userAgent: navigator.userAgent,
-        viewport: {
-          width: window.innerWidth,
-          height: window.innerHeight,
-        },
-        device: this.getDeviceInfo(),
-        performance: this.calculateErrorMetrics({}),
-      },
-      aiContext: this.generateAIContext(event, properties),
+/**
+ * Alert configuration
+ */
+export interface AlertConfig {
+  enabled: boolean;
+  slackWebhookUrl?: string;
+  emailRecipients?: string[];
+  smsRecipients?: string[];
+  alertThresholds: {
+    error: number; // errors per minute
+    performance: CoreWebVitalsThresholds;
+    uptime: number; // percentage
+  };
+}
+
+/**
+ * Core Web Vitals thresholds based on Google's recommendations
+ */
+export interface CoreWebVitalsThresholds {
+  LCP: { good: number; needsImprovement: number }; // milliseconds
+  FID: { good: number; needsImprovement: number }; // milliseconds
+  CLS: { good: number; needsImprovement: number }; // score
+  FCP: { good: number; needsImprovement: number }; // milliseconds
+  TTFB: { good: number; needsImprovement: number }; // milliseconds
+  INP: { good: number; needsImprovement: number }; // milliseconds
+}
+
+/**
+ * Custom event for business metrics
+ */
+export interface CustomEvent {
+  name: string;
+  category: 'user' | 'business' | 'performance' | 'error' | 'journey';
+  value?: number;
+  metadata?: Record<string, any>;
+  timestamp: number;
+}
+
+/**
+ * User journey step
+ */
+export interface JourneyStep {
+  stepId: string;
+  pagePath: string;
+  componentId?: string;
+  action: string;
+  timestamp: number;
+  duration?: number;
+  metadata?: Record<string, any>;
+}
+
+/**
+ * A/B test configuration
+ */
+export interface ABTest {
+  testId: string;
+  variants: string[];
+  trafficAllocation: number[]; // percentages for each variant
+  metrics: string[]; // metrics to track for this test
+  startDate: Date;
+  endDate?: Date;
+  isActive: boolean;
+}
+
+/**
+ * Analytics dashboard configuration
+ */
+export interface AnalyticsDashboardConfig {
+  refreshInterval: number;
+  defaultDateRange: 'today' | 'yesterday' | '7d' | '30d' | '90d';
+  defaultMetrics: string[];
+  alertsEnabled: boolean;
+  userSegments: string[];
+}
+
+/**
+ * Error event with detailed information
+ */
+export interface ErrorEvent {
+  message: string;
+  stack?: string;
+  componentName?: string;
+  userId?: string;
+  sessionId: string;
+  url: string;
+  timestamp: number;
+  metadata?: Record<string, any>;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+}
+
+// ==========================================================
+// CONFIGURATION
+// ==========================================================
+
+/**
+ * Default Core Web Vitals thresholds based on Google's recommendations
+ */
+export const DEFAULT_WEB_VITALS_THRESHOLDS: CoreWebVitalsThresholds = {
+  LCP: { good: 2500, needsImprovement: 4000 }, // milliseconds
+  FID: { good: 100, needsImprovement: 300 }, // milliseconds
+  CLS: { good: 0.1, needsImprovement: 0.25 }, // score
+  FCP: { good: 1800, needsImprovement: 3000 }, // milliseconds
+  TTFB: { good: 800, needsImprovement: 1800 }, // milliseconds
+  INP: { good: 200, needsImprovement: 500 }, // milliseconds
+};
+
+/**
+ * Default SLA configuration with 99.9% uptime target
+ */
+export const DEFAULT_SLA_CONFIG: SLAConfig = {
+  targetUptime: 99.9,
+  checkIntervalMs: 60000, // 1 minute
+  alertThreshold: 99.5, // Alert if below 99.5%
+  endpoints: [
+    '/api/health',
+    '/api/status',
+  ],
+};
+
+/**
+ * Default alert configuration
+ */
+export const DEFAULT_ALERT_CONFIG: AlertConfig = {
+  enabled: true,
+  slackWebhookUrl: process.env.NEXT_PUBLIC_ANALYTICS_SLACK_WEBHOOK,
+  emailRecipients: process.env.NEXT_PUBLIC_ANALYTICS_EMAIL_RECIPIENTS?.split(','),
+  alertThresholds: {
+    error: 5, // 5 errors per minute
+    performance: DEFAULT_WEB_VITALS_THRESHOLDS,
+    uptime: 99.5, // percentage
+  },
+};
+
+/**
+ * Default analytics dashboard configuration
+ */
+export const DEFAULT_DASHBOARD_CONFIG: AnalyticsDashboardConfig = {
+  refreshInterval: 60000, // 1 minute
+  defaultDateRange: '7d',
+  defaultMetrics: ['pageViews', 'conversions', 'revenue', 'LCP', 'CLS', 'errorRate'],
+  alertsEnabled: true,
+  userSegments: ['all', 'newUsers', 'returningUsers', 'premiumUsers'],
+};
+
+// ==========================================================
+// ANALYTICS PROVIDER COMPONENT
+// ==========================================================
+
+/**
+ * Analytics Provider component props
+ */
+interface AnalyticsProviderProps {
+  children: React.ReactNode;
+  slaConfig?: SLAConfig;
+  alertConfig?: AlertConfig;
+  dashboardConfig?: AnalyticsDashboardConfig;
+  debug?: boolean;
+}
+
+/**
+ * Enhanced Analytics Provider component that wraps Vercel Analytics
+ * and provides additional analytics features
+ */
+export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
+  children,
+  slaConfig = DEFAULT_SLA_CONFIG,
+  alertConfig = DEFAULT_ALERT_CONFIG,
+  dashboardConfig = DEFAULT_DASHBOARD_CONFIG,
+  debug = false,
+}) => {
+  // Initialize Vercel Analytics in production mode
+  useEffect(() => {
+    // Only inject analytics in production
+    if (process.env.NODE_ENV === 'production') {
+      inject({ debug });
+      
+      // Initialize web vitals reporting
+      initWebVitalsReporting();
+      
+      // Initialize SLA monitoring
+      initSLAMonitoring(slaConfig);
+      
+      console.log('KAZI Analytics: Production analytics initialized');
     }
+  }, [debug, slaConfig]);
 
-    this.eventQueue.push(analyticsEvent)
-    this.processEvent(analyticsEvent)
-  }
+  return (
+    <>
+      {/* Vercel Analytics component */}
+      <Analytics />
+      {children}
+    </>
+  );
+};
 
-  // Track page views with enhanced metadata
-  trackPageView(page: string, properties: Record<string, any> = {}) {
-    this.track('page_view', {
-      page,
-      title: document.title,
-      loadTime: performance.now(),
-      connectionType: this.getConnectionType(),
-      timeOnPage: this.getTimeOnPage(),
-      scrollDepth: this.getScrollDepth(),
-      interactionScore: this.calculateInteractionScore(),
-      ...properties,
-    })
-  }
+// ==========================================================
+// WEB VITALS TRACKING
+// ==========================================================
 
-  // AI-powered conversion tracking
-  trackConversion(conversionType: string, value: number, properties: Record<string, any> = {}) {
-    const conversionData = {
-      type: conversionType,
-      value,
-      currency: 'USD',
-      funnel: this.getCurrentFunnelStage(),
-      attribution: this.getAttributionData(),
-      predictedLifetimeValue: this.predictLifetimeValue(properties),
-      conversionProbability: this.calculateConversionProbability(),
-      ...properties,
-    }
-
-    this.track('conversion', conversionData)
-    this.updateAIModels(conversionData)
-  }
-
-  // Enhanced error tracking with AI categorization
-  trackError(error: Error, context: Record<string, any> = {}) {
-    const errorData = {
-      message: error.message,
-      stack: error.stack,
-      type: error.name,
-      severity: this.categorizeErrorSeverity(error),
-      impact: this.calculateErrorImpact(error, context),
-      aiCategory: this.categorizeErrorWithAI(error),
-      possibleSolutions: this.suggestErrorSolutions(error),
-      userJourney: this.getUserJourneyContext(),
-      ...context,
-    }
-
-    this.track('error', errorData)
-    this.triggerErrorAlert(errorData)
-  }
-
-  // Real-time performance monitoring
-  trackPerformance(metric: string, value: number, context: Record<string, any> = {}) {
-    const performanceData = {
-      metric,
-      value,
-      benchmark: this.getPerformanceBenchmark(metric),
-      percentile: this.calculatePercentile(metric, value),
-      trend: this.calculateTrend(metric, value),
-      impact: this.assessPerformanceImpact(metric, value),
-      optimization: this.suggestOptimizations(metric, value),
-      ...context,
-    }
-
-    this.track('performance', performanceData)
-    
-    // Trigger alerts for critical performance issues
-    if (this.isCriticalPerformanceIssue(metric, value)) {
-      this.triggerPerformanceAlert(performanceData)
-    }
-  }
-
-  // AI-powered user behavior analysis
-  analyzeUserBehavior(): UserBehaviorInsights {
-    const recentEvents = this.getRecentEvents(100)
-    const patterns = this.detectBehaviorPatterns(recentEvents)
-    
-    return {
-      sessionDuration: this.getSessionDuration(),
-      pageViews: this.getPageViewCount(),
-      interactions: this.getInteractionCount(),
-      conversionFunnel: this.analyzeFunnelProgress(),
-      behaviorPatterns: patterns,
-      engagementScore: this.calculateEngagementScore(),
-      churnRisk: this.predictChurnRisk(),
-      nextBestAction: this.recommendNextAction(),
-      personalization: this.generatePersonalizationData(),
-    }
-  }
-
-  // Advanced A/B testing with AI optimization
-  setupABTest(testName: string, variants: string[], config: ABTestConfig = {}) {
-    const testConfig = {
-      name: testName,
-      variants,
-      allocation: config.allocation || this.optimizeAllocation(variants),
-      duration: config.duration || this.calculateOptimalDuration(testName),
-      metrics: config.metrics || this.selectOptimalMetrics(testName),
-      aiOptimization: config.aiOptimization !== false,
-      statisticalPower: config.statisticalPower || 0.8,
-      confidenceLevel: config.confidenceLevel || 0.95,
-    }
-
-    this.track('ab_test_start', testConfig)
-    return this.assignVariant(testName, testConfig)
-  }
-
-  // Real-time insights generation
-  async generateInsights(): Promise<AnalyticsInsights> {
-    const rawData = await this.aggregateAnalyticsData()
-    const aiInsights = await this.processWithAI(rawData)
-    
-    return {
-      summary: {
-        users: this.calculateUserMetrics(rawData),
-        revenue: this.calculateRevenueMetrics(rawData),
-        performance: this.calculateErrorMetrics({}),
-        errors: this.calculateErrorMetrics(rawData),
-      },
-      trends: this.identifyTrends(rawData),
-      anomalies: this.detectAnomalies(rawData),
-      predictions: aiInsights.predictions,
-      recommendations: aiInsights.recommendations,
-      alerts: this.generateAlerts(rawData, aiInsights),
-      opportunities: this.identifyOpportunities(rawData, aiInsights),
-    }
-  }
-
-  // Advanced cohort analysis
-  analyzeCohorts(cohortType: 'daily' | 'weekly' | 'monthly' = 'weekly'): CohortAnalysis {
-    const cohorts = this.buildCohorts(cohortType)
-    
-    return {
-      retention: this.calculateRetentionRates(cohorts),
-      revenue: this.calculateCohortRevenue(cohorts),
-      engagement: this.calculateCohortEngagement(cohorts),
-      ltv: this.calculateLifetimeValue(cohorts),
-      churn: this.calculateChurnRates(cohorts),
-      predictions: this.predictCohortBehavior(cohorts),
-    }
-  }
-
-  // Initialize Web Vitals monitoring
-  private initializeWebVitals() {
-    if (typeof window === 'undefined') return
-
-    onCLS((metric) => this.trackPerformance('cls', metric.value, { rating: metric.rating }))
-    onFCP((metric) => this.trackPerformance('fcp', metric.value, { rating: metric.rating }))
-    onINP((metric) => this.trackPerformance('inp', metric.value, { rating: metric.rating }))
-    onLCP((metric) => this.trackPerformance('lcp', metric.value, { rating: metric.rating }))
-    onTTFB((metric) => this.trackPerformance('ttfb', metric.value, { rating: metric.rating }))
-  }
-
-  // Initialize Performance Observer
-  private initializePerformanceObserver() {
-    if (typeof window === 'undefined' || !('PerformanceObserver' in window)) return
-
-    const observer = new PerformanceObserver((list) => {
-      list.getEntries().forEach((entry) => {
-        this.processPerformanceEntry(entry)
-      })
-    })
-
-    observer.observe({ entryTypes: ['navigation', 'resource', 'measure', 'paint'] })
-  }
-
-  // AI model loading
-  private async loadAIModels() {
-    try {
-      // Load TensorFlow.js models for client-side inference
-      // This would be replaced with actual model URLs in production
-      const models = {
-        churnPrediction: '/models/churn-prediction.json',
-        conversionOptimization: '/models/conversion-optimization.json',
-        anomalyDetection: '/models/anomaly-detection.json',
-        userSegmentation: '/models/user-segmentation.json',
+/**
+ * Initialize Web Vitals reporting
+ */
+export function initWebVitalsReporting(): void {
+  if (typeof window !== 'undefined') {
+    // Report all core web vitals
+    metric((metric: Metric) => {
+      const { name, value, id } = metric;
+      
+      // Send to backend API
+      reportWebVital(metric);
+      
+      // Log in development
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`Web Vital: ${name} = ${value}`);
       }
-
-      // Simulate model loading
-      await Promise.all(
-        Object.entries(models).map(async ([name, url]) => {
-          console.log(`Loading AI model: ${name}`)
-          // await tf.loadLayersModel(url)
-        })
-      )
-
-      console.log('✅ AI models loaded successfully')
-    } catch (error) {
-      console.warn('⚠️ AI models failed to load, falling back to heuristics')
-    }
+      
+      // Check if the metric needs improvement
+      checkVitalThreshold(metric);
+    });
   }
+}
 
-  // Process events from the queue
-  private async processEvent(event: AnalyticsEvent) {
-    if (!this.isInitialized) {
-      return;
-    }
-
-    try {
-      // Send event to the server
-      await fetch('/api/analytics', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(event),
-      });
-
-      // Update AI models with the new event data
-      this.updateAIModels(event);
-    } catch (error) {
-      console.error('Error sending analytics event:', error);
-    }
+/**
+ * Report a web vital metric to the backend
+ */
+function reportWebVital(metric: Metric): void {
+  // Don't send metrics in development
+  if (process.env.NODE_ENV !== 'production') return;
+  
+  // Use sendBeacon if available, fall back to fetch
+  const url = '/api/analytics/vitals';
+  const body = JSON.stringify({
+    name: metric.name,
+    value: metric.value,
+    id: metric.id,
+    page: window.location.pathname,
+    timestamp: Date.now(),
+  });
+  
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon(url, body);
+  } else {
+    fetch(url, {
+      body,
+      method: 'POST',
+      keepalive: true,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
+}
 
-  // Utility methods
-  private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+/**
+ * Check if a vital metric is below threshold and trigger alert if needed
+ */
+function checkVitalThreshold(metric: Metric): void {
+  const { name, value } = metric;
+  
+  // Only check in production
+  if (process.env.NODE_ENV !== 'production') return;
+  
+  // Get threshold for this metric
+  let thresholds: { good: number; needsImprovement: number } | undefined;
+  
+  switch (name) {
+    case 'LCP':
+    case 'FID':
+    case 'CLS':
+    case 'FCP':
+    case 'TTFB':
+    case 'INP':
+      thresholds = DEFAULT_WEB_VITALS_THRESHOLDS[name as keyof CoreWebVitalsThresholds];
+      break;
+    default:
+      return; // Unsupported metric
   }
-
-  private generateEventId(): string {
-    return `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  
+  if (!thresholds) return;
+  
+  // Check if the metric is poor (worse than "needs improvement")
+  if (value > thresholds.needsImprovement) {
+    // This is a poor performance metric - trigger alert
+    triggerPerformanceAlert({
+      metricName: name,
+      value: value,
+      threshold: thresholds.needsImprovement,
+      page: window.location.pathname,
+    });
   }
+}
 
-  private getDeviceInfo() {
-    return {
-      type: /Mobile|Android|iPhone|iPad/.test(navigator.userAgent) ? 'mobile' : 'desktop',
-      os: this.detectOS(),
-      browser: this.detectBrowser(),
-      screenResolution: `${screen.width}x${screen.height}`,
-      colorDepth: screen.colorDepth,
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    }
+// ==========================================================
+// CUSTOM EVENT TRACKING
+// ==========================================================
+
+/**
+ * Track a custom event
+ */
+export function trackEvent(event: Omit<CustomEvent, 'timestamp'>): void {
+  const fullEvent: CustomEvent = {
+    ...event,
+    timestamp: Date.now(),
+  };
+  
+  // Don't send events in development
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('Event tracked:', fullEvent);
+    return;
   }
+  
+  // Send to backend API
+  fetch('/api/analytics/events', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(fullEvent),
+    keepalive: true,
+  }).catch(error => {
+    console.error('Failed to track event:', error);
+  });
+}
 
-  private detectOS(): string {
-    const userAgent = navigator.userAgent
-    if (userAgent.includes('Windows')) return 'Windows'
-    if (userAgent.includes('Mac')) return 'macOS'
-    if (userAgent.includes('Linux')) return 'Linux'
-    if (userAgent.includes('Android')) return 'Android'
-    if (userAgent.includes('iOS')) return 'iOS'
-    return 'Unknown'
+/**
+ * Track a business metric
+ */
+export function trackBusinessMetric(
+  name: string,
+  value: number,
+  metadata?: Record<string, any>
+): void {
+  trackEvent({
+    name,
+    category: 'business',
+    value,
+    metadata,
+  });
+}
+
+/**
+ * Track a user journey step
+ */
+export function trackJourneyStep(step: Omit<JourneyStep, 'timestamp'>): void {
+  const fullStep: JourneyStep = {
+    ...step,
+    timestamp: Date.now(),
+  };
+  
+  // Don't send events in development
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('Journey step tracked:', fullStep);
+    return;
   }
+  
+  // Send to backend API
+  fetch('/api/analytics/journey', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(fullStep),
+    keepalive: true,
+  }).catch(error => {
+    console.error('Failed to track journey step:', error);
+  });
+}
 
-  private detectBrowser(): string {
-    const userAgent = navigator.userAgent
-    if (userAgent.includes('Chrome')) return 'Chrome'
-    if (userAgent.includes('Firefox')) return 'Firefox'
-    if (userAgent.includes('Safari')) return 'Safari'
-    if (userAgent.includes('Edge')) return 'Edge'
-    return 'Unknown'
+// ==========================================================
+// ERROR TRACKING
+// ==========================================================
+
+/**
+ * Track an error event
+ */
+export function trackError(
+  error: Error | string,
+  metadata?: Record<string, any>,
+  severity: ErrorEvent['severity'] = 'medium'
+): void {
+  const message = typeof error === 'string' ? error : error.message;
+  const stack = typeof error === 'string' ? undefined : error.stack;
+  
+  const errorEvent: ErrorEvent = {
+    message,
+    stack,
+    url: typeof window !== 'undefined' ? window.location.href : '',
+    sessionId: getSessionId(),
+    timestamp: Date.now(),
+    metadata,
+    severity,
+  };
+  
+  // Always log errors to console
+  console.error('Error tracked:', errorEvent);
+  
+  // Don't send to backend in development
+  if (process.env.NODE_ENV !== 'production') return;
+  
+  // Send to backend API
+  fetch('/api/analytics/errors', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(errorEvent),
+    keepalive: true,
+  }).catch(err => {
+    console.error('Failed to track error:', err);
+  });
+  
+  // For critical errors, trigger immediate alert
+  if (severity === 'critical') {
+    triggerErrorAlert(errorEvent);
   }
+}
 
-  private getConnectionType(): string {
-    const connection = (navigator as any).connection
-    return connection ? connection.effectiveType : 'unknown'
+/**
+ * Get or generate a session ID
+ */
+function getSessionId(): string {
+  if (typeof window === 'undefined') return 'server';
+  
+  let sessionId = sessionStorage.getItem('kazi_analytics_session_id');
+  
+  if (!sessionId) {
+    sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    sessionStorage.setItem('kazi_analytics_session_id', sessionId);
   }
+  
+  return sessionId;
+}
 
-  private async sendToAnalytics(event: AnalyticsEvent) {
-    try {
-      // Send to multiple analytics services
-      await Promise.allSettled([
-        this.sendToCustomAnalytics(event),
-        this.sendToGoogleAnalytics(event),
-        this.sendToMixpanel(event),
-      ])
-    } catch (error) {
-      console.error('Analytics send failed: ', error)
-    }
+// ==========================================================
+// SLA MONITORING
+// ==========================================================
+
+/**
+ * Initialize SLA monitoring
+ */
+export function initSLAMonitoring(config: SLAConfig): void {
+  // Only run in production
+  if (process.env.NODE_ENV !== 'production') return;
+  
+  // Start periodic health checks
+  setInterval(() => {
+    checkEndpointHealth(config);
+  }, config.checkIntervalMs);
+  
+  console.log(`KAZI Analytics: SLA monitoring initialized (target: ${config.targetUptime}%)`);
+}
+
+/**
+ * Check health of all endpoints
+ */
+async function checkEndpointHealth(config: SLAConfig): Promise<void> {
+  const results = await Promise.all(
+    config.endpoints.map(async (endpoint) => {
+      try {
+        const startTime = Date.now();
+        const response = await fetch(endpoint, { 
+          method: 'GET',
+          headers: { 'X-SLA-Check': 'true' }
+        });
+        const endTime = Date.now();
+        
+        return {
+          endpoint,
+          status: response.status,
+          healthy: response.status >= 200 && response.status < 300,
+          responseTime: endTime - startTime,
+        };
+      } catch (error) {
+        return {
+          endpoint,
+          status: 0,
+          healthy: false,
+          responseTime: 0,
+          error: error instanceof Error ? error.message : String(error),
+        };
+      }
+    })
+  );
+  
+  // Calculate overall health
+  const healthyEndpoints = results.filter(r => r.healthy).length;
+  const uptimePercentage = (healthyEndpoints / results.length) * 100;
+  
+  // Track the SLA metric
+  trackBusinessMetric('system.uptime', uptimePercentage, {
+    timestamp: Date.now(),
+    endpointResults: results,
+  });
+  
+  // Check if we need to alert
+  if (uptimePercentage < config.alertThreshold) {
+    triggerUptimeAlert({
+      current: uptimePercentage,
+      target: config.targetUptime,
+      threshold: config.alertThreshold,
+      results,
+    });
   }
+}
 
-  private async sendToCustomAnalytics(event: AnalyticsEvent) {
-    // Send to your custom analytics API
-    if (!this.apiKey) return
+// ==========================================================
+// A/B TESTING
+// ==========================================================
 
-    return fetch('/api/analytics', {
+/**
+ * Get the variant for a specific A/B test
+ * @param testId The ID of the A/B test
+ * @returns The variant assigned to the current user
+ */
+export function getABTestVariant(testId: string): string {
+  // In a real implementation, we would:
+  // 1. Check if the user already has an assigned variant (from localStorage/cookie)
+  // 2. If not, assign a variant based on the test configuration
+  // 3. Store the assignment
+  // 4. Return the variant
+  
+  // For now, we'll use a simple random assignment
+  if (typeof window === 'undefined') return 'A'; // Default for SSR
+  
+  const storageKey = `kazi_abtest_${testId}`;
+  let variant = localStorage.getItem(storageKey);
+  
+  if (!variant) {
+    // Simple random assignment between A and B
+    variant = Math.random() < 0.5 ? 'A' : 'B';
+    localStorage.setItem(storageKey, variant);
+    
+    // Track the assignment
+    trackEvent({
+      name: 'abtest.assignment',
+      category: 'user',
+      metadata: { testId, variant },
+    });
+  }
+  
+  return variant;
+}
+
+/**
+ * Track a conversion for an A/B test
+ */
+export function trackABTestConversion(testId: string, conversionType: string, value?: number): void {
+  const variant = getABTestVariant(testId);
+  
+  trackEvent({
+    name: 'abtest.conversion',
+    category: 'user',
+    value,
+    metadata: { testId, variant, conversionType },
+  });
+}
+
+// ==========================================================
+// ALERTING SYSTEM
+// ==========================================================
+
+/**
+ * Trigger a performance alert
+ */
+function triggerPerformanceAlert(data: {
+  metricName: string;
+  value: number;
+  threshold: number;
+  page: string;
+}): void {
+  const alert = {
+    type: 'performance',
+    title: `Performance Alert: ${data.metricName} exceeds threshold`,
+    message: `${data.metricName} value of ${data.value} exceeds threshold of ${data.threshold} on page ${data.page}`,
+    data,
+    timestamp: Date.now(),
+  };
+  
+  sendAlert(alert);
+}
+
+/**
+ * Trigger an error alert
+ */
+function triggerErrorAlert(errorEvent: ErrorEvent): void {
+  const alert = {
+    type: 'error',
+    title: `Critical Error: ${errorEvent.message.substring(0, 100)}`,
+    message: `A critical error occurred: ${errorEvent.message}`,
+    data: errorEvent,
+    timestamp: Date.now(),
+  };
+  
+  sendAlert(alert);
+}
+
+/**
+ * Trigger an uptime alert
+ */
+function triggerUptimeAlert(data: {
+  current: number;
+  target: number;
+  threshold: number;
+  results: any[];
+}): void {
+  const alert = {
+    type: 'uptime',
+    title: `SLA Alert: Uptime below threshold`,
+    message: `Current uptime of ${data.current.toFixed(2)}% is below alert threshold of ${data.threshold}% (target: ${data.target}%)`,
+    data,
+    timestamp: Date.now(),
+  };
+  
+  sendAlert(alert);
+}
+
+/**
+ * Send an alert through configured channels
+ */
+async function sendAlert(alert: any): Promise<void> {
+  // Don't send alerts in development
+  if (process.env.NODE_ENV !== 'production') {
+    console.warn('ALERT:', alert);
+    return;
+  }
+  
+  try {
+    // 1. Send to backend API for logging and dashboard
+    await fetch('/api/analytics/alerts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(event),
-    })
-  }
-
-  private async sendToGoogleAnalytics(event: AnalyticsEvent) {
-    // Send to Google Analytics 4
-    if (typeof (window as any).gtag !== 'undefined') {
-      (window as any).gtag('event', event.event, event.properties)
+      body: JSON.stringify(alert),
+    });
+    
+    // 2. Send to Slack if configured
+    if (DEFAULT_ALERT_CONFIG.slackWebhookUrl) {
+      await sendSlackAlert(alert);
     }
-  }
-
-  private async sendToMixpanel(event: AnalyticsEvent) {
-    // Send to Mixpanel
-    if (typeof (window as any).mixpanel !== 'undefined') {
-      (window as any).mixpanel.track(event.event, event.properties)
+    
+    // 3. Send email if configured
+    if (DEFAULT_ALERT_CONFIG.emailRecipients?.length) {
+      await sendEmailAlert(alert);
     }
+  } catch (error) {
+    console.error('Failed to send alert:', error);
   }
+}
 
-  // Placeholder methods for AI functionality
-  private generateAIContext(event: string, properties: Record<string, unknown>): Record<string, unknown> {
-    return { event, properties, timestamp: Date.now() }
+/**
+ * Send an alert to Slack
+ */
+async function sendSlackAlert(alert: any): Promise<void> {
+  if (!DEFAULT_ALERT_CONFIG.slackWebhookUrl) return;
+  
+  try {
+    await fetch(DEFAULT_ALERT_CONFIG.slackWebhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: `🚨 *${alert.title}*\n${alert.message}\n\`\`\`${JSON.stringify(alert.data, null, 2)}\`\`\``,
+      }),
+    });
+  } catch (error) {
+    console.error('Failed to send Slack alert:', error);
   }
+}
 
-  private predictLifetimeValue(properties: Record<string, unknown>): number {
-    // AI-powered LTV prediction
-    return Math.random() * 1000 // Placeholder
+/**
+ * Send an alert via email
+ */
+async function sendEmailAlert(alert: any): Promise<void> {
+  if (!DEFAULT_ALERT_CONFIG.emailRecipients?.length) return;
+  
+  try {
+    await fetch('/api/analytics/email-alert', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        recipients: DEFAULT_ALERT_CONFIG.emailRecipients,
+        subject: alert.title,
+        body: `${alert.message}\n\n${JSON.stringify(alert.data, null, 2)}`,
+      }),
+    });
+  } catch (error) {
+    console.error('Failed to send email alert:', error);
   }
+}
 
-  private calculateConversionProbability(): number {
-    // AI-powered conversion probability
-    return Math.random() // Placeholder
-  }
+// ==========================================================
+// ANALYTICS DASHBOARD HOOKS
+// ==========================================================
 
-  private categorizeErrorWithAI(error: Error): string {
-    // AI error categorization
-    return 'runtime_error' // Placeholder
-  }
+/**
+ * Hook to get real-time Core Web Vitals metrics
+ */
+export function useCoreWebVitals(refreshInterval = 60000) {
+  const [metrics, setMetrics] = useState<Partial<CoreWebVitals>>({});
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
+  
+  useEffect(() => {
+    let isMounted = true;
+    
+    const fetchMetrics = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/analytics/core-web-vitals');
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch Core Web Vitals: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (isMounted) {
+          setMetrics(data);
+          setError(null);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err instanceof Error ? err : new Error(String(err)));
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+    
+    // Initial fetch
+    fetchMetrics();
+    
+    // Set up interval for refreshing data
+    const intervalId = setInterval(fetchMetrics, refreshInterval);
+    
+    // Cleanup
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, [refreshInterval]);
+  
+  return { metrics, loading, error };
+}
 
-  private suggestErrorSolutions(error: Error): string[] {
-    // AI-powered solution suggestions
-    return ['Check network connectivity', 'Refresh the page'] // Placeholder
-  }
+/**
+ * Hook to get business metrics over time
+ */
+export function useBusinessMetrics(
+  metricNames: string[],
+  dateRange: string = '7d',
+  refreshInterval = 60000
+) {
+  const [metrics, setMetrics] = useState<Record<string, any[]>>({});
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
+  
+  useEffect(() => {
+    let isMounted = true;
+    
+    const fetchMetrics = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `/api/analytics/business-metrics?metrics=${metricNames.join(',')}&range=${dateRange}`
+        );
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch business metrics: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (isMounted) {
+          setMetrics(data);
+          setError(null);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err instanceof Error ? err : new Error(String(err)));
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+    
+    // Initial fetch
+    fetchMetrics();
+    
+    // Set up interval for refreshing data
+    const intervalId = setInterval(fetchMetrics, refreshInterval);
+    
+    // Cleanup
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, [metricNames, dateRange, refreshInterval]);
+  
+  return { metrics, loading, error };
+}
 
-  private async processWithAI(data: Record<string, unknown>): Promise<any> {
-    // AI processing pipeline
-    return {
-      predictions: [],
-      recommendations: [],
+/**
+ * Hook to get current SLA status
+ */
+export function useSLAStatus(refreshInterval = 60000) {
+  const [status, setStatus] = useState<{
+    currentUptime: number;
+    targetUptime: number;
+    endpointStatuses: Record<string, { healthy: boolean; responseTime: number }>;
+    lastChecked: Date;
+  } | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
+  
+  useEffect(() => {
+    let isMounted = true;
+    
+    const fetchStatus = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/analytics/sla-status');
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch SLA status: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (isMounted) {
+          setStatus(data);
+          setError(null);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err instanceof Error ? err : new Error(String(err)));
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+    
+    // Initial fetch
+    fetchStatus();
+    
+    // Set up interval for refreshing data
+    const intervalId = setInterval(fetchStatus, refreshInterval);
+    
+    // Cleanup
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, [refreshInterval]);
+  
+  return { status, loading, error };
+}
+
+/**
+ * Hook to get recent alerts
+ */
+export function useRecentAlerts(limit = 10, refreshInterval = 60000) {
+  const [alerts, setAlerts] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
+  
+  useEffect(() => {
+    let isMounted = true;
+    
+    const fetchAlerts = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/analytics/alerts?limit=${limit}`);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch alerts: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (isMounted) {
+          setAlerts(data);
+          setError(null);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err instanceof Error ? err : new Error(String(err)));
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+    
+    // Initial fetch
+    fetchAlerts();
+    
+    // Set up interval for refreshing data
+    const intervalId = setInterval(fetchAlerts, refreshInterval);
+    
+    // Cleanup
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, [limit, refreshInterval]);
+  
+  return { alerts, loading, error };
+}
+
+// ==========================================================
+// EXPORT DEFAULT CONFIG
+// ==========================================================
+
+export default {
+  init: () => {
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+      inject({ debug: false });
+      initWebVitalsReporting();
+      initSLAMonitoring(DEFAULT_SLA_CONFIG);
+      console.log('KAZI Analytics: Production analytics initialized');
     }
-  }
-
-  // Additional placeholder methods would be implemented here...
-  private startSessionTracking() {}
-  private startEventProcessing() {}
-  private startAIAnalysis() {}
-  private getTimeOnPage() { return 0 }
-  private getScrollDepth() { return 0 }
-  private calculateInteractionScore() { return 0 }
-  private getCurrentFunnelStage() { return 'unknown' }
-  private getAttributionData() { return {} }
-  private categorizeErrorSeverity(error: Error) { return 'medium' }
-  private calculateErrorImpact(error: Error, context: Record<string, unknown>) { return 'low' }
-  private getUserJourneyContext() { return [] }
-  private triggerErrorAlert(errorData: Record<string, unknown>) {}
-  private getPerformanceBenchmark(metric: string) { return 0 }
-  private calculatePercentile(metric: string, value: number) { return 50 }
-  private calculateTrend(metric: string, value: number) { return 'stable' }
-  private assessPerformanceImpact(metric: string, value: number) { return 'low' }
-  private suggestOptimizations(metric: string, value: number) { return [] }
-  private isCriticalPerformanceIssue(metric: string, value: number) { return false }
-  private triggerPerformanceAlert(data: Record<string, unknown>) {}
-  private getRecentEvents(count: number) { return [] }
-  private detectBehaviorPatterns(events: Record<string, unknown>[]) { return {} }
-  private getSessionDuration() { return 0 }
-  private getPageViewCount() { return 0 }
-  private getInteractionCount() { return 0 }
-  private analyzeFunnelProgress() { return {} }
-  private calculateEngagementScore() { return 0 }
-  private predictChurnRisk() { return 0 }
-  private recommendNextAction() { return 'explore' }
-  private generatePersonalizationData() { return {} }
-  private optimizeAllocation(variants: string[]) { return {} }
-  private calculateOptimalDuration(testName: string) { return 14 }
-  private selectOptimalMetrics(testName: string) { return [] }
-  private assignVariant(testName: string, config: Record<string, unknown>) { return config.variants[0] }
-  private aggregateAnalyticsData() { return {} }
-  private calculateUserMetrics(data: Record<string, unknown>) { return {} }
-  private calculateRevenueMetrics(data: Record<string, unknown>) { return {} }
-  private calculateErrorMetrics(data: Record<string, unknown>) { return {} }
-  private identifyTrends(data: Record<string, unknown>) { return [] }
-  private detectAnomalies(data: Record<string, unknown>) { return [] }
-  private generateAlerts(data: Record<string, unknown>, insights: Record<string, unknown>) { return [] }
-  private identifyOpportunities(data: Record<string, unknown>, insights: Record<string, unknown>) { return [] }
-  private buildCohorts(type: string) { return {} }
-  private calculateRetentionRates(cohorts: Record<string, unknown>) { return {} }
-  private calculateCohortRevenue(cohorts: Record<string, unknown>) { return {} }
-  private calculateCohortEngagement(cohorts: Record<string, unknown>) { return {} }
-  private calculateLifetimeValue(cohorts: Record<string, unknown>) { return {} }
-  private calculateChurnRates(cohorts: Record<string, unknown>) { return {} }
-  private predictCohortBehavior(cohorts: Record<string, unknown>) { return {} }
-  private processPerformanceEntry(entry: Record<string, unknown>) {}
-  private generateEventInsight(event: AnalyticsEvent) { return null }
-  private updatePersonalization(event: AnalyticsEvent) {}
-  private updateAIModels(data: Record<string, unknown>) {}
-}
-
-// Types and interfaces
-interface AnalyticsEvent {
-  id: string
-  event: string
-  properties: Record<string, any>
-  aiContext: Record<string, unknown>
-}
-
-interface AIInsight {
-  type: string
-  confidence: number
-  data: Record<string, unknown>
-  timestamp: number
-}
-
-interface UserBehaviorInsights {
-  sessionDuration: number
-  pageViews: number
-  interactions: number
-  conversionFunnel: Record<string, unknown>
-  behaviorPatterns: Record<string, unknown>
-  engagementScore: number
-  churnRisk: number
-  nextBestAction: string
-  personalization: Record<string, unknown>
-}
-
-interface ABTestConfig {
-  allocation?: Record<string, number>
-  duration?: number
-  metrics?: string[]
-  aiOptimization?: boolean
-  statisticalPower?: number
-  confidenceLevel?: number
-}
-
-interface AnalyticsInsights {
-  summary: Record<string, unknown>
-  trends: Record<string, unknown>[]
-  anomalies: Record<string, unknown>[]
-  predictions: Record<string, unknown>[]
-  recommendations: Record<string, unknown>[]
-  alerts: Record<string, unknown>[]
-  opportunities: Record<string, unknown>[]
-}
-
-interface CohortAnalysis {
-  retention: Record<string, unknown>
-  revenue: Record<string, unknown>
-  engagement: Record<string, unknown>
-  ltv: Record<string, unknown>
-  churn: Record<string, unknown>
-  predictions: Record<string, unknown>
-}
-
-// Export singleton instance
-export const analytics = new AnalyticsService()
-
-// React hooks for analytics
-export function useAnalytics() {
-  return {
-    track: analytics.track.bind(analytics),
-    trackPageView: analytics.trackPageView.bind(analytics),
-    trackConversion: analytics.trackConversion.bind(analytics),
-    trackError: analytics.trackError.bind(analytics),
-    analyzeUserBehavior: analytics.analyzeUserBehavior.bind(analytics),
-    generateInsights: analytics.generateInsights.bind(analytics),
-  }
-}
-
-export default analytics 
+  },
+  trackEvent,
+  trackBusinessMetric,
+  trackJourneyStep,
+  trackError,
+  getABTestVariant,
+  trackABTestConversion,
+};

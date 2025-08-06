@@ -53,6 +53,35 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+/* ------------------------------------------------------------------
+ * Phase 6 hooks temporarily disabled to avoid unresolved imports.
+ * Placeholder no-op hooks are provided instead. Remove these and
+ * restore real imports once cost-optimised module path is settled.
+ * ------------------------------------------------------------------ */
+// import {
+//   useOptimizedAnalytics,
+//   useOptimizedABTesting,
+//   useOptimizedI18n,
+//   useOptimizedSLAMonitoring,
+// } from '@/lib/cost-optimized-integration'
+
+const useOptimizedAnalytics = () => ({
+  /* eslint-disable @typescript-eslint/no-unused-vars */
+  trackEvent: (_name: string, _data?: Record<string, any>) => {},
+})
+const useOptimizedABTesting = (
+  /* eslint-disable @typescript-eslint/no-unused-vars */
+  _testId: string,
+  _variants: string[]
+) => null
+const useOptimizedI18n = () => ({
+  /* simple passthrough */
+  t: (key: string) => key,
+})
+const useOptimizedSLAMonitoring = () => ({
+  status: 'up' as const,
+})
+
 // Mock data
 const mockData = {
   earnings: 45231,
@@ -75,7 +104,19 @@ export default function DashboardPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('overview')
 
+  /* ------------------------------------------------------------------
+   * Phase 6 hooks – lightweight, client-side, cost-optimised
+   * ------------------------------------------------------------------ */
+  const { trackEvent } = useOptimizedAnalytics()
+  // Simple A/B test placeholder (not used for now but keeps assignment)
+  useOptimizedABTesting('dashboard-layout', ['default', 'compact'])
+  // i18n hook (strings can be localised later with t('key'))
+  const { t } = useOptimizedI18n()
+  // SLA status for real-time platform health
+  const { status: slaStatus } = useOptimizedSLAMonitoring()
+
   const navigateToPage = (path: string) => {
+    trackEvent('navigate_dashboard', { path })
     router.push(`/dashboard/${path}`)
   }
 
@@ -423,7 +464,22 @@ export default function DashboardPage() {
                     <Star className="h-4 w-4 text-yellow-500" />
                     <div>
                       <p className="text-xs text-secondary">Platform Status</p>
-                      <p className="text-sm font-semibold text-green-600 dark:text-green-400">All Systems Operational</p>
+                      <p
+                        className={cn(
+                          'text-sm font-semibold',
+                          slaStatus === 'up'
+                            ? 'text-green-600 dark:text-green-400'
+                            : slaStatus === 'degraded'
+                            ? 'text-yellow-600 dark:text-yellow-400'
+                            : 'text-red-600 dark:text-red-400'
+                        )}
+                      >
+                        {slaStatus === 'up'
+                          ? t?.('status.operational') || 'All Systems Operational'
+                          : slaStatus === 'degraded'
+                          ? t?.('status.degraded') || 'Degraded Performance'
+                          : t?.('status.down') || 'Service Down'}
+                      </p>
                     </div>
                   </div>
                 </EnhancedCard>

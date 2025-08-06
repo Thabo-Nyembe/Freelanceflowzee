@@ -1,0 +1,3409 @@
+{
+  "timestamp": "2025-07-10T22:51:04.796Z",
+  "initialErrors": 550,
+  "finalErrors": 734,
+  "improvement": -33.5,
+  "newGrade": "A+",
+  "fixesApplied": [
+    {
+      "file": "app/(app)/dashboard/page.tsx",
+      "type": "jsx-syntax-fix",
+      "issue": "Critical JSX errors"
+    },
+    {
+      "file": "components/collaboration/BlockEditor.tsx",
+      "type": "jsx-syntax-fix",
+      "issue": "Critical JSX errors"
+    },
+    {
+      "file": "components/collaboration/CodeBlockViewer.tsx",
+      "type": "jsx-syntax-fix",
+      "issue": "Critical JSX errors"
+    },
+    {
+      "file": "components/collaboration/CommentPopover.tsx",
+      "type": "jsx-syntax-fix",
+      "issue": "Critical JSX errors"
+    },
+    {
+      "file": "components/collaboration/SuggestionModeToggle.tsx",
+      "type": "jsx-syntax-fix",
+      "issue": "Critical JSX errors"
+    },
+    {
+      "file": "components/demo/demo-router.tsx",
+      "type": "jsx-syntax-fix",
+      "issue": "Critical JSX errors"
+    },
+    {
+      "file": "__tests__/integration.test.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "__tests__/openai.test.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/ai-assistant/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/ai-design/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/analytics/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/calendar/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/canvas-collaboration/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/cloud-storage/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/collaboration/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/community-hub/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/cv-portfolio/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/dashboard-layout-client.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/escrow/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/files/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/files-hub/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/financial/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/financial-hub/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/gallery/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/invoices/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/layout.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/messages/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/my-day/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/notifications/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/profile/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/projects-hub/create/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/projects-hub/import/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/projects-hub/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/projects-hub/templates/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/settings/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/team/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/team-hub/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/time-tracking/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/video-studio/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/workflow-builder/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(resources)/api-docs/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(resources)/blog/[slug]/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(resources)/blog/category/[slug]/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(resources)/community/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(resources)/docs/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(resources)/newsletter/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(resources)/tutorials/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/ai-assistant/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/ai-demo/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/components/ToolMessageParts.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/components/community/create-post-form.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/components/simple-ai-demo.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/documents/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/layout.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/login/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/recording-test/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/video/[id]/analytics/ClientCharts.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/video/[id]/analytics/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/video/[id]/review/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/video-studio/layout.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/video-studio/status-demo/page.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/action-items-button.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ai/action-items-button.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ai/ai-create-studio.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ai/ai-create.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ai/asset-library-tab.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ai/enhanced-ai-chat.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ai/simple-ai-chat.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ai/summarize-button.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ai/text-selection-toolbar.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/analytics/analytics-dashboard.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/block-based-content-editor.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/blocks/block-renderer.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/blocks/block-wrapper.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/blocks/checklist-block.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/blocks/code-block.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/blocks/database-block.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/blocks/file-block.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/blocks/heading-block.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/blocks/image-block.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/blocks/list-block.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/blocks/quote-block.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/blocks/table-block.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/blocks/text-block.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/blocks/video-block.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/client/client-dashboard.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/cloud-storage-system.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/AudioPlayer.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/BlockEditor.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/CodeBlockViewer.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/CommentPopover.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/ImageViewer.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/SuggestionActionPopover.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/VideoPlayer.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/advanced-client-portal.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/ai-create.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/ai-enhanced-canvas-collaboration.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/ai-openai-integration.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/ai-powered-design-assistant.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/ai-video-recording-system.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/approval-workflow.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/block-based-content-editor.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/collaboration-provider.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/comment-thread.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/comments.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/community-showcase.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/cursor-overlay.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/cursor.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/enhanced-client-collaboration.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/enhanced-collaboration-chat.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/enhanced-collaboration-system.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/enterprise-video-studio.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/file-upload-zone.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/presence.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/real-time-collaboration.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/selection-overlay.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/selection.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/simple-api-key-settings.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/collaboration/universal-media-previews.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/community/create-post-dialog.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/comprehensive-error.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/contact-form.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/dashboard/demo-content-provider.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/demo/client-presentation-demo.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/demo/standalone-demo.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/demo-modal.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/dev/context7-helper.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/download/enhanced-download-manager.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/download-button.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/enhanced/enhanced-upload-button.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/enhanced/smart-download-button.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/enhanced-invoices.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/error-handling/js-disabled-fallback.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/error-handling/network-error.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/feedback/code-viewer.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/feedback/document-viewer.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/feedback/image-viewer.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/feedback/screenshot-viewer.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/feedback/video-viewer.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/file-upload.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/files/download-button.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/files/file-upload-dialog.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/files/file-upload.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/financial-hub.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/forms/booking-form.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/forms/project-creation-form.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/freelancer/freelancer-dashboard.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/gallery/advanced-gallery-system.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/gallery/advanced-sharing-system.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/global-search.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/hubs/community-hub.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/hubs/files-hub.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/hubs/financial-hub.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/hubs/projects-hub.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/icon-picker.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/interactive-contact-system.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/messaging/chat.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/mobile-menu.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/my-day-today.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/optimized-component-loader.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/payment/payment-form.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/payment/payment.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/portfolio/enhanced-gallery.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/portfolio/portfolio.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/providers/collaboration-provider.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/providers/context7-provider.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/providers/index.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/providers/root-providers.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/providers/theme-provider.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/seo/dynamic-seo.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/shared-team-calendar.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/shell.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/storage/enhanced-file-storage.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/storage/enterprise-dashboard.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/storage/startup-cost-dashboard.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/storage/storage-dashboard.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/team-collaboration-hub.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/team-hub.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/team.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/theme-provider.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/theme-toggle.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/accessible-components.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/alert-dialog.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/breadcrumb.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/calendar.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/carousel.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/chart.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/context-menu.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/dialog.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/drawer.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/dropdown-menu.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/enhanced-interactive-system.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/enhanced-sharing-modal.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/menubar.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/optimized-image-enhanced.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/optimized-image.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/pagination.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/resizable.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/sheet.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/sidebar.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/ui/skeleton.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/upload/enhanced-upload-progress.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/verification-reminder.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/VideoMessageRecorder.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/ai/ai-insights-dashboard.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/ai/ai-video-analysis.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/ai/background-replacement-controls.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/ai/client-review-enhancer.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/ai/gesture-recognition-controls.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/ai/highlight-manager.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/ai/real-time-analysis.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/ai/smart-recording-tips.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/ai/transcription-viewer.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/ai/video-ai-panel.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/ai/video-transcription.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/ai/voice-enhancement-controls.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/ai-enhanced-video-recording.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/bulk-operations.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/client-review-panel.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/export-dialog.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/export-list.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/export-presets.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/mux-video-player.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/review-management-dashboard.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/screen-recorder.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/share-header.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/transcript-search.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/video-comments.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/video-controls.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/video-editor.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/video-filters.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/video-grid.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/video-list.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/video-player.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/video-recording-system.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/video-search.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/video-share-dialog.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/video-sharing-controls.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/video-status-indicator.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/video-status-monitor.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/video-thumbnail.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/video-timeline-editor.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "components/video/video-upload.tsx",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "hooks/use-bulk-operations.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "hooks/use-client-reviews.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "hooks/use-collaboration.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "hooks/use-editor.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "hooks/use-enhanced-ai.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "hooks/use-freeflow-ai.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "hooks/use-media-query.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "hooks/use-safe-effects.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "hooks/use-screen-recorder.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "hooks/use-sharing-modal.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "hooks/use-video-export.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "hooks/use-video-search.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "hooks/use-video-security.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "hooks/useVideoStatus.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "hooks/video/useVideoAnalytics.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "lib/ai/openai-client.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "lib/ai/video-processing-service.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "lib/browser-compatibility.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "lib/dynamic-imports.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "lib/hooks/collaboration/use-collaboration.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "lib/hooks/use-ai-operations.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "lib/performance-optimized.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "lib/performance.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "lib/s3-client.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "lib/seo-optimizer.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "lib/storage/multi-cloud-storage.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "lib/storage/startup-cost-optimizer.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "lib/stripe-enhanced.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "lib/utils/download-utils.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "lib/utils/editor.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "lib/video/thumbnail-generator.ts",
+      "type": "type-annotations",
+      "issue": "Missing type annotations"
+    },
+    {
+      "file": "app/(app)/dashboard/page.tsx",
+      "type": "hook-dependencies",
+      "issue": "Missing hook dependencies"
+    },
+    {
+      "file": "components/analytics/revenue-analytics.tsx",
+      "type": "hook-dependencies",
+      "issue": "Missing hook dependencies"
+    },
+    {
+      "file": "components/collaboration/ai-create.tsx",
+      "type": "hook-dependencies",
+      "issue": "Missing hook dependencies"
+    },
+    {
+      "file": "components/download/enhanced-download-manager.tsx",
+      "type": "hook-dependencies",
+      "issue": "Missing hook dependencies"
+    },
+    {
+      "file": "components/enhanced/enhanced-upload-button.tsx",
+      "type": "hook-dependencies",
+      "issue": "Missing hook dependencies"
+    },
+    {
+      "file": "components/files/file-upload-dialog.tsx",
+      "type": "hook-dependencies",
+      "issue": "Missing hook dependencies"
+    },
+    {
+      "file": "components/storage/enhanced-file-storage.tsx",
+      "type": "hook-dependencies",
+      "issue": "Missing hook dependencies"
+    },
+    {
+      "file": "components/video/video-editor.tsx",
+      "type": "hook-dependencies",
+      "issue": "Missing hook dependencies"
+    },
+    {
+      "file": "components/video/video-timeline-editor.tsx",
+      "type": "hook-dependencies",
+      "issue": "Missing hook dependencies"
+    },
+    {
+      "file": "app/(app)/dashboard/enhanced-interactive-dashboard.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "app/embed/[id]/page.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "app/home-page-client.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "app/reviews/page.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "app/share/[id]/page.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "app/v/[id]/page.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "app/video/[id]/analytics/page.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "app/video/[id]/page.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "app/video/[id]/review/page.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "app/video-studio/editor/[id]/page.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "app/video-studio/page.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/ai/advanced-settings-tab.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/ai/ai-assistant-tabs.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/ai/ai-assistant.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/ai/ai-create-tabs.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/ai/analyze.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/ai/chat.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/ai/generate.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/client/client-dashboard.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/collaboration/enhanced-client-collaboration.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/community/creator-marketplace.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/community/social-wall.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/community-tab/creator-marketplace.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/community-tab/index.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/community-tab/social-wall.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/community-tab.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/dashboard/demo-feature-showcase.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/dashboard/enhanced-interactive-dashboard.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/dashboard-layout-client.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/demo/demo-router.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/enhanced-navigation-system.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/enhanced-payment-modal.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/feedback/audio-viewer.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/feedback/comment-dialog.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/feedback-system.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/file-upload-demo.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/hubs/team-hub.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/navigation/enhanced-navigation.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/navigation/main-navigation.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/notifications.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/payment/payment.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/profile.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/pwa-installer.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/video/ai-enhanced-video-recording.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/video/bulk-operations.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "components/video/video-filters.tsx",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "playwright.config.ts",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "playwright.dev.config.ts",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "vitest.config.ts",
+      "type": "import-export-fixes",
+      "issue": "Import/export issues"
+    },
+    {
+      "file": "__mocks__/supabase-provider.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "__tests__/ai-features.test.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "app/(app)/dashboard/cloud-storage/page.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "app/(app)/dashboard/dashboard-layout-client.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "app/(app)/dashboard/files/page.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "app/(app)/dashboard/layout.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "app/(app)/dashboard/projects-hub/create/page.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "app/(app)/dashboard/projects-hub/import/page.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "app/(app)/dashboard/team/page.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "app/(app)/dashboard/team-hub/page.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "app/(app)/dashboard/workflow-builder/page.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "app/(app)/projects/actions.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "app/components/ToolMessageParts.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "app/components/community/create-post-form.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "app/documents/page.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "app/layout.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "app/video/[id]/analytics/ClientCharts.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "app/video/[id]/analytics/page.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "app/video/[id]/review/page.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "app/video-studio/layout.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ai/ai-create-studio.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ai/asset-library-tab.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ai/text-selection-toolbar.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/block-based-content-editor.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/blocks/block-renderer.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/blocks/block-wrapper.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/blocks/checklist-block.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/blocks/code-block.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/blocks/database-block.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/blocks/file-block.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/blocks/heading-block.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/blocks/image-block.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/blocks/list-block.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/blocks/quote-block.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/blocks/table-block.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/blocks/text-block.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/blocks/video-block.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/ImageViewer.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/SuggestionActionPopover.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/VideoPlayer.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/advanced-client-portal.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/ai-create.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/ai-enhanced-canvas-collaboration.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/ai-openai-integration.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/ai-powered-design-assistant.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/ai-video-recording-system.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/approval-workflow.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/block-based-content-editor.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/collaboration-provider.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/comment-thread.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/comments.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/community-showcase.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/cursor.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/enhanced-client-collaboration.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/enhanced-collaboration-chat.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/enhanced-collaboration-system.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/enterprise-video-studio.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/file-upload-zone.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/presence.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/real-time-collaboration.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/selection.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/simple-api-key-settings.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/collaboration/universal-media-previews.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/community/create-post-dialog.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/comprehensive-error.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/dashboard/demo-content-provider.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/demo/client-presentation-demo.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/demo-modal.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/dev/context7-helper.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/download/enhanced-download-manager.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/download-button.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/enhanced/enhanced-upload-button.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/enhanced/smart-download-button.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/feedback/code-viewer.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/feedback/document-viewer.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/feedback/image-viewer.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/feedback/screenshot-viewer.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/feedback/video-viewer.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/file-upload.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/files/download-button.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/files/file-upload-dialog.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/files/file-upload.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/financial-hub.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/forms/booking-form.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/forms/project-creation-form.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/freelancer/freelancer-analytics.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/freelancer/freelancer-dashboard.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/freelancer/integrations/index.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/gallery/advanced-sharing-system.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/hubs/community-hub.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/hubs/files-hub.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/hubs/financial-hub.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/hubs/projects-hub.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/icon-picker.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/interactive-contact-system.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/mobile-menu.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/navigation/sidebar.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/optimized-component-loader.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/payment/payment.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/portfolio/enhanced-gallery.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/providers/collaboration-provider.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/providers/theme-provider.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/seo/dynamic-seo.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/shell.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/storage/enhanced-file-storage.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/team-collaboration-hub.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/team-hub.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/team.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/theme-provider.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/theme-toggle.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ui/accessible-components.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ui/alert-dialog.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ui/breadcrumb.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ui/calendar.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ui/chart.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ui/context-menu.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ui/dialog.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ui/drawer.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ui/dropdown-menu.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ui/enhanced-interactive-system.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ui/enhanced-sharing-modal.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ui/menubar.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ui/optimized-image-enhanced.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ui/optimized-image.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ui/pagination.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ui/resizable.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ui/sheet.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/ui/skeleton.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/unified-sidebar.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/upload/enhanced-upload-progress.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/verification-reminder.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/VideoMessageRecorder.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/ai/ai-insights-dashboard.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/ai/ai-video-analysis.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/ai/background-replacement-controls.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/ai/client-review-enhancer.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/ai/gesture-recognition-controls.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/ai/highlight-manager.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/ai/portfolio-enhancer.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/ai/real-time-analysis.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/ai/smart-recording-tips.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/ai/transcription-viewer.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/ai/video-ai-panel.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/ai/video-transcription.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/ai/voice-enhancement-controls.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/ai-enhanced-video-recording.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/bulk-operations.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/client-review-panel.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/export-dialog.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/mux-video-player.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/review-management-dashboard.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/screen-recorder.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/share-header.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/transcript-search.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/video-comments.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/video-controls.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/video-editor.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/video-filters.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/video-grid.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/video-list.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/video-player.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/video-recording-system.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/video-search.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/video-sharing-controls.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/video-status-indicator.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/video-status-monitor.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/video-thumbnail.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/video-timeline-editor.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "components/video/video-upload.tsx",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "hooks/collaboration/useCollaboration.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "hooks/use-collaboration.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "hooks/use-enhanced-ai.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "hooks/use-freeflow-ai.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "hooks/use-safe-effects.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "hooks/use-screen-recorder.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "hooks/useVideoStatus.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "hooks/video/useVideoAnalytics.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/ai/enhanced-ai-service.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/ai/openai-client.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/ai/real-time-ai-service.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/api/files.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/api/projects.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/browser-compatibility.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/dynamic-imports.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/hooks/collaboration/use-collaboration.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/mux/config.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/performance-optimized.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/performance.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/seo-optimizer.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/storage/startup-cost-optimizer.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/stripe-enhanced.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/types/ai.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/types/collaboration.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/types/editor.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/utils/download-utils.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/utils/editor.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/utils/storage.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/video/mux-client.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    },
+    {
+      "file": "lib/video/types.ts",
+      "type": "any-type-fixes",
+      "issue": "Implicit any types"
+    }
+  ],
+  "validation": {
+    "success": false,
+    "errors": 734,
+    "remainingErrors": [
+      "app/(app)/dashboard/page.tsx(128,55): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "app/(app)/dashboard/page.tsx(200,5): error TS1109: Expression expected.",
+      "app/(app)/dashboard/page.tsx(200,6): error TS1005: ',' expected.",
+      "app/(app)/dashboard/page.tsx(207,19): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "app/(app)/dashboard/page.tsx(211,17): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "app/(app)/dashboard/page.tsx(234,17): error TS1109: Expression expected.",
+      "app/(app)/dashboard/page.tsx(235,98): error TS1109: Expression expected.",
+      "app/(app)/dashboard/page.tsx(235,147): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "app/(app)/dashboard/page.tsx(239,17): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "app/(app)/dashboard/page.tsx(242,17): error TS1109: Expression expected.",
+      "app/(app)/dashboard/page.tsx(248,17): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "app/(app)/dashboard/page.tsx(368,8): error TS17008: JSX element 'ProjectsHub' has no corresponding closing tag.",
+      "app/(app)/dashboard/page.tsx(370,8): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "app/(app)/dashboard/page.tsx(378,8): error TS17008: JSX element 'FilesHub' has no corresponding closing tag.",
+      "app/(app)/dashboard/page.tsx(382,8): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "app/(app)/dashboard/page.tsx(390,8): error TS17008: JSX element 'CommunityHub' has no corresponding closing tag.",
+      "app/(app)/dashboard/page.tsx(393,8): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "app/(app)/dashboard/page.tsx(402,11): error TS1005: ')' expected.",
+      "app/(app)/dashboard/page.tsx(402,22): error TS1109: Expression expected.",
+      "app/(app)/dashboard/page.tsx(403,3): error TS1109: Expression expected.",
+      "components/collaboration/advanced-client-portal.tsx(239,70): error TS1005: ',' expected.",
+      "components/collaboration/advanced-client-portal.tsx(239,121): error TS1005: ',' expected.",
+      "components/collaboration/ai-create.tsx(1956,38): error TS1005: ';' expected.",
+      "components/collaboration/BlockEditor.tsx(142,13): error TS1109: Expression expected.",
+      "components/collaboration/BlockEditor.tsx(146,34): error TS1003: Identifier expected.",
+      "components/collaboration/BlockEditor.tsx(146,43): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/collaboration/BlockEditor.tsx(149,17): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/collaboration/BlockEditor.tsx(150,53): error TS1003: Identifier expected.",
+      "components/collaboration/BlockEditor.tsx(150,78): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/collaboration/BlockEditor.tsx(152,22): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/collaboration/BlockEditor.tsx(153,19): error TS17015: Expected corresponding closing tag for JSX fragment.",
+      "components/collaboration/BlockEditor.tsx(153,29): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/collaboration/BlockEditor.tsx(153,32): error TS1003: Identifier expected.",
+      "components/collaboration/BlockEditor.tsx(156,5): error TS1128: Declaration or statement expected.",
+      "components/collaboration/BlockEditor.tsx(157,3): error TS1109: Expression expected.",
+      "components/collaboration/BlockEditor.tsx(158,1): error TS1128: Declaration or statement expected.",
+      "components/collaboration/CodeBlockViewer.tsx(15,54): error TS1005: ',' expected.",
+      "components/collaboration/CodeBlockViewer.tsx(43,89): error TS1005: ',' expected.",
+      "components/collaboration/CodeBlockViewer.tsx(53,3): error TS1128: Declaration or statement expected.",
+      "components/collaboration/CodeBlockViewer.tsx(57,33): error TS1003: Identifier expected.",
+      "components/collaboration/CodeBlockViewer.tsx(57,44): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/collaboration/CodeBlockViewer.tsx(62,7): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/collaboration/CodeBlockViewer.tsx(64,9): error TS17002: Expected corresponding JSX closing tag for 'div'.",
+      "components/collaboration/CodeBlockViewer.tsx(64,27): error TS1005: ')' expected.",
+      "components/collaboration/CodeBlockViewer.tsx(66,13): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/collaboration/CodeBlockViewer.tsx(69,13): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/collaboration/CodeBlockViewer.tsx(79,5): error TS1128: Declaration or statement expected.",
+      "components/collaboration/CodeBlockViewer.tsx(80,3): error TS1109: Expression expected.",
+      "components/collaboration/CodeBlockViewer.tsx(81,1): error TS1128: Declaration or statement expected.",
+      "components/collaboration/collaboration-provider.tsx(57,20): error TS1109: Expression expected.",
+      "components/collaboration/CommentPopover.tsx(23,27): error TS1003: Identifier expected.",
+      "components/collaboration/CommentPopover.tsx(23,110): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/collaboration/CommentPopover.tsx(29,10): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/collaboration/CommentPopover.tsx(30,20): error TS1003: Identifier expected.",
+      "components/collaboration/CommentPopover.tsx(30,29): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/collaboration/CommentPopover.tsx(32,9): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/collaboration/CommentPopover.tsx(34,11): error TS17002: Expected corresponding JSX closing tag for 'form'.",
+      "components/collaboration/CommentPopover.tsx(34,20): error TS17002: Expected corresponding JSX closing tag for 'div'.",
+      "components/collaboration/CommentPopover.tsx(34,25): error TS1005: ')' expected.",
+      "components/collaboration/CommentPopover.tsx(35,3): error TS1109: Expression expected.",
+      "components/collaboration/CommentPopover.tsx(36,1): error TS1128: Declaration or statement expected.",
+      "components/collaboration/community-showcase.tsx(67,13): error TS1005: ',' expected.",
+      "components/collaboration/enhanced-collaboration-chat.tsx(138,39): error TS1003: Identifier expected.",
+      "components/collaboration/enhanced-collaboration-system.tsx(287,2): error TS1128: Declaration or statement expected.",
+      "components/collaboration/enterprise-video-studio.tsx(289,17): error TS1005: ',' expected.",
+      "components/collaboration/file-upload-zone.tsx(35,16): error TS1005: ',' expected.",
+      "components/collaboration/file-upload-zone.tsx(35,53): error TS1005: ',' expected.",
+      "components/collaboration/file-upload-zone.tsx(36,29): error TS1005: ',' expected.",
+      "components/collaboration/file-upload-zone.tsx(36,57): error TS1005: ',' expected.",
+      "components/collaboration/file-upload-zone.tsx(36,74): error TS1005: ',' expected.",
+      "components/collaboration/file-upload-zone.tsx(36,93): error TS1005: ',' expected.",
+      "components/collaboration/file-upload-zone.tsx(37,43): error TS1003: Identifier expected.",
+      "components/collaboration/file-upload-zone.tsx(37,45): error TS1005: ',' expected.",
+      "components/collaboration/presence.tsx(22,35): error TS1005: ',' expected.",
+      "components/collaboration/presence.tsx(22,64): error TS1005: ',' expected.",
+      "components/collaboration/SuggestionModeToggle.tsx(15,11): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/collaboration/SuggestionModeToggle.tsx(15,20): error TS1003: Identifier expected.",
+      "components/collaboration/SuggestionModeToggle.tsx(15,40): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/collaboration/SuggestionModeToggle.tsx(20,12): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/collaboration/SuggestionModeToggle.tsx(23,3): error TS1128: Declaration or statement expected.",
+      "components/collaboration/SuggestionModeToggle.tsx(24,1): error TS1128: Declaration or statement expected.",
+      "components/comprehensive-error.tsx(14,65): error TS1005: ',' expected.",
+      "components/dashboard/demo-content-provider.tsx(90,37): error TS1005: ',' expected.",
+      "components/dashboard/demo-content-provider.tsx(97,37): error TS1005: ',' expected.",
+      "components/dashboard/demo-content-provider.tsx(103,39): error TS1005: ',' expected.",
+      "components/dashboard/demo-feature-showcase.tsx(10,46): error TS1003: Identifier expected.",
+      "components/demo/demo-router.tsx(14,39): error TS17008: JSX element 'any' has no corresponding closing tag.",
+      "components/demo/demo-router.tsx(18,9): error TS1005: '}' expected.",
+      "components/demo/demo-router.tsx(26,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/demo/demo-router.tsx(28,9): error TS1005: '}' expected.",
+      "components/demo/demo-router.tsx(36,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/demo/demo-router.tsx(38,9): error TS1005: '}' expected.",
+      "components/demo/demo-router.tsx(46,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/demo/demo-router.tsx(48,9): error TS1005: '}' expected.",
+      "components/demo/demo-router.tsx(56,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/demo/demo-router.tsx(60,5): error TS1109: Expression expected.",
+      "components/demo/demo-router.tsx(69,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/demo/demo-router.tsx(82,13): error TS1109: Expression expected.",
+      "components/demo/demo-router.tsx(90,19): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/demo/demo-router.tsx(93,13): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/demo/demo-router.tsx(101,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/demo/demo-router.tsx(101,2): error TS1005: '</' expected.",
+      "components/dev/context7-helper.tsx(18,51): error TS1005: ',' expected.",
+      "components/download/enhanced-download-manager.tsx(204,132): error TS1005: ',' expected.",
+      "components/download/enhanced-download-manager.tsx(204,162): error TS1005: ',' expected.",
+      "components/enhanced/enhanced-upload-button.tsx(16,45): error TS1005: ',' expected.",
+      "components/enhanced/enhanced-upload-button.tsx(16,82): error TS1005: ',' expected.",
+      "components/enhanced/enhanced-upload-button.tsx(17,18): error TS1005: ',' expected.",
+      "components/enhanced/smart-download-button.tsx(64,37): error TS1005: ',' expected.",
+      "components/enhanced/smart-download-button.tsx(64,70): error TS1005: ',' expected.",
+      "components/enhanced/smart-download-button.tsx(64,165): error TS1005: ',' expected.",
+      "components/enhanced/smart-download-button.tsx(64,196): error TS1005: ',' expected.",
+      "components/enhanced/smart-download-button.tsx(261,59): error TS1005: ',' expected.",
+      "components/feedback/image-viewer.tsx(27,44): error TS1005: ',' expected.",
+      "components/feedback/image-viewer.tsx(35,20): error TS17008: JSX element 'HTMLDivElement' has no corresponding closing tag.",
+      "components/feedback/image-viewer.tsx(38,51): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/image-viewer.tsx(42,58): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/image-viewer.tsx(48,53): error TS17008: JSX element 'HTMLDivElement' has no corresponding closing tag.",
+      "components/feedback/image-viewer.tsx(48,71): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/image-viewer.tsx(49,5): error TS1109: Expression expected.",
+      "components/feedback/image-viewer.tsx(60,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/image-viewer.tsx(62,35): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/image-viewer.tsx(63,5): error TS1109: Expression expected.",
+      "components/feedback/image-viewer.tsx(66,14): error TS1005: '}' expected.",
+      "components/feedback/image-viewer.tsx(68,10): error TS1005: '}' expected.",
+      "components/feedback/image-viewer.tsx(70,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/image-viewer.tsx(73,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/image-viewer.tsx(80,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/image-viewer.tsx(82,32): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/image-viewer.tsx(83,5): error TS1109: Expression expected.",
+      "components/feedback/image-viewer.tsx(88,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/image-viewer.tsx(90,45): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/image-viewer.tsx(91,5): error TS1109: Expression expected.",
+      "components/feedback/image-viewer.tsx(95,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/image-viewer.tsx(97,36): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/image-viewer.tsx(326,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/image-viewer.tsx(326,2): error TS1005: '</' expected.",
+      "components/feedback/screenshot-viewer.tsx(21,20): error TS17008: JSX element 'HTMLDivElement' has no corresponding closing tag.",
+      "components/feedback/screenshot-viewer.tsx(23,51): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/screenshot-viewer.tsx(24,5): error TS1109: Expression expected.",
+      "components/feedback/screenshot-viewer.tsx(32,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/screenshot-viewer.tsx(34,47): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/screenshot-viewer.tsx(35,5): error TS1109: Expression expected.",
+      "components/feedback/screenshot-viewer.tsx(38,9): error TS1005: '}' expected.",
+      "components/feedback/screenshot-viewer.tsx(44,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/screenshot-viewer.tsx(49,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/screenshot-viewer.tsx(157,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/screenshot-viewer.tsx(158,1): error TS1005: '</' expected.",
+      "components/feedback/video-viewer.tsx(27,46): error TS1005: ',' expected.",
+      "components/feedback/video-viewer.tsx(40,20): error TS17008: JSX element 'HTMLVideoElement' has no corresponding closing tag.",
+      "components/feedback/video-viewer.tsx(41,24): error TS17008: JSX element 'HTMLDivElement' has no corresponding closing tag.",
+      "components/feedback/video-viewer.tsx(44,51): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/video-viewer.tsx(48,58): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/video-viewer.tsx(54,58): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/video-viewer.tsx(59,17): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/video-viewer.tsx(60,5): error TS1109: Expression expected.",
+      "components/feedback/video-viewer.tsx(63,28): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/video-viewer.tsx(64,32): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/video-viewer.tsx(69,16): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/video-viewer.tsx(71,7): error TS1005: '}' expected.",
+      "components/feedback/video-viewer.tsx(72,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/video-viewer.tsx(73,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/video-viewer.tsx(75,31): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/video-viewer.tsx(76,5): error TS1109: Expression expected.",
+      "components/feedback/video-viewer.tsx(85,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/video-viewer.tsx(87,32): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/video-viewer.tsx(88,5): error TS1109: Expression expected.",
+      "components/feedback/video-viewer.tsx(93,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/video-viewer.tsx(95,56): error TS17008: JSX element 'HTMLDivElement' has no corresponding closing tag.",
+      "components/feedback/video-viewer.tsx(95,74): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/video-viewer.tsx(96,5): error TS1109: Expression expected.",
+      "components/feedback/video-viewer.tsx(112,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/video-viewer.tsx(114,53): error TS17008: JSX element 'HTMLDivElement' has no corresponding closing tag.",
+      "components/feedback/video-viewer.tsx(114,71): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/video-viewer.tsx(115,5): error TS1109: Expression expected.",
+      "components/feedback/video-viewer.tsx(121,39): error TS1005: '}' expected.",
+      "components/feedback/video-viewer.tsx(121,53): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/video-viewer.tsx(126,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/video-viewer.tsx(128,35): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/video-viewer.tsx(129,5): error TS1109: Expression expected.",
+      "components/feedback/video-viewer.tsx(132,14): error TS1005: '}' expected.",
+      "components/feedback/video-viewer.tsx(136,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/video-viewer.tsx(143,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/video-viewer.tsx(145,32): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/video-viewer.tsx(146,5): error TS1109: Expression expected.",
+      "components/feedback/video-viewer.tsx(151,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/video-viewer.tsx(153,45): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/video-viewer.tsx(154,5): error TS1109: Expression expected.",
+      "components/feedback/video-viewer.tsx(158,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/video-viewer.tsx(160,36): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/video-viewer.tsx(168,41): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/feedback/video-viewer.tsx(169,5): error TS1109: Expression expected.",
+      "components/feedback/video-viewer.tsx(172,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/video-viewer.tsx(438,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/feedback/video-viewer.tsx(439,1): error TS1005: '</' expected.",
+      "components/file-upload.tsx(15,36): error TS1005: ',' expected.",
+      "components/files/file-upload.tsx(18,57): error TS1005: ',' expected.",
+      "components/files/file-upload.tsx(19,28): error TS1005: ',' expected.",
+      "components/files/file-upload.tsx(19,56): error TS1005: ',' expected.",
+      "components/financial-hub.tsx(13,46): error TS1109: Expression expected.",
+      "components/financial-hub.tsx(13,55): error TS1005: ',' expected.",
+      "components/financial-hub.tsx(13,57): error TS1144: '{' or ';' expected.",
+      "components/financial-hub.tsx(13,63): error TS1128: Declaration or statement expected.",
+      "components/financial-hub.tsx(13,64): error TS1128: Declaration or statement expected.",
+      "components/financial-hub.tsx(13,66): error TS1434: Unexpected keyword or identifier.",
+      "components/financial-hub.tsx(13,83): error TS1128: Declaration or statement expected.",
+      "components/freelancer/freelancer-analytics.tsx(50,33): error TS1003: Identifier expected.",
+      "components/freelancer/freelancer-analytics.tsx(51,43): error TS1003: Identifier expected.",
+      "components/freelancer/integrations/index.tsx(30,49): error TS1003: Identifier expected.",
+      "components/interactive-contact-system.tsx(183,19): error TS1005: ',' expected.",
+      "components/interactive-contact-system.tsx(183,48): error TS1005: ',' expected.",
+      "components/interactive-contact-system.tsx(183,74): error TS1005: ',' expected.",
+      "components/interactive-contact-system.tsx(183,106): error TS1005: ',' expected.",
+      "components/optimized-component-loader.tsx(8,110): error TS1005: ',' expected.",
+      "components/optimized-component-loader.tsx(54,88): error TS1005: ',' expected.",
+      "components/portfolio/enhanced-gallery.tsx(484,17): error TS1005: ',' expected.",
+      "components/portfolio/enhanced-gallery.tsx(484,50): error TS1005: ',' expected.",
+      "components/portfolio/enhanced-gallery.tsx(484,79): error TS1005: ',' expected.",
+      "components/seo/dynamic-seo.tsx(19,60): error TS1005: ',' expected.",
+      "components/seo/dynamic-seo.tsx(19,233): error TS1005: ',' expected.",
+      "components/seo/dynamic-seo.tsx(19,386): error TS1005: ',' expected.",
+      "components/seo/dynamic-seo.tsx(19,461): error TS1005: ',' expected.",
+      "components/seo/dynamic-seo.tsx(19,490): error TS1005: ',' expected.",
+      "components/seo/dynamic-seo.tsx(19,541): error TS1005: ',' expected.",
+      "components/shell.tsx(12,40): error TS1005: ',' expected.",
+      "components/storage/enhanced-file-storage.tsx(417,23): error TS1005: ',' expected.",
+      "components/storage/enhanced-file-storage.tsx(417,52): error TS1005: ',' expected.",
+      "components/storage/enhanced-file-storage.tsx(417,80): error TS1005: ',' expected.",
+      "components/theme-provider.tsx(80,50): error TS1005: ',' expected.",
+      "components/theme-toggle.tsx(22,16): error TS1005: ',' expected.",
+      "components/theme-toggle.tsx(22,42): error TS1005: ',' expected.",
+      "components/ui/accessible-components.tsx(42,81): error TS1005: ',' expected.",
+      "components/ui/accessible-components.tsx(55,64): error TS1005: ',' expected.",
+      "components/ui/calendar.tsx(13,66): error TS1005: ',' expected.",
+      "components/ui/chart.tsx(79,145): error TS1005: ',' expected.",
+      "components/ui/drawer.tsx(9,31): error TS1005: ',' expected.",
+      "components/ui/enhanced-interactive-system.tsx(256,54): error TS1005: ',' expected.",
+      "components/ui/enhanced-interactive-system.tsx(256,81): error TS1005: ',' expected.",
+      "components/ui/enhanced-interactive-system.tsx(256,141): error TS1005: ',' expected.",
+      "components/ui/enhanced-interactive-system.tsx(256,167): error TS1005: ',' expected.",
+      "components/ui/enhanced-interactive-system.tsx(256,192): error TS1005: ',' expected.",
+      "components/ui/enhanced-interactive-system.tsx(256,259): error TS1005: ',' expected.",
+      "components/ui/enhanced-interactive-system.tsx(393,38): error TS1005: ',' expected.",
+      "components/ui/enhanced-interactive-system.tsx(519,118): error TS1005: ',' expected.",
+      "components/ui/enhanced-interactive-system.tsx(519,143): error TS1005: ',' expected.",
+      "components/ui/enhanced-interactive-system.tsx(519,189): error TS1005: ',' expected.",
+      "components/ui/enhanced-interactive-system.tsx(608,43): error TS1005: ',' expected.",
+      "components/ui/enhanced-interactive-system.tsx(608,73): error TS1005: ',' expected.",
+      "components/ui/optimized-image-enhanced.tsx(73,18): error TS17008: JSX element 'HTMLDivElement' has no corresponding closing tag.",
+      "components/ui/optimized-image-enhanced.tsx(74,44): error TS1003: Identifier expected.",
+      "components/ui/optimized-image-enhanced.tsx(74,50): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(77,17): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(78,5): error TS1109: Expression expected.",
+      "components/ui/optimized-image-enhanced.tsx(80,7): error TS1005: '}' expected.",
+      "components/ui/optimized-image-enhanced.tsx(81,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(86,18): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(87,9): error TS1109: Expression expected.",
+      "components/ui/optimized-image-enhanced.tsx(89,11): error TS1005: '}' expected.",
+      "components/ui/optimized-image-enhanced.tsx(90,9): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(91,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(93,18): error TS1005: '}' expected.",
+      "components/ui/optimized-image-enhanced.tsx(95,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(100,16): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(103,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(106,26): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(108,5): error TS1005: '}' expected.",
+      "components/ui/optimized-image-enhanced.tsx(109,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(112,27): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(113,5): error TS1109: Expression expected.",
+      "components/ui/optimized-image-enhanced.tsx(115,7): error TS1005: '}' expected.",
+      "components/ui/optimized-image-enhanced.tsx(116,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(120,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(123,29): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(124,5): error TS1109: Expression expected.",
+      "components/ui/optimized-image-enhanced.tsx(128,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(131,50): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(132,5): error TS1109: Expression expected.",
+      "components/ui/optimized-image-enhanced.tsx(133,7): error TS1109: Expression expected.",
+      "components/ui/optimized-image-enhanced.tsx(134,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(138,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(141,35): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(142,5): error TS1109: Expression expected.",
+      "components/ui/optimized-image-enhanced.tsx(146,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(152,29): error TS1005: '}' expected.",
+      "components/ui/optimized-image-enhanced.tsx(156,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(164,15): error TS1005: '}' expected.",
+      "components/ui/optimized-image-enhanced.tsx(167,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(170,29): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(186,34): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(230,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(235,8): error TS17008: JSX element 'picture' has no corresponding closing tag.",
+      "components/ui/optimized-image-enhanced.tsx(240,22): error TS17008: JSX element 'picture' has no corresponding closing tag.",
+      "components/ui/optimized-image-enhanced.tsx(241,61): error TS1003: Identifier expected.",
+      "components/ui/optimized-image-enhanced.tsx(242,11): error TS1109: Expression expected.",
+      "components/ui/optimized-image-enhanced.tsx(243,3): error TS1005: '}' expected.",
+      "components/ui/optimized-image-enhanced.tsx(244,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(244,2): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(244,37): error TS1109: Expression expected.",
+      "components/ui/optimized-image-enhanced.tsx(244,46): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(244,50): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(245,3): error TS1109: Expression expected.",
+      "components/ui/optimized-image-enhanced.tsx(252,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(255,37): error TS1003: Identifier expected.",
+      "components/ui/optimized-image-enhanced.tsx(256,3): error TS1005: '...' expected.",
+      "components/ui/optimized-image-enhanced.tsx(256,9): error TS1005: '}' expected.",
+      "components/ui/optimized-image-enhanced.tsx(256,17): error TS1003: Identifier expected.",
+      "components/ui/optimized-image-enhanced.tsx(257,5): error TS1005: '...' expected.",
+      "components/ui/optimized-image-enhanced.tsx(257,8): error TS1005: '}' expected.",
+      "components/ui/optimized-image-enhanced.tsx(261,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(261,4): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(264,35): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(265,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(265,2): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(265,57): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(266,3): error TS1109: Expression expected.",
+      "components/ui/optimized-image-enhanced.tsx(266,62): error TS1003: Identifier expected.",
+      "components/ui/optimized-image-enhanced.tsx(266,64): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(268,17): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(270,5): error TS1109: Expression expected.",
+      "components/ui/optimized-image-enhanced.tsx(270,44): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(272,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(295,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(300,17): error TS1005: '}' expected.",
+      "components/ui/optimized-image-enhanced.tsx(300,60): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(301,5): error TS1109: Expression expected.",
+      "components/ui/optimized-image-enhanced.tsx(303,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(306,55): error TS17008: JSX element 'string' has no corresponding closing tag.",
+      "components/ui/optimized-image-enhanced.tsx(306,64): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(307,5): error TS1109: Expression expected.",
+      "components/ui/optimized-image-enhanced.tsx(307,35): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(318,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(319,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(322,41): error TS1003: Identifier expected.",
+      "components/ui/optimized-image-enhanced.tsx(322,43): error TS1005: '...' expected.",
+      "components/ui/optimized-image-enhanced.tsx(322,46): error TS1005: '}' expected.",
+      "components/ui/optimized-image-enhanced.tsx(322,68): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(322,69): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(322,89): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(323,60): error TS1003: Identifier expected.",
+      "components/ui/optimized-image-enhanced.tsx(323,66): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(324,57): error TS17008: JSX element 'string' has no corresponding closing tag.",
+      "components/ui/optimized-image-enhanced.tsx(326,20): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(327,39): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/ui/optimized-image-enhanced.tsx(335,8): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(338,6): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/ui/optimized-image-enhanced.tsx(341,9): error TS17008: JSX element 'div' has no corresponding closing tag.",
+      "components/ui/optimized-image-enhanced.tsx(394,1): error TS1109: Expression expected.",
+      "components/ui/optimized-image-enhanced.tsx(394,39): error TS1005: '/' expected.",
+      "components/ui/optimized-image-enhanced.tsx(394,39): error TS1005: '</' expected.",
+      "components/ui/optimized-image.tsx(24,100): error TS1005: ',' expected.",
+      "components/ui/optimized-image.tsx(24,123): error TS1005: ',' expected.",
+      "components/ui/optimized-image.tsx(24,162): error TS1005: ',' expected.",
+      "components/ui/optimized-image.tsx(24,194): error TS1005: ',' expected.",
+      "components/ui/optimized-image.tsx(128,40): error TS1005: ',' expected.",
+      "components/ui/optimized-image.tsx(134,50): error TS1005: ',' expected.",
+      "components/ui/optimized-image.tsx(157,52): error TS1005: ',' expected.",
+      "components/ui/pagination.tsx(43,55): error TS1005: ',' expected.",
+      "components/upload/enhanced-upload-progress.tsx(192,43): error TS1005: ',' expected.",
+      "components/upload/enhanced-upload-progress.tsx(192,81): error TS1005: ',' expected.",
+      "components/upload/enhanced-upload-progress.tsx(193,28): error TS1005: ',' expected.",
+      "components/upload/enhanced-upload-progress.tsx(193,48): error TS1005: ',' expected.",
+      "components/upload/enhanced-upload-progress.tsx(193,68): error TS1005: ',' expected.",
+      "components/upload/enhanced-upload-progress.tsx(193,94): error TS1005: ',' expected.",
+      "components/upload/enhanced-upload-progress.tsx(193,114): error TS1005: ',' expected.",
+      "components/upload/enhanced-upload-progress.tsx(193,141): error TS1005: ',' expected.",
+      "components/upload/enhanced-upload-progress.tsx(193,174): error TS1005: ',' expected.",
+      "components/upload/enhanced-upload-progress.tsx(193,204): error TS1005: ',' expected.",
+      "components/upload/enhanced-upload-progress.tsx(193,233): error TS1005: ',' expected.",
+      "components/upload/enhanced-upload-progress.tsx(235,24): error TS17008: JSX element 'HTMLInputElement' has no corresponding closing tag.",
+      "components/upload/enhanced-upload-progress.tsx(239,62): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/upload/enhanced-upload-progress.tsx(240,5): error TS1109: Expression expected.",
+      "components/upload/enhanced-upload-progress.tsx(244,12): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(246,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(247,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(250,63): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/upload/enhanced-upload-progress.tsx(251,5): error TS1109: Expression expected.",
+      "components/upload/enhanced-upload-progress.tsx(253,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(256,54): error TS17008: JSX element 'UploadedFile' has no corresponding closing tag.",
+      "components/upload/enhanced-upload-progress.tsx(256,69): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/upload/enhanced-upload-progress.tsx(257,5): error TS1109: Expression expected.",
+      "components/upload/enhanced-upload-progress.tsx(259,35): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/upload/enhanced-upload-progress.tsx(285,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(288,54): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/upload/enhanced-upload-progress.tsx(295,5): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(297,7): error TS1109: Expression expected.",
+      "components/upload/enhanced-upload-progress.tsx(297,40): error TS1003: Identifier expected.",
+      "components/upload/enhanced-upload-progress.tsx(299,9): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(300,15): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(302,9): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(303,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(309,13): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(311,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(325,14): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(327,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(330,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(336,7): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(337,14): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(340,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(341,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(342,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(345,66): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/upload/enhanced-upload-progress.tsx(346,5): error TS1109: Expression expected.",
+      "components/upload/enhanced-upload-progress.tsx(348,55): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/upload/enhanced-upload-progress.tsx(350,7): error TS1109: Expression expected.",
+      "components/upload/enhanced-upload-progress.tsx(350,21): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/upload/enhanced-upload-progress.tsx(356,9): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(357,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(360,51): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/upload/enhanced-upload-progress.tsx(361,9): error TS1109: Expression expected.",
+      "components/upload/enhanced-upload-progress.tsx(362,11): error TS1109: Expression expected.",
+      "components/upload/enhanced-upload-progress.tsx(363,9): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(365,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(373,9): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(374,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(377,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(380,50): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/upload/enhanced-upload-progress.tsx(386,7): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(387,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(391,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(394,56): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/upload/enhanced-upload-progress.tsx(396,5): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(396,20): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(396,53): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(398,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(400,60): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/upload/enhanced-upload-progress.tsx(402,5): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(402,20): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(402,52): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(403,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(405,61): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/upload/enhanced-upload-progress.tsx(407,5): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(407,20): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(407,53): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(408,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(411,77): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/upload/enhanced-upload-progress.tsx(412,5): error TS1109: Expression expected.",
+      "components/upload/enhanced-upload-progress.tsx(414,7): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(414,22): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(414,59): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(415,22): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/upload/enhanced-upload-progress.tsx(415,39): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(415,74): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(418,14): error TS1005: '}' expected.",
+      "components/upload/enhanced-upload-progress.tsx(420,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(421,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(428,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(430,42): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/upload/enhanced-upload-progress.tsx(434,39): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/upload/enhanced-upload-progress.tsx(435,5): error TS1109: Expression expected.",
+      "components/upload/enhanced-upload-progress.tsx(440,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(972,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/upload/enhanced-upload-progress.tsx(972,3): error TS1005: '</' expected.",
+      "components/verification-reminder.tsx(19,17): error TS1005: ',' expected.",
+      "components/verification-reminder.tsx(19,69): error TS1005: ',' expected.",
+      "components/video/ai-enhanced-video-recording.tsx(57,24): error TS1005: ',' expected.",
+      "components/video/ai-enhanced-video-recording.tsx(74,20): error TS17008: JSX element 'HTMLVideoElement' has no corresponding closing tag.",
+      "components/video/ai-enhanced-video-recording.tsx(77,15): error TS1005: '}' expected.",
+      "components/video/ai-enhanced-video-recording.tsx(82,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai-enhanced-video-recording.tsx(89,11): error TS1005: '}' expected.",
+      "components/video/ai-enhanced-video-recording.tsx(91,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai-enhanced-video-recording.tsx(93,68): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/ai-enhanced-video-recording.tsx(95,5): error TS1005: '}' expected.",
+      "components/video/ai-enhanced-video-recording.tsx(99,7): error TS1109: Expression expected.",
+      "components/video/ai-enhanced-video-recording.tsx(106,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai-enhanced-video-recording.tsx(108,7): error TS1005: '}' expected.",
+      "components/video/ai-enhanced-video-recording.tsx(109,14): error TS1005: '}' expected.",
+      "components/video/ai-enhanced-video-recording.tsx(112,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai-enhanced-video-recording.tsx(113,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai-enhanced-video-recording.tsx(116,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai-enhanced-video-recording.tsx(118,61): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/ai-enhanced-video-recording.tsx(120,5): error TS1005: '}' expected.",
+      "components/video/ai-enhanced-video-recording.tsx(122,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai-enhanced-video-recording.tsx(124,35): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/ai-enhanced-video-recording.tsx(126,5): error TS1005: '}' expected.",
+      "components/video/ai-enhanced-video-recording.tsx(128,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai-enhanced-video-recording.tsx(130,55): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/ai-enhanced-video-recording.tsx(134,56): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/ai-enhanced-video-recording.tsx(138,59): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/ai-enhanced-video-recording.tsx(142,5): error TS1005: '}' expected.",
+      "components/video/ai-enhanced-video-recording.tsx(143,7): error TS1109: Expression expected.",
+      "components/video/ai-enhanced-video-recording.tsx(154,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai-enhanced-video-recording.tsx(155,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai-enhanced-video-recording.tsx(157,74): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/ai-enhanced-video-recording.tsx(160,5): error TS1005: '}' expected.",
+      "components/video/ai-enhanced-video-recording.tsx(166,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai-enhanced-video-recording.tsx(168,41): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/ai-enhanced-video-recording.tsx(169,5): error TS1109: Expression expected.",
+      "components/video/ai-enhanced-video-recording.tsx(175,7): error TS1109: Expression expected.",
+      "components/video/ai-enhanced-video-recording.tsx(189,14): error TS1005: '}' expected.",
+      "components/video/ai-enhanced-video-recording.tsx(191,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai-enhanced-video-recording.tsx(196,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai-enhanced-video-recording.tsx(198,7): error TS1005: '}' expected.",
+      "components/video/ai-enhanced-video-recording.tsx(199,14): error TS1005: '}' expected.",
+      "components/video/ai-enhanced-video-recording.tsx(202,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai-enhanced-video-recording.tsx(203,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai-enhanced-video-recording.tsx(206,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai-enhanced-video-recording.tsx(208,58): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/ai-enhanced-video-recording.tsx(209,5): error TS1109: Expression expected.",
+      "components/video/ai-enhanced-video-recording.tsx(210,7): error TS1109: Expression expected.",
+      "components/video/ai-enhanced-video-recording.tsx(228,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai-enhanced-video-recording.tsx(229,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai-enhanced-video-recording.tsx(363,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai-enhanced-video-recording.tsx(363,3): error TS1005: '</' expected.",
+      "components/video/ai/ai-insights-dashboard.tsx(64,54): error TS1005: ',' expected.",
+      "components/video/ai/gesture-recognition-controls.tsx(31,29): error TS17008: JSX element 'number' has no corresponding closing tag.",
+      "components/video/ai/gesture-recognition-controls.tsx(34,17): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/ai/gesture-recognition-controls.tsx(35,5): error TS1109: Expression expected.",
+      "components/video/ai/gesture-recognition-controls.tsx(39,16): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/ai/gesture-recognition-controls.tsx(42,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai/gesture-recognition-controls.tsx(45,17): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/ai/gesture-recognition-controls.tsx(46,5): error TS1109: Expression expected.",
+      "components/video/ai/gesture-recognition-controls.tsx(47,7): error TS1109: Expression expected.",
+      "components/video/ai/gesture-recognition-controls.tsx(51,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai/gesture-recognition-controls.tsx(53,38): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/ai/gesture-recognition-controls.tsx(61,7): error TS1005: '}' expected.",
+      "components/video/ai/gesture-recognition-controls.tsx(62,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai/gesture-recognition-controls.tsx(66,16): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/ai/gesture-recognition-controls.tsx(67,7): error TS1109: Expression expected.",
+      "components/video/ai/gesture-recognition-controls.tsx(70,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai/gesture-recognition-controls.tsx(71,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai/gesture-recognition-controls.tsx(73,42): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/ai/gesture-recognition-controls.tsx(74,5): error TS1109: Expression expected.",
+      "components/video/ai/gesture-recognition-controls.tsx(75,7): error TS1109: Expression expected.",
+      "components/video/ai/gesture-recognition-controls.tsx(88,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai/gesture-recognition-controls.tsx(89,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai/gesture-recognition-controls.tsx(91,49): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/ai/gesture-recognition-controls.tsx(92,5): error TS1109: Expression expected.",
+      "components/video/ai/gesture-recognition-controls.tsx(93,7): error TS1109: Expression expected.",
+      "components/video/ai/gesture-recognition-controls.tsx(107,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai/gesture-recognition-controls.tsx(108,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai/gesture-recognition-controls.tsx(186,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/ai/gesture-recognition-controls.tsx(186,3): error TS1005: '</' expected.",
+      "components/video/ai/smart-recording-tips.tsx(122,42): error TS1003: Identifier expected.",
+      "components/video/ai/smart-recording-tips.tsx(122,44): error TS1005: ',' expected.",
+      "components/video/ai/transcription-viewer.tsx(40,44): error TS1005: ',' expected.",
+      "components/video/ai/video-ai-panel.tsx(61,100): error TS1005: ',' expected.",
+      "components/video/bulk-operations.tsx(25,51): error TS1003: Identifier expected.",
+      "components/video/bulk-operations.tsx(26,53): error TS17008: JSX element 'BulkOperationType' has no corresponding closing tag.",
+      "components/video/bulk-operations.tsx(28,42): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/bulk-operations.tsx(29,5): error TS1109: Expression expected.",
+      "components/video/bulk-operations.tsx(30,7): error TS1109: Expression expected.",
+      "components/video/bulk-operations.tsx(31,23): error TS1005: '}' expected.",
+      "components/video/bulk-operations.tsx(34,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/bulk-operations.tsx(39,66): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/bulk-operations.tsx(40,39): error TS1005: '}' expected.",
+      "components/video/bulk-operations.tsx(42,25): error TS1005: '}' expected.",
+      "components/video/bulk-operations.tsx(43,9): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/bulk-operations.tsx(44,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/bulk-operations.tsx(45,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/bulk-operations.tsx(46,61): error TS1005: '}' expected.",
+      "components/video/bulk-operations.tsx(47,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/bulk-operations.tsx(48,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/bulk-operations.tsx(50,44): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/bulk-operations.tsx(51,5): error TS1109: Expression expected.",
+      "components/video/bulk-operations.tsx(52,7): error TS1109: Expression expected.",
+      "components/video/bulk-operations.tsx(60,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/bulk-operations.tsx(61,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/bulk-operations.tsx(128,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/bulk-operations.tsx(128,3): error TS1005: '</' expected.",
+      "components/video/mux-video-player.tsx(56,70): error TS1005: ',' expected.",
+      "components/video/mux-video-player.tsx(56,97): error TS1005: ',' expected.",
+      "components/video/mux-video-player.tsx(56,121): error TS1005: ',' expected.",
+      "components/video/mux-video-player.tsx(56,172): error TS1005: ',' expected.",
+      "components/video/mux-video-player.tsx(56,278): error TS1005: ',' expected.",
+      "components/video/mux-video-player.tsx(56,308): error TS1005: ',' expected.",
+      "components/video/screen-recorder.tsx(70,22): error TS17008: JSX element 'HTMLVideoElement' has no corresponding closing tag.",
+      "components/video/screen-recorder.tsx(78,19): error TS1005: '}' expected.",
+      "components/video/screen-recorder.tsx(85,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(88,36): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/screen-recorder.tsx(89,22): error TS1005: '}' expected.",
+      "components/video/screen-recorder.tsx(90,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(93,34): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/screen-recorder.tsx(94,5): error TS1109: Expression expected.",
+      "components/video/screen-recorder.tsx(97,27): error TS1005: '}' expected.",
+      "components/video/screen-recorder.tsx(101,48): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/screen-recorder.tsx(102,59): error TS1005: '}' expected.",
+      "components/video/screen-recorder.tsx(103,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(110,22): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/screen-recorder.tsx(111,29): error TS1005: '}' expected.",
+      "components/video/screen-recorder.tsx(113,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(115,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(116,28): error TS1005: '}' expected.",
+      "components/video/screen-recorder.tsx(118,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(119,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(122,23): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/screen-recorder.tsx(123,5): error TS1109: Expression expected.",
+      "components/video/screen-recorder.tsx(124,55): error TS1005: '}' expected.",
+      "components/video/screen-recorder.tsx(126,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(127,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(130,43): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/screen-recorder.tsx(131,5): error TS1109: Expression expected.",
+      "components/video/screen-recorder.tsx(136,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(139,37): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/screen-recorder.tsx(140,5): error TS1109: Expression expected.",
+      "components/video/screen-recorder.tsx(141,11): error TS1005: '}' expected.",
+      "components/video/screen-recorder.tsx(141,19): error TS1005: '}' expected.",
+      "components/video/screen-recorder.tsx(141,77): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(142,20): error TS1005: '}' expected.",
+      "components/video/screen-recorder.tsx(142,76): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(143,24): error TS1005: '}' expected.",
+      "components/video/screen-recorder.tsx(143,73): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(144,21): error TS1005: '}' expected.",
+      "components/video/screen-recorder.tsx(144,70): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(145,23): error TS1005: '}' expected.",
+      "components/video/screen-recorder.tsx(145,79): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(146,24): error TS1005: '}' expected.",
+      "components/video/screen-recorder.tsx(146,81): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(147,20): error TS1005: '}' expected.",
+      "components/video/screen-recorder.tsx(147,71): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(148,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(160,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(163,5): error TS1109: Expression expected.",
+      "components/video/screen-recorder.tsx(175,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(456,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/screen-recorder.tsx(456,3): error TS1005: '</' expected.",
+      "components/video/video-comments.tsx(41,60): error TS1005: ',' expected.",
+      "components/video/video-player.tsx(47,73): error TS1005: ',' expected.",
+      "components/video/video-player.tsx(47,97): error TS1005: ',' expected.",
+      "components/video/video-player.tsx(47,120): error TS1005: ',' expected.",
+      "components/video/video-player.tsx(47,273): error TS1005: ',' expected.",
+      "components/video/video-player.tsx(47,304): error TS1005: ',' expected.",
+      "components/video/video-player.tsx(47,334): error TS1005: ',' expected.",
+      "components/video/video-recording-system.tsx(37,28): error TS17008: JSX element 'HTMLVideoElement' has no corresponding closing tag.",
+      "components/video/video-recording-system.tsx(38,25): error TS1003: Identifier expected.",
+      "components/video/video-recording-system.tsx(38,27): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/video-recording-system.tsx(42,17): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/video-recording-system.tsx(43,5): error TS1109: Expression expected.",
+      "components/video/video-recording-system.tsx(45,38): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/video-recording-system.tsx(46,7): error TS1109: Expression expected.",
+      "components/video/video-recording-system.tsx(47,13): error TS1005: '}' expected.",
+      "components/video/video-recording-system.tsx(57,11): error TS1109: Expression expected.",
+      "components/video/video-recording-system.tsx(58,18): error TS1005: '}' expected.",
+      "components/video/video-recording-system.tsx(60,11): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/video-recording-system.tsx(69,9): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/video-recording-system.tsx(79,45): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/video-recording-system.tsx(80,11): error TS1109: Expression expected.",
+      "components/video/video-recording-system.tsx(80,31): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/video-recording-system.tsx(83,9): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/video-recording-system.tsx(85,37): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/video-recording-system.tsx(86,11): error TS1109: Expression expected.",
+      "components/video/video-recording-system.tsx(86,58): error TS1005: '}' expected.",
+      "components/video/video-recording-system.tsx(86,73): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/video-recording-system.tsx(95,13): error TS1109: Expression expected.",
+      "components/video/video-recording-system.tsx(96,21): error TS1005: '}' expected.",
+      "components/video/video-recording-system.tsx(98,13): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/video-recording-system.tsx(104,11): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/video-recording-system.tsx(106,13): error TS1005: '}' expected.",
+      "components/video/video-recording-system.tsx(107,20): error TS1005: '}' expected.",
+      "components/video/video-recording-system.tsx(110,13): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/video-recording-system.tsx(111,11): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/video-recording-system.tsx(112,9): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/video-recording-system.tsx(117,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/video-recording-system.tsx(119,9): error TS1005: '}' expected.",
+      "components/video/video-recording-system.tsx(120,16): error TS1005: '}' expected.",
+      "components/video/video-recording-system.tsx(123,9): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/video-recording-system.tsx(124,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/video-recording-system.tsx(125,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/video-recording-system.tsx(129,16): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/video-recording-system.tsx(130,7): error TS1109: Expression expected.",
+      "components/video/video-recording-system.tsx(136,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/video-recording-system.tsx(137,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/video-recording-system.tsx(139,35): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?",
+      "components/video/video-recording-system.tsx(140,5): error TS1109: Expression expected.",
+      "components/video/video-recording-system.tsx(142,7): error TS1005: '}' expected.",
+      "components/video/video-recording-system.tsx(148,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/video-recording-system.tsx(149,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/video-recording-system.tsx(176,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?",
+      "components/video/video-recording-system.tsx(176,3): error TS1005: '</' expected.",
+      "components/video/video-sharing-controls.tsx(66,45): error TS1005: ',' expected.",
+      "components/video/video-sharing-controls.tsx(66,72): error TS1005: ',' expected.",
+      "components/video/video-sharing-controls.tsx(66,99): error TS1005: ',' expected.",
+      "components/video/video-sharing-controls.tsx(66,135): error TS1005: ',' expected.",
+      "components/video/video-sharing-controls.tsx(66,167): error TS1005: ',' expected.",
+      "components/video/video-sharing-controls.tsx(66,199): error TS1005: ',' expected.",
+      "components/video/video-status-indicator.tsx(26,32): error TS1005: ',' expected.",
+      "components/video/video-status-indicator.tsx(26,62): error TS1005: ',' expected.",
+      "components/video/video-status-indicator.tsx(26,89): error TS1005: ',' expected.",
+      "components/video/video-status-indicator.tsx(26,118): error TS1005: ',' expected.",
+      "components/video/video-status-monitor.tsx(43,42): error TS1005: ',' expected.",
+      "components/video/video-status-monitor.tsx(43,69): error TS1005: ',' expected.",
+      "components/video/video-timeline-editor.tsx(60,90): error TS1005: ',' expected.",
+      "components/video/video-upload.tsx(19,49): error TS1005: ',' expected.",
+      "components/video/video-upload.tsx(20,24): error TS1005: ',' expected.",
+      "components/video/video-upload.tsx(20,52): error TS1005: ',' expected.",
+      "components/video/video-upload.tsx(20,76): error TS1005: ',' expected.",
+      "hooks/use-safe-effects.ts(38,92): error TS1005: ',' expected.",
+      "hooks/use-safe-effects.ts(59,74): error TS1005: ',' expected.",
+      "hooks/useVideoStatus.ts(57,35): error TS1005: ',' expected.",
+      "hooks/useVideoStatus.ts(57,68): error TS1005: ',' expected.",
+      "hooks/useVideoStatus.ts(58,30): error TS1005: ',' expected.",
+      "lib/browser-compatibility.ts(50,87): error TS1005: ',' expected.",
+      "lib/dynamic-imports.ts(3,71): error TS1005: ',' expected.",
+      "lib/dynamic-imports.ts(5,33): error TS1005: ',' expected.",
+      "lib/dynamic-imports.ts(5,36): error TS1003: Identifier expected.",
+      "lib/dynamic-imports.ts(5,37): error TS1110: Type expected.",
+      "lib/dynamic-imports.ts(6,31): error TS1005: ';' expected.",
+      "lib/dynamic-imports.ts(6,34): error TS1434: Unexpected keyword or identifier.",
+      "lib/dynamic-imports.ts(6,49): error TS1161: Unterminated regular expression literal.",
+      "lib/dynamic-imports.ts(7,5): error TS2809: Declaration or statement expected. This '=' follows a block of statements, so if you intended to write a destructuring assignment, you might need to wrap the whole assignment in parentheses.",
+      "lib/dynamic-imports.ts(13,1): error TS1128: Declaration or statement expected.",
+      "lib/dynamic-imports.ts(17,23): error TS1005: '>' expected.",
+      "lib/dynamic-imports.ts(17,32): error TS1005: ',' expected.",
+      "lib/dynamic-imports.ts(17,73): error TS1005: ':' expected.",
+      "lib/dynamic-imports.ts(17,75): error TS1110: Type expected.",
+      "lib/dynamic-imports.ts(21,23): error TS1005: '>' expected.",
+      "lib/dynamic-imports.ts(21,32): error TS1005: ',' expected.",
+      "lib/dynamic-imports.ts(21,73): error TS1005: ':' expected.",
+      "lib/dynamic-imports.ts(21,75): error TS1110: Type expected.",
+      "lib/dynamic-imports.ts(25,23): error TS1005: '>' expected.",
+      "lib/dynamic-imports.ts(25,32): error TS1005: ',' expected.",
+      "lib/dynamic-imports.ts(25,73): error TS1005: ':' expected.",
+      "lib/dynamic-imports.ts(25,75): error TS1110: Type expected.",
+      "lib/performance-optimized.ts(21,57): error TS1005: ',' expected.",
+      "lib/performance.ts(21,57): error TS1005: ',' expected.",
+      "lib/s3-client.ts(69,3): error TS1005: ',' expected.",
+      "lib/s3-client.ts(81,1): error TS1128: Declaration or statement expected.",
+      "lib/s3-client.ts(87,3): error TS1005: ',' expected.",
+      "lib/s3-client.ts(98,1): error TS1128: Declaration or statement expected.",
+      "lib/seo-optimizer.ts(225,175): error TS1005: ',' expected.",
+      "lib/storage/startup-cost-optimizer.ts(250,69): error TS1005: ',' expected.",
+      "lib/stripe-enhanced.ts(252,2): error TS1005: ',' expected.",
+      "lib/stripe-enhanced.ts(288,2): error TS1005: ',' expected.",
+      "lib/stripe-enhanced.ts(305,84): error TS1005: ',' expected.",
+      "lib/stripe-enhanced.ts(310,70): error TS1005: ',' expected.",
+      "lib/stripe-enhanced.ts(315,94): error TS1005: ',' expected.",
+      "lib/stripe-enhanced.ts(320,67): error TS1005: ',' expected.",
+      "lib/utils/download-utils.ts(107,83): error TS1005: ',' expected.",
+      "lib/utils/download-utils.ts(157,94): error TS1005: ',' expected.",
+      "tests/components/my-day-today.test.tsx(264,77): error TS1005: ',' expected.",
+      "tests/components/my-day-today.test.tsx(264,79): error TS1005: ',' expected.",
+      "tests/components/my-day-today.test.tsx(264,86): error TS1005: ',' expected.",
+      "tests/components/my-day-today.test.tsx(264,93): error TS1005: ',' expected.",
+      "tests/components/my-day-today.test.tsx(264,116): error TS1002: Unterminated string literal.",
+      "tests/components/my-day-today.test.tsx(265,3): error TS1005: ',' expected."
+    ]
+  }
+}

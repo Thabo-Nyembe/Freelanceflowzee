@@ -1,0 +1,221 @@
+{
+  "timestamp": "2025-07-10T21:13:29.041Z",
+  "serverRunning": false,
+  "components": [
+    {
+      "name": "Dashboard Main Page",
+      "path": "app/(app)/dashboard/page.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective",
+        "hasStateManagement",
+        "hasEventHandlers"
+      ]
+    },
+    {
+      "name": "Interactive Dashboard",
+      "path": "components/dashboard/enhanced-interactive-dashboard.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective"
+      ]
+    },
+    {
+      "name": "Dashboard Navigation",
+      "path": "components/dashboard-nav.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective"
+      ]
+    },
+    {
+      "name": "AI Create",
+      "path": "components/ai/ai-create.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective",
+        "hasClickHandler",
+        "hasInputHandler",
+        "hasStateManagement",
+        "hasEventHandlers"
+      ]
+    },
+    {
+      "name": "AI Chat",
+      "path": "components/ai/enhanced-ai-chat.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective",
+        "hasClickHandler",
+        "hasFormHandler",
+        "hasInputHandler",
+        "hasStateManagement"
+      ]
+    },
+    {
+      "name": "AI Assistant",
+      "path": "components/ai/ai-assistant.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective"
+      ]
+    },
+    {
+      "name": "Video Player",
+      "path": "components/video/video-player.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective",
+        "hasClickHandler",
+        "hasInputHandler",
+        "hasStateManagement",
+        "hasEventHandlers",
+        "hasMediaHandlers"
+      ]
+    },
+    {
+      "name": "Video Upload",
+      "path": "components/video/video-upload.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective",
+        "hasClickHandler",
+        "hasStateManagement",
+        "hasFileHandlers"
+      ]
+    },
+    {
+      "name": "Screen Recorder",
+      "path": "components/video/screen-recorder.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective",
+        "hasClickHandler",
+        "hasInputHandler",
+        "hasStateManagement",
+        "hasEventHandlers"
+      ]
+    },
+    {
+      "name": "Site Header",
+      "path": "components/site-header.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective"
+      ]
+    },
+    {
+      "name": "Mobile Menu",
+      "path": "components/mobile-menu.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective",
+        "hasClickHandler",
+        "hasStateManagement"
+      ]
+    },
+    {
+      "name": "Main Navigation",
+      "path": "components/navigation.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective"
+      ]
+    },
+    {
+      "name": "Booking Form",
+      "path": "components/forms/booking-form.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective",
+        "hasClickHandler",
+        "hasFormHandler",
+        "hasInputHandler",
+        "hasStateManagement"
+      ]
+    },
+    {
+      "name": "Contact Form",
+      "path": "components/contact-form.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective",
+        "hasFormHandler",
+        "hasInputHandler",
+        "hasStateManagement"
+      ]
+    },
+    {
+      "name": "Payment Form",
+      "path": "components/payment/payment-form.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective",
+        "hasFormHandler",
+        "hasInputHandler",
+        "hasStateManagement",
+        "hasRouting"
+      ]
+    },
+    {
+      "name": "Button Component",
+      "path": "components/ui/button.tsx",
+      "status": "static",
+      "features": []
+    },
+    {
+      "name": "Dialog Component",
+      "path": "components/ui/dialog.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective"
+      ]
+    },
+    {
+      "name": "Tabs Component",
+      "path": "components/ui/tabs.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective"
+      ]
+    },
+    {
+      "name": "Real-time Collaboration",
+      "path": "components/collaboration/real-time-collaboration.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective",
+        "hasStateManagement"
+      ]
+    },
+    {
+      "name": "Collaboration System",
+      "path": "components/collaboration/enhanced-collaboration-system.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective",
+        "hasClickHandler",
+        "hasInputHandler",
+        "hasStateManagement",
+        "hasEventHandlers",
+        "hasRouting"
+      ]
+    },
+    {
+      "name": "Social Wall",
+      "path": "components/community/social-wall.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective"
+      ]
+    },
+    {
+      "name": "Creator Marketplace",
+      "path": "components/community/creator-marketplace.tsx",
+      "status": "interactive",
+      "features": [
+        "hasClientDirective"
+      ]
+    }
+  ]
+}

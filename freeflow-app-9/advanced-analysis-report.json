@@ -1,0 +1,3921 @@
+{
+  "timestamp": "2025-07-10T22:38:33.955Z",
+  "performance": [
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/action-items-button.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ai/action-items-button.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ai/ai-create-studio.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ai/ai-create.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ai/asset-library-tab.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ai/summarize-button.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ai/text-selection-toolbar.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/analytics/revenue-analytics.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/block-based-content-editor.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/block-renderer.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/block-wrapper.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/checklist-block.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/code-block.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/database-block.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/file-block.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/heading-block.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/image-block.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/list-block.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/quote-block.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/table-block.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/text-block.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/video-block.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/advanced-client-portal.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/ai-enhanced-canvas-collaboration.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/ai-powered-design-assistant.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/ai-video-recording-system.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/collaboration-provider.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/comment-thread.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/comments.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/cursor-overlay.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/cursor.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/enhanced-client-collaboration.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/enhanced-collaboration-chat.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/enterprise-video-studio.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/presence.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/selection-overlay.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/selection.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/community/create-post-dialog.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/comprehensive-error.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/dashboard-nav.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/dashboard-test-wrapper.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/demo-modal.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/dev/context7-helper.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/download/enhanced-download-manager.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/download-button.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/enhanced/enhanced-upload-button.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/enhanced/smart-download-button.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/code-viewer.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/document-viewer.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/image-viewer.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/screenshot-viewer.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/video-viewer.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/file-upload.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/files/download-button.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/files/file-upload-dialog.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/files/file-upload.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/financial-hub.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/forms/booking-form.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/forms/project-creation-form.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/gallery/advanced-sharing-system.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/icon-picker.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/interactive-contact-system.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/mobile-menu.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/portfolio/enhanced-gallery.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/providers/collaboration-provider.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/providers/index.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/seo/dynamic-seo.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/site-header.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/storage/enhanced-file-storage.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/storage/storage-dashboard.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/theme-provider.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/theme-toggle.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/enhanced-interactive-system.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/enhanced-sharing-modal.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/optimized-image-enhanced.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/optimized-image.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/use-toast.ts",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/upload/enhanced-upload-progress.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/ai-insights-dashboard.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/ai-video-analysis.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/background-replacement-controls.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/gesture-recognition-controls.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/highlight-manager.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/real-time-analysis.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/smart-chapters.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/smart-recording-tips.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/transcription-viewer.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/video-ai-panel.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/video-insights.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/video-transcription.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/voice-enhancement-controls.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai-enhanced-video-recording.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai-insights.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/bulk-operations.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/export-dialog.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/export-list.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/export-presets.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/share-header.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/transcript-search.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-comments.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-controls.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-filters.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-grid.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-list.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-metadata.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-recording-system.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-search.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-sharing-controls.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-status-indicator.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-status-monitor.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-upload.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/components/ToolMessageParts.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/components/collaboration/my-day-today.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/components/collaboration/video-studio.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/components/community/create-post-form.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/video-studio/editor/[id]/page.tsx",
+      "type": "missing-memo",
+      "issue": "Large component without React.memo optimization",
+      "suggestion": "Wrap component with React.memo for better performance"
+    }
+  ],
+  "memoryLeaks": [
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/ai-assistant/page.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/canvas-collaboration/page.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/community-hub/page.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/escrow/page.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/files-hub/page.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/my-day/page.tsx",
+      "type": "timer-leak",
+      "issue": "Timer created without cleanup",
+      "suggestion": "Clear timers in useEffect cleanup function"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/my-day/page.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/notifications/page.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/projects-hub/page.tsx",
+      "type": "timer-leak",
+      "issue": "Timer created without cleanup",
+      "suggestion": "Clear timers in useEffect cleanup function"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/projects-hub/page.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/time-tracking/page.tsx",
+      "type": "timer-leak",
+      "issue": "Timer created without cleanup",
+      "suggestion": "Clear timers in useEffect cleanup function"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/time-tracking/page.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ai/simple-ai-chat.tsx",
+      "type": "timer-leak",
+      "issue": "Timer created without cleanup",
+      "suggestion": "Clear timers in useEffect cleanup function"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ai/simple-ai-chat.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/analytics/analytics-dashboard.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/analytics/revenue-analytics.tsx",
+      "type": "timer-leak",
+      "issue": "Timer created without cleanup",
+      "suggestion": "Clear timers in useEffect cleanup function"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/analytics/revenue-analytics.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/database-block.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/heading-block.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/text-block.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/booking/enhanced-calendar-booking.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/AudioPlayer.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/BlockEditor.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/ai-enhanced-canvas-collaboration.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/ai-video-recording-system.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/collaboration-provider.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/cursor-overlay.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/cursor.tsx",
+      "type": "timer-leak",
+      "issue": "Timer created without cleanup",
+      "suggestion": "Clear timers in useEffect cleanup function"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/cursor.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/enhanced-collaboration-chat.tsx",
+      "type": "timer-leak",
+      "issue": "Timer created without cleanup",
+      "suggestion": "Clear timers in useEffect cleanup function"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/enhanced-collaboration-chat.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/enhanced-collaboration-system.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/enterprise-video-studio.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/real-time-collaboration.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/selection-overlay.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/selection.tsx",
+      "type": "timer-leak",
+      "issue": "Timer created without cleanup",
+      "suggestion": "Clear timers in useEffect cleanup function"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/selection.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/dashboard/demo-content-provider.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/dev/context7-helper.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/error-handling/js-disabled-fallback.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/error-handling/network-error.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/video-viewer.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/forms/booking-form.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/freelancer/freelancer-analytics.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/freelancer/freelancer-dashboard.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/gallery/advanced-sharing-system.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/global-search.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/interactive-contact-system.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/messaging/chat.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/portfolio/enhanced-gallery.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/providers/collaboration-provider.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/seo/dynamic-seo.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/storage/enterprise-dashboard.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/storage/startup-cost-dashboard.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/storage/storage-dashboard.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/theme-provider.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/theme-toggle.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/carousel.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/enhanced-interactive-system.tsx",
+      "type": "timer-leak",
+      "issue": "Timer created without cleanup",
+      "suggestion": "Clear timers in useEffect cleanup function"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/enhanced-interactive-system.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/optimized-image-enhanced.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/sidebar.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/use-mobile.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/use-toast.ts",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/VideoMessageRecorder.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/background-replacement-controls.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/client-review-enhancer.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/gesture-recognition-controls.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/highlight-manager.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/real-time-analysis.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/smart-recording-tips.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/video-ai-panel.tsx",
+      "type": "timer-leak",
+      "issue": "Timer created without cleanup",
+      "suggestion": "Clear timers in useEffect cleanup function"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/video-ai-panel.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/voice-enhancement-controls.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/export-list.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/mux-video-player.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/screen-recorder.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-comments.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-controls.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-player.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-recording-system.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-search.tsx",
+      "type": "timer-leak",
+      "issue": "Timer created without cleanup",
+      "suggestion": "Clear timers in useEffect cleanup function"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-search.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/collaboration/useCollaboration.ts",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-analytics.ts",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-client-reviews.ts",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-collaboration.ts",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-debounce.ts",
+      "type": "timer-leak",
+      "issue": "Timer created without cleanup",
+      "suggestion": "Clear timers in useEffect cleanup function"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-debounce.ts",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-editor.ts",
+      "type": "timer-leak",
+      "issue": "Timer created without cleanup",
+      "suggestion": "Clear timers in useEffect cleanup function"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-editor.ts",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-media-query.ts",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-mobile.tsx",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-screen-recorder.ts",
+      "type": "timer-leak",
+      "issue": "Timer created without cleanup",
+      "suggestion": "Clear timers in useEffect cleanup function"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-screen-recorder.ts",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-toast.ts",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-video-export.ts",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-video-search.ts",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/useVideoStatus.ts",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/hooks/collaboration/use-collaboration.ts",
+      "type": "missing-deps",
+      "issue": "useEffect without dependency array",
+      "suggestion": "Add dependency array to prevent infinite re-renders"
+    }
+  ],
+  "security": [
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/__tests__/integration.test.tsx",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: Key: 'test-key'...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/__tests__/openai.test.tsx",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: Key: 'test-key'...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/__tests__/test-utils.tsx",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: Key=\"vite-ui-theme\"...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/advanced-bug-hunter-v2.js",
+      "type": "xss-risk",
+      "severity": "high",
+      "issue": "dangerouslySetInnerHTML usage detected",
+      "suggestion": "Sanitize HTML content or use safer alternatives"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/advanced-bug-hunter-v2.js",
+      "type": "eval-usage",
+      "severity": "high",
+      "issue": "eval() usage detected",
+      "suggestion": "Avoid eval() - use safer alternatives"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/advanced-bug-hunter-v2.js",
+      "type": "insecure-storage",
+      "severity": "medium",
+      "issue": "Sensitive data stored in localStorage",
+      "suggestion": "Consider encrypting sensitive data before storage"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/escrow/page.tsx",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: Password: 'ECR2024!'...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(resources)/api-docs/page.tsx",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: password: 'password'...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(resources)/blog/[slug]/page.tsx",
+      "type": "xss-risk",
+      "severity": "high",
+      "issue": "dangerouslySetInnerHTML usage detected",
+      "suggestion": "Sanitize HTML content or use safer alternatives"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/page.tsx",
+      "type": "xss-risk",
+      "severity": "high",
+      "issue": "dangerouslySetInnerHTML usage detected",
+      "suggestion": "Sanitize HTML content or use safer alternatives"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/client-zone-gallery.tsx",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: Password: 'WEDDING20...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/ai-powered-design-assistant.tsx",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: key: 'typography'...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/document-viewer.tsx",
+      "type": "xss-risk",
+      "severity": "high",
+      "issue": "dangerouslySetInnerHTML usage detected",
+      "suggestion": "Sanitize HTML content or use safer alternatives"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/freelancer/freelancer-analytics.tsx",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: Key=\"completed\"...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/gallery/advanced-gallery-system.tsx",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: password: 'sarah2024...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/payment/payment-form.tsx",
+      "type": "insecure-storage",
+      "severity": "medium",
+      "issue": "Sensitive data stored in localStorage",
+      "suggestion": "Consider encrypting sensitive data before storage"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/providers/root-providers.tsx",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: Key=\"kazi-ui-theme\"...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/chart.tsx",
+      "type": "xss-risk",
+      "severity": "high",
+      "issue": "dangerouslySetInnerHTML usage detected",
+      "suggestion": "Sanitize HTML content or use safer alternatives"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/comprehensive-bug-hunter.js",
+      "type": "xss-risk",
+      "severity": "high",
+      "issue": "dangerouslySetInnerHTML usage detected",
+      "suggestion": "Sanitize HTML content or use safer alternatives"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/jest.setup.js",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: KEY = 'test-key'...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/jest.setup.ts",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: KEY = 'test-key'...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/ai/config.ts",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: Key: 'API key not co...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/context7/client.ts",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: password: 'password'...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/scripts/comprehensive-create-add-button-test.js",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: password: 'TestUser1...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/scripts/create-test-user.js",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: password: 'TestPassw...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/scripts/deploy-with-cost-optimization.js",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: KEY: 'V49WP15BYT9BHJ...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/scripts/playwright-user-testing.js",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: password: 'TestUser1...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/scripts/test-all-create-add-buttons-comprehensive.js",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: password: 'TestUser1...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/scripts/test-auth.js",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: KEY:', supabaseAnonK...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/scripts/test-s3-connection.js",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: Key: 'test/connectio...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/scripts/test-with-auth-bypass.js",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: token: 'test_token_b...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/scripts/test-with-auth-bypass.js",
+      "type": "insecure-storage",
+      "severity": "medium",
+      "issue": "Sensitive data stored in localStorage",
+      "suggestion": "Consider encrypting sensitive data before storage"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/test-app-functionality.js",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: key: 'aiCreate'...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/test-dashboard-functionality.js",
+      "type": "eval-usage",
+      "severity": "high",
+      "issue": "eval() usage detected",
+      "suggestion": "Avoid eval() - use safer alternatives"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/api-integration.spec.ts",
+      "type": "insecure-storage",
+      "severity": "medium",
+      "issue": "Sensitive data stored in localStorage",
+      "suggestion": "Consider encrypting sensitive data before storage"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/authentication.spec.ts",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: password: '<script>a...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/dashboard.spec.ts",
+      "type": "insecure-storage",
+      "severity": "medium",
+      "issue": "Sensitive data stored in localStorage",
+      "suggestion": "Consider encrypting sensitive data before storage"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/edge-cases.spec.ts",
+      "type": "insecure-storage",
+      "severity": "medium",
+      "issue": "Sensitive data stored in localStorage",
+      "suggestion": "Consider encrypting sensitive data before storage"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/logout-debug.spec.ts",
+      "type": "hardcoded-secret",
+      "severity": "critical",
+      "issue": "Potential hardcoded secret: token:', authToken);...",
+      "suggestion": "Move secrets to environment variables"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/logout-debug.spec.ts",
+      "type": "insecure-storage",
+      "severity": "medium",
+      "issue": "Sensitive data stored in localStorage",
+      "suggestion": "Consider encrypting sensitive data before storage"
+    }
+  ],
+  "bundleSize": [
+    {
+      "type": "bundle-analysis",
+      "issue": "Run npm ls to check for duplicate dependencies",
+      "suggestion": "Use npm dedupe to remove duplicate packages"
+    }
+  ],
+  "accessibility": [
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/__tests__/integration.test.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/__tests__/openai.test.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/__tests__/supabase.test.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/ai-assistant/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/ai-create/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/ai-design/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/calendar/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/canvas-collaboration/page.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/canvas-collaboration/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/cloud-storage/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/community-hub/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/cv-portfolio/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/dashboard-layout-client.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/escrow/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/files/page.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/files/page.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/files/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/files-hub/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/financial/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/financial-hub/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/gallery/page.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/gallery/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/invoices/page.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/invoices/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/my-day/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/notifications/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/profile/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/projects-hub/create/page.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/projects-hub/create/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/projects-hub/import/page.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/projects-hub/import/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/projects-hub/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/projects-hub/templates/page.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/projects-hub/templates/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/settings/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/team/page.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/team/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/team-hub/page.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/team-hub/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/video-studio/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/workflow-builder/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(resources)/api-docs/page.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(resources)/api-docs/page.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(resources)/api-docs/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(resources)/blog/[slug]/page.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(resources)/blog/[slug]/page.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(resources)/blog/category/[slug]/page.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(resources)/blog/category/[slug]/page.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(resources)/blog/category/[slug]/page.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(resources)/blog/category/[slug]/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(resources)/docs/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(resources)/tutorials/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/components/ToolMessageParts.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/components/ToolMessageParts.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/components/ToolMessageParts.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/components/collaboration/my-day-today.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/components/collaboration/my-day-today.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/components/collaboration/my-day-today.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/components/collaboration/my-day-today.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/components/collaboration/my-day-today.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/components/collaboration/video-studio.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/components/collaboration/video-studio.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/components/collaboration/video-studio.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/components/simple-ai-demo.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/components/simple-ai-demo.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/components/simple-ai-demo.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/demo-features/page.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/embed/[id]/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/login/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/offline/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/page.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/page.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/page.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/page.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/pricing/page.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/pricing/page.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/pricing/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/signup/page.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/video-studio/status-demo/page.tsx",
+      "type": "missing-alt",
+      "issue": "Image without alt text",
+      "suggestion": "Add descriptive alt text for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ai/asset-library-tab.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ai/asset-library-tab.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ai/enhanced-ai-chat.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/analytics/analytics-dashboard.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/block-wrapper.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/block-wrapper.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/checklist-block.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/file-block.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/file-block.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/image-block.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/image-block.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/list-block.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/video-block.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/video-block.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/cloud-storage-system.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/cloud-storage-system.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/AudioPlayer.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/CodeBlockViewer.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/CommentPopover.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/FeedbackSidebar.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/advanced-client-portal.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/ai-create.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/enhanced-collaboration-chat.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/enterprise-video-studio.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/file-upload-zone.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/community/create-post-dialog.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/comprehensive-error.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/dashboard/demo-enhanced-nav.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/dashboard/demo-enhanced-nav.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/dashboard/demo-enhanced-nav.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/dashboard-test-wrapper.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/dashboard-test-wrapper.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/dashboard-test-wrapper.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/demo/client-presentation-demo.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/download/enhanced-download-manager.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/enhanced/enhanced-upload-button.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/error-boundary.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/image-viewer.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/image-viewer.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/image-viewer.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/image-viewer.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/image-viewer.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/image-viewer.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/video-viewer.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/video-viewer.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/video-viewer.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/video-viewer.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/video-viewer.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/video-viewer.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/video-viewer.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/video-viewer.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/file-upload.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/files/file-upload-dialog.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/files/file-upload-dialog.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/forms/booking-form.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/freelancer/integrations/index.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/gallery/advanced-sharing-system.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/hubs/community-hub.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/hubs/files-hub.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/navigation/sidebar.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/navigation/sidebar.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/payment/payment-form.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/shared-team-calendar.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/storage/enhanced-file-storage.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/storage/storage-dashboard.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/team-collaboration-hub.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/enhanced-interactive-system.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/enhanced-sharing-modal.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/enhanced-sharing-modal.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/enhanced-sharing-modal.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/enhanced-sharing-modal.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/enhanced-sharing-modal.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/enhanced-sharing-modal.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/input.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/optimized-image-enhanced.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/optimized-image.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/upload/enhanced-upload-progress.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/ai-insights-dashboard.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/background-replacement-controls.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/portfolio-enhancer.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/transcription-viewer.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/video-ai-panel.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/export-dialog.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/export-presets.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/review-management-dashboard.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/transcript-search.tsx",
+      "type": "missing-aria-label",
+      "issue": "Interactive element without accessible label",
+      "suggestion": "Add aria-label or title for screen readers"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-editor.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-status-indicator.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-status-monitor.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-upload.tsx",
+      "type": "missing-form-label",
+      "issue": "Form input without associated label",
+      "suggestion": "Add proper form labels for accessibility"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-upload.tsx",
+      "type": "color-contrast",
+      "issue": "Potentially low color contrast detected",
+      "suggestion": "Verify color contrast meets WCAG standards"
+    }
+  ],
+  "crossBrowser": [
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/ai-assistant/actions.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/ai-assistant/page.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/canvas-collaboration/page.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/community-hub/page.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/files-hub/page.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/messages/page.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/my-day/page.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/projects-hub/create/page.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/team-hub/page.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(app)/dashboard/time-tracking/page.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/(resources)/api-docs/page.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/api/generate-title/route.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/embed/[id]/page.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/lib/rate-limit-store.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/lib/services/ai-service.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/lib/template-scoring-service.ts",
+      "type": "browser-compatibility",
+      "feature": "Nullish coalescing",
+      "issue": "Modern feature Nullish coalescing detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/lib/template-scoring-service.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/login/page.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/reviews/page.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/share/[id]/page.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/share/[id]/page.tsx",
+      "type": "css-compatibility",
+      "issue": "Advanced CSS features detected",
+      "suggestion": "Verify browser support and consider fallbacks"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/video/[id]/analytics/page.tsx",
+      "type": "browser-compatibility",
+      "feature": "Nullish coalescing",
+      "issue": "Modern feature Nullish coalescing detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/video/[id]/analytics/page.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/video/[id]/review/page.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/video/search/page.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/app/video-studio/status-demo/page.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ai/ai-create-studio.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ai/ai-create.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ai/asset-library-tab.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ai/simple-ai-chat.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/analytics/analytics-dashboard.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/block-based-content-editor.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/block-wrapper.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/checklist-block.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/code-block.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/database-block.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/file-block.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/heading-block.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/image-block.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/list-block.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/quote-block.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/table-block.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/text-block.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/blocks/video-block.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/cloud-storage-system.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/AudioPlayer.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/advanced-client-portal.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/ai-create.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/ai-openai-integration.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/ai-powered-design-assistant.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/ai-video-recording-system.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/approval-workflow.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/collaboration-provider.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/comment-thread.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/comments.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/community-showcase.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/enhanced-client-collaboration.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/enhanced-collaboration-chat.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/enhanced-collaboration-system.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/file-upload-zone.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/selection-overlay.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/collaboration/universal-media-previews.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/community/create-post-dialog.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/dashboard/demo-content-provider.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/dashboard/demo-enhanced-nav.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/dashboard/demo-enhanced-overview.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/dashboard/demo-feature-showcase.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/dashboard-breadcrumbs.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/demo/client-presentation-demo.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/download/enhanced-download-manager.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/download-button.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/enhanced/enhanced-upload-button.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/enhanced/smart-download-button.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/enhanced-invoices.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/error-handling/error-boundary.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/image-viewer.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/feedback/video-viewer.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/file-upload.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/files/file-upload.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/forms/booking-form.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/freelancer/freelancer-analytics.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/freelancer/integrations/index.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/gallery/advanced-gallery-system.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/global-search.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/hubs/community-hub.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/hubs/files-hub.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/hubs/projects-hub.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/messaging/chat.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/payment/payment-form.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/portfolio/enhanced-gallery.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/portfolio/portfolio.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/site-header.tsx",
+      "type": "css-compatibility",
+      "issue": "Advanced CSS features detected",
+      "suggestion": "Verify browser support and consider fallbacks"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/storage/storage-dashboard.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/team-collaboration-hub.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/team-hub.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/team.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/breadcrumb.tsx",
+      "type": "browser-compatibility",
+      "feature": "Nullish coalescing",
+      "issue": "Modern feature Nullish coalescing detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/carousel.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/chart.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/form.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/optimized-image-enhanced.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/optimized-image.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/sidebar.tsx",
+      "type": "browser-compatibility",
+      "feature": "Nullish coalescing",
+      "issue": "Modern feature Nullish coalescing detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/ui/sidebar.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/upload/enhanced-upload-progress.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/user-button.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/verification-reminder.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/VideoMessageRecorder.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/ai-insights-dashboard.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/background-replacement-controls.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/portfolio-enhancer.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/real-time-analysis.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/smart-recording-tips.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/transcription-viewer.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai/video-ai-panel.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai-enhanced-video-recording.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/ai-insights.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/bulk-operations.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/client-review-panel.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/export-dialog.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/export-presets.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/mux-video-player.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/review-management-dashboard.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/share-header.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-comments.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-editor.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-grid.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-list.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-player.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-recording-system.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-status-monitor.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/components/video/video-timeline-editor.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-analytics.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-client-reviews.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-collaboration.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-editor.ts",
+      "type": "browser-compatibility",
+      "feature": "Nullish coalescing",
+      "issue": "Modern feature Nullish coalescing detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-enhanced-ai.ts",
+      "type": "browser-compatibility",
+      "feature": "Nullish coalescing",
+      "issue": "Modern feature Nullish coalescing detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-enhanced-ai.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-freeflow-ai.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/use-video-export.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/useVideoStatus.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/hooks/video/useVideoAnalytics.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/jest.setup.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/ai/config.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/ai/enhanced-ai-service.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/ai/openai-client.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/ai/real-time-ai-service.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/ai/template-scoring-service.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/ai/voice-enhancement-service.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/analytics/analytics-client.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/api/community.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/api/files.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/api/projects.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/dal.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/seo-optimizer.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/services/template-scoring-service.ts",
+      "type": "browser-compatibility",
+      "feature": "Nullish coalescing",
+      "issue": "Modern feature Nullish coalescing detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/services/template-scoring-service.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/storage/enterprise-grade-optimizer.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/storage/multi-cloud-storage.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/storage/paid-tier-optimizer.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/storage/startup-cost-optimizer.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/stripe-enhanced-v2.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/stripe-enhanced.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/supabase/middleware.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/supabase/server.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/utils/download-utils.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/utils/test-mode.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/video/config.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/video/mux-client.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/lib/video/thumbnail-generator.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/supabase/functions/generate-ai-metadata/index.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/supabase/functions/openai-collaboration/index.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/components/community-hub.test.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/components/files-hub.test.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/components/my-day-today.test.tsx",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/bug-test.spec.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/cross-browser.spec.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/edge-cases-comprehensive.spec.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/edge-cases.spec.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/logout-debug.spec.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/navigation.spec.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/pricing.spec.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/responsive-ui-ux.spec.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    },
+    {
+      "file": "/Users/thabonyembe/Documents/freeflow-app-9/tests/e2e/signup.spec.ts",
+      "type": "browser-compatibility",
+      "feature": "Optional chaining",
+      "issue": "Modern feature Optional chaining detected",
+      "suggestion": "Ensure target browsers support this feature"
+    }
+  ],
+  "summary": {
+    "totalIssues": 613,
+    "criticalSecurity": 25,
+    "highPriorityPerformance": 0,
+    "memoryLeakRisks": 100,
+    "accessibilityGaps": 172
+  }
+}
