@@ -5,10 +5,10 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
   BarChart3,
-  FolderClosed,
+  FolderClosed, // kept for potential future use
+  FolderOpen,
   Video,
   Users,
-  Brain,
   Sparkles,
   Calendar,
   Shield,
@@ -19,7 +19,11 @@ import {
   Wallet,
   Bell,
   Palette,
-  Layers
+  Layers,
+  Zap,
+  Monitor,
+  DollarSign,
+  Receipt
 } from 'lucide-react'
 
 interface SidebarItem {
@@ -38,56 +42,47 @@ const sidebarItems: SidebarItem[] = [
   {
     name: 'Projects Hub',
     href: '/dashboard/projects-hub',
-    icon: FolderClosed,
-    badge: 'A+++'
+    icon: FolderOpen
   },
   {
     name: 'Video Studio',
     href: '/dashboard/video-studio',
-    icon: Video,
-    badge: 'A+++'
+    icon: Video
   },
   {
     name: 'Canvas Collaboration',
     href: '/dashboard/canvas',
-    icon: Palette,
-    badge: 'A+++'
+    icon: Monitor
   },
   {
     name: 'Community',
     href: '/dashboard/community',
-    icon: Users,
-    badge: 'A+++'
+    icon: Users
   },
   {
     name: 'AI Assistant',
     href: '/dashboard/ai-assistant',
-    icon: Brain,
-    badge: 'A+++'
+    icon: Zap
   },
   {
     name: 'AI Create',
     href: '/dashboard/ai-create',
-    icon: Sparkles,
-    badge: 'A+++'
+    icon: Sparkles
   },
   {
     name: 'My Day',
     href: '/dashboard/my-day',
-    icon: Calendar,
-    badge: 'A+++'
+    icon: Calendar
   },
   {
     name: 'Escrow',
     href: '/dashboard/escrow',
-    icon: Shield,
-    badge: 'A+++'
+    icon: Shield
   },
   {
     name: 'Files Hub',
     href: '/dashboard/files-hub',
-    icon: FileText,
-    badge: 'A+++'
+    icon: FileText
   },
   {
     name: 'Collaboration',
@@ -107,7 +102,7 @@ const sidebarItems: SidebarItem[] = [
   {
     name: 'Financial Hub',
     href: '/dashboard/financial-hub',
-    icon: Wallet
+    icon: DollarSign
   },
   {
     name: 'Notifications',

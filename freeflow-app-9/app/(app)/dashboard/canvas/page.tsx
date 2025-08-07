@@ -10,7 +10,8 @@ import {
   Layers, 
   Zap, 
   MousePointer,
-  MessageCircle
+  MessageCircle,
+  Monitor
 } from 'lucide-react'
 
 export default function CanvasPage() {
@@ -52,7 +53,7 @@ export default function CanvasPage() {
       <PageHeader
         title="Canvas Collaboration"
         description="Professional design and prototyping workspace with real-time collaboration"
-        icon={Palette}
+        icon={Monitor}
         badge={{ text: 'Coming Soon', variant: 'secondary' }}
         breadcrumbs={[
           { label: 'Dashboard', href: '/dashboard' },
