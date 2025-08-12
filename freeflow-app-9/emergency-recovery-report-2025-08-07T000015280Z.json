@@ -1,0 +1,222 @@
+{
+  "timestamp": "2025-08-06T23:59:57.712Z",
+  "buildStatus": {
+    "status": "failed",
+    "error": "Error: Command failed: npx tsc --noEmit",
+    "typeErrors": true
+  },
+  "componentAnalysis": {
+    "./components/unified-sidebar.tsx": {
+      "status": "issues-found",
+      "issues": [
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: BarChart3",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: FolderOpen",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Video",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Users",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Sparkles",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Calendar",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Shield",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: FileText",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: MessageSquare",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: TrendingUp",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: UserCircle",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Bell",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Palette",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Layers",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Zap",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Monitor",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: DollarSign",
+          "severity": "warning"
+        },
+        {
+          "type": "type-safety",
+          "message": "Using item.icon with unknown type may cause rendering issues",
+          "severity": "warning",
+          "suggestion": "Consider using React.ComponentType<any> or React.ElementType instead of unknown"
+        }
+      ],
+      "componentPath": "./components/unified-sidebar.tsx"
+    },
+    "./components/navigation/sidebar.tsx": {
+      "status": "issues-found",
+      "issues": [
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: BarChart3",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: FolderOpen",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Video",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Users",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Sparkles",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Calendar",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Shield",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: FileText",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: TrendingUp",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: LayoutDashboard",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Settings",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Palette",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: MessageSquare",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Bell",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: DollarSign",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Zap",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Monitor",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Wallet",
+          "severity": "warning"
+        },
+        {
+          "type": "unused-import",
+          "message": "Unused icon import: Receipt",
+          "severity": "warning"
+        },
+        {
+          "type": "type-safety",
+          "message": "Using item.icon with unknown type may cause rendering issues",
+          "severity": "warning",
+          "suggestion": "Consider using React.ComponentType<any> or React.ElementType instead of unknown"
+        }
+      ],
+      "componentPath": "./components/navigation/sidebar.tsx"
+    }
+  },
+  "routeTests": {},
+  "fixes": [],
+  "recommendations": [
+    {
+      "priority": "high",
+      "message": "Build is failing - consider rolling back recent changes"
+    }
+  ]
+}
