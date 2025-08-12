@@ -1,8 +1,8 @@
 'use client'
 
 import { PageHeader } from '@/components/ui/page-header'
-import { ComingSoonState } from '@/components/ui/empty-states'
 import { Card, CardContent } from '@/components/ui/card'
+import { AIEnhancedCanvasCollaboration } from '@/components/collaboration/ai-enhanced-canvas-collaboration'
 import { Badge } from '@/components/ui/badge'
 import { 
   Palette, 
@@ -54,7 +54,6 @@ export default function CanvasPage() {
         title="Canvas Collaboration"
         description="Professional design and prototyping workspace with real-time collaboration"
         icon={Monitor}
-        badge={{ text: 'Coming Soon', variant: 'secondary' }}
         breadcrumbs={[
           { label: 'Dashboard', href: '/dashboard' },
           { label: 'Canvas Collaboration' }
@@ -62,12 +61,11 @@ export default function CanvasPage() {
       />
 
       <div className="grid gap-6">
-        <ComingSoonState
-          featureName="Canvas Collaboration"
-          description="We're building a powerful visual collaboration platform that will revolutionize how teams work together on creative projects."
-          estimatedDate="Q2 2024"
-          className="col-span-full"
-        />
+        <Card className="kazi-card">
+          <CardContent className="p-6">
+            <AIEnhancedCanvasCollaboration projectId="demo-project" />
+          </CardContent>
+        </Card>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((feature, index) => (

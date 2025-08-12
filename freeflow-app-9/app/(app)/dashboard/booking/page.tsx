@@ -9,15 +9,10 @@ import {
   ArrowRight
 } from 'lucide-react'
 
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent
-} from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import EnhancedCalendarBooking from '@/components/booking/enhanced-calendar-booking'
 
 export default function BookingPage() {
   return (
@@ -39,95 +34,13 @@ export default function BookingPage() {
             </div>
           </div>
 
-          <Badge variant="outline" className="bg-primary/10">
-            Coming Soon
-          </Badge>
+          <Badge variant="outline" className="bg-primary/10">Live</Badge>
         </div>
       </div>
 
-      {/* Feature Cards */}
+      {/* Live Enhanced Calendar Booking */}
       <div className="container mx-auto px-4">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Upcoming Bookings */}
-          <Card className="group cursor-pointer hover:shadow-xl transition-shadow">
-            <CardHeader className="flex items-center gap-3">
-              <Clock className="h-5 w-5 text-blue-600" />
-              <div>
-                <CardTitle className="text-base">Upcoming Bookings</CardTitle>
-                <CardDescription>See your next appointments</CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full gap-2 group-hover:bg-blue-50"
-              >
-                Open <ArrowRight className="h-3 w-3" />
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Manage Services */}
-          <Card className="group cursor-pointer hover:shadow-xl transition-shadow">
-            <CardHeader className="flex items-center gap-3">
-              <SettingsIcon className="h-5 w-5 text-green-600" />
-              <div>
-                <CardTitle className="text-base">Manage Services</CardTitle>
-                <CardDescription>Create & edit offerings</CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full gap-2 group-hover:bg-green-50"
-              >
-                Open <ArrowRight className="h-3 w-3" />
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Clients / Attendees */}
-          <Card className="group cursor-pointer hover:shadow-xl transition-shadow">
-            <CardHeader className="flex items-center gap-3">
-              <Users className="h-5 w-5 text-purple-600" />
-              <div>
-                <CardTitle className="text-base">Clients</CardTitle>
-                <CardDescription>Manage attendee list</CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full gap-2 group-hover:bg-purple-50"
-              >
-                Open <ArrowRight className="h-3 w-3" />
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Notifications */}
-          <Card className="group cursor-pointer hover:shadow-xl transition-shadow">
-            <CardHeader className="flex items-center gap-3">
-              <Bell className="h-5 w-5 text-orange-600" />
-              <div>
-                <CardTitle className="text-base">Notifications</CardTitle>
-                <CardDescription>Booking alerts & reminders</CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full gap-2 group-hover:bg-orange-50"
-              >
-                Open <ArrowRight className="h-3 w-3" />
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+        <EnhancedCalendarBooking />
       </div>
     </div>
   )
