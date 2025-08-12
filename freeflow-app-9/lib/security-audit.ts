@@ -1851,8 +1851,8 @@ export function applySecurityHeaders(res: NextResponse): NextResponse {
     res.headers.set(
       'Content-Security-Policy',
       DEFAULT_SECURITY_CONFIG.xssProtection.mode === 'block'
-        ? "default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'; require-trusted-types-for 'script'"
-        : "default-src 'self'; script-src 'self' 'unsafe-inline'; object-src 'none'"
+        ? "default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'; require-trusted-types-for 'script'""
+        : "default-src 'self'; script-src 'self' 'unsafe-inline'; object-src 'none'""
     );
   }
   
@@ -1971,7 +1971,7 @@ export function sanitizeSqlInput(input: string): string {
   // This is a very basic implementation for demonstration
   
   // Escape single quotes
-  let sanitized = input.replace(/'/g, "''");
+  let sanitized = input.replace(/'/g, "''");"
   
   // Remove SQL comments
   sanitized = sanitized.replace(/--.*$/g, '');

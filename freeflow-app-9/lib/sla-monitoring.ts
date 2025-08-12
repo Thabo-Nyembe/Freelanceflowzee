@@ -2182,8 +2182,8 @@ async function notifyUsers(incident: ServiceIncident): Promise<void> {
     
     // Simulate sending notifications
     console.log(`Would send email to all users about incident affecting ${service.name}`);
-    console.log(`Email subject: "Service Disruption: ${service.name}"`);
-    console.log(`Email body: "We are currently experiencing issues with ${service.name}. Our team is investigating. We apologize for any inconvenience."`);
+    console.log(`Email subject: "Service Disruption: ${service.name}"`);"
+    console.log(`Email body: "We are currently experiencing issues with ${service.name}. Our team is investigating. We apologize for any inconvenience."`);"
   } catch (error) {
     console.error(`Error notifying users about incident ${incident.id}:`, error);
   }

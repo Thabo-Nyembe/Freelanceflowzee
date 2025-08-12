@@ -1137,7 +1137,7 @@ export function I18nProvider({
       }}
     >
       {/* Set RTL direction if needed */}
-      <div dir={localeConfig.dir} lang={locale} className="h-full">
+      <div dir={localeConfig.dir} lang={locale} className="h-full">"
         {children}
       </div>
     </NextIntlClientProvider>

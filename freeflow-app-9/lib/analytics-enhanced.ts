@@ -308,7 +308,7 @@ function checkVitalThreshold(metric: Metric): void {
   
   if (!thresholds) return;
   
-  // Check if the metric is poor (worse than "needs improvement")
+  // Check if the metric is poor (worse than "needs improvement")"
   if (value > thresholds.needsImprovement) {
     // This is a poor performance metric - trigger alert
     triggerPerformanceAlert({

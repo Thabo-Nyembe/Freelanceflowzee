@@ -23,7 +23,8 @@ import {
   Upload,
   Rocket,
   PlayCircle,
-  DollarSign
+  DollarSign,
+  FolderOpen
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'

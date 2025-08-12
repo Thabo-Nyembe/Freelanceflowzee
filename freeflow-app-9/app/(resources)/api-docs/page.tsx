@@ -99,12 +99,12 @@ const quickStart = [
 ]
 
 const sdks = [
-  { name: 'JavaScript/Node.js', status: 'Available', link: '#' },
-  { name: 'Python', status: 'Available', link: '#' },
-  { name: 'PHP', status: 'Available', link: '#' },
-  { name: 'Ruby', status: 'Coming Soon', link: '#' },
-  { name: 'Go', status: 'Coming Soon', link: '#' },
-  { name: 'Java', status: 'Coming Soon', link: '#' }
+  { name: 'JavaScript/Node.js', status: 'Available', link: '/docs/sdks/javascript' },
+  { name: 'Python', status: 'Available', link: '/docs/sdks/python' },
+  { name: 'PHP', status: 'Available', link: '/docs/sdks/php' },
+  { name: 'Ruby', status: 'Coming Soon', link: '/docs/sdks/ruby' },
+  { name: 'Go', status: 'Coming Soon', link: '/docs/sdks/go' },
+  { name: 'Java', status: 'Coming Soon', link: '/docs/sdks/java' }
 ]
 
 export default function ApiDocsPage() {

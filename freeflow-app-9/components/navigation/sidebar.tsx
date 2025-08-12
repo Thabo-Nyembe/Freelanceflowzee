@@ -6,7 +6,7 @@ import { useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import {
   BarChart3,
-  FolderClosed,
+  FolderOpen,
   Video,
   Users,
   Sparkles,
@@ -18,11 +18,13 @@ import {
   Settings,
   LogOut,
   Palette,
-  Bot,
   MessageSquare,
   Bell,
   DollarSign,
-  Brain
+  Zap,
+  Monitor,
+  Wallet,
+  Receipt
 } from 'lucide-react'
 
 interface SidebarItem {
@@ -44,64 +46,55 @@ const sidebarItems: SidebarItem[] = [
   {
     name: 'Projects Hub',
     href: '/dashboard/projects-hub',
-    icon: FolderClosed,
-    badge: 'A+++',
+    icon: FolderOpen,
     description: 'Manage and track all your projects'
   },
   {
     name: 'Video Studio',
     href: '/dashboard/video-studio',
     icon: Video,
-    badge: 'A+++',
     description: 'Professional video editing suite'
   },
   {
     name: 'Collaboration',
     href: '/dashboard/collaboration',
     icon: Palette,
-    badge: 'A+++',
     description: 'Real-time design collaboration'
   },
   {
     name: 'Community Hub',
     href: '/dashboard/community-hub',
     icon: Users,
-    badge: 'A+++',
     description: 'Connect with creators worldwide'
   },
   {
     name: 'AI Design',
     href: '/dashboard/ai-design',
-    icon: Bot,
-    badge: 'A+++',
+    icon: Zap,
     description: 'AI-powered design tools'
   },
   {
     name: 'AI Create',
     href: '/dashboard/ai-create',
     icon: Sparkles,
-    badge: 'A+++',
     description: 'Generate creative assets with AI'
   },
   {
     name: 'My Day',
     href: '/dashboard/my-day',
     icon: Calendar,
-    badge: 'A+++',
     description: 'Daily tasks and schedule management'
   },
   {
     name: 'Financial Hub',
     href: '/dashboard/financial',
-    icon: Shield,
-    badge: 'A+++',
+    icon: DollarSign,
     description: 'Secure payment protection'
   },
   {
     name: 'Files Hub',
     href: '/dashboard/files-hub',
     icon: FileText,
-    badge: 'A+++',
     description: 'Professional file management'
   },
   {

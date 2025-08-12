@@ -79,9 +79,9 @@ const docCategories = [
 
 const quickLinks = [
   { title: 'API Documentation', href: '/api-docs', icon: Code },
-  { title: 'Video Tutorials', href: '#', icon: Video },
+  { title: 'Video Tutorials', href: '/tutorials', icon: Video },
   { title: 'Community Forum', href: '/community', icon: Users },
-  { title: 'Support Center', href: '#', icon: HelpCircle }
+  { title: 'Support Center', href: '/contact', icon: HelpCircle }
 ]
 
 const popularDocs = [
