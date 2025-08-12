@@ -45,8 +45,8 @@ import {
 } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
 import { useAnalytics } from '@/hooks/use-analytics'
-import { ErrorBoundary } from '@/components/error-boundary'
-import { useEnhancedNavigation } from '@/components/enhanced-navigation'
+// import { ErrorBoundary } from '@/components/error-boundary'
+// import { useEnhancedNavigation } from '@/components/enhanced-navigation'
 
 /**
  * Sentiment type representing the emotional tone of transcribed content
@@ -1387,21 +1387,7 @@ export function AIVideoRecordingSystem({
   }, [state.isRecording, state.isPaused])
 
   return (
-    <ErrorBoundary
-      fallback={
-        <div className="p-8 text-center">
-          <AlertTriangle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-          <h3 className="text-xl font-bold mb-2">Video Recording Error</h3>
-          <p className="text-gray-600 mb-4">
-            An error occurred with the video recording system. Please refresh and try again.
-          </p>
-          <Button onClick={() => window.location.reload()}>
-            Refresh Page
-          </Button>
-        </div>
-      }
-    >
-      <div className={`space-y-6 ${className}`} data-testid="ai-video-recording-system">
+    <div className={`space-y-6 ${className}`} data-testid="ai-video-recording-system">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>

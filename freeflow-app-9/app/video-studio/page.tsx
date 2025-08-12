@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { EnhancedCard, EnhancedCardContent, EnhancedCardHeader, EnhancedCardTitle } from '@/components/ui/enhanced-card'
+// import { AIVideoRecordingSystem } from '@/components/collaboration/ai-video-recording-system'
 import { EnhancedButton } from '@/components/ui/enhanced-button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
@@ -56,6 +57,12 @@ export default function VideoStudioPage() {
           </TabsList>
 
           <TabsContent value="record">
+            {/* AI Video Recording System - Temporarily disabled */}
+            <div className="mb-6 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">AI Video Recording System</h3>
+              <p className="text-blue-700 dark:text-blue-300">Advanced video recording with AI transcription and analysis - Coming Soon!</p>
+            </div>
+            
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Recording Interface */}
               <EnhancedCard>

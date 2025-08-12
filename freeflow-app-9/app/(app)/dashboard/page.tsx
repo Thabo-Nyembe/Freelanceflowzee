@@ -11,6 +11,7 @@ import { EnhancedCard, EnhancedCardContent, EnhancedCardHeader, EnhancedCardTitl
 import { EnhancedButton } from '@/components/ui/enhanced-button'
 import { EnhancedBadge } from '@/components/ui/enhanced-badge'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+// import { EnhancedInteractiveSystem, EnhancedButton as InteractiveButton, EnhancedCard as InteractiveCard } from '@/components/ui/enhanced-interactive-system'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { 
   LayoutDashboard,
@@ -395,13 +396,13 @@ export default function DashboardPage() {
             </Badge>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 stagger-animation">
             {categoryFeatures.map(feature => {
               const Icon = feature.icon
               return (
                 <Card 
                   key={feature.path} 
-                  className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full"
+                  className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full hover-lift interactive-element"
                   onClick={() => navigateToPage(feature.path)}
                 >
                   <CardContent className="p-4 h-full flex flex-col">
@@ -422,6 +423,7 @@ export default function DashboardPage() {
                       variant="outline" 
                       size="sm" 
                       className="w-full gap-2 group-hover:bg-blue-50 group-hover:border-blue-200 text-xs"
+                      onClick={() => navigateToPage(feature.path)}
                     >
                       Open
                       <ArrowRight className="h-3 w-3" />
