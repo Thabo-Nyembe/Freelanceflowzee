@@ -1,4 +1,7 @@
-import { Metadata } from 'next'
+"use client"
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowRight, Check, Mail, User, Lock, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -7,13 +10,58 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 
-export const metadata: Metadata = {
-  title: 'Sign Up | KAZI - Start Your Creative Journey',
-  description: 'Join KAZI today and transform how you manage your creative business with AI-powered tools, universal feedback, and secure payments.',
-  keywords: 'KAZI signup, creative platform registration, AI tools, freelance management'
-}
-
 export default function SignUpPage() {
+  const router = useRouter()
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    agreedToTerms: false,
+    subscribeToNewsletter: true
+  })
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!formData.agreedToTerms) {
+      alert('Please agree to the Terms of Service and Privacy Policy')
+      return
+    }
+
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
+      alert('Please fill in all required fields')
+      return
+    }
+
+    if (formData.password.length < 8) {
+      alert('Password must be at least 8 characters long')
+      return
+    }
+
+    setIsLoading(true)
+
+    // Simulate signup delay
+    setTimeout(() => {
+      // Store auth state
+      localStorage.setItem('kazi-auth', 'true')
+      localStorage.setItem('kazi-user', JSON.stringify({ 
+        email: formData.email, 
+        name: `${formData.firstName} ${formData.lastName}`,
+        firstName: formData.firstName,
+        lastName: formData.lastName
+      }))
+      
+      // Redirect to dashboard
+      router.push('/dashboard')
+    }, 1000)
+  }
+
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="container mx-auto px-4 py-16">
@@ -90,20 +138,34 @@ export default function SignUpPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="firstName">First Name</Label>
                       <div className="relative">
                         <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input id="firstName" placeholder="John" className="pl-10" />
+                        <Input 
+                          id="firstName" 
+                          placeholder="John" 
+                          className="pl-10" 
+                          value={formData.firstName}
+                          onChange={(e) => handleInputChange('firstName', e.target.value)}
+                          required
+                        />
                       </div>
                     </div>
                     <div>
                       <Label htmlFor="lastName">Last Name</Label>
                       <div className="relative">
                         <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input id="lastName" placeholder="Doe" className="pl-10" />
+                        <Input 
+                          id="lastName" 
+                          placeholder="Doe" 
+                          className="pl-10" 
+                          value={formData.lastName}
+                          onChange={(e) => handleInputChange('lastName', e.target.value)}
+                          required
+                        />
                       </div>
                     </div>
                   </div>
@@ -112,7 +174,15 @@ export default function SignUpPage() {
                     <Label htmlFor="email">Email Address</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input id="email" type="email" placeholder="john@example.com" className="pl-10" />
+                      <Input 
+                        id="email" 
+                        type="email" 
+                        placeholder="john@example.com" 
+                        className="pl-10" 
+                        value={formData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        required
+                      />
                     </div>
                   </div>
                   
@@ -120,14 +190,33 @@ export default function SignUpPage() {
                     <Label htmlFor="password">Password</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input id="password" type="password" placeholder="Create a strong password" className="pl-10 pr-10" />
-                      <Eye className="absolute right-3 top-3 h-4 w-4 text-gray-400 cursor-pointer" />
+                      <Input 
+                        id="password" 
+                        type={showPassword ? 'text' : 'password'} 
+                        placeholder="Create a strong password" 
+                        className="pl-10 pr-10" 
+                        value={formData.password}
+                        onChange={(e) => handleInputChange('password', e.target.value)}
+                        required
+                        minLength={8}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-3 h-4 w-4 text-gray-400 cursor-pointer hover:text-gray-600"
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">At least 8 characters with numbers and symbols</p>
                   </div>
                   
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="terms" />
+                    <Checkbox 
+                      id="terms" 
+                      checked={formData.agreedToTerms}
+                      onCheckedChange={(checked) => handleInputChange('agreedToTerms', !!checked)}
+                    />
                     <Label htmlFor="terms" className="text-sm">
                       I agree to the{' '}
                       <Link href="/terms" className="text-blue-600 hover:underline">
@@ -141,15 +230,32 @@ export default function SignUpPage() {
                   </div>
                   
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="newsletter" defaultChecked />
+                    <Checkbox 
+                      id="newsletter" 
+                      checked={formData.subscribeToNewsletter}
+                      onCheckedChange={(checked) => handleInputChange('subscribeToNewsletter', !!checked)}
+                    />
                     <Label htmlFor="newsletter" className="text-sm">
                       Send me tips, updates, and special offers
                     </Label>
                   </div>
                   
-                  <Button type="submit" className="w-full text-lg py-6">
-                    Start Free Trial
-                    <ArrowRight className="w-5 h-5 ml-2" />
+                  <Button 
+                    type="submit" 
+                    className="w-full text-lg py-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Creating Account...
+                      </div>
+                    ) : (
+                      <>
+                        Start Free Trial
+                        <ArrowRight className="w-5 h-5 ml-2" />
+                      </>
+                    )}
                   </Button>
                 </form>
 
