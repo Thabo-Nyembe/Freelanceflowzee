@@ -1,7 +1,7 @@
 'use client'
 
 import { User } from '@supabase/supabase-js'
-import { Sidebar } from '@/components/navigation/sidebar'
+import { SidebarEnhanced } from '@/components/navigation/sidebar-enhanced'
 
 interface DashboardLayoutClientProps {
   children: React.ReactNode
@@ -15,7 +15,7 @@ export default function DashboardLayoutClient({
     <div className="flex h-screen overflow-hidden kazi-bg-light dark:kazi-bg-dark">
       {/* Desktop Sidebar */}
       <div className="w-64 flex-shrink-0">
-        <Sidebar />
+        <SidebarEnhanced />
       </div>
       
       {/* Main Content */}
