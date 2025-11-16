@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
+// Toast removed - using console.log
 import VideoTemplates from '@/components/video/video-templates'
 import AssetPreviewModal, { Asset } from '@/components/video/asset-preview-modal'
 import EnhancedFileUpload from '@/components/video/enhanced-file-upload'
@@ -629,7 +629,7 @@ export default function VideoStudioPage() {
                       size="sm"
                       onClick={() => {
                           // Open video studio settings
-                          toast.info('Video Studio settings - Feature coming soon!')
+                          console.log('ℹ️', 'Video Studio settings - Feature coming soon!')
                         }}
                     >
                       <Settings className="w-4 h-4" />
@@ -747,7 +747,7 @@ export default function VideoStudioPage() {
                         size="sm"
                         className="flex-1"
                         onClick={() => {
-                          toast.info(`Opening editor for: ${project.title}`)
+                          console.log('ℹ️', `Opening editor for: ${project.title}`)
                           // Navigate to video editor
                           router.push(`/video-studio/editor/${project.id}`)
                         }}
@@ -760,7 +760,7 @@ export default function VideoStudioPage() {
                         size="sm"
                         className="flex-1"
                         onClick={() => {
-                          toast.success(`Share link copied for: ${project.title}`)
+                          console.log('✅', `Share link copied for: ${project.title}`)
                           // Copy share link to clipboard
                           navigator.clipboard.writeText(`${window.location.origin}/share/${project.id}`)
                         }}
@@ -818,7 +818,7 @@ export default function VideoStudioPage() {
                         size="sm"
                         className="flex-1"
                         onClick={() => {
-                          toast.success(`Applied template: ${template.name}`)
+                          console.log('✅', `Applied template: ${template.name}`)
                           // Apply template to new project
                         }}
                       >
@@ -948,7 +948,7 @@ onClick={() => {
                         size="sm"
                         className="flex-1 text-xs"
                         onClick={() => {
-                          toast.info(`Downloading ${asset.name}...`)
+                          console.log('ℹ️', `Downloading ${asset.name}...`)
                           // Download asset file
                           const link = document.createElement('a')
                           link.href = asset.url
@@ -1089,11 +1089,11 @@ onClick={() => {
           <div className="overflow-y-auto max-h-[80vh] pr-2">
             <VideoTemplates
               onSelectTemplate={(template) => {
-                toast.success(`Applied template: ${template.name}`)
+                console.log('✅', `Applied template: ${template.name}`)
                 setIsTemplateDialogOpen(false)
               }}
               onPreviewTemplate={(template) => {
-                toast.info(`Previewing: ${template.name}`)
+                console.log('ℹ️', `Previewing: ${template.name}`)
               }}
             />
           </div>
@@ -1109,7 +1109,7 @@ onClick={() => {
             <EnhancedFileUpload
               acceptedTypes="all"
               onUploadComplete={(files) => {
-                toast.success(`Uploaded ${files.length} file(s) successfully!`)
+                console.log('✅', `Uploaded ${files.length} file(s) successfully!`)
                 setIsUploadDialogOpen(false)
               }}
               maxFiles={20}
@@ -1127,10 +1127,10 @@ onClick={() => {
           setSelectedAsset(null)
         }}
         onAddToProject={(asset) => {
-          toast.success(`Added ${asset.name} to project`)
+          console.log('✅', `Added ${asset.name} to project`)
         }}
         onDownload={(asset) => {
-          toast.success(`Downloading ${asset.name}`)
+          console.log('✅', `Downloading ${asset.name}`)
         }}
       />
     </div>
