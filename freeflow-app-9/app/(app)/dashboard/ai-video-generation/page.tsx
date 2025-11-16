@@ -169,7 +169,7 @@ export default function AIVideoGenerationPage() {
 
               {/* Generate Button */}
               <Button
-                onClick={handleGenerate}
+                onClick={() => { handleGenerate(); console.log("🎬 Generating AI video..."); }} data-testid="generate-video-btn"
                 disabled={!prompt.trim()}
                 className="w-full h-12 text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
               >

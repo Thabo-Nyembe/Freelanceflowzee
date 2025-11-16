@@ -73,7 +73,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs'
-import { toast } from 'sonner'
+// Toast removed - using console.log
 
 // Type definitions
 interface Category {
@@ -622,7 +622,7 @@ export default function AICreate() {
       
       // Validate file type and size
       if (file.size > 100 * 1024 * 1024) { // 100MB limit
-        toast.error(`File ${file.name} is too large. Maximum size is 100MB.`)
+        console.error('❌', `File ${file.name} is too large. Maximum size is 100MB.`)
         continue
       }
 
@@ -676,10 +676,10 @@ export default function AICreate() {
           payload: { id: uploadedFile.id, analysis: mockAnalysis } 
         })
 
-        toast.success(`Successfully processed ${file.name}`)
+        console.log('✅', `Successfully processed ${file.name}`)
         
       } catch (error) {
-        toast.error(`Failed to process ${file.name}`)
+        console.error('❌', `Failed to process ${file.name}`)
         dispatch({ type: 'REMOVE_UPLOADED_FILE', payload: uploadedFile.id })
       }
     }
@@ -712,7 +712,7 @@ export default function AICreate() {
   const handleDownloadAsset = useCallback(async (asset: GeneratedAsset) => {
     try {
       // For demo purposes, we&apos;ll simulate download
-      toast.success(`Downloading ${asset.name}...`)
+      console.log('✅', `Downloading ${asset.name}...`)
       
       // In a real implementation, this would trigger the actual download
       const link = document.createElement('a')
@@ -723,7 +723,7 @@ export default function AICreate() {
       document.body.removeChild(link)
       
     } catch (error) {
-      toast.error('Failed to download asset')
+      console.error('❌', 'Failed to download asset')
     }
   }, [])
 
@@ -732,7 +732,7 @@ export default function AICreate() {
     dispatch({ type: 'SET_GENERATING', payload: true })
     
     if (!state.selectedModel) {
-      toast.error('No AI model selected. Please choose a model to continue.')
+      console.error('❌', 'No AI model selected. Please choose a model to continue.')
       dispatch({ type: 'SET_GENERATING', payload: false })
       return
     }
@@ -839,7 +839,7 @@ export default function AICreate() {
       )
       
       // Add success toast
-      toast.success(`Generated ${mockAssets.length} assets successfully!`)
+      console.log('✅', `Generated ${mockAssets.length} assets successfully!`)
       
       for (const asset of mockAssets) {
         dispatch({ type: 'ADD_GENERATED_ASSET', payload: asset })
@@ -1342,7 +1342,7 @@ export default function AICreate() {
                             size= "sm"
                             className="flex-1"
                             onClick={() => {
-                              toast.info(`Previewing ${asset.name}`)
+                              console.log('ℹ️', `Previewing ${asset.name}`)
                               // Open asset preview modal or navigate to preview
                             }}
                             data-testid="preview-asset-btn"
@@ -1752,7 +1752,7 @@ export default function AICreate() {
                     onClick={() => {
                       const savings = (Object.keys(state.userApiKeys).length * 15) + (state.costSavings.freeTierUsed * 0.8)
                       dispatch({ type: 'UPDATE_COST_SAVINGS', payload: { monthly: savings } })
-                      toast.success(`Updated cost savings: $${savings.toFixed(2)}/month`)
+                      console.log('✅', `Updated cost savings: $${savings.toFixed(2)}/month`)
                     }}
                     variant="outline"
                     size= "sm"

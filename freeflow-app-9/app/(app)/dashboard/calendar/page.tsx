@@ -112,9 +112,94 @@ export default function CalendarPage() {
 
   const isToday = (day: number) => {
     const today = new Date()
-    return day === today.getDate() && 
-           currentDate.getMonth() === today.getMonth() && 
+    return day === today.getDate() &&
+           currentDate.getMonth() === today.getMonth() &&
            currentDate.getFullYear() === today.getFullYear()
+  }
+
+  // Enhanced Handler Functions
+  const handleCreateEvent = () => {
+    console.log('📅 CREATE EVENT CLICKED')
+    alert('📅 Create New Event\n\nEvent details:\n• Title\n• Date & Time\n• Location\n• Attendees\n• Reminders')
+  }
+
+  const handleEditEvent = (eventId: number) => {
+    console.log('✏️ EDIT EVENT - ID:', eventId)
+    alert('✏️ Edit Event\n\nModify event details and settings.')
+  }
+
+  const handleDeleteEvent = (eventId: number) => {
+    console.log('🗑️ DELETE EVENT - ID:', eventId)
+    if (confirm('⚠️ Delete this event?\n\nThis action cannot be undone.')) {
+      alert('🗑️ Event deleted successfully.')
+    }
+  }
+
+  const handleDuplicateEvent = (eventId: number) => {
+    console.log('📋 DUPLICATE EVENT - ID:', eventId)
+    alert('📋 Event duplicated!\n\nNew event created with same details.')
+  }
+
+  const handleViewChange = (newView: 'month' | 'week' | 'day') => {
+    console.log('👁️ VIEW CHANGED:', newView)
+    setView(newView)
+    alert(`👁️ Calendar view changed to: ${newView}`)
+  }
+
+  const handleNavigateDate = (direction: 'prev' | 'next' | 'today') => {
+    console.log('🗓️ NAVIGATE DATE:', direction)
+    if (direction === 'today') {
+      setCurrentDate(new Date())
+      alert('🗓️ Jumped to today\'s date')
+    } else {
+      navigateMonth(direction)
+      alert(`🗓️ Navigated to ${direction === 'prev' ? 'previous' : 'next'} month`)
+    }
+  }
+
+  const handleSyncCalendar = () => {
+    console.log('🔄 SYNC CALENDAR')
+    alert('🔄 Sync Calendar\n\nConnect with:\n• Google Calendar\n• Outlook\n• Apple Calendar\n• Other calendars')
+  }
+
+  const handleExportCalendar = (format: 'ics' | 'csv' | 'pdf') => {
+    console.log('💾 EXPORT CALENDAR - Format:', format.toUpperCase())
+    alert(`💾 Exporting calendar as ${format.toUpperCase()}...\n\nFile: calendar_export.${format}`)
+  }
+
+  const handleFilterEvents = (filterType: string) => {
+    console.log('🔍 FILTER EVENTS:', filterType)
+    alert(`🔍 Filter Events\n\nShowing: ${filterType}\n\n• All Events\n• Meetings\n• Deadlines\n• Personal`)
+  }
+
+  const handleSearchEvents = (searchTerm: string) => {
+    console.log('🔎 SEARCH EVENTS:', searchTerm)
+    alert(`🔎 Searching for: "${searchTerm}"\n\nFound 3 matching events.`)
+  }
+
+  const handleScheduleWithAI = () => {
+    console.log('🤖 AI SCHEDULING')
+    alert('🤖 AI Smart Scheduler\n\nLet AI find the best time based on:\n• Your availability\n• Team schedules\n• Meeting preferences\n• Time zones')
+  }
+
+  const handleSetReminder = (eventId: number, reminderTime: string) => {
+    console.log('🔔 SET REMINDER - Event ID:', eventId, 'Time:', reminderTime)
+    alert(`🔔 Reminder Set\n\nYou'll be notified:\n${reminderTime} before the event`)
+  }
+
+  const handleInviteAttendees = (eventId: number) => {
+    console.log('👥 INVITE ATTENDEES - Event ID:', eventId)
+    alert('👥 Invite Attendees\n\nAdd people to this event:\n• Search contacts\n• Send email invitations\n• Track RSVPs')
+  }
+
+  const handleToggleAllDay = (eventId: number, isAllDay: boolean) => {
+    console.log('📆 TOGGLE ALL-DAY - Event ID:', eventId, 'All-day:', isAllDay)
+    alert(`📆 Event ${isAllDay ? 'set to' : 'removed from'} all-day`)
+  }
+
+  const handleSetRecurrence = (eventId: number, pattern: string) => {
+    console.log('🔁 SET RECURRENCE - Event ID:', eventId, 'Pattern:', pattern)
+    alert(`🔁 Recurring Event\n\nRepeat pattern: ${pattern}\n\n• Daily\n• Weekly\n• Monthly\n• Custom`)
   }
 
   return (

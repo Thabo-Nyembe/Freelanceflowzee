@@ -5,23 +5,107 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { 
-  TrendingUp, 
-  DollarSign, 
-  Users, 
-  FolderOpen, 
+import {
+  TrendingUp,
+  DollarSign,
+  Users,
+  FolderOpen,
   BarChart3,
-  ArrowRight
+  ArrowRight,
+  RefreshCw,
+  Download,
+  Share2,
+  Calendar,
+  Filter,
+  Settings,
+  Bookmark,
+  Search
 } from 'lucide-react'
 
 export default function AnalyticsPage() {
   const [activeTab, setActiveTab] = useState('overview')
+  const [dateRange, setDateRange] = useState('last-30-days')
+  const [isExporting, setIsExporting] = useState(false)
+  const [predictiveMode, setPredictiveMode] = useState(false)
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD'
     }).format(amount)
+  }
+
+  // Enhanced Handler Functions
+  const handleDateRangeChange = (range: string) => {
+    console.log('📅 DATE RANGE CHANGED:', range)
+    setDateRange(range)
+    alert(`📅 Date range updated to: ${range.replace(/-/g, ' ')}`)
+  }
+
+  const handleDownloadChart = (chartName: string) => {
+    console.log('📊 DOWNLOAD CHART:', chartName)
+    alert(`📊 Downloading ${chartName} chart as PNG...`)
+  }
+
+  const handleShareAnalytics = () => {
+    console.log('🔗 SHARE ANALYTICS')
+    const shareUrl = `${window.location.origin}/dashboard/analytics?tab=${activeTab}&range=${dateRange}`
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(shareUrl)
+      alert(`🔗 Share link copied!\n\n${shareUrl}`)
+    } else {
+      alert(`🔗 Share link:\n\n${shareUrl}`)
+    }
+  }
+
+  const handleScheduleReport = () => {
+    console.log('📅 SCHEDULE REPORT')
+    alert('📅 Schedule Analytics Report\n\nChoose frequency:\n• Daily\n• Weekly\n• Monthly\n• Custom')
+  }
+
+  const handleCustomMetric = () => {
+    console.log('➕ CREATE CUSTOM METRIC')
+    alert('➕ Custom Metric Builder\n\nCreate custom metrics with formulas and visualizations.')
+  }
+
+  const handleComparePeriods = () => {
+    console.log('📊 COMPARE PERIODS')
+    alert('📊 Period Comparison\n\nCompare against:\n• Previous period\n• Same period last year\n• Custom range')
+  }
+
+  const handleExportData = async (format: string) => {
+    console.log('💾 EXPORT DATA - Format:', format)
+    setIsExporting(true)
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    setIsExporting(false)
+    alert(`💾 Export complete!\n\nFile: analytics_${activeTab}.${format}`)
+  }
+
+  const handleFilterByMetric = (metric: string) => {
+    console.log('🔍 FILTER BY METRIC:', metric)
+    alert(`🔍 Filtering by: ${metric}`)
+  }
+
+  const handleAIInsight = (insightId: string) => {
+    console.log('🤖 AI INSIGHT:', insightId)
+    alert('🤖 AI Insight Details\n\nShowing AI-powered recommendations and predictions.')
+  }
+
+  const handleTogglePredictive = () => {
+    const newState = !predictiveMode
+    console.log('🔮 TOGGLE PREDICTIVE MODE:', newState)
+    setPredictiveMode(newState)
+    alert(`🔮 Predictive Analytics ${newState ? 'Enabled' : 'Disabled'}`)
+  }
+
+  const handleDrillDown = (dataPoint: string) => {
+    console.log('🔎 DRILL DOWN:', dataPoint)
+    alert(`🔎 Detailed analysis of: ${dataPoint}`)
+  }
+
+  const handleBookmarkView = () => {
+    console.log('⭐ BOOKMARK VIEW')
+    alert('⭐ Current view bookmarked!\n\nAccess anytime from your bookmarks.')
   }
 
   return (

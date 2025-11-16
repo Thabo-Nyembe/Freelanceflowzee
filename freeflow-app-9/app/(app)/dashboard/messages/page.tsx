@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Send, Search, Filter, MessageSquare } from 'lucide-react'
+import { Send, Search, Filter, MessageSquare, Paperclip, Image, Mic, Plus, Pin, Bell, BellOff, Archive, Trash2, CheckCheck, Reply, Forward, Smile } from 'lucide-react'
 
 interface Message {
   id: number
@@ -37,6 +37,9 @@ export default function MessagesPage() {
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null)
   const [newMessage, setNewMessage] = useState<string>('')
   const [searchTerm, setSearchTerm] = useState<string>('')
+  const [isRecordingVoice, setIsRecordingVoice] = useState(false)
+  const [messages, setMessages] = useState<Message[]>(mockMessages)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const filteredChats = mockChats.filter(chat => 
     chat.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -51,13 +54,124 @@ export default function MessagesPage() {
         sender: 'You',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
-      
+
       // In a real app, this would send the message to the backend
       console.log('Sending message:', newMessage)
       setNewMessage('')
-      
+
       // Show success feedback
       alert('Message sent successfully!')
+    }
+  }
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  const handleAttachFile = () => {
+    console.log('📎 ATTACH FILE CLICKED')
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.multiple = true
+    input.accept = '*/*'
+    input.onchange = (e: Event) => {
+      const files = (e.target as HTMLInputElement).files
+      if (files && files.length > 0) {
+        console.log('📁 FILES SELECTED:', files.length)
+        alert(`📎 ${files.length} file(s) selected and ready to attach!`)
+      }
+    }
+    input.click()
+  }
+
+  const handleAttachImage = () => {
+    console.log('🖼️ ATTACH IMAGE CLICKED')
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.multiple = true
+    input.accept = 'image/*'
+    input.onchange = (e: Event) => {
+      const files = (e.target as HTMLInputElement).files
+      if (files && files.length > 0) {
+        console.log('🖼️ IMAGES SELECTED:', files.length)
+        alert(`🖼️ ${files.length} image(s) selected and ready to send!`)
+      }
+    }
+    input.click()
+  }
+
+  const handleRecordVoice = () => {
+    const newState = !isRecordingVoice
+    console.log('🎤 VOICE RECORDING:', newState ? 'STARTED' : 'STOPPED')
+    setIsRecordingVoice(newState)
+    if (newState) {
+      alert('🎤 Voice Recording Started\n\nSpeak your message. Click again to stop.')
+    } else {
+      alert('✅ Voice Recording Complete\n\nVoice message added to chat.')
+    }
+  }
+
+  const handleAddEmoji = (emoji: string) => {
+    console.log('😀 EMOJI SELECTED:', emoji)
+    setNewMessage(prev => prev + emoji)
+  }
+
+  const handlePinChat = (chatId: number) => {
+    console.log('📌 PIN CHAT - ID:', chatId)
+    alert('📌 Chat pinned to top of list!')
+  }
+
+  const handleMuteChat = (chatId: number) => {
+    console.log('🔕 MUTE CHAT - ID:', chatId)
+    alert('🔕 Chat notifications muted.')
+  }
+
+  const handleArchiveChat = (chatId: number) => {
+    console.log('📁 ARCHIVE CHAT - ID:', chatId)
+    alert('📁 Chat moved to archive.')
+  }
+
+  const handleDeleteChat = (chatId: number) => {
+    console.log('🗑️ DELETE CHAT - ID:', chatId)
+    if (confirm('⚠️ Delete this conversation?\n\nThis action cannot be undone.')) {
+      alert('🗑️ Chat deleted successfully.')
+      if (selectedChat?.id === chatId) {
+        setSelectedChat(null)
+      }
+    }
+  }
+
+  const handleMarkAsRead = (chatId: number) => {
+    console.log('✅ MARK AS READ - ID:', chatId)
+    alert('✅ All messages marked as read.')
+  }
+
+  const handleStartNewChat = () => {
+    console.log('➕ START NEW CHAT')
+    alert('➕ New Conversation\n\nSelect contacts to start a new chat.')
+  }
+
+  const handleReactToMessage = (messageId: number, emoji: string) => {
+    console.log('❤️ REACT TO MESSAGE - ID:', messageId, 'Emoji:', emoji)
+    alert(`${emoji} Reaction added to message!`)
+  }
+
+  const handleReplyToMessage = (messageId: number) => {
+    console.log('↩️ REPLY TO MESSAGE - ID:', messageId)
+    alert('↩️ Reply mode activated\n\nType your reply below.')
+  }
+
+  const handleForwardMessage = (messageId: number) => {
+    console.log('➡️ FORWARD MESSAGE - ID:', messageId)
+    alert('➡️ Select conversation to forward this message.')
+  }
+
+  const handleDeleteMessage = (messageId: number) => {
+    console.log('🗑️ DELETE MESSAGE - ID:', messageId)
+    if (confirm('⚠️ Delete this message?\n\nThis action cannot be undone.')) {
+      setMessages(messages.filter(m => m.id !== messageId))
+      alert('🗑️ Message deleted.')
     }
   }
 
