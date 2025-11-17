@@ -1,14 +1,15 @@
 "use client"
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Image, 
-  Video, 
-  Upload, 
+import {
+  Image,
+  Video,
+  Upload,
   Search,
   Filter,
   Grid,
@@ -31,28 +32,261 @@ export default function GalleryPage() {
   const [searchTerm, setSearchTerm] = useState<any>('')
 
   // Handlers
-  const handleUploadMedia = () => { console.log('📤 UPLOAD'); const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*,video/*'; input.multiple = true; input.click(); alert('📤 Upload Media\n\nSelect images or videos to add to gallery') }
+  const handleUploadMedia = async () => {
+    console.log('📤 UPLOAD')
+
+    // Simplified upload - in production would use actual file input and upload
+    const title = prompt('Enter media title:')
+    if (!title) return
+
+    const category = prompt('Enter category (branding, web-design, mobile, social, print, video):') || 'branding'
+    const tags = prompt('Enter tags (comma-separated):')?.split(',').map(t => t.trim()) || []
+
+    try {
+      const response = await fetch('/api/gallery', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'upload',
+          data: {
+            file: {}, // In production: actual file data
+            title,
+            category,
+            tags
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to upload media')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success(result.message, {
+          description: 'Your media has been added to the gallery'
+        })
+
+        // Show achievement if earned
+        if (result.achievement) {
+          setTimeout(() => {
+            toast.success(`${result.achievement.message} +${result.achievement.points} points!`, {
+              description: `Badge: ${result.achievement.badge}`
+            })
+          }, 500)
+        }
+      }
+    } catch (error: any) {
+      console.error('Upload Media Error:', error)
+      toast.error('Failed to upload media', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
   const handleViewItem = (itemId: number) => { console.log('👁️ VIEW:', itemId); alert('👁️ Viewing Media\n\nOpening fullscreen preview...') }
   const handleEditItem = (itemId: number) => { console.log('✏️ EDIT:', itemId); alert('✏️ Edit Media\n\nOpening editor for metadata and tags') }
   const handleDeleteItem = (itemId: number) => { console.log('🗑️ DELETE:', itemId); confirm('Delete this item?') && alert('✅ Media deleted') }
   const handleDownloadItem = (itemId: number) => { console.log('💾 DOWNLOAD:', itemId); alert('💾 Downloading Media\n\nPreparing download...') }
   const handleShareItem = (itemId: number) => { console.log('🔗 SHARE:', itemId); alert('🔗 Share Media\n\nGenerate shareable link\nShare to social media') }
-  const handleLikeItem = (itemId: number) => { console.log('❤️ LIKE:', itemId); alert('❤️ Liked!') }
+  const handleLikeItem = async (itemId: number) => {
+    console.log('❤️ LIKE:', itemId)
+
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'like',
+          postId: itemId.toString()
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to like item')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success('❤️ Liked!', {
+          description: 'You liked this gallery item'
+        })
+
+        // Show achievement if earned
+        if (result.achievement) {
+          setTimeout(() => {
+            toast.success(`${result.achievement.message} +${result.achievement.points} points!`, {
+              description: `Badge: ${result.achievement.badge}`
+            })
+          }, 500)
+        }
+      }
+    } catch (error: any) {
+      console.error('Like Item Error:', error)
+      toast.error('Failed to like item', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
   const handleCommentItem = (itemId: number) => { console.log('💬 COMMENT:', itemId); alert('💬 Add Comment\n\nShare your thoughts...') }
   const handleAddToProject = (itemId: number) => { console.log('➕ ADD TO PROJECT:', itemId); alert('➕ Add to Project\n\nSelect project to add this media') }
   const handleFeatureItem = (itemId: number) => { console.log('⭐ FEATURE:', itemId); alert('⭐ Featured\n\nItem marked as featured') }
-  const handleCreateAlbum = () => { console.log('📁 NEW ALBUM'); const name = prompt('Album name:'); name && alert(`📁 Album Created: ${name}`) }
+  const handleCreateAlbum = async () => {
+    console.log('📁 NEW ALBUM')
+
+    const name = prompt('Album name:')
+    if (!name) return
+
+    const description = prompt('Album description (optional):') || ''
+
+    try {
+      const response = await fetch('/api/gallery', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-album',
+          data: {
+            name,
+            description,
+            itemIds: [],
+            coverImage: 'default-cover.jpg'
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create album')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success(result.message, {
+          description: 'Your new album is ready to organize your work'
+        })
+
+        // Show achievement
+        if (result.achievement) {
+          setTimeout(() => {
+            toast.success(`${result.achievement.message} +${result.achievement.points} points!`, {
+              description: `Badge: ${result.achievement.badge}`
+            })
+          }, 500)
+        }
+
+        // Show share URL
+        if (result.shareUrl) {
+          setTimeout(() => {
+            alert(`📁 Album Created!\n\nName: ${name}\n\nShare URL: ${result.shareUrl}\n\nYou can now add items to this album!`)
+          }, 1000)
+        }
+      }
+    } catch (error: any) {
+      console.error('Create Album Error:', error)
+      toast.error('Failed to create album', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
   const handleMoveToAlbum = (itemId: number) => { console.log('📁 MOVE:', itemId); alert('📁 Move to Album\n\nSelect destination album') }
   const handleBulkSelect = () => { console.log('☑️ BULK SELECT'); alert('☑️ Bulk Selection\n\nSelect multiple items for batch operations') }
   const handleBulkDelete = (ids: number[]) => { console.log('🗑️ BULK DELETE:', ids.length); confirm(`Delete ${ids.length} items?`) && alert('✅ Items deleted') }
-  const handleBulkDownload = (ids: number[]) => { console.log('💾 BULK DOWNLOAD:', ids.length); alert(`💾 Downloading ${ids.length} items...`) }
+  const handleBulkDownload = async (ids: number[]) => {
+    console.log('💾 BULK DOWNLOAD:', ids.length)
+
+    if (ids.length === 0) {
+      toast.error('No items selected', {
+        description: 'Please select items to download'
+      })
+      return
+    }
+
+    try {
+      const response = await fetch('/api/gallery', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'bulk-download',
+          data: {
+            itemIds: ids.map(id => id.toString()),
+            format: 'original'
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to prepare download')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success(result.message, {
+          description: `${result.itemCount} items • ${result.estimatedSize}`
+        })
+
+        // Show download details
+        setTimeout(() => {
+          alert(`💾 Bulk Download Ready\n\nItems: ${result.itemCount}\nSize: ${result.estimatedSize}\nFormat: ${result.format}\n\nDownload URL: ${result.downloadUrl}\n\n${result.nextSteps.join('\n')}`)
+        }, 500)
+      }
+    } catch (error: any) {
+      console.error('Bulk Download Error:', error)
+      toast.error('Failed to prepare download', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
   const handleSort = (sortBy: string) => { console.log('🔃 SORT:', sortBy); alert(`🔃 Sorting by ${sortBy}`) }
   const handleFilter = (filter: string) => { console.log('🔍 FILTER:', filter); setSelectedCategory(filter) }
   const handleSearch = (term: string) => { console.log('🔍 SEARCH:', term); setSearchTerm(term) }
   const handleViewMode = (mode: 'grid' | 'list') => { console.log('👁️ VIEW MODE:', mode); setViewMode(mode) }
   const handleGenerateThumbnails = () => { console.log('🖼️ THUMBNAILS'); alert('🖼️ Generate Thumbnails\n\nCreating optimized thumbnails...') }
   const handleOptimizeImages = () => { console.log('⚡ OPTIMIZE'); alert('⚡ Optimize Images\n\nCompressing and optimizing all images...') }
-  const handleExportGallery = () => { console.log('💾 EXPORT'); alert('💾 Export Gallery\n\nDownloading gallery archive...') }
+  const handleExportGallery = async () => {
+    console.log('💾 EXPORT')
+
+    // In production, would show format selection dialog
+    const format = (prompt('Export format (zip, pdf, portfolio):') || 'zip') as 'zip' | 'pdf' | 'portfolio'
+
+    try {
+      const response = await fetch('/api/gallery', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'export-collection',
+          data: {
+            itemIds: galleryItems.map(item => item.id.toString()), // Export all items
+            format,
+            quality: 'high'
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to export gallery')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success(result.message, {
+          description: `${result.itemCount} items exported as ${result.format.toUpperCase()}`
+        })
+
+        // Show export details
+        setTimeout(() => {
+          alert(`💾 Gallery Export Ready\n\nFormat: ${result.format.toUpperCase()}\nQuality: ${result.quality}\nItems: ${result.itemCount}\n\nDownload URL: ${result.downloadUrl}\n\n${result.nextSteps.join('\n')}`)
+        }, 500)
+      }
+    } catch (error: any) {
+      console.error('Export Gallery Error:', error)
+      toast.error('Failed to export gallery', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
   const handleImportGallery = () => { console.log('📤 IMPORT'); alert('📤 Import Gallery\n\nSelect gallery archive to import') }
   const handleSlideshow = () => { console.log('▶️ SLIDESHOW'); alert('▶️ Starting Slideshow\n\nAutoplay enabled') }
   const handleTagging = (itemId: number) => { console.log('🏷️ TAG:', itemId); alert('🏷️ Add Tags\n\nOrganize with custom tags') }
