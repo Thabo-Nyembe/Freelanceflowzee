@@ -89,6 +89,28 @@ const statusColour: Record<string, string> = {
 export default function ClientsPage() {
   const [query, setQuery] = useState('')
 
+  // Handlers
+  const handleAddClient = () => { console.log('➕ ADD'); alert('➕ Add Client') }
+  const handleViewClient = (id: string) => { console.log('👁️:', id); alert(`👁️ View ${id}`) }
+  const handleEditClient = (id: string) => { console.log('✏️:', id); alert(`✏️ Edit ${id}`) }
+  const handleDeleteClient = (id: string) => { console.log('🗑️:', id); confirm('Delete client?') && alert('✅ Deleted') }
+  const handleSendMessage = (id: string) => { console.log('💬:', id); alert(`💬 Message ${id}`) }
+  const handleSendEmail = (id: string) => { console.log('📧:', id); alert(`📧 Email ${id}`) }
+  const handleCallClient = (id: string) => { console.log('📞:', id); alert(`📞 Call ${id}`) }
+  const handleViewProjects = (id: string) => { console.log('📁:', id); alert(`📁 Projects ${id}`) }
+  const handleAddProject = (id: string) => { console.log('➕📁:', id); alert(`➕ Add Project ${id}`) }
+  const handleUpgradeToVIP = (id: string) => { console.log('⭐:', id); alert(`⭐ VIP ${id}`) }
+  const handleChangeStatus = (id: string, status: string) => { console.log('🔄:', id, status); alert(`🔄 ${status}`) }
+  const handleExportClients = () => { console.log('💾 EXP'); alert('💾 Export') }
+  const handleImportClients = () => { console.log('📥 IMP'); alert('📥 Import') }
+  const handleBulkAction = (action: string) => { console.log('☑️:', action); alert(`☑️ ${action}`) }
+  const handleFilterStatus = (status: string) => { console.log('🔍:', status); alert(`🔍 Filter ${status}`) }
+  const handleSortClients = (by: string) => { console.log('🔃:', by); alert(`🔃 Sort ${by}`) }
+  const handleViewAnalytics = (id: string) => { console.log('📊:', id); alert(`📊 Analytics ${id}`) }
+  const handleSendInvoice = (id: string) => { console.log('💰:', id); alert(`💰 Invoice ${id}`) }
+  const handleScheduleMeeting = (id: string) => { console.log('📅:', id); alert(`📅 Meeting ${id}`) }
+  const handleViewHistory = (id: string) => { console.log('📜:', id); alert(`📜 History ${id}`) }
+
   const filtered = clients.filter((c) =>
     c.name.toLowerCase().includes(query.toLowerCase()) ||
     c.company.toLowerCase().includes(query.toLowerCase())
