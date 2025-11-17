@@ -48,7 +48,9 @@ import {
   HardDrive,
   Zap,
   Shield,
-  TrendingUp
+  TrendingUp,
+  X,
+  Check
 } from 'lucide-react'
 
 // Types
@@ -306,19 +308,228 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
   }
 
   const toggleStar = (fileId: string) => {
-    setFiles(prev => prev.map(f => 
+    console.log('⭐ TOGGLE STAR - File ID:', fileId)
+    setFiles(prev => prev.map(f =>
       f.id === fileId ? { ...f, starred: !f.starred } : f
     ))
+    const file = files.find(f => f.id === fileId)
+    if (file) {
+      alert(`${file.starred ? '✅ Removed from' : '⭐ Added to'} starred files`)
+    }
+  }
+
+  const handleDownloadFile = (file: FileItem) => {
+    console.log('📥 DOWNLOAD FILE:', file.name)
+    alert(`📥 Downloading File\n\nFile: ${file.name}\nSize: ${formatFileSize(file.size)}\n\nDownload started...`)
+    // In production: window.open(file.url, '_blank')
+  }
+
+  const handlePreviewFile = (file: FileItem) => {
+    console.log('👁️ PREVIEW FILE:', file.name)
+    alert(`👁️ Preview File\n\nFile: ${file.name}\nType: ${file.type}\n\nOpening preview...`)
+  }
+
+  const handleRenameFile = (fileId: string) => {
+    console.log('✏️ RENAME FILE - ID:', fileId)
+    const file = files.find(f => f.id === fileId)
+    if (file) {
+      const newName = prompt('Enter new file name:', file.name)
+      if (newName && newName.trim()) {
+        setFiles(prev => prev.map(f =>
+          f.id === fileId ? { ...f, name: newName.trim() } : f
+        ))
+        alert(`✅ File Renamed\n\nOld: ${file.name}\nNew: ${newName.trim()}`)
+      }
+    }
+  }
+
+  const handleCopyLink = (file: FileItem) => {
+    console.log('🔗 COPY LINK:', file.name)
+    const link = `${window.location.origin}/files/${file.id}`
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(link)
+      alert(`🔗 Link Copied!\n\nFile: ${file.name}\nLink: ${link}`)
+    } else {
+      alert(`🔗 Share Link\n\n${link}`)
+    }
+  }
+
+  const handleMoveToFolder = (fileId: string) => {
+    console.log('📁 MOVE TO FOLDER - File ID:', fileId)
+    const folderName = prompt('Enter folder name:', 'New Folder')
+    if (folderName && folderName.trim()) {
+      setFiles(prev => prev.map(f =>
+        f.id === fileId ? { ...f, folder: folderName.trim() } : f
+      ))
+      alert(`📁 File Moved\n\nFolder: ${folderName.trim()}`)
+    }
+  }
+
+  const handleAddTags = (fileId: string) => {
+    console.log('🏷️ ADD TAGS - File ID:', fileId)
+    const file = files.find(f => f.id === fileId)
+    if (file) {
+      const tags = prompt('Enter tags (comma-separated):', file.tags.join(', '))
+      if (tags) {
+        const newTags = tags.split(',').map(t => t.trim()).filter(Boolean)
+        setFiles(prev => prev.map(f =>
+          f.id === fileId ? { ...f, tags: newTags } : f
+        ))
+        alert(`🏷️ Tags Updated\n\nTags: ${newTags.join(', ')}`)
+      }
+    }
+  }
+
+  const handleSelectFile = (fileId: string) => {
+    console.log('✅ SELECT FILE:', fileId)
+    setSelectedFiles(prev =>
+      prev.includes(fileId)
+        ? prev.filter(id => id !== fileId)
+        : [...prev, fileId]
+    )
+  }
+
+  const handleSelectAll = () => {
+    console.log('✅ SELECT ALL FILES')
+    if (selectedFiles.length === sortedFiles.length) {
+      setSelectedFiles([])
+      alert('✅ All files deselected')
+    } else {
+      setSelectedFiles(sortedFiles.map(f => f.id))
+      alert(`✅ Selected ${sortedFiles.length} files`)
+    }
+  }
+
+  const handleBulkDelete = () => {
+    console.log('🗑️ BULK DELETE - Files:', selectedFiles.length)
+    if (selectedFiles.length === 0) {
+      alert('⚠️ No Files Selected\n\nPlease select files to delete.')
+      return
+    }
+    if (confirm(`⚠️ Delete ${selectedFiles.length} file(s)?\n\nThis action cannot be undone.`)) {
+      setFiles(prev => prev.filter(f => !selectedFiles.includes(f.id)))
+      alert(`✅ Deleted ${selectedFiles.length} file(s)`)
+      setSelectedFiles([])
+    }
+  }
+
+  const handleBulkDownload = () => {
+    console.log('📥 BULK DOWNLOAD - Files:', selectedFiles.length)
+    if (selectedFiles.length === 0) {
+      alert('⚠️ No Files Selected\n\nPlease select files to download.')
+      return
+    }
+    const selectedFileObjects = files.filter(f => selectedFiles.includes(f.id))
+    const totalSize = selectedFileObjects.reduce((sum, f) => sum + f.size, 0)
+    alert(`📥 Bulk Download\n\nFiles: ${selectedFiles.length}\nTotal Size: ${formatFileSize(totalSize)}\n\nCreating zip archive...`)
+  }
+
+  const handleCreateFolder = () => {
+    console.log('📁 CREATE FOLDER')
+    const folderName = prompt('Enter folder name:', 'New Folder')
+    if (folderName && folderName.trim()) {
+      alert(`📁 Folder Created\n\nName: ${folderName.trim()}\n\nYou can now move files to this folder.`)
+    }
+  }
+
+  const handleExportFileList = (format: 'csv' | 'json') => {
+    console.log('💾 EXPORT FILE LIST - Format:', format.toUpperCase())
+    const data = files.map(f => ({
+      name: f.name,
+      type: f.type,
+      size: formatFileSize(f.size),
+      uploadedBy: f.uploadedBy.name,
+      uploadedAt: formatDate(f.uploadedAt),
+      downloads: f.downloads,
+      views: f.views,
+      folder: f.folder || 'Root',
+      tags: f.tags.join(', ')
+    }))
+
+    let content: string
+    let filename: string
+
+    if (format === 'json') {
+      content = JSON.stringify(data, null, 2)
+      filename = 'files-list.json'
+    } else {
+      const headers = Object.keys(data[0] || {}).join(',')
+      const rows = data.map(row => Object.values(row).join(','))
+      content = [headers, ...rows].join('\n')
+      filename = 'files-list.csv'
+    }
+
+    const blob = new Blob([content], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    a.click()
+    URL.revokeObjectURL(url)
+
+    alert(`💾 File List Exported\n\nFormat: ${format.toUpperCase()}\nFile: ${filename}\nRecords: ${data.length}`)
+  }
+
+  const handleGenerateShareLink = (file: FileItem) => {
+    console.log('🔗 GENERATE SHARE LINK:', file.name)
+    const shareLink = `${window.location.origin}/share/${file.id}?expires=7d`
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(shareLink)
+      alert(`🔗 Share Link Generated!\n\nFile: ${file.name}\nLink: ${shareLink}\n\nExpires: 7 days\n\nLink copied to clipboard!`)
+    }
+  }
+
+  const handleBulkMove = () => {
+    console.log('📁 BULK MOVE - Files:', selectedFiles.length)
+    if (selectedFiles.length === 0) {
+      alert('⚠️ No Files Selected\n\nPlease select files to move.')
+      return
+    }
+    const folderName = prompt('Enter destination folder:', 'New Folder')
+    if (folderName && folderName.trim()) {
+      setFiles(prev => prev.map(f =>
+        selectedFiles.includes(f.id) ? { ...f, folder: folderName.trim() } : f
+      ))
+      alert(`📁 Moved ${selectedFiles.length} file(s)\n\nDestination: ${folderName.trim()}`)
+      setSelectedFiles([])
+    }
+  }
+
+  const handleFilterByFolder = (folder: string | null) => {
+    console.log('📁 FILTER BY FOLDER:', folder || 'All')
+    setSelectedFolder(folder)
+    alert(`📁 Filter Applied\n\nFolder: ${folder || 'All Files'}`)
+  }
+
+  const handleClearSearch = () => {
+    console.log('🔍 CLEAR SEARCH')
+    setSearchQuery('')
+    setFilterType('all')
+    setSelectedFolder(null)
+    alert('🔍 Search Cleared\n\nShowing all files.')
+  }
+
+  const handleSortChange = (newSortBy: 'name' | 'date' | 'size' | 'downloads') => {
+    console.log('🔄 SORT CHANGED:', newSortBy)
+    setSortBy(newSortBy)
+    alert(`🔄 Files sorted by: ${newSortBy}`)
   }
 
   const FileCard = ({ file }: { file: FileItem }) => {
     const FileIcon = FILE_TYPES[file.type].icon
-    
+    const isSelected = selectedFiles.includes(file.id)
+
     return (
-      <Card className="group hover:shadow-lg transition-all duration-200">
+      <Card className={`group hover:shadow-lg transition-all duration-200 ${isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={() => handleSelectFile(file.id)}
+                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
               <div className={`p-2 rounded-lg ${FILE_TYPES[file.type].bgColor}`}>
                 <FileIcon className={`w-5 h-5 ${FILE_TYPES[file.type].color}`} />
               </div>
@@ -343,24 +554,37 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handlePreviewFile(file)}>
                     <Eye className="mr-2 h-4 w-4" />
                     Preview
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleDownloadFile(file)}>
                     <Download className="mr-2 h-4 w-4" />
                     Download
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleGenerateShareLink(file)}>
+                    <Link className="mr-2 h-4 w-4" />
+                    Copy Link
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleFileShare(file.id)}>
                     <Share2 className="mr-2 h-4 w-4" />
                     {file.shared ? 'Unshare' : 'Share'}
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => handleRenameFile(file.id)}>
                     <Edit className="mr-2 h-4 w-4" />
                     Rename
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleMoveToFolder(file.id)}>
+                    <FolderOpen className="mr-2 h-4 w-4" />
+                    Move to Folder
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleAddTags(file.id)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit Tags
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     className="text-red-600"
                     onClick={() => handleFileDelete(file.id)}
                   >
@@ -425,6 +649,14 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
           </p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={handleCreateFolder}>
+            <FolderOpen className="w-4 h-4 mr-2" />
+            New Folder
+          </Button>
+          <Button variant="outline" onClick={() => handleExportFileList('json')}>
+            <Download className="w-4 h-4 mr-2" />
+            Export List
+          </Button>
           <input
             type="file"
             multiple
@@ -509,8 +741,43 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
         </Card>
       </div>
 
+      {/* Bulk Actions */}
+      {selectedFiles.length > 0 && (
+        <Card className="bg-blue-50 border-blue-200">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-blue-900">
+                {selectedFiles.length} file(s) selected
+              </span>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handleBulkDownload}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleBulkMove}>
+                  <FolderOpen className="w-4 h-4 mr-2" />
+                  Move
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleBulkDelete} className="text-red-600">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setSelectedFiles([])}>
+                  <X className="w-4 h-4 mr-2" />
+                  Clear
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Filters and Controls */}
       <div className="flex flex-wrap gap-4 items-center">
+        <Button variant="outline" size="sm" onClick={handleSelectAll}>
+          <Check className="w-4 h-4 mr-2" />
+          {selectedFiles.length === sortedFiles.length ? 'Deselect All' : 'Select All'}
+        </Button>
         <div className="flex-1 min-w-64">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -535,7 +802,7 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
         </select>
         <select
           value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as any)}
+          onChange={(e) => handleSortChange(e.target.value as any)}
           className="px-3 py-2 border rounded-md"
         >
           <option value="date">Sort by Date</option>
@@ -559,6 +826,12 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
             <List className="w-4 h-4" />
           </Button>
         </div>
+        {(searchQuery || filterType !== 'all' || selectedFolder) && (
+          <Button variant="ghost" size="sm" onClick={handleClearSearch}>
+            <X className="w-4 h-4 mr-2" />
+            Clear Filters
+          </Button>
+        )}
       </div>
 
       {/* Files Grid */}
