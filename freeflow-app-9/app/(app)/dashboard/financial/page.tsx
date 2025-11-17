@@ -5,21 +5,162 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  DollarSign, 
-  TrendingUp, 
-  TrendingDown, 
-  CreditCard, 
-  Wallet, 
+import {
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  CreditCard,
+  Wallet,
   PieChart,
   FileText,
   Calendar,
   ArrowUpRight,
-  ArrowDownRight 
+  ArrowDownRight,
+  Download,
+  Printer,
+  Plus,
+  Edit,
+  Trash2,
+  Send,
+  CheckCircle,
+  Filter,
+  Search,
+  RefreshCw
 } from 'lucide-react'
 
 export default function FinancialPage() {
   const [_selectedPeriod, setSelectedPeriod] = useState<any>('monthly')
+
+  const handleExportReport = (format: 'pdf' | 'csv' | 'xlsx') => {
+    console.log('💾 EXPORT FINANCIAL REPORT - Format:', format.toUpperCase())
+    alert(`💾 Exporting Financial Report\n\nFormat: ${format.toUpperCase()}\n\nIncluding:\n• Revenue & expenses\n• Transactions\n• Invoices\n• Tax summary`)
+  }
+
+  const handleScheduleReview = () => {
+    console.log('📅 SCHEDULE FINANCIAL REVIEW')
+    const reviewDate = prompt('Enter review date (YYYY-MM-DD):')
+    if (reviewDate) {
+      alert(`📅 Financial Review Scheduled\n\nDate: ${reviewDate}\n\nYou'll receive a reminder 24 hours before.`)
+    }
+  }
+
+  const handleViewAllTransactions = () => {
+    console.log('📋 VIEW ALL TRANSACTIONS')
+    alert('📋 All Transactions\n\nShowing complete transaction history...\n\n• Filter by date range\n• Filter by type\n• Search by description')
+  }
+
+  const handleAddTransaction = (type: 'income' | 'expense') => {
+    console.log(`➕ ADD ${type.toUpperCase()}`)
+    const description = prompt(`Enter ${type} description:`)
+    if (description) {
+      const amount = prompt('Enter amount:')
+      if (amount) {
+        alert(`✅ ${type === 'income' ? 'Income' : 'Expense'} Added\n\nDescription: ${description}\nAmount: $${amount}`)
+      }
+    }
+  }
+
+  const handleEditTransaction = (transactionId: number) => {
+    console.log('✏️ EDIT TRANSACTION - ID:', transactionId)
+    const newDescription = prompt('Edit transaction description:')
+    if (newDescription) {
+      alert(`✅ Transaction Updated\n\nNew description: ${newDescription}`)
+    }
+  }
+
+  const handleDeleteTransaction = (transactionId: number) => {
+    console.log('🗑️ DELETE TRANSACTION - ID:', transactionId)
+    if (confirm('⚠️ Delete Transaction?\n\nThis action cannot be undone.\n\nAre you sure?')) {
+      alert('✅ Transaction deleted successfully!')
+    }
+  }
+
+  const handleFilterTransactions = (filter: string) => {
+    console.log('🔍 FILTER TRANSACTIONS:', filter)
+    alert(`Filtering transactions by: ${filter}`)
+  }
+
+  const handleSearchTransactions = () => {
+    console.log('🔍 SEARCH TRANSACTIONS')
+    const query = prompt('Search transactions:')
+    if (query) {
+      alert(`🔍 Searching for: "${query}"`)
+    }
+  }
+
+  const handleCreateInvoice = () => {
+    console.log('➕ CREATE INVOICE')
+    alert('➕ Create New Invoice\n\nEnter invoice details:\n• Client name\n• Amount\n• Due date\n• Description\n• Line items')
+  }
+
+  const handleViewAllInvoices = () => {
+    console.log('📋 VIEW ALL INVOICES')
+    alert('📋 All Invoices\n\nShowing:\n• Paid invoices\n• Pending invoices\n• Overdue invoices\n• Draft invoices')
+  }
+
+  const handleEditInvoice = (invoiceId: number) => {
+    console.log('✏️ EDIT INVOICE - ID:', invoiceId)
+    alert(`✏️ Edit Invoice #${invoiceId}\n\nModify invoice details and line items.`)
+  }
+
+  const handleDeleteInvoice = (invoiceId: number) => {
+    console.log('🗑️ DELETE INVOICE - ID:', invoiceId)
+    if (confirm('⚠️ Delete Invoice?\n\nThis action cannot be undone.\n\nAre you sure?')) {
+      alert('✅ Invoice deleted successfully!')
+    }
+  }
+
+  const handleSendInvoice = (invoiceId: number) => {
+    console.log('📧 SEND INVOICE - ID:', invoiceId)
+    alert(`📧 Sending Invoice #${invoiceId}\n\nInvoice will be emailed to the client with payment instructions.`)
+  }
+
+  const handleMarkInvoicePaid = (invoiceId: number) => {
+    console.log('✅ MARK INVOICE PAID - ID:', invoiceId)
+    if (confirm('Mark this invoice as paid?')) {
+      alert(`✅ Invoice #${invoiceId} marked as paid!`)
+    }
+  }
+
+  const handleSendPaymentReminder = (invoiceId: number) => {
+    console.log('📧 SEND PAYMENT REMINDER - ID:', invoiceId)
+    alert(`📧 Payment Reminder Sent\n\nInvoice #${invoiceId}\n\nFriendly reminder email sent to client.`)
+  }
+
+  const handleGenerateProfitLoss = () => {
+    console.log('📊 GENERATE P&L REPORT')
+    alert('📊 Profit & Loss Statement\n\nGenerating monthly P&L...\n\n✅ Report ready!\n\nRevenue: $45,231\nExpenses: $18,500\nNet Profit: $26,731')
+  }
+
+  const handleGenerateCashFlow = () => {
+    console.log('📊 GENERATE CASH FLOW REPORT')
+    alert('📊 Cash Flow Report\n\nAnalyzing cash flow...\n\n✅ Report ready!\n\nInflows: +$48,500\nOutflows: -$21,769\nNet Cash Flow: +$26,731')
+  }
+
+  const handleGenerateTaxSummary = () => {
+    console.log('📊 GENERATE TAX SUMMARY')
+    alert('📊 Tax Summary Report\n\nCalculating quarterly taxes...\n\n✅ Report ready!\n\nTaxable Income: $26,731\nEstimated Tax: $6,682.75\nQuarterly Payment: $1,670.69')
+  }
+
+  const handleGenerateExpenseReport = () => {
+    console.log('📊 GENERATE EXPENSE REPORT')
+    alert('📊 Expense Report\n\nAnalyzing expenses...\n\n✅ Report ready!\n\nTotal Expenses: $18,500\nTop Categories:\n• Software: $5,200\n• Marketing: $4,500\n• Operations: $8,800')
+  }
+
+  const handleDownloadReport = (reportType: string) => {
+    console.log('📥 DOWNLOAD REPORT:', reportType)
+    alert(`📥 Downloading ${reportType}\n\nFormat: PDF\n\n✅ Download started!`)
+  }
+
+  const handlePrintReport = (reportType: string) => {
+    console.log('🖨️ PRINT REPORT:', reportType)
+    alert(`🖨️ Printing ${reportType}\n\nSending to default printer...`)
+  }
+
+  const handleRefreshData = () => {
+    console.log('🔄 REFRESH FINANCIAL DATA')
+    alert('🔄 Refreshing Data...\n\n✅ Financial data updated with latest transactions!')
+  }
 
   // Mock financial data
   const financialData = {
@@ -59,13 +200,17 @@ export default function FinancialPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <FileText className="h-4 w-4 mr-2" />
+          <Button variant="outline" size="sm" onClick={() => handleExportReport('pdf')}>
+            <Download className="h-4 w-4 mr-2" />
             Export Report
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={handleScheduleReview}>
             <Calendar className="h-4 w-4 mr-2" />
             Schedule Review
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleRefreshData}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
           </Button>
         </div>
       </div>
@@ -232,9 +377,19 @@ export default function FinancialPage() {
                     </span>
                   </div>
                 ))}
-                <Button variant="outline" className="w-full mt-4">
-                  View All Transactions
-                </Button>
+                <div className="flex gap-2 mt-4">
+                  <Button variant="outline" className="flex-1" onClick={handleViewAllTransactions}>
+                    View All Transactions
+                  </Button>
+                  <Button onClick={() => handleAddTransaction('income')}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Income
+                  </Button>
+                  <Button variant="outline" onClick={() => handleAddTransaction('expense')}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Expense
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -253,7 +408,10 @@ export default function FinancialPage() {
                     <h3 className="font-medium kazi-text-primary">Upcoming Payments</h3>
                     <p className="text-sm kazi-text-tertiary">Invoices awaiting payment</p>
                   </div>
-                  <Button size="sm">Create Invoice</Button>
+                  <Button size="sm" onClick={handleCreateInvoice}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Invoice
+                  </Button>
                 </div>
                 
                 <div className="space-y-3">
@@ -282,7 +440,7 @@ export default function FinancialPage() {
                   ))}
                 </div>
                 
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={handleViewAllInvoices}>
                   View All Invoices
                 </Button>
               </div>
@@ -339,7 +497,7 @@ export default function FinancialPage() {
                 <div className="space-y-3">
                   <h3 className="font-medium kazi-text-primary">Quick Reports</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <Button variant="outline" className="justify-start h-auto p-4">
+                    <Button variant="outline" className="justify-start h-auto p-4" onClick={handleGenerateProfitLoss}>
                       <div className="flex items-center space-x-3">
                         <PieChart className="h-5 w-5" />
                         <div className="text-left">
@@ -348,8 +506,8 @@ export default function FinancialPage() {
                         </div>
                       </div>
                     </Button>
-                    
-                    <Button variant="outline" className="justify-start h-auto p-4">
+
+                    <Button variant="outline" className="justify-start h-auto p-4" onClick={handleGenerateCashFlow}>
                       <div className="flex items-center space-x-3">
                         <TrendingUp className="h-5 w-5" />
                         <div className="text-left">
@@ -358,8 +516,8 @@ export default function FinancialPage() {
                         </div>
                       </div>
                     </Button>
-                    
-                    <Button variant="outline" className="justify-start h-auto p-4">
+
+                    <Button variant="outline" className="justify-start h-auto p-4" onClick={handleGenerateTaxSummary}>
                       <div className="flex items-center space-x-3">
                         <FileText className="h-5 w-5" />
                         <div className="text-left">
@@ -368,8 +526,8 @@ export default function FinancialPage() {
                         </div>
                       </div>
                     </Button>
-                    
-                    <Button variant="outline" className="justify-start h-auto p-4">
+
+                    <Button variant="outline" className="justify-start h-auto p-4" onClick={handleGenerateExpenseReport}>
                       <div className="flex items-center space-x-3">
                         <Wallet className="h-5 w-5" />
                         <div className="text-left">
