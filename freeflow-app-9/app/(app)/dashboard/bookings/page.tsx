@@ -113,6 +113,28 @@ export default function BookingsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
+  // Handlers
+  const handleNewBooking = () => { console.log('➕ NEW BOOKING'); alert('➕ Create New Booking\n\nSchedule a new client appointment.') }
+  const handleEditBooking = (id: string) => { console.log('✏️ EDIT:', id); alert(`✏️ Edit Booking ${id}`) }
+  const handleCancelBooking = (id: string) => { console.log('❌ CANCEL:', id); confirm('Cancel this booking?') && alert('✅ Booking cancelled') }
+  const handleConfirmBooking = (id: string) => { console.log('✅ CONFIRM:', id); alert(`✅ Booking ${id} confirmed!`) }
+  const handleRescheduleBooking = (id: string) => { console.log('📅 RESCHEDULE:', id); alert('📅 Reschedule booking to new date/time') }
+  const handleViewDetails = (id: string) => { console.log('👁️ VIEW:', id); alert(`👁️ Viewing details for ${id}`) }
+  const handleSendReminder = (id: string) => { console.log('📧 REMINDER:', id); alert('📧 Reminder sent to client') }
+  const handleSendConfirmation = (id: string) => { console.log('📧 CONFIRMATION:', id); alert('📧 Confirmation email sent') }
+  const handleMarkAsCompleted = (id: string) => { console.log('✅ COMPLETE:', id); alert('✅ Booking marked as completed') }
+  const handleMarkAsNoShow = (id: string) => { console.log('⚠️ NO-SHOW:', id); alert('⚠️ Marked as no-show') }
+  const handleRefundPayment = (id: string) => { console.log('💸 REFUND:', id); confirm('Refund payment?') && alert('💸 Refund processed') }
+  const handleViewPayment = (id: string) => { console.log('💳 PAYMENT:', id); alert('💳 Payment details') }
+  const handleExportBookings = () => { console.log('💾 EXPORT'); alert('💾 Exporting bookings to CSV/PDF') }
+  const handlePrintSchedule = () => { console.log('🖨️ PRINT'); alert('🖨️ Printing schedule...') }
+  const handleSettings = () => { console.log('⚙️ SETTINGS'); alert('⚙️ Booking settings\n\nConfigure availability, services, and pricing') }
+  const handleFilterByDate = (date: string) => { console.log('📅 FILTER DATE:', date); alert(`Filtering by date: ${date}`) }
+  const handleFilterByService = (service: string) => { console.log('🔍 FILTER SERVICE:', service); alert(`Filtering by service: ${service}`) }
+  const handleSearch = (query: string) => { console.log('🔍 SEARCH:', query); setSearchQuery(query) }
+  const handleRefresh = () => { console.log('🔄 REFRESH'); alert('🔄 Refreshing bookings...') }
+  const handleBulkAction = (action: string) => { console.log('📋 BULK:', action); alert(`📋 Bulk ${action} operation`) }
+
   // Stats
   const stats = {
     upcoming: 8,
@@ -186,11 +208,15 @@ export default function BookingsPage() {
           </div>
 
           <div className="flex gap-3">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleSettings}>
               <Settings className="h-4 w-4" />
               Settings
             </Button>
-            <Button className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExportBookings}>
+              <Download className="h-4 w-4" />
+              Export
+            </Button>
+            <Button className="gap-2" onClick={handleNewBooking}>
               <Plus className="h-4 w-4" />
               New Booking
             </Button>
