@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { toast } from 'sonner'
 import {
   Shield,
   DollarSign,
@@ -470,63 +471,188 @@ export default function EscrowPage() {
     }
   }
 
-  const handleCreateDeposit = () => {
-    const deposit: EscrowDeposit = {
-      id: `esc_${Date.now()}`,
-      projectTitle: newDeposit.projectTitle,
-      clientName: newDeposit.clientName,
-      clientEmail: newDeposit.clientEmail,
-      amount: parseFloat(newDeposit.amount),
-      currency: newDeposit.currency,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-      progressPercentage: 0,
-      paymentMethod: newDeposit.paymentMethod,
-      notes: newDeposit.notes,
-      fees: {
-        platform: parseFloat(newDeposit.amount) * 0.03,
-        payment: parseFloat(newDeposit.amount) * 0.02,
-        total: parseFloat(newDeposit.amount) * 0.05
-      },
-      milestones: newDeposit.milestones.map((milestone, index) => ({
-        id: `ms_${Date.now()}_${index}`,
-        title: milestone.title,
-        description: milestone.description,
-        amount: parseFloat(milestone.amount),
-        status: 'pending' as const
-      }))
-    }
+  const handleCreateDeposit = async () => {
+    console.log('🔐 CREATE ESCROW DEPOSIT')
 
-    dispatch({ type: 'ADD_DEPOSIT', deposit })
-    setIsCreateModalOpen(false)
-    setNewDeposit({
-      projectTitle: '',
-      clientName: '',
-      clientEmail: '',
-      amount: '',
-      currency: 'USD',
-      milestones: [{ title: '', description: '', amount: '' }],
-      paymentMethod: 'stripe',
-      notes: ''
-    })
-    alert('Escrow deposit created successfully!')
+    try {
+      const response = await fetch('/api/escrow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-deposit',
+          data: {
+            projectTitle: newDeposit.projectTitle,
+            clientName: newDeposit.clientName,
+            clientEmail: newDeposit.clientEmail,
+            amount: parseFloat(newDeposit.amount),
+            currency: newDeposit.currency,
+            milestones: newDeposit.milestones.map(m => ({
+              title: m.title,
+              description: m.description,
+              amount: parseFloat(m.amount)
+            })),
+            paymentMethod: newDeposit.paymentMethod,
+            notes: newDeposit.notes
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create escrow deposit')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Add deposit to local state
+        dispatch({ type: 'ADD_DEPOSIT', deposit: result.deposit })
+
+        // Close modal and reset form
+        setIsCreateModalOpen(false)
+        setNewDeposit({
+          projectTitle: '',
+          clientName: '',
+          clientEmail: '',
+          amount: '',
+          currency: 'USD',
+          milestones: [{ title: '', description: '', amount: '' }],
+          paymentMethod: 'stripe',
+          notes: ''
+        })
+
+        // Show success toast
+        if (result.achievement) {
+          toast.success(`${result.message} ${result.achievement.message} +${result.achievement.points} points!`, {
+            description: `Payment link: ${result.paymentUrl}`
+          })
+        } else {
+          toast.success(result.message, {
+            description: `Payment link: ${result.paymentUrl}`
+          })
+        }
+
+        // Show next steps alert
+        if (result.nextSteps && result.nextSteps.length > 0) {
+          setTimeout(() => {
+            alert(`Next Steps:\n\n${result.nextSteps.join('\n')}`)
+          }, 500)
+        }
+      }
+    } catch (error: any) {
+      console.error('Create Escrow Error:', error)
+      toast.error('Failed to create escrow deposit', {
+        description: error.message || 'Please try again later'
+      })
+    }
   }
 
-  const handleReleaseFunds = (depositId: string) => {
+  const handleReleaseFunds = async (depositId: string) => {
+    console.log('💰 RELEASE FUNDS:', depositId)
+
     const deposit = state.deposits.find(d => d.id === depositId)
-    if (deposit && releasePassword === deposit.completionPassword) {
-      dispatch({ type: 'RELEASE_FUNDS', depositId })
-      setShowPasswordForm(null)
-      setReleasePassword('')
-      alert('Funds released successfully!')
-    } else {
-      dispatch({ type: 'SET_ERROR', error: 'Invalid completion password' })
+    if (!deposit || releasePassword !== deposit.completionPassword) {
+      toast.error('Invalid completion password', {
+        description: 'Please enter the correct password to release funds'
+      })
+      return
+    }
+
+    try {
+      const response = await fetch('/api/escrow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'release-funds',
+          data: {
+            depositId,
+            amount: deposit.amount,
+            verificationCode: releasePassword
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to release funds')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Update local state
+        dispatch({ type: 'RELEASE_FUNDS', depositId })
+        setShowPasswordForm(null)
+        setReleasePassword('')
+
+        // Show success toast
+        if (result.achievement) {
+          toast.success(`${result.message} ${result.achievement.message} +${result.achievement.points} points!`, {
+            description: `Net amount: $${result.netAmount.toFixed(2)} • ${result.estimatedArrival}`
+          })
+        } else {
+          toast.success(result.message, {
+            description: `Net amount: $${result.netAmount.toFixed(2)} • ${result.estimatedArrival}`
+          })
+        }
+
+        // Show next steps alert
+        if (result.nextSteps && result.nextSteps.length > 0) {
+          setTimeout(() => {
+            alert(`Next Steps:\n\n${result.nextSteps.join('\n')}`)
+          }, 500)
+        }
+      }
+    } catch (error: any) {
+      console.error('Release Funds Error:', error)
+      toast.error('Failed to release funds', {
+        description: error.message || 'Please try again later'
+      })
     }
   }
 
-  const handleCompleteMilestone = (depositId: string, milestoneId: string) => {
-    dispatch({ type: 'COMPLETE_MILESTONE', depositId, milestoneId })
-    alert('Milestone marked as completed!')
+  const handleCompleteMilestone = async (depositId: string, milestoneId: string) => {
+    console.log('✅ COMPLETE MILESTONE:', milestoneId)
+
+    try {
+      const response = await fetch('/api/escrow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'complete-milestone',
+          data: {
+            depositId,
+            milestoneId
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to complete milestone')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Update local state
+        dispatch({ type: 'COMPLETE_MILESTONE', depositId, milestoneId })
+
+        // Show success toast
+        toast.success(result.message, {
+          description: `Completed at: ${new Date(result.completedAt).toLocaleString()}`
+        })
+
+        // Show next steps alert
+        if (result.nextSteps && result.nextSteps.length > 0) {
+          setTimeout(() => {
+            alert(`Next Steps:\n\n${result.nextSteps.join('\n')}`)
+          }, 500)
+        }
+      }
+    } catch (error: any) {
+      console.error('Complete Milestone Error:', error)
+      toast.error('Failed to complete milestone', {
+        description: error.message || 'Please try again later'
+      })
+    }
   }
 
   const addMilestone = () => {
