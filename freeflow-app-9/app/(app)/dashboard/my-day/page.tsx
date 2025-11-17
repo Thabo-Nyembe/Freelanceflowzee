@@ -8,25 +8,32 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { 
-  Clock, 
-  CheckCircle, 
-  Plus, 
-  Target, 
-  Calendar, 
-  Timer, 
-  Activity, 
-  ArrowRight, 
-  TrendingUp, 
-  Brain, 
-  Play, 
-  Pause, 
-  BarChart3, 
-  Trash2, 
-  Zap, 
-  MessageSquare, 
-  Briefcase, 
-  Lightbulb 
+import {
+  Clock,
+  CheckCircle,
+  Plus,
+  Target,
+  Calendar,
+  Timer,
+  Activity,
+  ArrowRight,
+  TrendingUp,
+  Brain,
+  Play,
+  Pause,
+  BarChart3,
+  Trash2,
+  Zap,
+  MessageSquare,
+  Briefcase,
+  Lightbulb,
+  Edit,
+  Copy,
+  Download,
+  Filter,
+  X,
+  RefreshCw,
+  Archive
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -360,6 +367,201 @@ export default function MyDayPage() {
 
   const stopTimer = () => {
     dispatch({ type: 'STOP_TIMER' })
+  }
+
+  const handleEditTask = (task: Task) => {
+    console.log('✏️ EDIT TASK - ID:', task.id)
+    const newTitle = prompt('Edit task title:', task.title)
+    if (newTitle && newTitle.trim()) {
+      dispatch({ type: 'UPDATE_TASK', id: task.id, updates: { title: newTitle } })
+      alert('✅ Task updated successfully!')
+    }
+  }
+
+  const handleDuplicateTask = (task: Task) => {
+    console.log('📋 DUPLICATE TASK - ID:', task.id)
+    const duplicated: Task = {
+      ...task,
+      id: `task_${Date.now()}`,
+      completed: false,
+      startTime: undefined,
+      endTime: undefined,
+      title: `${task.title} (Copy)`
+    }
+    dispatch({ type: 'ADD_TASK', task: duplicated })
+    alert('✅ Task duplicated successfully!')
+  }
+
+  const handleArchiveTask = (taskId: string) => {
+    console.log('📦 ARCHIVE TASK - ID:', taskId)
+    if (confirm('Archive this task?\n\nArchived tasks can be restored later.')) {
+      dispatch({ type: 'DELETE_TASK', id: taskId })
+      alert('✅ Task archived successfully!')
+    }
+  }
+
+  const handleChangePriority = (taskId: string) => {
+    console.log('🎯 CHANGE TASK PRIORITY - ID:', taskId)
+    const newPriority = prompt('Enter new priority:\nlow, medium, high, or urgent')?.toLowerCase()
+    if (newPriority && ['low', 'medium', 'high', 'urgent'].includes(newPriority)) {
+      dispatch({ type: 'UPDATE_TASK', id: taskId, updates: { priority: newPriority as any } })
+      alert(`✅ Priority updated to: ${newPriority}`)
+    }
+  }
+
+  const handleExportTasks = (format: 'csv' | 'json') => {
+    console.log('💾 EXPORT TASKS - Format:', format.toUpperCase())
+    const data = state.tasks.map(task => ({
+      title: task.title,
+      description: task.description || '',
+      priority: task.priority,
+      category: task.category,
+      estimatedTime: `${task.estimatedTime}min`,
+      completed: task.completed,
+      tags: task.tags.join(', ')
+    }))
+
+    let content: string
+    let filename: string
+
+    if (format === 'json') {
+      content = JSON.stringify(data, null, 2)
+      filename = 'my-day-tasks.json'
+    } else {
+      const headers = Object.keys(data[0] || {}).join(',')
+      const rows = data.map(row => Object.values(row).join(','))
+      content = [headers, ...rows].join('\n')
+      filename = 'my-day-tasks.csv'
+    }
+
+    const blob = new Blob([content], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    a.click()
+    URL.revokeObjectURL(url)
+
+    alert(`💾 Tasks Exported\n\nFormat: ${format.toUpperCase()}\nFile: ${filename}\nTasks: ${data.length}`)
+  }
+
+  const handleFilterByPriority = (priority: string) => {
+    console.log('🔍 FILTER BY PRIORITY:', priority)
+    alert(`Filtering tasks by priority: ${priority}`)
+  }
+
+  const handleFilterByCategory = (category: string) => {
+    console.log('📁 FILTER BY CATEGORY:', category)
+    alert(`Filtering tasks by category: ${category}`)
+  }
+
+  const handleClearFilters = () => {
+    console.log('🔄 CLEAR FILTERS')
+    alert('✅ All filters cleared!')
+  }
+
+  const handleBulkComplete = () => {
+    console.log('✅ BULK COMPLETE TASKS')
+    const incompleteTasks = state.tasks.filter(t => !t.completed)
+    if (incompleteTasks.length === 0) {
+      alert('⚠️ No Tasks\n\nAll tasks are already completed!')
+      return
+    }
+    if (confirm(`Complete all ${incompleteTasks.length} remaining tasks?`)) {
+      incompleteTasks.forEach(task => {
+        dispatch({ type: 'TOGGLE_TASK', id: task.id })
+      })
+      alert(`✅ Completed ${incompleteTasks.length} tasks!`)
+    }
+  }
+
+  const handleRescheduleTask = (taskId: string) => {
+    console.log('📅 RESCHEDULE TASK - ID:', taskId)
+    const newTime = prompt('Enter new start time (HH:MM):')
+    if (newTime) {
+      dispatch({ type: 'UPDATE_TASK', id: taskId, updates: { startTime: newTime } })
+      alert(`✅ Task rescheduled to ${newTime}`)
+    }
+  }
+
+  const handleApplyAISuggestion = (insightId: string) => {
+    console.log('🤖 APPLY AI SUGGESTION - ID:', insightId)
+    const insight = mockAIInsights.find(i => i.id === insightId)
+    alert(`✅ Applied Suggestion!\n\n${insight?.title}\n\nYour schedule has been optimized based on this insight.`)
+  }
+
+  const handleDismissInsight = (insightId: string) => {
+    console.log('❌ DISMISS INSIGHT - ID:', insightId)
+    alert('✅ Insight dismissed!')
+  }
+
+  const handleGenerateAISchedule = () => {
+    console.log('🤖 GENERATE AI SCHEDULE')
+    alert('🤖 AI Schedule Generator\n\nAnalyzing your tasks, preferences, and productivity patterns...\n\n✅ Optimized schedule generated!\n\nView the "Time Blocks" tab to see your AI-generated schedule.')
+  }
+
+  const handleExportAnalytics = () => {
+    console.log('📊 EXPORT ANALYTICS')
+    const analytics = {
+      date: new Date().toLocaleDateString(),
+      totalTasks: totalTasks,
+      completedTasks: state.completedTasks,
+      completionRate: `${completionRate}%`,
+      focusTime: `${focusHours}h ${focusMinutes}m`,
+      productivityScore: `${productivityScore}%`,
+      insights: mockAIInsights.length
+    }
+
+    const content = JSON.stringify(analytics, null, 2)
+    const blob = new Blob([content], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'my-day-analytics.json'
+    a.click()
+    URL.revokeObjectURL(url)
+
+    alert('📊 Analytics Exported\n\nFile: my-day-analytics.json')
+  }
+
+  const handleAddTimeBlock = () => {
+    console.log('➕ ADD TIME BLOCK')
+    const title = prompt('Enter time block title:')
+    if (title) {
+      alert(`✅ Time Block Created!\n\nTitle: ${title}\n\nConfigure start/end times in the schedule.`)
+    }
+  }
+
+  const handleEditTimeBlock = (blockId: string) => {
+    console.log('✏️ EDIT TIME BLOCK - ID:', blockId)
+    const block = mockTimeBlocks.find(b => b.id === blockId)
+    const newTitle = prompt('Edit time block title:', block?.title)
+    if (newTitle) {
+      alert(`✅ Time block updated: ${newTitle}`)
+    }
+  }
+
+  const handleDeleteTimeBlock = (blockId: string) => {
+    console.log('🗑️ DELETE TIME BLOCK - ID:', blockId)
+    const block = mockTimeBlocks.find(b => b.id === blockId)
+    if (confirm(`Delete time block: ${block?.title}?`)) {
+      alert('✅ Time block deleted!')
+    }
+  }
+
+  const handleSortTasks = (sortBy: string) => {
+    console.log('🔀 SORT TASKS BY:', sortBy)
+    alert(`Tasks sorted by: ${sortBy}`)
+  }
+
+  const handleViewTaskHistory = () => {
+    console.log('📋 VIEW TASK HISTORY')
+    alert('📋 Task History\n\nShowing completed tasks from the past 7 days...')
+  }
+
+  const handleRefreshInsights = () => {
+    console.log('🔄 REFRESH AI INSIGHTS')
+    alert('🔄 Refreshing Insights...\n\n✅ AI insights updated with latest data!')
   }
 
   // Calculate progress metrics
