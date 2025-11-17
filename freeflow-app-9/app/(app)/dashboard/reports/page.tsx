@@ -44,6 +44,28 @@ export default function ReportsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [timeRange, setTimeRange] = useState('7d')
 
+  // Handlers
+  const handleGenerateReport = (type: string) => { console.log('📊 GEN:', type); alert(`📊 Generating ${type}...`) }
+  const handleExportReport = (format: string) => { console.log('💾 EXP:', format); alert(`💾 Export ${format}`) }
+  const handleScheduleReport = () => { console.log('📅 SCHED'); alert('📅 Schedule') }
+  const handleShareReport = () => { console.log('🔗 SHARE'); alert('🔗 Share') }
+  const handleSaveReport = () => { console.log('💾 SAVE'); alert('💾 Saved') }
+  const handlePrintReport = () => { console.log('🖨️ PRINT'); window.print() }
+  const handleFilterData = (filter: string) => { console.log('🔍 FILT:', filter); alert(`🔍 ${filter}`) }
+  const handleDateRange = (range: string) => { console.log('📅 RANGE:', range); setTimeRange(range) }
+  const handleCustomReport = () => { console.log('🎨 CUSTOM'); alert('🎨 Custom') }
+  const handleCompareReports = () => { console.log('⚖️ CMP'); alert('⚖️ Compare') }
+  const handleEmailReport = () => { console.log('📧 EMAIL'); alert('📧 Email') }
+  const handleDashboardView = () => { console.log('📊 DASH'); alert('📊 Dashboard') }
+  const handleDetailedView = () => { console.log('🔍 DETAIL'); alert('🔍 Detail') }
+  const handleSummaryView = () => { console.log('📋 SUMM'); alert('📋 Summary') }
+  const handleRefreshData = () => { console.log('🔄 REFRESH'); alert('🔄 Refresh') }
+  const handleBenchmark = () => { console.log('📏 BENCH'); alert('📏 Benchmark') }
+  const handleInsights = () => { console.log('💡 AI'); alert('💡 AI Insights') }
+  const handleAnnotate = () => { console.log('✏️ NOTE'); alert('✏️ Annotate') }
+  const handleArchiveReport = () => { console.log('📦 ARCH'); alert('📦 Archive') }
+  const handleDeleteReport = () => { console.log('🗑️ DEL'); confirm('Delete?') && alert('✅ Deleted') }
+
   return (
     <div className="p-6 space-y-6 kazi-bg-light min-h-screen">
       <PageHeader

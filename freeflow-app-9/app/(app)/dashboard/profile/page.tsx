@@ -37,6 +37,28 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<any>('overview')
   const [isEditing, setIsEditing] = useState<any>(false)
 
+  // Handlers
+  const handleEditProfile = () => { console.log('✏️ EDIT'); setIsEditing(true); alert('✏️ Edit Profile') }
+  const handleSaveProfile = () => { console.log('💾 SAVE'); setIsEditing(false); alert('💾 Saved') }
+  const handleCancelEdit = () => { console.log('❌ CANCEL'); setIsEditing(false) }
+  const handleUploadAvatar = () => { console.log('📷 AVATAR'); const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.click(); alert('📷 Upload avatar') }
+  const handleUpdateBio = () => { console.log('📝 BIO'); alert('📝 Update bio') }
+  const handleAddSkill = () => { console.log('➕ SKILL'); const skill = prompt('Add skill:'); skill && alert(`➕ Added: ${skill}`) }
+  const handleRemoveSkill = (skill: string) => { console.log('➖ SKILL:', skill); confirm(`Remove ${skill}?`) && alert('✅ Removed') }
+  const handleAddSocial = () => { console.log('🔗 SOCIAL'); alert('🔗 Add social link') }
+  const handleUpdatePassword = () => { console.log('🔒 PASSWORD'); alert('🔒 Update password') }
+  const handleUpdateEmail = () => { console.log('📧 EMAIL'); alert('📧 Update email') }
+  const handleUpdatePhone = () => { console.log('📱 PHONE'); alert('📱 Update phone') }
+  const handleUpdateLocation = () => { console.log('📍 LOCATION'); alert('📍 Update location') }
+  const handlePrivacySettings = () => { console.log('🔒 PRIVACY'); alert('🔒 Privacy settings') }
+  const handleNotificationPrefs = () => { console.log('🔔 NOTIF'); alert('🔔 Notification preferences') }
+  const handleDeleteAccount = () => { console.log('🗑️ DELETE'); confirm('Delete account? This cannot be undone!') && alert('Account deletion requested') }
+  const handleExportData = () => { console.log('💾 EXPORT'); alert('💾 Exporting your data...') }
+  const handleViewActivity = () => { console.log('📊 ACTIVITY'); alert('📊 Activity log') }
+  const handleConnectedApps = () => { console.log('🔌 APPS'); alert('🔌 Connected apps') }
+  const handleTwoFactorAuth = () => { console.log('🔐 2FA'); alert('🔐 Two-factor authentication') }
+  const handleSessionManagement = () => { console.log('🖥️ SESSIONS'); alert('🖥️ Active sessions') }
+
   // Mock user profile data
   const userProfile = {
     name: 'Sarah Johnson',
