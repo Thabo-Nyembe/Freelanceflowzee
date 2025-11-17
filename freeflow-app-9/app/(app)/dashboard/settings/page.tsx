@@ -378,6 +378,8 @@ If you lose access to your authenticator app, you can use these codes to sign in
     }
   }
 
+  const handleTestNotifications = () => { console.log('🔔 TEST NOTIF'); alert('🔔 Test notification sent!\n\nCheck your notification settings to verify.') }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
