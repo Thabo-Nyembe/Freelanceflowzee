@@ -695,6 +695,30 @@ export default function CommunityHubPage() {
   const [state, dispatch] = useReducer(communityReducer, initialState)
   const [activeTab, setActiveTab] = useState<string>('feed')
 
+  // Handlers
+  const handleCreatePost = () => { console.log('➕ POST'); alert('➕ Create new post') }
+  const handleLikePost = (id: string) => { console.log('❤️ LIKE:', id); alert('❤️ Post liked!') }
+  const handleCommentOnPost = (id: string) => { console.log('💬 COMMENT:', id); alert('💬 Add comment') }
+  const handleSharePost = (id: string) => { console.log('🔗 SHARE:', id); alert('🔗 Post shared!') }
+  const handleBookmarkPost = (id: string) => { console.log('🔖 BOOKMARK:', id); alert('🔖 Post bookmarked') }
+  const handleFollowMember = (id: string) => { console.log('➕ FOLLOW:', id); alert('➕ Now following!') }
+  const handleUnfollowMember = (id: string) => { console.log('➖ UNFOLLOW:', id); alert('➖ Unfollowed') }
+  const handleConnectWithMember = (id: string) => { console.log('🤝 CONNECT:', id); alert('🤝 Connection request sent') }
+  const handleMessageMember = (id: string) => { console.log('💬 MESSAGE:', id); alert('💬 Opening chat...') }
+  const handleJoinEvent = (id: string) => { console.log('📅 JOIN EVENT:', id); alert('📅 Registered for event!') }
+  const handleCreateEvent = () => { console.log('➕ EVENT'); alert('➕ Create community event') }
+  const handleJoinGroup = (id: string) => { console.log('👥 JOIN GROUP:', id); alert('👥 Joined group!') }
+  const handleCreateGroup = () => { console.log('➕ GROUP'); alert('➕ Create new group') }
+  const handlePostJob = () => { console.log('💼 JOB'); alert('💼 Post job opportunity') }
+  const handleApplyToJob = (id: string) => { console.log('📝 APPLY:', id); alert('📝 Application submitted!') }
+  const handleSearchMembers = (query: string) => { console.log('🔍 SEARCH:', query); alert(`Searching: ${query}`) }
+  const handleFilterBySkill = (skill: string) => { console.log('🏷️ FILTER:', skill); alert(`Filter by: ${skill}`) }
+  const handleViewProfile = (id: string) => { console.log('👤 PROFILE:', id); alert('👤 Viewing profile') }
+  const handleEditProfile = () => { console.log('✏️ EDIT PROFILE'); alert('✏️ Edit your profile') }
+  const handleSendEndorsement = (id: string) => { console.log('⭐ ENDORSE:', id); alert('⭐ Endorsement sent!') }
+  const handleReportContent = (id: string) => { console.log('⚠️ REPORT:', id); alert('⚠️ Content reported') }
+  const handleBlockUser = (id: string) => { console.log('🚫 BLOCK:', id); confirm('Block user?') && alert('🚫 User blocked') }
+
   const mockMembers: CommunityMember[] = [
     {
       id: '1',
