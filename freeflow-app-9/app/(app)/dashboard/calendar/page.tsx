@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -118,9 +119,58 @@ export default function CalendarPage() {
   }
 
   // Enhanced Handler Functions
-  const handleCreateEvent = () => {
-    console.log('📅 CREATE EVENT CLICKED')
-    alert('📅 Create New Event\n\nEvent details:\n• Title\n• Date & Time\n• Location\n• Attendees\n• Reminders')
+  const handleCreateEvent = async () => {
+    console.log('📅 CREATE EVENT')
+
+    // Simplified event creation - in production would have a form modal
+    const title = prompt('Enter event title:')
+    if (!title) return
+
+    const time = prompt('Enter start time (e.g., 2025-02-01T09:00:00):')
+    if (!time) return
+
+    try {
+      const response = await fetch('/api/calendar/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          data: {
+            title,
+            description: 'New calendar event',
+            startTime: time,
+            endTime: new Date(new Date(time).getTime() + 60 * 60 * 1000).toISOString(),
+            type: 'meeting',
+            location: { type: 'virtual', details: 'Online' },
+            priority: 'medium'
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create event')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success(result.message, {
+          description: result.hasConflict ? '⚠️ Calendar conflict detected' : 'Event added to calendar'
+        })
+
+        // Show next steps
+        if (result.icsUrl) {
+          setTimeout(() => {
+            alert(`${result.message}\n\nICS Download: ${result.icsUrl}\n\nNext Steps:\n• Send calendar invites\n• Set reminders\n• Add meeting details`)
+          }, 500)
+        }
+      }
+    } catch (error: any) {
+      console.error('Create Event Error:', error)
+      toast.error('Failed to create event', {
+        description: error.message || 'Please try again later'
+      })
+    }
   }
 
   const handleEditEvent = (eventId: number) => {
@@ -128,10 +178,37 @@ export default function CalendarPage() {
     alert('✏️ Edit Event\n\nModify event details and settings.')
   }
 
-  const handleDeleteEvent = (eventId: number) => {
+  const handleDeleteEvent = async (eventId: number) => {
     console.log('🗑️ DELETE EVENT - ID:', eventId)
-    if (confirm('⚠️ Delete this event?\n\nThis action cannot be undone.')) {
-      alert('🗑️ Event deleted successfully.')
+
+    if (!confirm('⚠️ Delete this event?\n\nThis action cannot be undone.')) {
+      return
+    }
+
+    try {
+      const response = await fetch('/api/calendar/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          eventId: eventId.toString()
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete event')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success(result.message || 'Event deleted successfully')
+      }
+    } catch (error: any) {
+      console.error('Delete Event Error:', error)
+      toast.error('Failed to delete event', {
+        description: error.message || 'Please try again later'
+      })
     }
   }
 
@@ -177,9 +254,46 @@ export default function CalendarPage() {
     alert(`🔎 Searching for: "${searchTerm}"\n\nFound 3 matching events.`)
   }
 
-  const handleScheduleWithAI = () => {
+  const handleScheduleWithAI = async () => {
     console.log('🤖 AI SCHEDULING')
-    alert('🤖 AI Smart Scheduler\n\nLet AI find the best time based on:\n• Your availability\n• Team schedules\n• Meeting preferences\n• Time zones')
+
+    try {
+      const response = await fetch('/api/calendar/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'suggest',
+          data: {
+            title: 'New Meeting',
+            duration: 60,
+            attendees: []
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to get AI suggestions')
+      }
+
+      const result = await response.json()
+
+      if (result.success && result.suggestions) {
+        toast.success(result.message || 'AI scheduling suggestions ready!', {
+          description: `Found ${result.suggestions.length} optimal time slots`
+        })
+
+        // Show AI suggestions
+        const topSuggestion = result.suggestions[0]
+        setTimeout(() => {
+          alert(`🤖 AI Smart Scheduler\n\nTop Recommendation:\n${topSuggestion.time}\n\nConfidence: ${topSuggestion.confidence}%\nReason: ${topSuggestion.reason}\n\nProductivity Analysis:\n• Utilization: ${result.aiAnalysis.currentUtilization}%\n• Burnout Risk: ${result.aiAnalysis.burnoutRisk}\n• Trend: ${result.aiAnalysis.productivityTrend}`)
+        }, 500)
+      }
+    } catch (error: any) {
+      console.error('AI Scheduling Error:', error)
+      toast.error('Failed to generate AI suggestions', {
+        description: error.message || 'Please try again later'
+      })
+    }
   }
 
   const handleSetReminder = (eventId: number, reminderTime: string) => {
