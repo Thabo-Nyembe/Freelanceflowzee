@@ -31,6 +31,28 @@ export default function FinancialHubPage() {
   const [_selectedPeriod, setSelectedPeriod] = useState<string>('monthly')
   const [activeTab, setActiveTab] = useState<string>('overview')
 
+  // Handler functions
+  const handleExportReport = () => { console.log('💾 EXPORT'); alert('💾 Exporting comprehensive financial report...') }
+  const handleScheduleReview = () => { console.log('📅 SCHEDULE'); alert('📅 Financial review scheduled') }
+  const handleAddClient = () => { console.log('➕ ADD CLIENT'); alert('➕ Add new client') }
+  const handleEditClient = (id: number) => { console.log('✏️ EDIT CLIENT:', id); alert(`✏️ Edit client #${id}`) }
+  const handleDeleteClient = (id: number) => { console.log('🗑️ DELETE CLIENT:', id); confirm('Delete client?') && alert('✅ Client deleted') }
+  const handleViewClientDetails = (id: number) => { console.log('👤 VIEW CLIENT:', id); alert(`👤 Viewing client #${id} details`) }
+  const handleCreateGoal = () => { console.log('🎯 CREATE GOAL'); alert('🎯 Create new financial goal') }
+  const handleEditGoal = (id: string) => { console.log('✏️ EDIT GOAL:', id); alert(`✏️ Edit goal: ${id}`) }
+  const handleDeleteGoal = (id: string) => { console.log('🗑️ DELETE GOAL:', id); confirm('Delete goal?') && alert('✅ Goal deleted') }
+  const handleTrackGoalProgress = () => { console.log('📊 TRACK PROGRESS'); alert('📊 Tracking goal progress...') }
+  const handleAddExpense = () => { console.log('➕ ADD EXPENSE'); alert('➕ Add expense') }
+  const handleCategorizeExpense = () => { console.log('📁 CATEGORIZE'); alert('📁 Categorize expense') }
+  const handleViewExpenseBreakdown = () => { console.log('📊 BREAKDOWN'); alert('📊 Expense breakdown by category') }
+  const handleExportExpenses = () => { console.log('💾 EXPORT EXPENSES'); alert('💾 Exporting expenses...') }
+  const handleGenerateInvoiceReport = () => { console.log('📊 INVOICE REPORT'); alert('📊 Generating invoice report') }
+  const handleBulkInvoiceAction = () => { console.log('📋 BULK ACTION'); alert('📋 Bulk invoice operations') }
+  const handleSendInvoiceReminders = () => { console.log('📧 REMINDERS'); alert('📧 Sending payment reminders') }
+  const handleRecordPayment = (id: number) => { console.log('💰 PAYMENT:', id); alert(`💰 Record payment for invoice #${id}`) }
+  const handleRefreshDashboard = () => { console.log('🔄 REFRESH'); alert('🔄 Refreshing dashboard data...') }
+  const handleGenerateFinancialForecast = () => { console.log('🔮 FORECAST'); alert('🔮 Generating financial forecast') }
+
   // Mock comprehensive financial data
   const financialData = {
     overview: {
@@ -117,11 +139,11 @@ export default function FinancialHubPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleExportReport}>
             <FileText className="h-4 w-4 mr-2" />
             Export Report
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={handleScheduleReview}>
             <Calendar className="h-4 w-4 mr-2" />
             Schedule Review
           </Button>
