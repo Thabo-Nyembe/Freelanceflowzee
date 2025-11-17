@@ -227,6 +227,28 @@ export default function NotificationsPage() {
     dispatch({ type: 'SET_NOTIFICATIONS', payload: mockNotifications })
   }, [])
 
+  // Handlers
+  const handleRefresh = () => { console.log('🔄 REFRESH'); dispatch({ type: 'SET_LOADING', payload: true }); window.location.reload() }
+  const handleSettings = () => { console.log('⚙️ SETTINGS'); setActiveTab('settings') }
+  const handleViewNotification = (id: string) => { console.log('👁️:', id); dispatch({ type: 'MARK_AS_READ', payload: id }); alert(`👁️ View ${id}`) }
+  const handleMarkRead = (id: string) => { console.log('✅:', id); dispatch({ type: 'MARK_AS_READ', payload: id }) }
+  const handleMarkAllRead = () => { console.log('✅ ALL'); dispatch({ type: 'MARK_ALL_READ' }) }
+  const handleArchive = (id: string) => { console.log('📦:', id); dispatch({ type: 'ARCHIVE_NOTIFICATION', payload: id }) }
+  const handleArchiveAll = () => { console.log('📦 ALL'); state.notifications.forEach(n => dispatch({ type: 'ARCHIVE_NOTIFICATION', payload: n.id })); alert('📦 All archived') }
+  const handleDelete = (id: string) => { console.log('🗑️:', id); dispatch({ type: 'DELETE_NOTIFICATION', payload: id }) }
+  const handleDeleteAll = () => { console.log('🗑️ ALL'); confirm('Delete all?') && state.notifications.forEach(n => dispatch({ type: 'DELETE_NOTIFICATION', payload: n.id })) }
+  const handleUnarchive = (id: string) => { console.log('📤:', id); alert('📤 Unarchive') }
+  const handleFilterAll = () => { console.log('🔍 ALL'); dispatch({ type: 'SET_FILTER', payload: 'all' }) }
+  const handleFilterUnread = () => { console.log('🔍 UNREAD'); dispatch({ type: 'SET_FILTER', payload: 'unread' }) }
+  const handleFilterRead = () => { console.log('🔍 READ'); dispatch({ type: 'SET_FILTER', payload: 'read' }) }
+  const handleExportNotifications = () => { console.log('💾 EXP'); alert('💾 Export') }
+  const handleClearAll = () => { console.log('🧹 CLEAR'); confirm('Clear all?') && dispatch({ type: 'SET_NOTIFICATIONS', payload: [] }) }
+  const handleToggleSound = () => { console.log('🔔 SOUND'); dispatch({ type: 'TOGGLE_SOUND' }) }
+  const handleTogglePreviews = () => { console.log('👁️ PREVIEW'); dispatch({ type: 'TOGGLE_PREVIEWS' }) }
+  const handleSavePreferences = () => { console.log('💾 PREFS'); alert('💾 Preferences saved') }
+  const handleResetPreferences = () => { console.log('🔄 RESET'); confirm('Reset?') && alert('🔄 Reset to defaults') }
+  const handleSnooze = (id: string) => { console.log('⏰:', id); alert(`⏰ Snooze ${id}`) }
+
   const filteredNotifications = state.notifications.filter(notification => {
     const matchesSearch = notification.title.toLowerCase().includes(state.search.toLowerCase()) ||
                          notification.message.toLowerCase().includes(state.search.toLowerCase())
