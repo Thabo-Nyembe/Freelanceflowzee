@@ -44,6 +44,28 @@ export default function ClientZonePage() {
   const [newMessage, setNewMessage] = useState('')
   const [newFeedback, setNewFeedback] = useState('')
 
+  // Handlers
+  const handleViewProject = (id: number) => { console.log('👁️ VIEW PROJECT:', id); alert('👁️ Viewing project details') }
+  const handleApproveDeliverable = (id: number) => { console.log('✅ APPROVE:', id); alert('✅ Deliverable approved!') }
+  const handleRequestRevision = (id: number) => { console.log('🔄 REVISE:', id); alert('🔄 Revision requested') }
+  const handleSendMessage = () => { console.log('📧 SEND MESSAGE'); alert('📧 Message sent to team'); setNewMessage('') }
+  const handleDownloadFile = (id: number) => { console.log('📥 DOWNLOAD:', id); alert('📥 Downloading file...') }
+  const handleUploadFile = () => { console.log('📤 UPLOAD'); const input = document.createElement('input'); input.type = 'file'; input.click(); alert('📤 File upload started') }
+  const handleSubmitFeedback = () => { console.log('⭐ FEEDBACK'); alert('⭐ Feedback submitted!'); setNewFeedback('') }
+  const handleScheduleMeeting = () => { console.log('📅 SCHEDULE'); alert('📅 Schedule meeting with team') }
+  const handleMakePayment = (id: number) => { console.log('💳 PAYMENT:', id); alert('💳 Processing payment...') }
+  const handleViewInvoice = (id: number) => { console.log('🧾 INVOICE:', id); alert('🧾 Viewing invoice') }
+  const handleDownloadInvoice = (id: number) => { console.log('📥 DOWNLOAD INVOICE:', id); alert('📥 Downloading invoice...') }
+  const handleRequestQuote = () => { console.log('📋 QUOTE'); alert('📋 Request new project quote') }
+  const handleViewGallery = (id: number) => { console.log('🖼️ GALLERY:', id); alert('🖼️ Opening project gallery') }
+  const handleRateTeamMember = (id: string) => { console.log('⭐ RATE:', id); alert('⭐ Rate team member performance') }
+  const handleContactSupport = () => { console.log('💬 SUPPORT'); alert('💬 Contacting support team...') }
+  const handleUpdateProfile = () => { console.log('✏️ UPDATE PROFILE'); alert('✏️ Update client profile') }
+  const handleManageNotifications = () => { console.log('🔔 NOTIFICATIONS'); alert('🔔 Manage notification preferences') }
+  const handleExportProjectReport = (id: number) => { console.log('📊 EXPORT REPORT:', id); alert('📊 Exporting project report...') }
+  const handleShareProject = (id: number) => { console.log('🔗 SHARE:', id); alert('🔗 Share project link') }
+  const handleArchiveProject = (id: number) => { console.log('📦 ARCHIVE:', id); confirm('Archive project?') && alert('📦 Project archived') }
+
   // Mock client data (from client's perspective)
   const clientInfo = {
     name: 'Acme Corporation',
