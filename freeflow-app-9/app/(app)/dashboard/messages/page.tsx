@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Send, Search, Filter, MessageSquare, Paperclip, Image, Mic, Plus, Pin, Bell, BellOff, Archive, Trash2, CheckCheck, Reply, Forward, Smile } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface Message {
   id: number
@@ -45,22 +46,56 @@ export default function MessagesPage() {
     chat.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const handleSendMessage = () => {
-    if (newMessage.trim() && selectedChat) {
-      // Add message to chat
-      const _message: Message = {
-        id: mockMessages.length + 1,
-        text: newMessage,
-        sender: 'You',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedChat) return
+
+    console.log('📤 SEND MESSAGE')
+
+    try {
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send',
+          data: {
+            chatId: `chat-${selectedChat}`,
+            content: newMessage,
+            type: 'text',
+            senderId: 'user-1'
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send message')
       }
 
-      // In a real app, this would send the message to the backend
-      console.log('Sending message:', newMessage)
-      setNewMessage('')
+      const result = await response.json()
 
-      // Show success feedback
-      alert('Message sent successfully!')
+      if (result.success) {
+        // Add message to local state
+        const localMessage: Message = {
+          id: mockMessages.length + 1,
+          text: newMessage,
+          sender: 'You',
+          timestamp: new Date(result.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+
+        setMessages([...messages, localMessage])
+        setNewMessage('')
+
+        // Show delivery confirmation
+        if (result.delivered) {
+          toast.success(result.messageText, {
+            description: `Delivered at ${localMessage.timestamp}`
+          })
+        }
+      }
+    } catch (error: any) {
+      console.error('Send Message Error:', error)
+      toast.error('Failed to send message', {
+        description: error.message || 'Please try again later'
+      })
     }
   }
 
