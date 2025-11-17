@@ -52,6 +52,7 @@ import {
   X,
   Check
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 // Types
 interface FileItem {
@@ -424,11 +425,55 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
     alert(`📥 Bulk Download\n\nFiles: ${selectedFiles.length}\nTotal Size: ${formatFileSize(totalSize)}\n\nCreating zip archive...`)
   }
 
-  const handleCreateFolder = () => {
+  const handleCreateFolder = async () => {
     console.log('📁 CREATE FOLDER')
     const folderName = prompt('Enter folder name:', 'New Folder')
-    if (folderName && folderName.trim()) {
-      alert(`📁 Folder Created\n\nName: ${folderName.trim()}\n\nYou can now move files to this folder.`)
+    if (!folderName || !folderName.trim()) {
+      return
+    }
+
+    try {
+      // Call API to create folder
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-folder',
+          data: {
+            name: folderName.trim(),
+            parentFolder: null,
+            color: 'blue',
+            icon: 'folder'
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create folder')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Show success message
+        if (result.achievement) {
+          toast.success(`${result.message} ${result.achievement.message} +${result.achievement.points} points!`, {
+            description: `Folder "${folderName.trim()}" created successfully!`
+          })
+        } else {
+          toast.success(result.message, {
+            description: `Folder "${folderName.trim()}" created successfully!`
+          })
+        }
+
+        // Note: In production, this would update the local folders state
+        // setFolders(prev => [...prev, result.folder])
+      }
+    } catch (error: any) {
+      console.error('Create Folder Error:', error)
+      toast.error('Failed to create folder', {
+        description: error.message || 'Please try again later'
+      })
     }
   }
 

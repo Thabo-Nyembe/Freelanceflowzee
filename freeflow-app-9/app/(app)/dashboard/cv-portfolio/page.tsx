@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -30,6 +31,8 @@ import {
 
 export default function CVPortfolioPage() {
   const [activeTab, setActiveTab] = useState<string>('overview')
+  const [isExporting, setIsExporting] = useState<boolean>(false)
+  const [isSharing, setIsSharing] = useState<boolean>(false)
 
   // Handler functions
   const handleEditProfile = () => {
@@ -37,21 +40,115 @@ export default function CVPortfolioPage() {
     alert('✏️ Edit Profile\n\nOpening profile editor...\n\nYou can update:\n• Personal information\n• Contact details\n• Professional summary\n• Profile picture')
   }
 
-  const handleSharePortfolio = () => {
+  const handleSharePortfolio = async () => {
     console.log('🔗 SHARE PORTFOLIO')
-    const shareLink = `${window.location.origin}/portfolio/${profileData.name.toLowerCase().replace(' ', '-')}`
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(shareLink)
-      alert(`🔗 Portfolio Link Copied!\n\nLink: ${shareLink}\n\nShare this link with clients and recruiters!`)
-    } else {
-      alert(`🔗 Share Portfolio\n\n${shareLink}`)
+    setIsSharing(true)
+
+    try {
+      // Call API to generate shareable link
+      const response = await fetch('/api/cv-portfolio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'share',
+          data: {
+            method: 'social'
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate share link')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Copy link to clipboard
+        if (navigator.clipboard) {
+          await navigator.clipboard.writeText(result.shareUrl)
+        }
+
+        // Show social sharing options
+        const socialLinks = result.shareLinks
+        alert(`🔗 Portfolio Shared Successfully!
+
+Share URL: ${result.shareUrl}
+Expires: ${result.expiresIn}
+
+Social Sharing:
+• LinkedIn: ${socialLinks.linkedin}
+• Twitter: ${socialLinks.twitter}
+• Facebook: ${socialLinks.facebook}
+• WhatsApp: ${socialLinks.whatsapp}
+
+Link copied to clipboard!`)
+
+        toast.success('🔗 Share Link Generated!', {
+          description: 'Link copied to clipboard. Valid for 30 days.'
+        })
+      }
+    } catch (error: any) {
+      console.error('Share Error:', error)
+      toast.error('Failed to generate share link', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsSharing(false)
     }
   }
 
-  const handleDownloadCV = () => {
+  const handleDownloadCV = async () => {
     console.log('📥 DOWNLOAD CV')
-    alert('📥 Downloading CV\n\nFormat: PDF\nFile: Thabo_Nkanyane_CV.pdf\n\nGenerating professional CV from your profile...')
-    // In production: Generate and download PDF
+    setIsExporting(true)
+
+    try {
+      // Prepare CV data
+      const cvData = {
+        profile: profileData,
+        experience,
+        projects,
+        skills,
+        education,
+        achievements: []
+      }
+
+      // Call API to export PDF
+      const response = await fetch('/api/cv-portfolio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'export-pdf',
+          data: cvData
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate CV')
+      }
+
+      // Download the PDF
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `cv-${profileData.name.replace(/\s/g, '-')}-${Date.now()}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('📥 CV Downloaded Successfully!', {
+        description: `File: ${a.download}`
+      })
+    } catch (error: any) {
+      console.error('CV Export Error:', error)
+      toast.error('Failed to download CV', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   const handleViewProject = (project: any) => {
@@ -335,13 +432,22 @@ export default function CVPortfolioPage() {
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Profile
               </Button>
-              <Button variant="outline" className="kazi-focus" onClick={handleSharePortfolio}>
+              <Button
+                variant="outline"
+                className="kazi-focus"
+                onClick={handleSharePortfolio}
+                disabled={isSharing}
+              >
                 <Share2 className="w-4 h-4 mr-2" />
-                Share
+                {isSharing ? 'Generating...' : 'Share'}
               </Button>
-              <Button className="btn-kazi-primary kazi-ripple" onClick={handleDownloadCV}>
+              <Button
+                className="btn-kazi-primary kazi-ripple"
+                onClick={handleDownloadCV}
+                disabled={isExporting}
+              >
                 <Download className="w-4 h-4 mr-2" />
-                Download CV
+                {isExporting ? 'Exporting...' : 'Download CV'}
               </Button>
             </div>
           </div>
