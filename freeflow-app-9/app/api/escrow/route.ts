@@ -224,7 +224,7 @@ async function handleReleaseFunds(data: {
       'You will receive an email confirmation',
       'Check your bank account in 2-3 days',
     ],
-    achievement: Math.random() > 0.6 ? {
+    achievement: Math.random() > 0.4 ? {
       message: '💰 Payday! Another successful project!',
       badge: 'Earner',
       points: 25,
