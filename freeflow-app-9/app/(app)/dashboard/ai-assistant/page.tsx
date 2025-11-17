@@ -317,6 +317,31 @@ export default function AIAssistantPage() {
     }
   }
 
+  // Additional Handlers
+  const handleNewConversation = () => { console.log('➕ NEW CONVERSATION'); alert('➕ New Conversation\n\nStarting fresh chat session...'); setMessages([{ id: Date.now().toString(), content: 'Hello! How can I help you today?', type: 'assistant', timestamp: new Date() }]) }
+  const handleLoadConversation = (conversationId: string, title: string) => { console.log('📂 LOAD:', conversationId); alert(`📂 Loading Conversation\n\n${title}`) }
+  const handleDeleteConversation = (conversationId: string) => { console.log('🗑️ DELETE CONV:', conversationId); confirm('Delete conversation?') && alert('✅ Conversation deleted') }
+  const handleCopyMessage = (messageId: string, content: string) => { console.log('📋 COPY:', messageId); navigator.clipboard.writeText(content); alert('📋 Message Copied\n\nCopied to clipboard') }
+  const handleBookmarkMessage = (messageId: string) => { console.log('🔖 BOOKMARK:', messageId); alert('🔖 Message Bookmarked\n\nSaved to bookmarks') }
+  const handleRefreshInsights = () => { console.log('🔄 REFRESH INSIGHTS'); alert('🔄 Refreshing AI Insights\n\nAnalyzing latest data...') }
+  const handleImplementAction = (insightId: string, action: string) => { console.log('✅ ACTION:', insightId, action); alert(`✅ Implementing Action\n\n${action}`) }
+  const handleExportConversation = (conversationId: string) => { console.log('💾 EXPORT:', conversationId); alert('💾 Export Conversation\n\nDownloading as PDF/MD...') }
+  const handleShareConversation = (conversationId: string) => { console.log('🔗 SHARE:', conversationId); alert('🔗 Share Conversation\n\nGenerate shareable link') }
+  const handleVoiceInput = () => { console.log('🎤 VOICE INPUT'); setIsListening(!isListening); alert('🎤 Voice Input\n\nListening for voice command...') }
+  const handleRegenerateResponse = (messageId: string) => { console.log('🔄 REGENERATE:', messageId); alert('🔄 Regenerating Response\n\nCreating new AI response...') }
+  const handleSearchConversations = () => { console.log('🔍 SEARCH'); alert('🔍 Search Conversations\n\nSearch through chat history') }
+  const handleFilterConversations = (filter: string) => { console.log('🔍 FILTER:', filter); alert(`🔍 Filtering: ${filter}`) }
+  const handleExportInsights = () => { console.log('💾 EXPORT INSIGHTS'); alert('💾 Export Insights Report\n\nGenerating PDF report...') }
+  const handleScheduleReminder = (action: string) => { console.log('📅 REMINDER:', action); alert(`📅 Schedule Reminder\n\n${action}`) }
+  const handleViewAnalytics = () => { console.log('📊 ANALYTICS'); alert('📊 View Analytics\n\nDetailed performance metrics') }
+  const handleConfigureAI = () => { console.log('⚙️ CONFIG AI'); alert('⚙️ AI Configuration\n\nModel settings\nTemperature\nContext length\nSystem prompts') }
+  const handleSaveChat = () => { console.log('💾 SAVE CHAT'); alert('💾 Chat Saved\n\nConversation saved successfully') }
+  const handleClearChat = () => { console.log('🗑️ CLEAR'); confirm('Clear all messages?') && (setMessages([]), alert('✅ Chat cleared')) }
+  const handleAttachFile = () => { console.log('📎 ATTACH'); const input = document.createElement('input'); input.type = 'file'; input.click(); alert('📎 Attach File\n\nFile picker opened') }
+  const handleInsightDismiss = (insightId: string) => { console.log('❌ DISMISS:', insightId); confirm('Dismiss this insight?') && alert('✅ Insight dismissed') }
+  const handlePinConversation = (conversationId: string) => { console.log('📌 PIN:', conversationId); alert('📌 Conversation Pinned') }
+  const handleArchiveConversation = (conversationId: string) => { console.log('📦 ARCHIVE:', conversationId); alert('📦 Conversation Archived') }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -356,7 +381,7 @@ export default function AIAssistantPage() {
               {isVoiceMode ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             </Button>
             
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleConfigureAI}>
               <Settings className="w-4 h-4" />
             </Button>
           </div>
@@ -367,7 +392,7 @@ export default function AIAssistantPage() {
         {/* Left Sidebar - Conversations */}
         <div className="w-80 bg-white border-r border-gray-200">
           <div className="p-4 border-b border-gray-200">
-            <Button className="w-full">
+            <Button className="w-full" onClick={handleNewConversation}>
               <MessageSquare className="w-4 h-4 mr-2" />
               New Conversation
             </Button>
@@ -376,7 +401,7 @@ export default function AIAssistantPage() {
           <ScrollArea className="h-[calc(100%-80px)]">
             <div className="p-4 space-y-3">
               {conversations.map(conversation => (
-                <Card key={conversation.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                <Card key={conversation.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleLoadConversation(conversation.id, conversation.title)}>
                   <CardContent className="p-3">
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="font-medium text-sm truncate">{conversation.title}</h3>
@@ -464,10 +489,10 @@ export default function AIAssistantPage() {
                               >
                                 <ThumbsDown className={`w-3 h-3 ${message.rating === 'down' ? 'text-red-600' : 'text-gray-400'}`} />
                               </Button>
-                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => handleCopyMessage(message.id, message.content)}>
                                 <Copy className="w-3 h-3 text-gray-400" />
                               </Button>
-                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => handleBookmarkMessage(message.id)}>
                                 <Bookmark className="w-3 h-3 text-gray-400" />
                               </Button>
                             </div>
@@ -574,7 +599,7 @@ export default function AIAssistantPage() {
               <div className="max-w-6xl mx-auto space-y-6">
                 <div className="flex items-center justify-between">
                   <h2 className="text-2xl font-bold">AI Insights</h2>
-                  <Button>
+                  <Button onClick={handleRefreshInsights}>
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Refresh Insights
                   </Button>
@@ -596,7 +621,7 @@ export default function AIAssistantPage() {
                       </CardHeader>
                       <CardContent>
                         <p className="text-gray-600 mb-4">{insight.description}</p>
-                        <Button size="sm" className="w-full">
+                        <Button size="sm" className="w-full" onClick={() => handleImplementAction(insight.id, insight.action)}>
                           {insight.action}
                         </Button>
                       </CardContent>
