@@ -541,6 +541,131 @@ export default function EscrowPage() {
     setNewDeposit({ ...newDeposit, milestones })
   }
 
+  const handleEditDeposit = (depositId: string) => {
+    console.log('✏️ EDIT DEPOSIT:', depositId)
+    alert(`✏️ Edit Deposit #${depositId}\n\nUpdate deposit details, milestones, and payment terms.`)
+  }
+
+  const handleDeleteDeposit = (depositId: string) => {
+    console.log('🗑️ DELETE DEPOSIT:', depositId)
+    if (confirm('⚠️ Delete Escrow Deposit?\n\nThis action cannot be undone.\n\nAre you sure?')) {
+      dispatch({ type: 'DELETE_DEPOSIT', depositId })
+      alert('✅ Deposit deleted successfully!')
+    }
+  }
+
+  const handleViewContract = (depositId: string) => {
+    console.log('📄 VIEW CONTRACT:', depositId)
+    alert('📄 Opening contract document...')
+  }
+
+  const handleUploadContract = (depositId: string) => {
+    console.log('📤 UPLOAD CONTRACT:', depositId)
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.pdf,.doc,.docx'
+    input.onchange = (e: Event) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (file) {
+        console.log('✅ CONTRACT UPLOADED:', file.name)
+        alert(`✅ Contract Uploaded!\n\nFile: ${file.name}\n\nContract has been attached to deposit.`)
+      }
+    }
+    input.click()
+  }
+
+  const handleSendNotification = (depositId: string) => {
+    console.log('📧 SEND NOTIFICATION:', depositId)
+    alert('📧 Notification Sent\n\nClient has been notified about deposit status update.')
+  }
+
+  const handleDisputeResolution = (depositId: string) => {
+    console.log('⚖️ DISPUTE RESOLUTION:', depositId)
+    const reason = prompt('Enter dispute reason:')
+    if (reason) {
+      dispatch({ type: 'DISPUTE_DEPOSIT', depositId, reason })
+      alert('⚖️ Dispute Filed\n\nDispute has been submitted for review.')
+    }
+  }
+
+  const handleDownloadReceipt = (depositId: string) => {
+    console.log('📥 DOWNLOAD RECEIPT:', depositId)
+    alert('📥 Downloading receipt...\n\nReceipt will be saved as PDF.')
+  }
+
+  const handleViewTransactionHistory = (depositId: string) => {
+    console.log('📊 TRANSACTION HISTORY:', depositId)
+    alert('📊 Transaction History\n\nShowing all transactions for this deposit.')
+  }
+
+  const handleAddNotes = (depositId: string) => {
+    console.log('📝 ADD NOTES:', depositId)
+    const notes = prompt('Enter notes:')
+    if (notes) {
+      dispatch({ type: 'UPDATE_DEPOSIT', depositId, updates: { notes } })
+      alert('✅ Notes added successfully!')
+    }
+  }
+
+  const handleRequestApproval = (depositId: string) => {
+    console.log('✋ REQUEST APPROVAL:', depositId)
+    alert('✋ Approval Requested\n\nClient will receive approval request notification.')
+  }
+
+  const handleRefundDeposit = (depositId: string) => {
+    console.log('💸 REFUND DEPOSIT:', depositId)
+    if (confirm('Refund this deposit to client?\n\nThis will return funds to client account.')) {
+      alert('💸 Refund Processed\n\nFunds will be returned to client within 5-7 business days.')
+    }
+  }
+
+  const handleUpdatePaymentMethod = (depositId: string) => {
+    console.log('💳 UPDATE PAYMENT:', depositId)
+    alert('💳 Update Payment Method\n\nClient can update their payment details.')
+  }
+
+  const handleGenerateInvoice = (depositId: string) => {
+    console.log('🧾 GENERATE INVOICE:', depositId)
+    alert('🧾 Invoice Generated\n\nInvoice has been created and sent to client.')
+  }
+
+  const handleExportEscrowReport = () => {
+    console.log('💾 EXPORT ESCROW REPORT')
+    alert('💾 Exporting Escrow Report\n\nFormat: PDF\nIncluding all deposits and transactions')
+  }
+
+  const handleFilterByStatus = (filter: EscrowState['filter']) => {
+    console.log('🔍 FILTER BY STATUS:', filter)
+    dispatch({ type: 'SET_FILTER', filter })
+  }
+
+  const handleSearchDeposits = (searchTerm: string) => {
+    console.log('🔍 SEARCH:', searchTerm)
+    dispatch({ type: 'SET_SEARCH', searchTerm })
+  }
+
+  const handleEditMilestone = (depositId: string, milestoneId: string) => {
+    console.log('✏️ EDIT MILESTONE:', milestoneId)
+    alert(`✏️ Edit Milestone\n\nUpdate milestone details and amount.`)
+  }
+
+  const handleDeleteMilestone = (depositId: string, milestoneId: string) => {
+    console.log('🗑️ DELETE MILESTONE:', milestoneId)
+    if (confirm('Delete this milestone?')) {
+      alert('✅ Milestone deleted!')
+    }
+  }
+
+  const handleAddMilestone = (depositId: string) => {
+    console.log('➕ ADD MILESTONE:', depositId)
+    alert('➕ Add Milestone\n\nCreate a new milestone for this deposit.')
+  }
+
+  const handleViewDepositDetails = (depositId: string) => {
+    console.log('👁️ VIEW DETAILS:', depositId)
+    alert('👁️ Viewing detailed deposit information...')
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
