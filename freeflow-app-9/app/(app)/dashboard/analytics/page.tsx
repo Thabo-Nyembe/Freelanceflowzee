@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -74,11 +75,58 @@ export default function AnalyticsPage() {
   }
 
   const handleExportData = async (format: string) => {
-    console.log('💾 EXPORT DATA - Format:', format)
+    console.log('💾 EXPORT ANALYTICS DATA - Format:', format)
     setIsExporting(true)
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    setIsExporting(false)
-    alert(`💾 Export complete!\n\nFile: analytics_${activeTab}.${format}`)
+
+    try {
+      const response = await fetch('/api/analytics/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reportType: 'comprehensive',  // Export comprehensive analytics by default
+          format: format.toLowerCase(),
+          period: {
+            start: new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString().split('T')[0],
+            end: new Date().toISOString().split('T')[0]
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to export analytics')
+      }
+
+      // Handle CSV/XLSX download
+      if (format.toLowerCase() === 'csv' || format.toLowerCase() === 'xlsx') {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `analytics-comprehensive-${Date.now()}.${format.toLowerCase()}`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+        toast.success(`Analytics exported as ${format.toUpperCase()}`, {
+          description: `Report includes comprehensive data for the last 6 months`
+        })
+      } else {
+        // Handle JSON response
+        const result = await response.json()
+        if (result.success) {
+          toast.success('Analytics report generated!', {
+            description: `${result.reportType} data retrieved successfully`
+          })
+        }
+      }
+    } catch (error: any) {
+      console.error('Export Analytics Error:', error)
+      toast.error('Failed to export analytics', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   const handleFilterByMetric = (metric: string) => {
