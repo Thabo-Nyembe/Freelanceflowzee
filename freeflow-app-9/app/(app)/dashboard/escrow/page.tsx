@@ -585,19 +585,20 @@ export default function EscrowPage() {
 
         // Show success toast
         if (result.achievement) {
-          toast.success(`${result.message} ${result.achievement.message} +${result.achievement.points} points!`, {
-            description: `Net amount: $${result.netAmount.toFixed(2)} • ${result.estimatedArrival}`
-          })
+          toast.success(`${result.message} ${result.achievement.message} +${result.achievement.points} points!`)
         } else {
-          toast.success(result.message, {
-            description: `Net amount: $${result.netAmount.toFixed(2)} • ${result.estimatedArrival}`
-          })
+          toast.success(result.message)
         }
 
-        // Show next steps alert
-        if (result.nextSteps && result.nextSteps.length > 0) {
+        // Show payout details alert
+        if (result.netAmount) {
           setTimeout(() => {
-            alert(`Next Steps:\n\n${result.nextSteps.join('\n')}`)
+            alert(`Payout Details:
+Amount: $${result.amount}
+Processing Fee: $${result.processingFee.toFixed(2)}
+Net Amount: $${result.netAmount.toFixed(2)}
+
+Estimated Arrival: ${result.estimatedArrival}`)
           }, 500)
         }
       }
