@@ -21,6 +21,31 @@ import {
 export default function AIDesignPage() {
   const [activeTab, setActiveTab] = useState<string>('tools')
 
+  // Handlers
+  const handleNewProject = () => { console.log('➕ NEW PROJECT'); alert('➕ Create New AI Design Project\n\nChoose project type:\n• Logo Design\n• UI/UX Layout\n• Color Palette\n• Mockup Generator') }
+  const handleLaunchTool = (toolId: string, toolName: string) => { console.log('🚀 LAUNCH TOOL:', toolId); alert(`🚀 Launching ${toolName}\n\nInitializing AI design tool...`) }
+  const handleGenerateLogo = () => { console.log('🎨 GENERATE LOGO'); alert('🎨 AI Logo Generator\n\nDescribe your brand:\n• Industry\n• Style preferences\n• Color preferences\n• Brand values') }
+  const handleGenerateColorScheme = () => { console.log('🎨 COLOR SCHEME'); alert('🎨 AI Color Palette Generator\n\nSelect inspiration:\n• Upload image\n• Describe mood\n• Industry type\n• Brand guidelines') }
+  const handleGenerateLayout = () => { console.log('📐 LAYOUT'); alert('📐 AI Layout Generator\n\nSpecify requirements:\n• Page type\n• Content sections\n• Style preference\n• Responsive breakpoints') }
+  const handleGenerateMockup = () => { console.log('🖼️ MOCKUP'); alert('🖼️ AI Mockup Generator\n\nComing soon!\n\nCreate product mockups with AI') }
+  const handleContinueProject = (projectId: number, projectName: string) => { console.log('▶️ CONTINUE:', projectId); alert(`▶️ Opening Project\n\n${projectName}\n\nLoading design workspace...`) }
+  const handleShareProject = (projectId: number) => { console.log('🔗 SHARE:', projectId); alert('🔗 Share Project\n\nGenerate shareable link or export') }
+  const handleUseTemplate = (templateId: string, templateName: string) => { console.log('✨ USE TEMPLATE:', templateId); alert(`✨ Using Template\n\n${templateName}\n\nCustomizing with AI...`) }
+  const handleExportDesign = (format: 'png' | 'svg' | 'pdf') => { console.log('💾 EXPORT:', format); alert(`💾 Exporting Design\n\nFormat: ${format.toUpperCase()}\n\nPreparing download...`) }
+  const handleSaveProject = (projectId: number) => { console.log('💾 SAVE:', projectId); alert('💾 Project Saved\n\nAll changes saved successfully') }
+  const handleDeleteProject = (projectId: number) => { console.log('🗑️ DELETE PROJECT:', projectId); confirm('Delete this project?') && alert('✅ Project deleted') }
+  const handleDuplicateProject = (projectId: number) => { console.log('📋 DUPLICATE:', projectId); alert('📋 Project Duplicated\n\nCreated copy with all assets') }
+  const handleRenameProject = (projectId: number) => { console.log('✏️ RENAME:', projectId); const name = prompt('New project name:'); name && alert(`✅ Renamed to: ${name}`) }
+  const handleViewProjectHistory = (projectId: number) => { console.log('📜 HISTORY:', projectId); alert('📜 Project Version History\n\nView and restore previous versions') }
+  const handleConfigureAISettings = () => { console.log('⚙️ AI SETTINGS'); alert('⚙️ Configure AI Settings\n\nModel selection\nQuality settings\nStyle preferences\nOutput format') }
+  const handleRefreshTemplates = () => { console.log('🔄 REFRESH TEMPLATES'); alert('🔄 Refreshing Templates\n\nLoading latest designs...') }
+  const handleFilterTemplates = (category: string) => { console.log('🔍 FILTER:', category); alert(`🔍 Filtering Templates\n\nCategory: ${category}`) }
+  const handleDownloadTemplate = (templateId: string) => { console.log('⬇️ DOWNLOAD:', templateId); alert('⬇️ Downloading Template\n\nTemplate files ready') }
+  const handleFavoriteTemplate = (templateId: string) => { console.log('⭐ FAVORITE:', templateId); alert('⭐ Added to Favorites') }
+  const handlePreviewDesign = (id: string) => { console.log('👁️ PREVIEW:', id); alert('👁️ Design Preview\n\nOpening full preview...') }
+  const handleAIEnhance = (projectId: number) => { console.log('✨ AI ENHANCE:', projectId); alert('✨ AI Enhancement\n\nApplying AI improvements...') }
+  const handleGenerateBrandKit = () => { console.log('🎨 BRAND KIT'); alert('🎨 Generate Brand Kit\n\nCreating:\n• Logo variations\n• Color palette\n• Typography\n• Brand guidelines') }
+
   const designTools = [
     {
       id: 'logo-gen',
@@ -87,7 +112,7 @@ export default function AIDesignPage() {
                 Create stunning designs with the power of artificial intelligence
               </p>
             </div>
-            <Button className="btn-kazi-primary kazi-ripple">
+            <Button className="btn-kazi-primary kazi-ripple" onClick={handleNewProject}>
               <Plus className="w-4 h-4 mr-2" />
               New Project
             </Button>
@@ -123,9 +148,10 @@ export default function AIDesignPage() {
                       <CardDescription className="kazi-body">{tool.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <Button 
+                      <Button
                         className="w-full btn-kazi-primary kazi-ripple"
                         disabled={tool.status !== 'available'}
+                        onClick={() => handleLaunchTool(tool.id, tool.name)}
                       >
                         {tool.status === 'available' ? (
                           <>
@@ -152,19 +178,19 @@ export default function AIDesignPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <Button variant="outline" className="flex flex-col h-20 items-center justify-center gap-2">
+                  <Button variant="outline" className="flex flex-col h-20 items-center justify-center gap-2" onClick={handleGenerateLogo}>
                     <Brain className="w-5 h-5" />
                     <span className="text-xs">Generate Logo</span>
                   </Button>
-                  <Button variant="outline" className="flex flex-col h-20 items-center justify-center gap-2">
+                  <Button variant="outline" className="flex flex-col h-20 items-center justify-center gap-2" onClick={handleGenerateColorScheme}>
                     <Palette className="w-5 h-5" />
                     <span className="text-xs">Color Scheme</span>
                   </Button>
-                  <Button variant="outline" className="flex flex-col h-20 items-center justify-center gap-2">
+                  <Button variant="outline" className="flex flex-col h-20 items-center justify-center gap-2" onClick={handleGenerateLayout}>
                     <Layers className="w-5 h-5" />
                     <span className="text-xs">UI Layout</span>
                   </Button>
-                  <Button variant="outline" className="flex flex-col h-20 items-center justify-center gap-2">
+                  <Button variant="outline" className="flex flex-col h-20 items-center justify-center gap-2" onClick={handleGenerateMockup}>
                     <Image className="w-5 h-5" />
                     <span className="text-xs">Mockup</span>
                   </Button>
@@ -208,10 +234,10 @@ export default function AIDesignPage() {
                           </div>
                         </div>
                         <div className="flex gap-2 mt-4">
-                          <Button size="sm" className="flex-1">
+                          <Button size="sm" className="flex-1" onClick={() => handleContinueProject(project.id, project.name)}>
                             Continue
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleShareProject(project.id)}>
                             <Share2 className="w-3 h-3" />
                           </Button>
                         </div>
@@ -303,7 +329,7 @@ export default function AIDesignPage() {
                             <span>{template.downloads} downloads</span>
                           </div>
                         </div>
-                        <Button className="w-full mt-3" size="sm">
+                        <Button className="w-full mt-3" size="sm" onClick={() => handleUseTemplate(template.id, template.name)}>
                           <Wand2 className="w-4 h-4 mr-2" />
                           Use Template
                         </Button>
