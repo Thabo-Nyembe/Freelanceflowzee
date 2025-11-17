@@ -108,6 +108,15 @@ export default function AnalyticsPage() {
     alert('⭐ Current view bookmarked!\n\nAccess anytime from your bookmarks.')
   }
 
+  const handleRefreshData = () => { console.log('🔄 REFRESH'); alert('🔄 Refreshing data...') }
+  const handleViewDetails = (metric: string) => { console.log('👁️:', metric); alert(`👁️ Details: ${metric}`) }
+  const handlePrintReport = () => { console.log('🖨️ PRINT'); window.print() }
+  const handleEmailReport = () => { console.log('📧 EMAIL'); alert('📧 Email report') }
+  const handleSaveSnapshot = () => { console.log('📸 SNAP'); alert('📸 Snapshot saved') }
+  const handleRestoreSnapshot = () => { console.log('⏮️ RESTORE'); alert('⏮️ Restore snapshot') }
+  const handleCompareMetrics = () => { console.log('⚖️ COMPARE'); alert('⚖️ Compare metrics') }
+  const handleSetGoals = () => { console.log('🎯 GOALS'); alert('🎯 Set goals') }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6">
       <div className="max-w-7xl mx-auto">
