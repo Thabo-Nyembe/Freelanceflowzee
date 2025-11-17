@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { toast } from 'sonner'
 import {
   Clock,
   CheckCircle,
@@ -337,25 +338,92 @@ export default function MyDayPage() {
     }
   }
 
-  const addTask = () => {
+  const addTask = async () => {
     if (!newTaskTitle.trim()) return
 
-    const newTask: Task = {
-      id: `task_${Date.now()}`,
-      title: newTaskTitle,
-      description: newTaskDescription,
-      priority: newTaskPriority,
-      category: 'work',
-      estimatedTime: 60,
-      completed: false,
-      tags: []
-    }
+    console.log('➕ ADD TASK')
 
-    dispatch({ type: 'ADD_TASK', task: newTask })
-    setNewTaskTitle('')
-    setNewTaskDescription('')
-    setNewTaskPriority('medium')
-    setIsAddingTask(false)
+    try {
+      const response = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          data: {
+            title: newTaskTitle,
+            description: newTaskDescription,
+            priority: newTaskPriority,
+            category: 'work',
+            estimatedTime: 60,
+            tags: []
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create task')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        dispatch({ type: 'ADD_TASK', task: result.task })
+        setNewTaskTitle('')
+        setNewTaskDescription('')
+        setNewTaskPriority('medium')
+        setIsAddingTask(false)
+        toast.success(result.message)
+      }
+    } catch (error: any) {
+      console.error('Add Task Error:', error)
+      toast.error('Failed to add task', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
+
+  const toggleTask = async (taskId: string) => {
+    console.log('✅ TOGGLE TASK:', taskId)
+
+    const task = state.tasks.find(t => t.id === taskId)
+    if (!task) return
+
+    const newCompleted = !task.completed
+
+    try {
+      const response = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'complete',
+          taskId,
+          data: { completed: newCompleted }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to toggle task')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        dispatch({ type: 'TOGGLE_TASK', id: taskId })
+
+        if (result.celebration) {
+          toast.success(`${result.message} ${result.celebration.message} +${result.celebration.points} points!`, {
+            description: `Streak: ${result.celebration.streak} days`
+          })
+        } else {
+          toast.success(result.message)
+        }
+      }
+    } catch (error: any) {
+      console.error('Toggle Task Error:', error)
+      toast.error('Failed to update task', {
+        description: error.message || 'Please try again later'
+      })
+    }
   }
 
   const startTimer = (taskId: string) => {
@@ -392,11 +460,37 @@ export default function MyDayPage() {
     alert('✅ Task duplicated successfully!')
   }
 
-  const handleArchiveTask = (taskId: string) => {
+  const handleArchiveTask = async (taskId: string) => {
     console.log('📦 ARCHIVE TASK - ID:', taskId)
-    if (confirm('Archive this task?\n\nArchived tasks can be restored later.')) {
-      dispatch({ type: 'DELETE_TASK', id: taskId })
-      alert('✅ Task archived successfully!')
+    if (!confirm('Archive this task?\n\nArchived tasks can be restored later.')) {
+      return
+    }
+
+    try {
+      const response = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          taskId
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete task')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        dispatch({ type: 'DELETE_TASK', id: taskId })
+        toast.success(result.message)
+      }
+    } catch (error: any) {
+      console.error('Delete Task Error:', error)
+      toast.error('Failed to delete task', {
+        description: error.message || 'Please try again later'
+      })
     }
   }
 
@@ -782,7 +876,7 @@ export default function MyDayPage() {
                             variant="ghost"
                             size="sm"
                             className="p-0 h-auto"
-                            onClick={() => dispatch({ type: 'TOGGLE_TASK', id: task.id })}
+                            onClick={() => toggleTask(task.id)}
                           >
                             <CheckCircle 
                               className={cn("h-5 w-5", task.completed ? "text-green-600 fill-green-100" : "text-gray-400")} 
