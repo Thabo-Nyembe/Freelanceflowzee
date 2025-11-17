@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 import {
   Calendar,
   Clock,
@@ -117,12 +118,75 @@ export default function BookingsPage() {
   const handleNewBooking = () => { console.log('➕ NEW BOOKING'); alert('➕ Create New Booking\n\nSchedule a new client appointment.') }
   const handleEditBooking = (id: string) => { console.log('✏️ EDIT:', id); alert(`✏️ Edit Booking ${id}`) }
   const handleCancelBooking = (id: string) => { console.log('❌ CANCEL:', id); confirm('Cancel this booking?') && alert('✅ Booking cancelled') }
-  const handleConfirmBooking = (id: string) => { console.log('✅ CONFIRM:', id); alert(`✅ Booking ${id} confirmed!`) }
+  const handleConfirmBooking = async (id: string) => {
+    console.log('✅ CONFIRM BOOKING - ID:', id)
+
+    try {
+      const response = await fetch('/api/bookings/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'confirm',
+          bookingId: id
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to confirm booking')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success(result.message, {
+          description: result.emailSent ? 'Confirmation email sent to client' : undefined
+        })
+      }
+    } catch (error: any) {
+      console.error('Confirm Booking Error:', error)
+      toast.error('Failed to confirm booking', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
   const handleRescheduleBooking = (id: string) => { console.log('📅 RESCHEDULE:', id); alert('📅 Reschedule booking to new date/time') }
   const handleViewDetails = (id: string) => { console.log('👁️ VIEW:', id); alert(`👁️ Viewing details for ${id}`) }
   const handleSendReminder = (id: string) => { console.log('📧 REMINDER:', id); alert('📧 Reminder sent to client') }
   const handleSendConfirmation = (id: string) => { console.log('📧 CONFIRMATION:', id); alert('📧 Confirmation email sent') }
-  const handleMarkAsCompleted = (id: string) => { console.log('✅ COMPLETE:', id); alert('✅ Booking marked as completed') }
+  const handleMarkAsCompleted = async (id: string) => {
+    console.log('✅ MARK AS COMPLETED - ID:', id)
+
+    try {
+      const response = await fetch('/api/bookings/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'complete',
+          bookingId: id
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to complete booking')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Show achievement celebration for +20 points
+        if (result.achievement) {
+          toast.success(`${result.message} ${result.achievement.message} +${result.achievement.points} points!`)
+        } else {
+          toast.success(result.message)
+        }
+      }
+    } catch (error: any) {
+      console.error('Complete Booking Error:', error)
+      toast.error('Failed to complete booking', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
   const handleMarkAsNoShow = (id: string) => { console.log('⚠️ NO-SHOW:', id); alert('⚠️ Marked as no-show') }
   const handleRefundPayment = (id: string) => { console.log('💸 REFUND:', id); confirm('Refund payment?') && alert('💸 Refund processed') }
   const handleViewPayment = (id: string) => { console.log('💳 PAYMENT:', id); alert('💳 Payment details') }
