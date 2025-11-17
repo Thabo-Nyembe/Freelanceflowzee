@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -46,12 +47,115 @@ export default function ClientZonePage() {
 
   // Handlers
   const handleViewProject = (id: number) => { console.log('👁️ VIEW PROJECT:', id); alert('👁️ Viewing project details') }
-  const handleApproveDeliverable = (id: number) => { console.log('✅ APPROVE:', id); alert('✅ Deliverable approved!') }
-  const handleRequestRevision = (id: number) => { console.log('🔄 REVISE:', id); alert('🔄 Revision requested') }
+  const handleApproveDeliverable = async (id: number) => {
+    console.log('✅ APPROVE DELIVERABLE - ID:', id)
+
+    try {
+      const response = await fetch('/api/projects/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-status',
+          projectId: id.toString(),
+          data: { status: 'approved' }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to approve deliverable')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success('✅ Deliverable approved!', {
+          description: 'The team has been notified of your approval'
+        })
+      }
+    } catch (error: any) {
+      console.error('Approve Deliverable Error:', error)
+      toast.error('Failed to approve deliverable', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
+  const handleRequestRevision = async (id: number) => {
+    console.log('🔄 REQUEST REVISION - ID:', id)
+
+    const feedback = prompt('Please describe the changes needed:')
+    if (!feedback) return
+
+    try {
+      const response = await fetch('/api/projects/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          projectId: id.toString(),
+          data: {
+            status: 'revision-requested',
+            revisionNotes: feedback
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to request revision')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success('🔄 Revision requested', {
+          description: 'The team will review your feedback and make the necessary changes'
+        })
+      }
+    } catch (error: any) {
+      console.error('Request Revision Error:', error)
+      toast.error('Failed to request revision', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
   const handleSendMessage = () => { console.log('📧 SEND MESSAGE'); alert('📧 Message sent to team'); setNewMessage('') }
   const handleDownloadFile = (id: number) => { console.log('📥 DOWNLOAD:', id); alert('📥 Downloading file...') }
   const handleUploadFile = () => { console.log('📤 UPLOAD'); const input = document.createElement('input'); input.type = 'file'; input.click(); alert('📤 File upload started') }
-  const handleSubmitFeedback = () => { console.log('⭐ FEEDBACK'); alert('⭐ Feedback submitted!'); setNewFeedback('') }
+  const handleSubmitFeedback = async () => {
+    console.log('⭐ SUBMIT FEEDBACK')
+
+    if (!newFeedback.trim()) {
+      toast.error('Please enter your feedback')
+      return
+    }
+
+    try {
+      const response = await fetch('/api/collaboration/client-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          feedback: newFeedback,
+          rating: 5,
+          timestamp: new Date().toISOString()
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to submit feedback')
+      }
+
+      const result = await response.json()
+
+      toast.success('⭐ Feedback submitted!', {
+        description: 'Thank you for sharing your thoughts with us'
+      })
+      setNewFeedback('')
+    } catch (error: any) {
+      console.error('Submit Feedback Error:', error)
+      toast.error('Failed to submit feedback', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
   const handleScheduleMeeting = () => { console.log('📅 SCHEDULE'); alert('📅 Schedule meeting with team') }
   const handleMakePayment = (id: number) => { console.log('💳 PAYMENT:', id); alert('💳 Processing payment...') }
   const handleViewInvoice = (id: number) => { console.log('🧾 INVOICE:', id); alert('🧾 Viewing invoice') }
