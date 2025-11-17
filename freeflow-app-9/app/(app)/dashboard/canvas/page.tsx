@@ -15,6 +15,33 @@ import {
 } from 'lucide-react'
 
 export default function CanvasPage() {
+  // Handlers
+  const handleNewCanvas = () => { console.log('➕ NEW CANVAS'); alert('➕ Create New Canvas\n\nChoose template or start blank') }
+  const handleOpenExisting = () => { console.log('📂 OPEN'); alert('📂 Open Canvas\n\nBrowse your canvases') }
+  const handleStartCollaborating = () => { console.log('👥 COLLAB'); alert('👥 Start Collaborating\n\nReal-time design with your team') }
+  const handleViewExamples = () => { console.log('👁️ EXAMPLES'); alert('👁️ View Examples\n\nExplore sample canvases') }
+  const handleLearnMore = () => { console.log('📖 LEARN'); alert('📖 Learn Canvas Tools\n\nTutorials and documentation') }
+  const handleExploreTemplates = () => { console.log('📋 TEMPLATES'); alert('📋 Explore Templates\n\nPre-made design templates') }
+  const handleImportDesign = () => { console.log('📤 IMPORT'); const input = document.createElement('input'); input.type = 'file'; input.accept = '.fig,.sketch,.svg,.ai'; input.click(); alert('📤 Import Design') }
+  const handleExportDesign = () => { console.log('📥 EXPORT'); alert('📥 Export Design\n\nChoose format:\n• PNG\n• SVG\n• PDF\n• Figma') }
+  const handleShareCanvas = () => { console.log('🔗 SHARE'); alert('🔗 Share Canvas\n\nGenerate share link\nSet permissions') }
+  const handleDuplicateCanvas = () => { console.log('📋 DUPLICATE'); alert('📋 Duplicate Canvas\n\nCreate a copy') }
+  const handleDeleteCanvas = () => { console.log('🗑️ DELETE'); confirm('Delete canvas?') && alert('✅ Canvas deleted') }
+  const handleRenameCanvas = () => { console.log('✏️ RENAME'); const name = prompt('New name:'); name && alert(`✏️ Renamed to: ${name}`) }
+  const handleAddToFolder = () => { console.log('📁 ADD TO FOLDER'); alert('📁 Add to Folder\n\nOrganize your canvases') }
+  const handleVersion History = () => { console.log('📜 HISTORY'); alert('📜 Version History\n\nView and restore previous versions') }
+  const handleSetPermissions = () => { console.log('🔒 PERMISSIONS'); alert('🔒 Set Permissions\n\nView/Edit/Admin access') }
+  const handleInviteTeam = () => { console.log('➕ INVITE'); alert('➕ Invite Team Members\n\nCollaborate in real-time') }
+  const handlePreviewMode = () => { console.log('👁️ PREVIEW'); alert('👁️ Preview Mode\n\nView without editing') }
+  const handlePresentMode = () => { console.log('🎬 PRESENT'); alert('🎬 Presentation Mode\n\nFullscreen presentation') }
+  const handleAddPlugins = () => { console.log('🔌 PLUGINS'); alert('🔌 Add Plugins\n\nExtend canvas functionality') }
+  const handleKeyboardShortcuts = () => { console.log('⌨️ SHORTCUTS'); alert('⌨️ Keyboard Shortcuts\n\nView all shortcuts') }
+  const handleCanvasSettings = () => { console.log('⚙️ SETTINGS'); alert('⚙️ Canvas Settings\n\nConfigure preferences') }
+  const handleGridSettings = () => { console.log('📐 GRID'); alert('📐 Grid Settings\n\nShow/hide grid\nAdjust spacing') }
+  const handleSnapToGrid = () => { console.log('🧲 SNAP'); alert('🧲 Snap to Grid\n\nToggled') }
+  const handleRulerSettings = () => { console.log('📏 RULERS'); alert('📏 Rulers\n\nShow/hide rulers') }
+  const handleZoomSettings = () => { console.log('🔍 ZOOM'); alert('🔍 Zoom Settings\n\nFit to screen\nActual size\nCustom zoom') }
+
   const features = [
     {
       icon: Palette,

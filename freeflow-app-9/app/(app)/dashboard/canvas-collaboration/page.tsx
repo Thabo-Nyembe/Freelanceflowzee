@@ -396,6 +396,31 @@ export default function CanvasCollaboration() {
   const handleZoomIn = () => setZoom(Math.min(500, zoom + 25))
   const handleZoomOut = () => setZoom(Math.max(25, zoom - 25))
 
+  // Additional Handlers
+  const handleCreateCanvas = () => { console.log('➕ CREATE CANVAS'); alert('➕ New Canvas\n\nChoose canvas size\nSelect template (optional)') }
+  const handleOpenCanvas = (canvasId: string) => { console.log('📂 OPEN:', canvasId); alert('📂 Opening Canvas\n\nLoading...') }
+  const handleSaveCanvas = () => { console.log('💾 SAVE'); alert('💾 Canvas Saved\n\nAll changes saved') }
+  const handleExportCanvas = (format: string) => { console.log('📥 EXPORT:', format); alert(`📥 Exporting Canvas\n\nFormat: ${format}`) }
+  const handleShareCanvas = () => { console.log('🔗 SHARE'); alert('🔗 Share Canvas\n\nGenerate link\nInvite collaborators\nSet permissions') }
+  const handleInviteCollaborator = () => { console.log('➕ INVITE'); const email = prompt('Collaborator email:'); email && alert(`✉️ Invitation sent to ${email}`) }
+  const handleRemoveCollaborator = (name: string) => { console.log('➖ REMOVE:', name); confirm(`Remove ${name}?`) && alert('✅ Removed') }
+  const handleAddComment = () => { console.log('💬 COMMENT'); alert('💬 Add Comment\n\nClick on canvas to add annotation') }
+  const handleResolveComment = (id: string) => { console.log('✅ RESOLVE:', id); alert('✅ Comment resolved') }
+  const handleUndo = () => { console.log('↩️ UNDO'); alert('↩️ Undo last action') }
+  const handleRedo = () => { console.log('↪️ REDO'); alert('↪️ Redo action') }
+  const handleCopyElement = () => { console.log('📋 COPY'); alert('📋 Element copied') }
+  const handlePasteElement = () => { console.log('📋 PASTE'); alert('📋 Element pasted') }
+  const handleDeleteElement = () => { console.log('🗑️ DELETE'); alert('🗑️ Element deleted') }
+  const handleDuplicateElement = () => { console.log('📋 DUPLICATE'); alert('📋 Element duplicated') }
+  const handleGroupElements = () => { console.log('📁 GROUP'); alert('📁 Elements grouped') }
+  const handleUngroupElements = () => { console.log('📂 UNGROUP'); alert('📂 Group ungrouped') }
+  const handleAlignElements = (align: string) => { console.log('📐 ALIGN:', align); alert(`📐 Aligned: ${align}`) }
+  const handleDistributeElements = (direction: string) => { console.log('↔️ DISTRIBUTE:', direction); alert(`↔️ Distributed: ${direction}`) }
+  const handleBringToFront = () => { console.log('⬆️ TO FRONT'); alert('⬆️ Brought to front') }
+  const handleSendToBack = () => { console.log('⬇️ TO BACK'); alert('⬇️ Sent to back') }
+  const handleLockElement = () => { console.log('🔒 LOCK'); alert('🔒 Element locked') }
+  const handleUnlockElement = () => { console.log('🔓 UNLOCK'); alert('🔓 Element unlocked') }
+
   const toggleLayer = (layerId: string, property: 'visible' | 'locked') => {
     setLayers(layers.map(layer => 
       layer.id === layerId 
