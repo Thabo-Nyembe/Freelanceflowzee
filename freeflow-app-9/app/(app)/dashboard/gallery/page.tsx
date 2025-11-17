@@ -30,6 +30,33 @@ export default function GalleryPage() {
   const [selectedCategory, setSelectedCategory] = useState<any>('all')
   const [searchTerm, setSearchTerm] = useState<any>('')
 
+  // Handlers
+  const handleUploadMedia = () => { console.log('📤 UPLOAD'); const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*,video/*'; input.multiple = true; input.click(); alert('📤 Upload Media\n\nSelect images or videos to add to gallery') }
+  const handleViewItem = (itemId: number) => { console.log('👁️ VIEW:', itemId); alert('👁️ Viewing Media\n\nOpening fullscreen preview...') }
+  const handleEditItem = (itemId: number) => { console.log('✏️ EDIT:', itemId); alert('✏️ Edit Media\n\nOpening editor for metadata and tags') }
+  const handleDeleteItem = (itemId: number) => { console.log('🗑️ DELETE:', itemId); confirm('Delete this item?') && alert('✅ Media deleted') }
+  const handleDownloadItem = (itemId: number) => { console.log('💾 DOWNLOAD:', itemId); alert('💾 Downloading Media\n\nPreparing download...') }
+  const handleShareItem = (itemId: number) => { console.log('🔗 SHARE:', itemId); alert('🔗 Share Media\n\nGenerate shareable link\nShare to social media') }
+  const handleLikeItem = (itemId: number) => { console.log('❤️ LIKE:', itemId); alert('❤️ Liked!') }
+  const handleCommentItem = (itemId: number) => { console.log('💬 COMMENT:', itemId); alert('💬 Add Comment\n\nShare your thoughts...') }
+  const handleAddToProject = (itemId: number) => { console.log('➕ ADD TO PROJECT:', itemId); alert('➕ Add to Project\n\nSelect project to add this media') }
+  const handleFeatureItem = (itemId: number) => { console.log('⭐ FEATURE:', itemId); alert('⭐ Featured\n\nItem marked as featured') }
+  const handleCreateAlbum = () => { console.log('📁 NEW ALBUM'); const name = prompt('Album name:'); name && alert(`📁 Album Created: ${name}`) }
+  const handleMoveToAlbum = (itemId: number) => { console.log('📁 MOVE:', itemId); alert('📁 Move to Album\n\nSelect destination album') }
+  const handleBulkSelect = () => { console.log('☑️ BULK SELECT'); alert('☑️ Bulk Selection\n\nSelect multiple items for batch operations') }
+  const handleBulkDelete = (ids: number[]) => { console.log('🗑️ BULK DELETE:', ids.length); confirm(`Delete ${ids.length} items?`) && alert('✅ Items deleted') }
+  const handleBulkDownload = (ids: number[]) => { console.log('💾 BULK DOWNLOAD:', ids.length); alert(`💾 Downloading ${ids.length} items...`) }
+  const handleSort = (sortBy: string) => { console.log('🔃 SORT:', sortBy); alert(`🔃 Sorting by ${sortBy}`) }
+  const handleFilter = (filter: string) => { console.log('🔍 FILTER:', filter); setSelectedCategory(filter) }
+  const handleSearch = (term: string) => { console.log('🔍 SEARCH:', term); setSearchTerm(term) }
+  const handleViewMode = (mode: 'grid' | 'list') => { console.log('👁️ VIEW MODE:', mode); setViewMode(mode) }
+  const handleGenerateThumbnails = () => { console.log('🖼️ THUMBNAILS'); alert('🖼️ Generate Thumbnails\n\nCreating optimized thumbnails...') }
+  const handleOptimizeImages = () => { console.log('⚡ OPTIMIZE'); alert('⚡ Optimize Images\n\nCompressing and optimizing all images...') }
+  const handleExportGallery = () => { console.log('💾 EXPORT'); alert('💾 Export Gallery\n\nDownloading gallery archive...') }
+  const handleImportGallery = () => { console.log('📤 IMPORT'); alert('📤 Import Gallery\n\nSelect gallery archive to import') }
+  const handleSlideshow = () => { console.log('▶️ SLIDESHOW'); alert('▶️ Starting Slideshow\n\nAutoplay enabled') }
+  const handleTagging = (itemId: number) => { console.log('🏷️ TAG:', itemId); alert('🏷️ Add Tags\n\nOrganize with custom tags') }
+
   // Mock gallery data
   const galleryItems = [
     {
