@@ -77,6 +77,28 @@ export default function ProjectsHubPage() {
     category: 'web-development'
   })
 
+  // Handlers
+  const handleCreateProject = () => { console.log('➕ NEW'); router.push('/dashboard/projects-hub/create') }
+  const handleViewProject = (id: string) => { console.log('👁️ VIEW:', id); alert(`👁️ Project ${id}`) }
+  const handleEditProject = (id: string) => { console.log('✏️ EDIT:', id); alert(`✏️ Edit ${id}`) }
+  const handleDeleteProject = (id: string) => { console.log('🗑️ DEL:', id); confirm('Delete?') && alert('✅ Deleted') }
+  const handleDuplicateProject = (id: string) => { console.log('📋 DUP:', id); alert('📋 Duplicated') }
+  const handleArchiveProject = (id: string) => { console.log('📦 ARCH:', id); alert('📦 Archived') }
+  const handleFilterStatus = (status: string) => { console.log('🔍 FILT:', status); setStatusFilter(status) }
+  const handleSearch = (query: string) => { console.log('🔍 SEARCH:', query); setSearchTerm(query) }
+  const handleSort = (by: string) => { console.log('🔃 SORT:', by); alert(`🔃 ${by}`) }
+  const handleExportProjects = () => { console.log('💾 EXPORT'); alert('💾 Exporting...') }
+  const handleImportProjects = () => { console.log('📤 IMPORT'); alert('📤 Import') }
+  const handleBulkAction = (action: string, ids: string[]) => { console.log('☑️ BULK:', action); alert(`☑️ ${action}`) }
+  const handleShareProject = (id: string) => { console.log('🔗 SHARE:', id); alert('🔗 Shared') }
+  const handleProjectAnalytics = (id: string) => { console.log('📊 ANA:', id); alert('📊 Analytics') }
+  const handleAssignTeam = (id: string) => { console.log('👥 TEAM:', id); alert('👥 Assign') }
+  const handleSetBudget = (id: string) => { console.log('💰 BUDGET:', id); alert('💰 Budget') }
+  const handleSetDeadline = (id: string) => { console.log('📅 DATE:', id); alert('📅 Deadline') }
+  const handleProjectTemplates = () => { console.log('📋 TEMP'); router.push('/dashboard/projects-hub/templates') }
+  const handleProjectReports = () => { console.log('📄 REP'); alert('📄 Reports') }
+  const handleQuickStats = () => { console.log('📊 STATS'); alert('📊 Stats') }
+
   const mockProjects: Project[] = [
     {
       id: '1',
