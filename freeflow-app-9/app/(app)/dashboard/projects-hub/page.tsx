@@ -29,6 +29,7 @@ import {
   Briefcase
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 interface Project {
   id: string
@@ -78,7 +79,6 @@ export default function ProjectsHubPage() {
   })
 
   // Handlers
-  const handleCreateProject = () => { console.log('➕ NEW'); router.push('/dashboard/projects-hub/create') }
   const handleViewProject = (id: string) => { console.log('👁️ VIEW:', id); alert(`👁️ Project ${id}`) }
   const handleEditProject = (id: string) => { console.log('✏️ EDIT:', id); alert(`✏️ Edit ${id}`) }
   const handleDeleteProject = (id: string) => { console.log('🗑️ DEL:', id); confirm('Delete?') && alert('✅ Deleted') }
@@ -270,50 +270,105 @@ export default function ProjectsHubPage() {
     return 'bg-red-500'
   }
 
-  const handleCreateProject = () => {
+  const handleCreateProject = async () => {
     if (!newProject.title.trim()) {
-      alert('Please enter a project title')
+      toast.error('Please enter a project title')
       return
     }
 
-    const project: Project = {
-      id: Date.now().toString(),
-      title: newProject.title,
-      description: newProject.description,
-      status: 'draft',
-      progress: 0,
-      client_name: newProject.client_name,
-      budget: parseFloat(newProject.budget) || 0,
-      spent: 0,
-      start_date: new Date().toISOString(),
-      end_date: newProject.end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      team_members: [],
-      priority: newProject.priority as 'low' | 'medium' | 'high' | 'urgent',
-      comments_count: 0,
-      attachments: [],
-      category: newProject.category,
-      tags: []
+    console.log('➕ CREATE PROJECT')
+
+    try {
+      const response = await fetch('/api/projects/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          data: {
+            title: newProject.title,
+            description: newProject.description,
+            client_name: newProject.client_name,
+            budget: parseFloat(newProject.budget) || 0,
+            end_date: newProject.end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            priority: newProject.priority as 'low' | 'medium' | 'high' | 'urgent',
+            category: newProject.category
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create project')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Add project to local state
+        setProjects([...projects, result.project])
+        setIsCreateModalOpen(false)
+        setNewProject({
+          title: '',
+          description: '',
+          client_name: '',
+          budget: '',
+          end_date: '',
+          priority: 'medium',
+          category: 'web-development'
+        })
+
+        toast.success(result.message, {
+          description: `Project ID: ${result.projectId}`
+        })
+      }
+    } catch (error: any) {
+      console.error('Create Project Error:', error)
+      toast.error('Failed to create project', {
+        description: error.message || 'Please try again later'
+      })
     }
-    
-    setProjects([...projects, project])
-    setIsCreateModalOpen(false)
-    setNewProject({
-      title: '',
-      description: '',
-      client_name: '',
-      budget: '',
-      end_date: '',
-      priority: 'medium',
-      category: 'web-development'
-    })
-    alert('Project created successfully!')
   }
 
-  const handleUpdateProjectStatus = (projectId: string, newStatus: string) => {
-    setProjects(projects.map(p => 
-      p.id === projectId ? { ...p, status: newStatus as Project['status'] } : p
-    ))
-    alert(`Project status updated to ${newStatus}`)
+  const handleUpdateProjectStatus = async (projectId: string, newStatus: string) => {
+    console.log('🔄 UPDATE PROJECT STATUS - ID:', projectId, 'Status:', newStatus)
+
+    try {
+      const response = await fetch('/api/projects/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-status',
+          projectId,
+          data: { status: newStatus }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update project status')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Update local state
+        setProjects(projects.map(p =>
+          p.id === projectId ? { ...p, status: newStatus as Project['status'], progress: newStatus === 'completed' ? 100 : p.progress } : p
+        ))
+
+        // Show celebration for completed projects
+        if (result.celebration) {
+          toast.success(`${result.message} ${result.celebration.message} +${result.celebration.points} points!`, {
+            description: `Achievement: ${result.celebration.achievement}`
+          })
+        } else {
+          toast.success(result.message)
+        }
+      }
+    } catch (error: any) {
+      console.error('Update Project Status Error:', error)
+      toast.error('Failed to update project status', {
+        description: error.message || 'Please try again later'
+      })
+    }
   }
 
   const formatDate = (dateString: string) => {
