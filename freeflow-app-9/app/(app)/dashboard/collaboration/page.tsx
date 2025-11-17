@@ -21,6 +21,30 @@ import {
 export default function CollaborationPage() {
   const [activeTab, setActiveTab] = useState<any>("chat");
 
+  // Handlers
+  const handleStartAudioCall = () => { console.log('🎤 AUDIO CALL'); alert('🎤 Starting audio call...') }
+  const handleStartVideoCall = () => { console.log('📹 VIDEO CALL'); alert('📹 Starting video call...') }
+  const handleSendMessage = () => { console.log('💬 SEND'); alert('💬 Message sent!') }
+  const handleAddPinpointFeedback = () => { console.log('📌 FEEDBACK'); alert('📌 Click on media to add pinpoint feedback') }
+  const handleUploadFile = () => { console.log('📎 UPLOAD'); const input = document.createElement('input'); input.type = 'file'; input.click(); alert('📎 File upload dialog opened') }
+  const handleAddVoiceNote = () => { console.log('🎙️ VOICE NOTE'); alert('🎙️ Recording voice note...') }
+  const handleShareScreen = () => { console.log('🖥️ SHARE SCREEN'); alert('🖥️ Screen sharing started') }
+  const handleEditFeedback = (id: number) => { console.log('✏️ EDIT FEEDBACK:', id); alert('✏️ Edit feedback') }
+  const handleDeleteFeedback = (id: number) => { console.log('🗑️ DELETE:', id); confirm('Delete feedback?') && alert('✅ Deleted') }
+  const handleReplyToMessage = (id: number) => { console.log('💬 REPLY:', id); alert('💬 Reply to message') }
+  const handleReactToMessage = (id: number, emoji: string) => { console.log('😀 REACT:', emoji); alert(`Reacted with ${emoji}`) }
+  const handlePinMessage = (id: number) => { console.log('📌 PIN:', id); alert('📌 Message pinned') }
+  const handleArchiveConversation = () => { console.log('📦 ARCHIVE'); alert('📦 Conversation archived') }
+  const handleAddParticipants = () => { console.log('➕ ADD USERS'); alert('➕ Add participants to collaboration') }
+  const handleRemoveParticipant = (id: number) => { console.log('➖ REMOVE:', id); confirm('Remove participant?') && alert('✅ Removed') }
+  const handleExportChat = () => { console.log('💾 EXPORT'); alert('💾 Exporting chat history...') }
+  const handleMuteNotifications = () => { console.log('🔕 MUTE'); alert('🔕 Notifications muted') }
+  const handleCreateCanvas = () => { console.log('🎨 CREATE CANVAS'); alert('🎨 Creating new canvas...') }
+  const handleAddDrawing = () => { console.log('✏️ DRAW'); alert('✏️ Drawing mode activated') }
+  const handleSaveCanvas = () => { console.log('💾 SAVE CANVAS'); alert('💾 Canvas saved!') }
+  const handleExportMedia = () => { console.log('📥 EXPORT MEDIA'); alert('📥 Exporting all media files...') }
+  const handleViewMediaPreview = (type: string) => { console.log('👁️ PREVIEW:', type); alert(`👁️ Viewing ${type} preview`) }
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-8">
@@ -66,13 +90,17 @@ export default function CollaborationPage() {
                   </div>
                   <Badge variant="secondary">Audio Call Ready</Badge>
                   <div className="ml-auto flex gap-2">
-                    <Button size="sm" variant="outline">
+                    <Button size="sm" variant="outline" onClick={handleStartAudioCall}>
                       <Mic className="h-4 w-4 mr-2" />
                       Audio Call
                     </Button>
-                    <Button size="sm" variant="outline">
+                    <Button size="sm" variant="outline" onClick={handleStartVideoCall}>
                       <Video className="h-4 w-4 mr-2" />
                       Video Call
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={handleShareScreen}>
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Share
                     </Button>
                   </div>
                 </div>
