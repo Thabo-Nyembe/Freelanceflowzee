@@ -25,6 +25,31 @@ import SimpleAIChat from '@/components/ai/simple-ai-chat';
 export default function AIEnhancedPage() {
   const [_activeDemo, setActiveDemo] = useState<string | null>(null);
 
+  // Handlers
+  const handleTryDemo = (featureId: string, demoPrompt: string) => { console.log('🎯 TRY DEMO:', featureId); setActiveDemo(featureId); alert(`🎯 AI Demo\n\nFeature: ${featureId}\n\nPrompt: ${demoPrompt}\n\nInitializing AI assistant...`) }
+  const handleProjectAnalysis = () => { console.log('🧠 PROJECT ANALYSIS'); alert('🧠 AI Project Analysis\n\nAnalyzing:\n• Requirements\n• Timeline\n• Budget\n• Resources\n• Risks') }
+  const handleGenerateAssets = () => { console.log('🎨 GENERATE ASSETS'); alert('🎨 Creative Asset Generation\n\nCreating:\n• Color palettes\n• Typography\n• Style guide\n• Brand assets') }
+  const handleDraftCommunication = (type: string) => { console.log('✉️ DRAFT:', type); alert(`✉️ Professional Communication\n\nDrafting ${type}...\n\nAnalyzing context\nMatching tone\nGenerating content`) }
+  const handleOptimizeWorkflow = () => { console.log('⚡ OPTIMIZE'); alert('⚡ Workflow Optimization\n\nAnalyzing:\n• Time allocation\n• Resource distribution\n• Phase prioritization\n• Efficiency opportunities') }
+  const handleAIConsultation = () => { console.log('💡 CONSULT'); alert('💡 AI Consultation\n\nGet personalized business insights and recommendations') }
+  const handleGenerateProposal = () => { console.log('📄 PROPOSAL'); alert('📄 AI Proposal Generator\n\nCreating professional project proposal...') }
+  const handleAnalyzeCompetition = () => { console.log('🔍 COMPETITION'); alert('🔍 Competitor Analysis\n\nResearching market positioning and pricing') }
+  const handleBudgetOptimization = () => { console.log('💰 BUDGET'); alert('💰 Budget Optimization\n\nOptimizing resource allocation and cost structure') }
+  const handleTimelineEstimation = () => { console.log('📅 TIMELINE'); alert('📅 AI Timeline Estimation\n\nCalculating optimal project timeline...') }
+  const handleRiskAssessment = () => { console.log('⚠️ RISK'); alert('⚠️ Risk Assessment\n\nIdentifying potential project risks and mitigation strategies') }
+  const handleGenerateContract = () => { console.log('📝 CONTRACT'); alert('📝 Contract Generator\n\nCreating customized service agreement...') }
+  const handleClientProfiling = () => { console.log('👤 PROFILE'); alert('👤 Client Profiling\n\nAnalyzing client preferences and communication style') }
+  const handleScopeAnalysis = () => { console.log('🎯 SCOPE'); alert('🎯 Scope Analysis\n\nDefining project boundaries and deliverables') }
+  const handlePricingStrategy = () => { console.log('💵 PRICING'); alert('💵 AI Pricing Strategy\n\nCalculating optimal pricing based on:\n• Market rates\n• Project complexity\n• Client budget\n• Your experience') }
+  const handleQualityCheck = () => { console.log('✅ QUALITY'); alert('✅ AI Quality Check\n\nReviewing deliverables for:\n• Standards compliance\n• Best practices\n• Client requirements') }
+  const handleGenerateMilestones = () => { console.log('🎯 MILESTONES'); alert('🎯 Milestone Generation\n\nCreating project checkpoints and deliverables') }
+  const handleResourcePlanning = () => { console.log('📊 RESOURCES'); alert('📊 Resource Planning\n\nOptimizing team allocation and tool usage') }
+  const handlePerformanceInsights = () => { console.log('📈 INSIGHTS'); alert('📈 Performance Insights\n\nAnalyzing your business metrics and growth opportunities') }
+  const handleAutomateReporting = () => { console.log('📊 AUTO REPORT'); alert('📊 Automated Reporting\n\nGenerating comprehensive progress reports') }
+  const handleSentimentAnalysis = () => { console.log('😊 SENTIMENT'); alert('😊 Client Sentiment Analysis\n\nAnalyzing client feedback and satisfaction levels') }
+  const handleTrendAnalysis = () => { console.log('📈 TRENDS'); alert('📈 Industry Trend Analysis\n\nIdentifying emerging opportunities in your niche') }
+  const handleSkillRecommendations = () => { console.log('🎓 SKILLS'); alert('🎓 Skill Recommendations\n\nSuggesting skills to learn based on market demand') }
+
   const aiFeatures = [
     {
       id: 'project-analysis',
