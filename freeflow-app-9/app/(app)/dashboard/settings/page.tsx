@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { toast } from 'sonner'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -138,10 +139,44 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     setIsLoading(true)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setIsLoading(false)
-    alert('Settings saved successfully!')
+
+    try {
+      const response = await fetch('/api/settings/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          category: 'all',
+          data: { profile, notifications, security, appearance }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to save settings')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success(result.message || 'Settings saved successfully!')
+
+        // Show achievement if present
+        if (result.achievement) {
+          toast.success(`${result.achievement.message} +${result.achievement.points} points!`, {
+            description: result.achievement.badge
+          })
+        }
+      } else {
+        throw new Error(result.error || 'Failed to save settings')
+      }
+    } catch (error: any) {
+      console.error('Settings save error:', error)
+      toast.error('Failed to save settings', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleExportData = () => {

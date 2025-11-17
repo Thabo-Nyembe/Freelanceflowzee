@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useReducer, useEffect } from 'react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -232,10 +233,117 @@ export default function NotificationsPage() {
   const handleSettings = () => { console.log('⚙️ SETTINGS'); setActiveTab('settings') }
   const handleViewNotification = (id: string) => { console.log('👁️:', id); dispatch({ type: 'MARK_AS_READ', payload: id }); alert(`👁️ View ${id}`) }
   const handleMarkRead = (id: string) => { console.log('✅:', id); dispatch({ type: 'MARK_AS_READ', payload: id }) }
-  const handleMarkAllRead = () => { console.log('✅ ALL'); dispatch({ type: 'MARK_ALL_READ' }) }
-  const handleArchive = (id: string) => { console.log('📦:', id); dispatch({ type: 'ARCHIVE_NOTIFICATION', payload: id }) }
+  const handleMarkAllRead = async () => {
+    console.log('✅ ALL')
+
+    try {
+      // Call API to mark all as read
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'mark-all-read',
+          filter: state.filter
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to mark all as read')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Update local state
+        dispatch({ type: 'MARK_ALL_READ' })
+
+        // Show success message
+        toast.success(result.message || `${result.count || 'All'} notifications marked as read`)
+
+        // Show achievement if present
+        if (result.achievement) {
+          toast.success(`${result.achievement.message} +${result.achievement.points} points!`, {
+            description: result.achievement.badge
+          })
+        }
+      }
+    } catch (error: any) {
+      console.error('Error marking all as read:', error)
+      toast.error('Failed to mark all as read', {
+        description: error.message || 'Please try again'
+      })
+    }
+  }
+  const handleArchive = async (id: string) => {
+    console.log('📦:', id)
+
+    try {
+      // Call API to archive notification
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'archive',
+          notificationId: id
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to archive notification')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Update local state
+        dispatch({ type: 'ARCHIVE_NOTIFICATION', payload: id })
+
+        // Show success message
+        toast.success(result.message || '1 notification archived')
+      }
+    } catch (error: any) {
+      console.error('Error archiving notification:', error)
+      toast.error('Failed to archive notification', {
+        description: error.message || 'Please try again'
+      })
+    }
+  }
   const handleArchiveAll = () => { console.log('📦 ALL'); state.notifications.forEach(n => dispatch({ type: 'ARCHIVE_NOTIFICATION', payload: n.id })); alert('📦 All archived') }
-  const handleDelete = (id: string) => { console.log('🗑️:', id); dispatch({ type: 'DELETE_NOTIFICATION', payload: id }) }
+  const handleDelete = async (id: string) => {
+    console.log('🗑️:', id)
+
+    try {
+      // Call API to delete notification
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          notificationId: id,
+          permanent: false // Soft delete by default
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete notification')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Update local state
+        dispatch({ type: 'DELETE_NOTIFICATION', payload: id })
+
+        // Show success message
+        toast.success(result.message || '1 notification deleted')
+      }
+    } catch (error: any) {
+      console.error('Error deleting notification:', error)
+      toast.error('Failed to delete notification', {
+        description: error.message || 'Please try again'
+      })
+    }
+  }
   const handleDeleteAll = () => { console.log('🗑️ ALL'); confirm('Delete all?') && state.notifications.forEach(n => dispatch({ type: 'DELETE_NOTIFICATION', payload: n.id })) }
   const handleUnarchive = (id: string) => { console.log('📤:', id); alert('📤 Unarchive') }
   const handleFilterAll = () => { console.log('🔍 ALL'); dispatch({ type: 'SET_FILTER', payload: 'all' }) }
@@ -312,11 +420,32 @@ export default function NotificationsPage() {
     return timestamp.toLocaleDateString()
   }
 
-  const handleNotificationClick = (notification: Notification) => {
-    dispatch({ type: 'MARK_AS_READ', payload: notification.id })
-    if (notification.actionUrl) {
-      // In a real app, navigate to the URL
-      alert(`Navigating to: ${notification.actionUrl}`)
+  const handleNotificationClick = async (notification: Notification) => {
+    try {
+      // Call API to mark as read
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'mark-read',
+          notificationId: notification.id
+        })
+      })
+
+      if (response.ok) {
+        // Update local state
+        dispatch({ type: 'MARK_AS_READ', payload: notification.id })
+      }
+
+      // Navigate to action URL if present
+      if (notification.actionUrl) {
+        // In a real app, use router.push()
+        alert(`Navigating to: ${notification.actionUrl}`)
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error)
+      // Graceful degradation - still update UI even if API fails
+      dispatch({ type: 'MARK_AS_READ', payload: notification.id })
     }
   }
 
@@ -340,7 +469,7 @@ export default function NotificationsPage() {
           </div>
           
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={() => dispatch({ type: 'MARK_ALL_READ' })}>
+            <Button variant="outline" size="sm" onClick={handleMarkAllRead}>
               <Check className="w-4 h-4 mr-2" />
               Mark All Read
             </Button>
