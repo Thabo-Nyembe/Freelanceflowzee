@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useReducer, useEffect, useMemo } from 'react'
+import { toast } from 'sonner'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -697,13 +698,183 @@ export default function CommunityHubPage() {
 
   // Handlers
   const handleCreatePost = () => { console.log('➕ POST'); alert('➕ Create new post') }
-  const handleLikePost = (id: string) => { console.log('❤️ LIKE:', id); alert('❤️ Post liked!') }
+  const handleLikePost = async (id: string) => {
+    console.log('❤️ LIKE POST - ID:', id)
+
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'like',
+          resourceId: id,
+          userId: 'user-1'
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to like post')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Show achievement for Social Butterfly (+5 points, 10% chance)
+        if (result.achievement) {
+          toast.success(`${result.message} ${result.achievement.message} +${result.achievement.points} points!`, {
+            description: `Badge: ${result.achievement.badge}`
+          })
+        } else {
+          toast.success(result.message)
+        }
+      }
+    } catch (error: any) {
+      console.error('Like Post Error:', error)
+      toast.error('Failed to like post', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
   const handleCommentOnPost = (id: string) => { console.log('💬 COMMENT:', id); alert('💬 Add comment') }
-  const handleSharePost = (id: string) => { console.log('🔗 SHARE:', id); alert('🔗 Post shared!') }
-  const handleBookmarkPost = (id: string) => { console.log('🔖 BOOKMARK:', id); alert('🔖 Post bookmarked') }
-  const handleFollowMember = (id: string) => { console.log('➕ FOLLOW:', id); alert('➕ Now following!') }
+  const handleSharePost = async (id: string) => {
+    console.log('🔗 SHARE POST - ID:', id)
+
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'share',
+          resourceId: id,
+          data: { method: 'link' }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to share post')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success(result.message, {
+          description: result.shareUrl ? `Link: ${result.shareUrl}` : undefined
+        })
+      }
+    } catch (error: any) {
+      console.error('Share Post Error:', error)
+      toast.error('Failed to share post', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
+  const handleBookmarkPost = async (id: string) => {
+    console.log('🔖 BOOKMARK POST - ID:', id)
+
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'bookmark',
+          resourceId: id,
+          userId: 'user-1'
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to bookmark post')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success(result.message, {
+          description: result.tip || undefined
+        })
+      }
+    } catch (error: any) {
+      console.error('Bookmark Post Error:', error)
+      toast.error('Failed to bookmark post', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
+  const handleFollowMember = async (id: string) => {
+    console.log('➕ FOLLOW MEMBER - ID:', id)
+
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'follow',
+          resourceId: id,
+          userId: 'user-1'
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to follow member')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Show achievement for Networker (+10 points, 20% chance)
+        if (result.achievement) {
+          toast.success(`${result.message} ${result.achievement.message} +${result.achievement.points} points!`, {
+            description: `Badge: ${result.achievement.badge}`
+          })
+        } else {
+          toast.success(result.message)
+        }
+      }
+    } catch (error: any) {
+      console.error('Follow Member Error:', error)
+      toast.error('Failed to follow member', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
   const handleUnfollowMember = (id: string) => { console.log('➖ UNFOLLOW:', id); alert('➖ Unfollowed') }
-  const handleConnectWithMember = (id: string) => { console.log('🤝 CONNECT:', id); alert('🤝 Connection request sent') }
+  const handleConnectWithMember = async (id: string) => {
+    console.log('🤝 CONNECT WITH MEMBER - ID:', id)
+
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'connect',
+          resourceId: id,
+          userId: 'user-1'
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to connect with member')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Show next steps if available
+        if (result.nextSteps && result.nextSteps.length > 0) {
+          setTimeout(() => {
+            alert(`${result.message}\n\nNext Steps:\n${result.nextSteps.join('\n')}`)
+          }, 500)
+        } else {
+          toast.success(result.message)
+        }
+      }
+    } catch (error: any) {
+      console.error('Connect With Member Error:', error)
+      toast.error('Failed to connect with member', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
   const handleMessageMember = (id: string) => { console.log('💬 MESSAGE:', id); alert('💬 Opening chat...') }
   const handleJoinEvent = (id: string) => { console.log('📅 JOIN EVENT:', id); alert('📅 Registered for event!') }
   const handleCreateEvent = () => { console.log('➕ EVENT'); alert('➕ Create community event') }
