@@ -31,9 +31,30 @@ export default function AIVideoGenerationPage() {
   const [duration, setDuration] = useState('30')
   const [aspectRatio, setAspectRatio] = useState('16:9')
 
-  const handleGenerate = () => {
-    console.log('Generating video with:', { prompt, selectedStyle, selectedModel, duration, aspectRatio })
-  }
+  // Handlers
+  const handleGenerate = () => { console.log('🎬 GENERATE VIDEO:', { prompt, selectedStyle, selectedModel, duration, aspectRatio }); alert(`🎬 Generating AI Video\n\nStyle: ${selectedStyle}\nModel: ${selectedModel}\nDuration: ${duration}s\nRatio: ${aspectRatio}\n\nProcessing...`) }
+  const handleSelectStyle = (styleId: string, styleName: string) => { setSelectedStyle(styleId); console.log('🎨 STYLE:', styleName); alert(`🎨 Style Selected: ${styleName}`) }
+  const handleSelectModel = (modelId: string, modelName: string) => { setSelectedModel(modelId); console.log('🤖 MODEL:', modelName); alert(`🤖 AI Model: ${modelName}`) }
+  const handleSaveVideo = (videoId: string) => { console.log('💾 SAVE VIDEO:', videoId); alert('💾 Video Saved\n\nAdded to your library') }
+  const handleExportVideo = (format: 'mp4' | 'mov' | 'webm') => { console.log('📥 EXPORT:', format); alert(`📥 Exporting Video\n\nFormat: ${format.toUpperCase()}\n\nPreparing download...`) }
+  const handleShareVideo = (videoId: string) => { console.log('🔗 SHARE:', videoId); alert('🔗 Share Video\n\nGenerate link or share to social media') }
+  const handleDeleteVideo = (videoId: string) => { console.log('🗑️ DELETE:', videoId); confirm('Delete this video?') && alert('✅ Video deleted') }
+  const handleRegenerateVideo = () => { console.log('🔄 REGENERATE'); alert('🔄 Regenerating Video\n\nCreating new version with same settings...') }
+  const handleEditVideo = (videoId: string) => { console.log('✏️ EDIT:', videoId); alert('✏️ Video Editor\n\nOpening advanced editor...') }
+  const handleViewHistory = () => { console.log('📜 HISTORY'); alert('📜 Video Generation History\n\nView all generated videos') }
+  const handleSavePreset = () => { console.log('💾 SAVE PRESET'); const name = prompt('Preset name:'); name && alert(`💾 Preset Saved: ${name}`) }
+  const handleLoadPreset = (presetId: string) => { console.log('📂 LOAD PRESET:', presetId); alert('📂 Preset Loaded\n\nSettings applied') }
+  const handleAddBackgroundMusic = () => { console.log('🎵 MUSIC'); alert('🎵 Background Music\n\nBrowse royalty-free music library') }
+  const handleAddVoiceover = () => { console.log('🎤 VOICEOVER'); alert('🎤 Add Voiceover\n\nRecord or upload audio\nGenerate AI voiceover') }
+  const handleGenerateSubtitles = () => { console.log('📝 SUBTITLES'); alert('📝 Generate Subtitles\n\nAuto-generate captions and subtitles') }
+  const handleDuplicateVideo = (videoId: string) => { console.log('📋 DUPLICATE:', videoId); alert('📋 Video Duplicated\n\nCopy created in library') }
+  const handleVideoAnalytics = (videoId: string) => { console.log('📊 ANALYTICS:', videoId); alert('📊 Video Analytics\n\nViews, engagement, and performance metrics') }
+  const handleBatchGenerate = () => { console.log('📦 BATCH'); alert('📦 Batch Generation\n\nGenerate multiple videos from CSV/template') }
+  const handleTemplateManager = () => { console.log('📋 TEMPLATES'); alert('📋 Template Manager\n\nSave and load video templates') }
+  const handleQualitySettings = () => { console.log('⚙️ QUALITY'); alert('⚙️ Quality Settings\n\nResolution: 4K/1080p/720p\nBitrate\nFrame rate') }
+  const handleScheduleGeneration = () => { console.log('📅 SCHEDULE'); alert('📅 Schedule Generation\n\nQueue video for later processing') }
+  const handleCancelGeneration = (jobId: string) => { console.log('❌ CANCEL:', jobId); confirm('Cancel generation?') && alert('❌ Generation cancelled') }
+  const handlePreviewVideo = (videoId: string) => { console.log('👁️ PREVIEW:', videoId); alert('👁️ Video Preview\n\nOpening preview player...') }
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
