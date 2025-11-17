@@ -139,6 +139,28 @@ export default function DashboardPage() {
     }
   }
 
+  // Handlers
+  const handleViewAllProjects = () => { console.log('📂 ALL'); navigateToPage('projects-hub') }
+  const handleCreateProject = () => { console.log('➕ NEW'); navigateToPage('projects-hub/create') }
+  const handleViewAnalytics = () => { console.log('📊 ANALYTICS'); navigateToPage('analytics') }
+  const handleViewFinancial = () => { console.log('💰 FINANCIAL'); navigateToPage('financial') }
+  const handleQuickAction = (action: string) => { console.log('⚡:', action); alert(`⚡ ${action}`) }
+  const handleViewNotifications = () => { console.log('🔔 NOTIF'); navigateToPage('notifications') }
+  const handleViewMessages = () => { console.log('💬 MSG'); navigateToPage('messages') }
+  const handleViewCalendar = () => { console.log('📅 CAL'); navigateToPage('calendar') }
+  const handleUpgradePlan = () => { console.log('⭐ UPGRADE'); alert('⭐ Upgrade') }
+  const handleViewSettings = () => { console.log('⚙️ SETTINGS'); navigateToPage('settings') }
+  const handleRefreshDashboard = () => { console.log('🔄 REFRESH'); alert('🔄 Refreshing...') }
+  const handleExportReport = () => { console.log('💾 EXPORT'); alert('💾 Exporting...') }
+  const handleCustomizeWidgets = () => { console.log('🎨 CUSTOMIZE'); alert('🎨 Customize') }
+  const handleViewActivity = () => { console.log('📈 ACTIVITY'); alert('📈 Activity') }
+  const handleViewTasks = () => { console.log('✅ TASKS'); navigateToPage('my-day') }
+  const handleStartTour = () => { console.log('🎓 TOUR'); alert('🎓 Tour') }
+  const handleInviteTeam = () => { console.log('➕ INVITE'); alert('➕ Invite') }
+  const handleViewStats = (stat: string) => { console.log('📊:', stat); alert(`📊 ${stat}`) }
+  const handleViewReports = () => { console.log('📄 REPORTS'); navigateToPage('reports') }
+  const handleAIInsights = () => { console.log('🤖 AI'); alert('🤖 AI Insights') }
+
   // All available features organized by category - EXPANDED LIST
   const features = {
     core: [
