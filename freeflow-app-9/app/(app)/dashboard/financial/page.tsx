@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -31,9 +32,57 @@ import {
 export default function FinancialPage() {
   const [_selectedPeriod, setSelectedPeriod] = useState<any>('monthly')
 
-  const handleExportReport = (format: 'pdf' | 'csv' | 'xlsx') => {
+  const handleExportReport = async (format: 'pdf' | 'csv' | 'xlsx') => {
     console.log('💾 EXPORT FINANCIAL REPORT - Format:', format.toUpperCase())
-    alert(`💾 Exporting Financial Report\n\nFormat: ${format.toUpperCase()}\n\nIncluding:\n• Revenue & expenses\n• Transactions\n• Invoices\n• Tax summary`)
+
+    try {
+      const response = await fetch('/api/financial/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reportType: 'comprehensive',
+          format: format === 'xlsx' ? 'csv' : format,  // xlsx maps to csv for now
+          period: {
+            start: new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString().split('T')[0],
+            end: new Date().toISOString().split('T')[0]
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to export report')
+      }
+
+      // Handle CSV download
+      if (format === 'csv' || format === 'xlsx') {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `financial-report-${Date.now()}.${format}`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+        toast.success(`Report exported as ${format.toUpperCase()}`)
+      } else {
+        // Handle JSON/PDF response
+        const result = await response.json()
+        if (result.success) {
+          toast.success('Report generated successfully!', {
+            description: result.downloadUrl ? 'Download link ready' : 'Report data retrieved'
+          })
+          if (result.downloadUrl) {
+            window.open(result.downloadUrl, '_blank')
+          }
+        }
+      }
+    } catch (error: any) {
+      console.error('Export Report Error:', error)
+      toast.error('Failed to export report', {
+        description: error.message || 'Please try again later'
+      })
+    }
   }
 
   const handleScheduleReview = () => {
@@ -88,9 +137,61 @@ export default function FinancialPage() {
     }
   }
 
-  const handleCreateInvoice = () => {
+  const handleCreateInvoice = async () => {
     console.log('➕ CREATE INVOICE')
-    alert('➕ Create New Invoice\n\nEnter invoice details:\n• Client name\n• Amount\n• Due date\n• Description\n• Line items')
+
+    // Simplified invoice creation - in production would have a form modal
+    const client = prompt('Enter client name:')
+    if (!client) return
+
+    const amount = prompt('Enter invoice amount:')
+    if (!amount) return
+
+    try {
+      const response = await fetch('/api/financial/invoices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          data: {
+            client,
+            project: 'Services Rendered',
+            items: [
+              {
+                description: 'Professional Services',
+                quantity: 1,
+                rate: parseFloat(amount),
+                amount: parseFloat(amount)
+              }
+            ],
+            taxRate: 0,
+            currency: 'USD'
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create invoice')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success(result.message, {
+          description: `Invoice ${result.invoiceNumber} • PDF available`
+        })
+
+        // Show next steps
+        setTimeout(() => {
+          alert(`${result.message}\n\nInvoice Number: ${result.invoiceNumber}\nPDF: ${result.pdfUrl}\n\nNext Steps:\n• Review invoice details\n• Send to client\n• Track payment status`)
+        }, 500)
+      }
+    } catch (error: any) {
+      console.error('Create Invoice Error:', error)
+      toast.error('Failed to create invoice', {
+        description: error.message || 'Please try again later'
+      })
+    }
   }
 
   const handleViewAllInvoices = () => {
