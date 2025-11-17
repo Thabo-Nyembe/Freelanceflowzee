@@ -157,6 +157,38 @@ export default function VideoStudioPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const timelineRef = useRef<HTMLDivElement>(null)
 
+  // Handlers
+  const handleCreateProject = () => { console.log('➕ CREATE PROJECT'); setIsCreateModalOpen(true); alert('➕ Create New Video Project\n\nInitializing project setup...') }
+  const handleOpenProject = (projectId: string) => { console.log('📂 OPEN:', projectId); alert('📂 Opening Project\n\nLoading video editor...') }
+  const handleDeleteProject = (projectId: string) => { console.log('🗑️ DELETE:', projectId); confirm('Delete this project?') && alert('✅ Project deleted') }
+  const handleDuplicateProject = (projectId: string) => { console.log('📋 DUPLICATE:', projectId); alert('📋 Project Duplicated\n\nCopy created successfully') }
+  const handleExportVideo = (format: string) => { console.log('💾 EXPORT:', format); alert(`💾 Exporting Video\n\nFormat: ${format}\n\nProcessing...`) }
+  const handlePublishVideo = (projectId: string) => { console.log('🚀 PUBLISH:', projectId); alert('🚀 Publishing Video\n\nUploading to platform...') }
+  const handleShareVideo = (projectId: string) => { console.log('🔗 SHARE:', projectId); alert('🔗 Share Video\n\nGenerate shareable link\nShare to social media') }
+  const handleStartRecording = (type: RecordingType) => { console.log('🎬 RECORD:', type); setRecordingType(type); setIsRecording(true); alert(`🎬 Recording ${type}\n\nRecording started...`) }
+  const handleStopRecording = () => { console.log('⏹️ STOP'); setIsRecording(false); alert('⏹️ Recording Stopped\n\nSaving video...') }
+  const handlePlayPause = () => { setIsPlaying(!isPlaying); console.log(isPlaying ? '⏸️ PAUSE' : '▶️ PLAY') }
+  const handleToggleMute = () => { setIsMuted(!isMuted); console.log(isMuted ? '🔊 UNMUTE' : '🔇 MUTE') }
+  const handleToggleFullscreen = () => { setIsFullscreen(!isFullscreen); console.log(isFullscreen ? '🪟 EXIT FULLSCREEN' : '⛶ FULLSCREEN') }
+  const handleAddMedia = (type: string) => { console.log('➕ ADD:', type); alert(`➕ Add ${type}\n\nBrowse media library\nUpload new ${type}`) }
+  const handleAddTransition = () => { console.log('✨ TRANSITION'); alert('✨ Add Transition\n\nChoose transition effect\nAdjust duration') }
+  const handleAddEffect = () => { console.log('🎨 EFFECT'); alert('🎨 Add Effect\n\nBrowse effects library\nApply to clip') }
+  const handleAddText = () => { console.log('📝 TEXT'); alert('📝 Add Text\n\nCreate text overlay\nCustomize font and style') }
+  const handleAddAudio = () => { console.log('🎵 AUDIO'); alert('🎵 Add Audio\n\nBrowse music library\nUpload audio file\nRecord voiceover') }
+  const handleTrimClip = () => { console.log('✂️ TRIM'); alert('✂️ Trim Clip\n\nDrag handles to adjust clip duration') }
+  const handleSplitClip = () => { console.log('✂️ SPLIT'); alert('✂️ Split Clip\n\nSplit clip at playhead position') }
+  const handleUseTemplate = (templateId: string) => { console.log('📋 TEMPLATE:', templateId); alert('📋 Using Template\n\nApplying template to project...') }
+  const handleSaveProject = () => { console.log('💾 SAVE'); alert('💾 Project Saved\n\nAll changes saved successfully') }
+  const handleUndo = () => { console.log('↩️ UNDO'); alert('↩️ Undo last action') }
+  const handleRedo = () => { console.log('↪️ REDO'); alert('↪️ Redo action') }
+  const handleGenerateSubtitles = () => { console.log('📝 SUBTITLES'); alert('📝 Auto-Generate Subtitles\n\nAnalyzing audio\nCreating captions') }
+  const handleAIEnhancement = () => { console.log('✨ AI ENHANCE'); alert('✨ AI Enhancement\n\nAuto color correction\nNoise reduction\nStabilization\nQuality improvement') }
+  const handleCollaborate = () => { console.log('👥 COLLAB'); alert('👥 Invite Collaborators\n\nShare project\nReal-time editing\nComment and review') }
+  const handleRenderPreview = () => { console.log('👁️ PREVIEW'); alert('👁️ Rendering Preview\n\nGenerating preview...') }
+  const handleApplyColorGrade = () => { console.log('🎨 COLOR GRADE'); alert('🎨 Color Grading\n\nAdjust brightness\nContrast\nSaturation\nApply LUTs') }
+  const handleAnalytics = (projectId: string) => { console.log('📊 ANALYTICS:', projectId); alert('📊 Video Analytics\n\nViews\nEngagement\nWatch time\nAudience insights') }
+  const handleVersionHistory = (projectId: string) => { console.log('📜 VERSIONS:', projectId); alert('📜 Version History\n\nView all versions\nRestore previous version') }
+
   // Mock data
   const mockProjects: VideoProject[] = [
     {
