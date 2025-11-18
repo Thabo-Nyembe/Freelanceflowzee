@@ -12,7 +12,7 @@ import { EnhancedButton } from '@/components/ui/enhanced-button'
 import { EnhancedBadge } from '@/components/ui/enhanced-badge'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { 
+import {
   LayoutDashboard,
   FolderOpen,
   MessageSquare,
@@ -49,7 +49,10 @@ import {
   UserCheck,
   Archive,
   Monitor,
-  Headphones
+  Headphones,
+  RefreshCw,
+  Lightbulb,
+  Sparkles
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -90,19 +93,61 @@ const mockData = {
   totalClients: 156,
   hoursThisMonth: 187,
   recentActivities: [
-    { id: 1, type: 'project', message: 'New project "Brand Identity" started', time: '2 hours ago', status: 'success' },
-    { id: 2, type: 'payment', message: 'Payment received from John Doe', time: '4 hours ago', status: 'success' },
-    { id: 3, type: 'feedback', message: 'Client feedback on "Website Design"', time: '1 day ago', status: 'info' }
+    { id: 1, type: 'project', message: 'New project "Brand Identity" started', time: '2 hours ago', status: 'success', impact: 'high' },
+    { id: 2, type: 'payment', message: 'Payment received from John Doe', time: '4 hours ago', status: 'success', impact: 'medium' },
+    { id: 3, type: 'feedback', message: 'Client feedback on "Website Design"', time: '1 day ago', status: 'info', impact: 'low' }
   ],
   projects: [
-    { id: 1, name: 'Brand Identity Package', client: 'Acme Corp', progress: 85, status: 'In Progress', value: 2500, priority: 'high' },
-    { id: 2, name: 'Mobile App Design', client: 'Tech Startup', progress: 40, status: 'In Progress', value: 5000, priority: 'urgent' }
+    { id: 1, name: 'Brand Identity Package', client: 'Acme Corp', progress: 85, status: 'In Progress', value: 2500, priority: 'high', aiAutomation: true, collaboration: 3, deadline: '2024-02-15', category: 'design', estimatedCompletion: '3 days' },
+    { id: 2, name: 'Mobile App Design', client: 'Tech Startup', progress: 40, status: 'In Progress', value: 5000, priority: 'urgent', aiAutomation: false, collaboration: 2, deadline: '2024-03-01', category: 'development', estimatedCompletion: '2 weeks' },
+    { id: 3, name: 'Marketing Campaign', client: 'Local Business', progress: 60, status: 'In Progress', value: 1500, priority: 'medium', aiAutomation: true, collaboration: 1, deadline: '2024-02-20', category: 'marketing', estimatedCompletion: '1 week' }
+  ],
+  insights: [
+    {
+      id: 1,
+      type: 'revenue',
+      title: 'Revenue Optimization',
+      description: 'Your average project value increased by 23% this month. AI pricing suggestions are working effectively.',
+      impact: 'high',
+      action: 'Continue using AI pricing suggestions',
+      confidence: 94,
+      actedUpon: false
+    },
+    {
+      id: 2,
+      type: 'productivity',
+      title: 'Productivity Boost',
+      description: 'AI tools saved you 15 hours this week. Consider exploring more automation features.',
+      impact: 'high',
+      action: 'Explore more AI automation features',
+      confidence: 89,
+      actedUpon: false
+    },
+    {
+      id: 3,
+      type: 'client',
+      title: 'Client Retention',
+      description: 'Response time improved by 40%, leading to higher client satisfaction scores.',
+      impact: 'medium',
+      action: 'Maintain current communication pace',
+      confidence: 92,
+      actedUpon: false
+    }
   ]
 }
 
 export default function DashboardPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('overview')
+
+  // Enhanced state management for full functionality
+  const [liveActivities, setLiveActivities] = useState(mockData.recentActivities)
+  const [projects, setProjects] = useState(mockData.projects)
+  const [insights, setInsights] = useState(mockData.insights)
+  const [refreshing, setRefreshing] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [notificationCount, setNotificationCount] = useState(5)
+  const [use2025GUI, setUse2025GUI] = useState(false)
 
   /* ------------------------------------------------------------------
    * Phase 6 hooks – lightweight, client-side, cost-optimised
@@ -139,18 +184,15 @@ export default function DashboardPage() {
     }
   }
 
-  // Handlers
+  // Handlers - Simple navigation handlers
   const handleViewAllProjects = () => { console.log('📂 ALL'); navigateToPage('projects-hub') }
   const handleCreateProject = () => { console.log('➕ NEW'); navigateToPage('projects-hub/create') }
   const handleViewAnalytics = () => { console.log('📊 ANALYTICS'); navigateToPage('analytics') }
   const handleViewFinancial = () => { console.log('💰 FINANCIAL'); navigateToPage('financial') }
   const handleQuickAction = (action: string) => { console.log('⚡:', action); alert(`⚡ ${action}`) }
-  const handleViewNotifications = () => { console.log('🔔 NOTIF'); navigateToPage('notifications') }
   const handleViewMessages = () => { console.log('💬 MSG'); navigateToPage('messages') }
   const handleViewCalendar = () => { console.log('📅 CAL'); navigateToPage('calendar') }
   const handleUpgradePlan = () => { console.log('⭐ UPGRADE'); alert('⭐ Upgrade') }
-  const handleViewSettings = () => { console.log('⚙️ SETTINGS'); navigateToPage('settings') }
-  const handleRefreshDashboard = () => { console.log('🔄 REFRESH'); alert('🔄 Refreshing...') }
   const handleExportReport = () => { console.log('💾 EXPORT'); alert('💾 Exporting...') }
   const handleCustomizeWidgets = () => { console.log('🎨 CUSTOMIZE'); alert('🎨 Customize') }
   const handleViewActivity = () => { console.log('📈 ACTIVITY'); alert('📈 Activity') }
@@ -160,6 +202,122 @@ export default function DashboardPage() {
   const handleViewStats = (stat: string) => { console.log('📊:', stat); alert(`📊 ${stat}`) }
   const handleViewReports = () => { console.log('📄 REPORTS'); navigateToPage('reports') }
   const handleAIInsights = () => { console.log('🤖 AI'); alert('🤖 AI Insights') }
+
+  // Comprehensive handlers with full functionality
+  const handleRefreshDashboard = async () => {
+    console.log('🔄 DASHBOARD: Starting refresh...')
+    setRefreshing(true)
+
+    try {
+      // Simulate API call with 1.5s delay
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      // Add new activity to feed (newest first)
+      const newActivity = {
+        id: Date.now(),
+        type: 'system',
+        message: 'Dashboard refreshed successfully',
+        time: 'Just now',
+        status: 'success',
+        impact: 'low'
+      }
+
+      setLiveActivities(prev => [newActivity, ...prev])
+      console.log('✅ DASHBOARD: Refresh complete')
+    } catch (error) {
+      console.error('❌ DASHBOARD: Refresh failed', error)
+    } finally {
+      setRefreshing(false)
+    }
+  }
+
+  const handleViewProject = (projectId: number) => {
+    const project = projects.find(p => p.id === projectId)
+    console.log('👁️ VIEW PROJECT:', {
+      id: projectId,
+      name: project?.name,
+      client: project?.client,
+      progress: project?.progress,
+      status: project?.status
+    })
+    navigateToPage(`projects-hub?id=${projectId}`)
+  }
+
+  const handleProjectMessage = (projectId: number) => {
+    const project = projects.find(p => p.id === projectId)
+    console.log('💬 MESSAGE PROJECT:', {
+      id: projectId,
+      name: project?.name,
+      client: project?.client
+    })
+    navigateToPage(`messages?project=${projectId}`)
+  }
+
+  const handleActOnInsight = (insightId: number) => {
+    const insight = insights.find(i => i.id === insightId)
+    console.log('🎯 ACT ON INSIGHT:', {
+      id: insightId,
+      type: insight?.type,
+      title: insight?.title,
+      action: insight?.action,
+      confidence: insight?.confidence
+    })
+
+    // Mark insight as acted upon
+    setInsights(prev => prev.map(i =>
+      i.id === insightId ? { ...i, actedUpon: true } : i
+    ))
+
+    // Smart navigation based on insight type
+    if (insight?.type === 'revenue') {
+      console.log('📊 Navigating to analytics for revenue insight')
+      navigateToPage('analytics')
+    } else if (insight?.type === 'productivity') {
+      console.log('🤖 Navigating to AI Create for productivity insight')
+      navigateToPage('ai-create')
+    } else if (insight?.type === 'client') {
+      console.log('👥 Navigating to client zone for client insight')
+      navigateToPage('client-zone')
+    }
+  }
+
+  const handleViewAllActivities = () => {
+    console.log('📋 VIEW ALL: Navigating to all activities')
+    navigateToPage('notifications')
+  }
+
+  const handleOpenNotifications = () => {
+    console.log('🔔 NOTIFICATIONS:', {
+      unreadCount: notificationCount,
+      action: 'Opening notifications panel'
+    })
+    setNotificationCount(0) // Reset badge
+    navigateToPage('notifications')
+  }
+
+  const handleSearch = (query: string, filters?: { category?: string, dateRange?: string }) => {
+    console.log('🔍 SEARCH:', {
+      query,
+      filters,
+      timestamp: new Date().toISOString()
+    })
+    setSearchQuery(query)
+    trackEvent('dashboard_search', { query, filters })
+  }
+
+  const handle2025GUIToggle = () => {
+    console.log('🎨 GUI TOGGLE:', {
+      current: use2025GUI,
+      switching_to: !use2025GUI
+    })
+    setUse2025GUI(prev => !prev)
+    trackEvent('gui_2025_toggle', { enabled: !use2025GUI })
+  }
+
+  const handleOpenSettings = () => {
+    console.log('⚙️ SETTINGS: Opening settings panel')
+    navigateToPage('settings')
+  }
 
   // All available features organized by category - EXPANDED LIST
   const features = {
@@ -312,7 +470,7 @@ export default function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {mockData.projects.map(project => (
+            {projects.map(project => (
               <div key={project.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
@@ -333,7 +491,91 @@ export default function DashboardPage() {
                     </div>
                     <Progress value={project.progress} className="h-2" />
                   </div>
-                  <Button size="sm" variant="outline">View</Button>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleViewProject(project.id)}
+                      data-testid={`view-project-${project.id}-btn`}
+                    >
+                      View
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleProjectMessage(project.id)}
+                      data-testid={`message-project-${project.id}-btn`}
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* AI Insights Section */}
+        <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 border-blue-200 dark:border-blue-800 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Lightbulb className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              AI Insights
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {insights.map(insight => (
+              <div
+                key={insight.id}
+                className={cn(
+                  "p-4 rounded-lg border-2 transition-all",
+                  insight.actedUpon
+                    ? "bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 opacity-60"
+                    : "bg-white dark:bg-gray-900 border-blue-200 dark:border-blue-700 hover:shadow-md"
+                )}
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100">
+                        {insight.title}
+                      </h4>
+                      <Badge
+                        variant={insight.impact === 'high' ? 'default' : 'secondary'}
+                        className={cn(
+                          insight.impact === 'high' && "bg-orange-500 text-white",
+                          insight.impact === 'medium' && "bg-yellow-500 text-white"
+                        )}
+                      >
+                        {insight.impact} impact
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      {insight.description}
+                    </p>
+                    <p className="text-xs font-medium text-blue-600 dark:text-blue-400">
+                      💡 {insight.action}
+                    </p>
+                  </div>
+                  <div className="ml-4 text-right">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                      Confidence: {insight.confidence}%
+                    </div>
+                    {!insight.actedUpon ? (
+                      <Button
+                        size="sm"
+                        onClick={() => handleActOnInsight(insight.id)}
+                        data-testid={`act-insight-${insight.id}-btn`}
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        Act on This
+                      </Button>
+                    ) : (
+                      <Badge variant="outline" className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 border-green-300 dark:border-green-700">
+                        ✓ Acted Upon
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -505,6 +747,63 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 </EnhancedCard>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2">
+                  {/* Refresh Button with Loading State */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRefreshDashboard}
+                    disabled={refreshing}
+                    data-testid="refresh-dashboard-btn"
+                    className="relative"
+                  >
+                    <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
+                    <span className="ml-2">{refreshing ? 'Refreshing...' : 'Refresh'}</span>
+                  </Button>
+
+                  {/* Notification Button with Badge */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleOpenNotifications}
+                    data-testid="notifications-btn"
+                    className="relative"
+                  >
+                    <Bell className="h-4 w-4" />
+                    {notificationCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                        {notificationCount}
+                      </span>
+                    )}
+                  </Button>
+
+                  {/* 2025 GUI Toggle */}
+                  <Button
+                    variant={use2025GUI ? "default" : "outline"}
+                    size="sm"
+                    onClick={handle2025GUIToggle}
+                    data-testid="gui-2025-toggle-btn"
+                    className={cn(
+                      use2025GUI && "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    )}
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    2025 GUI
+                  </Button>
+
+                  {/* Settings Button */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleOpenSettings}
+                    data-testid="settings-btn"
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </div>
+
                 <ThemeToggle />
               </div>
             </div>
