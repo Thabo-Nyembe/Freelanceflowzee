@@ -37,6 +37,7 @@ import {
   Archive
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { motion } from 'framer-motion'
 
 // Type definitions
 interface Task {
@@ -175,6 +176,49 @@ const mockAIInsights: AIInsight[] = [
   }
 ]
 
+// Framer Motion Animation Components
+const FloatingParticle = ({ delay = 0, color = 'purple' }: { delay?: number; color?: string }) => {
+  return (
+    <motion.div
+      className={`absolute w-2 h-2 bg-${color}-400 rounded-full opacity-30`}
+      animate={{
+        y: [0, -30, 0],
+        x: [0, 15, -15, 0],
+        scale: [0.8, 1.2, 0.8],
+        opacity: [0.3, 0.8, 0.3]
+      }}
+      transition={{
+        duration: 4 + delay,
+        repeat: Infinity,
+        ease: 'easeInOut',
+        delay: delay
+      }}
+    />
+  )
+}
+
+const TextShimmer = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
+  return (
+    <motion.div
+      className={`relative inline-block ${className}`}
+      initial={{ backgroundPosition: '200% 0' }}
+      animate={{ backgroundPosition: '-200% 0' }}
+      transition={{
+        duration: 2,
+        repeat: Infinity,
+        ease: 'linear'
+      }}
+      style={{
+        background: 'linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.4), transparent)',
+        backgroundSize: '200% 100%',
+        WebkitBackgroundClip: 'text'
+      }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
 const mockTimeBlocks: TimeBlock[] = [
   {
     id: 'block_1',
@@ -221,6 +265,9 @@ export default function MyDayPage() {
   const [newTaskDescription, setNewTaskDescription] = useState('')
   const [newTaskPriority, setNewTaskPriority] = useState<'low' | 'medium' | 'high' | 'urgent'>('medium')
   const [isAddingTask, setIsAddingTask] = useState(false)
+  const [isGeneratingSchedule, setIsGeneratingSchedule] = useState(false)
+  const [aiGeneratedSchedule, setAiGeneratedSchedule] = useState<any[]>([])
+  const [showCelebration, setShowCelebration] = useState(false)
 
   // Initialize state with mock data
   const initialState: TaskState = {
@@ -341,7 +388,10 @@ export default function MyDayPage() {
   const addTask = async () => {
     if (!newTaskTitle.trim()) return
 
-    console.log('➕ ADD TASK')
+    console.log('➕ ADDING NEW TASK')
+    console.log('📝 Title:', newTaskTitle)
+    console.log('🎯 Priority:', newTaskPriority)
+    console.log('💬 Description:', newTaskDescription || '(none)')
 
     try {
       const response = await fetch('/api/tasks', {
@@ -388,10 +438,12 @@ export default function MyDayPage() {
   }
 
   const toggleTask = async (taskId: string) => {
-    console.log('✅ TOGGLE TASK:', taskId)
-
     const task = state.tasks.find(t => t.id === taskId)
     if (!task) return
+
+    console.log('✓ TOGGLING TASK:', task.title)
+    console.log('📊 Current status:', task.completed ? 'completed' : 'pending')
+    console.log('🔄 New status:', !task.completed ? 'completed' : 'pending')
 
     const newCompleted = !task.completed
 
@@ -414,6 +466,13 @@ export default function MyDayPage() {
 
       if (result.success) {
         dispatch({ type: 'TOGGLE_TASK', id: taskId })
+        console.log('✅ TASK TOGGLED SUCCESSFULLY')
+
+        if (newCompleted) {
+          console.log('🎉 TASK COMPLETED - SHOWING CELEBRATION')
+          setShowCelebration(true)
+          setTimeout(() => setShowCelebration(false), 3000)
+        }
 
         if (result.celebration) {
           toast.success(`${result.message} ${result.celebration.message} +${result.celebration.points} points!`, {
@@ -431,21 +490,36 @@ export default function MyDayPage() {
         }
       }
     } catch (error: any) {
-      console.error('Toggle Task Error:', error)
+      console.error('❌ TOGGLE TASK ERROR:', error)
+      console.log('⚠️ UPDATING UI OPTIMISTICALLY')
       toast.error('Failed to update task', {
         description: error.message || 'Please try again later'
       })
+      // Optimistic update even if API fails
+      dispatch({ type: 'TOGGLE_TASK', id: taskId })
     }
   }
 
   const startTimer = (taskId: string) => {
+    const task = state.tasks.find(t => t.id === taskId)
+    console.log('⏱️ STARTING TIMER FOR TASK:', task?.title || taskId)
+
     if (state.currentTimer) {
+      console.log('⏸️ STOPPING CURRENT TIMER FIRST')
       dispatch({ type: 'STOP_TIMER' })
     }
+
+    console.log('▶️ TIMER STARTED')
     dispatch({ type: 'START_TIMER', taskId })
   }
 
   const stopTimer = () => {
+    const task = state.tasks.find(t => t.id === state.currentTimer || '')
+    console.log('⏹️ STOPPING TIMER')
+    console.log('⏱️ Task:', task?.title || 'Unknown')
+    console.log('⏱️ Elapsed time:', formatTime(state.elapsedTime))
+    console.log('📊 Total focus time:', state.totalFocusTime + state.elapsedTime, 'seconds')
+
     dispatch({ type: 'STOP_TIMER' })
   }
 
@@ -473,7 +547,9 @@ export default function MyDayPage() {
   }
 
   const handleArchiveTask = async (taskId: string) => {
-    console.log('📦 ARCHIVE TASK - ID:', taskId)
+    const task = state.tasks.find(t => t.id === taskId)
+    console.log('🗑️ DELETING TASK:', task?.title || taskId)
+
     if (!confirm('Archive this task?\n\nArchived tasks can be restored later.')) {
       return
     }
@@ -496,13 +572,17 @@ export default function MyDayPage() {
 
       if (result.success) {
         dispatch({ type: 'DELETE_TASK', id: taskId })
+        console.log('✅ TASK DELETED SUCCESSFULLY')
         toast.success(result.message)
       }
     } catch (error: any) {
-      console.error('Delete Task Error:', error)
+      console.error('❌ DELETE TASK ERROR:', error)
+      console.log('⚠️ UPDATING UI OPTIMISTICALLY')
       toast.error('Failed to delete task', {
         description: error.message || 'Please try again later'
       })
+      // Optimistic update even if API fails
+      dispatch({ type: 'DELETE_TASK', id: taskId })
     }
   }
 
@@ -601,9 +681,67 @@ export default function MyDayPage() {
     alert('✅ Insight dismissed!')
   }
 
-  const handleGenerateAISchedule = () => {
-    console.log('🤖 GENERATE AI SCHEDULE')
-    alert('🤖 AI Schedule Generator\n\nAnalyzing your tasks, preferences, and productivity patterns...\n\n✅ Optimized schedule generated!\n\nView the "Time Blocks" tab to see your AI-generated schedule.')
+  const handleGenerateAISchedule = async () => {
+    console.log('🤖 GENERATING AI SCHEDULE')
+    console.log('📊 Current tasks:', state.tasks.length)
+    setIsGeneratingSchedule(true)
+    toast.info('AI is analyzing your tasks...')
+
+    try {
+      const response = await fetch('/api/ai/generate-schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tasks: state.tasks,
+          goals: ['Maximize productivity', 'Maintain work-life balance'],
+          preferences: {
+            workHours: '9am-5pm',
+            breakDuration: 15,
+            focusTimePreference: 'morning'
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate schedule')
+      }
+
+      const data = await response.json()
+
+      if (data.success && data.schedule) {
+        setAiGeneratedSchedule(data.schedule)
+        console.log('✅ SCHEDULE GENERATED:', data.schedule.length, 'time blocks')
+        toast.success(`AI generated a schedule with ${data.schedule.length} optimized time blocks!`)
+
+        // Optionally add schedule blocks as tasks
+        data.schedule.forEach((block: any, index: number) => {
+          if (block.type === 'work' || block.type === 'focus') {
+            dispatch({
+              type: 'ADD_TASK',
+              task: {
+                id: `ai-${Date.now()}-${index}`,
+                title: block.title,
+                description: block.description || '',
+                completed: false,
+                priority: block.priority as any || 'medium',
+                category: block.type === 'focus' ? 'work' : 'meeting',
+                estimatedTime: block.duration,
+                startTime: new Date().toISOString(),
+                tags: ['ai-generated']
+              }
+            })
+          }
+        })
+      }
+    } catch (error: any) {
+      console.error('❌ SCHEDULE GENERATION ERROR:', error)
+      toast.error('Failed to generate AI schedule', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsGeneratingSchedule(false)
+      console.log('🏁 SCHEDULE GENERATION COMPLETE')
+    }
   }
 
   const handleExportAnalytics = () => {
@@ -692,7 +830,7 @@ export default function MyDayPage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-purple-900 to-violet-900 bg-clip-text text-transparent mb-2">
-                My Day Today
+                <TextShimmer>My Day Today</TextShimmer>
               </h1>
               <p className="text-lg text-gray-600 font-light">
                 AI-powered daily planning and productivity optimization ✨
@@ -700,18 +838,20 @@ export default function MyDayPage() {
             </div>
             
             <div className="flex items-center gap-4">
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                data-testid="back-to-dashboard-btn"
+                variant="outline"
+                size="sm"
                 className="gap-2"
                 onClick={() => router.push('/dashboard')}
               >
                 <ArrowRight className="h-4 w-4 rotate-180" />
                 Back to Dashboard
               </Button>
-              
-              <Button 
-                size="sm" 
+
+              <Button
+                data-testid="add-task-header-btn"
+                size="sm"
                 className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                 onClick={() => setIsAddingTask(true)}
               >
@@ -723,7 +863,7 @@ export default function MyDayPage() {
 
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg relative overflow-hidden">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -734,6 +874,11 @@ export default function MyDayPage() {
                   <div className="p-3 bg-purple-100 rounded-xl">
                     <Target className="h-6 w-6 text-purple-600" />
                   </div>
+                </div>
+                {/* Floating particles */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                  <FloatingParticle delay={0} color="purple" />
+                  <FloatingParticle delay={1} color="pink" />
                 </div>
               </CardContent>
             </Card>
@@ -806,8 +951,9 @@ export default function MyDayPage() {
                     <div className="text-3xl font-bold">{formatTime(state.elapsedTime)}</div>
                     <div className="text-purple-100 text-sm">Elapsed time</div>
                   </div>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    data-testid="stop-timer-btn"
+                    variant="outline"
                     className="bg-white/20 border-white/30 text-white hover:bg-white/30"
                     onClick={stopTimer}
                   >
@@ -822,7 +968,7 @@ export default function MyDayPage() {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-4 bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl p-2 shadow-xl">
+          <TabsList className="grid w-full grid-cols-6 bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl p-2 shadow-xl">
             <TabsTrigger value="today" className="flex items-center gap-2 rounded-2xl">
               <Calendar className="h-4 w-4" />
               Today's Tasks
@@ -841,6 +987,14 @@ export default function MyDayPage() {
             <TabsTrigger value="analytics" className="flex items-center gap-2 rounded-2xl">
               <BarChart3 className="h-4 w-4" />
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="projects" className="flex items-center gap-2 rounded-2xl">
+              <Briefcase className="h-4 w-4" />
+              Projects
+            </TabsTrigger>
+            <TabsTrigger value="goals" className="flex items-center gap-2 rounded-2xl">
+              <Target className="h-4 w-4" />
+              Goals
             </TabsTrigger>
           </TabsList>
 
@@ -885,13 +1039,14 @@ export default function MyDayPage() {
                       >
                         <div className="flex items-start gap-4">
                           <Button
+                            data-testid="toggle-task-btn"
                             variant="ghost"
                             size="sm"
                             className="p-0 h-auto"
                             onClick={() => toggleTask(task.id)}
                           >
-                            <CheckCircle 
-                              className={cn("h-5 w-5", task.completed ? "text-green-600 fill-green-100" : "text-gray-400")} 
+                            <CheckCircle
+                              className={cn("h-5 w-5", task.completed ? "text-green-600 fill-green-100" : "text-gray-400")}
                             />
                           </Button>
                           
@@ -963,8 +1118,9 @@ export default function MyDayPage() {
                                     )}
                                   </Button>
                                 )}
-                                
+
                                 <Button
+                                  data-testid="delete-task-btn"
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => dispatch({ type: 'DELETE_TASK', id: task.id })}
@@ -1018,7 +1174,8 @@ export default function MyDayPage() {
                       Generate Schedule
                     </Button>
                     
-                    <Button 
+                    <Button
+                      data-testid="check-messages-btn"
                       className="w-full justify-start gap-2"
                       variant="outline"
                       onClick={() => router.push('/dashboard/collaboration')}
@@ -1026,8 +1183,9 @@ export default function MyDayPage() {
                       <MessageSquare className="h-4 w-4" />
                       Check Client Messages
                     </Button>
-                    
-                    <Button 
+
+                    <Button
+                      data-testid="view-projects-btn"
                       className="w-full justify-start gap-2"
                       variant="outline"
                       onClick={() => router.push('/dashboard/projects-hub')}
@@ -1145,9 +1303,15 @@ export default function MyDayPage() {
                           </Badge>
                         </div>
                         <p className="text-gray-600 mb-3">{insight.description}</p>
-                        
+
                         {insight.actionable && (
-                          <Button variant="outline" size="sm" className="gap-2">
+                          <Button
+                            data-testid="apply-suggestion-btn"
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                            onClick={() => handleApplyAISuggestion(insight.id)}
+                          >
                             <CheckCircle className="h-3 w-3" />
                             Apply Suggestion
                           </Button>
@@ -1225,6 +1389,419 @@ export default function MyDayPage() {
               </Card>
             </div>
           </TabsContent>
+
+          {/* Projects Tab */}
+          <TabsContent value="projects" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Active Projects */}
+              <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Briefcase className="h-5 w-5" />
+                    Active Projects
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Project 1 */}
+                  <div className="p-4 rounded-xl border border-purple-200 bg-purple-50">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold text-gray-900">TechCorp Branding</h4>
+                      <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+                        On Track
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">Complete logo design and brand guidelines</p>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Progress</span>
+                        <span className="font-medium">75%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-purple-600 h-2 rounded-full" style={{ width: '75%' }}></div>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-gray-500 mt-2">
+                        <span>Tasks today: 2</span>
+                        <span>Due: 3 days</span>
+                      </div>
+                      <div className="flex gap-2 mt-3">
+                        <Badge variant="outline" className="text-xs bg-purple-100 text-purple-700 border-purple-300">
+                          High Priority
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          Velocity: 85%
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Project 2 */}
+                  <div className="p-4 rounded-xl border border-blue-200 bg-blue-50">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold text-gray-900">Portfolio Redesign</h4>
+                      <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                        At Risk
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">Modernize portfolio with new case studies</p>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Progress</span>
+                        <span className="font-medium">45%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: '45%' }}></div>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-gray-500 mt-2">
+                        <span>Tasks today: 1</span>
+                        <span>Due: 1 week</span>
+                      </div>
+                      <div className="flex gap-2 mt-3">
+                        <Badge variant="outline" className="text-xs bg-blue-100 text-blue-700 border-blue-300">
+                          Medium Priority
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          Velocity: 72%
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Project 3 */}
+                  <div className="p-4 rounded-xl border border-green-200 bg-green-50">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold text-gray-900">Client Dashboard</h4>
+                      <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+                        Ahead
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">Build custom analytics dashboard</p>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Progress</span>
+                        <span className="font-medium">92%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-green-600 h-2 rounded-full" style={{ width: '92%' }}></div>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-gray-500 mt-2">
+                        <span>Tasks today: 1</span>
+                        <span>Due: 5 days</span>
+                      </div>
+                      <div className="flex gap-2 mt-3">
+                        <Badge variant="outline" className="text-xs bg-green-100 text-green-700 border-green-300">
+                          Low Priority
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          Velocity: 95%
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Project Insights */}
+              <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    Project Insights
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Velocity Metrics */}
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3">Team Velocity</h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">TechCorp Branding</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">85%</span>
+                          <TrendingUp className="h-4 w-4 text-green-600" />
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Portfolio Redesign</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">72%</span>
+                          <Activity className="h-4 w-4 text-yellow-600" />
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Client Dashboard</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">95%</span>
+                          <TrendingUp className="h-4 w-4 text-green-600" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Resource Allocation */}
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3">Resource Allocation</h4>
+                    <div className="space-y-2">
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-gray-600">Design</span>
+                          <span className="font-medium">45%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="bg-purple-600 h-2 rounded-full" style={{ width: '45%' }}></div>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-gray-600">Development</span>
+                          <span className="font-medium">30%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="bg-blue-600 h-2 rounded-full" style={{ width: '30%' }}></div>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-gray-600">Communication</span>
+                          <span className="font-medium">25%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="bg-green-600 h-2 rounded-full" style={{ width: '25%' }}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* AI Recommendations */}
+                  <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+                    <h4 className="font-semibold text-purple-900 mb-2 flex items-center gap-2">
+                      <Brain className="h-4 w-4" />
+                      AI Recommendation
+                    </h4>
+                    <p className="text-sm text-purple-700 mb-3">
+                      Focus on TechCorp Branding this week to maintain momentum. Portfolio Redesign needs attention - consider allocating 2 more hours today.
+                    </p>
+                    <Button variant="outline" size="sm" className="w-full gap-2 border-purple-300 text-purple-700 hover:bg-purple-100">
+                      <CheckCircle className="h-3 w-3" />
+                      Apply Recommendation
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Goals Tab */}
+          <TabsContent value="goals" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Daily Goals */}
+              <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5" />
+                    Daily Goals
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Goal 1 */}
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
+                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">Complete 5 tasks</p>
+                      <p className="text-sm text-gray-600">Current: 1/5 completed</p>
+                      <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                        <div className="bg-green-600 h-2 rounded-full" style={{ width: '20%' }}></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Goal 2 */}
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                    <Timer className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">6 hours of focus time</p>
+                      <p className="text-sm text-gray-600">Current: {focusHours}h {focusMinutes}m / 6h</p>
+                      <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${Math.min((state.totalFocusTime / 360) * 100, 100)}%` }}></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Goal 3 */}
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-purple-50 border border-purple-200">
+                    <MessageSquare className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">2 client check-ins</p>
+                      <p className="text-sm text-gray-600">Current: 0/2 completed</p>
+                      <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                        <div className="bg-purple-600 h-2 rounded-full" style={{ width: '0%' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Weekly Goals */}
+              <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5" />
+                    Weekly Goals
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Week Goal 1 */}
+                  <div className="p-3 rounded-lg bg-indigo-50 border border-indigo-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="font-medium text-gray-900">Finish TechCorp milestone</p>
+                      <Badge variant="outline" className="bg-indigo-100 text-indigo-700 border-indigo-300 text-xs">
+                        In Progress
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-2">Complete all logo variations and documentation</p>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-indigo-600 h-2 rounded-full" style={{ width: '75%' }}></div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">75% complete - 2 days remaining</p>
+                  </div>
+
+                  {/* Week Goal 2 */}
+                  <div className="p-3 rounded-lg bg-orange-50 border border-orange-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="font-medium text-gray-900">Client presentation prep</p>
+                      <Badge variant="outline" className="bg-orange-100 text-orange-700 border-orange-300 text-xs">
+                        Pending
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-2">Prepare slides and demo materials</p>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-orange-600 h-2 rounded-full" style={{ width: '30%' }}></div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">30% complete - 4 days remaining</p>
+                  </div>
+
+                  {/* Week Goal 3 */}
+                  <div className="p-3 rounded-lg bg-teal-50 border border-teal-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="font-medium text-gray-900">Portfolio update</p>
+                      <Badge variant="outline" className="bg-teal-100 text-teal-700 border-teal-300 text-xs">
+                        On Track
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-2">Add 3 new case studies</p>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-teal-600 h-2 rounded-full" style={{ width: '66%' }}></div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">2/3 case studies added</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Goal Analytics */}
+              <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg md:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    Goal Achievement Analytics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Overall Achievement */}
+                    <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
+                      <p className="text-sm text-gray-600 mb-1">Overall Achievement</p>
+                      <p className="text-4xl font-bold text-purple-700">87%</p>
+                      <p className="text-xs text-gray-500 mt-1">Weekly average</p>
+                    </div>
+
+                    {/* Daily Goals */}
+                    <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl">
+                      <p className="text-sm text-gray-600 mb-1">Daily Goals</p>
+                      <p className="text-4xl font-bold text-blue-700">92%</p>
+                      <p className="text-xs text-gray-500 mt-1">Success rate</p>
+                    </div>
+
+                    {/* Weekly Goals */}
+                    <div className="text-center p-4 bg-gradient-to-br from-green-50 to-teal-50 rounded-xl">
+                      <p className="text-sm text-gray-600 mb-1">Weekly Goals</p>
+                      <p className="text-4xl font-bold text-green-700">82%</p>
+                      <p className="text-xs text-gray-500 mt-1">Completion rate</p>
+                    </div>
+                  </div>
+
+                  {/* Streak Tracking */}
+                  <div className="mt-6 p-4 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl border border-orange-200">
+                    <h4 className="font-semibold text-gray-900 mb-3">Current Streaks</h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-orange-600">12</p>
+                        <p className="text-xs text-gray-600">Daily tasks</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-orange-600">8</p>
+                        <p className="text-xs text-gray-600">Focus hours</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-orange-600">5</p>
+                        <p className="text-xs text-gray-600">Client updates</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Category Performance */}
+                  <div className="mt-6">
+                    <h4 className="font-semibold text-gray-900 mb-3">Performance by Category</h4>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-gray-600">Productivity</span>
+                          <span className="font-medium">92%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="bg-purple-600 h-2 rounded-full" style={{ width: '92%' }}></div>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-gray-600">Communication</span>
+                          <span className="font-medium">78%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="bg-blue-600 h-2 rounded-full" style={{ width: '78%' }}></div>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-gray-600">Learning</span>
+                          <span className="font-medium">85%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="bg-green-600 h-2 rounded-full" style={{ width: '85%' }}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* AI Goal Suggestions */}
+                  <div className="mt-6 p-4 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-200">
+                    <h4 className="font-semibold text-indigo-900 mb-2 flex items-center gap-2">
+                      <Lightbulb className="h-4 w-4" />
+                      AI Goal Suggestions
+                    </h4>
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-2">
+                        <span className="text-indigo-600">•</span>
+                        <p className="text-sm text-indigo-700">Based on your velocity, you could add a stretch goal: "Ship one feature early this week"</p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-indigo-600">•</span>
+                        <p className="text-sm text-indigo-700">Your productivity peaks in mornings - schedule important goals between 9-11 AM</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
         </Tabs>
 
         {/* Add Task Modal */}
@@ -1276,6 +1853,7 @@ export default function MyDayPage() {
                 
                 <div className="flex gap-3 pt-4">
                   <Button
+                    data-testid="confirm-add-task-btn"
                     className="flex-1"
                     onClick={addTask}
                     disabled={!newTaskTitle.trim()}
@@ -1283,6 +1861,7 @@ export default function MyDayPage() {
                     Add Task
                   </Button>
                   <Button
+                    data-testid="cancel-add-task-btn"
                     variant="outline"
                     className="flex-1"
                     onClick={() => setIsAddingTask(false)}
