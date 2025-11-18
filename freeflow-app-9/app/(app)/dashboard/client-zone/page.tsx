@@ -606,11 +606,21 @@ export default function ClientZonePage() {
                         <Calendar className="h-4 w-4 mr-2" />
                         Schedule New Meeting
                       </Button>
-                      <Button variant="outline" className="w-full justify-start">
+                      <Button variant="outline" className="w-full justify-start" onClick={() => {
+                        toast.info('Loading project timeline...')
+                        setTimeout(() => {
+                          alert(`📊 Project Timeline\n\nNext Steps:\n• View all project milestones\n• Track progress over time\n• Identify bottlenecks\n• Adjust deadlines if needed\n• Share timeline with stakeholders\n• Export timeline report`)
+                        }, 500)
+                      }}>
                         <Clock className="h-4 w-4 mr-2" />
                         View Project Timeline
                       </Button>
-                      <Button variant="outline" className="w-full justify-start">
+                      <Button variant="outline" className="w-full justify-start" onClick={() => {
+                        toast.info('Setting up reminders...')
+                        setTimeout(() => {
+                          alert(`⏰ Set Reminders\n\nNext Steps:\n• Choose reminder times\n• Select notification method\n• Add custom reminder messages\n• Set recurring reminders\n• Manage existing reminders\n• Enable mobile notifications`)
+                        }, 500)
+                      }}>
                         <Bell className="h-4 w-4 mr-2" />
                         Set Reminders
                       </Button>
