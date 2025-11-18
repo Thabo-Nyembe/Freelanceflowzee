@@ -35,6 +35,9 @@ export default function GalleryPage() {
   const handleUploadMedia = async () => {
     console.log('📤 UPLOAD')
 
+    // SESSION_13: Info toast at start
+    toast.info('Opening file upload...')
+
     // Simplified upload - in production would use actual file input and upload
     const title = prompt('Enter media title:')
     if (!title) return
@@ -68,13 +71,18 @@ export default function GalleryPage() {
           description: 'Your media has been added to the gallery'
         })
 
+        // SESSION_13: Alert with next steps
+        setTimeout(() => {
+          alert(`📤 Upload Media\n\nNext Steps:\n• Select images, videos, or documents\n• Upload multiple files at once\n• Add titles and descriptions\n• Organize into albums or categories\n• Tag for easy searching\n• Share with team or clients`)
+        }, 500)
+
         // Show achievement if earned
         if (result.achievement) {
           setTimeout(() => {
             toast.success(`${result.achievement.message} +${result.achievement.points} points!`, {
               description: `Badge: ${result.achievement.badge}`
             })
-          }, 500)
+          }, 1000)
         }
       }
     } catch (error: any) {
@@ -83,6 +91,13 @@ export default function GalleryPage() {
         description: error.message || 'Please try again later'
       })
     }
+  }
+
+  // SESSION_13: View mode toggle with toast feedback
+  const handleViewModeToggle = () => {
+    const newMode = viewMode === 'grid' ? 'list' : 'grid'
+    setViewMode(newMode)
+    toast.success(`Switched to ${newMode} view`)
   }
   const handleViewItem = (itemId: number) => { console.log('👁️ VIEW:', itemId); alert('👁️ Viewing Media\n\nOpening fullscreen preview...') }
   const handleEditItem = (itemId: number) => { console.log('✏️ EDIT:', itemId); alert('✏️ Edit Media\n\nOpening editor for metadata and tags') }
@@ -414,11 +429,11 @@ export default function GalleryPage() {
           <p className="text-gray-600 dark:text-gray-300">Showcase your creative work and portfolio</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}>
+          <Button variant="outline" size="sm" onClick={handleViewModeToggle}>
             {viewMode === 'grid' ? <List className="h-4 w-4 mr-2" /> : <Grid className="h-4 w-4 mr-2" />}
             {viewMode === 'grid' ? 'List View' : 'Grid View'}
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={handleUploadMedia}>
             <Upload className="h-4 w-4 mr-2" />
             Upload Media
           </Button>

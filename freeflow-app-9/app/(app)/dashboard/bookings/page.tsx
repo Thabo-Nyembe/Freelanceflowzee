@@ -115,7 +115,15 @@ export default function BookingsPage() {
   const [statusFilter, setStatusFilter] = useState('all')
 
   // Handlers
-  const handleNewBooking = () => { console.log('➕ NEW BOOKING'); alert('➕ Create New Booking\n\nSchedule a new client appointment.') }
+  const handleNewBooking = () => {
+    console.log('➕ NEW BOOKING')
+
+    // SESSION_13: Toast + Alert pattern
+    toast.info('Opening booking form...')
+    setTimeout(() => {
+      alert(`➕ Create New Booking\n\nNext Steps:\n• Schedule a new client appointment\n• Select service and duration\n• Choose available time slot\n• Add client contact information\n• Set payment terms\n• Send confirmation email`)
+    }, 500)
+  }
   const handleEditBooking = (id: string) => { console.log('✏️ EDIT:', id); alert(`✏️ Edit Booking ${id}`) }
   const handleCancelBooking = (id: string) => { console.log('❌ CANCEL:', id); confirm('Cancel this booking?') && alert('✅ Booking cancelled') }
   const handleConfirmBooking = async (id: string) => {
