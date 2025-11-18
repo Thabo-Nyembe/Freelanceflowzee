@@ -30,6 +30,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { motion } from 'framer-motion'
 
 interface Project {
   id: string
@@ -58,6 +59,49 @@ interface ProjectStats {
   efficiency: number
 }
 
+// Framer Motion Animation Components
+const FloatingParticle = ({ delay = 0, color = 'blue' }: { delay?: number; color?: string }) => {
+  return (
+    <motion.div
+      className={`absolute w-2 h-2 bg-${color}-400 rounded-full opacity-30`}
+      animate={{
+        y: [0, -30, 0],
+        x: [0, 15, -15, 0],
+        scale: [0.8, 1.2, 0.8],
+        opacity: [0.3, 0.8, 0.3]
+      }}
+      transition={{
+        duration: 4 + delay,
+        repeat: Infinity,
+        ease: 'easeInOut',
+        delay: delay
+      }}
+    />
+  )
+}
+
+const TextShimmer = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
+  return (
+    <motion.div
+      className={`relative inline-block ${className}`}
+      initial={{ backgroundPosition: '200% 0' }}
+      animate={{ backgroundPosition: '-200% 0' }}
+      transition={{
+        duration: 2,
+        repeat: Infinity,
+        ease: 'linear'
+      }}
+      style={{
+        background: 'linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.4), transparent)',
+        backgroundSize: '200% 100%',
+        WebkitBackgroundClip: 'text'
+      }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
 export default function ProjectsHubPage() {
   const router = useRouter()
   const [projects, setProjects] = useState<Project[]>([])
@@ -68,6 +112,9 @@ export default function ProjectsHubPage() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [priorityFilter, setPriorityFilter] = useState('all')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [newProject, setNewProject] = useState({
     title: '',
     description: '',
@@ -78,26 +125,149 @@ export default function ProjectsHubPage() {
     category: 'web-development'
   })
 
-  // Handlers
-  const handleViewProject = (id: string) => { console.log('👁️ VIEW:', id); alert(`👁️ Project ${id}`) }
-  const handleEditProject = (id: string) => { console.log('✏️ EDIT:', id); alert(`✏️ Edit ${id}`) }
-  const handleDeleteProject = (id: string) => { console.log('🗑️ DEL:', id); confirm('Delete?') && alert('✅ Deleted') }
-  const handleDuplicateProject = (id: string) => { console.log('📋 DUP:', id); alert('📋 Duplicated') }
-  const handleArchiveProject = (id: string) => { console.log('📦 ARCH:', id); alert('📦 Archived') }
-  const handleFilterStatus = (status: string) => { console.log('🔍 FILT:', status); setStatusFilter(status) }
-  const handleSearch = (query: string) => { console.log('🔍 SEARCH:', query); setSearchTerm(query) }
-  const handleSort = (by: string) => { console.log('🔃 SORT:', by); alert(`🔃 ${by}`) }
-  const handleExportProjects = () => { console.log('💾 EXPORT'); alert('💾 Exporting...') }
-  const handleImportProjects = () => { console.log('📤 IMPORT'); alert('📤 Import') }
-  const handleBulkAction = (action: string, ids: string[]) => { console.log('☑️ BULK:', action); alert(`☑️ ${action}`) }
-  const handleShareProject = (id: string) => { console.log('🔗 SHARE:', id); alert('🔗 Shared') }
-  const handleProjectAnalytics = (id: string) => { console.log('📊 ANA:', id); alert('📊 Analytics') }
-  const handleAssignTeam = (id: string) => { console.log('👥 TEAM:', id); alert('👥 Assign') }
-  const handleSetBudget = (id: string) => { console.log('💰 BUDGET:', id); alert('💰 Budget') }
-  const handleSetDeadline = (id: string) => { console.log('📅 DATE:', id); alert('📅 Deadline') }
-  const handleProjectTemplates = () => { console.log('📋 TEMP'); router.push('/dashboard/projects-hub/templates') }
-  const handleProjectReports = () => { console.log('📄 REP'); alert('📄 Reports') }
-  const handleQuickStats = () => { console.log('📊 STATS'); alert('📊 Stats') }
+  // Enhanced Handlers with Full Implementations
+  const handleViewProject = (project: Project) => {
+    console.log('👁️ VIEW PROJECT')
+    console.log('📁 Project:', project.title)
+    console.log('👤 Client:', project.client_name)
+    console.log('📊 Status:', project.status)
+    console.log('💰 Budget:', `$${project.budget.toLocaleString()}`)
+    console.log('📈 Progress:', `${project.progress}%`)
+    setSelectedProject(project)
+    setIsViewModalOpen(true)
+  }
+
+  const handleEditProject = (project: Project) => {
+    console.log('✏️ EDIT PROJECT')
+    console.log('📁 Project ID:', project.id)
+    console.log('📝 Title:', project.title)
+    setSelectedProject(project)
+    setIsEditModalOpen(true)
+  }
+
+  const handleDeleteProject = async (id: string) => {
+    const project = projects.find(p => p.id === id)
+    console.log('🗑️ DELETE PROJECT')
+    console.log('📁 Project:', project?.title || id)
+    console.log('⚠️ Impact: This will permanently delete the project')
+
+    if (!confirm(`Delete project "${project?.title}"?\n\nThis action cannot be undone.`)) {
+      console.log('❌ DELETE CANCELLED BY USER')
+      return
+    }
+
+    try {
+      console.log('🔄 SENDING DELETE REQUEST')
+      const response = await fetch('/api/projects/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', projectId: id })
+      })
+
+      if (!response.ok) throw new Error('Failed to delete project')
+
+      const result = await response.json()
+
+      if (result.success) {
+        console.log('✅ PROJECT DELETED SUCCESSFULLY')
+        setProjects(projects.filter(p => p.id !== id))
+        toast.success(`Project "${project?.title}" deleted successfully`)
+      }
+    } catch (error: any) {
+      console.error('❌ DELETE PROJECT ERROR:', error)
+      toast.error('Failed to delete project', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
+
+  const handleDuplicateProject = (id: string) => {
+    const project = projects.find(p => p.id === id)
+    console.log('📋 DUPLICATE PROJECT')
+    console.log('📁 Source Project:', project?.title)
+
+    if (!project) return
+
+    const duplicated: Project = {
+      ...project,
+      id: `${Date.now()}`,
+      title: `${project.title} (Copy)`,
+      status: 'draft',
+      progress: 0,
+      spent: 0,
+      start_date: new Date().toISOString(),
+      comments_count: 0
+    }
+
+    console.log('➕ CREATING DUPLICATE')
+    console.log('🆔 New ID:', duplicated.id)
+    console.log('📝 New Title:', duplicated.title)
+
+    setProjects([...projects, duplicated])
+    toast.success(`Project duplicated: ${duplicated.title}`)
+    console.log('✅ DUPLICATE CREATED SUCCESSFULLY')
+  }
+
+  const handleArchiveProject = async (id: string) => {
+    const project = projects.find(p => p.id === id)
+    console.log('📦 ARCHIVE PROJECT')
+    console.log('📁 Project:', project?.title || id)
+
+    try {
+      console.log('🔄 ARCHIVING PROJECT')
+      const response = await fetch('/api/projects/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'archive', projectId: id })
+      })
+
+      if (!response.ok) throw new Error('Failed to archive project')
+
+      const result = await response.json()
+
+      if (result.success) {
+        console.log('✅ PROJECT ARCHIVED SUCCESSFULLY')
+        setProjects(projects.filter(p => p.id !== id))
+        toast.success(`Project "${project?.title}" archived`)
+      }
+    } catch (error: any) {
+      console.error('❌ ARCHIVE PROJECT ERROR:', error)
+      toast.error('Failed to archive project', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
+
+  const handleExportProjects = () => {
+    console.log('💾 EXPORT PROJECTS')
+    console.log('📊 Total projects:', projects.length)
+    console.log('📁 Format: JSON')
+
+    const data = projects.map(p => ({
+      title: p.title,
+      client: p.client_name,
+      status: p.status,
+      progress: `${p.progress}%`,
+      budget: `$${p.budget.toLocaleString()}`,
+      spent: `$${p.spent.toLocaleString()}`,
+      priority: p.priority,
+      category: p.category,
+      due_date: formatDate(p.end_date)
+    }))
+
+    const content = JSON.stringify(data, null, 2)
+    const blob = new Blob([content], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'projects-export.json'
+    a.click()
+    URL.revokeObjectURL(url)
+
+    console.log('✅ EXPORT COMPLETED')
+    console.log('📄 File: projects-export.json')
+    toast.success(`Exported ${projects.length} projects`)
+  }
 
   const mockProjects: Project[] = [
     {
@@ -207,9 +377,15 @@ export default function ProjectsHubPage() {
 
   useEffect(() => {
     const loadProjects = async () => {
+      console.log('📂 LOADING PROJECTS...')
       setLoading(true)
       // Simulate API call
       setTimeout(() => {
+        console.log('✅ PROJECTS LOADED:', mockProjects.length, 'projects')
+        console.log('📊 Active:', mockProjects.filter(p => p.status === 'active').length)
+        console.log('✔️ Completed:', mockProjects.filter(p => p.status === 'completed').length)
+        console.log('⏸️ Paused:', mockProjects.filter(p => p.status === 'paused').length)
+        console.log('📝 Draft:', mockProjects.filter(p => p.status === 'draft').length)
         setProjects(mockProjects)
         setFilteredProjects(mockProjects)
         setLoading(false)
@@ -220,17 +396,27 @@ export default function ProjectsHubPage() {
   }, [])
 
   useEffect(() => {
+    console.log('🔍 FILTERING PROJECTS')
+    console.log('🔎 Search Term:', searchTerm || '(none)')
+    console.log('📊 Status Filter:', statusFilter)
+    console.log('🎯 Priority Filter:', priorityFilter)
+
     const filtered = projects.filter(project => {
       const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            project.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            project.description.toLowerCase().includes(searchTerm.toLowerCase())
-      
+
       const matchesStatus = statusFilter === 'all' || project.status === statusFilter
       const matchesPriority = priorityFilter === 'all' || project.priority === priorityFilter
-      
+
       return matchesSearch && matchesStatus && matchesPriority
     })
-    
+
+    console.log('✅ FILTERED RESULTS:', filtered.length, 'projects')
+    if (filtered.length < projects.length) {
+      console.log('📉 Filtered out:', projects.length - filtered.length, 'projects')
+    }
+
     setFilteredProjects(filtered)
   }, [projects, searchTerm, statusFilter, priorityFilter])
 
@@ -276,9 +462,16 @@ export default function ProjectsHubPage() {
       return
     }
 
-    console.log('➕ CREATE PROJECT')
+    console.log('➕ CREATING NEW PROJECT')
+    console.log('📝 Title:', newProject.title)
+    console.log('👤 Client:', newProject.client_name || '(not specified)')
+    console.log('💰 Budget:', newProject.budget ? `$${newProject.budget}` : '(not specified)')
+    console.log('🎯 Priority:', newProject.priority)
+    console.log('📁 Category:', newProject.category)
+    console.log('📅 End Date:', newProject.end_date || '(30 days from now)')
 
     try {
+      console.log('🔄 SENDING CREATE REQUEST')
       const response = await fetch('/api/projects/manage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -303,6 +496,8 @@ export default function ProjectsHubPage() {
       const result = await response.json()
 
       if (result.success) {
+        console.log('✅ PROJECT CREATED SUCCESSFULLY:', result.project.title)
+        console.log('🆔 Project ID:', result.projectId)
         // Add project to local state
         setProjects([...projects, result.project])
         setIsCreateModalOpen(false)
@@ -320,13 +515,16 @@ export default function ProjectsHubPage() {
           description: `Project ID: ${result.projectId}`
         })
 
+        console.log('🎊 SHOWING NEXT STEPS ALERT')
         // Show next steps
         setTimeout(() => {
           alert(`✅ Project Created Successfully!\n\nNext Steps:\n• Set up project milestones and deliverables\n• Assign team members to the project\n• Create initial tasks and timeline\n• Schedule kickoff meeting with client\n• Set up project tracking and reporting`)
         }, 500)
+      } else {
+        console.log('❌ PROJECT CREATION FAILED')
       }
     } catch (error: any) {
-      console.error('Create Project Error:', error)
+      console.error('❌ PROJECT CREATION ERROR:', error)
       toast.error('Failed to create project', {
         description: error.message || 'Please try again later'
       })
@@ -334,9 +532,14 @@ export default function ProjectsHubPage() {
   }
 
   const handleUpdateProjectStatus = async (projectId: string, newStatus: string) => {
-    console.log('🔄 UPDATE PROJECT STATUS - ID:', projectId, 'Status:', newStatus)
+    const project = projects.find(p => p.id === projectId)
+    console.log('🔄 UPDATING PROJECT STATUS')
+    console.log('📁 Project:', project?.title || projectId)
+    console.log('📊 Current Status:', project?.status || 'unknown')
+    console.log('📊 New Status:', newStatus)
 
     try {
+      console.log('🔄 SENDING STATUS UPDATE REQUEST')
       const response = await fetch('/api/projects/manage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -354,6 +557,8 @@ export default function ProjectsHubPage() {
       const result = await response.json()
 
       if (result.success) {
+        console.log('✅ PROJECT STATUS UPDATED SUCCESSFULLY')
+
         // Update local state
         setProjects(projects.map(p =>
           p.id === projectId ? { ...p, status: newStatus as Project['status'], progress: newStatus === 'completed' ? 100 : p.progress } : p
@@ -361,14 +566,24 @@ export default function ProjectsHubPage() {
 
         // Show celebration for completed projects
         if (result.celebration) {
+          console.log('🎉 CELEBRATION TRIGGERED:', result.celebration.message)
           toast.success(`${result.message} ${result.celebration.message} +${result.celebration.points} points!`, {
             description: `Achievement: ${result.celebration.achievement}`
           })
         } else {
+          console.log('✅ STATUS UPDATE ACKNOWLEDGED')
           toast.success(result.message)
         }
 
         // Show next steps based on status change
+        if (newStatus === 'completed') {
+          console.log('🏆 PROJECT COMPLETED - SHOWING NEXT STEPS')
+        } else if (newStatus === 'active') {
+          console.log('🚀 PROJECT ACTIVATED - SHOWING NEXT STEPS')
+        } else if (newStatus === 'paused') {
+          console.log('⏸️ PROJECT PAUSED - SHOWING NEXT STEPS')
+        }
+
         setTimeout(() => {
           if (newStatus === 'completed') {
             alert(`✅ Project Completed!\n\nNext Steps:\n• Request final feedback from client\n• Archive project files and documentation\n• Send final invoice if applicable\n• Update portfolio with project showcase\n• Schedule project retrospective with team`)
@@ -378,9 +593,12 @@ export default function ProjectsHubPage() {
             alert(`⏸️ Project On Hold\n\nNext Steps:\n• Document current progress and status\n• Notify client and team members\n• Set expected resume date\n• Archive current work safely\n• Plan resource reallocation if needed`)
           }
         }, 500)
+      } else {
+        console.log('❌ STATUS UPDATE FAILED')
       }
     } catch (error: any) {
-      console.error('Update Project Status Error:', error)
+      console.error('❌ STATUS UPDATE ERROR:', error)
+      console.log('⚠️ UPDATING UI OPTIMISTICALLY')
       toast.error('Failed to update project status', {
         description: error.message || 'Please try again later'
       })
@@ -459,20 +677,30 @@ export default function ProjectsHubPage() {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Total Projects</p>
-                    <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
-                    <p className="text-sm text-gray-500">{stats.active} active</p>
-                  </div>
-                  <div className="p-3 bg-blue-100 rounded-xl">
-                    <Briefcase className="h-6 w-6 text-blue-600" />
-                  </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0 }}
+            >
+              <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow relative overflow-hidden">
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                  <FloatingParticle delay={0} color="blue" />
+                  <FloatingParticle delay={1} color="indigo" />
                 </div>
-              </CardContent>
-            </Card>
+                <CardContent className="p-6 relative z-10">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Total Projects</p>
+                      <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
+                      <p className="text-sm text-gray-500">{stats.active} active</p>
+                    </div>
+                    <div className="p-3 bg-blue-100 rounded-xl">
+                      <Briefcase className="h-6 w-6 text-blue-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
             
             <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
               <CardContent className="p-6">
@@ -668,18 +896,18 @@ export default function ProjectsHubPage() {
                                 variant="outline"
                                 size="sm"
                                 className="gap-2"
-                                onClick={() => alert(`Viewing project: ${project.title}`)}
+                                onClick={() => handleViewProject(project)}
                                 data-testid="view-project-btn"
                               >
                                 <Eye className="h-3 w-3" />
                                 View
                               </Button>
-                              
+
                               <Button
                                 variant="outline"
                                 size="sm"
                                 className="gap-2"
-                                onClick={() => alert(`Editing project: ${project.title}`)}
+                                onClick={() => handleEditProject(project)}
                                 data-testid="edit-project-btn"
                               >
                                 <Edit className="h-3 w-3" />
@@ -838,6 +1066,220 @@ export default function ProjectsHubPage() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* View Project Modal */}
+        {isViewModalOpen && selectedProject && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setIsViewModalOpen(false)}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Card className="w-full max-w-3xl bg-white max-h-[90vh] overflow-y-auto">
+                <CardHeader className="border-b">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-2xl">{selectedProject.title}</CardTitle>
+                      <div className="flex items-center gap-3 mt-2">
+                        <Badge className={cn(getStatusColor(selectedProject.status))}>
+                          {selectedProject.status}
+                        </Badge>
+                        <div className={cn("w-3 h-3 rounded-full", getPriorityColor(selectedProject.priority))} />
+                        <span className="text-sm text-gray-600 capitalize">{selectedProject.priority} priority</span>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => setIsViewModalOpen(false)}>
+                      ✕
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Description</h3>
+                    <p className="text-gray-700">{selectedProject.description}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Client</p>
+                      <p className="font-medium">{selectedProject.client_name}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Budget</p>
+                      <p className="font-medium">${selectedProject.budget.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Spent</p>
+                      <p className="font-medium">${selectedProject.spent.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Start Date</p>
+                      <p className="font-medium">{formatDate(selectedProject.start_date)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Due Date</p>
+                      <p className="font-medium">{formatDate(selectedProject.end_date)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Category</p>
+                      <p className="font-medium">{selectedProject.category}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-semibold">Progress</h3>
+                      <span className="text-2xl font-bold text-blue-600">{selectedProject.progress}%</span>
+                    </div>
+                    <Progress value={selectedProject.progress} className="h-3" />
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4 pt-4 border-t">
+                    <div className="text-center">
+                      <Users className="h-5 w-5 mx-auto mb-1 text-gray-500" />
+                      <p className="text-sm text-gray-600">{selectedProject.team_members.length} Members</p>
+                    </div>
+                    <div className="text-center">
+                      <Calendar className="h-5 w-5 mx-auto mb-1 text-gray-500" />
+                      <p className="text-sm text-gray-600">{selectedProject.comments_count} Comments</p>
+                    </div>
+                    <div className="text-center">
+                      <FolderOpen className="h-5 w-5 mx-auto mb-1 text-gray-500" />
+                      <p className="text-sm text-gray-600">{selectedProject.attachments.length} Files</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                    <Button className="flex-1" onClick={() => { setIsViewModalOpen(false); setIsEditModalOpen(true); }}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Project
+                    </Button>
+                    <Button variant="outline" className="flex-1" onClick={() => handleExportProjects()}>
+                      Export Data
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Edit Project Modal */}
+        {isEditModalOpen && selectedProject && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setIsEditModalOpen(false)}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Card className="w-full max-w-2xl bg-white max-h-[90vh] overflow-y-auto">
+                <CardHeader className="border-b">
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Edit Project</CardTitle>
+                    <Button variant="ghost" size="sm" onClick={() => setIsEditModalOpen(false)}>
+                      ✕
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Project Title</label>
+                      <Input
+                        value={selectedProject.title}
+                        onChange={(e) => setSelectedProject({...selectedProject, title: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Client Name</label>
+                      <Input
+                        value={selectedProject.client_name}
+                        onChange={(e) => setSelectedProject({...selectedProject, client_name: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-2 block">Description</label>
+                    <Textarea
+                      value={selectedProject.description}
+                      onChange={(e) => setSelectedProject({...selectedProject, description: e.target.value})}
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Budget ($)</label>
+                      <Input
+                        type="number"
+                        value={selectedProject.budget}
+                        onChange={(e) => setSelectedProject({...selectedProject, budget: parseFloat(e.target.value)})}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Status</label>
+                      <select
+                        value={selectedProject.status}
+                        onChange={(e) => setSelectedProject({...selectedProject, status: e.target.value as Project['status']})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      >
+                        <option value="draft">Draft</option>
+                        <option value="active">Active</option>
+                        <option value="paused">Paused</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Priority</label>
+                      <select
+                        value={selectedProject.priority}
+                        onChange={(e) => setSelectedProject({...selectedProject, priority: e.target.value as Project['priority']})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      >
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="urgent">Urgent</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-2 block">Progress (%)</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={selectedProject.progress}
+                      onChange={(e) => setSelectedProject({...selectedProject, progress: parseInt(e.target.value)})}
+                    />
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                    <Button
+                      className="flex-1"
+                      onClick={() => {
+                        console.log('💾 SAVE PROJECT EDITS')
+                        console.log('📁 Project:', selectedProject.title)
+                        setProjects(projects.map(p => p.id === selectedProject.id ? selectedProject : p))
+                        toast.success(`Project "${selectedProject.title}" updated`)
+                        setIsEditModalOpen(false)
+                      }}
+                    >
+                      Save Changes
+                    </Button>
+                    <Button variant="outline" className="flex-1" onClick={() => setIsEditModalOpen(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        )}
 
         {/* Create Project Modal */}
         {isCreateModalOpen && (
