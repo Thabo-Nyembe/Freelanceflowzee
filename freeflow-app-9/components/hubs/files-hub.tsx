@@ -252,60 +252,176 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
     setUploading(true)
     setUploadProgress(0)
 
-    // Simulate upload progress
-    const progressInterval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(progressInterval)
-          setUploading(false)
-          return 100
+    try {
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval)
+            return 90
+          }
+          return prev + 10
+        })
+      }, 200)
+
+      // Upload each file to API
+      const newFiles: FileItem[] = []
+
+      for (const file of Array.from(uploadedFiles)) {
+        const response = await fetch('/api/files', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'upload-file',
+            data: {
+              name: file.name,
+              type: file.type,
+              size: file.size,
+              parentFolder: selectedFolder,
+              tags: []
+            }
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to upload ${file.name}`)
         }
-        return prev + 10
-      })
-    }, 200)
 
-    // Process files (mock implementation)
-    const newFiles: FileItem[] = Array.from(uploadedFiles).map((file, index) => ({
-      id: `file_${Date.now()}_${index}`,
-      name: file.name,
-      type: file.type.startsWith('image/') ? 'image' : 
-            file.type.startsWith('video/') ? 'video' :
-            file.type.startsWith('audio/') ? 'audio' :
-            file.type.includes('pdf') || file.type.includes('document') ? 'document' :
-            file.type.includes('zip') || file.type.includes('archive') ? 'archive' : 'other',
-      size: file.size,
-      url: URL.createObjectURL(file),
-      uploadedAt: new Date().toISOString(),
-      uploadedBy: {
-        id: userId,
-        name: 'Current User',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=User'
-      },
-      shared: false,
-      starred: false,
-      downloads: 0,
-      views: 0,
-      folder: selectedFolder || 'Uploads',
-      tags: [],
-      metadata: {}
-    }))
+        const result = await response.json()
 
-    setTimeout(() => {
+        if (result.success) {
+          newFiles.push(result.file)
+
+          // Show achievement if earned
+          if (result.achievement) {
+            toast.success(`${result.achievement.message} +${result.achievement.points} points!`, {
+              description: `Badge: ${result.achievement.badge}`
+            })
+          }
+        }
+      }
+
+      clearInterval(progressInterval)
+      setUploadProgress(100)
+
+      // Add uploaded files to state
       setFiles(prev => [...newFiles, ...prev])
       onFileUpload?.(newFiles)
-    }, 2000)
+
+      toast.success(`${newFiles.length} file(s) uploaded successfully!`)
+
+      setTimeout(() => {
+        setUploading(false)
+        setUploadProgress(0)
+      }, 500)
+
+    } catch (error: any) {
+      console.error('File Upload Error:', error)
+      setUploading(false)
+      setUploadProgress(0)
+      toast.error('Failed to upload files', {
+        description: error.message || 'Please try again later'
+      })
+    }
   }
 
-  const handleFileDelete = (fileId: string) => {
-    setFiles(prev => prev.filter(f => f.id !== fileId))
-    onFileDelete?.(fileId)
+  const handleFileDelete = async (fileId: string) => {
+    console.log('🗑️ DELETE FILE:', fileId)
+
+    if (!confirm('⚠️ Move this file to trash?\n\nYou can restore it within 30 days.')) {
+      return
+    }
+
+    try {
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete-files',
+          data: {
+            fileIds: [fileId],
+            permanent: false
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete file')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Remove from local state
+        setFiles(prev => prev.filter(f => f.id !== fileId))
+        onFileDelete?.(fileId)
+
+        toast.success(result.message, {
+          description: result.undoAvailable ? `Can restore within ${result.undoExpires}` : undefined
+        })
+      }
+    } catch (error: any) {
+      console.error('Delete File Error:', error)
+      toast.error('Failed to delete file', {
+        description: error.message || 'Please try again later'
+      })
+    }
   }
 
-  const handleFileShare = (fileId: string) => {
-    setFiles(prev => prev.map(f => 
-      f.id === fileId ? { ...f, shared: !f.shared } : f
-    ))
-    onFileShare?.(fileId)
+  const handleFileShare = async (fileId: string) => {
+    console.log('🔗 SHARE FILE:', fileId)
+
+    try {
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'share-file',
+          data: {
+            fileIds: [fileId],
+            permissions: 'view',
+            expiresIn: '30 days'
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to share file')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Update local state
+        setFiles(prev => prev.map(f =>
+          f.id === fileId ? { ...f, shared: true } : f
+        ))
+        onFileShare?.(fileId)
+
+        toast.success(result.message, {
+          description: `Share link: ${result.shareUrl}`
+        })
+
+        // Show achievement if earned
+        if (result.achievement) {
+          setTimeout(() => {
+            toast.success(`${result.achievement.message} +${result.achievement.points} points!`, {
+              description: `Badge: ${result.achievement.badge}`
+            })
+          }, 500)
+        }
+
+        // Show share details
+        setTimeout(() => {
+          alert(`📤 File Shared!\n\nShare URL: ${result.shareUrl}\n\nQR Code: ${result.shareLinks.qrCode}\n\nExpires: ${result.expiresIn}`)
+        }, 1000)
+      }
+    } catch (error: any) {
+      console.error('Share File Error:', error)
+      toast.error('Failed to share file', {
+        description: error.message || 'Please try again later'
+      })
+    }
   }
 
   const toggleStar = (fileId: string) => {
