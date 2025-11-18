@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Input } from '@/components/ui/input'
 import {
   Image,
   Video,
@@ -23,13 +24,20 @@ import {
   Calendar,
   User,
   Star,
-  Play
+  Play,
+  Sparkles,
+  Loader2
 } from 'lucide-react'
 
 export default function GalleryPage() {
   const [viewMode, setViewMode] = useState<any>('grid')
   const [selectedCategory, setSelectedCategory] = useState<any>('all')
   const [searchTerm, setSearchTerm] = useState<any>('')
+
+  // SESSION_13: AI Image Generation state
+  const [aiPrompt, setAiPrompt] = useState<string>('')
+  const [isGenerating, setIsGenerating] = useState<boolean>(false)
+  const [generatedImage, setGeneratedImage] = useState<string>('')
 
   // Handlers
   const handleUploadMedia = async () => {
@@ -99,6 +107,50 @@ export default function GalleryPage() {
     setViewMode(newMode)
     toast.success(`Switched to ${newMode} view`)
   }
+
+  // SESSION_13: AI Image Generation with validation and feedback
+  const handleGenerateImage = async () => {
+    if (!aiPrompt.trim()) {
+      toast.error('Please enter an image description')
+      return
+    }
+
+    setIsGenerating(true)
+    toast.info('Generating image with AI...')
+
+    try {
+      const response = await fetch('/api/ai-image-generation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: aiPrompt,
+          action: 'generate'
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate image')
+      }
+
+      const data = await response.json()
+
+      if (data.success) {
+        setGeneratedImage(data.imageUrl)
+        toast.success('Image generated successfully!')
+        setTimeout(() => {
+          alert(`🎨 AI Image Generated!\n\nNext Steps:\n• Review the generated image\n• Download to your gallery\n• Edit or refine if needed\n• Use in your projects\n• Generate variations with different prompts\n• Share with clients for feedback`)
+        }, 500)
+      } else {
+        toast.error('Image generation failed. Please try again.')
+      }
+    } catch (error) {
+      console.error('AI Image Generation Error:', error)
+      toast.error('Failed to generate image. Please try again.')
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
   const handleViewItem = (itemId: number) => { console.log('👁️ VIEW:', itemId); alert('👁️ Viewing Media\n\nOpening fullscreen preview...') }
   const handleEditItem = (itemId: number) => { console.log('✏️ EDIT:', itemId); alert('✏️ Edit Media\n\nOpening editor for metadata and tags') }
   const handleDeleteItem = (itemId: number) => { console.log('🗑️ DELETE:', itemId); confirm('Delete this item?') && alert('✅ Media deleted') }
@@ -490,6 +542,82 @@ export default function GalleryPage() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* SESSION_13: AI Image Generator */}
+      <Card className="border-purple-200 dark:border-purple-800">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-purple-500" />
+            AI Image Generator
+          </CardTitle>
+          <CardDescription>Create unique images with AI based on your descriptions</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                placeholder="Describe the image you want to generate..."
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+                disabled={isGenerating}
+                className="flex-1"
+              />
+              <Button
+                onClick={handleGenerateImage}
+                disabled={isGenerating}
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Generate
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {/* Generated Image Preview */}
+            {generatedImage && (
+              <div className="mt-4">
+                <p className="text-sm font-medium mb-2">Generated Image:</p>
+                <div className="relative rounded-lg overflow-hidden border">
+                  <img
+                    src={generatedImage}
+                    alt="AI Generated"
+                    className="w-full h-64 object-cover"
+                  />
+                  <div className="absolute bottom-2 right-2 flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => handleDownloadItem(0)}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => setGeneratedImage('')}
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <p className="text-xs text-gray-500">
+              💡 Tip: Be specific with your descriptions for better results. Include style, mood, colors, and composition details.
+            </p>
           </div>
         </CardContent>
       </Card>

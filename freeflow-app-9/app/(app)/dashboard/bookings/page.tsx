@@ -114,15 +114,67 @@ export default function BookingsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
+  // SESSION_13: Booking creation state
+  const [isCreating, setIsCreating] = useState(false)
+
   // Handlers
-  const handleNewBooking = () => {
+  const handleNewBooking = async () => {
     console.log('➕ NEW BOOKING')
 
-    // SESSION_13: Toast + Alert pattern
-    toast.info('Opening booking form...')
-    setTimeout(() => {
-      alert(`➕ Create New Booking\n\nNext Steps:\n• Schedule a new client appointment\n• Select service and duration\n• Choose available time slot\n• Add client contact information\n• Set payment terms\n• Send confirmation email`)
-    }, 500)
+    setIsCreating(true)
+    toast.info('Creating new booking...')
+
+    try {
+      // In production, this would collect form data from a modal/dialog
+      const bookingData = {
+        action: 'create',
+        data: {
+          clientName: 'New Client',
+          service: 'Consultation',
+          date: new Date().toISOString().split('T')[0],
+          time: '10:00 AM',
+          duration: '60 min',
+          status: 'pending',
+          payment: 'awaiting',
+          amount: 150
+        }
+      }
+
+      const response = await fetch('/api/bookings/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData)
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create booking')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success('Booking created successfully!')
+        setTimeout(() => {
+          alert(`➕ Create New Booking\n\nNext Steps:\n• Schedule a new client appointment\n• Select service and duration\n• Choose available time slot\n• Add client contact information\n• Set payment terms\n• Send confirmation email`)
+        }, 500)
+
+        // Show achievement if earned
+        if (result.achievement) {
+          setTimeout(() => {
+            toast.success(`${result.achievement.message} +${result.achievement.points} points!`, {
+              description: `Badge: ${result.achievement.badge}`
+            })
+          }, 1000)
+        }
+      }
+    } catch (error: any) {
+      console.error('Create Booking Error:', error)
+      toast.error('Failed to create booking', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsCreating(false)
+    }
   }
   const handleEditBooking = (id: string) => { console.log('✏️ EDIT:', id); alert(`✏️ Edit Booking ${id}`) }
   const handleCancelBooking = (id: string) => { console.log('❌ CANCEL:', id); confirm('Cancel this booking?') && alert('✅ Booking cancelled') }
@@ -288,9 +340,9 @@ export default function BookingsPage() {
               <Download className="h-4 w-4" />
               Export
             </Button>
-            <Button className="gap-2" onClick={handleNewBooking}>
+            <Button className="gap-2" onClick={handleNewBooking} disabled={isCreating}>
               <Plus className="h-4 w-4" />
-              New Booking
+              {isCreating ? 'Creating...' : 'New Booking'}
             </Button>
           </div>
         </div>
