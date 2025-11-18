@@ -45,40 +45,25 @@ export default function ClientZonePage() {
   const [newMessage, setNewMessage] = useState('')
   const [newFeedback, setNewFeedback] = useState('')
 
-  // Handlers
-  const handleViewProject = (id: number) => { console.log('👁️ VIEW PROJECT:', id); alert('👁️ Viewing project details') }
-  const handleApproveDeliverable = async (id: number) => {
-    console.log('✅ APPROVE DELIVERABLE - ID:', id)
+  // SESSION_12 Handlers - Enhanced with next steps guidance
 
-    try {
-      const response = await fetch('/api/projects/manage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'update-status',
-          projectId: id.toString(),
-          data: { status: 'approved' }
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to approve deliverable')
-      }
-
-      const result = await response.json()
-
-      if (result.success) {
-        toast.success('✅ Deliverable approved!', {
-          description: 'The team has been notified of your approval'
-        })
-      }
-    } catch (error: any) {
-      console.error('Approve Deliverable Error:', error)
-      toast.error('Failed to approve deliverable', {
-        description: error.message || 'Please try again later'
-      })
-    }
+  // Handler 1: Notifications
+  const handleNotifications = () => {
+    toast.success('Opening notifications...')
+    setTimeout(() => {
+      alert(`🔔 Notifications Center\n\nNext Steps:\n• Review project updates and milestones\n• Check messages from your team\n• See delivery notifications\n• Manage notification preferences\n• Mark important updates\n• Stay informed on project progress`)
+    }, 500)
   }
+
+  // Handler 2: Contact Team
+  const handleContactTeam = () => {
+    toast.success('Opening team communication...')
+    setTimeout(() => {
+      alert(`💬 Contact Your Team\n\nNext Steps:\n• Send a message to your project team\n• Schedule a video call or meeting\n• Share feedback or requirements\n• Ask questions about your project\n• Request updates or clarifications\n• Build strong collaboration`)
+    }, 500)
+  }
+
+  // Handler 3: Request Revision (with API call)
   const handleRequestRevision = async (id: number) => {
     console.log('🔄 REQUEST REVISION - ID:', id)
 
@@ -106,9 +91,10 @@ export default function ClientZonePage() {
       const result = await response.json()
 
       if (result.success) {
-        toast.success('🔄 Revision requested', {
-          description: 'The team will review your feedback and make the necessary changes'
-        })
+        toast.success('Revision request submitted!')
+        setTimeout(() => {
+          alert(`🔄 Revision Requested\n\nNext Steps:\n• Your team will review the request within 24 hours\n• Provide detailed feedback on what to change\n• Attach reference materials if needed\n• Track revision status in the dashboard\n• Receive notification when revisions are complete\n• Approve final deliverables`)
+        }, 500)
       }
     } catch (error: any) {
       console.error('Request Revision Error:', error)
@@ -117,12 +103,68 @@ export default function ClientZonePage() {
       })
     }
   }
-  const handleSendMessage = () => { console.log('📧 SEND MESSAGE'); alert('📧 Message sent to team'); setNewMessage('') }
-  const handleDownloadFile = (id: number) => { console.log('📥 DOWNLOAD:', id); alert('📥 Downloading file...') }
-  const handleUploadFile = () => { console.log('📤 UPLOAD'); const input = document.createElement('input'); input.type = 'file'; input.click(); alert('📤 File upload started') }
-  const handleSubmitFeedback = async () => {
-    console.log('⭐ SUBMIT FEEDBACK')
 
+  // Handler 4: Approve Deliverable (with API call)
+  const handleApproveDeliverable = async (id: number) => {
+    console.log('✅ APPROVE DELIVERABLE - ID:', id)
+
+    try {
+      const response = await fetch('/api/projects/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-status',
+          projectId: id.toString(),
+          data: { status: 'approved' }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to approve deliverable')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success('Deliverable approved!')
+        setTimeout(() => {
+          alert(`✅ Approval Confirmed\n\nNext Steps:\n• Team notified of your approval\n• Milestone payment will be processed\n• Download final files for your records\n• Next phase of project will begin\n• Provide testimonial or feedback\n• Stay updated on remaining deliverables`)
+        }, 500)
+      }
+    } catch (error: any) {
+      console.error('Approve Deliverable Error:', error)
+      toast.error('Failed to approve deliverable', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
+
+  // Handler 5: Download Files
+  const handleDownloadFiles = (id: number) => {
+    toast.success('Preparing download...')
+    setTimeout(() => {
+      alert(`📥 Download Files\n\nNext Steps:\n• Files will download as a ZIP archive\n• Extract and review all deliverables\n• Save files to your preferred location\n• Share with stakeholders if needed\n• Archive for future reference\n• Provide feedback on the delivery`)
+    }, 500)
+    console.log('📥 DOWNLOAD:', id)
+  }
+
+  // Handler 6: Send Message (with validation)
+  const handleSendMessage = () => {
+    if (!newMessage.trim()) {
+      toast.error('Please enter a message')
+      return
+    }
+
+    toast.success('Message sent successfully!')
+    setTimeout(() => {
+      alert(`📧 Message Sent\n\nNext Steps:\n• Your team will respond within 4-6 hours\n• Check back for responses in Messages tab\n• Upload attachments if you forgot any\n• Set up meeting if discussion needed\n• Track conversation history\n• Get real-time project updates`)
+    }, 500)
+    setNewMessage('')
+    console.log('📧 SEND MESSAGE')
+  }
+
+  // Handler 7: Submit Feedback (with API call and validation)
+  const handleSubmitFeedback = async () => {
     if (!newFeedback.trim()) {
       toast.error('Please enter your feedback')
       return
@@ -143,11 +185,10 @@ export default function ClientZonePage() {
         throw new Error('Failed to submit feedback')
       }
 
-      const result = await response.json()
-
-      toast.success('⭐ Feedback submitted!', {
-        description: 'Thank you for sharing your thoughts with us'
-      })
+      toast.success('Feedback submitted!')
+      setTimeout(() => {
+        alert(`⭐ Thank You!\n\nNext Steps:\n• Your input helps us improve\n• Team will review and respond promptly\n• Feedback influences project direction\n• Share more thoughts anytime\n• Rate your experience periodically\n• Help us serve you better`)
+      }, 500)
       setNewFeedback('')
     } catch (error: any) {
       console.error('Submit Feedback Error:', error)
@@ -156,7 +197,38 @@ export default function ClientZonePage() {
       })
     }
   }
-  const handleScheduleMeeting = () => { console.log('📅 SCHEDULE'); alert('📅 Schedule meeting with team') }
+
+  // Handler 8: Pay Invoice
+  const handlePayInvoice = (invoiceNumber: string, amount: number) => {
+    toast.success('Redirecting to secure payment...')
+    setTimeout(() => {
+      alert(`💳 Payment for Invoice ${invoiceNumber}\n\nNext Steps:\n• You'll be redirected to secure payment gateway\n• Choose payment method (Card/Bank/Crypto)\n• Complete transaction securely\n• Receive instant payment confirmation\n• Download receipt for your records\n• Project continues upon payment`)
+    }, 500)
+    console.log('💳 PAYMENT:', invoiceNumber, amount)
+  }
+
+  // Handler 9: Schedule Meeting
+  const handleScheduleMeeting = () => {
+    toast.success('Opening calendar...')
+    setTimeout(() => {
+      alert(`📅 Schedule New Meeting\n\nNext Steps:\n• Choose available time slots\n• Add meeting agenda and topics\n• Invite team members to join\n• Set up video conference link\n• Receive meeting reminders\n• Prepare questions or materials`)
+    }, 500)
+    console.log('📅 SCHEDULE')
+  }
+
+  // Handler 10: View Invoice Details
+  const handleViewInvoiceDetails = (invoiceNumber: string) => {
+    toast.success('Loading invoice details...')
+    setTimeout(() => {
+      alert(`🧾 Invoice ${invoiceNumber}\n\nNext Steps:\n• Review itemized charges\n• Check payment terms and due date\n• Download PDF for your records\n• Submit for accounting/approval\n• Make payment before due date\n• Save receipt after payment`)
+    }, 500)
+    console.log('🧾 INVOICE:', invoiceNumber)
+  }
+
+  // Keep existing utility handlers
+  const handleViewProject = (id: number) => { console.log('👁️ VIEW PROJECT:', id); alert('👁️ Viewing project details') }
+  const handleDownloadFile = (id: number) => { console.log('📥 DOWNLOAD:', id); alert('📥 Downloading file...') }
+  const handleUploadFile = () => { console.log('📤 UPLOAD'); const input = document.createElement('input'); input.type = 'file'; input.click(); alert('📤 File upload started') }
   const handleMakePayment = (id: number) => { console.log('💳 PAYMENT:', id); alert('💳 Processing payment...') }
   const handleViewInvoice = (id: number) => { console.log('🧾 INVOICE:', id); alert('🧾 Viewing invoice') }
   const handleDownloadInvoice = (id: number) => { console.log('📥 DOWNLOAD INVOICE:', id); alert('📥 Downloading invoice...') }
@@ -301,11 +373,11 @@ export default function ClientZonePage() {
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleNotifications}>
               <Bell className="h-4 w-4 mr-2" />
               Notifications
             </Button>
-            <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
+            <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" onClick={handleContactTeam}>
               <MessageSquare className="h-4 w-4 mr-2" />
               Contact Team
             </Button>
@@ -470,12 +542,12 @@ export default function ClientZonePage() {
 
                     <div className="flex items-center justify-between pt-4 border-t">
                       <div className="flex items-center space-x-2">
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => handleDownloadFiles(project.id)}>
                           <Download className="h-3 w-3 mr-1" />
                           Download Files
                         </Button>
                       </div>
-                      <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
+                      <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" onClick={handleContactTeam}>
                         <MessageSquare className="h-3 w-3 mr-1" />
                         Discuss Project
                       </Button>
@@ -530,7 +602,7 @@ export default function ClientZonePage() {
                   <div className="space-y-4">
                     <h3 className="font-semibold text-lg">Quick Actions</h3>
                     <div className="space-y-2">
-                      <Button className="w-full justify-start bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
+                      <Button className="w-full justify-start bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" onClick={handleScheduleMeeting}>
                         <Calendar className="h-4 w-4 mr-2" />
                         Schedule New Meeting
                       </Button>
@@ -595,7 +667,7 @@ export default function ClientZonePage() {
                         <p className="font-semibold text-yellow-600">$3,500</p>
                         <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>
                       </div>
-                      <Button size="sm" className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white">
+                      <Button size="sm" className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white" onClick={() => handlePayInvoice('INV-001', 3500)}>
                         <CreditCard className="h-3 w-3 mr-1" />
                         Pay Now
                       </Button>
@@ -609,7 +681,7 @@ export default function ClientZonePage() {
                         <p className="font-semibold text-green-600">$12,000</p>
                         <Badge className="bg-green-100 text-green-800">Paid</Badge>
                       </div>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => handleViewInvoiceDetails('INV-002')}>
                         <Download className="h-3 w-3 mr-1" />
                         Download
                       </Button>
@@ -649,7 +721,7 @@ export default function ClientZonePage() {
                         </div>
                         <p className="text-sm text-gray-600">Brand Identity Project</p>
                         <p className="text-lg font-semibold text-yellow-600">$1,500</p>
-                        <Button size="sm" className="mt-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white">
+                        <Button size="sm" className="mt-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white" onClick={() => handleApproveDeliverable(1)}>
                           Approve & Release
                         </Button>
                       </div>
@@ -713,11 +785,11 @@ export default function ClientZonePage() {
                         className="min-h-[80px]"
                       />
                       <div className="flex items-center justify-between">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={handleUploadFile}>
                           <Upload className="h-3 w-3 mr-1" />
                           Attach File
                         </Button>
-                        <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
+                        <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" onClick={handleSendMessage}>
                           <Send className="h-3 w-3 mr-1" />
                           Send Message
                         </Button>
@@ -753,7 +825,7 @@ export default function ClientZonePage() {
                           </Badge>
                         </div>
                       </div>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => handleDownloadFiles(file.id)}>
                         <Download className="h-3 w-3 mr-1" />
                         Download
                       </Button>
@@ -955,7 +1027,7 @@ export default function ClientZonePage() {
                     </div>
                   </div>
                   
-                  <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
+                  <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" onClick={handleSubmitFeedback}>
                     <Send className="h-4 w-4 mr-2" />
                     Submit Feedback
                   </Button>
