@@ -33,6 +33,28 @@ export default function TeamPage() {
   const [selectedRole, setSelectedRole] = useState<string>('all')
   const [viewMode, setViewMode] = useState<string>('grid')
 
+  // Handlers
+  const handleInviteMember = () => { console.log('➕ INVITE'); alert('➕ Invite') }
+  const handleViewMember = (id: number) => { console.log('👁️ VIEW:', id); alert(`👁️ ${id}`) }
+  const handleEditMember = (id: number) => { console.log('✏️ EDIT:', id); alert(`✏️ ${id}`) }
+  const handleRemoveMember = (id: number) => { console.log('➖ REM:', id); confirm('Remove?') && alert('✅ Removed') }
+  const handleChangeRole = (id: number) => { console.log('🔄 ROLE:', id); alert('🔄 Role') }
+  const handleSetPermissions = (id: number) => { console.log('🔒 PERM:', id); alert('🔒 Perm') }
+  const handleSendMessage = (id: number) => { console.log('💬 MSG:', id); alert('💬 Msg') }
+  const handleViewActivity = (id: number) => { console.log('📊 ACT:', id); alert('📊 Act') }
+  const handleAssignProject = (id: number) => { console.log('📁 ASSIGN:', id); alert('📁 Assign') }
+  const handleViewProjects = (id: number) => { console.log('📂 PROJ:', id); alert('📂 Proj') }
+  const handleTeamAnalytics = () => { console.log('📊 ANALYTICS'); alert('📊 Analytics') }
+  const handleTeamSettings = () => { console.log('⚙️ SET'); alert('⚙️ Settings') }
+  const handleExportTeam = () => { console.log('💾 EXP'); alert('💾 Export') }
+  const handleBulkInvite = () => { console.log('📧 BULK'); alert('📧 Bulk') }
+  const handleTeamChat = () => { console.log('💬 CHAT'); alert('💬 Chat') }
+  const handleScheduleMeeting = () => { console.log('📅 MEET'); alert('📅 Meeting') }
+  const handleViewCalendar = () => { console.log('📅 CAL'); alert('📅 Calendar') }
+  const handlePerformanceReview = (id: number) => { console.log('📈 REV:', id); alert('📈 Review') }
+  const handleTimeTracking = (id: number) => { console.log('⏱️ TIME:', id); alert('⏱️ Time') }
+  const handleFilter = (filter: string) => { console.log('🔍 FILT:', filter); alert(`🔍 ${filter}`) }
+
   // Mock team data
   const teamMembers = [
     {

@@ -27,6 +27,28 @@ export default function InvoicesPage() {
   const [selectedStatus, setSelectedStatus] = useState<any>('all')
   const [searchTerm, setSearchTerm] = useState<any>('')
 
+  // Handlers
+  const handleCreateInvoice = () => { console.log('➕ NEW'); alert('➕ Create') }
+  const handleViewInvoice = (id: string) => { console.log('👁️:', id); alert(`👁️ ${id}`) }
+  const handleEditInvoice = (id: string) => { console.log('✏️:', id); alert(`✏️ ${id}`) }
+  const handleDeleteInvoice = (id: string) => { console.log('🗑️:', id); confirm('Delete?') && alert('✅ Deleted') }
+  const handleSendInvoice = (id: string) => { console.log('📧:', id); alert('📧 Sent') }
+  const handleDownloadPDF = (id: string) => { console.log('💾:', id); alert('💾 PDF') }
+  const handleMarkPaid = (id: string) => { console.log('✅:', id); alert('✅ Paid') }
+  const handleMarkUnpaid = (id: string) => { console.log('❌:', id); alert('❌ Unpaid') }
+  const handleDuplicateInvoice = (id: string) => { console.log('📋:', id); alert('📋 Dup') }
+  const handleSendReminder = (id: string) => { console.log('🔔:', id); alert('🔔 Reminder') }
+  const handleRecordPayment = (id: string) => { console.log('💰:', id); alert('💰 Payment') }
+  const handleVoidInvoice = (id: string) => { console.log('❌:', id); confirm('Void?') && alert('❌ Voided') }
+  const handleExportInvoices = () => { console.log('💾 EXP'); alert('💾 Export') }
+  const handleFilterStatus = (status: string) => { console.log('🔍:', status); setSelectedStatus(status) }
+  const handleSearch = (query: string) => { console.log('🔍:', query); setSearchTerm(query) }
+  const handleSort = (by: string) => { console.log('🔃:', by); alert(`🔃 ${by}`) }
+  const handleBulkAction = (action: string) => { console.log('☑️:', action); alert(`☑️ ${action}`) }
+  const handlePreview = (id: string) => { console.log('👁️:', id); alert('👁️ Preview') }
+  const handleEmailTemplate = () => { console.log('📧 TEMP'); alert('📧 Template') }
+  const handleInvoiceSettings = () => { console.log('⚙️ SET'); alert('⚙️ Settings') }
+
   // Mock invoice data
   const invoices = [
     {

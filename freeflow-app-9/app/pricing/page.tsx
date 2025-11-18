@@ -1,6 +1,9 @@
 import { Metadata } from 'next'
+import Link from 'next/link'
 import { Zap, Crown, Sparkles } from 'lucide-react'
 import { PricingCard } from '@/components/pricing-card'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 
 export const metadata: Metadata = {
   title: 'Pricing | KAZI - Choose Your Perfect Plan',
