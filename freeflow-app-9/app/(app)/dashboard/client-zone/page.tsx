@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -9,11 +11,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { 
-  UserCheck, 
-  FolderOpen, 
-  MessageSquare, 
-  FileText, 
+import {
+  UserCheck,
+  FolderOpen,
+  MessageSquare,
+  FileText,
   Download,
   Star,
   Clock,
@@ -40,224 +42,77 @@ import {
 } from 'lucide-react'
 import ClientZoneGallery from '@/components/client-zone-gallery'
 
-export default function ClientZonePage() {
-  const [activeTab, setActiveTab] = useState('projects')
-  const [newMessage, setNewMessage] = useState('')
-  const [newFeedback, setNewFeedback] = useState('')
+// ============================================================================
+// FRAMER MOTION COMPONENTS
+// ============================================================================
 
-  // SESSION_12 Handlers - Enhanced with next steps guidance
+const FloatingParticle = ({ delay = 0, color = 'blue' }: { delay?: number; color?: string }) => {
+  return (
+    <motion.div
+      className={`absolute w-2 h-2 bg-${color}-400 rounded-full opacity-30`}
+      animate={{
+        y: [0, -30, 0],
+        x: [0, 15, -15, 0],
+        scale: [0.8, 1.2, 0.8],
+        opacity: [0.3, 0.8, 0.3]
+      }}
+      transition={{
+        duration: 4 + delay,
+        repeat: Infinity,
+        ease: 'easeInOut',
+        delay: delay
+      }}
+    />
+  )
+}
 
-  // Handler 1: Notifications
-  const handleNotifications = () => {
-    toast.success('Opening notifications...')
-    setTimeout(() => {
-      alert(`🔔 Notifications Center\n\nNext Steps:\n• Review project updates and milestones\n• Check messages from your team\n• See delivery notifications\n• Manage notification preferences\n• Mark important updates\n• Stay informed on project progress`)
-    }, 500)
-  }
+const TextShimmer = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
+  return (
+    <motion.div
+      className={`relative inline-block ${className}`}
+      initial={{ backgroundPosition: '200% 0' }}
+      animate={{ backgroundPosition: '-200% 0' }}
+      transition={{
+        duration: 2,
+        repeat: Infinity,
+        ease: 'linear'
+      }}
+      style={{
+        background: 'linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.4), transparent)',
+        backgroundSize: '200% 100%',
+        WebkitBackgroundClip: 'text'
+      }}
+    >
+      {children}
+    </motion.div>
+  )
+}
 
-  // Handler 2: Contact Team
-  const handleContactTeam = () => {
-    toast.success('Opening team communication...')
-    setTimeout(() => {
-      alert(`💬 Contact Your Team\n\nNext Steps:\n• Send a message to your project team\n• Schedule a video call or meeting\n• Share feedback or requirements\n• Ask questions about your project\n• Request updates or clarifications\n• Build strong collaboration`)
-    }, 500)
-  }
+// ============================================================================
+// KAZI CLIENT DATA MODEL
+// ============================================================================
 
-  // Handler 3: Request Revision (with API call)
-  const handleRequestRevision = async (id: number) => {
-    console.log('🔄 REQUEST REVISION - ID:', id)
-
-    const feedback = prompt('Please describe the changes needed:')
-    if (!feedback) return
-
-    try {
-      const response = await fetch('/api/projects/manage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'update',
-          projectId: id.toString(),
-          data: {
-            status: 'revision-requested',
-            revisionNotes: feedback
-          }
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to request revision')
-      }
-
-      const result = await response.json()
-
-      if (result.success) {
-        toast.success('Revision request submitted!')
-        setTimeout(() => {
-          alert(`🔄 Revision Requested\n\nNext Steps:\n• Your team will review the request within 24 hours\n• Provide detailed feedback on what to change\n• Attach reference materials if needed\n• Track revision status in the dashboard\n• Receive notification when revisions are complete\n• Approve final deliverables`)
-        }, 500)
-      }
-    } catch (error: any) {
-      console.error('Request Revision Error:', error)
-      toast.error('Failed to request revision', {
-        description: error.message || 'Please try again later'
-      })
-    }
-  }
-
-  // Handler 4: Approve Deliverable (with API call)
-  const handleApproveDeliverable = async (id: number) => {
-    console.log('✅ APPROVE DELIVERABLE - ID:', id)
-
-    try {
-      const response = await fetch('/api/projects/manage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'update-status',
-          projectId: id.toString(),
-          data: { status: 'approved' }
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to approve deliverable')
-      }
-
-      const result = await response.json()
-
-      if (result.success) {
-        toast.success('Deliverable approved!')
-        setTimeout(() => {
-          alert(`✅ Approval Confirmed\n\nNext Steps:\n• Team notified of your approval\n• Milestone payment will be processed\n• Download final files for your records\n• Next phase of project will begin\n• Provide testimonial or feedback\n• Stay updated on remaining deliverables`)
-        }, 500)
-      }
-    } catch (error: any) {
-      console.error('Approve Deliverable Error:', error)
-      toast.error('Failed to approve deliverable', {
-        description: error.message || 'Please try again later'
-      })
-    }
-  }
-
-  // Handler 5: Download Files
-  const handleDownloadFiles = (id: number) => {
-    toast.success('Preparing download...')
-    setTimeout(() => {
-      alert(`📥 Download Files\n\nNext Steps:\n• Files will download as a ZIP archive\n• Extract and review all deliverables\n• Save files to your preferred location\n• Share with stakeholders if needed\n• Archive for future reference\n• Provide feedback on the delivery`)
-    }, 500)
-    console.log('📥 DOWNLOAD:', id)
-  }
-
-  // Handler 6: Send Message (with validation)
-  const handleSendMessage = () => {
-    if (!newMessage.trim()) {
-      toast.error('Please enter a message')
-      return
-    }
-
-    toast.success('Message sent successfully!')
-    setTimeout(() => {
-      alert(`📧 Message Sent\n\nNext Steps:\n• Your team will respond within 4-6 hours\n• Check back for responses in Messages tab\n• Upload attachments if you forgot any\n• Set up meeting if discussion needed\n• Track conversation history\n• Get real-time project updates`)
-    }, 500)
-    setNewMessage('')
-    console.log('📧 SEND MESSAGE')
-  }
-
-  // Handler 7: Submit Feedback (with API call and validation)
-  const handleSubmitFeedback = async () => {
-    if (!newFeedback.trim()) {
-      toast.error('Please enter your feedback')
-      return
-    }
-
-    try {
-      const response = await fetch('/api/collaboration/client-feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          feedback: newFeedback,
-          rating: 5,
-          timestamp: new Date().toISOString()
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to submit feedback')
-      }
-
-      toast.success('Feedback submitted!')
-      setTimeout(() => {
-        alert(`⭐ Thank You!\n\nNext Steps:\n• Your input helps us improve\n• Team will review and respond promptly\n• Feedback influences project direction\n• Share more thoughts anytime\n• Rate your experience periodically\n• Help us serve you better`)
-      }, 500)
-      setNewFeedback('')
-    } catch (error: any) {
-      console.error('Submit Feedback Error:', error)
-      toast.error('Failed to submit feedback', {
-        description: error.message || 'Please try again later'
-      })
-    }
-  }
-
-  // Handler 8: Pay Invoice
-  const handlePayInvoice = (invoiceNumber: string, amount: number) => {
-    toast.success('Redirecting to secure payment...')
-    setTimeout(() => {
-      alert(`💳 Payment for Invoice ${invoiceNumber}\n\nNext Steps:\n• You'll be redirected to secure payment gateway\n• Choose payment method (Card/Bank/Crypto)\n• Complete transaction securely\n• Receive instant payment confirmation\n• Download receipt for your records\n• Project continues upon payment`)
-    }, 500)
-    console.log('💳 PAYMENT:', invoiceNumber, amount)
-  }
-
-  // Handler 9: Schedule Meeting
-  const handleScheduleMeeting = () => {
-    toast.success('Opening calendar...')
-    setTimeout(() => {
-      alert(`📅 Schedule New Meeting\n\nNext Steps:\n• Choose available time slots\n• Add meeting agenda and topics\n• Invite team members to join\n• Set up video conference link\n• Receive meeting reminders\n• Prepare questions or materials`)
-    }, 500)
-    console.log('📅 SCHEDULE')
-  }
-
-  // Handler 10: View Invoice Details
-  const handleViewInvoiceDetails = (invoiceNumber: string) => {
-    toast.success('Loading invoice details...')
-    setTimeout(() => {
-      alert(`🧾 Invoice ${invoiceNumber}\n\nNext Steps:\n• Review itemized charges\n• Check payment terms and due date\n• Download PDF for your records\n• Submit for accounting/approval\n• Make payment before due date\n• Save receipt after payment`)
-    }, 500)
-    console.log('🧾 INVOICE:', invoiceNumber)
-  }
-
-  // Keep existing utility handlers
-  const handleViewProject = (id: number) => { console.log('👁️ VIEW PROJECT:', id); alert('👁️ Viewing project details') }
-  const handleDownloadFile = (id: number) => { console.log('📥 DOWNLOAD:', id); alert('📥 Downloading file...') }
-  const handleUploadFile = () => { console.log('📤 UPLOAD'); const input = document.createElement('input'); input.type = 'file'; input.click(); alert('📤 File upload started') }
-  const handleMakePayment = (id: number) => { console.log('💳 PAYMENT:', id); alert('💳 Processing payment...') }
-  const handleViewInvoice = (id: number) => { console.log('🧾 INVOICE:', id); alert('🧾 Viewing invoice') }
-  const handleDownloadInvoice = (id: number) => { console.log('📥 DOWNLOAD INVOICE:', id); alert('📥 Downloading invoice...') }
-  const handleRequestQuote = () => { console.log('📋 QUOTE'); alert('📋 Request new project quote') }
-  const handleViewGallery = (id: number) => { console.log('🖼️ GALLERY:', id); alert('🖼️ Opening project gallery') }
-  const handleRateTeamMember = (id: string) => { console.log('⭐ RATE:', id); alert('⭐ Rate team member performance') }
-  const handleContactSupport = () => { console.log('💬 SUPPORT'); alert('💬 Contacting support team...') }
-  const handleUpdateProfile = () => { console.log('✏️ UPDATE PROFILE'); alert('✏️ Update client profile') }
-  const handleManageNotifications = () => { console.log('🔔 NOTIFICATIONS'); alert('🔔 Manage notification preferences') }
-  const handleExportProjectReport = (id: number) => { console.log('📊 EXPORT REPORT:', id); alert('📊 Exporting project report...') }
-  const handleShareProject = (id: number) => { console.log('🔗 SHARE:', id); alert('🔗 Share project link') }
-  const handleArchiveProject = (id: number) => { console.log('📦 ARCHIVE:', id); confirm('Archive project?') && alert('📦 Project archived') }
-
-  // Mock client data (from client's perspective)
-  const clientInfo = {
+const KAZI_CLIENT_DATA = {
+  clientInfo: {
     name: 'Acme Corporation',
     contactPerson: 'John Smith',
     email: 'john@acme.com',
     avatar: '/avatars/acme-corp.jpg',
+    phone: '+1 (555) 123-4567',
+    company: 'Acme Corporation',
+    industry: 'Technology',
     memberSince: '2023-01-15',
     totalProjects: 12,
     activeProjects: 3,
     completedProjects: 9,
     totalInvestment: 45000,
     satisfaction: 4.9,
-    tier: 'Premium'
-  }
+    tier: 'Premium',
+    nextMeeting: '2024-02-01',
+    accountManager: 'Sarah Johnson'
+  },
 
-  const myProjects = [
+  projects: [
     {
       id: 1,
       name: 'Brand Identity Redesign',
@@ -274,7 +129,8 @@ export default function ClientZonePage() {
         { name: 'Color Palette', status: 'completed', dueDate: '2024-01-25' },
         { name: 'Brand Guidelines', status: 'in-progress', dueDate: '2024-02-05' },
         { name: 'Business Cards', status: 'pending', dueDate: '2024-02-10' }
-      ]
+      ],
+      lastUpdate: '2 hours ago'
     },
     {
       id: 2,
@@ -292,18 +148,20 @@ export default function ClientZonePage() {
         { name: 'Inner Pages', status: 'completed', dueDate: '2023-12-30' },
         { name: 'CMS Integration', status: 'completed', dueDate: '2024-01-15' },
         { name: 'Testing & Launch', status: 'review', dueDate: '2024-01-30' }
-      ]
+      ],
+      lastUpdate: '1 day ago'
     }
-  ]
+  ],
 
-  const messages = [
+  messages: [
     {
       id: 1,
       sender: 'Sarah Johnson',
       role: 'Designer',
       message: 'Hi John! I\'ve uploaded the latest logo concepts for your review. Please let me know your thoughts on the color variations.',
       timestamp: '2 hours ago',
-      avatar: '/avatars/sarah.jpg'
+      avatar: '/avatars/sarah.jpg',
+      unread: true
     },
     {
       id: 2,
@@ -311,18 +169,20 @@ export default function ClientZonePage() {
       role: 'Developer',
       message: 'The website staging environment is ready for your review. You can access it using the credentials I sent earlier.',
       timestamp: '45 minutes ago',
-      avatar: '/avatars/michael.jpg'
+      avatar: '/avatars/michael.jpg',
+      unread: true
     }
-  ]
+  ],
 
-  const recentFiles = [
+  recentFiles: [
     {
       id: 1,
       name: 'Brand Guidelines Draft v3.pdf',
       size: '2.4 MB',
       uploadedBy: 'Sarah Johnson',
       uploadDate: '2024-01-25',
-      project: 'Brand Identity Redesign'
+      project: 'Brand Identity Redesign',
+      type: 'document'
     },
     {
       id: 2,
@@ -330,28 +190,412 @@ export default function ClientZonePage() {
       size: '15.7 MB',
       uploadedBy: 'Sarah Johnson',
       uploadDate: '2024-01-20',
-      project: 'Brand Identity Redesign'
+      project: 'Brand Identity Redesign',
+      type: 'archive'
     }
-  ]
+  ],
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800'
-      case 'in-progress': return 'bg-blue-100 text-blue-800'
-      case 'review': return 'bg-yellow-100 text-yellow-800'
-      case 'pending': return 'bg-gray-100 text-gray-800'
-      default: return 'bg-gray-100 text-gray-800'
+  invoices: [
+    {
+      id: 1,
+      number: 'INV-001',
+      project: 'Brand Identity Package',
+      amount: 3500,
+      dueDate: '2024-01-30',
+      status: 'pending',
+      items: ['Logo Design', 'Brand Guidelines', 'Business Card Design']
+    },
+    {
+      id: 2,
+      number: 'INV-002',
+      project: 'Website Development',
+      amount: 12000,
+      paidDate: '2024-01-15',
+      status: 'paid',
+      items: ['Website Design', 'CMS Integration', 'Testing']
+    }
+  ],
+
+  analytics: {
+    onTimeDelivery: 94,
+    firstTimeApproval: 98,
+    avgResponseTime: 2.1,
+    messagesExchanged: 127,
+    meetingsHeld: 8,
+    filesShared: 23
+  }
+}
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD'
+  }).format(amount)
+}
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'completed': return 'bg-green-100 text-green-800'
+    case 'in-progress': return 'bg-blue-100 text-blue-800'
+    case 'review': return 'bg-yellow-100 text-yellow-800'
+    case 'pending': return 'bg-gray-100 text-gray-800'
+    case 'paid': return 'bg-green-100 text-green-800'
+    default: return 'bg-gray-100 text-gray-800'
+  }
+}
+
+const getStatusIcon = (status: string) => {
+  switch (status) {
+    case 'completed': return <CheckCircle className="h-4 w-4 text-green-600" />
+    case 'in-progress': return <Clock className="h-4 w-4 text-blue-600" />
+    case 'review': return <Eye className="h-4 w-4 text-yellow-600" />
+    case 'pending': return <AlertCircle className="h-4 w-4 text-gray-600" />
+    default: return <Clock className="h-4 w-4 text-gray-600" />
+  }
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
+export default function ClientZonePage() {
+  const router = useRouter()
+  const [activeTab, setActiveTab] = useState('projects')
+  const [newMessage, setNewMessage] = useState('')
+  const [newFeedback, setNewFeedback] = useState('')
+
+  // ============================================================================
+  // HANDLER 1: NOTIFICATIONS
+  // ============================================================================
+
+  const handleNotifications = () => {
+    console.log('🔔 OPENING NOTIFICATIONS')
+    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
+    console.log('👤 Contact:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
+    console.log('📧 Email:', KAZI_CLIENT_DATA.clientInfo.email)
+    console.log('📊 Active projects:', KAZI_CLIENT_DATA.clientInfo.activeProjects)
+    console.log('📅 Current tab:', activeTab)
+    console.log('✅ NOTIFICATIONS PANEL OPENED')
+    console.log('🏁 NOTIFICATION PROCESS COMPLETE')
+
+    toast.success('Notifications center opened!', {
+      description: 'View all your project updates and messages'
+    })
+  }
+
+  // ============================================================================
+  // HANDLER 2: CONTACT TEAM
+  // ============================================================================
+
+  const handleContactTeam = () => {
+    console.log('💬 CONTACTING TEAM')
+    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
+    console.log('👤 Contact person:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
+    console.log('📊 Active projects:', KAZI_CLIENT_DATA.clientInfo.activeProjects)
+    console.log('📅 Current tab:', activeTab)
+    console.log('✉️ Opening team communication panel')
+    console.log('✅ TEAM CONTACT INITIATED')
+    console.log('🏁 CONTACT TEAM PROCESS COMPLETE')
+
+    toast.success('Team communication opened!', {
+      description: 'Send a message or schedule a call with your team'
+    })
+  }
+
+  // ============================================================================
+  // HANDLER 3: REQUEST REVISION
+  // ============================================================================
+
+  const handleRequestRevision = async (id: number) => {
+    const project = KAZI_CLIENT_DATA.projects.find(p => p.id === id)
+
+    console.log('✏️ REQUESTING REVISION')
+    console.log('📁 Project name:', project?.name || id)
+    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
+    console.log('👤 Requested by:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
+    console.log('📅 Current tab:', activeTab)
+    console.log('⏰ Expected response time: 24 hours')
+
+    const feedback = prompt('Please describe the changes needed:')
+    if (!feedback) {
+      console.log('❌ REVISION REQUEST CANCELLED')
+      return
+    }
+
+    console.log('📝 Revision notes:', feedback.substring(0, 50) + (feedback.length > 50 ? '...' : ''))
+
+    try {
+      console.log('📡 SENDING REVISION REQUEST TO API')
+      const response = await fetch('/api/projects/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          projectId: id.toString(),
+          data: {
+            status: 'revision-requested',
+            revisionNotes: feedback
+          }
+        })
+      })
+
+      console.log('📡 API RESPONSE STATUS:', response.status, response.statusText)
+
+      if (!response.ok) {
+        throw new Error('Failed to request revision')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        console.log('✅ REVISION REQUEST SUBMITTED')
+        console.log('📨 Team will be notified')
+        console.log('🏁 REVISION REQUEST PROCESS COMPLETE')
+
+        toast.success('Revision request submitted!', {
+          description: 'Your team will review and respond within 24 hours'
+        })
+      }
+    } catch (error: any) {
+      console.error('❌ REQUEST REVISION ERROR:', error)
+      console.log('📊 Error details:', error.message || 'Unknown error')
+      toast.error('Failed to request revision', {
+        description: error.message || 'Please try again later'
+      })
     }
   }
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed': return <CheckCircle className="h-4 w-4 text-green-600" />
-      case 'in-progress': return <Clock className="h-4 w-4 text-blue-600" />
-      case 'review': return <Eye className="h-4 w-4 text-yellow-600" />
-      case 'pending': return <AlertCircle className="h-4 w-4 text-gray-600" />
-      default: return <Clock className="h-4 w-4 text-gray-600" />
+  // ============================================================================
+  // HANDLER 4: APPROVE DELIVERABLE
+  // ============================================================================
+
+  const handleApproveDeliverable = async (id: number) => {
+    const project = KAZI_CLIENT_DATA.projects.find(p => p.id === id)
+
+    console.log('✅ APPROVING DELIVERABLE')
+    console.log('📦 Deliverable:', project?.name || id)
+    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
+    console.log('👤 Approved by:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
+    console.log('📅 Current tab:', activeTab)
+    console.log('💰 Milestone payment will be processed')
+
+    try {
+      console.log('📡 SENDING APPROVAL TO API')
+      const response = await fetch('/api/projects/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-status',
+          projectId: id.toString(),
+          data: { status: 'approved' }
+        })
+      })
+
+      console.log('📡 API RESPONSE STATUS:', response.status, response.statusText)
+
+      if (!response.ok) {
+        throw new Error('Failed to approve deliverable')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        console.log('✅ DELIVERABLE APPROVED')
+        console.log('📨 Team will be notified')
+        console.log('🏁 APPROVAL PROCESS COMPLETE')
+
+        toast.success('Deliverable approved!', {
+          description: 'Milestone payment will be processed automatically'
+        })
+      }
+    } catch (error: any) {
+      console.error('❌ APPROVE DELIVERABLE ERROR:', error)
+      console.log('📊 Error details:', error.message || 'Unknown error')
+      toast.error('Failed to approve deliverable', {
+        description: error.message || 'Please try again later'
+      })
     }
+  }
+
+  // ============================================================================
+  // HANDLER 5: DOWNLOAD FILES
+  // ============================================================================
+
+  const handleDownloadFiles = (id: number) => {
+    const project = KAZI_CLIENT_DATA.projects.find(p => p.id === id)
+
+    console.log('📥 DOWNLOADING FILES')
+    console.log('📁 Project:', project?.name || id)
+    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
+    console.log('👤 Downloaded by:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
+    console.log('📅 Current tab:', activeTab)
+    console.log('📦 Preparing ZIP archive')
+    console.log('✅ DOWNLOAD INITIATED')
+    console.log('🏁 DOWNLOAD PROCESS COMPLETE')
+
+    toast.success('Preparing download...', {
+      description: 'Files will download as a ZIP archive'
+    })
+  }
+
+  // ============================================================================
+  // HANDLER 6: SEND MESSAGE
+  // ============================================================================
+
+  const handleSendMessage = () => {
+    console.log('💬 SENDING MESSAGE')
+    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
+    console.log('👤 Sender:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
+    console.log('📧 Email:', KAZI_CLIENT_DATA.clientInfo.email)
+
+    if (!newMessage.trim()) {
+      console.log('⚠️ MESSAGE VALIDATION FAILED: Empty message')
+      toast.error('Please enter a message')
+      return
+    }
+
+    console.log('📝 Message length:', newMessage.length, 'characters')
+    console.log('📅 Current tab:', activeTab)
+    console.log('💭 Message preview:', newMessage.substring(0, 45) + (newMessage.length > 45 ? '...' : ''))
+    console.log('✅ MESSAGE SENT SUCCESSFULLY')
+    console.log('📨 Team will respond within 4-6 hours')
+    console.log('🧹 Message input cleared')
+    console.log('🏁 SEND MESSAGE PROCESS COMPLETE')
+
+    toast.success('Message sent successfully!', {
+      description: 'Your team will respond within 4-6 hours'
+    })
+    setNewMessage('')
+  }
+
+  // ============================================================================
+  // HANDLER 7: SUBMIT FEEDBACK
+  // ============================================================================
+
+  const handleSubmitFeedback = async () => {
+    console.log('⭐ SUBMITTING FEEDBACK')
+    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
+    console.log('👤 Submitted by:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
+
+    if (!newFeedback.trim()) {
+      console.log('⚠️ FEEDBACK VALIDATION FAILED: Empty feedback')
+      toast.error('Please enter your feedback')
+      return
+    }
+
+    console.log('📝 Feedback length:', newFeedback.length, 'characters')
+    console.log('📅 Current tab:', activeTab)
+    console.log('💭 Feedback preview:', newFeedback.substring(0, 45) + (newFeedback.length > 45 ? '...' : ''))
+
+    try {
+      console.log('📡 SENDING FEEDBACK TO API')
+      const response = await fetch('/api/collaboration/client-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          feedback: newFeedback,
+          rating: 5,
+          timestamp: new Date().toISOString()
+        })
+      })
+
+      console.log('📡 API RESPONSE STATUS:', response.status, response.statusText)
+
+      if (!response.ok) {
+        throw new Error('Failed to submit feedback')
+      }
+
+      console.log('✅ FEEDBACK SUBMITTED SUCCESSFULLY')
+      console.log('📨 Team will review and respond promptly')
+      console.log('🧹 Feedback input cleared')
+      console.log('🏁 SUBMIT FEEDBACK PROCESS COMPLETE')
+
+      toast.success('Feedback submitted!', {
+        description: 'Your input helps us improve'
+      })
+      setNewFeedback('')
+    } catch (error: any) {
+      console.error('❌ SUBMIT FEEDBACK ERROR:', error)
+      console.log('📊 Error details:', error.message || 'Unknown error')
+      toast.error('Failed to submit feedback', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 8: PAY INVOICE
+  // ============================================================================
+
+  const handlePayInvoice = (invoiceNumber: string, amount: number) => {
+    console.log('💳 PAYING INVOICE')
+    console.log('🧾 Invoice number:', invoiceNumber)
+    console.log('💰 Amount:', formatCurrency(amount))
+    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
+    console.log('👤 Paid by:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
+    console.log('📧 Email:', KAZI_CLIENT_DATA.clientInfo.email)
+    console.log('📅 Current tab:', activeTab)
+    console.log('🔒 Redirecting to secure payment gateway')
+    console.log('✅ PAYMENT PROCESS INITIATED')
+    console.log('🏁 PAY INVOICE PROCESS COMPLETE')
+
+    toast.success('Redirecting to secure payment...', {
+      description: `Invoice ${invoiceNumber} - ${formatCurrency(amount)}`
+    })
+  }
+
+  // ============================================================================
+  // HANDLER 9: SCHEDULE MEETING
+  // ============================================================================
+
+  const handleScheduleMeeting = () => {
+    console.log('📅 SCHEDULING MEETING')
+    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
+    console.log('👤 Scheduled by:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
+    console.log('📧 Email:', KAZI_CLIENT_DATA.clientInfo.email)
+    console.log('📅 Current tab:', activeTab)
+    console.log('🎥 Opening calendar interface')
+    console.log('✅ MEETING SCHEDULER OPENED')
+    console.log('🏁 SCHEDULE MEETING PROCESS COMPLETE')
+
+    toast.success('Opening calendar...', {
+      description: 'Schedule a meeting with your team'
+    })
+  }
+
+  // ============================================================================
+  // HANDLER 10: VIEW INVOICE DETAILS
+  // ============================================================================
+
+  const handleViewInvoiceDetails = (invoiceNumber: string) => {
+    console.log('🧾 VIEWING INVOICE DETAILS')
+    console.log('📋 Invoice number:', invoiceNumber)
+    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
+    console.log('👤 Viewed by:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
+    console.log('📅 Current tab:', activeTab)
+    console.log('📄 Loading invoice details')
+    console.log('✅ INVOICE DETAILS LOADED')
+    console.log('🏁 VIEW INVOICE PROCESS COMPLETE')
+
+    toast.success('Loading invoice details...', {
+      description: `Invoice ${invoiceNumber}`
+    })
+  }
+
+  // ============================================================================
+  // HELPER HANDLERS
+  // ============================================================================
+
+  const handleUploadFile = () => {
+    console.log('📤 UPLOAD FILE')
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.click()
+    toast.info('File upload initiated')
   }
 
   return (
@@ -368,16 +612,16 @@ export default function ClientZonePage() {
                 My Projects
               </h1>
               <p className="text-gray-600 mt-2 text-lg">
-                Welcome back, {clientInfo.contactPerson}! Here's your project overview.
+                Welcome back, {KAZI_CLIENT_DATA.clientInfo.contactPerson}! Here's your project overview.
               </p>
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <Button variant="outline" onClick={handleNotifications}>
+            <Button variant="outline" onClick={handleNotifications} data-testid="notifications-btn">
               <Bell className="h-4 w-4 mr-2" />
               Notifications
             </Button>
-            <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" onClick={handleContactTeam}>
+            <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" onClick={handleContactTeam} data-testid="contact-team-btn">
               <MessageSquare className="h-4 w-4 mr-2" />
               Contact Team
             </Button>
@@ -386,45 +630,85 @@ export default function ClientZonePage() {
 
         {/* Client Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-            <CardContent className="p-6 text-center">
-              <div className="p-3 bg-blue-100 rounded-xl inline-block mb-4">
-                <FolderOpen className="h-8 w-8 text-blue-600" />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0 }}
+          >
+            <Card className="kazi-card relative overflow-hidden group hover:shadow-xl transition-shadow bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+              <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <FloatingParticle delay={0} color="blue" />
+                <FloatingParticle delay={1} color="indigo" />
               </div>
-              <p className="text-2xl font-bold text-blue-600">{clientInfo.activeProjects}</p>
-              <p className="text-gray-600">Active Projects</p>
-            </CardContent>
-          </Card>
+              <CardContent className="p-6 text-center relative z-10">
+                <div className="p-3 bg-blue-100 rounded-xl inline-block mb-4">
+                  <FolderOpen className="h-8 w-8 text-blue-600" />
+                </div>
+                <p className="text-2xl font-bold text-blue-600">{KAZI_CLIENT_DATA.clientInfo.activeProjects}</p>
+                <p className="text-gray-600">Active Projects</p>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-            <CardContent className="p-6 text-center">
-              <div className="p-3 bg-green-100 rounded-xl inline-block mb-4">
-                <CheckCircle className="h-8 w-8 text-green-600" />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Card className="kazi-card relative overflow-hidden group hover:shadow-xl transition-shadow bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+              <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <FloatingParticle delay={0.5} color="green" />
+                <FloatingParticle delay={1.5} color="emerald" />
               </div>
-              <p className="text-2xl font-bold text-green-600">{clientInfo.completedProjects}</p>
-              <p className="text-gray-600">Completed</p>
-            </CardContent>
-          </Card>
+              <CardContent className="p-6 text-center relative z-10">
+                <div className="p-3 bg-green-100 rounded-xl inline-block mb-4">
+                  <CheckCircle className="h-8 w-8 text-green-600" />
+                </div>
+                <p className="text-2xl font-bold text-green-600">{KAZI_CLIENT_DATA.clientInfo.completedProjects}</p>
+                <p className="text-gray-600">Completed</p>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-            <CardContent className="p-6 text-center">
-              <div className="p-3 bg-purple-100 rounded-xl inline-block mb-4">
-                <DollarSign className="h-8 w-8 text-purple-600" />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <Card className="kazi-card relative overflow-hidden group hover:shadow-xl transition-shadow bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+              <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <FloatingParticle delay={1} color="purple" />
+                <FloatingParticle delay={2} color="violet" />
               </div>
-              <p className="text-2xl font-bold text-purple-600">${clientInfo.totalInvestment.toLocaleString()}</p>
-              <p className="text-gray-600">Total Investment</p>
-            </CardContent>
-          </Card>
+              <CardContent className="p-6 text-center relative z-10">
+                <div className="p-3 bg-purple-100 rounded-xl inline-block mb-4">
+                  <DollarSign className="h-8 w-8 text-purple-600" />
+                </div>
+                <p className="text-2xl font-bold text-purple-600">{formatCurrency(KAZI_CLIENT_DATA.clientInfo.totalInvestment)}</p>
+                <p className="text-gray-600">Total Investment</p>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-            <CardContent className="p-6 text-center">
-              <div className="p-3 bg-yellow-100 rounded-xl inline-block mb-4">
-                <Star className="h-8 w-8 text-yellow-600" />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <Card className="kazi-card relative overflow-hidden group hover:shadow-xl transition-shadow bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+              <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <FloatingParticle delay={1.5} color="yellow" />
+                <FloatingParticle delay={2.5} color="amber" />
               </div>
-              <p className="text-2xl font-bold text-yellow-600">{clientInfo.satisfaction}</p>
-              <p className="text-gray-600">Satisfaction Rating</p>
-            </CardContent>
-          </Card>
+              <CardContent className="p-6 text-center relative z-10">
+                <div className="p-3 bg-yellow-100 rounded-xl inline-block mb-4">
+                  <Star className="h-8 w-8 text-yellow-600" />
+                </div>
+                <p className="text-2xl font-bold text-yellow-600">{KAZI_CLIENT_DATA.clientInfo.satisfaction}</p>
+                <p className="text-gray-600">Satisfaction Rating</p>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
 
         {/* Main Content */}
@@ -481,7 +765,7 @@ export default function ClientZonePage() {
           {/* Projects Tab */}
           <TabsContent value="projects" className="space-y-6">
             <div className="grid grid-cols-1 gap-6">
-              {myProjects.map((project) => (
+              {KAZI_CLIENT_DATA.projects.map((project) => (
                 <Card key={project.id} className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -542,15 +826,25 @@ export default function ClientZonePage() {
 
                     <div className="flex items-center justify-between pt-4 border-t">
                       <div className="flex items-center space-x-2">
-                        <Button size="sm" variant="outline" onClick={() => handleDownloadFiles(project.id)}>
+                        <Button size="sm" variant="outline" onClick={() => handleDownloadFiles(project.id)} data-testid={`download-files-${project.id}-btn`}>
                           <Download className="h-3 w-3 mr-1" />
                           Download Files
                         </Button>
+                        <Button size="sm" variant="outline" onClick={() => handleRequestRevision(project.id)}>
+                          <Edit className="h-3 w-3 mr-1" />
+                          Request Revision
+                        </Button>
                       </div>
-                      <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" onClick={handleContactTeam}>
-                        <MessageSquare className="h-3 w-3 mr-1" />
-                        Discuss Project
-                      </Button>
+                      <div className="flex items-center space-x-2">
+                        <Button size="sm" className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white" onClick={() => handleApproveDeliverable(project.id)}>
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Approve
+                        </Button>
+                        <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" onClick={handleContactTeam} data-testid={`discuss-project-${project.id}-btn`}>
+                          <MessageSquare className="h-3 w-3 mr-1" />
+                          Discuss Project
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -602,24 +896,18 @@ export default function ClientZonePage() {
                   <div className="space-y-4">
                     <h3 className="font-semibold text-lg">Quick Actions</h3>
                     <div className="space-y-2">
-                      <Button className="w-full justify-start bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" onClick={handleScheduleMeeting}>
+                      <Button className="w-full justify-start bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" onClick={handleScheduleMeeting} data-testid="schedule-meeting-btn">
                         <Calendar className="h-4 w-4 mr-2" />
                         Schedule New Meeting
                       </Button>
                       <Button variant="outline" className="w-full justify-start" onClick={() => {
                         toast.info('Loading project timeline...')
-                        setTimeout(() => {
-                          alert(`📊 Project Timeline\n\nNext Steps:\n• View all project milestones\n• Track progress over time\n• Identify bottlenecks\n• Adjust deadlines if needed\n• Share timeline with stakeholders\n• Export timeline report`)
-                        }, 500)
-                      }}>
+                      }} data-testid="view-timeline-btn">
                         <Clock className="h-4 w-4 mr-2" />
                         View Project Timeline
                       </Button>
                       <Button variant="outline" className="w-full justify-start" onClick={() => {
                         toast.info('Setting up reminders...')
-                        setTimeout(() => {
-                          alert(`⏰ Set Reminders\n\nNext Steps:\n• Choose reminder times\n• Select notification method\n• Add custom reminder messages\n• Set recurring reminders\n• Manage existing reminders\n• Enable mobile notifications`)
-                        }, 500)
                       }}>
                         <Bell className="h-4 w-4 mr-2" />
                         Set Reminders
@@ -645,14 +933,14 @@ export default function ClientZonePage() {
                   <Card className="bg-green-50 border-green-200">
                     <CardContent className="p-4 text-center">
                       <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                      <p className="text-2xl font-bold text-green-600">$15,500</p>
+                      <p className="text-2xl font-bold text-green-600">{formatCurrency(15500)}</p>
                       <p className="text-sm text-gray-600">Paid Invoices</p>
                     </CardContent>
                   </Card>
                   <Card className="bg-yellow-50 border-yellow-200">
                     <CardContent className="p-4 text-center">
                       <Clock className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
-                      <p className="text-2xl font-bold text-yellow-600">$3,500</p>
+                      <p className="text-2xl font-bold text-yellow-600">{formatCurrency(3500)}</p>
                       <p className="text-sm text-gray-600">Pending Payment</p>
                     </CardContent>
                   </Card>
@@ -664,38 +952,39 @@ export default function ClientZonePage() {
                     </CardContent>
                   </Card>
                 </div>
-                
+
                 <div className="space-y-4">
                   <h3 className="font-semibold text-lg">Recent Invoices</h3>
                   <div className="space-y-3">
-                    <div className="p-4 rounded-lg border border-gray-200 flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">INV-001 - Brand Identity Package</p>
-                        <p className="text-sm text-gray-600">Due: January 30, 2024</p>
+                    {KAZI_CLIENT_DATA.invoices.map((invoice) => (
+                      <div key={invoice.id} className="p-4 rounded-lg border border-gray-200 flex items-center justify-between gap-4">
+                        <div className="flex-1">
+                          <p className="font-medium">{invoice.number} - {invoice.project}</p>
+                          <p className="text-sm text-gray-600">
+                            {invoice.status === 'pending' ? `Due: ${new Date(invoice.dueDate!).toLocaleDateString()}` : `Paid: ${new Date(invoice.paidDate!).toLocaleDateString()}`}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className={`font-semibold ${invoice.status === 'paid' ? 'text-green-600' : 'text-yellow-600'}`}>
+                            {formatCurrency(invoice.amount)}
+                          </p>
+                          <Badge className={getStatusColor(invoice.status)}>
+                            {invoice.status}
+                          </Badge>
+                        </div>
+                        {invoice.status === 'pending' ? (
+                          <Button size="sm" className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white" onClick={() => handlePayInvoice(invoice.number, invoice.amount)}>
+                            <CreditCard className="h-3 w-3 mr-1" />
+                            Pay Now
+                          </Button>
+                        ) : (
+                          <Button size="sm" variant="outline" onClick={() => handleViewInvoiceDetails(invoice.number)}>
+                            <Download className="h-3 w-3 mr-1" />
+                            Download
+                          </Button>
+                        )}
                       </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-yellow-600">$3,500</p>
-                        <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>
-                      </div>
-                      <Button size="sm" className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white" onClick={() => handlePayInvoice('INV-001', 3500)}>
-                        <CreditCard className="h-3 w-3 mr-1" />
-                        Pay Now
-                      </Button>
-                    </div>
-                    <div className="p-4 rounded-lg border border-gray-200 flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">INV-002 - Website Development</p>
-                        <p className="text-sm text-gray-600">Paid: January 15, 2024</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-green-600">$12,000</p>
-                        <Badge className="bg-green-100 text-green-800">Paid</Badge>
-                      </div>
-                      <Button size="sm" variant="outline" onClick={() => handleViewInvoiceDetails('INV-002')}>
-                        <Download className="h-3 w-3 mr-1" />
-                        Download
-                      </Button>
-                    </div>
+                    ))}
                   </div>
                 </div>
               </CardContent>
@@ -722,7 +1011,7 @@ export default function ClientZonePage() {
                           <Badge className="bg-green-100 text-green-800">Released</Badge>
                         </div>
                         <p className="text-sm text-gray-600">Brand Identity Project</p>
-                        <p className="text-lg font-semibold text-green-600">$2,000</p>
+                        <p className="text-lg font-semibold text-green-600">{formatCurrency(2000)}</p>
                       </div>
                       <div className="p-4 rounded-lg bg-yellow-50 border border-yellow-200">
                         <div className="flex items-center justify-between mb-2">
@@ -730,7 +1019,7 @@ export default function ClientZonePage() {
                           <Badge className="bg-yellow-100 text-yellow-800">In Escrow</Badge>
                         </div>
                         <p className="text-sm text-gray-600">Brand Identity Project</p>
-                        <p className="text-lg font-semibold text-yellow-600">$1,500</p>
+                        <p className="text-lg font-semibold text-yellow-600">{formatCurrency(1500)}</p>
                         <Button size="sm" className="mt-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white" onClick={() => handleApproveDeliverable(1)}>
                           Approve & Release
                         </Button>
@@ -763,7 +1052,7 @@ export default function ClientZonePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="max-h-96 overflow-y-auto space-y-4">
-                  {messages.map((message) => (
+                  {KAZI_CLIENT_DATA.messages.map((message) => (
                     <div key={message.id} className="flex space-x-4 p-4 rounded-lg bg-gray-50">
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={message.avatar} alt={message.sender} />
@@ -780,12 +1069,12 @@ export default function ClientZonePage() {
                     </div>
                   ))}
                 </div>
-                
+
                 <div className="border-t pt-4">
                   <div className="flex space-x-4">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={clientInfo.avatar} alt={clientInfo.contactPerson} />
-                      <AvatarFallback>{clientInfo.contactPerson.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                      <AvatarImage src={KAZI_CLIENT_DATA.clientInfo.avatar} alt={KAZI_CLIENT_DATA.clientInfo.contactPerson} />
+                      <AvatarFallback>{KAZI_CLIENT_DATA.clientInfo.contactPerson.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 space-y-2">
                       <Textarea
@@ -819,7 +1108,7 @@ export default function ClientZonePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {recentFiles.map((file) => (
+                  {KAZI_CLIENT_DATA.recentFiles.map((file) => (
                     <div key={file.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50">
                       <div className="flex items-center space-x-4">
                         <div className="p-2 bg-blue-100 rounded-lg">
@@ -927,21 +1216,21 @@ export default function ClientZonePage() {
                   <Card className="bg-blue-50 border-blue-200">
                     <CardContent className="p-4 text-center">
                       <Target className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                      <p className="text-2xl font-bold text-blue-600">94%</p>
+                      <p className="text-2xl font-bold text-blue-600">{KAZI_CLIENT_DATA.analytics.onTimeDelivery}%</p>
                       <p className="text-sm text-gray-600">On-Time Delivery</p>
                     </CardContent>
                   </Card>
                   <Card className="bg-green-50 border-green-200">
                     <CardContent className="p-4 text-center">
                       <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                      <p className="text-2xl font-bold text-green-600">98%</p>
+                      <p className="text-2xl font-bold text-green-600">{KAZI_CLIENT_DATA.analytics.firstTimeApproval}%</p>
                       <p className="text-sm text-gray-600">First-Time Approval</p>
                     </CardContent>
                   </Card>
                   <Card className="bg-purple-50 border-purple-200">
                     <CardContent className="p-4 text-center">
                       <Zap className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                      <p className="text-2xl font-bold text-purple-600">2.1 days</p>
+                      <p className="text-2xl font-bold text-purple-600">{KAZI_CLIENT_DATA.analytics.avgResponseTime} days</p>
                       <p className="text-sm text-gray-600">Avg Response Time</p>
                     </CardContent>
                   </Card>
@@ -951,20 +1240,15 @@ export default function ClientZonePage() {
                   <div className="space-y-4">
                     <h3 className="font-semibold text-lg">Project Timeline</h3>
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
-                        <span className="text-sm">Brand Identity</span>
-                        <div className="flex items-center gap-2">
-                          <Progress value={75} className="w-20 h-2" />
-                          <span className="text-sm font-medium">75%</span>
+                      {KAZI_CLIENT_DATA.projects.map((project) => (
+                        <div key={project.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                          <span className="text-sm">{project.name}</span>
+                          <div className="flex items-center gap-2">
+                            <Progress value={project.progress} className="w-20 h-2" />
+                            <span className="text-sm font-medium">{project.progress}%</span>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
-                        <span className="text-sm">Website Development</span>
-                        <div className="flex items-center gap-2">
-                          <Progress value={90} className="w-20 h-2" />
-                          <span className="text-sm font-medium">90%</span>
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
                   <div className="space-y-4">
@@ -972,15 +1256,15 @@ export default function ClientZonePage() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
                         <span className="text-sm">Messages Exchanged</span>
-                        <span className="font-semibold">127</span>
+                        <span className="font-semibold">{KAZI_CLIENT_DATA.analytics.messagesExchanged}</span>
                       </div>
                       <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
                         <span className="text-sm">Meetings Held</span>
-                        <span className="font-semibold">8</span>
+                        <span className="font-semibold">{KAZI_CLIENT_DATA.analytics.meetingsHeld}</span>
                       </div>
                       <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
                         <span className="text-sm">Files Shared</span>
-                        <span className="font-semibold">23</span>
+                        <span className="font-semibold">{KAZI_CLIENT_DATA.analytics.filesShared}</span>
                       </div>
                     </div>
                   </div>
@@ -1009,7 +1293,7 @@ export default function ClientZonePage() {
                       <span className="ml-2 text-sm text-gray-600">(Excellent)</span>
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium mb-2">Your Feedback</label>
                     <Textarea
@@ -1019,7 +1303,7 @@ export default function ClientZonePage() {
                       className="min-h-[120px]"
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-2">Communication Quality</label>
@@ -1036,7 +1320,7 @@ export default function ClientZonePage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" onClick={handleSubmitFeedback}>
                     <Send className="h-4 w-4 mr-2" />
                     Submit Feedback
@@ -1088,7 +1372,7 @@ export default function ClientZonePage() {
                     <div className="space-y-3">
                       <div className="p-3 rounded-lg bg-gray-50">
                         <p className="font-medium mb-2">Contact Information</p>
-                        <p className="text-sm text-gray-600 mb-2">Email: {clientInfo.email}</p>
+                        <p className="text-sm text-gray-600 mb-2">Email: {KAZI_CLIENT_DATA.clientInfo.email}</p>
                         <Button size="sm" variant="outline">
                           <Edit className="h-3 w-3 mr-1" />
                           Update Contact Info
