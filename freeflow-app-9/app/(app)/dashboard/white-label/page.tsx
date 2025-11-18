@@ -180,6 +180,7 @@ export default function WhiteLabelPage() {
   }
 
   const generateWhiteLabel = async () => {
+    console.log('🎨 Generating white label app...')
     setIsGenerating(true)
     setGenerationProgress(0)
 
@@ -197,11 +198,9 @@ export default function WhiteLabelPage() {
 
     // Mock generation process
     try {
-      console.log('Generating white-label solution:', {
-        template: selectedTemplate,
-        brandConfig,
-        components: COMPONENTS.filter(c => brandConfig.features.includes(c.id))
-      })
+      console.log('Template:', selectedTemplate)
+      console.log('Brand Config:', brandConfig)
+      console.log('Components:', COMPONENTS.filter(c => brandConfig.features.includes(c.id)))
     } catch (error) {
       console.error('Generation failed:', error)
       setIsGenerating(false)
@@ -209,6 +208,7 @@ export default function WhiteLabelPage() {
   }
 
   const exportCode = () => {
+    console.log('💻 Exporting code...')
     const codePackage = {
       template: selectedTemplate,
       brandConfig,
@@ -221,11 +221,12 @@ export default function WhiteLabelPage() {
         borderRadius: brandConfig.borderRadius
       }
     }
-    console.log('Exporting white-label code package:', codePackage)
+    console.log('Code package ready:', codePackage)
   }
 
   const deployToCustomDomain = () => {
-    console.log('Deploying to custom domain:', brandConfig.customDomain)
+    console.log('🚀 Deploying to custom domain...')
+    console.log('Domain:', brandConfig.customDomain)
   }
 
   // Preview Component
@@ -404,9 +405,115 @@ export default function WhiteLabelPage() {
                               selectedTemplate === template.id
                                 ? 'border-primary bg-primary/10'
                                 : 'border-border bg-card hover:bg-accent/10'
-                            }
-                      className={`p-6 rounded-lg border-2 transition-all ${
-                        tier.id === 'professional'
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border bg-card'
-                      }
+                            }`}
+                            onClick={() => setSelectedTemplate(template.id)}
+                          >
+                            <h4 className="font-semibold">{template.name}</h4>
+                            <p className="text-xs text-muted-foreground mt-1">{template.description}</p>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="branding" className="space-y-4">
+                    <div className="p-6 text-center text-muted-foreground">
+                      Branding configuration coming soon
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="components" className="space-y-4">
+                    <div className="p-6 text-center text-muted-foreground">
+                      Component selection coming soon
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="deployment" className="space-y-4">
+                    <div>
+                      <h3 className="font-semibold mb-3">Pricing Tiers</h3>
+                      <div className="space-y-4">
+                        {PRICING_TIERS.map((tier) => (
+                          <div
+                            key={tier.id}
+                            className={`p-6 rounded-lg border-2 transition-all ${
+                              tier.id === 'professional'
+                                ? 'border-primary bg-primary/5'
+                                : 'border-border bg-card'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-3">
+                              <h4 className="text-lg font-semibold">{tier.name}</h4>
+                              {tier.id === 'professional' && (
+                                <Badge>Recommended</Badge>
+                              )}
+                            </div>
+                            <div className="mb-4">
+                              <span className="text-3xl font-bold">${tier.price}</span>
+                              <span className="text-muted-foreground">/{tier.period}</span>
+                            </div>
+                            <div className="space-y-2 mb-4">
+                              {tier.features.map((feature, i) => (
+                                <div key={i} className="flex items-center gap-2 text-sm">
+                                  <CheckCircle className="w-4 h-4 text-green-500" />
+                                  <span>{feature}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center justify-center gap-4 mt-8">
+          <button
+            data-testid="generate-white-label-btn"
+            onClick={generateWhiteLabel}
+            disabled={isGenerating}
+            className="px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground rounded-md flex items-center gap-2"
+          >
+            <Sparkles className="w-4 h-4" />
+            {isGenerating ? `Generating... ${Math.floor(generationProgress)}%` : 'Generate White Label'}
+          </button>
+
+          <button
+            data-testid="export-code-btn"
+            onClick={exportCode}
+            className="px-6 py-3 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md flex items-center gap-2"
+          >
+            <Code className="w-4 h-4" />
+            Export Code
+          </button>
+
+          <button
+            data-testid="deploy-domain-btn"
+            onClick={deployToCustomDomain}
+            className="px-6 py-3 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md flex items-center gap-2"
+          >
+            <Globe className="w-4 h-4" />
+            Deploy to Domain
+          </button>
+        </div>
+
+        {isGenerating && (
+          <div className="mt-4">
+            <Progress value={generationProgress} className="h-2" />
+          </div>
+        )}
+
+        {/* Preview Section */}
+        <div className="mt-8">
+          <Card className="p-6">
+            <h3 className="text-lg font-bold mb-4">Preview</h3>
+            <WhiteLabelPreview />
+          </Card>
+        </div>
+      </div>
+    </ErrorBoundary>
+  )
+}

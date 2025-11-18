@@ -430,7 +430,12 @@ export default function AISettingsPage() {
                               <p className="text-sm text-muted-foreground">{provider.description}</p>
                             </div>
                           </div>
-                          <Badge className={`gap-1 ${getStatusColor(provider.status)}
+                          <Badge className={`gap-1 ${getStatusColor(provider.status)}`}>
+                            {getStatusIcon(provider.status)}
+                            {provider.status}
+                          </Badge>
+                        </div>
+                        <div>
                           <Label htmlFor={`${provider.id}-key`}>API Key</Label>
                           <div className="flex gap-2">
                             <div className="relative flex-1">
@@ -484,4 +489,47 @@ export default function AISettingsPage() {
                                   testResults[provider.id].success
                                     ? 'bg-green-500/10 text-green-500 border border-green-500/20'
                                     : 'bg-red-500/10 text-red-500 border border-red-500/20'
-                                }
+                                }`}
+                              >
+                                {testResults[provider.id].message}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      </Card>
+                    </motion.div>
+                  )
+                })}
+              </div>
+
+              {/* Save All Settings Button */}
+              <div className="flex items-center justify-center mt-8">
+                <button
+                  data-testid="save-all-settings-btn"
+                  onClick={saveAllSettings}
+                  disabled={isSaving}
+                  className="px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground rounded-md flex items-center gap-2"
+                >
+                  <Save className="w-5 h-5" />
+                  {isSaving ? 'Saving...' : 'Save All Settings'}
+                </button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="features" className="space-y-6">
+              <div className="p-6 text-center text-muted-foreground">
+                Feature configuration coming soon
+              </div>
+            </TabsContent>
+
+            <TabsContent value="usage" className="space-y-6">
+              <div className="p-6 text-center text-muted-foreground">
+                Usage and billing dashboard coming soon
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </ErrorBoundary>
+    </div>
+  )
+}
