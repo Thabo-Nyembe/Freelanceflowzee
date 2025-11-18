@@ -18,6 +18,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Download,
+  Upload,
   Printer,
   Plus,
   Edit,
@@ -88,6 +89,74 @@ export default function FinancialPage() {
         description: error.message || 'Please try again later'
       })
     }
+  }
+
+  const handleImportData = async () => {
+    console.log('📥 IMPORT FINANCIAL DATA')
+
+    // Create file input
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.csv,.json,.xlsx'
+
+    input.onchange = async (e: Event) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+
+      try {
+        // Read file content
+        const text = await file.text()
+
+        // Determine file type
+        let data
+        if (file.name.endsWith('.json')) {
+          data = JSON.parse(text)
+        } else if (file.name.endsWith('.csv')) {
+          // In production, would parse CSV properly
+          data = { rawCsv: text, fileName: file.name }
+        } else {
+          data = { fileName: file.name, size: file.size }
+        }
+
+        const response = await fetch('/api/financial/reports', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'import',
+            data: {
+              fileName: file.name,
+              fileType: file.type,
+              fileSize: file.size,
+              importData: data
+            }
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to import data')
+        }
+
+        const result = await response.json()
+
+        if (result.success) {
+          toast.success(result.message || 'Data imported successfully!', {
+            description: `${result.recordsImported || 0} records imported`
+          })
+
+          // Show next steps
+          setTimeout(() => {
+            alert(`✅ Data Imported Successfully\n\nNext Steps:\n• Review imported transactions in the dashboard\n• Verify all amounts and categories are correct\n• Reconcile with bank statements\n• Update any missing information\n• Generate updated financial reports`)
+          }, 500)
+        }
+      } catch (error: any) {
+        console.error('Import Data Error:', error)
+        toast.error('Failed to import data', {
+          description: error.message || 'Please check file format and try again'
+        })
+      }
+    }
+
+    input.click()
   }
 
   const handleScheduleReview = () => {
@@ -309,6 +378,10 @@ export default function FinancialPage() {
           <Button variant="outline" size="sm" onClick={() => handleExportReport('pdf')}>
             <Download className="h-4 w-4 mr-2" />
             Export Report
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleImportData}>
+            <Upload className="h-4 w-4 mr-2" />
+            Import Data
           </Button>
           <Button size="sm" onClick={handleScheduleReview}>
             <Calendar className="h-4 w-4 mr-2" />
