@@ -1,11 +1,14 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
+import { motion } from 'framer-motion'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 import {
   DollarSign,
   TrendingUp,
@@ -27,11 +30,358 @@ import {
   CheckCircle,
   Filter,
   Search,
-  RefreshCw
+  RefreshCw,
+  Brain,
+  Target,
+  Lightbulb
 } from 'lucide-react'
+
+// Framer Motion Animation Components
+const FloatingParticle = ({ delay = 0, color = 'emerald' }: { delay?: number; color?: string }) => {
+  return (
+    <motion.div
+      className={`absolute w-2 h-2 bg-${color}-400 rounded-full opacity-30`}
+      animate={{
+        y: [0, -30, 0],
+        x: [0, 15, -15, 0],
+        scale: [0.8, 1.2, 0.8],
+        opacity: [0.3, 0.8, 0.3]
+      }}
+      transition={{
+        duration: 4 + delay,
+        repeat: Infinity,
+        ease: 'easeInOut',
+        delay: delay
+      }}
+    />
+  )
+}
+
+const TextShimmer = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
+  return (
+    <motion.div
+      className={`relative inline-block ${className}`}
+      initial={{ backgroundPosition: '200% 0' }}
+      animate={{ backgroundPosition: '-200% 0' }}
+      transition={{
+        duration: 2,
+        repeat: Infinity,
+        ease: 'linear'
+      }}
+      style={{
+        background: 'linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.4), transparent)',
+        backgroundSize: '200% 100%',
+        WebkitBackgroundClip: 'text'
+      }}
+    >
+      {children}
+    </motion.div>
+  )
+}
 
 export default function FinancialPage() {
   const [_selectedPeriod, setSelectedPeriod] = useState<any>('monthly')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterCategory, setFilterCategory] = useState('all')
+
+  // Utility Functions
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount)
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'paid': return 'bg-green-100 text-green-800 border-green-200'
+      case 'sent': return 'bg-blue-100 text-blue-800 border-blue-200'
+      case 'overdue': return 'bg-red-100 text-red-800 border-red-200'
+      case 'draft': return 'bg-gray-100 text-gray-800 border-gray-200'
+      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+    }
+  }
+
+  const getInsightColor = (impact: string) => {
+    switch (impact) {
+      case 'high': return 'border-red-300 bg-red-50'
+      case 'medium': return 'border-yellow-300 bg-yellow-50'
+      case 'low': return 'border-green-300 bg-green-50'
+      default: return 'border-gray-300 bg-gray-50'
+    }
+  }
+
+  // Comprehensive KAZI Financial Data (73 data points)
+  const KAZI_FINANCIAL_DATA = {
+    overview: {
+      totalRevenue: 287450,
+      monthlyRevenue: 45231,
+      totalExpenses: 98750,
+      netProfit: 188700,
+      profitMargin: 65.7,
+      monthlyGrowth: 23.4,
+      quarterlyGrowth: 67.8,
+      yearlyGrowth: 145.2,
+      cashFlow: 156780,
+      accountsReceivable: 45600,
+      accountsPayable: 12400
+    },
+    analytics: {
+      revenuePerClient: 8950,
+      averageProjectValue: 3850,
+      clientRetentionRate: 94.2,
+      projectProfitability: 72.3,
+      operationalEfficiency: 87.5,
+      burnRate: 12400,
+      runwayMonths: 18.7,
+      breakEvenPoint: 15600,
+      roi: 234.5,
+      costPerAcquisition: 450
+    },
+    transactions: [
+      {
+        id: 'txn_001',
+        type: 'income' as const,
+        category: 'project_payment',
+        description: 'Brand Identity Package - TechCorp Inc.',
+        amount: 8500,
+        date: '2024-02-01',
+        client: 'TechCorp Inc.',
+        project: 'Brand Identity 2024',
+        status: 'completed',
+        paymentMethod: 'bank_transfer' as const,
+        invoice: 'INV-2024-001',
+        tags: ['branding', 'design', 'milestone']
+      },
+      {
+        id: 'txn_002',
+        type: 'expense' as const,
+        category: 'software',
+        description: 'Adobe Creative Cloud - Annual Subscription',
+        amount: 899,
+        date: '2024-01-31',
+        vendor: 'Adobe Inc.',
+        status: 'completed',
+        paymentMethod: 'credit_card' as const,
+        recurring: true,
+        nextDue: '2025-01-31',
+        tags: ['software', 'recurring', 'tools']
+      },
+      {
+        id: 'txn_003',
+        type: 'income' as const,
+        category: 'consulting',
+        description: 'Design Consultation - RetailMax Corp',
+        amount: 2500,
+        date: '2024-01-28',
+        client: 'RetailMax Corp',
+        project: 'Store Redesign Consultation',
+        status: 'completed',
+        paymentMethod: 'paypal' as const,
+        tags: ['consulting', 'strategy']
+      },
+      {
+        id: 'txn_004',
+        type: 'expense' as const,
+        category: 'marketing',
+        description: 'Google Ads - Brand Awareness Campaign',
+        amount: 1200,
+        date: '2024-01-25',
+        campaign: 'Brand Awareness Q1',
+        status: 'completed',
+        paymentMethod: 'credit_card' as const,
+        tags: ['marketing', 'advertising']
+      },
+      {
+        id: 'txn_005',
+        type: 'income' as const,
+        category: 'product_sales',
+        description: 'Logo Template Pack V3 - Marketplace Sales',
+        amount: 450,
+        date: '2024-01-20',
+        platform: 'KAZI Marketplace',
+        product: 'Logo Template Pack V3',
+        quantity: 15,
+        unitPrice: 30,
+        status: 'completed',
+        paymentMethod: 'platform' as const,
+        tags: ['digital-products', 'passive-income']
+      }
+    ],
+    invoices: [
+      {
+        id: 'INV-2024-007',
+        number: 'INV-2024-007',
+        client: 'TechCorp Inc.',
+        project: 'Website Redesign',
+        amount: 12500,
+        issueDate: '2024-02-01',
+        dueDate: '2024-02-15',
+        status: 'sent' as const,
+        paidAmount: 0,
+        currency: 'USD',
+        taxRate: 0,
+        items: [
+          { description: 'UI/UX Design', quantity: 1, rate: 7500, amount: 7500 },
+          { description: 'Frontend Development', quantity: 1, rate: 5000, amount: 5000 }
+        ],
+        notes: 'Payment due within 14 days of invoice date'
+      },
+      {
+        id: 'INV-2024-006',
+        number: 'INV-2024-006',
+        client: 'RetailMax Corp',
+        project: 'Brand Identity Package',
+        amount: 8750,
+        issueDate: '2024-01-15',
+        dueDate: '2024-01-30',
+        status: 'overdue' as const,
+        paidAmount: 0,
+        currency: 'USD',
+        taxRate: 8.25,
+        items: [
+          { description: 'Logo Design', quantity: 1, rate: 3500, amount: 3500 },
+          { description: 'Brand Guidelines', quantity: 1, rate: 2500, amount: 2500 },
+          { description: 'Business Cards', quantity: 1, rate: 2000, amount: 2000 }
+        ],
+        notes: 'Tax: 8.25% California sales tax applied'
+      },
+      {
+        id: 'INV-2024-005',
+        number: 'INV-2024-005',
+        client: 'StartupXYZ',
+        project: 'MVP Design Sprint',
+        amount: 5500,
+        issueDate: '2024-01-05',
+        dueDate: '2024-01-20',
+        status: 'paid' as const,
+        paidAmount: 5500,
+        paidDate: '2024-01-18',
+        currency: 'USD',
+        taxRate: 0,
+        items: [
+          { description: '5-Day Design Sprint', quantity: 1, rate: 5500, amount: 5500 }
+        ],
+        notes: 'Paid early - excellent client!'
+      }
+    ],
+    clients: [
+      {
+        id: 'client_001',
+        name: 'TechCorp Inc.',
+        totalRevenue: 45600,
+        activeProjects: 2,
+        completedProjects: 8,
+        averageProjectValue: 5700,
+        paymentHistory: 'excellent' as const,
+        lastPayment: '2024-02-01',
+        outstandingAmount: 12500,
+        creditRating: 'A+' as const,
+        relationship: 'enterprise' as const
+      },
+      {
+        id: 'client_002',
+        name: 'StartupXYZ',
+        totalRevenue: 28900,
+        activeProjects: 1,
+        completedProjects: 5,
+        averageProjectValue: 5780,
+        paymentHistory: 'excellent' as const,
+        lastPayment: '2024-01-18',
+        outstandingAmount: 0,
+        creditRating: 'A' as const,
+        relationship: 'growth' as const
+      },
+      {
+        id: 'client_003',
+        name: 'RetailMax Corp',
+        totalRevenue: 67800,
+        activeProjects: 1,
+        completedProjects: 12,
+        averageProjectValue: 5650,
+        paymentHistory: 'fair' as const,
+        lastPayment: '2024-01-28',
+        outstandingAmount: 8750,
+        creditRating: 'B+' as const,
+        relationship: 'enterprise' as const
+      }
+    ],
+    insights: [
+      {
+        id: 'insight_001',
+        type: 'revenue_optimization' as const,
+        title: 'Premium Pricing Opportunity',
+        description: 'Your average project value increased 34% this quarter. Consider implementing premium pricing for enterprise clients.',
+        impact: 'high' as const,
+        potentialValue: 15600,
+        actionable: true,
+        confidence: 92,
+        category: 'pricing' as const
+      },
+      {
+        id: 'insight_002',
+        type: 'cash_flow' as const,
+        title: 'Invoice Collection Optimization',
+        description: 'You have 1 overdue invoice totaling $8,750. Following up within 48 hours increases collection rate by 40%.',
+        impact: 'medium' as const,
+        potentialValue: 8400,
+        actionable: true,
+        confidence: 87,
+        category: 'operations' as const
+      },
+      {
+        id: 'insight_003',
+        type: 'cost_reduction' as const,
+        title: 'Subscription Optimization',
+        description: 'Annual software subscriptions could save you $2,400/year vs monthly billing. Consider upgrading Adobe and other tools.',
+        impact: 'low' as const,
+        potentialValue: 2400,
+        actionable: true,
+        confidence: 95,
+        category: 'expenses' as const
+      }
+    ],
+    tax: {
+      quarterlyEstimate: 18750,
+      yearToDateTax: 45600,
+      deductions: {
+        homeOffice: 3600,
+        equipment: 4200,
+        software: 2100,
+        professional: 1500
+      },
+      documents: ['1099-K', 'W-9', 'Quarterly Estimates', 'Expense Receipts']
+    },
+    goals: {
+      monthlyRevenue: { target: 50000, current: 45231, progress: 90.4 },
+      quarterlyGrowth: { target: 60, current: 67.8, progress: 113 },
+      profitMargin: { target: 70, current: 65.7, progress: 93.9 },
+      clientAcquisition: { target: 5, current: 3, progress: 60 },
+      emergencyFund: { target: 100000, current: 156780, progress: 156.8 }
+    }
+  }
+
+  // Transaction Filtering with useMemo
+  const filteredTransactions = useMemo(() => {
+    console.log('🔍 FILTERING TRANSACTIONS')
+    console.log('🔎 Search Term:', searchTerm || '(none)')
+    console.log('📁 Category Filter:', filterCategory)
+
+    const filtered = KAZI_FINANCIAL_DATA.transactions.filter(transaction => {
+      const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (transaction.client?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
+      const matchesCategory = filterCategory === 'all' || transaction.category === filterCategory
+      return matchesSearch && matchesCategory
+    })
+
+    console.log('✅ FILTERED RESULTS:', filtered.length, 'transactions')
+    if (filtered.length < KAZI_FINANCIAL_DATA.transactions.length) {
+      console.log('📉 Filtered out:', KAZI_FINANCIAL_DATA.transactions.length - filtered.length, 'transactions')
+    }
+
+    return filtered
+  }, [searchTerm, filterCategory])
 
   const handleExportReport = async (format: 'pdf' | 'csv' | 'xlsx') => {
     console.log('💾 EXPORT FINANCIAL REPORT - Format:', format.toUpperCase())
@@ -337,24 +687,19 @@ export default function FinancialPage() {
     alert('🔄 Refreshing Data...\n\n✅ Financial data updated with latest transactions!')
   }
 
-  // Mock financial data
+  // Derived data from KAZI_FINANCIAL_DATA
   const financialData = {
-    totalRevenue: 45231,
-    totalExpenses: 18500,
-    netProfit: 26731,
-    monthlyGrowth: 12.5,
-    pendingInvoices: 5,
-    overdueInvoices: 2,
-    recentTransactions: [
-      { id: 1, type: 'income', description: 'Project Payment - Acme Corp', amount: 5000, date: '2024-01-15' },
-      { id: 2, type: 'expense', description: 'Software Subscriptions', amount: -299, date: '2024-01-14' },
-      { id: 3, type: 'income', description: 'Design Package - Tech Startup', amount: 3500, date: '2024-01-12' },
-      { id: 4, type: 'expense', description: 'Marketing Campaign', amount: -1500, date: '2024-01-10' }
-    ],
-    upcomingPayments: [
-      { id: 1, client: 'Acme Corp', amount: 2500, dueDate: '2024-01-20', status: 'pending' },
-      { id: 2, client: 'Tech Startup', amount: 5000, dueDate: '2024-01-25', status: 'overdue' }
-    ]
+    ...KAZI_FINANCIAL_DATA.overview,
+    pendingInvoices: KAZI_FINANCIAL_DATA.invoices.filter(i => i.status === 'sent' || i.status === 'pending').length,
+    overdueInvoices: KAZI_FINANCIAL_DATA.invoices.filter(i => i.status === 'overdue').length,
+    recentTransactions: filteredTransactions,
+    upcomingPayments: KAZI_FINANCIAL_DATA.invoices.filter(i => i.status !== 'paid').map(inv => ({
+      id: inv.id,
+      client: inv.client,
+      amount: inv.amount,
+      dueDate: inv.dueDate,
+      status: inv.status
+    }))
   }
 
   return (
@@ -395,20 +740,32 @@ export default function FinancialPage() {
       </div>
 
       {/* Financial Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="kazi-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 kazi-text-accent" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold kazi-text-accent">${financialData.totalRevenue.toLocaleString()}</div>
-            <p className="text-xs text-gray-500 flex items-center gap-1">
-              <ArrowUpRight className="h-3 w-3 text-green-500" />
-              +{financialData.monthlyGrowth}% from last month
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0 }}
+        >
+          <Card className="kazi-card relative overflow-hidden group hover:shadow-xl transition-shadow">
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              <FloatingParticle delay={0} color="emerald" />
+              <FloatingParticle delay={1} color="teal" />
+            </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+              <div className="p-3 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-xl group-hover:scale-110 transition-transform">
+                <DollarSign className="h-6 w-6 text-white" />
+              </div>
+            </CardHeader>
+            <CardContent className="relative z-10">
+              <div className="text-3xl font-bold text-emerald-600">{formatCurrency(financialData.totalRevenue)}</div>
+              <p className="text-sm text-green-600 flex items-center gap-1">
+                <ArrowUpRight className="h-3 w-3" />
+                +{financialData.yearlyGrowth}% YoY
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         <Card className="kazi-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -446,6 +803,84 @@ export default function FinancialPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* AI Financial Intelligence Card */}
+      <Card className="bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Brain className="w-5 h-5 text-emerald-600" />
+            <TextShimmer>AI Financial Intelligence</TextShimmer>
+            <Badge className="bg-emerald-100 text-emerald-700 border-emerald-300">Live Analysis</Badge>
+          </CardTitle>
+          <CardDescription>AI-powered insights to optimize your financial performance</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {KAZI_FINANCIAL_DATA.insights.map((insight, index) => (
+              <motion.div
+                key={insight.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className={`p-4 rounded-lg border-l-4 ${getInsightColor(insight.impact)}`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    {insight.impact === 'high' && <Target className="h-4 w-4 text-red-600" />}
+                    {insight.impact === 'medium' && <Lightbulb className="h-4 w-4 text-yellow-600" />}
+                    {insight.impact === 'low' && <TrendingUp className="h-4 w-4 text-green-600" />}
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge variant="outline" className="text-xs">{insight.impact} impact</Badge>
+                    <Badge variant="outline" className="text-xs">{insight.confidence}% confidence</Badge>
+                  </div>
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">{insight.title}</h4>
+                <p className="text-sm text-gray-600 mb-3">{insight.description}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-bold text-emerald-600">
+                    Potential: {formatCurrency(insight.potentialValue)}
+                  </span>
+                  {insight.actionable && (
+                    <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
+                      Implement
+                    </Button>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Search and Filter */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search transactions, clients..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="all">All Categories</option>
+              <option value="project_payment">Project Payments</option>
+              <option value="software">Software</option>
+              <option value="consulting">Consulting</option>
+              <option value="marketing">Marketing</option>
+              <option value="product_sales">Product Sales</option>
+            </select>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Detailed Financial Analysis */}
       <Tabs defaultValue="overview" className="space-y-4">
