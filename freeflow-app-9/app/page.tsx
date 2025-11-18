@@ -1,10 +1,13 @@
-import { Metadata } from "next";
+'use client'
+
 import Link from 'next/link'
 import React, { Suspense } from 'react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { ErrorBoundary } from "@/components/error-boundary"
-import { 
-  Zap, 
-  Upload, 
+import {
+  Zap,
+  Upload,
   Target,
   Brain,
   Shield,
@@ -104,15 +107,53 @@ const trustedBy = [
   "TechCrunch", "Product Hunt", "Forbes", "Wired", "Business Insider", "VentureBeat"
 ]
 
-export const metadata: Metadata = {
-  title: "Kazi – The Ultimate All-in-One Workspace for Freelancers & Agencies",
-  description: "Kazi is your all-in-one platform for creating, collaborating, managing projects, and getting paid—seamlessly. Engineered in South Africa, used worldwide.",
-  keywords: "freelance management software, AI project management platform, best freelance payment platform, escrow payment software, integrated workspace solution, secure online payments freelancers, project management for creatives, AI productivity tool, SaaS productivity solution, South African SaaS startup, global freelance workspace, Kazi workspace, AI project management, secure payments platform, all-in-one workspace, best SaaS for freelancers, creative project management, elegant productivity tools, African tech innovation",
-  authors: [{ name: "Kazi Team" }],
-  creator: "Kazi"
-};
-
 export default function Home() {
+  const router = useRouter()
+
+  // Handler: Start Free Trial (Hero Section)
+  const handleStartFreeTrial = () => {
+    toast.success('Starting your free trial!')
+    setTimeout(() => {
+      alert(`🎉 Welcome to KAZI!\n\nNext Steps:\n• Create your account in seconds\n• Explore the dashboard and features\n• Set up your first project\n• Invite team members to collaborate\n• Access all premium features for 14 days\n• No credit card required during trial`)
+    }, 500)
+    setTimeout(() => {
+      router.push('/signup')
+    }, 2000)
+  }
+
+  // Handler: Watch Demo (Hero Section)
+  const handleWatchDemo = () => {
+    toast.success('Loading demo video...')
+    setTimeout(() => {
+      alert(`🎬 KAZI Platform Demo\n\nWhat You'll See:\n• Complete platform walkthrough\n• Real-world use cases and workflows\n• AI-powered features in action\n• Team collaboration demonstrations\n• Payment and invoicing flows\n• Tips from power users`)
+    }, 500)
+    setTimeout(() => {
+      router.push('/dashboard/video-studio')
+    }, 2000)
+  }
+
+  // Handler: Feature Card Clicks
+  const handleFeatureClick = (name: string, href: string) => {
+    toast.success(`Opening ${name}...`)
+    setTimeout(() => {
+      alert(`✨ ${name}\n\nExplore:\n• Live demonstration\n• Interactive tools and features\n• Real-world use cases\n• Workflow examples\n• Integration capabilities\n• Try it now for free`)
+    }, 500)
+    setTimeout(() => {
+      router.push(href)
+    }, 2000)
+  }
+
+  // Handler: Get Started (CTA Section)
+  const handleGetStarted = () => {
+    toast.success("Let's get you started!")
+    setTimeout(() => {
+      alert(`🚀 Getting Started with KAZI\n\nNext Steps:\n• Sign up for free account\n• Choose your plan (Starter is free forever)\n• Complete onboarding in 3 minutes\n• Start creating and collaborating\n• Upgrade anytime to unlock more features`)
+    }, 500)
+    setTimeout(() => {
+      router.push('/signup')
+    }, 2000)
+  }
+
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <ErrorBoundary fallback={<div>Something went wrong</div>}>
@@ -190,18 +231,14 @@ export default function Home() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/login">
-                <button className="btn-kazi-primary kazi-ripple kazi-focus">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </button>
-              </Link>
-              <Link href="/dashboard/video-studio">
-                <button className="btn-kazi-secondary kazi-ripple kazi-focus">
-                  <Play className="mr-2 w-5 h-5" />
-                  Watch Demo
-                </button>
-              </Link>
+              <button onClick={handleStartFreeTrial} className="btn-kazi-primary kazi-ripple kazi-focus">
+                Start Free Trial
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </button>
+              <button onClick={handleWatchDemo} className="btn-kazi-secondary kazi-ripple kazi-focus">
+                <Play className="mr-2 w-5 h-5" />
+                Watch Demo
+              </button>
             </div>
           </div>
         </div>
@@ -275,12 +312,10 @@ export default function Home() {
                   </div>
                   <h3 className="text-xl font-bold kazi-text-dark dark:kazi-text-light mb-2 kazi-headline">{feature.title}</h3>
                   <p className="text-gray-600 dark:text-gray-300 mb-4 kazi-body">{feature.description}</p>
-                  <Link href={feature.href}>
-                    <button className="btn-kazi-secondary w-full kazi-ripple kazi-focus">
-                      Learn More
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </button>
-                  </Link>
+                  <button onClick={() => handleFeatureClick(feature.title, feature.href)} className="btn-kazi-secondary w-full kazi-ripple kazi-focus">
+                    Learn More
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </button>
                 </div>
               </div>
             ))}
@@ -369,12 +404,10 @@ export default function Home() {
           <p className="text-xl mb-8 max-w-2xl mx-auto kazi-body" style={{ color: '#F8F7F4', opacity: 0.9 }}>
             Join thousands of freelancers and agencies who've streamlined their work with Kazi
           </p>
-          <Link href="/login">
-            <button className="bg-soft-ivory kazi-text-primary hover:bg-white px-8 py-4 text-lg font-semibold rounded-lg kazi-ripple kazi-focus kazi-hover-scale transition-all duration-300">
-              Start Your Free Trial
-              <ArrowRight className="ml-2 w-5 h-5 inline" />
-            </button>
-          </Link>
+          <button onClick={handleGetStarted} className="bg-soft-ivory kazi-text-primary hover:bg-white px-8 py-4 text-lg font-semibold rounded-lg kazi-ripple kazi-focus kazi-hover-scale transition-all duration-300">
+            Start Your Free Trial
+            <ArrowRight className="ml-2 w-5 h-5 inline" />
+          </button>
         </div>
       </section>
 

@@ -3,16 +3,17 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { 
-  Eye, 
-  EyeOff, 
-  Mail, 
-  Lock, 
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
   LogIn,
   Zap,
   Star,
@@ -40,13 +41,22 @@ export default function LoginPage() {
       if (formData.email.includes('@') && formData.password.length > 0) {
         // Store auth state
         localStorage.setItem('kazi-auth', 'true')
-        localStorage.setItem('kazi-user', JSON.stringify({ 
-          email: formData.email, 
-          name: 'Professional User' 
+        localStorage.setItem('kazi-user', JSON.stringify({
+          email: formData.email,
+          name: 'Professional User'
         }))
-        
-        // Redirect to dashboard
-        router.push('/dashboard')
+
+        // Success feedback
+        toast.success('Login successful!')
+
+        setTimeout(() => {
+          alert(`✨ Welcome Back to KAZI!\n\nNext Steps:\n• Explore your dashboard and projects\n• Check notifications and messages\n• Resume work on active projects\n• Review your calendar and schedule\n• Access new AI-powered features\n• Collaborate with your team`)
+        }, 500)
+
+        // Redirect to dashboard after 2 seconds
+        setTimeout(() => {
+          router.push('/dashboard')
+        }, 2000)
       } else {
         alert('Please enter valid credentials')
         setIsLoading(false)

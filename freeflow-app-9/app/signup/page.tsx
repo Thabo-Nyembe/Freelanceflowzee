@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import { ArrowRight, Check, Mail, User, Lock, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -47,15 +48,24 @@ export default function SignUpPage() {
     setTimeout(() => {
       // Store auth state
       localStorage.setItem('kazi-auth', 'true')
-      localStorage.setItem('kazi-user', JSON.stringify({ 
-        email: formData.email, 
+      localStorage.setItem('kazi-user', JSON.stringify({
+        email: formData.email,
         name: `${formData.firstName} ${formData.lastName}`,
         firstName: formData.firstName,
         lastName: formData.lastName
       }))
-      
-      // Redirect to dashboard
-      router.push('/dashboard')
+
+      // Success feedback
+      toast.success('Account created successfully!')
+
+      setTimeout(() => {
+        alert(`🎉 Welcome to KAZI, ${formData.firstName}!\n\nNext Steps:\n• Complete your profile setup\n• Take the interactive platform tour\n• Create your first project\n• Explore AI-powered tools\n• Connect with the community\n• Invite team members to collaborate\n• Your 30-day free trial is now active!`)
+      }, 500)
+
+      // Redirect to dashboard after 2.5 seconds (longer for celebration)
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 2500)
     }, 1000)
   }
 
