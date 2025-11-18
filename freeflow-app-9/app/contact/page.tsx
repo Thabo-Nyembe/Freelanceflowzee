@@ -15,6 +15,7 @@ export default function ContactPage() {
     firstName: '',
     lastName: '',
     email: '',
+    company: '',
     subject: '',
     message: ''
   })
@@ -47,6 +48,7 @@ export default function ContactPage() {
           firstName: '',
           lastName: '',
           email: '',
+          company: '',
           subject: '',
           message: ''
         })
@@ -122,6 +124,16 @@ export default function ContactPage() {
                       value={formData.email}
                       onChange={(e) => setFormData({...formData, email: e.target.value})}
                       required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="company">Company (Optional)</Label>
+                    <Input
+                      id="company"
+                      placeholder="Your Company Name"
+                      value={formData.company}
+                      onChange={(e) => setFormData({...formData, company: e.target.value})}
                     />
                   </div>
 
