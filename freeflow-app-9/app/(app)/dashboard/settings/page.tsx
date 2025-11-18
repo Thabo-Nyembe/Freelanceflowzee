@@ -438,12 +438,12 @@ If you lose access to your authenticator app, you can use these codes to sign in
           </div>
           
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={handleExportData}>
+            <Button data-testid="export-settings-btn" variant="outline" size="sm" onClick={handleExportData}>
               <Download className="w-4 h-4 mr-2" />
               Export Settings
             </Button>
-            
-            <Button size="sm" onClick={handleSave} disabled={isLoading}>
+
+            <Button data-testid="save-changes-btn" size="sm" onClick={handleSave} disabled={isLoading}>
               {isLoading ? (
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
               ) : (
@@ -458,27 +458,27 @@ If you lose access to your authenticator app, you can use these codes to sign in
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="profile" className="flex items-center gap-2">
+            <TabsTrigger data-testid="profile-tab" value="profile" className="flex items-center gap-2">
               <User className="w-4 h-4" />
               Profile
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center gap-2">
+            <TabsTrigger data-testid="notifications-settings-tab" value="notifications" className="flex items-center gap-2">
               <Bell className="w-4 h-4" />
               Notifications
             </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center gap-2">
+            <TabsTrigger data-testid="security-tab" value="security" className="flex items-center gap-2">
               <Shield className="w-4 h-4" />
               Security
             </TabsTrigger>
-            <TabsTrigger value="appearance" className="flex items-center gap-2">
+            <TabsTrigger data-testid="appearance-tab" value="appearance" className="flex items-center gap-2">
               <Palette className="w-4 h-4" />
               Appearance
             </TabsTrigger>
-            <TabsTrigger value="billing" className="flex items-center gap-2">
+            <TabsTrigger data-testid="billing-tab" value="billing" className="flex items-center gap-2">
               <CreditCard className="w-4 h-4" />
               Billing
             </TabsTrigger>
-            <TabsTrigger value="advanced" className="flex items-center gap-2">
+            <TabsTrigger data-testid="advanced-tab" value="advanced" className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
               Advanced
             </TabsTrigger>

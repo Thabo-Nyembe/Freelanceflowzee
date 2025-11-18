@@ -469,17 +469,17 @@ export default function NotificationsPage() {
           </div>
           
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={handleMarkAllRead}>
+            <Button data-testid="mark-all-read-btn" variant="outline" size="sm" onClick={handleMarkAllRead}>
               <Check className="w-4 h-4 mr-2" />
               Mark All Read
             </Button>
-            
-            <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+
+            <Button data-testid="refresh-notifications-btn" variant="outline" size="sm" onClick={() => window.location.reload()}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
             </Button>
-            
-            <Button variant="outline" size="sm">
+
+            <Button data-testid="notification-settings-btn" variant="outline" size="sm">
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </Button>
@@ -490,9 +490,9 @@ export default function NotificationsPage() {
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="inbox">Inbox ({filteredNotifications.length})</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-            <TabsTrigger value="archive">Archive</TabsTrigger>
+            <TabsTrigger data-testid="inbox-tab" value="inbox">Inbox ({filteredNotifications.length})</TabsTrigger>
+            <TabsTrigger data-testid="notification-settings-tab" value="settings">Settings</TabsTrigger>
+            <TabsTrigger data-testid="archive-tab" value="archive">Archive</TabsTrigger>
           </TabsList>
           
           <TabsContent value="inbox" className="space-y-6">
