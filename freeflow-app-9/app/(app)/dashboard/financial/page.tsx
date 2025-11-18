@@ -65,6 +65,11 @@ export default function FinancialPage() {
         window.URL.revokeObjectURL(url)
         document.body.removeChild(a)
         toast.success(`Report exported as ${format.toUpperCase()}`)
+
+        // Show next steps
+        setTimeout(() => {
+          alert(`✅ Financial Report Exported\n\nNext Steps:\n• Open the CSV file in Excel or Google Sheets\n• Review revenue and expense trends\n• Share with your accountant or financial advisor\n• Use insights for tax planning and budgeting\n• Set up recurring exports for monthly reviews`)
+        }, 500)
       } else {
         // Handle JSON/PDF response
         const result = await response.json()

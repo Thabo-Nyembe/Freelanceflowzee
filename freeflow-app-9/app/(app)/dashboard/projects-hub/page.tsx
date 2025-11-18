@@ -319,6 +319,11 @@ export default function ProjectsHubPage() {
         toast.success(result.message, {
           description: `Project ID: ${result.projectId}`
         })
+
+        // Show next steps
+        setTimeout(() => {
+          alert(`✅ Project Created Successfully!\n\nNext Steps:\n• Set up project milestones and deliverables\n• Assign team members to the project\n• Create initial tasks and timeline\n• Schedule kickoff meeting with client\n• Set up project tracking and reporting`)
+        }, 500)
       }
     } catch (error: any) {
       console.error('Create Project Error:', error)
@@ -362,6 +367,17 @@ export default function ProjectsHubPage() {
         } else {
           toast.success(result.message)
         }
+
+        // Show next steps based on status change
+        setTimeout(() => {
+          if (newStatus === 'completed') {
+            alert(`✅ Project Completed!\n\nNext Steps:\n• Request final feedback from client\n• Archive project files and documentation\n• Send final invoice if applicable\n• Update portfolio with project showcase\n• Schedule project retrospective with team`)
+          } else if (newStatus === 'active') {
+            alert(`🚀 Project Started!\n\nNext Steps:\n• Review project scope and requirements\n• Set up communication channels with client\n• Create task breakdown and assign responsibilities\n• Schedule regular check-ins and updates\n• Begin tracking time and progress`)
+          } else if (newStatus === 'paused') {
+            alert(`⏸️ Project On Hold\n\nNext Steps:\n• Document current progress and status\n• Notify client and team members\n• Set expected resume date\n• Archive current work safely\n• Plan resource reallocation if needed`)
+          }
+        }, 500)
       }
     } catch (error: any) {
       console.error('Update Project Status Error:', error)

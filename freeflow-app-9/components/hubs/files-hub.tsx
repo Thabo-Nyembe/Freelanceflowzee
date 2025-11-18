@@ -582,6 +582,11 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
           })
         }
 
+        // Show next steps
+        setTimeout(() => {
+          alert(`✅ Folder Created Successfully!\n\nNext Steps:\n• Upload files to this folder\n• Set folder permissions and sharing settings\n• Add collaborators if needed\n• Organize with subfolders\n• Add folder description and tags`)
+        }, 500)
+
         // Note: In production, this would update the local folders state
         // setFolders(prev => [...prev, result.folder])
       }

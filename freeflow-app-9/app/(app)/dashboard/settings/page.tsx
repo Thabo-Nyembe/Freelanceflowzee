@@ -166,6 +166,11 @@ export default function SettingsPage() {
             description: result.achievement.badge
           })
         }
+
+        // Show next steps
+        setTimeout(() => {
+          alert(`✅ Settings Saved Successfully!\n\nNext Steps:\n• Review your updated preferences\n• Test notification settings\n• Update your profile picture if needed\n• Configure integrations and connected apps\n• Set up two-factor authentication for security`)
+        }, 500)
       } else {
         throw new Error(result.error || 'Failed to save settings')
       }

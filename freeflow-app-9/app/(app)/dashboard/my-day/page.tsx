@@ -373,6 +373,11 @@ export default function MyDayPage() {
         setNewTaskPriority('medium')
         setIsAddingTask(false)
         toast.success(result.message)
+
+        // Show next steps
+        setTimeout(() => {
+          alert(`✅ Task Added to My Day!\n\nNext Steps:\n• Set estimated time for better planning\n• Add task to a time block for scheduling\n• Start timer when you begin work\n• Add notes or attachments if needed\n• Link to related project for context`)
+        }, 500)
       }
     } catch (error: any) {
       console.error('Add Task Error:', error)
@@ -416,6 +421,13 @@ export default function MyDayPage() {
           })
         } else {
           toast.success(result.message)
+        }
+
+        // Show next steps for completed tasks (with longer delay for celebration)
+        if (newCompleted) {
+          setTimeout(() => {
+            alert(`🎉 Task Completed!\n\nNext Steps:\n• Review your accomplishment and learnings\n• Update project status if applicable\n• Share progress with client or team\n• Plan your next task\n• Take a short break to recharge`)
+          }, 2500)
         }
       }
     } catch (error: any) {
