@@ -397,7 +397,7 @@ export default function ModelingStudioPage() {
                   {/* View options */}
                   <div className="flex items-center gap-4">
                     <Select value={viewMode} onValueChange={setViewMode as any}>
-                      <SelectTrigger className="w-32">
+                      <SelectTrigger data-testid="3d-view-mode-select" className="w-32">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -697,7 +697,7 @@ export default function ModelingStudioPage() {
                   <div>
                     <label className="text-sm font-medium mb-2 block">Quality</label>
                     <Select value={renderQuality[0]} onValueChange={(value) => setRenderQuality([value])}>
-                      <SelectTrigger>
+                      <SelectTrigger data-testid="render-quality-select">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>

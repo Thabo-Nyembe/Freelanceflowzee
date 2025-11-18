@@ -104,6 +104,7 @@ export default function AIVideoGenerationPage() {
                   {VIDEO_STYLES.map((style) => (
                     <motion.div
                       key={style.id}
+                      data-testid={`video-style-${style.id}`}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setSelectedStyle(style.id)}
@@ -127,6 +128,7 @@ export default function AIVideoGenerationPage() {
               <div>
                 <Label className="block text-sm font-medium mb-2">Duration: {duration} seconds</Label>
                 <input
+                  data-testid="video-duration-slider"
                   type="range"
                   min="10"
                   max="180"
@@ -140,7 +142,7 @@ export default function AIVideoGenerationPage() {
               <div>
                 <Label className="block text-sm font-medium mb-2">Aspect Ratio</Label>
                 <Select value={aspectRatio} onValueChange={setAspectRatio}>
-                  <SelectTrigger>
+                  <SelectTrigger data-testid="aspect-ratio-select">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
