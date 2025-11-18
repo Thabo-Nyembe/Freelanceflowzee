@@ -665,6 +665,7 @@ export default function VideoStudioPage() {
           
           <div className="flex items-center gap-3">
             <Button
+              data-testid="record-video-btn"
               variant="default"
               size="sm"
               onClick={handleRecord}
@@ -674,6 +675,7 @@ export default function VideoStudioPage() {
             </Button>
 
             <Button
+              data-testid="ai-tools-btn"
               size="sm"
               onClick={handleAITools}
               className="bg-purple-600 hover:bg-purple-700"
@@ -684,7 +686,7 @@ export default function VideoStudioPage() {
 
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" onClick={handleNewProject}>
+                <Button data-testid="new-project-btn" size="sm" onClick={handleNewProject}>
                   <Plus className="w-4 h-4 mr-2" />
                   New Project
                 </Button>
@@ -697,16 +699,18 @@ export default function VideoStudioPage() {
                   <div>
                     <Label htmlFor="title">Project Title</Label>
                     <Input
+                      data-testid="project-title-input"
                       id="title"
                       value={newProject.title}
                       onChange={(e) => setNewProject({...newProject, title: e.target.value})}
                       placeholder="Enter project title"
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="description">Description</Label>
                     <Textarea
+                      data-testid="project-description-input"
                       id="description"
                       value={newProject.description}
                       onChange={(e) => setNewProject({...newProject, description: e.target.value})}
@@ -714,12 +718,12 @@ export default function VideoStudioPage() {
                       rows={3}
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="resolution">Resolution</Label>
                       <Select value={newProject.resolution} onValueChange={(value) => setNewProject({...newProject, resolution: value})}>
-                        <SelectTrigger>
+                        <SelectTrigger data-testid="project-resolution-select">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -730,11 +734,11 @@ export default function VideoStudioPage() {
                         </SelectContent>
                       </Select>
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="format">Format</Label>
                       <Select value={newProject.format} onValueChange={(value) => setNewProject({...newProject, format: value})}>
-                        <SelectTrigger>
+                        <SelectTrigger data-testid="project-format-select">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -746,22 +750,23 @@ export default function VideoStudioPage() {
                       </Select>
                     </div>
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="client">Client (Optional)</Label>
                     <Input
+                      data-testid="project-client-input"
                       id="client"
                       value={newProject.client}
                       onChange={(e) => setNewProject({...newProject, client: e.target.value})}
                       placeholder="Client name"
                     />
                   </div>
-                  
+
                   <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={() => setIsCreateModalOpen(false)} disabled={isCreatingProject}>
+                    <Button data-testid="cancel-create-project-btn" variant="outline" onClick={() => setIsCreateModalOpen(false)} disabled={isCreatingProject}>
                       Cancel
                     </Button>
-                    <Button onClick={handleCreateNewProject} disabled={isCreatingProject}>
+                    <Button data-testid="create-project-btn" onClick={handleCreateNewProject} disabled={isCreatingProject}>
                       {isCreatingProject ? 'Creating...' : 'Create Project'}
                     </Button>
                   </div>
@@ -874,10 +879,10 @@ export default function VideoStudioPage() {
                   </div>
 
                   <div className="flex justify-end gap-2 pt-4">
-                    <Button variant="outline" onClick={() => setIsAIToolsOpen(false)}>
+                    <Button data-testid="close-ai-tools-btn" variant="outline" onClick={() => setIsAIToolsOpen(false)}>
                       Close
                     </Button>
-                    <Button onClick={() => {
+                    <Button data-testid="start-using-ai-tools-btn" onClick={() => {
                       setIsAIToolsOpen(false)
                       toast.success('AI Tools ready to use!')
                     }} className="bg-purple-600 hover:bg-purple-700">
@@ -894,10 +899,10 @@ export default function VideoStudioPage() {
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="projects">Projects ({filteredProjects.length})</TabsTrigger>
-            <TabsTrigger value="templates">Templates</TabsTrigger>
-            <TabsTrigger value="assets">Assets</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger data-testid="projects-tab" value="projects">Projects ({filteredProjects.length})</TabsTrigger>
+            <TabsTrigger data-testid="templates-tab" value="templates">Templates</TabsTrigger>
+            <TabsTrigger data-testid="assets-tab" value="assets">Assets</TabsTrigger>
+            <TabsTrigger data-testid="analytics-tab" value="analytics">Analytics</TabsTrigger>
           </TabsList>
           
           <TabsContent value="projects" className="space-y-6">
@@ -914,7 +919,7 @@ export default function VideoStudioPage() {
                   <div className="space-y-2">
                     <Label>Recording Type</Label>
                     <Select value={recordingType} onValueChange={setRecordingType}>
-                      <SelectTrigger>
+                      <SelectTrigger data-testid="recording-type-select">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -925,11 +930,11 @@ export default function VideoStudioPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label>Quality</Label>
                     <Select defaultValue="1080p">
-                      <SelectTrigger>
+                      <SelectTrigger data-testid="recording-quality-select">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -939,11 +944,11 @@ export default function VideoStudioPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label>Frame Rate</Label>
                     <Select defaultValue="30">
-                      <SelectTrigger>
+                      <SelectTrigger data-testid="recording-framerate-select">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -953,9 +958,10 @@ export default function VideoStudioPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div className="flex items-end gap-2">
                     <Button
+                      data-testid="toggle-microphone-btn"
                       variant="outline"
                       size="sm"
                       onClick={() => setIsMuted(!isMuted)}
@@ -963,8 +969,9 @@ export default function VideoStudioPage() {
                     >
                       {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
                     </Button>
-                    
+
                     <Button
+                      data-testid="recording-settings-btn"
                       variant="outline"
                       size="sm"
                       onClick={() => {
@@ -984,16 +991,17 @@ export default function VideoStudioPage() {
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
                 <Input
+                  data-testid="search-projects-input"
                   placeholder="Search projects..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
               </div>
-              
+
               <div className="flex gap-2">
                 <Select value={filterCategory} onValueChange={setFilterCategory}>
-                  <SelectTrigger className="w-32">
+                  <SelectTrigger data-testid="filter-category-select" className="w-32">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -1004,8 +1012,9 @@ export default function VideoStudioPage() {
                     <SelectItem value="social">Social</SelectItem>
                   </SelectContent>
                 </Select>
-                
+
                 <Button
+                  data-testid="toggle-view-mode-btn"
                   variant="outline"
                   size="sm"
                   onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
@@ -1022,7 +1031,7 @@ export default function VideoStudioPage() {
                   <Video className="w-16 h-16 mx-auto text-gray-400" />
                   <h3 className="text-xl font-semibold text-gray-900">No projects yet</h3>
                   <p className="text-gray-600">Get started by creating your first video project</p>
-                  <Button onClick={handleCreateFirstProject} className="bg-purple-600 hover:bg-purple-700">
+                  <Button data-testid="create-first-project-btn" onClick={handleCreateFirstProject} className="bg-purple-600 hover:bg-purple-700">
                     <Plus className="w-4 h-4 mr-2" />
                     Create Your First Project
                   </Button>
@@ -1096,6 +1105,7 @@ export default function VideoStudioPage() {
                     
                     <div className="flex gap-2">
                       <Button
+                        data-testid="edit-project-btn"
                         variant="outline"
                         size="sm"
                         className="flex-1"
@@ -1105,6 +1115,7 @@ export default function VideoStudioPage() {
                         Edit
                       </Button>
                       <Button
+                        data-testid="share-project-btn"
                         variant="outline"
                         size="sm"
                         className="flex-1"
@@ -1154,6 +1165,7 @@ export default function VideoStudioPage() {
                     
                     <div className="flex gap-2">
                       <Button
+                        data-testid="preview-template-btn"
                         variant="outline"
                         size="sm"
                         className="flex-1"
@@ -1165,6 +1177,7 @@ export default function VideoStudioPage() {
                         Preview
                       </Button>
                       <Button
+                        data-testid="use-template-btn"
                         size="sm"
                         className="flex-1"
                         onClick={() => {
@@ -1184,6 +1197,7 @@ export default function VideoStudioPage() {
           <TabsContent value="assets" className="space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Button
+                data-testid="upload-video-btn"
                 variant="outline"
                 className="p-6 h-auto flex-col gap-2"
                 onClick={handleUploadAssets}
@@ -1191,8 +1205,9 @@ export default function VideoStudioPage() {
                 <Video className="w-8 h-8 text-purple-600" />
                 <span className="text-sm">Upload Video</span>
               </Button>
-              
+
               <Button
+                data-testid="upload-audio-btn"
                 variant="outline"
                 className="p-6 h-auto flex-col gap-2"
   onClick={() => {
@@ -1202,8 +1217,9 @@ export default function VideoStudioPage() {
                 <Volume2 className="w-8 h-8 text-purple-600" />
                 <span className="text-sm">Upload Audio</span>
               </Button>
-              
+
               <Button
+                data-testid="upload-images-btn"
                 variant="outline"
                 className="p-6 h-auto flex-col gap-2"
   onClick={() => {
@@ -1213,8 +1229,9 @@ export default function VideoStudioPage() {
                 <Image className="w-8 h-8 text-purple-600" />
                 <span className="text-sm">Upload Images</span>
               </Button>
-              
+
               <Button
+                data-testid="browse-stock-assets-btn"
                 variant="outline"
                 className="p-6 h-auto flex-col gap-2"
   onClick={() => {
@@ -1266,6 +1283,7 @@ export default function VideoStudioPage() {
                     
                     <div className="flex gap-1">
                       <Button
+                        data-testid="use-asset-btn"
                         variant="outline"
                         size="sm"
                         className="flex-1 text-xs"
@@ -1292,6 +1310,7 @@ onClick={() => {
                         Use
                       </Button>
                       <Button
+                        data-testid="download-asset-btn"
                         variant="outline"
                         size="sm"
                         className="flex-1 text-xs"
@@ -1369,11 +1388,11 @@ onClick={() => {
             </div>
 
             <div className="flex gap-4">
-              <Button onClick={handleViewAnalytics} className="bg-blue-600 hover:bg-blue-700">
+              <Button data-testid="view-detailed-analytics-btn" onClick={handleViewAnalytics} className="bg-blue-600 hover:bg-blue-700">
                 <BarChart3 className="w-4 h-4 mr-2" />
                 View Detailed Analytics
               </Button>
-              <Button onClick={handleStartRender} className="bg-purple-600 hover:bg-purple-700">
+              <Button data-testid="start-render-btn" onClick={handleStartRender} className="bg-purple-600 hover:bg-purple-700">
                 <Video className="w-4 h-4 mr-2" />
                 Start Render
               </Button>
