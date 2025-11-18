@@ -139,11 +139,11 @@ export default function FinancialHubPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleExportReport}>
+          <Button data-testid="export-report-btn" variant="outline" size="sm" onClick={handleExportReport}>
             <FileText className="h-4 w-4 mr-2" />
             Export Report
           </Button>
-          <Button size="sm" onClick={handleScheduleReview}>
+          <Button data-testid="schedule-review-btn" size="sm" onClick={handleScheduleReview}>
             <Calendar className="h-4 w-4 mr-2" />
             Schedule Review
           </Button>
@@ -152,7 +152,7 @@ export default function FinancialHubPage() {
 
       {/* Financial Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="kazi-card">
+        <Card data-testid="revenue-card" className="kazi-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
             <DollarSign className="h-4 w-4 kazi-text-accent" />
@@ -166,7 +166,7 @@ export default function FinancialHubPage() {
           </CardContent>
         </Card>
 
-        <Card className="kazi-card">
+        <Card data-testid="profit-card" className="kazi-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Net Profit</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-500" />
@@ -177,7 +177,7 @@ export default function FinancialHubPage() {
           </CardContent>
         </Card>
 
-        <Card className="kazi-card">
+        <Card data-testid="expenses-card" className="kazi-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
             <CreditCard className="h-4 w-4 text-red-500" />
@@ -191,7 +191,7 @@ export default function FinancialHubPage() {
           </CardContent>
         </Card>
 
-        <Card className="kazi-card">
+        <Card data-testid="clients-card" className="kazi-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Clients</CardTitle>
             <Users className="h-4 w-4 kazi-text-primary" />
@@ -206,11 +206,11 @@ export default function FinancialHubPage() {
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="invoices">Invoices</TabsTrigger>
-          <TabsTrigger value="expenses">Expenses</TabsTrigger>
-          <TabsTrigger value="clients">Clients</TabsTrigger>
-          <TabsTrigger value="goals">Goals</TabsTrigger>
+          <TabsTrigger data-testid="overview-tab" value="overview">Overview</TabsTrigger>
+          <TabsTrigger data-testid="invoices-tab" value="invoices">Invoices</TabsTrigger>
+          <TabsTrigger data-testid="expenses-tab" value="expenses">Expenses</TabsTrigger>
+          <TabsTrigger data-testid="clients-tab" value="clients">Clients</TabsTrigger>
+          <TabsTrigger data-testid="goals-tab" value="goals">Goals</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">

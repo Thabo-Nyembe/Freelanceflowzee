@@ -801,18 +801,18 @@ export default function ProjectsHubPage() {
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <TabsList className="grid w-full grid-cols-3 bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl p-2 shadow-xl">
-            <TabsTrigger value="overview" className="flex items-center gap-2 rounded-2xl">
+            <TabsTrigger data-testid="project-overview-tab" value="overview" className="flex items-center gap-2 rounded-2xl">
               <FolderOpen className="h-4 w-4" />
               Project Overview
             </TabsTrigger>
-            <TabsTrigger value="active" className="flex items-center gap-2 rounded-2xl">
+            <TabsTrigger data-testid="active-projects-tab" value="active" className="flex items-center gap-2 rounded-2xl">
               <Activity className="h-4 w-4" />
               Active Projects
               <Badge variant="secondary" className="text-xs">
                 {stats.active}
               </Badge>
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2 rounded-2xl">
+            <TabsTrigger data-testid="analytics-tab" value="analytics" className="flex items-center gap-2 rounded-2xl">
               <TrendingUp className="h-4 w-4" />
               Analytics
             </TabsTrigger>
@@ -1187,6 +1187,7 @@ export default function ProjectsHubPage() {
                     <div>
                       <label className="text-sm font-medium text-gray-700 mb-2 block">Project Title</label>
                       <Input
+                        data-testid="edit-project-title-input"
                         value={selectedProject.title}
                         onChange={(e) => setSelectedProject({...selectedProject, title: e.target.value})}
                       />

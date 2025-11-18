@@ -815,11 +815,11 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleCreateFolder}>
+          <Button data-testid="create-folder-btn" variant="outline" onClick={handleCreateFolder}>
             <FolderOpen className="w-4 h-4 mr-2" />
             New Folder
           </Button>
-          <Button variant="outline" onClick={() => handleExportFileList('json')}>
+          <Button data-testid="export-file-list-btn" variant="outline" onClick={() => handleExportFileList('json')}>
             <Download className="w-4 h-4 mr-2" />
             Export List
           </Button>
@@ -831,7 +831,7 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
             id="file-upload"
           />
           <label htmlFor="file-upload">
-            <Button asChild className="cursor-pointer">
+            <Button data-testid="upload-files-btn" asChild className="cursor-pointer">
               <span>
                 <Upload className="w-4 h-4 mr-2" />
                 Upload Files
@@ -916,19 +916,19 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
                 {selectedFiles.length} file(s) selected
               </span>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={handleBulkDownload}>
+                <Button data-testid="bulk-download-btn" variant="outline" size="sm" onClick={handleBulkDownload}>
                   <Download className="w-4 h-4 mr-2" />
                   Download
                 </Button>
-                <Button variant="outline" size="sm" onClick={handleBulkMove}>
+                <Button data-testid="bulk-move-btn" variant="outline" size="sm" onClick={handleBulkMove}>
                   <FolderOpen className="w-4 h-4 mr-2" />
                   Move
                 </Button>
-                <Button variant="outline" size="sm" onClick={handleBulkDelete} className="text-red-600">
+                <Button data-testid="bulk-delete-btn" variant="outline" size="sm" onClick={handleBulkDelete} className="text-red-600">
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => setSelectedFiles([])}>
+                <Button data-testid="clear-selection-btn" variant="ghost" size="sm" onClick={() => setSelectedFiles([])}>
                   <X className="w-4 h-4 mr-2" />
                   Clear
                 </Button>
@@ -940,7 +940,7 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
 
       {/* Filters and Controls */}
       <div className="flex flex-wrap gap-4 items-center">
-        <Button variant="outline" size="sm" onClick={handleSelectAll}>
+        <Button data-testid="select-all-btn" variant="outline" size="sm" onClick={handleSelectAll}>
           <Check className="w-4 h-4 mr-2" />
           {selectedFiles.length === sortedFiles.length ? 'Deselect All' : 'Select All'}
         </Button>
@@ -948,6 +948,7 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
+              data-testid="search-files-input"
               placeholder="Search files..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -956,6 +957,7 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
           </div>
         </div>
         <select
+          data-testid="filter-type-select"
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
           className="px-3 py-2 border rounded-md"
@@ -967,6 +969,7 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
           <option value="archive">Archives</option>
         </select>
         <select
+          data-testid="sort-by-select"
           value={sortBy}
           onChange={(e) => handleSortChange(e.target.value as any)}
           className="px-3 py-2 border rounded-md"
@@ -978,6 +981,7 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
         </select>
         <div className="flex border rounded-md">
           <Button
+            data-testid="view-grid-btn"
             variant={viewMode === 'grid' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setViewMode('grid')}
@@ -985,6 +989,7 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
             <Grid className="w-4 h-4" />
           </Button>
           <Button
+            data-testid="view-list-btn"
             variant={viewMode === 'list' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setViewMode('list')}
@@ -993,7 +998,7 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
           </Button>
         </div>
         {(searchQuery || filterType !== 'all' || selectedFolder) && (
-          <Button variant="ghost" size="sm" onClick={handleClearSearch}>
+          <Button data-testid="clear-filters-btn" variant="ghost" size="sm" onClick={handleClearSearch}>
             <X className="w-4 h-4 mr-2" />
             Clear Filters
           </Button>

@@ -403,9 +403,9 @@ export default function AISettingsPage() {
 
           <Tabs defaultValue="providers" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="providers">AI Providers</TabsTrigger>
-              <TabsTrigger value="features">Features</TabsTrigger>
-              <TabsTrigger value="usage">Usage & Billing</TabsTrigger>
+              <TabsTrigger data-testid="providers-tab" value="providers">AI Providers</TabsTrigger>
+              <TabsTrigger data-testid="features-tab" value="features">Features</TabsTrigger>
+              <TabsTrigger data-testid="usage-tab" value="usage">Usage & Billing</TabsTrigger>
             </TabsList>
 
             <TabsContent value="providers" className="space-y-6">
