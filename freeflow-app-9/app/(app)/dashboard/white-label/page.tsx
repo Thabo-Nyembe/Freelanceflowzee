@@ -11,7 +11,7 @@ import {
   Package, Layers, Grid3x3, MousePointer, Hand, Move,
   RotateCcw, Scale, Trash2, Plus, Minus, Edit, Search,
   Filter, MoreVertical, ArrowRight, ExternalLink, Target,
-  Paintbrush, Pipette, Scissors, Wand2, Sparkles, Magic
+  Paintbrush, Pipette, Scissors, Wand2, Sparkles
 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
@@ -512,6 +512,7 @@ export default function WhiteLabelPage() {
             <h3 className="text-lg font-bold mb-4">Preview</h3>
             <WhiteLabelPreview />
           </Card>
+        </div>
         </div>
       </div>
     </ErrorBoundary>

@@ -529,7 +529,7 @@ export default function AISettingsPage() {
             </TabsContent>
           </Tabs>
         </div>
-      </ErrorBoundary>
-    </div>
+      </div>
+    </ErrorBoundary>
   )
 }
