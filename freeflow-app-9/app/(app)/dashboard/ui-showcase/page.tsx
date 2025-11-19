@@ -99,32 +99,11 @@ export default function UIShowcasePage() {
                   : morphingSuccess
                     ? 'bg-green-500 text-white'
                     : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700'
-              }
-                  particle.style.cssText = `
-                    position: fixed;
-                    width: 4px;
-                    height: 4px;
-                    background: #f97316;
-                    border-radius: 50%;
-                    pointer-events: none;
-                    z-index: 1000;
-                    left: ${e.clientX}px;
-                    top: ${e.clientY}px;
-                    animation: particle-explode 1s ease-out forwards;
-                  `;
-
-                  const angle = (i / 10) * Math.PI * 2;
-                  const velocity = 100;
-                  particle.style.setProperty('--dx', `${Math.cos(angle) * velocity}px`);
-                  particle.style.setProperty('--dy', `${Math.sin(angle) * velocity}px`);
-
-                  document.body.appendChild(particle);
-                  setTimeout(() => particle.remove(), 1000);
-                }
-              }}
+              }`}
+              onClick={handleMorphingClick}
             >
               <Star className="w-4 h-4 mr-2" />
-              Explode!
+              {morphingLoading ? 'Loading...' : morphingSuccess ? 'Success!' : 'Morph Me!'}
             </button>
           </div>
         </div>
@@ -249,16 +228,11 @@ export default function UIShowcasePage() {
             <button
               className={`bg-black text-white rounded-full transition-all duration-500 ${
                 dynamicIslandExpanded ? 'px-6 py-3' : 'px-4 py-2'
-              }
-                e.currentTarget.style.transform = `translate(${x * 0.05}px, ${y * 0.05}px) scale(1.05)`;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translate(0px, 0px) scale(1)';
-              }}
+              }`}
+              onClick={() => setDynamicIslandExpanded(!dynamicIslandExpanded)}
             >
-              <h3 className="text-xl font-bold mb-2">Magnetic Element</h3>
-              <p>I'm attracted to your cursor!</p>
-            </div>
+              {dynamicIslandExpanded ? 'Tap to Collapse' : 'Tap to Expand'}
+            </button>
           </div>
         </div>
       </div>

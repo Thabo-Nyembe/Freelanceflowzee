@@ -275,16 +275,12 @@ export default function VideoStudioPage() {
     }, 500)
   }
 
-  const handleCreateProject = () => { console.log('➕ CREATE PROJECT'); setIsCreateModalOpen(true); alert('➕ Create New Video Project\n\nInitializing project setup...') }
   const handleOpenProject = (projectId: string) => { console.log('📂 OPEN:', projectId); alert('📂 Opening Project\n\nLoading video editor...') }
   const handleDeleteProject = (projectId: string) => { console.log('🗑️ DELETE:', projectId); confirm('Delete this project?') && alert('✅ Project deleted') }
   const handleDuplicateProject = (projectId: string) => { console.log('📋 DUPLICATE:', projectId); alert('📋 Project Duplicated\n\nCopy created successfully') }
   const handleExportVideo = (format: string) => { console.log('💾 EXPORT:', format); alert(`💾 Exporting Video\n\nFormat: ${format}\n\nProcessing...`) }
   const handlePublishVideo = (projectId: string) => { console.log('🚀 PUBLISH:', projectId); alert('🚀 Publishing Video\n\nUploading to platform...') }
   const handleShareVideo = (projectId: string) => { console.log('🔗 SHARE:', projectId); alert('🔗 Share Video\n\nGenerate shareable link\nShare to social media') }
-  const handleStartRecording = (type: RecordingType) => { console.log('🎬 RECORD:', type); setRecordingType(type); setIsRecording(true); alert(`🎬 Recording ${type}\n\nRecording started...`) }
-  const handleStopRecording = () => { console.log('⏹️ STOP'); setIsRecording(false); alert('⏹️ Recording Stopped\n\nSaving video...') }
-  const handlePlayPause = () => { setIsPlaying(!isPlaying); console.log(isPlaying ? '⏸️ PAUSE' : '▶️ PLAY') }
   const handleToggleMute = () => { setIsMuted(!isMuted); console.log(isMuted ? '🔊 UNMUTE' : '🔇 MUTE') }
   const handleToggleFullscreen = () => { setIsFullscreen(!isFullscreen); console.log(isFullscreen ? '🪟 EXIT FULLSCREEN' : '⛶ FULLSCREEN') }
   const handleAddMedia = (type: string) => { console.log('➕ ADD:', type); alert(`➕ Add ${type}\n\nBrowse media library\nUpload new ${type}`) }
