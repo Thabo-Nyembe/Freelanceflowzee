@@ -738,7 +738,7 @@ export default function CommunityHubPage() {
     console.log('💬 COMMUNITY: Comment on post initiated')
     console.log('📝 COMMUNITY: Post ID:', id)
     console.log('✅ COMMUNITY: Opening comment dialog')
-    alert('💬 Add comment')
+    toast.info('💬 Add comment')
   }
   const handleSharePost = async (id: string) => {
     console.log('🔗 SHARE POST - ID:', id)
@@ -845,7 +845,7 @@ export default function CommunityHubPage() {
     console.log('➖ COMMUNITY: Unfollow member initiated')
     console.log('👤 COMMUNITY: Member ID:', id)
     console.log('✅ COMMUNITY: Unfollowed successfully')
-    alert('➖ Unfollowed')
+    toast.success('➖ Unfollowed')
   }
   const handleConnectWithMember = async (id: string) => {
     console.log('🤝 CONNECT WITH MEMBER - ID:', id)
@@ -870,9 +870,11 @@ export default function CommunityHubPage() {
       if (result.success) {
         // Show next steps if available
         if (result.nextSteps && result.nextSteps.length > 0) {
-          setTimeout(() => {
-            alert(`${result.message}\n\nNext Steps:\n${result.nextSteps.join('\n')}`)
-          }, 500)
+          console.log('📝 COMMUNITY: Next steps:')
+          result.nextSteps.forEach((step: string) => console.log('  •', step))
+          toast.success(result.message, {
+            description: result.nextSteps.slice(0, 2).join(', ')
+          })
         } else {
           toast.success(result.message)
         }
@@ -888,86 +890,86 @@ export default function CommunityHubPage() {
     console.log('💬 COMMUNITY: Message member initiated')
     console.log('👤 COMMUNITY: Member ID:', id)
     console.log('📨 COMMUNITY: Opening chat interface')
-    alert('💬 Opening chat...')
+    toast.info('💬 Opening chat...')
   }
   const handleJoinEvent = (id: string) => {
     console.log('📅 COMMUNITY: Join event initiated')
     console.log('🎟️ COMMUNITY: Event ID:', id)
     console.log('✅ COMMUNITY: Registered for event!')
-    alert('📅 Registered for event!')
+    toast.success('📅 Registered for event!')
   }
   const handleCreateEvent = () => {
     console.log('➕ COMMUNITY: Create event initiated')
     console.log('📋 COMMUNITY: Opening event creation form')
     console.log('✅ COMMUNITY: Event form ready')
-    alert('➕ Create community event')
+    toast.info('➕ Create community event')
   }
   const handleJoinGroup = (id: string) => {
     console.log('👥 COMMUNITY: Join group initiated')
     console.log('🔗 COMMUNITY: Group ID:', id)
     console.log('✅ COMMUNITY: Joined group!')
-    alert('👥 Joined group!')
+    toast.success('👥 Joined group!')
   }
   const handleCreateGroup = () => {
     console.log('➕ COMMUNITY: Create group initiated')
     console.log('📋 COMMUNITY: Opening group creation form')
     console.log('✅ COMMUNITY: Group form ready')
-    alert('➕ Create new group')
+    toast.info('➕ Create new group')
   }
   const handlePostJob = () => {
     console.log('💼 COMMUNITY: Post job initiated')
     console.log('📋 COMMUNITY: Opening job posting form')
     console.log('✅ COMMUNITY: Job form ready')
-    alert('💼 Post job opportunity')
+    toast.info('💼 Post job opportunity')
   }
   const handleApplyToJob = (id: string) => {
     console.log('📝 COMMUNITY: Apply to job initiated')
     console.log('💼 COMMUNITY: Job ID:', id)
     console.log('✅ COMMUNITY: Application submitted!')
-    alert('📝 Application submitted!')
+    toast.success('📝 Application submitted!')
   }
   const handleSearchMembers = (query: string) => {
     console.log('🔍 COMMUNITY: Search members initiated')
     console.log('📝 COMMUNITY: Query:', query)
     console.log('✅ COMMUNITY: Searching...')
-    alert(`Searching: ${query}`)
+    toast.info('🔍 Searching: ' + query)
   }
   const handleFilterBySkill = (skill: string) => {
     console.log('🏷️ COMMUNITY: Filter by skill initiated')
     console.log('💼 COMMUNITY: Skill:', skill)
     console.log('✅ COMMUNITY: Filter applied')
-    alert(`Filter by: ${skill}`)
+    toast.info('🏷️ Filter by: ' + skill)
   }
   const handleViewProfile = (id: string) => {
     console.log('👤 COMMUNITY: View profile initiated')
     console.log('👤 COMMUNITY: Profile ID:', id)
     console.log('✅ COMMUNITY: Loading profile')
-    alert('👤 Viewing profile')
+    toast.info('👤 Viewing profile')
   }
   const handleEditProfile = () => {
     console.log('✏️ COMMUNITY: Edit profile initiated')
     console.log('📋 COMMUNITY: Opening profile editor')
     console.log('✅ COMMUNITY: Editor ready')
-    alert('✏️ Edit your profile')
+    toast.info('✏️ Edit your profile')
   }
   const handleSendEndorsement = (id: string) => {
     console.log('⭐ COMMUNITY: Send endorsement initiated')
     console.log('👤 COMMUNITY: Member ID:', id)
     console.log('✅ COMMUNITY: Endorsement sent!')
-    alert('⭐ Endorsement sent!')
+    toast.success('⭐ Endorsement sent!')
   }
   const handleReportContent = (id: string) => {
     console.log('⚠️ COMMUNITY: Report content initiated')
     console.log('📋 COMMUNITY: Content ID:', id)
     console.log('✅ COMMUNITY: Content reported')
-    alert('⚠️ Content reported')
+    toast.success('⚠️ Content reported')
   }
   const handleBlockUser = (id: string) => {
     console.log('🚫 COMMUNITY: Block user initiated')
     console.log('👤 COMMUNITY: User ID:', id)
     if (confirm('Block user?')) {
       console.log('✅ COMMUNITY: User blocked')
-      alert('🚫 User blocked')
+      toast.success('🚫 User blocked')
     }
   }
 
@@ -1531,7 +1533,7 @@ export default function CommunityHubPage() {
       dispatch({ type: 'ADD_POST', payload: newPost })
       dispatch({ type: 'SET_NEW_POST', payload: {} })
       dispatch({ type: 'SET_SHOW_CREATE_POST', payload: false })
-      alert('Post created successfully!')
+      toast.success('Post created successfully!')
     }
   }
 
@@ -1553,10 +1555,10 @@ export default function CommunityHubPage() {
         dispatch({ type: 'SHARE_POST', payload: postId })
         break
       case 'comment':
-        alert(`Opening comments for post ${postId}`)
+        toast.info('💬 Opening comments for post ' + postId)
         break
       case 'report':
-        alert(`Reporting post ${postId}`)
+        toast.info('⚠️ Reporting post ' + postId)
         break
       default:
         break
@@ -1584,10 +1586,10 @@ export default function CommunityHubPage() {
         dispatch({ type: 'UNBLOCK_MEMBER', payload: memberId })
         break
       case 'message':
-        alert(`Opening chat with ${memberId}`)
+        toast.info('💬 Opening chat with ' + memberId)
         break
       case 'hire':
-        alert(`Hiring ${memberId}`)
+        toast.info('💼 Hiring ' + memberId)
         break
       default:
         break
