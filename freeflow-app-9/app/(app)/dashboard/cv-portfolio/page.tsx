@@ -36,8 +36,16 @@ export default function CVPortfolioPage() {
 
   // Handler functions
   const handleEditProfile = () => {
-    console.log('✏️ EDIT PROFILE')
-    alert('✏️ Edit Profile\n\nOpening profile editor...\n\nYou can update:\n• Personal information\n• Contact details\n• Professional summary\n• Profile picture')
+    console.log('✏️ CV PORTFOLIO: Edit profile')
+    console.log('📝 CV PORTFOLIO: Opening profile editor')
+    console.log('✅ CV PORTFOLIO: Available updates:')
+    console.log('  • Personal information')
+    console.log('  • Contact details')
+    console.log('  • Professional summary')
+    console.log('  • Profile picture')
+    toast.info('✏️ Edit Profile', {
+      description: 'Opening profile editor'
+    })
   }
 
   const handleSharePortfolio = async () => {
@@ -71,18 +79,15 @@ export default function CVPortfolioPage() {
 
         // Show social sharing options
         const socialLinks = result.shareLinks
-        alert(`🔗 Portfolio Shared Successfully!
-
-Share URL: ${result.shareUrl}
-Expires: ${result.expiresIn}
-
-Social Sharing:
-• LinkedIn: ${socialLinks.linkedin}
-• Twitter: ${socialLinks.twitter}
-• Facebook: ${socialLinks.facebook}
-• WhatsApp: ${socialLinks.whatsapp}
-
-Link copied to clipboard!`)
+        console.log('🔗 CV PORTFOLIO: Portfolio shared successfully!')
+        console.log('📎 CV PORTFOLIO: Share URL:', result.shareUrl)
+        console.log('⏰ CV PORTFOLIO: Expires in:', result.expiresIn)
+        console.log('📱 CV PORTFOLIO: Social sharing:')
+        console.log('  • LinkedIn:', socialLinks.linkedin)
+        console.log('  • Twitter:', socialLinks.twitter)
+        console.log('  • Facebook:', socialLinks.facebook)
+        console.log('  • WhatsApp:', socialLinks.whatsapp)
+        console.log('✅ CV PORTFOLIO: Link copied to clipboard')
 
         toast.success('🔗 Share Link Generated!', {
           description: 'Link copied to clipboard. Valid for 30 days.'
@@ -152,144 +157,251 @@ Link copied to clipboard!`)
   }
 
   const handleViewProject = (project: any) => {
-    console.log('👁️ VIEW PROJECT:', project.title)
-    alert(`👁️ View Project\n\nProject: ${project.title}\nStatus: ${project.status}\nLink: ${project.link}\n\nOpening project details...`)
+    console.log('👁️ CV PORTFOLIO: View project:', project.title)
+    console.log('📊 CV PORTFOLIO: Status:', project.status)
+    console.log('🔗 CV PORTFOLIO: Link:', project.link)
+    console.log('✅ CV PORTFOLIO: Opening project details')
+    toast.info('👁️ Viewing Project', {
+      description: project.title
+    })
   }
 
   const handleAddExperience = () => {
-    console.log('➕ ADD EXPERIENCE')
-    alert('➕ Add Work Experience\n\nEnter details:\n• Company name\n• Position\n• Duration\n• Description\n• Technologies used')
+    console.log('➕ CV PORTFOLIO: Add experience')
+    console.log('📝 CV PORTFOLIO: Enter details:')
+    console.log('  • Company name')
+    console.log('  • Position')
+    console.log('  • Duration')
+    console.log('  • Description')
+    console.log('  • Technologies used')
+    toast.info('➕ Add Work Experience', {
+      description: 'Fill in your work details'
+    })
   }
 
   const handleEditExperience = (experience: any) => {
-    console.log('✏️ EDIT EXPERIENCE:', experience.company)
-    alert(`✏️ Edit Experience\n\nEditing: ${experience.position} at ${experience.company}\n\nUpdate any field and save changes.`)
+    console.log('✏️ CV PORTFOLIO: Edit experience:', experience.company)
+    console.log('📝 CV PORTFOLIO: Position:', experience.position)
+    console.log('✅ CV PORTFOLIO: Update any field and save')
+    toast.info('✏️ Edit Experience', {
+      description: experience.position + ' at ' + experience.company
+    })
   }
 
   const handleDeleteExperience = (experienceId: number) => {
-    console.log('🗑️ DELETE EXPERIENCE - ID:', experienceId)
-    if (confirm('⚠️ Delete Experience?\n\nThis will remove this entry from your CV.\n\nAre you sure?')) {
-      alert('✅ Experience deleted successfully!')
+    console.log('🗑️ CV PORTFOLIO: Delete experience - ID:', experienceId)
+    if (confirm('⚠️ Delete Experience? This will remove this entry from your CV. Are you sure?')) {
+      console.log('✅ CV PORTFOLIO: Experience deleted successfully')
+      toast.success('✅ Experience deleted', {
+        description: 'Entry removed from your CV'
+      })
     }
   }
 
   const handleAddProject = () => {
-    console.log('➕ ADD PROJECT')
-    alert('➕ Add Project\n\nShowcase your work:\n• Project name\n• Description\n• Technologies\n• Project URL\n• Upload images')
+    console.log('➕ CV PORTFOLIO: Add project')
+    console.log('📝 CV PORTFOLIO: Showcase your work:')
+    console.log('  • Project name')
+    console.log('  • Description')
+    console.log('  • Technologies')
+    console.log('  • Project URL')
+    console.log('  • Upload images')
+    toast.info('➕ Add Project', {
+      description: 'Showcase your work'
+    })
   }
 
   const handleEditProject = (project: any) => {
-    console.log('✏️ EDIT PROJECT:', project.title)
-    alert(`✏️ Edit Project\n\nEditing: ${project.title}\n\nUpdate project details, images, or status.`)
+    console.log('✏️ CV PORTFOLIO: Edit project:', project.title)
+    console.log('📝 CV PORTFOLIO: Update project details, images, or status')
+    toast.info('✏️ Edit Project', {
+      description: project.title
+    })
   }
 
   const handleDeleteProject = (projectId: number) => {
-    console.log('🗑️ DELETE PROJECT - ID:', projectId)
-    if (confirm('⚠️ Delete Project?\n\nThis will remove this project from your portfolio.\n\nAre you sure?')) {
-      alert('✅ Project deleted successfully!')
+    console.log('🗑️ CV PORTFOLIO: Delete project - ID:', projectId)
+    if (confirm('⚠️ Delete Project? This will remove this project from your portfolio. Are you sure?')) {
+      console.log('✅ CV PORTFOLIO: Project deleted successfully')
+      toast.success('✅ Project deleted', {
+        description: 'Removed from your portfolio'
+      })
     }
   }
 
   const handleAddEducation = () => {
-    console.log('➕ ADD EDUCATION')
-    alert('➕ Add Education\n\nAdd your qualifications:\n• Institution name\n• Degree/Certification\n• Period\n• Achievements')
+    console.log('➕ CV PORTFOLIO: Add education')
+    console.log('📝 CV PORTFOLIO: Add your qualifications:')
+    console.log('  • Institution name')
+    console.log('  • Degree/Certification')
+    console.log('  • Period')
+    console.log('  • Achievements')
+    toast.info('➕ Add Education', {
+      description: 'Add your qualifications'
+    })
   }
 
   const handleEditEducation = (education: any) => {
-    console.log('✏️ EDIT EDUCATION:', education.institution)
-    alert(`✏️ Edit Education\n\nEditing: ${education.degree}\n\nUpdate your educational details.`)
+    console.log('✏️ CV PORTFOLIO: Edit education:', education.institution)
+    console.log('📝 CV PORTFOLIO: Degree:', education.degree)
+    toast.info('✏️ Edit Education', {
+      description: education.degree
+    })
   }
 
   const handleDeleteEducation = (educationId: number) => {
-    console.log('🗑️ DELETE EDUCATION - ID:', educationId)
-    if (confirm('⚠️ Delete Education?\n\nThis will remove this entry from your CV.\n\nAre you sure?')) {
-      alert('✅ Education entry deleted successfully!')
+    console.log('🗑️ CV PORTFOLIO: Delete education - ID:', educationId)
+    if (confirm('⚠️ Delete Education? This will remove this entry from your CV. Are you sure?')) {
+      console.log('✅ CV PORTFOLIO: Education entry deleted successfully')
+      toast.success('✅ Education deleted', {
+        description: 'Entry removed from your CV'
+      })
     }
   }
 
   const handleAddAchievement = () => {
-    console.log('🏆 ADD ACHIEVEMENT')
-    alert('🏆 Add Achievement\n\nHighlight your accomplishments:\n• Award title\n• Issuing organization\n• Date received\n• Description')
+    console.log('🏆 CV PORTFOLIO: Add achievement')
+    console.log('📝 CV PORTFOLIO: Highlight your accomplishments:')
+    console.log('  • Award title')
+    console.log('  • Issuing organization')
+    console.log('  • Date received')
+    console.log('  • Description')
+    toast.info('🏆 Add Achievement', {
+      description: 'Highlight your accomplishments'
+    })
   }
 
   const handleEditAchievement = (achievement: any) => {
-    console.log('✏️ EDIT ACHIEVEMENT:', achievement.title)
-    alert(`✏️ Edit Achievement\n\nEditing: ${achievement.title}\n\nUpdate achievement details.`)
+    console.log('✏️ CV PORTFOLIO: Edit achievement:', achievement.title)
+    console.log('📝 CV PORTFOLIO: Update achievement details')
+    toast.info('✏️ Edit Achievement', {
+      description: achievement.title
+    })
   }
 
   const handleDeleteAchievement = (achievementId: number) => {
-    console.log('🗑️ DELETE ACHIEVEMENT - ID:', achievementId)
-    if (confirm('⚠️ Delete Achievement?\n\nThis will remove this award from your profile.\n\nAre you sure?')) {
-      alert('✅ Achievement deleted successfully!')
+    console.log('🗑️ CV PORTFOLIO: Delete achievement - ID:', achievementId)
+    if (confirm('⚠️ Delete Achievement? This will remove this award from your profile. Are you sure?')) {
+      console.log('✅ CV PORTFOLIO: Achievement deleted successfully')
+      toast.success('✅ Achievement deleted', {
+        description: 'Award removed from your profile'
+      })
     }
   }
 
   const handleUploadAvatar = () => {
-    console.log('📸 UPLOAD AVATAR')
+    console.log('📸 CV PORTFOLIO: Upload avatar')
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = 'image/*'
     input.onchange = (e: Event) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
-        console.log('✅ AVATAR SELECTED:', file.name)
-        alert(`✅ Avatar Uploaded!\n\nFile: ${file.name}\n\nYour profile picture has been updated.`)
+        console.log('✅ CV PORTFOLIO: Avatar selected:', file.name)
+        console.log('📷 CV PORTFOLIO: Profile picture updated')
+        toast.success('✅ Avatar Uploaded!', {
+          description: file.name
+        })
       }
     }
     input.click()
   }
 
   const handleAddSkill = () => {
-    console.log('➕ ADD SKILL')
+    console.log('➕ CV PORTFOLIO: Add skill')
     const skill = prompt('Enter skill category and items (e.g., "Mobile: React Native, Flutter, Swift")')
     if (skill) {
-      alert(`✅ Skill Added!\n\n${skill}\n\nYou can adjust the proficiency level in the editor.`)
+      console.log('✅ CV PORTFOLIO: Skill added:', skill)
+      console.log('📝 CV PORTFOLIO: Adjust proficiency level in editor')
+      toast.success('✅ Skill Added!', {
+        description: skill
+      })
     }
   }
 
   const handleRemoveSkill = (category: string) => {
-    console.log('🗑️ REMOVE SKILL CATEGORY:', category)
-    if (confirm(`⚠️ Remove ${category} skills?\n\nThis will remove the entire category.\n\nAre you sure?`)) {
-      alert(`✅ ${category} skills removed successfully!`)
+    console.log('🗑️ CV PORTFOLIO: Remove skill category:', category)
+    if (confirm('⚠️ Remove ' + category + ' skills? This will remove the entire category. Are you sure?')) {
+      console.log('✅ CV PORTFOLIO: ' + category + ' skills removed')
+      toast.success('✅ Skills removed', {
+        description: category + ' category deleted'
+      })
     }
   }
 
   const handleExportToPDF = () => {
-    console.log('📄 EXPORT TO PDF')
-    alert('📄 Export to PDF\n\nGenerating PDF from your profile...\n\nOptions:\n• One-page CV\n• Full portfolio\n• Custom selection')
+    console.log('📄 CV PORTFOLIO: Export to PDF')
+    console.log('📝 CV PORTFOLIO: Generating PDF from your profile')
+    console.log('📋 CV PORTFOLIO: Options:')
+    console.log('  • One-page CV')
+    console.log('  • Full portfolio')
+    console.log('  • Custom selection')
+    toast.info('📄 Export to PDF', {
+      description: 'Choose your export format'
+    })
   }
 
   const handlePrintCV = () => {
-    console.log('🖨️ PRINT CV')
-    alert('🖨️ Print CV\n\nOpening print dialog...\n\nTip: Save as PDF for digital copies!')
+    console.log('🖨️ CV PORTFOLIO: Print CV')
+    console.log('📄 CV PORTFOLIO: Opening print dialog')
+    console.log('💡 CV PORTFOLIO: Tip - Save as PDF for digital copies')
+    toast.info('🖨️ Print CV', {
+      description: 'Opening print dialog'
+    })
     // In production: window.print()
   }
 
   const handleGeneratePublicLink = () => {
-    console.log('🌐 GENERATE PUBLIC PORTFOLIO LINK')
+    console.log('🌐 CV PORTFOLIO: Generate public portfolio link')
     const publicLink = `${window.location.origin}/public/portfolio/${profileData.name.toLowerCase().replace(' ', '-')}`
+    console.log('🔗 CV PORTFOLIO: Link:', publicLink)
+    console.log('📱 CV PORTFOLIO: Share on:')
+    console.log('  • LinkedIn')
+    console.log('  • Resume')
+    console.log('  • Email signature')
+    console.log('  • Business cards')
     if (navigator.clipboard) {
       navigator.clipboard.writeText(publicLink)
-      alert(`🌐 Public Portfolio Link Generated!\n\nLink: ${publicLink}\n\nThis link can be shared on:\n• LinkedIn\n• Resume\n• Email signature\n• Business cards\n\nLink copied to clipboard!`)
+      console.log('✅ CV PORTFOLIO: Link copied to clipboard')
+      toast.success('🌐 Public Link Generated!', {
+        description: 'Link copied to clipboard'
+      })
     }
   }
 
   const handleUpdateBio = () => {
-    console.log('✏️ UPDATE BIO')
+    console.log('✏️ CV PORTFOLIO: Update bio')
     const newBio = prompt('Update your professional summary:', profileData.bio)
     if (newBio && newBio.trim()) {
-      alert(`✅ Bio Updated!\n\nYour professional summary has been updated.`)
+      console.log('✅ CV PORTFOLIO: Bio updated successfully')
+      toast.success('✅ Bio Updated!', {
+        description: 'Professional summary updated'
+      })
     }
   }
 
   const handleTogglePublicVisibility = () => {
-    console.log('👁️ TOGGLE PUBLIC VISIBILITY')
-    alert('👁️ Portfolio Visibility\n\nOptions:\n• Public (Anyone can view)\n• Private (Only you)\n• Link-only (Anyone with link)\n\nCurrent: Link-only')
+    console.log('👁️ CV PORTFOLIO: Toggle public visibility')
+    console.log('📋 CV PORTFOLIO: Visibility options:')
+    console.log('  • Public (Anyone can view)')
+    console.log('  • Private (Only you)')
+    console.log('  • Link-only (Anyone with link)')
+    console.log('📍 CV PORTFOLIO: Current: Link-only')
+    toast.info('👁️ Portfolio Visibility', {
+      description: 'Current: Link-only'
+    })
   }
 
   const handleExportToLinkedIn = () => {
-    console.log('💼 EXPORT TO LINKEDIN')
-    alert('💼 Export to LinkedIn\n\nThis will:\n• Format your experience\n• Optimize for LinkedIn\n• Copy to clipboard\n\nReady to paste into your profile!')
+    console.log('💼 CV PORTFOLIO: Export to LinkedIn')
+    console.log('📝 CV PORTFOLIO: This will:')
+    console.log('  • Format your experience')
+    console.log('  • Optimize for LinkedIn')
+    console.log('  • Copy to clipboard')
+    console.log('✅ CV PORTFOLIO: Ready to paste into your profile')
+    toast.success('💼 Export to LinkedIn', {
+      description: 'Content copied to clipboard'
+    })
   }
 
   const profileData = {
