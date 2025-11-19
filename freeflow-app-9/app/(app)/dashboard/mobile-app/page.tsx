@@ -320,11 +320,22 @@ const MockScreen = ({ screen, deviceWidth, deviceHeight }: MockScreenProps) => {
                             height: deviceHeight
                           }}
                         >
-                          <MockScreen
-                            screen={currentScreen}
-                            deviceWidth={deviceWidth}
-                            deviceHeight={deviceHeight}
-                          />
+                          {/* Screen Content */}
+                          <div className="h-full flex flex-col bg-white dark:bg-gray-900">
+                            {/* Status Bar */}
+                            {getStatusBarContent()}
+
+                            {/* Main Content Area */}
+                            <div className="flex-1 bg-gray-50 dark:bg-gray-800 p-4 overflow-auto">
+                              <h3 className="text-lg font-semibold mb-2 capitalize">{currentScreen} Screen</h3>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                This is a preview of the {currentScreen} screen interface
+                              </p>
+                            </div>
+
+                            {/* Navigation Bar */}
+                            {getNavigationBar()}
+                          </div>
                         </div>
                       </div>
 
