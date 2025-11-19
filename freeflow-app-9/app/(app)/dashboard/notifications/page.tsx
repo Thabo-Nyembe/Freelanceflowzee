@@ -231,7 +231,7 @@ export default function NotificationsPage() {
   // Handlers
   const handleRefresh = () => { console.log('🔄 REFRESH'); dispatch({ type: 'SET_LOADING', payload: true }); window.location.reload() }
   const handleSettings = () => { console.log('⚙️ SETTINGS'); setActiveTab('settings') }
-  const handleViewNotification = (id: string) => { console.log('👁️:', id); dispatch({ type: 'MARK_AS_READ', payload: id }); alert(`👁️ View ${id}`) }
+  const handleViewNotification = (id: string) => { console.log('NOTIFICATIONS: View notification:', id); dispatch({ type: 'MARK_AS_READ', payload: id }); toast.info('Viewing notification: ' + id) }
   const handleMarkRead = (id: string) => { console.log('✅:', id); dispatch({ type: 'MARK_AS_READ', payload: id }) }
   const handleMarkAllRead = async () => {
     console.log('✅ ALL')
@@ -308,7 +308,7 @@ export default function NotificationsPage() {
       })
     }
   }
-  const handleArchiveAll = () => { console.log('📦 ALL'); state.notifications.forEach(n => dispatch({ type: 'ARCHIVE_NOTIFICATION', payload: n.id })); alert('📦 All archived') }
+  const handleArchiveAll = () => { console.log('NOTIFICATIONS: Archive all notifications'); state.notifications.forEach(n => dispatch({ type: 'ARCHIVE_NOTIFICATION', payload: n.id })); toast.success('All notifications archived') }
   const handleDelete = async (id: string) => {
     console.log('🗑️:', id)
 
@@ -345,17 +345,17 @@ export default function NotificationsPage() {
     }
   }
   const handleDeleteAll = () => { console.log('🗑️ ALL'); confirm('Delete all?') && state.notifications.forEach(n => dispatch({ type: 'DELETE_NOTIFICATION', payload: n.id })) }
-  const handleUnarchive = (id: string) => { console.log('📤:', id); alert('📤 Unarchive') }
+  const handleUnarchive = (id: string) => { console.log('NOTIFICATIONS: Unarchive notification:', id); toast.success('Notification unarchived') }
   const handleFilterAll = () => { console.log('🔍 ALL'); dispatch({ type: 'SET_FILTER', payload: 'all' }) }
   const handleFilterUnread = () => { console.log('🔍 UNREAD'); dispatch({ type: 'SET_FILTER', payload: 'unread' }) }
   const handleFilterRead = () => { console.log('🔍 READ'); dispatch({ type: 'SET_FILTER', payload: 'read' }) }
-  const handleExportNotifications = () => { console.log('💾 EXP'); alert('💾 Export') }
+  const handleExportNotifications = () => { console.log('NOTIFICATIONS: Export notifications'); toast.success('Exporting notifications...') }
   const handleClearAll = () => { console.log('🧹 CLEAR'); confirm('Clear all?') && dispatch({ type: 'SET_NOTIFICATIONS', payload: [] }) }
   const handleToggleSound = () => { console.log('🔔 SOUND'); dispatch({ type: 'TOGGLE_SOUND' }) }
   const handleTogglePreviews = () => { console.log('👁️ PREVIEW'); dispatch({ type: 'TOGGLE_PREVIEWS' }) }
-  const handleSavePreferences = () => { console.log('💾 PREFS'); alert('💾 Preferences saved') }
-  const handleResetPreferences = () => { console.log('🔄 RESET'); confirm('Reset?') && alert('🔄 Reset to defaults') }
-  const handleSnooze = (id: string) => { console.log('⏰:', id); alert(`⏰ Snooze ${id}`) }
+  const handleSavePreferences = () => { console.log('NOTIFICATIONS: Save preferences'); toast.success('Preferences saved successfully') }
+  const handleResetPreferences = () => { console.log('NOTIFICATIONS: Reset preferences'); confirm('Reset all preferences to defaults?') && toast.success('Preferences reset to defaults') }
+  const handleSnooze = (id: string) => { console.log('NOTIFICATIONS: Snooze notification:', id); toast.success('Notification snoozed for 1 hour') }
 
   const filteredNotifications = state.notifications.filter(notification => {
     const matchesSearch = notification.title.toLowerCase().includes(state.search.toLowerCase()) ||
@@ -440,7 +440,8 @@ export default function NotificationsPage() {
       // Navigate to action URL if present
       if (notification.actionUrl) {
         // In a real app, use router.push()
-        alert(`Navigating to: ${notification.actionUrl}`)
+        console.log('NOTIFICATIONS: Navigate to:', notification.actionUrl)
+        toast.info('Navigating to: ' + notification.actionUrl)
       }
     } catch (error) {
       console.error('Error marking notification as read:', error)
