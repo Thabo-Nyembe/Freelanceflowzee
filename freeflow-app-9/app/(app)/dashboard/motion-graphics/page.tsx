@@ -363,12 +363,41 @@ export default function MotionGraphicsPage() {
               key={layer.id}
               className={`relative h-12 rounded border-2 transition-all ${
                 selectedLayer === layer.id ? 'border-primary' : 'border-border'
-              }
+              }`}
+              onClick={() => setSelectedLayer(layer.id)}
+            >
+              <div
+                className="absolute top-1/2 -translate-y-1/2 h-8 rounded cursor-move"
+                style={{
                   left: `${(layer.startTime / totalDuration) * 100}%`,
                   width: `${(layer.duration / totalDuration) * 100}%`,
                   backgroundColor: layer.color + '80',
-                  border: `2px solid ${layer.color}
-      name: `${type.charAt(0).toUpperCase() + type.slice(1)} ${layers.length + 1}
+                  border: `2px solid ${layer.color}`
+                }}
+              >
+                <span className="text-xs px-2 truncate">{layer.name}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  const addLayer = (type: Layer['type']) => {
+    const newLayer: Layer = {
+      id: Date.now().toString(),
+      name: `${type.charAt(0).toUpperCase() + type.slice(1)} ${layers.length + 1}`,
+      type,
+      visible: true,
+      locked: false,
+      opacity: 100,
+      blendMode: 'normal',
+      duration: 3,
+      startTime: currentTime,
+      position: { x: 0, y: 0 },
+      scale: { x: 1, y: 1 },
+      rotation: 0,
       color: `hsl(${Math.random() * 360}, 70%, 50%)`,
       content: type === 'text' ? 'New Text' : undefined
     }

@@ -412,26 +412,35 @@ export default function PluginMarketplacePage() {
         <div className="flex items-center gap-2">
           {getStatusBadge(plugin.status)}
           <span className="text-sm font-medium">
-            {plugin.price === 0 ? 'Free' : `$${plugin.price}
-              data-testid={`uninstall-plugin-${plugin.id}-btn`}
-            >
-              <Trash2 className="w-3 h-3" />
-            </button>
-          ) : (
-            <button
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation()
-                installPlugin(plugin.id)
-                console.log('✅ Plugin installed:', plugin.id)
-              }}
-              data-testid={`install-plugin-${plugin.id}-btn`}
-            >
-              <Download className="w-3 h-3 mr-1" />
-              Install
-            </button>
-          )}
+            {plugin.price === 0 ? 'Free' : `$${plugin.price}`}
+          </span>
         </div>
+        {plugin.installed ? (
+          <button
+            className="px-3 py-1.5 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md text-sm"
+            onClick={(e) => {
+              e.stopPropagation()
+              uninstallPlugin(plugin.id)
+              console.log('❌ Plugin uninstalled:', plugin.id)
+            }}
+            data-testid={`uninstall-plugin-${plugin.id}-btn`}
+          >
+            <Trash2 className="w-3 h-3" />
+          </button>
+        ) : (
+          <button
+            className="px-3 py-1.5 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md text-sm flex items-center gap-1"
+            onClick={(e) => {
+              e.stopPropagation()
+              installPlugin(plugin.id)
+              console.log('✅ Plugin installed:', plugin.id)
+            }}
+            data-testid={`install-plugin-${plugin.id}-btn`}
+          >
+            <Download className="w-3 h-3 mr-1" />
+            Install
+          </button>
+        )}
       </div>
     </motion.div>
   )
@@ -466,21 +475,29 @@ export default function PluginMarketplacePage() {
         </div>
         <div className="text-center">
           <div className="text-sm font-medium">
-            {plugin.price === 0 ? 'Free' : `$${plugin.price}
-                            className={`w-full flex items-center justify-between p-2 rounded text-left transition-colors ${
-                              selectedCategory === category.id
-                                ? 'bg-primary text-primary-foreground'
-                                : 'hover:bg-accent/10'
-                            }
-                              data-testid={`uninstall-installed-${plugin.id}-btn`}
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </TabsContent>
+            {plugin.price === 0 ? 'Free' : `$${plugin.price}`}
+          </div>
+          <div className="text-xs text-muted-foreground">Price</div>
+        </div>
+      </div>
+
+      {plugin.installed ? (
+        <Badge variant="secondary">Installed</Badge>
+      ) : (
+        <button
+          className="px-3 py-1.5 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md text-sm"
+          onClick={(e) => {
+            e.stopPropagation()
+            installPlugin(plugin.id)
+            console.log('✅ Plugin installed from list:', plugin.id)
+          }}
+          data-testid={`install-list-${plugin.id}-btn`}
+        >
+          <Download className="w-3 h-3" />
+        </button>
+      )}
+    </motion.div>
+  )
 
                   <TabsContent value="developers" className="space-y-4">
                     <div className="space-y-3">

@@ -263,18 +263,19 @@ const DesktopWindow = ({ app, os, width, height }: DesktopWindowProps) => {
                       width: device.width * scaleFactor,
                       height: device.height * scaleFactor,
                       maxWidth: '100%',
-                      aspectRatio: `${device.width}/${device.height}
-                    <div className={`absolute inset-0 ${showMenuBar && device.os === 'macOS' ? 'top-6' : ''} ${showTaskbar ? 'bottom-12' : ''}
-                            transform: `scale(${1 / scaleFactor})`,
-                            transformOrigin: 'center'
-                          }}
-                        >
-                          <DesktopWindow
-                            app={selectedApp}
-                            os={device.os}
-                            width={Math.min(device.width * 0.8, 1000)}
-                            height={Math.min(device.height * 0.7, 700)}
-                          />
+                      aspectRatio: device.width + '/' + device.height
+                    }}
+                  >
+                    <div className="absolute inset-0" style={{
+                      transform: 'scale(' + (1 / scaleFactor) + ')',
+                      transformOrigin: 'center'
+                    }}>
+                      <DesktopWindow
+                        app={selectedApp}
+                        os={device.os}
+                        width={Math.min(device.width * 0.8, 1000)}
+                        height={Math.min(device.height * 0.7, 700)}
+                      />
                         </div>
                       </div>
                     </div>
@@ -349,7 +350,8 @@ const DesktopWindow = ({ app, os, width, height }: DesktopWindowProps) => {
                           selectedApp === app.id
                             ? 'bg-primary text-primary-foreground'
                             : 'hover:bg-accent/10'
-                        }                        }>`}
+                        }`}
+                      >
                         <Icon className="w-5 h-5" />
                         <div className="flex-1">
                           <p className="font-medium text-sm">{app.name}</p>

@@ -258,3 +258,7 @@ export default function UIShowcasePage() {
             opacity: 0;
           }
         }
+      `}</style>
+    </div>
+  )
+}

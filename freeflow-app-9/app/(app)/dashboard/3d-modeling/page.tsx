@@ -191,7 +191,8 @@ export default function ModelingStudioPage() {
       const commonProps = {
         key: obj.id,
         onClick: () => setSelectedObject(obj.id),
-        className: `cursor-pointer transition-all duration-200 ${isSelected ? 'ring-2 ring-primary' : ''}
+        className: `cursor-pointer transition-all duration-200 ${isSelected ? 'ring-2 ring-primary' : ''}`,
+        style: {
           transform: `rotate(${rotation}deg)`,
           opacity: obj.locked ? 0.7 : 1,
           filter: isSelected ? 'brightness(1.2)' : 'none'
@@ -214,15 +215,9 @@ export default function ModelingStudioPage() {
                 backgroundColor: 'transparent',
                 borderLeft: `${size/2}px solid transparent`,
                 borderRight: `${size/2}px solid transparent`,
-                borderBottom: `${size}px solid ${material?.color || '#888'}
-                backgroundImage: `
-                  linear-gradient(to right, #666 1px, transparent 1px),
-                  linear-gradient(to bottom, #666 1px, transparent 1px)
-                `,
-                backgroundSize: '40px 40px'
+                borderBottom: `${size}px solid ${material?.color || '#888'}`
               }}
             />
-          </div>
         )}
 
         {/* 3D Objects */}
