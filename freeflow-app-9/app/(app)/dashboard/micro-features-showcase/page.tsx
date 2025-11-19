@@ -41,4 +41,71 @@ export default function MicroFeaturesShowcase() {
 
   // Demo handler for buttons
   const handleDemoAction = (feature: string) => {
-    console.log(`Demo: ${feature}
+    console.log(`Demo: ${feature}`)
+    alert(`Demo action: ${feature}`)
+  }
+
+  return (
+    <ErrorBoundary>
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        <div className="space-y-4">
+          <EnhancedBreadcrumb items={breadcrumbItems} />
+          <h1 className="text-4xl font-bold">Micro Features Showcase</h1>
+          <p className="text-muted-foreground">
+            Explore enhanced micro-interactions and components
+          </p>
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList>
+            <TabsTrigger value="animations">Animations</TabsTrigger>
+            <TabsTrigger value="buttons">Buttons</TabsTrigger>
+            <TabsTrigger value="tooltips">Tooltips</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="animations" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Micro Animations</CardTitle>
+                <CardDescription>Smooth, delightful animations</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  <Button onClick={() => handleDemoAction('animation')}>
+                    Try Animation
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="buttons" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Enhanced Buttons</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <MagneticButton>Magnetic Button</MagneticButton>
+                <RippleButton>Ripple Button</RippleButton>
+                <NeonButton>Neon Button</NeonButton>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="tooltips" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Contextual Tooltips</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <ContextualTooltip content="Contextual help">
+                  <Button>Hover for tooltip</Button>
+                </ContextualTooltip>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </ErrorBoundary>
+  )
+}

@@ -29,7 +29,7 @@ export default function CanvasPage() {
   const handleDeleteCanvas = () => { console.log('🗑️ DELETE'); confirm('Delete canvas?') && alert('✅ Canvas deleted') }
   const handleRenameCanvas = () => { console.log('✏️ RENAME'); const name = prompt('New name:'); name && alert(`✏️ Renamed to: ${name}`) }
   const handleAddToFolder = () => { console.log('📁 ADD TO FOLDER'); alert('📁 Add to Folder\n\nOrganize your canvases') }
-  const handleVersion History = () => { console.log('📜 HISTORY'); alert('📜 Version History\n\nView and restore previous versions') }
+  const handleVersionHistory = () => { console.log('📜 HISTORY'); alert('📜 Version History\n\nView and restore previous versions') }
   const handleSetPermissions = () => { console.log('🔒 PERMISSIONS'); alert('🔒 Set Permissions\n\nView/Edit/Admin access') }
   const handleInviteTeam = () => { console.log('➕ INVITE'); alert('➕ Invite Team Members\n\nCollaborate in real-time') }
   const handlePreviewMode = () => { console.log('👁️ PREVIEW'); alert('👁️ Preview Mode\n\nView without editing') }

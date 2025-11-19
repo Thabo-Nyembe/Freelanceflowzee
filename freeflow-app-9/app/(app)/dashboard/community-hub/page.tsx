@@ -697,7 +697,6 @@ export default function CommunityHubPage() {
   const [activeTab, setActiveTab] = useState<string>('feed')
 
   // Handlers
-  const handleCreatePost = () => { console.log('➕ POST'); alert('➕ Create new post') }
   const handleLikePost = async (id: string) => {
     console.log('❤️ LIKE POST - ID:', id)
 
