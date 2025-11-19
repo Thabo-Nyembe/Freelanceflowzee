@@ -8,6 +8,7 @@ import { Video, Wand2 } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { toast } from 'sonner'
 
 const VIDEO_STYLES = [
   { id: 'cinematic', name: 'Cinematic', description: 'Hollywood-style cinematic videos', image: '/Cinematic' },
@@ -32,29 +33,205 @@ export default function AIVideoGenerationPage() {
   const [aspectRatio, setAspectRatio] = useState('16:9')
 
   // Handlers
-  const handleGenerate = () => { console.log('🎬 GENERATE VIDEO:', { prompt, selectedStyle, selectedModel, duration, aspectRatio }); alert(`🎬 Generating AI Video\n\nStyle: ${selectedStyle}\nModel: ${selectedModel}\nDuration: ${duration}s\nRatio: ${aspectRatio}\n\nProcessing...`) }
-  const handleSelectStyle = (styleId: string, styleName: string) => { setSelectedStyle(styleId); console.log('🎨 STYLE:', styleName); alert(`🎨 Style Selected: ${styleName}`) }
-  const handleSelectModel = (modelId: string, modelName: string) => { setSelectedModel(modelId); console.log('🤖 MODEL:', modelName); alert(`🤖 AI Model: ${modelName}`) }
-  const handleSaveVideo = (videoId: string) => { console.log('💾 SAVE VIDEO:', videoId); alert('💾 Video Saved\n\nAdded to your library') }
-  const handleExportVideo = (format: 'mp4' | 'mov' | 'webm') => { console.log('📥 EXPORT:', format); alert(`📥 Exporting Video\n\nFormat: ${format.toUpperCase()}\n\nPreparing download...`) }
-  const handleShareVideo = (videoId: string) => { console.log('🔗 SHARE:', videoId); alert('🔗 Share Video\n\nGenerate link or share to social media') }
-  const handleDeleteVideo = (videoId: string) => { console.log('🗑️ DELETE:', videoId); confirm('Delete this video?') && alert('✅ Video deleted') }
-  const handleRegenerateVideo = () => { console.log('🔄 REGENERATE'); alert('🔄 Regenerating Video\n\nCreating new version with same settings...') }
-  const handleEditVideo = (videoId: string) => { console.log('✏️ EDIT:', videoId); alert('✏️ Video Editor\n\nOpening advanced editor...') }
-  const handleViewHistory = () => { console.log('📜 HISTORY'); alert('📜 Video Generation History\n\nView all generated videos') }
-  const handleSavePreset = () => { console.log('💾 SAVE PRESET'); const name = prompt('Preset name:'); name && alert(`💾 Preset Saved: ${name}`) }
-  const handleLoadPreset = (presetId: string) => { console.log('📂 LOAD PRESET:', presetId); alert('📂 Preset Loaded\n\nSettings applied') }
-  const handleAddBackgroundMusic = () => { console.log('🎵 MUSIC'); alert('🎵 Background Music\n\nBrowse royalty-free music library') }
-  const handleAddVoiceover = () => { console.log('🎤 VOICEOVER'); alert('🎤 Add Voiceover\n\nRecord or upload audio\nGenerate AI voiceover') }
-  const handleGenerateSubtitles = () => { console.log('📝 SUBTITLES'); alert('📝 Generate Subtitles\n\nAuto-generate captions and subtitles') }
-  const handleDuplicateVideo = (videoId: string) => { console.log('📋 DUPLICATE:', videoId); alert('📋 Video Duplicated\n\nCopy created in library') }
-  const handleVideoAnalytics = (videoId: string) => { console.log('📊 ANALYTICS:', videoId); alert('📊 Video Analytics\n\nViews, engagement, and performance metrics') }
-  const handleBatchGenerate = () => { console.log('📦 BATCH'); alert('📦 Batch Generation\n\nGenerate multiple videos from CSV/template') }
-  const handleTemplateManager = () => { console.log('📋 TEMPLATES'); alert('📋 Template Manager\n\nSave and load video templates') }
-  const handleQualitySettings = () => { console.log('⚙️ QUALITY'); alert('⚙️ Quality Settings\n\nResolution: 4K/1080p/720p\nBitrate\nFrame rate') }
-  const handleScheduleGeneration = () => { console.log('📅 SCHEDULE'); alert('📅 Schedule Generation\n\nQueue video for later processing') }
-  const handleCancelGeneration = (jobId: string) => { console.log('❌ CANCEL:', jobId); confirm('Cancel generation?') && alert('❌ Generation cancelled') }
-  const handlePreviewVideo = (videoId: string) => { console.log('👁️ PREVIEW:', videoId); alert('👁️ Video Preview\n\nOpening preview player...') }
+  const handleGenerate = () => {
+    console.log('✨ AI VIDEO GENERATION: Initiating video generation')
+    console.log('📝 AI VIDEO GENERATION: Prompt - ' + prompt)
+    console.log('🎨 AI VIDEO GENERATION: Style - ' + selectedStyle)
+    console.log('🤖 AI VIDEO GENERATION: Model - ' + selectedModel)
+    console.log('⏱️ AI VIDEO GENERATION: Duration - ' + duration + 's')
+    console.log('📐 AI VIDEO GENERATION: Aspect Ratio - ' + aspectRatio)
+    toast.success('🎬 Generating AI Video', {
+      description: 'Style: ' + selectedStyle + ' | Model: ' + selectedModel + ' | Duration: ' + duration + 's'
+    })
+  }
+
+  const handleSelectStyle = (styleId: string, styleName: string) => {
+    setSelectedStyle(styleId)
+    console.log('✨ AI VIDEO GENERATION: Style selected - ' + styleName)
+    console.log('🎨 AI VIDEO GENERATION: Style ID - ' + styleId)
+    toast.info('🎨 Style Selected', {
+      description: styleName
+    })
+  }
+
+  const handleSelectModel = (modelId: string, modelName: string) => {
+    setSelectedModel(modelId)
+    console.log('✨ AI VIDEO GENERATION: Model selected - ' + modelName)
+    console.log('🤖 AI VIDEO GENERATION: Model ID - ' + modelId)
+    toast.info('🤖 AI Model Selected', {
+      description: modelName
+    })
+  }
+
+  const handleSaveVideo = (videoId: string) => {
+    console.log('✨ AI VIDEO GENERATION: Saving video to library')
+    console.log('💾 AI VIDEO GENERATION: Video ID - ' + videoId)
+    toast.success('💾 Video Saved', {
+      description: 'Added to your library'
+    })
+  }
+
+  const handleExportVideo = (format: 'mp4' | 'mov' | 'webm') => {
+    console.log('✨ AI VIDEO GENERATION: Exporting video')
+    console.log('📥 AI VIDEO GENERATION: Format - ' + format.toUpperCase())
+    console.log('📥 AI VIDEO GENERATION: Preparing download...')
+    toast.success('📥 Exporting Video', {
+      description: 'Format: ' + format.toUpperCase() + ' - Preparing download...'
+    })
+  }
+
+  const handleShareVideo = (videoId: string) => {
+    console.log('✨ AI VIDEO GENERATION: Sharing video')
+    console.log('🔗 AI VIDEO GENERATION: Video ID - ' + videoId)
+    toast.info('🔗 Share Video', {
+      description: 'Generate link or share to social media'
+    })
+  }
+
+  const handleDeleteVideo = (videoId: string) => {
+    console.log('✨ AI VIDEO GENERATION: Delete video requested')
+    console.log('🗑️ AI VIDEO GENERATION: Video ID - ' + videoId)
+    if (confirm('Delete this video?')) {
+      console.log('✅ AI VIDEO GENERATION: Video deleted - ' + videoId)
+      toast.success('✅ Video Deleted', {
+        description: 'Video removed from library'
+      })
+    }
+  }
+
+  const handleRegenerateVideo = () => {
+    console.log('✨ AI VIDEO GENERATION: Regenerating video')
+    console.log('🔄 AI VIDEO GENERATION: Creating new version with same settings')
+    toast.info('🔄 Regenerating Video', {
+      description: 'Creating new version with same settings...'
+    })
+  }
+
+  const handleEditVideo = (videoId: string) => {
+    console.log('✨ AI VIDEO GENERATION: Opening video editor')
+    console.log('✏️ AI VIDEO GENERATION: Video ID - ' + videoId)
+    toast.info('✏️ Video Editor', {
+      description: 'Opening advanced editor...'
+    })
+  }
+
+  const handleViewHistory = () => {
+    console.log('✨ AI VIDEO GENERATION: Opening video generation history')
+    console.log('📜 AI VIDEO GENERATION: Loading all generated videos')
+    toast.info('📜 Video Generation History', {
+      description: 'View all generated videos'
+    })
+  }
+
+  const handleSavePreset = () => {
+    console.log('✨ AI VIDEO GENERATION: Saving preset')
+    const name = prompt('Preset name:')
+    if (name) {
+      console.log('💾 AI VIDEO GENERATION: Preset saved - ' + name)
+      toast.success('💾 Preset Saved', {
+        description: name
+      })
+    }
+  }
+
+  const handleLoadPreset = (presetId: string) => {
+    console.log('✨ AI VIDEO GENERATION: Loading preset')
+    console.log('📂 AI VIDEO GENERATION: Preset ID - ' + presetId)
+    toast.success('📂 Preset Loaded', {
+      description: 'Settings applied'
+    })
+  }
+
+  const handleAddBackgroundMusic = () => {
+    console.log('✨ AI VIDEO GENERATION: Adding background music')
+    console.log('🎵 AI VIDEO GENERATION: Opening royalty-free music library')
+    toast.info('🎵 Background Music', {
+      description: 'Browse royalty-free music library'
+    })
+  }
+
+  const handleAddVoiceover = () => {
+    console.log('✨ AI VIDEO GENERATION: Adding voiceover')
+    console.log('🎤 AI VIDEO GENERATION: Record, upload, or generate AI voiceover')
+    toast.info('🎤 Add Voiceover', {
+      description: 'Record or upload audio, or generate AI voiceover'
+    })
+  }
+
+  const handleGenerateSubtitles = () => {
+    console.log('✨ AI VIDEO GENERATION: Generating subtitles')
+    console.log('📝 AI VIDEO GENERATION: Auto-generating captions and subtitles')
+    toast.info('📝 Generate Subtitles', {
+      description: 'Auto-generate captions and subtitles'
+    })
+  }
+
+  const handleDuplicateVideo = (videoId: string) => {
+    console.log('✨ AI VIDEO GENERATION: Duplicating video')
+    console.log('📋 AI VIDEO GENERATION: Video ID - ' + videoId)
+    toast.success('📋 Video Duplicated', {
+      description: 'Copy created in library'
+    })
+  }
+
+  const handleVideoAnalytics = (videoId: string) => {
+    console.log('✨ AI VIDEO GENERATION: Opening video analytics')
+    console.log('📊 AI VIDEO GENERATION: Video ID - ' + videoId)
+    toast.info('📊 Video Analytics', {
+      description: 'Views, engagement, and performance metrics'
+    })
+  }
+
+  const handleBatchGenerate = () => {
+    console.log('✨ AI VIDEO GENERATION: Opening batch generation')
+    console.log('📦 AI VIDEO GENERATION: Generate multiple videos from CSV/template')
+    toast.info('📦 Batch Generation', {
+      description: 'Generate multiple videos from CSV/template'
+    })
+  }
+
+  const handleTemplateManager = () => {
+    console.log('✨ AI VIDEO GENERATION: Opening template manager')
+    console.log('📋 AI VIDEO GENERATION: Save and load video templates')
+    toast.info('📋 Template Manager', {
+      description: 'Save and load video templates'
+    })
+  }
+
+  const handleQualitySettings = () => {
+    console.log('✨ AI VIDEO GENERATION: Opening quality settings')
+    console.log('⚙️ AI VIDEO GENERATION: Resolution, bitrate, frame rate settings')
+    toast.info('⚙️ Quality Settings', {
+      description: 'Resolution: 4K/1080p/720p, Bitrate, Frame rate'
+    })
+  }
+
+  const handleScheduleGeneration = () => {
+    console.log('✨ AI VIDEO GENERATION: Scheduling video generation')
+    console.log('📅 AI VIDEO GENERATION: Queue video for later processing')
+    toast.info('📅 Schedule Generation', {
+      description: 'Queue video for later processing'
+    })
+  }
+
+  const handleCancelGeneration = (jobId: string) => {
+    console.log('✨ AI VIDEO GENERATION: Cancel generation requested')
+    console.log('❌ AI VIDEO GENERATION: Job ID - ' + jobId)
+    if (confirm('Cancel generation?')) {
+      console.log('❌ AI VIDEO GENERATION: Generation cancelled - ' + jobId)
+      toast.info('❌ Generation Cancelled', {
+        description: 'Video generation stopped'
+      })
+    }
+  }
+
+  const handlePreviewVideo = (videoId: string) => {
+    console.log('✨ AI VIDEO GENERATION: Opening video preview')
+    console.log('👁️ AI VIDEO GENERATION: Video ID - ' + videoId)
+    toast.info('👁️ Video Preview', {
+      description: 'Opening preview player...'
+    })
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">

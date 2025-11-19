@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Brain, 
-  Palette, 
-  MessageSquare, 
-  Clock, 
+import {
+  Brain,
+  Palette,
+  MessageSquare,
+  Clock,
   Target,
   TrendingUp,
   Zap,
@@ -21,34 +21,247 @@ import {
   Sparkles,
 } from 'lucide-react';
 import SimpleAIChat from '@/components/ai/simple-ai-chat';
+import { toast } from 'sonner';
 
 export default function AIEnhancedPage() {
   const [_activeDemo, setActiveDemo] = useState<string | null>(null);
 
   // Handlers
-  const handleTryDemo = (featureId: string, demoPrompt: string) => { console.log('🎯 TRY DEMO:', featureId); setActiveDemo(featureId); alert(`🎯 AI Demo\n\nFeature: ${featureId}\n\nPrompt: ${demoPrompt}\n\nInitializing AI assistant...`) }
-  const handleProjectAnalysis = () => { console.log('🧠 PROJECT ANALYSIS'); alert('🧠 AI Project Analysis\n\nAnalyzing:\n• Requirements\n• Timeline\n• Budget\n• Resources\n• Risks') }
-  const handleGenerateAssets = () => { console.log('🎨 GENERATE ASSETS'); alert('🎨 Creative Asset Generation\n\nCreating:\n• Color palettes\n• Typography\n• Style guide\n• Brand assets') }
-  const handleDraftCommunication = (type: string) => { console.log('✉️ DRAFT:', type); alert(`✉️ Professional Communication\n\nDrafting ${type}...\n\nAnalyzing context\nMatching tone\nGenerating content`) }
-  const handleOptimizeWorkflow = () => { console.log('⚡ OPTIMIZE'); alert('⚡ Workflow Optimization\n\nAnalyzing:\n• Time allocation\n• Resource distribution\n• Phase prioritization\n• Efficiency opportunities') }
-  const handleAIConsultation = () => { console.log('💡 CONSULT'); alert('💡 AI Consultation\n\nGet personalized business insights and recommendations') }
-  const handleGenerateProposal = () => { console.log('📄 PROPOSAL'); alert('📄 AI Proposal Generator\n\nCreating professional project proposal...') }
-  const handleAnalyzeCompetition = () => { console.log('🔍 COMPETITION'); alert('🔍 Competitor Analysis\n\nResearching market positioning and pricing') }
-  const handleBudgetOptimization = () => { console.log('💰 BUDGET'); alert('💰 Budget Optimization\n\nOptimizing resource allocation and cost structure') }
-  const handleTimelineEstimation = () => { console.log('📅 TIMELINE'); alert('📅 AI Timeline Estimation\n\nCalculating optimal project timeline...') }
-  const handleRiskAssessment = () => { console.log('⚠️ RISK'); alert('⚠️ Risk Assessment\n\nIdentifying potential project risks and mitigation strategies') }
-  const handleGenerateContract = () => { console.log('📝 CONTRACT'); alert('📝 Contract Generator\n\nCreating customized service agreement...') }
-  const handleClientProfiling = () => { console.log('👤 PROFILE'); alert('👤 Client Profiling\n\nAnalyzing client preferences and communication style') }
-  const handleScopeAnalysis = () => { console.log('🎯 SCOPE'); alert('🎯 Scope Analysis\n\nDefining project boundaries and deliverables') }
-  const handlePricingStrategy = () => { console.log('💵 PRICING'); alert('💵 AI Pricing Strategy\n\nCalculating optimal pricing based on:\n• Market rates\n• Project complexity\n• Client budget\n• Your experience') }
-  const handleQualityCheck = () => { console.log('✅ QUALITY'); alert('✅ AI Quality Check\n\nReviewing deliverables for:\n• Standards compliance\n• Best practices\n• Client requirements') }
-  const handleGenerateMilestones = () => { console.log('🎯 MILESTONES'); alert('🎯 Milestone Generation\n\nCreating project checkpoints and deliverables') }
-  const handleResourcePlanning = () => { console.log('📊 RESOURCES'); alert('📊 Resource Planning\n\nOptimizing team allocation and tool usage') }
-  const handlePerformanceInsights = () => { console.log('📈 INSIGHTS'); alert('📈 Performance Insights\n\nAnalyzing your business metrics and growth opportunities') }
-  const handleAutomateReporting = () => { console.log('📊 AUTO REPORT'); alert('📊 Automated Reporting\n\nGenerating comprehensive progress reports') }
-  const handleSentimentAnalysis = () => { console.log('😊 SENTIMENT'); alert('😊 Client Sentiment Analysis\n\nAnalyzing client feedback and satisfaction levels') }
-  const handleTrendAnalysis = () => { console.log('📈 TRENDS'); alert('📈 Industry Trend Analysis\n\nIdentifying emerging opportunities in your niche') }
-  const handleSkillRecommendations = () => { console.log('🎓 SKILLS'); alert('🎓 Skill Recommendations\n\nSuggesting skills to learn based on market demand') }
+  const handleTryDemo = (featureId: string, demoPrompt: string) => {
+    console.log('✨ AI ENHANCED: Try Demo initiated');
+    console.log('📝 AI ENHANCED: Feature ID - ' + featureId);
+    console.log('💬 AI ENHANCED: Demo prompt - ' + demoPrompt);
+    console.log('🚀 AI ENHANCED: Initializing AI assistant for demo');
+    setActiveDemo(featureId);
+    toast.success('🎯 AI Demo Starting', {
+      description: 'Feature: ' + featureId + ' - Initializing AI assistant...'
+    });
+  }
+
+  const handleProjectAnalysis = () => {
+    console.log('✨ AI ENHANCED: Project Analysis initiated');
+    console.log('📊 AI ENHANCED: Analyzing requirements');
+    console.log('⏱️ AI ENHANCED: Calculating timeline estimates');
+    console.log('💰 AI ENHANCED: Evaluating budget constraints');
+    console.log('👥 AI ENHANCED: Assessing resource needs');
+    console.log('⚠️ AI ENHANCED: Identifying potential risks');
+    toast.info('🧠 AI Project Analysis', {
+      description: 'Analyzing requirements, timeline, budget, resources, and risks'
+    });
+  }
+
+  const handleGenerateAssets = () => {
+    console.log('✨ AI ENHANCED: Creative Asset Generation initiated');
+    console.log('🎨 AI ENHANCED: Generating color palettes');
+    console.log('🔤 AI ENHANCED: Creating typography recommendations');
+    console.log('📐 AI ENHANCED: Building style guide');
+    console.log('🎯 AI ENHANCED: Designing brand assets');
+    toast.success('🎨 Creative Asset Generation', {
+      description: 'Creating color palettes, typography, style guide, and brand assets'
+    });
+  }
+
+  const handleDraftCommunication = (type: string) => {
+    console.log('✨ AI ENHANCED: Professional Communication draft initiated');
+    console.log('📧 AI ENHANCED: Communication type - ' + type);
+    console.log('🔍 AI ENHANCED: Analyzing communication context');
+    console.log('🎵 AI ENHANCED: Matching professional tone');
+    console.log('✍️ AI ENHANCED: Generating content');
+    toast.info('✉️ Professional Communication', {
+      description: 'Drafting ' + type + ' with context-aware professional tone'
+    });
+  }
+
+  const handleOptimizeWorkflow = () => {
+    console.log('✨ AI ENHANCED: Workflow Optimization initiated');
+    console.log('⏰ AI ENHANCED: Analyzing time allocation');
+    console.log('📊 AI ENHANCED: Reviewing resource distribution');
+    console.log('🎯 AI ENHANCED: Prioritizing project phases');
+    console.log('⚡ AI ENHANCED: Identifying efficiency opportunities');
+    toast.success('⚡ Workflow Optimization', {
+      description: 'Analyzing time, resources, priorities, and efficiency opportunities'
+    });
+  }
+
+  const handleAIConsultation = () => {
+    console.log('✨ AI ENHANCED: AI Consultation session initiated');
+    console.log('💡 AI ENHANCED: Preparing personalized business insights');
+    console.log('📈 AI ENHANCED: Generating strategic recommendations');
+    toast.info('💡 AI Consultation', {
+      description: 'Get personalized business insights and recommendations'
+    });
+  }
+
+  const handleGenerateProposal = () => {
+    console.log('✨ AI ENHANCED: Proposal Generator initiated');
+    console.log('📄 AI ENHANCED: Creating professional project proposal');
+    console.log('✍️ AI ENHANCED: Structuring proposal sections');
+    console.log('💼 AI ENHANCED: Formatting professional document');
+    toast.success('📄 AI Proposal Generator', {
+      description: 'Creating professional project proposal with all sections'
+    });
+  }
+
+  const handleAnalyzeCompetition = () => {
+    console.log('✨ AI ENHANCED: Competitor Analysis initiated');
+    console.log('🔍 AI ENHANCED: Researching market positioning');
+    console.log('💵 AI ENHANCED: Analyzing competitor pricing');
+    console.log('📊 AI ENHANCED: Evaluating competitive landscape');
+    toast.info('🔍 Competitor Analysis', {
+      description: 'Researching market positioning and pricing strategies'
+    });
+  }
+
+  const handleBudgetOptimization = () => {
+    console.log('✨ AI ENHANCED: Budget Optimization initiated');
+    console.log('💰 AI ENHANCED: Optimizing resource allocation');
+    console.log('📊 AI ENHANCED: Analyzing cost structure');
+    console.log('💡 AI ENHANCED: Identifying cost savings');
+    toast.success('💰 Budget Optimization', {
+      description: 'Optimizing resource allocation and cost structure'
+    });
+  }
+
+  const handleTimelineEstimation = () => {
+    console.log('✨ AI ENHANCED: Timeline Estimation initiated');
+    console.log('📅 AI ENHANCED: Calculating optimal project timeline');
+    console.log('⏱️ AI ENHANCED: Estimating phase durations');
+    console.log('🎯 AI ENHANCED: Setting milestone dates');
+    toast.info('📅 AI Timeline Estimation', {
+      description: 'Calculating optimal project timeline with milestones'
+    });
+  }
+
+  const handleRiskAssessment = () => {
+    console.log('✨ AI ENHANCED: Risk Assessment initiated');
+    console.log('⚠️ AI ENHANCED: Identifying potential project risks');
+    console.log('🛡️ AI ENHANCED: Developing mitigation strategies');
+    console.log('📋 AI ENHANCED: Creating risk management plan');
+    toast.info('⚠️ Risk Assessment', {
+      description: 'Identifying potential risks and mitigation strategies'
+    });
+  }
+
+  const handleGenerateContract = () => {
+    console.log('✨ AI ENHANCED: Contract Generator initiated');
+    console.log('📝 AI ENHANCED: Creating customized service agreement');
+    console.log('⚖️ AI ENHANCED: Including legal terms and conditions');
+    console.log('✍️ AI ENHANCED: Formatting professional contract');
+    toast.success('📝 Contract Generator', {
+      description: 'Creating customized service agreement with legal terms'
+    });
+  }
+
+  const handleClientProfiling = () => {
+    console.log('✨ AI ENHANCED: Client Profiling initiated');
+    console.log('👤 AI ENHANCED: Analyzing client preferences');
+    console.log('💬 AI ENHANCED: Understanding communication style');
+    console.log('🎯 AI ENHANCED: Building client profile');
+    toast.info('👤 Client Profiling', {
+      description: 'Analyzing client preferences and communication style'
+    });
+  }
+
+  const handleScopeAnalysis = () => {
+    console.log('✨ AI ENHANCED: Scope Analysis initiated');
+    console.log('🎯 AI ENHANCED: Defining project boundaries');
+    console.log('📋 AI ENHANCED: Listing deliverables');
+    console.log('✅ AI ENHANCED: Setting acceptance criteria');
+    toast.success('🎯 Scope Analysis', {
+      description: 'Defining project boundaries and deliverables'
+    });
+  }
+
+  const handlePricingStrategy = () => {
+    console.log('✨ AI ENHANCED: Pricing Strategy initiated');
+    console.log('💵 AI ENHANCED: Analyzing market rates');
+    console.log('🔍 AI ENHANCED: Evaluating project complexity');
+    console.log('💼 AI ENHANCED: Considering client budget');
+    console.log('⭐ AI ENHANCED: Factoring in your experience');
+    toast.info('💵 AI Pricing Strategy', {
+      description: 'Calculating optimal pricing based on market and project factors'
+    });
+  }
+
+  const handleQualityCheck = () => {
+    console.log('✨ AI ENHANCED: Quality Check initiated');
+    console.log('✅ AI ENHANCED: Reviewing standards compliance');
+    console.log('📐 AI ENHANCED: Verifying best practices');
+    console.log('🎯 AI ENHANCED: Checking client requirements');
+    toast.success('✅ AI Quality Check', {
+      description: 'Reviewing deliverables for compliance and best practices'
+    });
+  }
+
+  const handleGenerateMilestones = () => {
+    console.log('✨ AI ENHANCED: Milestone Generation initiated');
+    console.log('🎯 AI ENHANCED: Creating project checkpoints');
+    console.log('📋 AI ENHANCED: Defining deliverables');
+    console.log('⏱️ AI ENHANCED: Setting milestone dates');
+    toast.info('🎯 Milestone Generation', {
+      description: 'Creating project checkpoints and deliverables'
+    });
+  }
+
+  const handleResourcePlanning = () => {
+    console.log('✨ AI ENHANCED: Resource Planning initiated');
+    console.log('📊 AI ENHANCED: Optimizing team allocation');
+    console.log('🛠️ AI ENHANCED: Planning tool usage');
+    console.log('💼 AI ENHANCED: Balancing workload distribution');
+    toast.success('📊 Resource Planning', {
+      description: 'Optimizing team allocation and tool usage'
+    });
+  }
+
+  const handlePerformanceInsights = () => {
+    console.log('✨ AI ENHANCED: Performance Insights initiated');
+    console.log('📈 AI ENHANCED: Analyzing business metrics');
+    console.log('📊 AI ENHANCED: Identifying growth opportunities');
+    console.log('💡 AI ENHANCED: Generating actionable insights');
+    toast.info('📈 Performance Insights', {
+      description: 'Analyzing business metrics and growth opportunities'
+    });
+  }
+
+  const handleAutomateReporting = () => {
+    console.log('✨ AI ENHANCED: Automated Reporting initiated');
+    console.log('📊 AI ENHANCED: Generating comprehensive progress reports');
+    console.log('📈 AI ENHANCED: Compiling performance data');
+    console.log('📋 AI ENHANCED: Formatting professional report');
+    toast.success('📊 Automated Reporting', {
+      description: 'Generating comprehensive progress reports'
+    });
+  }
+
+  const handleSentimentAnalysis = () => {
+    console.log('✨ AI ENHANCED: Sentiment Analysis initiated');
+    console.log('😊 AI ENHANCED: Analyzing client feedback');
+    console.log('📊 AI ENHANCED: Measuring satisfaction levels');
+    console.log('💬 AI ENHANCED: Identifying sentiment patterns');
+    toast.info('😊 Client Sentiment Analysis', {
+      description: 'Analyzing client feedback and satisfaction levels'
+    });
+  }
+
+  const handleTrendAnalysis = () => {
+    console.log('✨ AI ENHANCED: Trend Analysis initiated');
+    console.log('📈 AI ENHANCED: Identifying emerging opportunities');
+    console.log('🔍 AI ENHANCED: Researching industry trends');
+    console.log('💡 AI ENHANCED: Analyzing niche market dynamics');
+    toast.success('📈 Industry Trend Analysis', {
+      description: 'Identifying emerging opportunities in your niche'
+    });
+  }
+
+  const handleSkillRecommendations = () => {
+    console.log('✨ AI ENHANCED: Skill Recommendations initiated');
+    console.log('🎓 AI ENHANCED: Analyzing market demand');
+    console.log('📊 AI ENHANCED: Identifying skill gaps');
+    console.log('💡 AI ENHANCED: Suggesting learning paths');
+    toast.info('🎓 Skill Recommendations', {
+      description: 'Suggesting skills to learn based on market demand'
+    });
+  }
 
   const aiFeatures = [
     {

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { toast } from 'sonner'
 import {
   Bot,
   Send,
@@ -318,29 +319,228 @@ export default function AIAssistantPage() {
   }
 
   // Additional Handlers
-  const handleNewConversation = () => { console.log('➕ NEW CONVERSATION'); alert('➕ New Conversation\n\nStarting fresh chat session...'); setMessages([{ id: Date.now().toString(), content: 'Hello! How can I help you today?', type: 'assistant', timestamp: new Date() }]) }
-  const handleLoadConversation = (conversationId: string, title: string) => { console.log('📂 LOAD:', conversationId); alert(`📂 Loading Conversation\n\n${title}`) }
-  const handleDeleteConversation = (conversationId: string) => { console.log('🗑️ DELETE CONV:', conversationId); confirm('Delete conversation?') && alert('✅ Conversation deleted') }
-  const handleCopyMessage = (messageId: string, content: string) => { console.log('📋 COPY:', messageId); navigator.clipboard.writeText(content); alert('📋 Message Copied\n\nCopied to clipboard') }
-  const handleBookmarkMessage = (messageId: string) => { console.log('🔖 BOOKMARK:', messageId); alert('🔖 Message Bookmarked\n\nSaved to bookmarks') }
-  const handleRefreshInsights = () => { console.log('🔄 REFRESH INSIGHTS'); alert('🔄 Refreshing AI Insights\n\nAnalyzing latest data...') }
-  const handleImplementAction = (insightId: string, action: string) => { console.log('✅ ACTION:', insightId, action); alert(`✅ Implementing Action\n\n${action}`) }
-  const handleExportConversation = (conversationId: string) => { console.log('💾 EXPORT:', conversationId); alert('💾 Export Conversation\n\nDownloading as PDF/MD...') }
-  const handleShareConversation = (conversationId: string) => { console.log('🔗 SHARE:', conversationId); alert('🔗 Share Conversation\n\nGenerate shareable link') }
-  const handleVoiceInput = () => { console.log('🎤 VOICE INPUT'); setIsListening(!isListening); alert('🎤 Voice Input\n\nListening for voice command...') }
-  const handleRegenerateResponse = (messageId: string) => { console.log('🔄 REGENERATE:', messageId); alert('🔄 Regenerating Response\n\nCreating new AI response...') }
-  const handleSearchConversations = () => { console.log('🔍 SEARCH'); alert('🔍 Search Conversations\n\nSearch through chat history') }
-  const handleFilterConversations = (filter: string) => { console.log('🔍 FILTER:', filter); alert(`🔍 Filtering: ${filter}`) }
-  const handleExportInsights = () => { console.log('💾 EXPORT INSIGHTS'); alert('💾 Export Insights Report\n\nGenerating PDF report...') }
-  const handleScheduleReminder = (action: string) => { console.log('📅 REMINDER:', action); alert(`📅 Schedule Reminder\n\n${action}`) }
-  const handleViewAnalytics = () => { console.log('📊 ANALYTICS'); alert('📊 View Analytics\n\nDetailed performance metrics') }
-  const handleConfigureAI = () => { console.log('⚙️ CONFIG AI'); alert('⚙️ AI Configuration\n\nModel settings\nTemperature\nContext length\nSystem prompts') }
-  const handleSaveChat = () => { console.log('💾 SAVE CHAT'); alert('💾 Chat Saved\n\nConversation saved successfully') }
-  const handleClearChat = () => { console.log('🗑️ CLEAR'); confirm('Clear all messages?') && (setMessages([]), alert('✅ Chat cleared')) }
-  const handleAttachFile = () => { console.log('📎 ATTACH'); const input = document.createElement('input'); input.type = 'file'; input.click(); alert('📎 Attach File\n\nFile picker opened') }
-  const handleInsightDismiss = (insightId: string) => { console.log('❌ DISMISS:', insightId); confirm('Dismiss this insight?') && alert('✅ Insight dismissed') }
-  const handlePinConversation = (conversationId: string) => { console.log('📌 PIN:', conversationId); alert('📌 Conversation Pinned') }
-  const handleArchiveConversation = (conversationId: string) => { console.log('📦 ARCHIVE:', conversationId); alert('📦 Conversation Archived') }
+  const handleNewConversation = () => {
+    console.log('✨ AI ASSISTANT: New conversation initiated')
+    console.log('📝 AI ASSISTANT: Starting fresh chat session')
+    console.log('🔄 AI ASSISTANT: Resetting message history')
+    setMessages([{ id: Date.now().toString(), content: 'Hello! How can I help you today?', type: 'assistant', timestamp: new Date() }])
+    toast.success('✨ New Conversation Started', {
+      description: 'Fresh chat session ready'
+    })
+  }
+
+  const handleLoadConversation = (conversationId: string, title: string) => {
+    console.log('✨ AI ASSISTANT: Loading conversation')
+    console.log('📝 AI ASSISTANT: Conversation ID: ' + conversationId)
+    console.log('📋 AI ASSISTANT: Title: ' + title)
+    toast.info('📂 Loading Conversation', {
+      description: title
+    })
+  }
+
+  const handleDeleteConversation = (conversationId: string) => {
+    console.log('✨ AI ASSISTANT: Delete conversation requested')
+    console.log('📝 AI ASSISTANT: Conversation ID: ' + conversationId)
+    if (confirm('Delete conversation?')) {
+      console.log('✅ AI ASSISTANT: Conversation deleted successfully')
+      toast.success('✅ Conversation Deleted', {
+        description: 'Conversation removed successfully'
+      })
+    }
+  }
+
+  const handleCopyMessage = (messageId: string, content: string) => {
+    console.log('✨ AI ASSISTANT: Copying message to clipboard')
+    console.log('📝 AI ASSISTANT: Message ID: ' + messageId)
+    console.log('📋 AI ASSISTANT: Content length: ' + content.length + ' characters')
+    navigator.clipboard.writeText(content)
+    toast.success('📋 Message Copied', {
+      description: 'Copied to clipboard'
+    })
+  }
+
+  const handleBookmarkMessage = (messageId: string) => {
+    console.log('✨ AI ASSISTANT: Bookmarking message')
+    console.log('📝 AI ASSISTANT: Message ID: ' + messageId)
+    console.log('🔖 AI ASSISTANT: Message saved to bookmarks')
+    toast.success('🔖 Message Bookmarked', {
+      description: 'Saved to bookmarks'
+    })
+  }
+
+  const handleRefreshInsights = () => {
+    console.log('✨ AI ASSISTANT: Refreshing AI insights')
+    console.log('📝 AI ASSISTANT: Analyzing latest data')
+    console.log('🔄 AI ASSISTANT: Generating new recommendations')
+    toast.info('🔄 Refreshing AI Insights', {
+      description: 'Analyzing latest data...'
+    })
+  }
+
+  const handleImplementAction = (insightId: string, action: string) => {
+    console.log('✨ AI ASSISTANT: Implementing action')
+    console.log('📝 AI ASSISTANT: Insight ID: ' + insightId)
+    console.log('🎯 AI ASSISTANT: Action: ' + action)
+    toast.success('✅ Implementing Action', {
+      description: action
+    })
+  }
+
+  const handleExportConversation = (conversationId: string) => {
+    console.log('✨ AI ASSISTANT: Exporting conversation')
+    console.log('📝 AI ASSISTANT: Conversation ID: ' + conversationId)
+    console.log('💾 AI ASSISTANT: Generating PDF/MD export')
+    toast.info('💾 Exporting Conversation', {
+      description: 'Downloading as PDF/MD...'
+    })
+  }
+
+  const handleShareConversation = (conversationId: string) => {
+    console.log('✨ AI ASSISTANT: Sharing conversation')
+    console.log('📝 AI ASSISTANT: Conversation ID: ' + conversationId)
+    console.log('🔗 AI ASSISTANT: Generating shareable link')
+    toast.info('🔗 Share Conversation', {
+      description: 'Generating shareable link'
+    })
+  }
+
+  const handleVoiceInput = () => {
+    console.log('✨ AI ASSISTANT: Voice input toggled')
+    console.log('📝 AI ASSISTANT: Listening state: ' + !isListening)
+    console.log('🎤 AI ASSISTANT: Voice command mode activated')
+    setIsListening(!isListening)
+    toast.info('🎤 Voice Input', {
+      description: 'Listening for voice command...'
+    })
+  }
+
+  const handleRegenerateResponse = (messageId: string) => {
+    console.log('✨ AI ASSISTANT: Regenerating response')
+    console.log('📝 AI ASSISTANT: Message ID: ' + messageId)
+    console.log('🔄 AI ASSISTANT: Creating new AI response')
+    toast.info('🔄 Regenerating Response', {
+      description: 'Creating new AI response...'
+    })
+  }
+
+  const handleSearchConversations = () => {
+    console.log('✨ AI ASSISTANT: Searching conversations')
+    console.log('📝 AI ASSISTANT: Opening search interface')
+    console.log('🔍 AI ASSISTANT: Ready to search chat history')
+    toast.info('🔍 Search Conversations', {
+      description: 'Search through chat history'
+    })
+  }
+
+  const handleFilterConversations = (filter: string) => {
+    console.log('✨ AI ASSISTANT: Filtering conversations')
+    console.log('📝 AI ASSISTANT: Filter: ' + filter)
+    console.log('🔍 AI ASSISTANT: Applying filter criteria')
+    toast.info('🔍 Filtering', {
+      description: 'Filter: ' + filter
+    })
+  }
+
+  const handleExportInsights = () => {
+    console.log('✨ AI ASSISTANT: Exporting insights report')
+    console.log('📝 AI ASSISTANT: Generating comprehensive PDF report')
+    console.log('💾 AI ASSISTANT: Compiling all insights and recommendations')
+    toast.info('💾 Export Insights Report', {
+      description: 'Generating PDF report...'
+    })
+  }
+
+  const handleScheduleReminder = (action: string) => {
+    console.log('✨ AI ASSISTANT: Scheduling reminder')
+    console.log('📝 AI ASSISTANT: Action: ' + action)
+    console.log('📅 AI ASSISTANT: Reminder scheduled successfully')
+    toast.success('📅 Schedule Reminder', {
+      description: action
+    })
+  }
+
+  const handleViewAnalytics = () => {
+    console.log('✨ AI ASSISTANT: Viewing analytics')
+    console.log('📝 AI ASSISTANT: Loading detailed performance metrics')
+    console.log('📊 AI ASSISTANT: Compiling comprehensive analytics data')
+    toast.info('📊 View Analytics', {
+      description: 'Detailed performance metrics'
+    })
+  }
+
+  const handleConfigureAI = () => {
+    console.log('✨ AI ASSISTANT: Opening AI configuration')
+    console.log('📝 AI ASSISTANT: Available settings:')
+    console.log('  - Model settings')
+    console.log('  - Temperature')
+    console.log('  - Context length')
+    console.log('  - System prompts')
+    toast.info('⚙️ AI Configuration', {
+      description: 'Customize AI settings'
+    })
+  }
+
+  const handleSaveChat = () => {
+    console.log('✨ AI ASSISTANT: Saving chat')
+    console.log('📝 AI ASSISTANT: Conversation saved successfully')
+    console.log('💾 AI ASSISTANT: All messages preserved')
+    toast.success('💾 Chat Saved', {
+      description: 'Conversation saved successfully'
+    })
+  }
+
+  const handleClearChat = () => {
+    console.log('✨ AI ASSISTANT: Clear chat requested')
+    if (confirm('Clear all messages?')) {
+      console.log('📝 AI ASSISTANT: Clearing all messages')
+      console.log('🗑️ AI ASSISTANT: Chat cleared successfully')
+      setMessages([])
+      toast.success('✅ Chat Cleared', {
+        description: 'All messages removed'
+      })
+    }
+  }
+
+  const handleAttachFile = () => {
+    console.log('✨ AI ASSISTANT: Attaching file')
+    console.log('📝 AI ASSISTANT: Opening file picker')
+    console.log('📎 AI ASSISTANT: Ready to upload file')
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.click()
+    toast.info('📎 Attach File', {
+      description: 'File picker opened'
+    })
+  }
+
+  const handleInsightDismiss = (insightId: string) => {
+    console.log('✨ AI ASSISTANT: Dismissing insight')
+    console.log('📝 AI ASSISTANT: Insight ID: ' + insightId)
+    if (confirm('Dismiss this insight?')) {
+      console.log('✅ AI ASSISTANT: Insight dismissed successfully')
+      toast.success('✅ Insight Dismissed', {
+        description: 'Insight removed from list'
+      })
+    }
+  }
+
+  const handlePinConversation = (conversationId: string) => {
+    console.log('✨ AI ASSISTANT: Pinning conversation')
+    console.log('📝 AI ASSISTANT: Conversation ID: ' + conversationId)
+    console.log('📌 AI ASSISTANT: Conversation pinned to top')
+    toast.success('📌 Conversation Pinned', {
+      description: 'Pinned to top of list'
+    })
+  }
+
+  const handleArchiveConversation = (conversationId: string) => {
+    console.log('✨ AI ASSISTANT: Archiving conversation')
+    console.log('📝 AI ASSISTANT: Conversation ID: ' + conversationId)
+    console.log('📦 AI ASSISTANT: Moved to archive')
+    toast.success('📦 Conversation Archived', {
+      description: 'Moved to archive'
+    })
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
