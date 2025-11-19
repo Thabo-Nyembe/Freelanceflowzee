@@ -3,7 +3,7 @@
 import React, { useState, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card } from '@/components/ui/card'
-import { ErrorBoundary } from 'react-error-boundary'
+// ErrorBoundary removed for build compatibility
 import {
   Monitor, Laptop, Download, Upload, Settings, Maximize2, Minimize2,
   Square, X, Minus, Circle, Chrome, Firefox, Safari, Edge,
@@ -168,8 +168,7 @@ export default function DesktopAppPage() {
   }
 
   return (
-    <div>
-        <div className="container mx-auto px-4 py-8 space-y-8">
+    <div className="container mx-auto px-4 py-8 space-y-8">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -282,8 +281,6 @@ export default function DesktopAppPage() {
                         width={Math.min(device.width * 0.8, 1000)}
                         height={Math.min(device.height * 0.7, 700)}
                       />
-                        </div>
-                      </div>
                     </div>
 
                     {/* Taskbar (Windows/Linux) */}
@@ -330,7 +327,7 @@ export default function DesktopAppPage() {
                   </div>
 
                   {/* Device Info */}
-                  <div className="absolute -bottom-8 left-0 right-0 text-center text-sm text-muted-foreground">
+                  <div className="mt-8 text-center text-sm text-muted-foreground">
                     {device.name} • {device.width} × {device.height}px • {framework.name} • {zoom[0]}%
                   </div>
                 </div>
@@ -370,8 +367,6 @@ export default function DesktopAppPage() {
               </Card>
             </div>
           </div>
-        </div>
-      </div>
     </div>
   )
 }

@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card } from '@/components/ui/card'
-import { ErrorBoundary } from 'react-error-boundary'
+// ErrorBoundary removed for build compatibility
 import {
   Box, Circle as Sphere, Box as Cylinder, Triangle as Cone, Triangle as Pyramid, Box as Hexagon, Box as Cube, Move3D,
   RotateCcw, Scale, Eye, EyeOff, Grid3x3, Layers, Palette,
@@ -224,6 +224,47 @@ export default function ModelingStudioPage() {
       }
     }
 
+    return (
+      <div
+        ref={viewportRef}
+        className="relative w-full aspect-video bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-lg overflow-hidden border border-slate-700"
+        onMouseMove={handleMouseMove}
+        onMouseDown={() => setIsDragging(true)}
+        onMouseUp={() => setIsDragging(false)}
+        onMouseLeave={() => setIsDragging(false)}
+      >
+        {/* Grid */}
+        {showGrid && (
+          <div className="absolute inset-0 opacity-20">
+            <svg width="100%" height="100%">
+              <defs>
+                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#grid)" />
+            </svg>
+          </div>
+        )}
+
+        {/* 3D Objects */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          {objects.map(renderObject)}
+        </div>
+
+        {/* Camera Info */}
+        <div className="absolute top-4 left-4 text-xs text-white/60 font-mono">
+          Camera: [{cameraPosition.x.toFixed(1)}, {cameraPosition.y.toFixed(1)}, {cameraPosition.z.toFixed(1)}]
+        </div>
+
+        {/* Tool Indicator */}
+        <div className="absolute top-4 right-4 text-xs text-white/80 font-medium capitalize">
+          {selectedTool} Tool
+        </div>
+      </div>
+    )
+  }
+
   const addObject = (type: string) => {
     const newObject: SceneObject = {
       id: Date.now().toString(),
@@ -259,6 +300,13 @@ export default function ModelingStudioPage() {
     ))
   }
 
+  const deleteObject = (id: string) => {
+    setObjects(prev => prev.filter(obj => obj.id !== id))
+    if (selectedObject === id) {
+      setSelectedObject(objects[0]?.id || '')
+    }
+  }
+
   const exportModel = () => {
     const modelData = {
       objects,
@@ -276,18 +324,8 @@ export default function ModelingStudioPage() {
     console.log('Rendering scene with quality:', renderQuality[0])
   }
 
-  const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) => (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Something went wrong in 3D Modeling Studio</h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">{error.message}</p>
-        <button onClick={resetErrorBoundary}>Try again</button>
-      </div>
-    </div>
-  )
-
   return (
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
+    <>
       <div>
         <div className="container mx-auto px-4 py-8 space-y-8">
           {/* Header */}
@@ -542,7 +580,23 @@ export default function ModelingStudioPage() {
                               selectedObject === obj.id
                                 ? 'border-primary bg-primary/10'
                                 : 'border-border bg-card hover:bg-accent/10'
-                            }
+                            }`}
+                            onClick={() => setSelectedObject(obj.id)}
+                          >
+                            <div className="flex items-center gap-2 flex-1">
+                              <Box className="w-3 h-3" />
+                              <span className="text-sm">{obj.name}</span>
+                              {obj.locked && <Lock className="w-3 h-3 text-muted-foreground" />}
+                            </div>
+                            <div className="flex gap-1">
+                              <button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  updateObjectProperty(obj.id, 'visible', !obj.visible)
+                                  console.log(`👁️ Toggled visibility for ${obj.name}`)
+                                }}
                                 data-testid={`toggle-visibility-${obj.id}-btn`}
                               >
                                 {obj.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
@@ -738,6 +792,6 @@ export default function ModelingStudioPage() {
           </div>
         </div>
       </div>
-    </ErrorBoundary>
+    </>
   )
 }
