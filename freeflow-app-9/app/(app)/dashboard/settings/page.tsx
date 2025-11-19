@@ -167,10 +167,14 @@ export default function SettingsPage() {
           })
         }
 
-        // Show next steps
-        setTimeout(() => {
-          alert(`✅ Settings Saved Successfully!\n\nNext Steps:\n• Review your updated preferences\n• Test notification settings\n• Update your profile picture if needed\n• Configure integrations and connected apps\n• Set up two-factor authentication for security`)
-        }, 500)
+        // Log next steps
+        console.log('✅ SETTINGS: Saved successfully')
+        console.log('📝 SETTINGS: Next steps:')
+        console.log('  • Review your updated preferences')
+        console.log('  • Test notification settings')
+        console.log('  • Update your profile picture if needed')
+        console.log('  • Configure integrations and connected apps')
+        console.log('  • Set up two-factor authentication for security')
       } else {
         throw new Error(result.error || 'Failed to save settings')
       }
@@ -199,11 +203,15 @@ export default function SettingsPage() {
     a.download = 'freeflow-settings.json'
     a.click()
     URL.revokeObjectURL(url)
-    alert('💾 Settings Exported!\n\nFile: freeflow-settings.json')
+    console.log('💾 SETTINGS: Settings exported')
+    console.log('📄 SETTINGS: File: freeflow-settings.json')
+    toast.success('💾 Settings Exported!', {
+      description: 'File: freeflow-settings.json'
+    })
   }
 
   const handleImportData = () => {
-    console.log('📥 IMPORT SETTINGS')
+    console.log('📥 SETTINGS: Import settings')
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = '.json'
@@ -213,16 +221,21 @@ export default function SettingsPage() {
         try {
           const text = await file.text()
           const imported = JSON.parse(text)
-          console.log('✅ SETTINGS IMPORTED:', imported)
+          console.log('✅ SETTINGS: Settings imported successfully')
+          console.log('📄 SETTINGS: File:', file.name)
 
           if (imported.profile) setProfile(imported.profile)
           if (imported.notifications) setNotifications(imported.notifications)
           if (imported.appearance) setAppearance(imported.appearance)
 
-          alert(`✅ Settings Imported!\n\nFile: ${file.name}\n\nYour settings have been restored.`)
+          toast.success('✅ Settings Imported!', {
+            description: 'File: ' + file.name
+          })
         } catch (error) {
-          console.error('❌ IMPORT ERROR:', error)
-          alert('❌ Import Failed\n\nInvalid settings file. Please check the file format.')
+          console.error('❌ SETTINGS: Import error:', error)
+          toast.error('❌ Import Failed', {
+            description: 'Invalid settings file format'
+          })
         }
       }
     }
@@ -232,12 +245,19 @@ export default function SettingsPage() {
   const handleEnable2FA = () => {
     console.log('🔒 ENABLE 2FA')
     if (!security.twoFactorAuth) {
-      alert('🔒 Enable Two-Factor Authentication\n\nSetup steps:\n1. Scan QR code with authenticator app\n2. Enter 6-digit code to verify\n3. Save backup codes\n\nThis adds extra security to your account.')
+      console.log('✅ SETTINGS: Enabling Two-Factor Authentication')
+      console.log('📝 SETTINGS: Setup steps: Scan QR code, enter 6-digit code, save backup codes')
+      toast.info('🔒 Enable Two-Factor Authentication', {
+        description: 'Setup: Scan QR code with authenticator app, enter code to verify, save backup codes'
+      })
       setSecurity({ ...security, twoFactorAuth: true })
     } else {
       if (confirm('⚠️ Disable Two-Factor Authentication?\n\nThis will reduce your account security.')) {
         setSecurity({ ...security, twoFactorAuth: false })
-        alert('✅ Two-Factor Authentication disabled.')
+        console.log('✅ SETTINGS: Two-Factor Authentication disabled')
+        toast.success('✅ Two-Factor Authentication Disabled', {
+          description: 'Your account security has been reduced'
+        })
       }
     }
   }
@@ -264,12 +284,20 @@ If you lose access to your authenticator app, you can use these codes to sign in
     a.click()
     URL.revokeObjectURL(url)
 
-    alert('📋 Backup Codes Downloaded!\n\n10 backup codes saved to:\nkazi-backup-codes.txt\n\nStore them securely!')
+    console.log('✅ SETTINGS: Backup codes downloaded')
+    console.log('📄 SETTINGS: File: kazi-backup-codes.txt')
+    console.log('🔒 SETTINGS: 10 backup codes saved - store securely')
+    toast.success('📋 Backup Codes Downloaded!', {
+      description: '10 backup codes saved to kazi-backup-codes.txt - Store them securely!'
+    })
   }
 
   const handleChangePassword = async () => {
     console.log('🔑 CHANGE PASSWORD')
-    alert('🔑 Change Password\n\nRequirements:\n• At least 8 characters\n• 1 uppercase letter\n• 1 number\n• 1 special character\n\nEnter your current password to continue.')
+    console.log('📝 SETTINGS: Password requirements: 8+ chars, 1 uppercase, 1 number, 1 special char')
+    toast.info('🔑 Change Password', {
+      description: 'Requirements: At least 8 characters, 1 uppercase, 1 number, 1 special character'
+    })
   }
 
   const handleUpdateProfile = async () => {
@@ -277,14 +305,23 @@ If you lose access to your authenticator app, you can use these codes to sign in
     setIsLoading(true)
     await new Promise(resolve => setTimeout(resolve, 1000))
     setIsLoading(false)
-    alert('👤 Profile Updated!\n\nYour information has been saved successfully.')
+    console.log('✅ SETTINGS: Profile updated successfully')
+    console.log('📝 SETTINGS: Information saved')
+    toast.success('👤 Profile Updated!', {
+      description: 'Your information has been saved successfully'
+    })
   }
 
   const handleDeleteAccount = () => {
     console.log('🗑️ DELETE ACCOUNT')
     if (confirm('⚠️ DELETE ACCOUNT?\n\nThis will permanently delete:\n• Your profile and data\n• All projects and files\n• Payment history\n• Team memberships\n\nThis action CANNOT be undone!')) {
       if (confirm('⚠️ FINAL CONFIRMATION\n\nType DELETE to confirm account deletion.\n\nAre you absolutely sure?')) {
-        alert('🗑️ Account Deletion Requested\n\nWe\'ve sent a confirmation email to verify this request.\n\nYour account will be deleted in 7 days unless you cancel.')
+        console.log('🗑️ SETTINGS: Account deletion requested')
+        console.log('📧 SETTINGS: Confirmation email sent')
+        console.log('⏰ SETTINGS: Account will be deleted in 7 days')
+        toast.info('🗑️ Account Deletion Requested', {
+          description: 'Confirmation email sent. Account will be deleted in 7 days unless you cancel'
+        })
       }
     }
   }
@@ -292,7 +329,12 @@ If you lose access to your authenticator app, you can use these codes to sign in
   const handleClearCache = () => {
     console.log('🧹 CLEAR CACHE')
     if (confirm('🧹 Clear Application Cache?\n\nThis will:\n• Clear stored preferences\n• Remove cached data\n• Sign you out\n\nYou\'ll need to sign in again.')) {
-      alert('✅ Cache Cleared!\n\nApplication cache has been cleared.\n\nYou will be signed out in 3 seconds...')
+      console.log('✅ SETTINGS: Cache cleared')
+      console.log('📝 SETTINGS: Stored preferences removed')
+      console.log('🚪 SETTINGS: Signing out in 3 seconds')
+      toast.success('✅ Cache Cleared!', {
+        description: 'Application cache cleared. You will be signed out in 3 seconds'
+      })
       setTimeout(() => {
         console.log('🚪 SIGNING OUT...')
       }, 3000)
@@ -301,7 +343,10 @@ If you lose access to your authenticator app, you can use these codes to sign in
 
   const handleManageIntegrations = () => {
     console.log('🔌 MANAGE INTEGRATIONS')
-    alert('🔌 Manage Integrations\n\nAvailable integrations:\n• Google Drive\n• Dropbox\n• Slack\n• GitHub\n• Figma\n• Adobe Creative Cloud\n\nConnect your favorite tools!')
+    console.log('📝 SETTINGS: Available integrations: Google Drive, Dropbox, Slack, GitHub, Figma, Adobe Creative Cloud')
+    toast.info('🔌 Manage Integrations', {
+      description: 'Available: Google Drive, Dropbox, Slack, GitHub, Figma, Adobe Creative Cloud'
+    })
   }
 
   const handleExportUserData = async () => {
@@ -329,18 +374,30 @@ If you lose access to your authenticator app, you can use these codes to sign in
     a.click()
     URL.revokeObjectURL(url)
 
-    alert('📦 User Data Exported!\n\nGDPR Compliant Data Export\n\nFile: kazi-user-data-export.json\n\nThis includes all your personal data stored in KAZI.')
+    console.log('✅ SETTINGS: User data exported')
+    console.log('📄 SETTINGS: File: kazi-user-data-export.json')
+    console.log('🔒 SETTINGS: GDPR compliant data export complete')
+    toast.success('📦 User Data Exported!', {
+      description: 'GDPR compliant export saved to kazi-user-data-export.json'
+    })
   }
 
   const handleToggleNotification = (notificationType: string, enabled: boolean) => {
-    console.log(`🔔 TOGGLE NOTIFICATION - Type: ${notificationType}, Enabled: ${enabled}`)
-    alert(`🔔 Notification ${enabled ? 'Enabled' : 'Disabled'}\n\n${notificationType} notifications are now ${enabled ? 'ON' : 'OFF'}.`)
+    console.log('🔔 TOGGLE NOTIFICATION - Type: ' + notificationType + ', Enabled: ' + enabled)
+    console.log('✅ SETTINGS: Notification ' + (enabled ? 'enabled' : 'disabled'))
+    toast.success('🔔 Notification ' + (enabled ? 'Enabled' : 'Disabled'), {
+      description: notificationType + ' notifications are now ' + (enabled ? 'ON' : 'OFF')
+    })
   }
 
   const handleUpdateTheme = (theme: 'light' | 'dark' | 'system') => {
     console.log('🎨 UPDATE THEME:', theme)
     setAppearance({ ...appearance, theme })
-    alert(`🎨 Theme Updated!\n\nNow using: ${theme.charAt(0).toUpperCase() + theme.slice(1)} mode\n\nThe interface will update automatically.`)
+    console.log('✅ SETTINGS: Theme updated to ' + theme + ' mode')
+    console.log('🎨 SETTINGS: Interface will update automatically')
+    toast.success('🎨 Theme Updated!', {
+      description: 'Now using ' + theme.charAt(0).toUpperCase() + theme.slice(1) + ' mode'
+    })
   }
 
   const handleSyncSettings = async () => {
@@ -348,7 +405,11 @@ If you lose access to your authenticator app, you can use these codes to sign in
     setIsLoading(true)
     await new Promise(resolve => setTimeout(resolve, 1500))
     setIsLoading(false)
-    alert('🔄 Settings Synced!\n\nYour settings have been synchronized across all devices.\n\nLast sync: ' + new Date().toLocaleString())
+    console.log('✅ SETTINGS: Settings synced across all devices')
+    console.log('⏰ SETTINGS: Last sync: ' + new Date().toLocaleString())
+    toast.success('🔄 Settings Synced!', {
+      description: 'Synchronized across all devices. Last sync: ' + new Date().toLocaleString()
+    })
   }
 
   const handleResetSettings = () => {
@@ -373,19 +434,32 @@ If you lose access to your authenticator app, you can use these codes to sign in
         marketingEmails: false,
         weeklyDigest: true
       })
-      alert('✅ Settings Reset!\n\nAll preferences have been restored to defaults.')
+      console.log('✅ SETTINGS: All settings reset to defaults')
+      console.log('📝 SETTINGS: Theme, notifications, and preferences restored')
+      toast.success('✅ Settings Reset!', {
+        description: 'All preferences have been restored to defaults'
+      })
     }
   }
 
   const handleUpdateBilling = () => {
     console.log('💳 UPDATE BILLING')
-    alert('💳 Update Billing Information\n\nManage:\n• Payment method\n• Billing address\n• Tax information\n• Invoices\n\nYour payment data is securely encrypted.')
+    console.log('📝 SETTINGS: Manage payment method, billing address, tax info, invoices')
+    console.log('🔒 SETTINGS: Payment data is securely encrypted')
+    toast.info('💳 Update Billing Information', {
+      description: 'Manage payment method, billing address, tax info, and invoices'
+    })
   }
 
   const handleCancelSubscription = () => {
     console.log('❌ CANCEL SUBSCRIPTION')
     if (confirm('⚠️ Cancel Subscription?\n\nYou will:\n• Lose access to premium features\n• Keep your data until end of billing period\n• Can resubscribe anytime\n\nContinue with cancellation?')) {
-      alert('❌ Subscription Canceled\n\nYour subscription will remain active until:\nJanuary 15, 2025\n\nAfter that, you\'ll be on the free plan.\n\nWe\'re sad to see you go!')
+      console.log('❌ SETTINGS: Subscription canceled')
+      console.log('📅 SETTINGS: Active until January 15, 2025')
+      console.log('📝 SETTINGS: Will switch to free plan after expiry')
+      toast.info('❌ Subscription Canceled', {
+        description: 'Active until January 15, 2025. You will switch to the free plan after that'
+      })
     }
   }
 
@@ -402,7 +476,11 @@ If you lose access to your authenticator app, you can use these codes to sign in
         reader.onload = (e) => {
           const result = e.target?.result as string
           setProfile({ ...profile, avatar: result })
-          alert(`✅ Photo Uploaded!\n\nFile: ${file.name}\n\nYour profile picture has been updated.`)
+          console.log('✅ SETTINGS: Photo uploaded successfully')
+          console.log('📄 SETTINGS: File: ' + file.name)
+          toast.success('✅ Photo Uploaded!', {
+            description: 'File: ' + file.name + ' - Profile picture updated'
+          })
         }
         reader.readAsDataURL(file)
       }
@@ -414,11 +492,22 @@ If you lose access to your authenticator app, you can use these codes to sign in
     console.log('🗑️ REMOVE PHOTO')
     if (confirm('⚠️ Remove profile photo?\n\nYour photo will be replaced with your initials.')) {
       setProfile({ ...profile, avatar: '' })
-      alert('✅ Photo Removed\n\nYour profile picture has been removed.')
+      console.log('✅ SETTINGS: Profile photo removed')
+      console.log('📝 SETTINGS: Replaced with initials')
+      toast.success('✅ Photo Removed', {
+        description: 'Your profile picture has been removed'
+      })
     }
   }
 
-  const handleTestNotifications = () => { console.log('🔔 TEST NOTIF'); alert('🔔 Test notification sent!\n\nCheck your notification settings to verify.') }
+  const handleTestNotifications = () => {
+    console.log('🔔 TEST NOTIF')
+    console.log('✅ SETTINGS: Test notification sent')
+    console.log('📝 SETTINGS: Check notification settings to verify')
+    toast.success('🔔 Test Notification Sent!', {
+      description: 'Check your notification settings to verify'
+    })
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
