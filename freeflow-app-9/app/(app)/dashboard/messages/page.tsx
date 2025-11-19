@@ -105,7 +105,7 @@ export default function MessagesPage() {
   }, [messages])
 
   const handleAttachFile = () => {
-    console.log('📎 ATTACH FILE CLICKED')
+    console.log('📎 MESSAGES: Attach file clicked')
     const input = document.createElement('input')
     input.type = 'file'
     input.multiple = true
@@ -113,15 +113,18 @@ export default function MessagesPage() {
     input.onchange = (e: Event) => {
       const files = (e.target as HTMLInputElement).files
       if (files && files.length > 0) {
-        console.log('📁 FILES SELECTED:', files.length)
-        alert(`📎 ${files.length} file(s) selected and ready to attach!`)
+        console.log('📁 MESSAGES: Files selected:', files.length)
+        console.log('✅ MESSAGES: Files ready to attach')
+        toast.success('📎 ' + files.length + ' file(s) selected', {
+          description: 'Files ready to attach to message'
+        })
       }
     }
     input.click()
   }
 
   const handleAttachImage = () => {
-    console.log('🖼️ ATTACH IMAGE CLICKED')
+    console.log('🖼️ MESSAGES: Attach image clicked')
     const input = document.createElement('input')
     input.type = 'file'
     input.multiple = true
@@ -129,8 +132,11 @@ export default function MessagesPage() {
     input.onchange = (e: Event) => {
       const files = (e.target as HTMLInputElement).files
       if (files && files.length > 0) {
-        console.log('🖼️ IMAGES SELECTED:', files.length)
-        alert(`🖼️ ${files.length} image(s) selected and ready to send!`)
+        console.log('🖼️ MESSAGES: Images selected:', files.length)
+        console.log('✅ MESSAGES: Images ready to send')
+        toast.success('🖼️ ' + files.length + ' image(s) selected', {
+          description: 'Images ready to send in message'
+        })
       }
     }
     input.click()
@@ -138,12 +144,20 @@ export default function MessagesPage() {
 
   const handleRecordVoice = () => {
     const newState = !isRecordingVoice
-    console.log('🎤 VOICE RECORDING:', newState ? 'STARTED' : 'STOPPED')
+    console.log('🎤 MESSAGES: Voice recording:', newState ? 'STARTED' : 'STOPPED')
     setIsRecordingVoice(newState)
     if (newState) {
-      alert('🎤 Voice Recording Started\n\nSpeak your message. Click again to stop.')
+      console.log('🎤 MESSAGES: Recording started, speak your message')
+      console.log('📝 MESSAGES: Click again to stop recording')
+      toast.success('🎤 Voice Recording Started', {
+        description: 'Speak your message. Click again to stop.'
+      })
     } else {
-      alert('✅ Voice Recording Complete\n\nVoice message added to chat.')
+      console.log('✅ MESSAGES: Voice recording complete')
+      console.log('💬 MESSAGES: Voice message added to chat')
+      toast.success('✅ Voice Recording Complete', {
+        description: 'Voice message added to chat'
+      })
     }
   }
 
@@ -153,24 +167,36 @@ export default function MessagesPage() {
   }
 
   const handlePinChat = (chatId: number) => {
-    console.log('📌 PIN CHAT - ID:', chatId)
-    alert('📌 Chat pinned to top of list!')
+    console.log('📌 MESSAGES: Pin chat - ID:', chatId)
+    console.log('✅ MESSAGES: Chat pinned to top of list')
+    toast.success('📌 Chat pinned', {
+      description: 'Chat moved to top of conversation list'
+    })
   }
 
   const handleMuteChat = (chatId: number) => {
-    console.log('🔕 MUTE CHAT - ID:', chatId)
-    alert('🔕 Chat notifications muted.')
+    console.log('🔕 MESSAGES: Mute chat - ID:', chatId)
+    console.log('✅ MESSAGES: Chat notifications muted')
+    toast.success('🔕 Chat muted', {
+      description: 'Notifications turned off for this chat'
+    })
   }
 
   const handleArchiveChat = (chatId: number) => {
-    console.log('📁 ARCHIVE CHAT - ID:', chatId)
-    alert('📁 Chat moved to archive.')
+    console.log('📁 MESSAGES: Archive chat - ID:', chatId)
+    console.log('✅ MESSAGES: Chat moved to archive')
+    toast.success('📁 Chat archived', {
+      description: 'Chat moved to archive folder'
+    })
   }
 
   const handleDeleteChat = (chatId: number) => {
-    console.log('🗑️ DELETE CHAT - ID:', chatId)
-    if (confirm('⚠️ Delete this conversation?\n\nThis action cannot be undone.')) {
-      alert('🗑️ Chat deleted successfully.')
+    console.log('🗑️ MESSAGES: Delete chat - ID:', chatId)
+    if (confirm('⚠️ Delete this conversation? This action cannot be undone.')) {
+      console.log('✅ MESSAGES: Chat deleted successfully')
+      toast.success('🗑️ Chat deleted', {
+        description: 'Conversation permanently removed'
+      })
       if (selectedChat?.id === chatId) {
         setSelectedChat(null)
       }
@@ -178,35 +204,54 @@ export default function MessagesPage() {
   }
 
   const handleMarkAsRead = (chatId: number) => {
-    console.log('✅ MARK AS READ - ID:', chatId)
-    alert('✅ All messages marked as read.')
+    console.log('✅ MESSAGES: Mark as read - ID:', chatId)
+    console.log('✅ MESSAGES: All messages marked as read')
+    toast.success('✅ Marked as read', {
+      description: 'All messages in this chat'
+    })
   }
 
   const handleStartNewChat = () => {
-    console.log('➕ START NEW CHAT')
-    alert('➕ New Conversation\n\nSelect contacts to start a new chat.')
+    console.log('➕ MESSAGES: Start new chat')
+    console.log('📝 MESSAGES: Select contacts to begin conversation')
+    toast.info('➕ New Conversation', {
+      description: 'Select contacts to start a new chat'
+    })
   }
 
   const handleReactToMessage = (messageId: number, emoji: string) => {
-    console.log('❤️ REACT TO MESSAGE - ID:', messageId, 'Emoji:', emoji)
-    alert(`${emoji} Reaction added to message!`)
+    console.log('❤️ MESSAGES: React to message - ID:', messageId, 'Emoji:', emoji)
+    console.log('✅ MESSAGES: Reaction added:', emoji)
+    toast.success(emoji + ' Reaction added', {
+      description: 'Reaction added to message'
+    })
   }
 
   const handleReplyToMessage = (messageId: number) => {
-    console.log('↩️ REPLY TO MESSAGE - ID:', messageId)
-    alert('↩️ Reply mode activated\n\nType your reply below.')
+    console.log('↩️ MESSAGES: Reply to message - ID:', messageId)
+    console.log('📝 MESSAGES: Reply mode activated')
+    console.log('💬 MESSAGES: Type your reply in the input below')
+    toast.info('↩️ Reply mode activated', {
+      description: 'Type your reply below'
+    })
   }
 
   const handleForwardMessage = (messageId: number) => {
-    console.log('➡️ FORWARD MESSAGE - ID:', messageId)
-    alert('➡️ Select conversation to forward this message.')
+    console.log('➡️ MESSAGES: Forward message - ID:', messageId)
+    console.log('📝 MESSAGES: Select conversation to forward to')
+    toast.info('➡️ Forward message', {
+      description: 'Select conversation to forward this message'
+    })
   }
 
   const handleDeleteMessage = (messageId: number) => {
-    console.log('🗑️ DELETE MESSAGE - ID:', messageId)
-    if (confirm('⚠️ Delete this message?\n\nThis action cannot be undone.')) {
+    console.log('🗑️ MESSAGES: Delete message - ID:', messageId)
+    if (confirm('⚠️ Delete this message? This action cannot be undone.')) {
+      console.log('✅ MESSAGES: Message deleted successfully')
       setMessages(messages.filter(m => m.id !== messageId))
-      alert('🗑️ Message deleted.')
+      toast.success('🗑️ Message deleted', {
+        description: 'Message permanently removed'
+      })
     }
   }
 
@@ -294,17 +339,32 @@ export default function MessagesPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm" onClick={() => alert('Starting video call...')}>
+                  <Button variant="ghost" size="sm" onClick={() => {
+                    console.log('📹 MESSAGES: Starting video call with ' + selectedChat.name)
+                    toast.info('📹 Starting video call...', {
+                      description: 'Connecting to ' + selectedChat.name
+                    })
+                  }}>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => alert('Starting voice call...')}>
+                  <Button variant="ghost" size="sm" onClick={() => {
+                    console.log('📞 MESSAGES: Starting voice call with ' + selectedChat.name)
+                    toast.info('📞 Starting voice call...', {
+                      description: 'Calling ' + selectedChat.name
+                    })
+                  }}>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => alert('Chat settings...')}>
+                  <Button variant="ghost" size="sm" onClick={() => {
+                    console.log('⚙️ MESSAGES: Opening chat settings')
+                    toast.info('⚙️ Chat settings', {
+                      description: 'Configure chat preferences'
+                    })
+                  }}>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                     </svg>
