@@ -5,12 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  DollarSign, 
-  TrendingUp, 
-  TrendingDown, 
-  CreditCard, 
-  Wallet, 
+import { toast } from 'sonner'
+import {
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  CreditCard,
+  Wallet,
   FileText,
   Calendar,
   ArrowUpRight,
@@ -36,64 +37,82 @@ export default function FinancialHubPage() {
     console.log('💾 FINANCIAL HUB: Export report initiated')
     console.log('📊 FINANCIAL HUB: Gathering financial data for export')
     console.log('✅ FINANCIAL HUB: Report generated successfully')
-    alert('💾 Exporting comprehensive financial report...')
+    toast.success('💾 Exporting Financial Report', {
+      description: 'Comprehensive financial report is being generated'
+    })
   }
 
   const handleScheduleReview = () => {
     console.log('📅 FINANCIAL HUB: Schedule review initiated')
     console.log('🔍 FINANCIAL HUB: Checking calendar availability')
     console.log('✅ FINANCIAL HUB: Financial review scheduled')
-    alert('📅 Financial review scheduled')
+    toast.success('📅 Financial Review Scheduled', {
+      description: 'Your financial review has been successfully scheduled'
+    })
   }
 
   const handleAddClient = () => {
     console.log('➕ FINANCIAL HUB: Add client initiated')
     console.log('📝 FINANCIAL HUB: Opening client creation form')
-    alert('➕ Add new client')
+    toast.info('➕ Add New Client', {
+      description: 'Opening client creation form'
+    })
   }
 
   const handleEditClient = (id: number) => {
     console.log('✏️ FINANCIAL HUB: Edit client initiated')
-    console.log('🔍 FINANCIAL HUB: Loading client data:', id)
-    console.log('📝 FINANCIAL HUB: Opening edit form for client', id)
-    alert(`✏️ Edit client #${id}`)
+    console.log('🔍 FINANCIAL HUB: Loading client data: ' + id)
+    console.log('📝 FINANCIAL HUB: Opening edit form for client ' + id)
+    toast.info('✏️ Edit Client', {
+      description: 'Opening edit form for client #' + id
+    })
   }
 
   const handleDeleteClient = (id: number) => {
-    console.log('🗑️ FINANCIAL HUB: Delete client requested:', id)
+    console.log('🗑️ FINANCIAL HUB: Delete client requested: ' + id)
     if (confirm('Delete client?')) {
       console.log('✅ FINANCIAL HUB: Client deletion confirmed')
       console.log('💾 FINANCIAL HUB: Removing client from database')
-      alert('✅ Client deleted')
+      toast.success('✅ Client Deleted', {
+        description: 'Client has been successfully removed'
+      })
     } else {
       console.log('❌ FINANCIAL HUB: Client deletion cancelled')
     }
   }
 
   const handleViewClientDetails = (id: number) => {
-    console.log('👤 FINANCIAL HUB: View client details:', id)
+    console.log('👤 FINANCIAL HUB: View client details: ' + id)
     console.log('📊 FINANCIAL HUB: Loading client revenue data')
     console.log('📈 FINANCIAL HUB: Loading client project history')
-    alert(`👤 Viewing client #${id} details`)
+    toast.info('👤 Viewing Client Details', {
+      description: 'Loading details for client #' + id
+    })
   }
 
   const handleCreateGoal = () => {
     console.log('🎯 FINANCIAL HUB: Create goal initiated')
     console.log('📝 FINANCIAL HUB: Opening goal creation form')
-    alert('🎯 Create new financial goal')
+    toast.info('🎯 Create New Financial Goal', {
+      description: 'Opening goal creation form'
+    })
   }
 
   const handleEditGoal = (id: string) => {
-    console.log('✏️ FINANCIAL HUB: Edit goal:', id)
+    console.log('✏️ FINANCIAL HUB: Edit goal: ' + id)
     console.log('📊 FINANCIAL HUB: Loading goal progress data')
-    alert(`✏️ Edit goal: ${id}`)
+    toast.info('✏️ Edit Goal', {
+      description: 'Loading goal: ' + id
+    })
   }
 
   const handleDeleteGoal = (id: string) => {
-    console.log('🗑️ FINANCIAL HUB: Delete goal requested:', id)
+    console.log('🗑️ FINANCIAL HUB: Delete goal requested: ' + id)
     if (confirm('Delete goal?')) {
       console.log('✅ FINANCIAL HUB: Goal deletion confirmed')
-      alert('✅ Goal deleted')
+      toast.success('✅ Goal Deleted', {
+        description: 'Financial goal has been successfully removed'
+      })
     }
   }
 
@@ -101,33 +120,43 @@ export default function FinancialHubPage() {
     console.log('📊 FINANCIAL HUB: Track goal progress initiated')
     console.log('📈 FINANCIAL HUB: Calculating progress metrics')
     console.log('✅ FINANCIAL HUB: Progress data loaded')
-    alert('📊 Tracking goal progress...')
+    toast.info('📊 Tracking Goal Progress', {
+      description: 'Calculating your financial goal progress metrics'
+    })
   }
 
   const handleAddExpense = () => {
     console.log('➕ FINANCIAL HUB: Add expense initiated')
     console.log('📝 FINANCIAL HUB: Opening expense form')
-    alert('➕ Add expense')
+    toast.info('➕ Add Expense', {
+      description: 'Opening expense form'
+    })
   }
 
   const handleCategorizeExpense = () => {
     console.log('📁 FINANCIAL HUB: Categorize expense initiated')
     console.log('🏷️ FINANCIAL HUB: Loading expense categories')
-    alert('📁 Categorize expense')
+    toast.info('📁 Categorize Expense', {
+      description: 'Loading expense categories'
+    })
   }
 
   const handleViewExpenseBreakdown = () => {
     console.log('📊 FINANCIAL HUB: View expense breakdown')
     console.log('📈 FINANCIAL HUB: Calculating category percentages')
     console.log('✅ FINANCIAL HUB: Breakdown data ready')
-    alert('📊 Expense breakdown by category')
+    toast.info('📊 Expense Breakdown', {
+      description: 'Viewing breakdown by category'
+    })
   }
 
   const handleExportExpenses = () => {
     console.log('💾 FINANCIAL HUB: Export expenses initiated')
     console.log('📊 FINANCIAL HUB: Formatting expense data for export')
     console.log('✅ FINANCIAL HUB: Expenses exported successfully')
-    alert('💾 Exporting expenses...')
+    toast.success('💾 Exporting Expenses', {
+      description: 'Your expense data is being exported'
+    })
   }
 
   const handleGenerateInvoiceReport = () => {
@@ -135,13 +164,17 @@ export default function FinancialHubPage() {
     console.log('🔍 FINANCIAL HUB: Analyzing invoice data')
     console.log('📈 FINANCIAL HUB: Calculating totals and statistics')
     console.log('✅ FINANCIAL HUB: Invoice report generated')
-    alert('📊 Generating invoice report')
+    toast.success('📊 Generating Invoice Report', {
+      description: 'Analyzing invoice data and calculating statistics'
+    })
   }
 
   const handleBulkInvoiceAction = () => {
     console.log('📋 FINANCIAL HUB: Bulk invoice action initiated')
     console.log('📊 FINANCIAL HUB: Processing multiple invoices')
-    alert('📋 Bulk invoice operations')
+    toast.info('📋 Bulk Invoice Operations', {
+      description: 'Processing multiple invoices'
+    })
   }
 
   const handleSendInvoiceReminders = () => {
@@ -149,21 +182,27 @@ export default function FinancialHubPage() {
     console.log('🔍 FINANCIAL HUB: Finding overdue invoices')
     console.log('✉️ FINANCIAL HUB: Sending email reminders')
     console.log('✅ FINANCIAL HUB: Reminders sent successfully')
-    alert('📧 Sending payment reminders')
+    toast.success('📧 Sending Payment Reminders', {
+      description: 'Email reminders are being sent for overdue invoices'
+    })
   }
 
   const handleRecordPayment = (id: number) => {
-    console.log('💰 FINANCIAL HUB: Record payment for invoice:', id)
+    console.log('💰 FINANCIAL HUB: Record payment for invoice: ' + id)
     console.log('🔍 FINANCIAL HUB: Loading invoice details')
     console.log('💳 FINANCIAL HUB: Processing payment information')
-    alert(`💰 Record payment for invoice #${id}`)
+    toast.info('💰 Record Payment', {
+      description: 'Recording payment for invoice #' + id
+    })
   }
 
   const handleRefreshDashboard = () => {
     console.log('🔄 FINANCIAL HUB: Refresh dashboard initiated')
     console.log('📊 FINANCIAL HUB: Fetching latest financial data')
     console.log('✅ FINANCIAL HUB: Dashboard data refreshed')
-    alert('🔄 Refreshing dashboard data...')
+    toast.success('🔄 Refreshing Dashboard', {
+      description: 'Fetching latest financial data'
+    })
   }
 
   const handleGenerateFinancialForecast = () => {
@@ -171,7 +210,9 @@ export default function FinancialHubPage() {
     console.log('📊 FINANCIAL HUB: Analyzing historical data')
     console.log('📈 FINANCIAL HUB: Calculating projections')
     console.log('✅ FINANCIAL HUB: Forecast generated successfully')
-    alert('🔮 Generating financial forecast')
+    toast.success('🔮 Generating Financial Forecast', {
+      description: 'Analyzing historical data and calculating projections'
+    })
   }
 
   // Mock comprehensive financial data

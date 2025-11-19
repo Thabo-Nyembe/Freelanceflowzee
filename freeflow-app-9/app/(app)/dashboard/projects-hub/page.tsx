@@ -271,20 +271,19 @@ export default function ProjectsHubPage() {
 
   const handleShareProject = (projectId: string) => {
     const project = projects.find(p => p.id === projectId)
-    console.log('🔗 SHARE PROJECT')
-    console.log('📁 Project:', project?.title || projectId)
-    console.log('👥 Share options: Email, Link, Team, Client Portal')
-    console.log('🔐 Permissions: View, Comment, Edit')
+    console.log('🔗 PROJECTS HUB: Share project initiated')
+    console.log('📁 PROJECTS HUB: Project - ' + (project?.title || projectId))
+    console.log('👥 PROJECTS HUB: Share options available - Email, Link, Team, Client Portal')
+    console.log('🔐 PROJECTS HUB: Permissions - View, Comment, Edit')
 
-    const shareLink = `https://kazi.app/share/project/${projectId}`
-    console.log('📎 Share Link Generated:', shareLink)
-    console.log('✅ PROJECT SHARED - Link copied to clipboard')
+    const shareLink = 'https://kazi.app/share/project/' + projectId
+    console.log('📎 PROJECTS HUB: Share link generated - ' + shareLink)
+    console.log('✅ PROJECTS HUB: Link copied to clipboard')
+    console.log('📧 PROJECTS HUB: Share options - Send via email, Copy link, Set permissions, Track views, Revoke access')
 
-    toast.success(`Share link created for "${project?.title}"`, {
-      description: 'Link copied to clipboard'
+    toast.success('🔗 Project shared successfully!', {
+      description: 'Share link created for "' + (project?.title || 'project') + '" - Link copied to clipboard'
     })
-
-    alert('🔗 Project Shared Successfully!\n\nShare Link: ' + shareLink + '\n\nShare Options:\n• Send via email to team members\n• Copy link for client portal access\n• Set view/edit permissions\n• Track who viewed the project\n• Revoke access anytime')
   }
 
   const handleAddTeamMember = (projectId: string) => {
@@ -387,21 +386,24 @@ export default function ProjectsHubPage() {
 
   const handleViewTimeline = (projectId: string) => {
     const project = projects.find(p => p.id === projectId)
-    console.log('📅 VIEW PROJECT TIMELINE')
-    console.log('📁 Project:', project?.title || projectId)
-    console.log('🎯 Milestones:', '5 total (2 completed, 2 in-progress, 1 upcoming)')
-    console.log('📊 Timeline View: Gantt Chart')
-    console.log('🔄 Dependencies: 3 task dependencies mapped')
-    console.log('⏱️ Critical Path: 45 days')
+    console.log('📅 PROJECTS HUB: View project timeline')
+    console.log('📁 PROJECTS HUB: Project - ' + (project?.title || projectId))
+    console.log('🎯 PROJECTS HUB: Milestones - 5 total (2 completed, 2 in-progress, 1 upcoming)')
+    console.log('📊 PROJECTS HUB: Timeline view - Gantt Chart')
+    console.log('🔄 PROJECTS HUB: Dependencies - 3 task dependencies mapped')
+    console.log('⏱️ PROJECTS HUB: Critical path - 45 days')
+    console.log('✅ PROJECTS HUB: Timeline loaded successfully')
+    console.log('📈 PROJECTS HUB: Project on track for ' + formatDate(project?.end_date || new Date().toISOString()))
+    console.log('📋 PROJECTS HUB: Phase 1 Requirements - Completed')
+    console.log('📋 PROJECTS HUB: Phase 2 Design - Completed')
+    console.log('📋 PROJECTS HUB: Phase 3 Development - In Progress (60%)')
+    console.log('📋 PROJECTS HUB: Phase 4 Testing - In Progress (30%)')
+    console.log('📋 PROJECTS HUB: Phase 5 Deployment - Upcoming')
+    console.log('🎯 PROJECTS HUB: Next milestone - Development completion in 12 days')
 
-    console.log('✅ TIMELINE LOADED')
-    console.log('📈 Project on track for', formatDate(project?.end_date || new Date().toISOString()))
-
-    toast.success('Timeline view loaded', {
-      description: 'Viewing Gantt chart with milestones'
+    toast.success('📅 Timeline view loaded', {
+      description: 'Viewing Gantt chart with 5 milestones - Project on track'
     })
-
-    alert('📅 Project Timeline\n\nMilestones:\n✅ Phase 1: Requirements (Completed)\n✅ Phase 2: Design (Completed)\n🔄 Phase 3: Development (In Progress - 60%)\n🔄 Phase 4: Testing (In Progress - 30%)\n📋 Phase 5: Deployment (Upcoming)\n\nCritical Path: 45 days\nOn Track: Yes\nNext Milestone: Development completion in 12 days')
   }
 
   const handleAddFile = (projectId: string) => {
@@ -531,28 +533,34 @@ export default function ProjectsHubPage() {
 
   const handleGenerateReport = (projectId: string) => {
     const project = projects.find(p => p.id === projectId)
-    console.log('📊 GENERATE PROJECT REPORT')
-    console.log('📁 Project:', project?.title || projectId)
-    console.log('📈 Report Type: Comprehensive Project Summary')
-    console.log('📊 Including: Progress, Budget, Timeline, Team, Milestones')
-    console.log('🎨 Format: PDF with charts and graphs')
+    console.log('📊 PROJECTS HUB: Generate project report')
+    console.log('📁 PROJECTS HUB: Project - ' + (project?.title || projectId))
+    console.log('📈 PROJECTS HUB: Report type - Comprehensive Project Summary')
+    console.log('📊 PROJECTS HUB: Including - Progress, Budget, Timeline, Team, Milestones')
+    console.log('🎨 PROJECTS HUB: Format - PDF with charts and graphs')
 
-    console.log('⚙️ GENERATING REPORT...')
-    console.log('📊 Calculating metrics...')
-    console.log('📈 Creating visualizations...')
-    console.log('📄 Building PDF document...')
+    console.log('⚙️ PROJECTS HUB: Generating report...')
+    console.log('📊 PROJECTS HUB: Calculating metrics...')
+    console.log('📈 PROJECTS HUB: Creating visualizations...')
+    console.log('📄 PROJECTS HUB: Building PDF document...')
 
     setTimeout(() => {
-      console.log('✅ REPORT GENERATED')
-      console.log('📄 File: ' + (project?.title || 'project') + '-report.pdf')
-      console.log('💾 Size: 1.2 MB')
-      console.log('📧 Report ready for download and sharing')
+      const fileName = (project?.title || 'project') + '-report.pdf'
+      console.log('✅ PROJECTS HUB: Report generated successfully')
+      console.log('📄 PROJECTS HUB: File - ' + fileName)
+      console.log('💾 PROJECTS HUB: Size - 1.2 MB')
+      console.log('📧 PROJECTS HUB: Report ready for download and sharing')
+      console.log('📋 PROJECTS HUB: Executive Summary included')
+      console.log('📈 PROJECTS HUB: Progress Overview - ' + (project?.progress || 0) + '%')
+      console.log('💰 PROJECTS HUB: Budget Analysis - $' + (project?.spent || 0).toLocaleString() + ' spent of $' + (project?.budget || 0).toLocaleString())
+      console.log('📅 PROJECTS HUB: Timeline & Milestones included')
+      console.log('👥 PROJECTS HUB: Team Performance included')
+      console.log('⚠️ PROJECTS HUB: Risk Assessment included')
+      console.log('🎯 PROJECTS HUB: Next Steps outlined')
 
-      toast.success('Project report generated', {
-        description: 'PDF ready for download'
+      toast.success('📊 Project report generated!', {
+        description: 'Comprehensive summary PDF ready for download (1.2 MB)'
       })
-
-      alert('📊 Project Report Generated!\n\n' + (project?.title || 'Project') + ' - Comprehensive Summary\n\nIncluded Sections:\n• Executive Summary\n• Progress Overview (' + (project?.progress || 0) + '%)\n• Budget Analysis ($' + (project?.spent || 0).toLocaleString() + ' / $' + (project?.budget || 0).toLocaleString() + ')\n• Timeline & Milestones\n• Team Performance\n• Risk Assessment\n• Next Steps\n\nFormat: PDF (1.2 MB)\nReady to download and share with stakeholders')
     }, 1500)
   }
 
@@ -892,15 +900,17 @@ export default function ProjectsHubPage() {
           category: 'web-development'
         })
 
-        toast.success(result.message, {
-          description: `Project ID: ${result.projectId}`
-        })
+        console.log('✅ PROJECTS HUB: Project created successfully - ' + result.project.title)
+        console.log('🆔 PROJECTS HUB: Project ID - ' + result.projectId)
+        console.log('📋 PROJECTS HUB: Next steps - Set up milestones and deliverables')
+        console.log('👥 PROJECTS HUB: Next steps - Assign team members to project')
+        console.log('✅ PROJECTS HUB: Next steps - Create initial tasks and timeline')
+        console.log('📅 PROJECTS HUB: Next steps - Schedule kickoff meeting with client')
+        console.log('📊 PROJECTS HUB: Next steps - Set up project tracking and reporting')
 
-        console.log('🎊 SHOWING NEXT STEPS ALERT')
-        // Show next steps
-        setTimeout(() => {
-          alert(`✅ Project Created Successfully!\n\nNext Steps:\n• Set up project milestones and deliverables\n• Assign team members to the project\n• Create initial tasks and timeline\n• Schedule kickoff meeting with client\n• Set up project tracking and reporting`)
-        }, 500)
+        toast.success('✅ Project created successfully!', {
+          description: result.project.title + ' - Ready to add milestones and team members'
+        })
       } else {
         console.log('❌ PROJECT CREATION FAILED')
       }
@@ -958,22 +968,39 @@ export default function ProjectsHubPage() {
 
         // Show next steps based on status change
         if (newStatus === 'completed') {
-          console.log('🏆 PROJECT COMPLETED - SHOWING NEXT STEPS')
-        } else if (newStatus === 'active') {
-          console.log('🚀 PROJECT ACTIVATED - SHOWING NEXT STEPS')
-        } else if (newStatus === 'paused') {
-          console.log('⏸️ PROJECT PAUSED - SHOWING NEXT STEPS')
-        }
+          console.log('🏆 PROJECTS HUB: Project completed - ' + (project?.title || projectId))
+          console.log('📋 PROJECTS HUB: Next steps - Request final feedback from client')
+          console.log('📦 PROJECTS HUB: Next steps - Archive project files and documentation')
+          console.log('💰 PROJECTS HUB: Next steps - Send final invoice if applicable')
+          console.log('🎨 PROJECTS HUB: Next steps - Update portfolio with project showcase')
+          console.log('👥 PROJECTS HUB: Next steps - Schedule project retrospective with team')
 
-        setTimeout(() => {
-          if (newStatus === 'completed') {
-            alert(`✅ Project Completed!\n\nNext Steps:\n• Request final feedback from client\n• Archive project files and documentation\n• Send final invoice if applicable\n• Update portfolio with project showcase\n• Schedule project retrospective with team`)
-          } else if (newStatus === 'active') {
-            alert(`🚀 Project Started!\n\nNext Steps:\n• Review project scope and requirements\n• Set up communication channels with client\n• Create task breakdown and assign responsibilities\n• Schedule regular check-ins and updates\n• Begin tracking time and progress`)
-          } else if (newStatus === 'paused') {
-            alert(`⏸️ Project On Hold\n\nNext Steps:\n• Document current progress and status\n• Notify client and team members\n• Set expected resume date\n• Archive current work safely\n• Plan resource reallocation if needed`)
-          }
-        }, 500)
+          toast.info('🏆 Project completed!', {
+            description: 'Ready for final client feedback and portfolio showcase'
+          })
+        } else if (newStatus === 'active') {
+          console.log('🚀 PROJECTS HUB: Project activated - ' + (project?.title || projectId))
+          console.log('📋 PROJECTS HUB: Next steps - Review project scope and requirements')
+          console.log('💬 PROJECTS HUB: Next steps - Set up communication channels with client')
+          console.log('✅ PROJECTS HUB: Next steps - Create task breakdown and assign responsibilities')
+          console.log('📅 PROJECTS HUB: Next steps - Schedule regular check-ins and updates')
+          console.log('⏱️ PROJECTS HUB: Next steps - Begin tracking time and progress')
+
+          toast.info('🚀 Project started!', {
+            description: 'Review scope and set up communication channels'
+          })
+        } else if (newStatus === 'paused') {
+          console.log('⏸️ PROJECTS HUB: Project paused - ' + (project?.title || projectId))
+          console.log('📋 PROJECTS HUB: Next steps - Document current progress and status')
+          console.log('📧 PROJECTS HUB: Next steps - Notify client and team members')
+          console.log('📅 PROJECTS HUB: Next steps - Set expected resume date')
+          console.log('💾 PROJECTS HUB: Next steps - Archive current work safely')
+          console.log('👥 PROJECTS HUB: Next steps - Plan resource reallocation if needed')
+
+          toast.info('⏸️ Project on hold', {
+            description: 'Document progress and notify team members'
+          })
+        }
       } else {
         console.log('❌ STATUS UPDATE FAILED')
       }

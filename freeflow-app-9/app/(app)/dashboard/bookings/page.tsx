@@ -358,10 +358,12 @@ export default function BookingsPage() {
       const result = await response.json()
 
       if (result.success) {
-        toast.success('Booking created successfully!')
-        setTimeout(() => {
-          alert(`➕ Create New Booking\n\nNext Steps:\n• Schedule a new client appointment\n• Select service and duration\n• Choose available time slot\n• Add client contact information\n• Set payment terms\n• Send confirmation email`)
-        }, 500)
+        console.log('✨ BOOKINGS: Booking created successfully')
+        console.log('📋 BOOKINGS: Next steps: Schedule appointment, select service, choose time slot')
+        console.log('💼 BOOKINGS: Add client contact info, set payment terms, send confirmation')
+        toast.success('✨ Booking created successfully!', {
+          description: 'Client appointment scheduled and confirmation sent'
+        })
 
         // Show achievement if earned
         if (result.achievement) {
@@ -383,19 +385,26 @@ export default function BookingsPage() {
   }
   const handleEditBooking = (id: string) => {
     console.log('✏️ BOOKINGS: Edit booking initiated')
-    console.log('📋 BOOKINGS: Booking ID:', id)
+    console.log('📋 BOOKINGS: Booking ID: ' + id)
     console.log('📝 BOOKINGS: Loading booking details')
     console.log('✅ BOOKINGS: Edit form ready')
-    alert(`✏️ Edit Booking ${id}\n\nUpdate:\n• Date and time\n• Service selection\n• Client information\n• Payment details\n• Special requirements`)
+    toast.info('✏️ Edit Booking', {
+      description: 'Update date, time, service, client info, and payment details'
+    })
   }
 
   const handleCancelBooking = (id: string) => {
     console.log('❌ BOOKINGS: Cancel booking initiated')
-    console.log('📋 BOOKINGS: Booking ID:', id)
+    console.log('📋 BOOKINGS: Booking ID: ' + id)
     console.log('⚠️ BOOKINGS: Requesting confirmation')
     if (confirm('Cancel this booking?')) {
       console.log('✅ BOOKINGS: Booking cancelled successfully')
-      alert('✅ Booking cancelled\n\nNext steps:\n• Refund processed\n• Client notified\n• Calendar updated')
+      console.log('💰 BOOKINGS: Refund processed')
+      console.log('📧 BOOKINGS: Client notified')
+      console.log('📅 BOOKINGS: Calendar updated')
+      toast.success('✅ Booking cancelled', {
+        description: 'Refund processed, client notified, and calendar updated'
+      })
     }
   }
   const handleConfirmBooking = async (id: string) => {
@@ -431,34 +440,42 @@ export default function BookingsPage() {
   }
   const handleRescheduleBooking = (id: string) => {
     console.log('📅 BOOKINGS: Reschedule booking initiated')
-    console.log('📋 BOOKINGS: Booking ID:', id)
+    console.log('📋 BOOKINGS: Booking ID: ' + id)
     console.log('🕒 BOOKINGS: Opening date/time picker')
     console.log('✅ BOOKINGS: Reschedule dialog ready')
-    alert('📅 Reschedule Booking\n\nSelect new:\n• Date\n• Time slot\n• Send notification to client\n• Update calendar\n• Adjust payment if needed')
+    toast.info('📅 Reschedule Booking', {
+      description: 'Select new date, time slot, and send notification to client'
+    })
   }
 
   const handleViewDetails = (id: string) => {
     console.log('👁️ BOOKINGS: View details initiated')
-    console.log('📋 BOOKINGS: Booking ID:', id)
+    console.log('📋 BOOKINGS: Booking ID: ' + id)
     console.log('📝 BOOKINGS: Loading complete booking information')
     console.log('✅ BOOKINGS: Details ready')
-    alert(`👁️ Viewing Booking ${id}\n\nDetails:\n• Client information\n• Service details\n• Schedule\n• Payment status\n• Notes & requirements\n• Communication history`)
+    toast.info('👁️ Viewing Booking Details', {
+      description: 'Client info, service, schedule, payment, and communication history'
+    })
   }
 
   const handleSendReminder = (id: string) => {
     console.log('📧 BOOKINGS: Send reminder initiated')
-    console.log('📋 BOOKINGS: Booking ID:', id)
+    console.log('📋 BOOKINGS: Booking ID: ' + id)
     console.log('✉️ BOOKINGS: Preparing reminder email')
     console.log('✅ BOOKINGS: Reminder sent successfully')
-    alert('📧 Reminder Sent\n\nDelivered via:\n• Email\n• SMS (if available)\n• Push notification\n\nClient notified of upcoming appointment')
+    toast.success('📧 Reminder sent successfully', {
+      description: 'Delivered via email, SMS, and push notification'
+    })
   }
 
   const handleSendConfirmation = (id: string) => {
     console.log('📧 BOOKINGS: Send confirmation initiated')
-    console.log('📋 BOOKINGS: Booking ID:', id)
+    console.log('📋 BOOKINGS: Booking ID: ' + id)
     console.log('✉️ BOOKINGS: Generating confirmation email')
     console.log('✅ BOOKINGS: Confirmation sent')
-    alert('📧 Confirmation Email Sent\n\nIncludes:\n• Appointment details\n• Calendar invite\n• Meeting link (if virtual)\n• Preparation instructions\n• Contact information')
+    toast.success('📧 Confirmation email sent', {
+      description: 'Includes appointment details, calendar invite, and meeting link'
+    })
   }
   const handleMarkAsCompleted = async (id: string) => {
     console.log('✅ MARK AS COMPLETED - ID:', id)
@@ -496,28 +513,37 @@ export default function BookingsPage() {
   }
   const handleMarkAsNoShow = (id: string) => {
     console.log('⚠️ BOOKINGS: Mark as no-show initiated')
-    console.log('📋 BOOKINGS: Booking ID:', id)
+    console.log('📋 BOOKINGS: Booking ID: ' + id)
     console.log('📝 BOOKINGS: Updating booking status')
     console.log('✅ BOOKINGS: Marked as no-show')
-    alert('⚠️ Marked as No-Show\n\nActions taken:\n• Status updated\n• Client notification sent\n• Payment policy applied\n• Analytics updated\n• Follow-up scheduled')
+    toast.info('⚠️ Marked as no-show', {
+      description: 'Status updated, client notified, and follow-up scheduled'
+    })
   }
 
   const handleRefundPayment = (id: string) => {
     console.log('💸 BOOKINGS: Refund payment initiated')
-    console.log('📋 BOOKINGS: Booking ID:', id)
+    console.log('📋 BOOKINGS: Booking ID: ' + id)
     console.log('💳 BOOKINGS: Processing refund')
     if (confirm('Process refund for this payment?')) {
       console.log('✅ BOOKINGS: Refund processed successfully')
-      alert('💸 Refund Processed\n\nDetails:\n• Full amount refunded\n• Payment gateway notified\n• Client confirmation sent\n• Transaction recorded\n• Refund appears in 3-5 business days')
+      console.log('💰 BOOKINGS: Full amount refunded')
+      console.log('📧 BOOKINGS: Client confirmation sent')
+      console.log('📝 BOOKINGS: Transaction recorded')
+      toast.success('💸 Refund processed successfully', {
+        description: 'Client notified. Refund appears in 3-5 business days'
+      })
     }
   }
 
   const handleViewPayment = (id: string) => {
     console.log('💳 BOOKINGS: View payment details initiated')
-    console.log('📋 BOOKINGS: Booking ID:', id)
+    console.log('📋 BOOKINGS: Booking ID: ' + id)
     console.log('💰 BOOKINGS: Loading payment information')
     console.log('✅ BOOKINGS: Payment details ready')
-    alert('💳 Payment Details\n\nInformation:\n• Amount: $150\n• Method: Credit Card\n• Status: Paid\n• Transaction ID: TXN-2025-001\n• Date: Jan 12, 2025\n• Receipt: Available')
+    toast.info('💳 Payment Details', {
+      description: 'Amount: $150, Method: Credit Card, Status: Paid, Receipt available'
+    })
   }
 
   const handleExportBookings = () => {
@@ -525,7 +551,9 @@ export default function BookingsPage() {
     console.log('📊 BOOKINGS: Preparing export data')
     console.log('📁 BOOKINGS: Generating file')
     console.log('✅ BOOKINGS: Export complete')
-    alert('💾 Export Bookings\n\nFormats available:\n• CSV (Excel compatible)\n• PDF (Printable report)\n• Excel (.xlsx)\n• JSON (API data)\n\nIncludes:\n• All booking details\n• Client information\n• Payment status\n• Revenue summary')
+    toast.success('💾 Export bookings', {
+      description: 'Formats: CSV, PDF, Excel, JSON with all details and revenue summary'
+    })
   }
 
   const handlePrintSchedule = () => {
@@ -533,30 +561,38 @@ export default function BookingsPage() {
     console.log('📅 BOOKINGS: Formatting schedule')
     console.log('📄 BOOKINGS: Opening print dialog')
     console.log('✅ BOOKINGS: Print ready')
-    alert('🖨️ Printing Schedule\n\nIncludes:\n• Daily/weekly view\n• All appointments\n• Client contact info\n• Service details\n• Notes & requirements')
+    toast.info('🖨️ Printing schedule', {
+      description: 'Daily/weekly view with appointments, client info, and service details'
+    })
   }
 
   const handleSettings = () => {
     console.log('⚙️ BOOKINGS: Settings opened')
     console.log('🔧 BOOKINGS: Loading configuration')
     console.log('✅ BOOKINGS: Settings ready')
-    alert('⚙️ Booking Settings\n\nConfigure:\n• Business hours\n• Time zone\n• Booking window\n• Cancellation policy\n• Auto-confirm bookings\n• Reminder settings\n• Payment requirements\n• Email templates\n• SMS settings')
+    toast.info('⚙️ Booking Settings', {
+      description: 'Configure business hours, time zone, cancellation policy, and reminders'
+    })
   }
 
   const handleFilterByDate = (date: string) => {
     console.log('📅 BOOKINGS: Filter by date initiated')
-    console.log('📆 BOOKINGS: Selected date:', date)
+    console.log('📆 BOOKINGS: Selected date: ' + date)
     console.log('🔍 BOOKINGS: Applying filter')
     console.log('✅ BOOKINGS: Filter applied')
-    alert(`Filtering by date: ${date}`)
+    toast.info('📅 Filter applied', {
+      description: 'Showing bookings for: ' + date
+    })
   }
 
   const handleFilterByService = (service: string) => {
     console.log('🔍 BOOKINGS: Filter by service initiated')
-    console.log('📋 BOOKINGS: Service:', service)
+    console.log('📋 BOOKINGS: Service: ' + service)
     console.log('🎯 BOOKINGS: Applying filter')
     console.log('✅ BOOKINGS: Filter applied')
-    alert(`Filtering by service: ${service}`)
+    toast.info('🔍 Filter applied', {
+      description: 'Showing bookings for: ' + service
+    })
   }
 
   const handleSearch = (query: string) => {
@@ -572,24 +608,30 @@ export default function BookingsPage() {
     console.log('📊 BOOKINGS: Fetching latest data')
     console.log('💫 BOOKINGS: Updating UI')
     console.log('✅ BOOKINGS: Refresh complete')
-    alert('🔄 Refreshing Bookings\n\nUpdating:\n• Current bookings\n• Status changes\n• New appointments\n• Payment updates\n• Client information')
+    toast.success('🔄 Bookings refreshed', {
+      description: 'Updated bookings, status changes, and payment information'
+    })
   }
 
   const handleBulkAction = (action: string) => {
     console.log('📋 BOOKINGS: Bulk action initiated')
-    console.log('🎯 BOOKINGS: Action type:', action)
+    console.log('🎯 BOOKINGS: Action type: ' + action)
     console.log('📊 BOOKINGS: Processing selected bookings')
     console.log('✅ BOOKINGS: Bulk action complete')
-    alert(`📋 Bulk ${action}\n\nOperations:\n• Confirm all pending\n• Cancel multiple\n• Export selection\n• Send reminders\n• Update status\n\nResults: All selected bookings processed`)
+    toast.success('📋 Bulk action complete', {
+      description: 'All selected bookings processed: ' + action
+    })
   }
 
   // NEW COMPREHENSIVE HANDLERS
   const handleProcessPayment = (id: string) => {
     console.log('💳 BOOKINGS: Process payment initiated')
-    console.log('📋 BOOKINGS: Booking ID:', id)
+    console.log('📋 BOOKINGS: Booking ID: ' + id)
     console.log('💰 BOOKINGS: Loading payment methods')
     console.log('✅ BOOKINGS: Payment options ready')
-    alert('💳 Process Payment\n\nPayment Methods:\n• Credit/Debit Card\n• PayPal\n• Bank Transfer\n• Cryptocurrency\n\nFeatures:\n• Secure payment gateway\n• Instant confirmation\n• Receipt generation\n• Auto-invoice creation')
+    toast.info('💳 Process Payment', {
+      description: 'Secure payment: Card, PayPal, Bank Transfer, Crypto available'
+    })
   }
 
   const handleSendBulkReminders = () => {
@@ -597,7 +639,9 @@ export default function BookingsPage() {
     console.log('📊 BOOKINGS: Targeting upcoming bookings')
     console.log('✉️ BOOKINGS: Preparing reminder messages')
     console.log('✅ BOOKINGS: Bulk reminders sent')
-    alert('📧 Send Bulk Reminders\n\nOptions:\n• 24-hour reminders\n• 2-hour reminders\n• 15-minute reminders\n\nChannels:\n• Email\n• SMS\n• Push notifications\n\nStatus: 8 reminders sent successfully')
+    toast.success('📧 Bulk reminders sent', {
+      description: '8 reminders sent via email, SMS, and push notifications'
+    })
   }
 
   const handleImportBookings = () => {
@@ -605,23 +649,29 @@ export default function BookingsPage() {
     console.log('📁 BOOKINGS: Opening file selector')
     console.log('🔄 BOOKINGS: Ready to import')
     console.log('✅ BOOKINGS: Import ready')
-    alert('📥 Import Bookings\n\nSupported Formats:\n• CSV (Comma-separated)\n• Excel (.xlsx)\n• Google Calendar sync\n• iCal (.ics)\n• Outlook integration\n\nFeatures:\n• Field mapping\n• Preview before import\n• Duplicate detection\n• Auto-validation')
+    toast.info('📥 Import Bookings', {
+      description: 'Supports CSV, Excel, Google Calendar, iCal, and Outlook'
+    })
   }
 
   const handleGenerateInvoice = (id: string) => {
     console.log('📄 BOOKINGS: Generate invoice initiated')
-    console.log('📋 BOOKINGS: Booking ID:', id)
+    console.log('📋 BOOKINGS: Booking ID: ' + id)
     console.log('💰 BOOKINGS: Calculating totals')
     console.log('✅ BOOKINGS: Invoice generated')
-    alert(`📄 Generate Invoice\n\nInvoice #INV-2025-${id}\n\nDetails:\n• Service: Brand Strategy\n• Amount: $150\n• Tax: $15 (10%)\n• Total: $165\n\nPayment Terms: Net 30\nDue Date: Feb 11, 2025\n\nActions:\n• Send to client\n• Download PDF\n• Mark as paid\n• Schedule reminder`)
+    toast.success('📄 Invoice generated', {
+      description: 'Invoice #INV-2025-' + id + ' - Total: $165, Due: Feb 11, 2025'
+    })
   }
 
   const handleSetupRecurring = (id: string) => {
     console.log('🔄 BOOKINGS: Setup recurring booking initiated')
-    console.log('📋 BOOKINGS: Booking ID:', id)
+    console.log('📋 BOOKINGS: Booking ID: ' + id)
     console.log('📅 BOOKINGS: Opening recurrence settings')
     console.log('✅ BOOKINGS: Recurrence setup ready')
-    alert('🔄 Setup Recurring Booking\n\nPatterns:\n• Daily (every day)\n• Weekly (same day/time)\n• Bi-weekly (every 2 weeks)\n• Monthly (same date)\n• Custom schedule\n\nSettings:\n• Start date\n• End date or occurrence count\n• Days of week\n• Time slot\n• Auto-confirm\n• Client notification')
+    toast.info('🔄 Setup Recurring Booking', {
+      description: 'Choose pattern: Daily, Weekly, Bi-weekly, Monthly, or Custom'
+    })
   }
 
   const handleSetAvailability = () => {
@@ -629,7 +679,9 @@ export default function BookingsPage() {
     console.log('📅 BOOKINGS: Loading current availability')
     console.log('🔧 BOOKINGS: Opening configuration')
     console.log('✅ BOOKINGS: Availability settings ready')
-    alert('⏰ Set Availability\n\nConfigure:\n• Working hours (9 AM - 5 PM)\n• Break times (12 PM - 1 PM)\n• Buffer between bookings (15 min)\n• Maximum bookings per day (8)\n• Time zone (EST)\n• Blocked dates\n• Holiday schedule\n\nCurrent: Mon-Fri, 9AM-5PM')
+    toast.info('⏰ Set Availability', {
+      description: 'Configure working hours, breaks, time zone, and holiday schedule'
+    })
   }
 
   const handleManageServices = () => {
@@ -637,15 +689,19 @@ export default function BookingsPage() {
     console.log('📊 BOOKINGS: Loading service list')
     console.log('🔧 BOOKINGS: Services configuration ready')
     console.log('✅ BOOKINGS: Service management ready')
-    alert('🎯 Manage Services\n\nActive Services (4):\n• Brand Strategy - $150/60min\n• Website Consultation - $225/90min\n• Logo Design Review - $120/45min\n• Marketing Strategy - $300/120min\n\nActions:\n• Add new service\n• Edit pricing\n• Set durations\n• Configure availability\n• Add descriptions\n• Upload images\n• Set booking limits')
+    toast.info('🎯 Manage Services', {
+      description: '4 active services - Edit pricing, durations, and availability'
+    })
   }
 
   const handleAddToCalendar = (id: string) => {
     console.log('📅 BOOKINGS: Add to calendar initiated')
-    console.log('📋 BOOKINGS: Booking ID:', id)
+    console.log('📋 BOOKINGS: Booking ID: ' + id)
     console.log('🔄 BOOKINGS: Calendar integration starting')
     console.log('✅ BOOKINGS: Calendar options ready')
-    alert(`📅 Add to Calendar\n\nBooking: ${id}\n\nIntegrations:\n• Google Calendar\n• Apple Calendar\n• Outlook Calendar\n• iCal file export\n\nIncludes:\n• Automatic reminders\n• Video call link\n• Client details\n• Meeting notes\n\nSync: Two-way sync enabled`)
+    toast.info('📅 Add to Calendar', {
+      description: 'Google, Apple, Outlook calendars with two-way sync enabled'
+    })
   }
 
   const handleBlockTimeSlot = () => {
@@ -653,15 +709,19 @@ export default function BookingsPage() {
     console.log('📅 BOOKINGS: Opening time slot selector')
     console.log('⏰ BOOKINGS: Block settings ready')
     console.log('✅ BOOKINGS: Ready to block time')
-    alert('🚫 Block Time Slot\n\nBlock Types:\n• One-time block\n• Recurring block\n• Vacation/Holiday\n• Buffer time\n• Personal time\n\nSettings:\n• Date range selection\n• Time range selection\n• Recurring pattern\n• Block reason\n• Notification to clients')
+    toast.info('🚫 Block Time Slot', {
+      description: 'Choose block type: One-time, Recurring, Vacation, or Personal'
+    })
   }
 
   const handleViewClientHistory = (clientName: string) => {
     console.log('👤 BOOKINGS: View client history initiated')
-    console.log('📋 BOOKINGS: Client:', clientName)
+    console.log('📋 BOOKINGS: Client: ' + clientName)
     console.log('📊 BOOKINGS: Loading client data')
     console.log('✅ BOOKINGS: Client history ready')
-    alert(`👤 Client History: ${clientName}\n\nStatistics:\n• Total Bookings: 12\n• Total Spent: $1,800\n• Last Booking: Jan 10, 2025\n• Average Value: $150\n• Client Since: Mar 2024\n• Status: VIP\n\nPreferences:\n• Preferred Service: Brand Strategy\n• Usual Time: 10 AM\n• Payment Method: Credit Card\n\nActions:\n• View all bookings\n• Send special offer\n• Request feedback\n• Book new appointment`)
+    toast.info('👤 Client History: ' + clientName, {
+      description: '12 bookings, $1,800 spent, VIP status - Last booking: Jan 10, 2025'
+    })
   }
 
   const handleViewBookingAnalytics = () => {
@@ -669,7 +729,12 @@ export default function BookingsPage() {
     console.log('📈 BOOKINGS: Loading analytics data')
     console.log('🎯 BOOKINGS: Calculating metrics')
     console.log('✅ BOOKINGS: Analytics dashboard ready')
-    alert('📊 Booking Analytics\n\n📈 Performance Metrics:\n• Total Bookings: 28 (+15% ↑)\n• Revenue: $4,200 (+12% ↑)\n• Average Booking Value: $150\n• Conversion Rate: 85%\n• Show-up Rate: 94%\n• Rebooking Rate: 68%\n\n⏰ Peak Times:\n• Best Hours: 10AM-12PM (35%)\n• Best Day: Tuesday\n• Top Service: Brand Strategy\n\n💡 AI Insights:\n• Increase Tuesday availability\n• Offer 10AM slots premium pricing\n• Bundle popular services\n• Target rebooking at 30-day mark')
+    console.log('📈 BOOKINGS: Performance - 28 bookings, $4,200 revenue, 85% conversion')
+    console.log('⏰ BOOKINGS: Peak times - Tuesday 10AM-12PM, Brand Strategy top service')
+    console.log('💡 BOOKINGS: AI Insights - Increase Tuesday availability, premium pricing')
+    toast.info('📊 Booking Analytics', {
+      description: '28 bookings (+15%), $4,200 revenue (+12%), 85% conversion, 94% show-up'
+    })
   }
 
   // Stats

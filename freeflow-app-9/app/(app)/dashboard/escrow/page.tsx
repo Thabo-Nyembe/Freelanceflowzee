@@ -531,10 +531,14 @@ export default function EscrowPage() {
           })
         }
 
-        // Show next steps alert
+        // Show next steps notification
         if (result.nextSteps && result.nextSteps.length > 0) {
           setTimeout(() => {
-            alert(`Next Steps:\n\n${result.nextSteps.join('\n')}`)
+            console.log('✨ ESCROW: Next steps available')
+            console.log('📋 ESCROW: Steps - ' + result.nextSteps.join(', '))
+            toast.info('Next Steps Available', {
+              description: result.nextSteps.join(' • ')
+            })
           }, 500)
         }
       }
@@ -590,15 +594,17 @@ export default function EscrowPage() {
           toast.success(result.message)
         }
 
-        // Show payout details alert
+        // Show payout details notification
         if (result.netAmount) {
           setTimeout(() => {
-            alert(`Payout Details:
-Amount: $${result.amount}
-Processing Fee: $${result.processingFee.toFixed(2)}
-Net Amount: $${result.netAmount.toFixed(2)}
-
-Estimated Arrival: ${result.estimatedArrival}`)
+            console.log('✨ ESCROW: Payout details available')
+            console.log('💰 ESCROW: Amount - $' + result.amount)
+            console.log('💳 ESCROW: Processing Fee - $' + result.processingFee.toFixed(2))
+            console.log('💵 ESCROW: Net Amount - $' + result.netAmount.toFixed(2))
+            console.log('📅 ESCROW: Estimated Arrival - ' + result.estimatedArrival)
+            toast.success('Payout Details', {
+              description: 'Amount: $' + result.amount + ' | Net: $' + result.netAmount.toFixed(2) + ' | Arrives: ' + result.estimatedArrival
+            })
           }, 500)
         }
       }
@@ -641,10 +647,14 @@ Estimated Arrival: ${result.estimatedArrival}`)
           description: `Completed at: ${new Date(result.completedAt).toLocaleString()}`
         })
 
-        // Show next steps alert
+        // Show next steps notification
         if (result.nextSteps && result.nextSteps.length > 0) {
           setTimeout(() => {
-            alert(`Next Steps:\n\n${result.nextSteps.join('\n')}`)
+            console.log('✨ ESCROW: Milestone completion - next steps available')
+            console.log('📋 ESCROW: Next steps - ' + result.nextSteps.join(', '))
+            toast.info('Next Steps', {
+              description: result.nextSteps.join(' • ')
+            })
           }, 500)
         }
       }
@@ -669,96 +679,157 @@ Estimated Arrival: ${result.estimatedArrival}`)
   }
 
   const handleEditDeposit = (depositId: string) => {
-    console.log('✏️ EDIT DEPOSIT:', depositId)
-    alert(`✏️ Edit Deposit #${depositId}\n\nUpdate deposit details, milestones, and payment terms.`)
+    console.log('✨ ESCROW: Edit deposit action initiated')
+    console.log('📝 ESCROW: Deposit ID - ' + depositId)
+    toast.info('Edit Deposit', {
+      description: 'Update deposit details, milestones, and payment terms'
+    })
   }
 
   const handleDeleteDeposit = (depositId: string) => {
-    console.log('🗑️ DELETE DEPOSIT:', depositId)
+    console.log('✨ ESCROW: Delete deposit action initiated')
+    console.log('📝 ESCROW: Deposit ID - ' + depositId)
     if (confirm('⚠️ Delete Escrow Deposit?\n\nThis action cannot be undone.\n\nAre you sure?')) {
+      console.log('✅ ESCROW: Deposit deletion confirmed')
+      console.log('🗑️ ESCROW: Removing deposit - ' + depositId)
       dispatch({ type: 'DELETE_DEPOSIT', depositId })
-      alert('✅ Deposit deleted successfully!')
+      toast.success('Deposit Deleted', {
+        description: 'Escrow deposit has been removed successfully'
+      })
     }
   }
 
   const handleViewContract = (depositId: string) => {
-    console.log('📄 VIEW CONTRACT:', depositId)
-    alert('📄 Opening contract document...')
+    console.log('✨ ESCROW: View contract action initiated')
+    console.log('📄 ESCROW: Deposit ID - ' + depositId)
+    toast.info('Opening Contract', {
+      description: 'Contract document is being loaded'
+    })
   }
 
   const handleUploadContract = (depositId: string) => {
-    console.log('📤 UPLOAD CONTRACT:', depositId)
+    console.log('✨ ESCROW: Upload contract action initiated')
+    console.log('📤 ESCROW: Deposit ID - ' + depositId)
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = '.pdf,.doc,.docx'
     input.onchange = (e: Event) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
-        console.log('✅ CONTRACT UPLOADED:', file.name)
-        alert(`✅ Contract Uploaded!\n\nFile: ${file.name}\n\nContract has been attached to deposit.`)
+        console.log('✅ ESCROW: Contract uploaded successfully')
+        console.log('📄 ESCROW: File name - ' + file.name)
+        console.log('💾 ESCROW: File size - ' + file.size + ' bytes')
+        toast.success('Contract Uploaded', {
+          description: 'File: ' + file.name + ' has been attached to deposit'
+        })
       }
     }
     input.click()
   }
 
   const handleSendNotification = (depositId: string) => {
-    console.log('📧 SEND NOTIFICATION:', depositId)
-    alert('📧 Notification Sent\n\nClient has been notified about deposit status update.')
+    console.log('✨ ESCROW: Send notification action initiated')
+    console.log('📧 ESCROW: Deposit ID - ' + depositId)
+    console.log('📨 ESCROW: Notifying client about status update')
+    toast.success('Notification Sent', {
+      description: 'Client has been notified about deposit status update'
+    })
   }
 
   const handleDisputeResolution = (depositId: string) => {
-    console.log('⚖️ DISPUTE RESOLUTION:', depositId)
+    console.log('✨ ESCROW: Dispute resolution action initiated')
+    console.log('⚖️ ESCROW: Deposit ID - ' + depositId)
     const reason = prompt('Enter dispute reason:')
     if (reason) {
+      console.log('📝 ESCROW: Dispute reason - ' + reason)
+      console.log('⚖️ ESCROW: Submitting dispute for review')
       dispatch({ type: 'DISPUTE_DEPOSIT', depositId, reason })
-      alert('⚖️ Dispute Filed\n\nDispute has been submitted for review.')
+      toast.info('Dispute Filed', {
+        description: 'Dispute has been submitted for review'
+      })
     }
   }
 
   const handleDownloadReceipt = (depositId: string) => {
-    console.log('📥 DOWNLOAD RECEIPT:', depositId)
-    alert('📥 Downloading receipt...\n\nReceipt will be saved as PDF.')
+    console.log('✨ ESCROW: Download receipt action initiated')
+    console.log('📥 ESCROW: Deposit ID - ' + depositId)
+    console.log('📄 ESCROW: Generating PDF receipt')
+    toast.info('Downloading Receipt', {
+      description: 'Receipt will be saved as PDF'
+    })
   }
 
   const handleViewTransactionHistory = (depositId: string) => {
-    console.log('📊 TRANSACTION HISTORY:', depositId)
-    alert('📊 Transaction History\n\nShowing all transactions for this deposit.')
+    console.log('✨ ESCROW: View transaction history action initiated')
+    console.log('📊 ESCROW: Deposit ID - ' + depositId)
+    console.log('📋 ESCROW: Loading transaction history')
+    toast.info('Transaction History', {
+      description: 'Showing all transactions for this deposit'
+    })
   }
 
   const handleAddNotes = (depositId: string) => {
-    console.log('📝 ADD NOTES:', depositId)
+    console.log('✨ ESCROW: Add notes action initiated')
+    console.log('📝 ESCROW: Deposit ID - ' + depositId)
     const notes = prompt('Enter notes:')
     if (notes) {
+      console.log('📝 ESCROW: Notes content - ' + notes)
+      console.log('✅ ESCROW: Updating deposit with new notes')
       dispatch({ type: 'UPDATE_DEPOSIT', depositId, updates: { notes } })
-      alert('✅ Notes added successfully!')
+      toast.success('Notes Added', {
+        description: 'Notes have been saved to deposit'
+      })
     }
   }
 
   const handleRequestApproval = (depositId: string) => {
-    console.log('✋ REQUEST APPROVAL:', depositId)
-    alert('✋ Approval Requested\n\nClient will receive approval request notification.')
+    console.log('✨ ESCROW: Request approval action initiated')
+    console.log('✋ ESCROW: Deposit ID - ' + depositId)
+    console.log('📨 ESCROW: Sending approval request to client')
+    toast.success('Approval Requested', {
+      description: 'Client will receive approval request notification'
+    })
   }
 
   const handleRefundDeposit = (depositId: string) => {
-    console.log('💸 REFUND DEPOSIT:', depositId)
+    console.log('✨ ESCROW: Refund deposit action initiated')
+    console.log('💸 ESCROW: Deposit ID - ' + depositId)
     if (confirm('Refund this deposit to client?\n\nThis will return funds to client account.')) {
-      alert('💸 Refund Processed\n\nFunds will be returned to client within 5-7 business days.')
+      console.log('✅ ESCROW: Refund confirmed')
+      console.log('💰 ESCROW: Processing refund to client')
+      toast.success('Refund Processed', {
+        description: 'Funds will be returned to client within 5-7 business days'
+      })
     }
   }
 
   const handleUpdatePaymentMethod = (depositId: string) => {
-    console.log('💳 UPDATE PAYMENT:', depositId)
-    alert('💳 Update Payment Method\n\nClient can update their payment details.')
+    console.log('✨ ESCROW: Update payment method action initiated')
+    console.log('💳 ESCROW: Deposit ID - ' + depositId)
+    console.log('🔄 ESCROW: Opening payment method update form')
+    toast.info('Update Payment Method', {
+      description: 'Client can update their payment details'
+    })
   }
 
   const handleGenerateInvoice = (depositId: string) => {
-    console.log('🧾 GENERATE INVOICE:', depositId)
-    alert('🧾 Invoice Generated\n\nInvoice has been created and sent to client.')
+    console.log('✨ ESCROW: Generate invoice action initiated')
+    console.log('🧾 ESCROW: Deposit ID - ' + depositId)
+    console.log('📄 ESCROW: Creating invoice document')
+    console.log('📧 ESCROW: Sending invoice to client')
+    toast.success('Invoice Generated', {
+      description: 'Invoice has been created and sent to client'
+    })
   }
 
   const handleExportEscrowReport = () => {
-    console.log('💾 EXPORT ESCROW REPORT')
-    alert('💾 Exporting Escrow Report\n\nFormat: PDF\nIncluding all deposits and transactions')
+    console.log('✨ ESCROW: Export report action initiated')
+    console.log('💾 ESCROW: Report format - PDF')
+    console.log('📊 ESCROW: Including all deposits and transactions')
+    console.log('📁 ESCROW: Generating report file')
+    toast.info('Exporting Report', {
+      description: 'PDF report including all deposits and transactions'
+    })
   }
 
   const handleFilterByStatus = (filter: EscrowState['filter']) => {
@@ -772,25 +843,43 @@ Estimated Arrival: ${result.estimatedArrival}`)
   }
 
   const handleEditMilestone = (depositId: string, milestoneId: string) => {
-    console.log('✏️ EDIT MILESTONE:', milestoneId)
-    alert(`✏️ Edit Milestone\n\nUpdate milestone details and amount.`)
+    console.log('✨ ESCROW: Edit milestone action initiated')
+    console.log('📝 ESCROW: Deposit ID - ' + depositId)
+    console.log('📋 ESCROW: Milestone ID - ' + milestoneId)
+    toast.info('Edit Milestone', {
+      description: 'Update milestone details and amount'
+    })
   }
 
   const handleDeleteMilestone = (depositId: string, milestoneId: string) => {
-    console.log('🗑️ DELETE MILESTONE:', milestoneId)
+    console.log('✨ ESCROW: Delete milestone action initiated')
+    console.log('📝 ESCROW: Deposit ID - ' + depositId)
+    console.log('📋 ESCROW: Milestone ID - ' + milestoneId)
     if (confirm('Delete this milestone?')) {
-      alert('✅ Milestone deleted!')
+      console.log('✅ ESCROW: Milestone deletion confirmed')
+      console.log('🗑️ ESCROW: Removing milestone - ' + milestoneId)
+      toast.success('Milestone Deleted', {
+        description: 'Milestone has been removed successfully'
+      })
     }
   }
 
   const handleAddMilestone = (depositId: string) => {
-    console.log('➕ ADD MILESTONE:', depositId)
-    alert('➕ Add Milestone\n\nCreate a new milestone for this deposit.')
+    console.log('✨ ESCROW: Add milestone action initiated')
+    console.log('➕ ESCROW: Deposit ID - ' + depositId)
+    console.log('📋 ESCROW: Opening milestone creation form')
+    toast.info('Add Milestone', {
+      description: 'Create a new milestone for this deposit'
+    })
   }
 
   const handleViewDepositDetails = (depositId: string) => {
-    console.log('👁️ VIEW DETAILS:', depositId)
-    alert('👁️ Viewing detailed deposit information...')
+    console.log('✨ ESCROW: View deposit details action initiated')
+    console.log('👁️ ESCROW: Deposit ID - ' + depositId)
+    console.log('📊 ESCROW: Loading detailed deposit information')
+    toast.info('Viewing Details', {
+      description: 'Loading detailed deposit information'
+    })
   }
 
   return (
@@ -1282,7 +1371,14 @@ Estimated Arrival: ${result.estimatedArrival}`)
                           {deposit.status === 'released' && (
                             <Button
                               variant="outline"
-                              onClick={() => alert('Receipt downloaded!')}
+                              onClick={() => {
+                                console.log('✨ ESCROW: Download receipt action initiated')
+                                console.log('📄 ESCROW: Deposit ID - ' + deposit.id)
+                                console.log('📥 ESCROW: Generating receipt PDF')
+                                toast.success('Receipt Downloaded', {
+                                  description: 'Receipt has been saved to your device'
+                                })
+                              }}
                             >
                               <Receipt className="w-4 h-4 mr-1" />
                               Receipt
@@ -1293,7 +1389,14 @@ Estimated Arrival: ${result.estimatedArrival}`)
                             <Button
                               variant="outline"
                               className="text-red-600 border-red-200"
-                              onClick={() => alert('Dispute details: ' + deposit.disputeReason)}
+                              onClick={() => {
+                                console.log('✨ ESCROW: View dispute action initiated')
+                                console.log('⚖️ ESCROW: Deposit ID - ' + deposit.id)
+                                console.log('📝 ESCROW: Dispute reason - ' + (deposit.disputeReason || 'Not specified'))
+                                toast.info('Dispute Details', {
+                                  description: deposit.disputeReason || 'No reason specified'
+                                })
+                              }}
                             >
                               <AlertCircle className="w-4 h-4 mr-1" />
                               View Dispute
@@ -1302,7 +1405,15 @@ Estimated Arrival: ${result.estimatedArrival}`)
                           
                           <Button
                             variant="outline"
-                            onClick={() => setSelectedDeposit(deposit)}
+                            onClick={() => {
+                              console.log('✨ ESCROW: View details action initiated')
+                              console.log('📊 ESCROW: Deposit ID - ' + deposit.id)
+                              console.log('📋 ESCROW: Project - ' + deposit.projectTitle)
+                              _setSelectedDeposit(deposit)
+                              toast.info('Deposit Details', {
+                                description: 'Viewing details for ' + deposit.projectTitle
+                              })
+                            }}
                           >
                             <Eye className="w-4 h-4 mr-1" />
                             Details

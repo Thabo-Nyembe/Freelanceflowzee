@@ -4,6 +4,7 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 import {
   Users,
   UserPlus,
@@ -90,26 +91,188 @@ export default function ClientsPage() {
   const [query, setQuery] = useState('')
 
   // Handlers
-  const handleAddClient = () => { console.log('➕ ADD'); alert('➕ Add Client') }
-  const handleViewClient = (id: string) => { console.log('👁️:', id); alert(`👁️ View ${id}`) }
-  const handleEditClient = (id: string) => { console.log('✏️:', id); alert(`✏️ Edit ${id}`) }
-  const handleDeleteClient = (id: string) => { console.log('🗑️:', id); confirm('Delete client?') && alert('✅ Deleted') }
-  const handleSendMessage = (id: string) => { console.log('💬:', id); alert(`💬 Message ${id}`) }
-  const handleSendEmail = (id: string) => { console.log('📧:', id); alert(`📧 Email ${id}`) }
-  const handleCallClient = (id: string) => { console.log('📞:', id); alert(`📞 Call ${id}`) }
-  const handleViewProjects = (id: string) => { console.log('📁:', id); alert(`📁 Projects ${id}`) }
-  const handleAddProject = (id: string) => { console.log('➕📁:', id); alert(`➕ Add Project ${id}`) }
-  const handleUpgradeToVIP = (id: string) => { console.log('⭐:', id); alert(`⭐ VIP ${id}`) }
-  const handleChangeStatus = (id: string, status: string) => { console.log('🔄:', id, status); alert(`🔄 ${status}`) }
-  const handleExportClients = () => { console.log('💾 EXP'); alert('💾 Export') }
-  const handleImportClients = () => { console.log('📥 IMP'); alert('📥 Import') }
-  const handleBulkAction = (action: string) => { console.log('☑️:', action); alert(`☑️ ${action}`) }
-  const handleFilterStatus = (status: string) => { console.log('🔍:', status); alert(`🔍 Filter ${status}`) }
-  const handleSortClients = (by: string) => { console.log('🔃:', by); alert(`🔃 Sort ${by}`) }
-  const handleViewAnalytics = (id: string) => { console.log('📊:', id); alert(`📊 Analytics ${id}`) }
-  const handleSendInvoice = (id: string) => { console.log('💰:', id); alert(`💰 Invoice ${id}`) }
-  const handleScheduleMeeting = (id: string) => { console.log('📅:', id); alert(`📅 Meeting ${id}`) }
-  const handleViewHistory = (id: string) => { console.log('📜:', id); alert(`📜 History ${id}`) }
+  const handleAddClient = () => {
+    console.log('✨ CLIENTS: Add client action initiated')
+    console.log('📝 CLIENTS: Opening add client form')
+    toast.success('✨ Add Client', {
+      description: 'Client form will open here'
+    })
+  }
+
+  const handleViewClient = (id: string) => {
+    console.log('✨ CLIENTS: View client action initiated')
+    console.log('📝 CLIENTS: Client ID: ' + id)
+    console.log('📋 CLIENTS: Opening client profile view')
+    toast.info('👁️ View Client', {
+      description: 'Opening profile for ' + id
+    })
+  }
+
+  const handleEditClient = (id: string) => {
+    console.log('✨ CLIENTS: Edit client action initiated')
+    console.log('📝 CLIENTS: Client ID: ' + id)
+    console.log('📋 CLIENTS: Opening client edit form')
+    toast.info('✏️ Edit Client', {
+      description: 'Opening edit form for ' + id
+    })
+  }
+
+  const handleDeleteClient = (id: string) => {
+    console.log('✨ CLIENTS: Delete client action initiated')
+    console.log('📝 CLIENTS: Client ID: ' + id)
+    if (confirm('Delete client?')) {
+      console.log('✅ CLIENTS: Client deletion confirmed')
+      console.log('📋 CLIENTS: Removing client from database')
+      toast.success('✅ Client Deleted', {
+        description: 'Client ' + id + ' has been removed'
+      })
+    }
+  }
+
+  const handleSendMessage = (id: string) => {
+    console.log('✨ CLIENTS: Send message action initiated')
+    console.log('📝 CLIENTS: Client ID: ' + id)
+    console.log('💬 CLIENTS: Opening messaging interface')
+    toast.success('💬 Message Client', {
+      description: 'Opening chat with ' + id
+    })
+  }
+
+  const handleSendEmail = (id: string) => {
+    console.log('✨ CLIENTS: Send email action initiated')
+    console.log('📝 CLIENTS: Client ID: ' + id)
+    console.log('📧 CLIENTS: Opening email composer')
+    toast.success('📧 Email Client', {
+      description: 'Opening email for ' + id
+    })
+  }
+
+  const handleCallClient = (id: string) => {
+    console.log('✨ CLIENTS: Call client action initiated')
+    console.log('📝 CLIENTS: Client ID: ' + id)
+    console.log('📞 CLIENTS: Initiating phone call')
+    toast.info('📞 Call Client', {
+      description: 'Calling ' + id
+    })
+  }
+
+  const handleViewProjects = (id: string) => {
+    console.log('✨ CLIENTS: View projects action initiated')
+    console.log('📝 CLIENTS: Client ID: ' + id)
+    console.log('📁 CLIENTS: Loading client projects')
+    toast.info('📁 View Projects', {
+      description: 'Loading projects for ' + id
+    })
+  }
+
+  const handleAddProject = (id: string) => {
+    console.log('✨ CLIENTS: Add project action initiated')
+    console.log('📝 CLIENTS: Client ID: ' + id)
+    console.log('➕ CLIENTS: Opening new project form')
+    toast.success('➕ Add Project', {
+      description: 'Creating new project for ' + id
+    })
+  }
+
+  const handleUpgradeToVIP = (id: string) => {
+    console.log('✨ CLIENTS: Upgrade to VIP action initiated')
+    console.log('📝 CLIENTS: Client ID: ' + id)
+    console.log('⭐ CLIENTS: Upgrading client status to VIP')
+    toast.success('⭐ Upgraded to VIP', {
+      description: 'Client ' + id + ' is now VIP'
+    })
+  }
+
+  const handleChangeStatus = (id: string, status: string) => {
+    console.log('✨ CLIENTS: Change status action initiated')
+    console.log('📝 CLIENTS: Client ID: ' + id)
+    console.log('📝 CLIENTS: New status: ' + status)
+    console.log('🔄 CLIENTS: Updating client status')
+    toast.success('🔄 Status Updated', {
+      description: 'Changed to ' + status
+    })
+  }
+
+  const handleExportClients = () => {
+    console.log('✨ CLIENTS: Export clients action initiated')
+    console.log('💾 CLIENTS: Preparing client data export')
+    console.log('📊 CLIENTS: Generating CSV file')
+    toast.success('💾 Export Started', {
+      description: 'Downloading client list'
+    })
+  }
+
+  const handleImportClients = () => {
+    console.log('✨ CLIENTS: Import clients action initiated')
+    console.log('📥 CLIENTS: Opening file import dialog')
+    console.log('📋 CLIENTS: Ready to process CSV/Excel')
+    toast.info('📥 Import Clients', {
+      description: 'Select a file to import'
+    })
+  }
+
+  const handleBulkAction = (action: string) => {
+    console.log('✨ CLIENTS: Bulk action initiated')
+    console.log('📝 CLIENTS: Action type: ' + action)
+    console.log('☑️ CLIENTS: Processing selected clients')
+    toast.success('☑️ Bulk Action', {
+      description: 'Executing ' + action
+    })
+  }
+
+  const handleFilterStatus = (status: string) => {
+    console.log('✨ CLIENTS: Filter status action initiated')
+    console.log('📝 CLIENTS: Filter by: ' + status)
+    console.log('🔍 CLIENTS: Applying status filter')
+    toast.info('🔍 Filter Applied', {
+      description: 'Showing ' + status + ' clients'
+    })
+  }
+
+  const handleSortClients = (by: string) => {
+    console.log('✨ CLIENTS: Sort clients action initiated')
+    console.log('📝 CLIENTS: Sort by: ' + by)
+    console.log('🔃 CLIENTS: Reordering client list')
+    toast.info('🔃 Sort Applied', {
+      description: 'Sorted by ' + by
+    })
+  }
+
+  const handleViewAnalytics = (id: string) => {
+    console.log('✨ CLIENTS: View analytics action initiated')
+    console.log('📝 CLIENTS: Client ID: ' + id)
+    console.log('📊 CLIENTS: Loading analytics dashboard')
+    toast.info('📊 View Analytics', {
+      description: 'Loading stats for ' + id
+    })
+  }
+
+  const handleSendInvoice = (id: string) => {
+    console.log('✨ CLIENTS: Send invoice action initiated')
+    console.log('📝 CLIENTS: Client ID: ' + id)
+    console.log('💰 CLIENTS: Generating invoice')
+    toast.success('💰 Invoice Sent', {
+      description: 'Invoice sent to ' + id
+    })
+  }
+
+  const handleScheduleMeeting = (id: string) => {
+    console.log('✨ CLIENTS: Schedule meeting action initiated')
+    console.log('📝 CLIENTS: Client ID: ' + id)
+    console.log('📅 CLIENTS: Opening calendar scheduler')
+    toast.info('📅 Schedule Meeting', {
+      description: 'Calendar opening for ' + id
+    })
+  }
+
+  const handleViewHistory = (id: string) => {
+    console.log('✨ CLIENTS: View history action initiated')
+    console.log('📝 CLIENTS: Client ID: ' + id)
+    console.log('📜 CLIENTS: Loading interaction history')
+    toast.info('📜 View History', {
+      description: 'Loading history for ' + id
+    })
+  }
 
   const filtered = clients.filter((c) =>
     c.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -143,7 +306,7 @@ export default function ClientsPage() {
             </div>
           </div>
 
-          <Button className="gap-2">
+          <Button onClick={handleAddClient} className="gap-2">
             <UserPlus className="h-4 w-4" />
             Add Client
           </Button>
@@ -201,7 +364,7 @@ export default function ClientsPage() {
             className="pl-9"
           />
         </div>
-        <Button variant="outline" className="gap-2">
+        <Button onClick={() => handleFilterStatus('all')} variant="outline" className="gap-2">
           <Filter className="h-4 w-4" />
           Filters
         </Button>
@@ -230,10 +393,10 @@ export default function ClientsPage() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                  <DropdownMenuItem>View Profile</DropdownMenuItem>
-                  <DropdownMenuItem>Send Message</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleViewClient(c.id)}>View Profile</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleSendMessage(c.id)}>Send Message</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600">Remove Client</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleDeleteClient(c.id)} className="text-red-600">Remove Client</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </CardHeader>

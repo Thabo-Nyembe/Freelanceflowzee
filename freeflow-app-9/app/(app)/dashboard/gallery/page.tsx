@@ -79,9 +79,15 @@ export default function GalleryPage() {
           description: 'Your media has been added to the gallery'
         })
 
-        // SESSION_13: Alert with next steps
+        // SESSION_13: Enhanced user guidance with toast
         setTimeout(() => {
-          alert(`📤 Upload Media\n\nNext Steps:\n• Select images, videos, or documents\n• Upload multiple files at once\n• Add titles and descriptions\n• Organize into albums or categories\n• Tag for easy searching\n• Share with team or clients`)
+          console.log('✨ GALLERY: Upload Media next steps guidance')
+          console.log('📝 GALLERY: Media title: ' + title)
+          console.log('📂 GALLERY: Category: ' + category)
+          console.log('🏷️ GALLERY: Tags: ' + tags.join(', '))
+          toast.info('📤 Upload Media - Next Steps', {
+            description: 'Select files, add metadata, organize into albums, and share with your team'
+          })
         }, 500)
 
         // Show achievement if earned
@@ -138,7 +144,13 @@ export default function GalleryPage() {
         setGeneratedImage(data.imageUrl)
         toast.success('Image generated successfully!')
         setTimeout(() => {
-          alert(`🎨 AI Image Generated!\n\nNext Steps:\n• Review the generated image\n• Download to your gallery\n• Edit or refine if needed\n• Use in your projects\n• Generate variations with different prompts\n• Share with clients for feedback`)
+          console.log('✨ GALLERY: AI Image generated successfully')
+          console.log('🎨 GALLERY: Prompt: ' + aiPrompt)
+          console.log('🖼️ GALLERY: Image URL: ' + data.imageUrl)
+          console.log('📝 GALLERY: Next steps guidance displayed')
+          toast.info('🎨 AI Image Generated - Next Steps', {
+            description: 'Review, download, refine, and use in your projects or share with clients'
+          })
         }, 500)
       } else {
         toast.error('Image generation failed. Please try again.')
@@ -153,32 +165,38 @@ export default function GalleryPage() {
 
   const handleOpenPreview = (item: any) => {
     console.log('👁️ GALLERY: Preview gallery item')
-    console.log('🖼️ GALLERY: Title:', item.title)
-    console.log('📂 GALLERY: Type:', item.type)
-    console.log('👤 GALLERY: Client:', item.client)
-    console.log('💼 GALLERY: Project:', item.project)
-    console.log('❤️ GALLERY: Likes:', item.likes)
-    console.log('💬 GALLERY: Comments:', item.comments)
+    console.log('🖼️ GALLERY: Title: ' + item.title)
+    console.log('📂 GALLERY: Type: ' + item.type)
+    console.log('👤 GALLERY: Client: ' + item.client)
+    console.log('💼 GALLERY: Project: ' + item.project)
+    console.log('❤️ GALLERY: Likes: ' + item.likes)
+    console.log('💬 GALLERY: Comments: ' + item.comments)
     console.log('✅ GALLERY: Preview opened')
-    alert(`👁️ Viewing: ${item.title}`)
+    toast.info('👁️ Viewing: ' + item.title, {
+      description: 'Opening fullscreen preview'
+    })
   }
 
   const handleDownload = (item: any) => {
     console.log('💾 GALLERY: Download gallery item')
-    console.log('🖼️ GALLERY: Title:', item.title)
-    console.log('📂 GALLERY: Type:', item.type)
-    console.log('🔗 GALLERY: URL:', item.url)
+    console.log('🖼️ GALLERY: Title: ' + item.title)
+    console.log('📂 GALLERY: Type: ' + item.type)
+    console.log('🔗 GALLERY: URL: ' + item.url)
     console.log('✅ GALLERY: Download initiated')
-    alert(`💾 Downloading: ${item.title}`)
+    toast.success('💾 Downloading: ' + item.title, {
+      description: 'Preparing your file for download'
+    })
   }
 
   const handleShare = (item: any) => {
     console.log('📤 GALLERY: Share gallery item')
-    console.log('🖼️ GALLERY: Title:', item.title)
-    console.log('👤 GALLERY: Client:', item.client)
+    console.log('🖼️ GALLERY: Title: ' + item.title)
+    console.log('👤 GALLERY: Client: ' + item.client)
     console.log('🔗 GALLERY: Generating share link')
     console.log('✅ GALLERY: Share modal opened')
-    alert(`📤 Sharing: ${item.title}`)
+    toast.info('📤 Sharing: ' + item.title, {
+      description: 'Generating shareable link'
+    })
   }
 
   const handleFilterGallery = () => {
@@ -188,11 +206,49 @@ export default function GalleryPage() {
     console.log('✅ GALLERY: Filter panel loaded')
   }
 
-  const handleViewItem = (itemId: number) => { console.log('👁️ VIEW:', itemId); alert('👁️ Viewing Media\n\nOpening fullscreen preview...') }
-  const handleEditItem = (itemId: number) => { console.log('✏️ EDIT:', itemId); alert('✏️ Edit Media\n\nOpening editor for metadata and tags') }
-  const handleDeleteItem = (itemId: number) => { console.log('🗑️ DELETE:', itemId); confirm('Delete this item?') && alert('✅ Media deleted') }
-  const handleDownloadItem = (itemId: number) => { console.log('💾 DOWNLOAD:', itemId); alert('💾 Downloading Media\n\nPreparing download...') }
-  const handleShareItem = (itemId: number) => { console.log('🔗 SHARE:', itemId); alert('🔗 Share Media\n\nGenerate shareable link\nShare to social media') }
+  const handleViewItem = (itemId: number) => {
+    console.log('👁️ GALLERY: View media item')
+    console.log('🆔 GALLERY: Item ID: ' + itemId)
+    console.log('✅ GALLERY: Opening fullscreen preview')
+    toast.info('👁️ Viewing Media', {
+      description: 'Opening fullscreen preview'
+    })
+  }
+  const handleEditItem = (itemId: number) => {
+    console.log('✏️ GALLERY: Edit media item')
+    console.log('🆔 GALLERY: Item ID: ' + itemId)
+    console.log('✅ GALLERY: Opening metadata editor')
+    toast.info('✏️ Edit Media', {
+      description: 'Opening editor for metadata and tags'
+    })
+  }
+  const handleDeleteItem = (itemId: number) => {
+    console.log('🗑️ GALLERY: Delete media item')
+    console.log('🆔 GALLERY: Item ID: ' + itemId)
+    console.log('⚠️ GALLERY: Requesting user confirmation')
+    if (confirm('Delete this item?')) {
+      console.log('✅ GALLERY: Media deleted successfully')
+      toast.success('✅ Media deleted', {
+        description: 'The item has been removed from your gallery'
+      })
+    }
+  }
+  const handleDownloadItem = (itemId: number) => {
+    console.log('💾 GALLERY: Download media item')
+    console.log('🆔 GALLERY: Item ID: ' + itemId)
+    console.log('✅ GALLERY: Preparing download')
+    toast.success('💾 Downloading Media', {
+      description: 'Preparing your download'
+    })
+  }
+  const handleShareItem = (itemId: number) => {
+    console.log('🔗 GALLERY: Share media item')
+    console.log('🆔 GALLERY: Item ID: ' + itemId)
+    console.log('✅ GALLERY: Generating shareable link')
+    toast.info('🔗 Share Media', {
+      description: 'Generate shareable link and share to social media'
+    })
+  }
   const handleLikeItem = async (itemId: number) => {
     console.log('❤️ LIKE:', itemId)
 
@@ -233,9 +289,30 @@ export default function GalleryPage() {
       })
     }
   }
-  const handleCommentItem = (itemId: number) => { console.log('💬 COMMENT:', itemId); alert('💬 Add Comment\n\nShare your thoughts...') }
-  const handleAddToProject = (itemId: number) => { console.log('➕ ADD TO PROJECT:', itemId); alert('➕ Add to Project\n\nSelect project to add this media') }
-  const handleFeatureItem = (itemId: number) => { console.log('⭐ FEATURE:', itemId); alert('⭐ Featured\n\nItem marked as featured') }
+  const handleCommentItem = (itemId: number) => {
+    console.log('💬 GALLERY: Add comment to item')
+    console.log('🆔 GALLERY: Item ID: ' + itemId)
+    console.log('✅ GALLERY: Opening comment dialog')
+    toast.info('💬 Add Comment', {
+      description: 'Share your thoughts'
+    })
+  }
+  const handleAddToProject = (itemId: number) => {
+    console.log('➕ GALLERY: Add item to project')
+    console.log('🆔 GALLERY: Item ID: ' + itemId)
+    console.log('✅ GALLERY: Opening project selector')
+    toast.info('➕ Add to Project', {
+      description: 'Select a project to add this media'
+    })
+  }
+  const handleFeatureItem = (itemId: number) => {
+    console.log('⭐ GALLERY: Feature item')
+    console.log('🆔 GALLERY: Item ID: ' + itemId)
+    console.log('✅ GALLERY: Item marked as featured')
+    toast.success('⭐ Featured', {
+      description: 'Item marked as featured'
+    })
+  }
   const handleCreateAlbum = async () => {
     console.log('📁 NEW ALBUM')
 
@@ -282,7 +359,13 @@ export default function GalleryPage() {
         // Show share URL
         if (result.shareUrl) {
           setTimeout(() => {
-            alert(`📁 Album Created!\n\nName: ${name}\n\nShare URL: ${result.shareUrl}\n\nYou can now add items to this album!`)
+            console.log('✨ GALLERY: Album created successfully')
+            console.log('📁 GALLERY: Album name: ' + name)
+            console.log('🔗 GALLERY: Share URL: ' + result.shareUrl)
+            console.log('📝 GALLERY: Ready to add items')
+            toast.success('📁 Album Created: ' + name, {
+              description: 'Share URL ready - You can now add items to this album'
+            })
           }, 1000)
         }
       }
@@ -293,9 +376,32 @@ export default function GalleryPage() {
       })
     }
   }
-  const handleMoveToAlbum = (itemId: number) => { console.log('📁 MOVE:', itemId); alert('📁 Move to Album\n\nSelect destination album') }
-  const handleBulkSelect = () => { console.log('☑️ BULK SELECT'); alert('☑️ Bulk Selection\n\nSelect multiple items for batch operations') }
-  const handleBulkDelete = (ids: number[]) => { console.log('🗑️ BULK DELETE:', ids.length); confirm(`Delete ${ids.length} items?`) && alert('✅ Items deleted') }
+  const handleMoveToAlbum = (itemId: number) => {
+    console.log('📁 GALLERY: Move item to album')
+    console.log('🆔 GALLERY: Item ID: ' + itemId)
+    console.log('✅ GALLERY: Opening album selector')
+    toast.info('📁 Move to Album', {
+      description: 'Select destination album'
+    })
+  }
+  const handleBulkSelect = () => {
+    console.log('☑️ GALLERY: Bulk selection mode')
+    console.log('✅ GALLERY: Enabling batch operations')
+    toast.info('☑️ Bulk Selection', {
+      description: 'Select multiple items for batch operations'
+    })
+  }
+  const handleBulkDelete = (ids: number[]) => {
+    console.log('🗑️ GALLERY: Bulk delete operation')
+    console.log('📊 GALLERY: Items count: ' + ids.length)
+    console.log('⚠️ GALLERY: Requesting user confirmation')
+    if (confirm('Delete ' + ids.length + ' items?')) {
+      console.log('✅ GALLERY: Items deleted successfully')
+      toast.success('✅ Items deleted', {
+        description: ids.length + ' items removed from gallery'
+      })
+    }
+  }
   const handleBulkDownload = async (ids: number[]) => {
     console.log('💾 BULK DOWNLOAD:', ids.length)
 
@@ -332,7 +438,14 @@ export default function GalleryPage() {
 
         // Show download details
         setTimeout(() => {
-          alert(`💾 Bulk Download Ready\n\nItems: ${result.itemCount}\nSize: ${result.estimatedSize}\nFormat: ${result.format}\n\nDownload URL: ${result.downloadUrl}\n\n${result.nextSteps.join('\n')}`)
+          console.log('✨ GALLERY: Bulk download ready')
+          console.log('📊 GALLERY: Items: ' + result.itemCount)
+          console.log('💾 GALLERY: Size: ' + result.estimatedSize)
+          console.log('📦 GALLERY: Format: ' + result.format)
+          console.log('🔗 GALLERY: Download URL: ' + result.downloadUrl)
+          toast.success('💾 Bulk Download Ready', {
+            description: result.itemCount + ' items • ' + result.estimatedSize + ' • ' + result.format
+          })
         }, 500)
       }
     } catch (error: any) {
@@ -342,12 +455,31 @@ export default function GalleryPage() {
       })
     }
   }
-  const handleSort = (sortBy: string) => { console.log('🔃 SORT:', sortBy); alert(`🔃 Sorting by ${sortBy}`) }
+  const handleSort = (sortBy: string) => {
+    console.log('🔃 GALLERY: Sort gallery')
+    console.log('📊 GALLERY: Sort by: ' + sortBy)
+    console.log('✅ GALLERY: Gallery sorted')
+    toast.success('🔃 Sorting by ' + sortBy, {
+      description: 'Gallery reorganized'
+    })
+  }
   const handleFilter = (filter: string) => { console.log('🔍 FILTER:', filter); setSelectedCategory(filter) }
   const handleSearch = (term: string) => { console.log('🔍 SEARCH:', term); setSearchTerm(term) }
   const handleViewMode = (mode: 'grid' | 'list') => { console.log('👁️ VIEW MODE:', mode); setViewMode(mode) }
-  const handleGenerateThumbnails = () => { console.log('🖼️ THUMBNAILS'); alert('🖼️ Generate Thumbnails\n\nCreating optimized thumbnails...') }
-  const handleOptimizeImages = () => { console.log('⚡ OPTIMIZE'); alert('⚡ Optimize Images\n\nCompressing and optimizing all images...') }
+  const handleGenerateThumbnails = () => {
+    console.log('🖼️ GALLERY: Generate thumbnails')
+    console.log('✅ GALLERY: Creating optimized thumbnails')
+    toast.info('🖼️ Generate Thumbnails', {
+      description: 'Creating optimized thumbnails'
+    })
+  }
+  const handleOptimizeImages = () => {
+    console.log('⚡ GALLERY: Optimize images')
+    console.log('✅ GALLERY: Compressing and optimizing all images')
+    toast.info('⚡ Optimize Images', {
+      description: 'Compressing and optimizing all images'
+    })
+  }
   const handleExportGallery = async () => {
     console.log('💾 EXPORT')
 
@@ -381,7 +513,14 @@ export default function GalleryPage() {
 
         // Show export details
         setTimeout(() => {
-          alert(`💾 Gallery Export Ready\n\nFormat: ${result.format.toUpperCase()}\nQuality: ${result.quality}\nItems: ${result.itemCount}\n\nDownload URL: ${result.downloadUrl}\n\n${result.nextSteps.join('\n')}`)
+          console.log('✨ GALLERY: Export ready')
+          console.log('📦 GALLERY: Format: ' + result.format.toUpperCase())
+          console.log('⭐ GALLERY: Quality: ' + result.quality)
+          console.log('📊 GALLERY: Items: ' + result.itemCount)
+          console.log('🔗 GALLERY: Download URL: ' + result.downloadUrl)
+          toast.success('💾 Gallery Export Ready', {
+            description: result.itemCount + ' items • ' + result.format.toUpperCase() + ' • ' + result.quality
+          })
         }, 500)
       }
     } catch (error: any) {
@@ -391,9 +530,28 @@ export default function GalleryPage() {
       })
     }
   }
-  const handleImportGallery = () => { console.log('📤 IMPORT'); alert('📤 Import Gallery\n\nSelect gallery archive to import') }
-  const handleSlideshow = () => { console.log('▶️ SLIDESHOW'); alert('▶️ Starting Slideshow\n\nAutoplay enabled') }
-  const handleTagging = (itemId: number) => { console.log('🏷️ TAG:', itemId); alert('🏷️ Add Tags\n\nOrganize with custom tags') }
+  const handleImportGallery = () => {
+    console.log('📤 GALLERY: Import gallery')
+    console.log('✅ GALLERY: Opening file selector')
+    toast.info('📤 Import Gallery', {
+      description: 'Select gallery archive to import'
+    })
+  }
+  const handleSlideshow = () => {
+    console.log('▶️ GALLERY: Starting slideshow')
+    console.log('✅ GALLERY: Autoplay enabled')
+    toast.success('▶️ Starting Slideshow', {
+      description: 'Autoplay enabled'
+    })
+  }
+  const handleTagging = (itemId: number) => {
+    console.log('🏷️ GALLERY: Add tags to item')
+    console.log('🆔 GALLERY: Item ID: ' + itemId)
+    console.log('✅ GALLERY: Opening tag editor')
+    toast.info('🏷️ Add Tags', {
+      description: 'Organize with custom tags'
+    })
+  }
 
   // Mock gallery data
   const galleryItems = [

@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  FileText, 
-  Plus, 
+import { toast } from 'sonner'
+import {
+  FileText,
+  Plus,
   Search,
   Filter,
   Download,
@@ -28,26 +29,184 @@ export default function InvoicesPage() {
   const [searchTerm, setSearchTerm] = useState<any>('')
 
   // Handlers
-  const handleCreateInvoice = () => { console.log('➕ NEW'); alert('➕ Create') }
-  const handleViewInvoice = (id: string) => { console.log('👁️:', id); alert(`👁️ ${id}`) }
-  const handleEditInvoice = (id: string) => { console.log('✏️:', id); alert(`✏️ ${id}`) }
-  const handleDeleteInvoice = (id: string) => { console.log('🗑️:', id); confirm('Delete?') && alert('✅ Deleted') }
-  const handleSendInvoice = (id: string) => { console.log('📧:', id); alert('📧 Sent') }
-  const handleDownloadPDF = (id: string) => { console.log('💾:', id); alert('💾 PDF') }
-  const handleMarkPaid = (id: string) => { console.log('✅:', id); alert('✅ Paid') }
-  const handleMarkUnpaid = (id: string) => { console.log('❌:', id); alert('❌ Unpaid') }
-  const handleDuplicateInvoice = (id: string) => { console.log('📋:', id); alert('📋 Dup') }
-  const handleSendReminder = (id: string) => { console.log('🔔:', id); alert('🔔 Reminder') }
-  const handleRecordPayment = (id: string) => { console.log('💰:', id); alert('💰 Payment') }
-  const handleVoidInvoice = (id: string) => { console.log('❌:', id); confirm('Void?') && alert('❌ Voided') }
-  const handleExportInvoices = () => { console.log('💾 EXP'); alert('💾 Export') }
-  const handleFilterStatus = (status: string) => { console.log('🔍:', status); setSelectedStatus(status) }
-  const handleSearch = (query: string) => { console.log('🔍:', query); setSearchTerm(query) }
-  const handleSort = (by: string) => { console.log('🔃:', by); alert(`🔃 ${by}`) }
-  const handleBulkAction = (action: string) => { console.log('☑️:', action); alert(`☑️ ${action}`) }
-  const handlePreview = (id: string) => { console.log('👁️:', id); alert('👁️ Preview') }
-  const handleEmailTemplate = () => { console.log('📧 TEMP'); alert('📧 Template') }
-  const handleInvoiceSettings = () => { console.log('⚙️ SET'); alert('⚙️ Settings') }
+  const handleCreateInvoice = () => {
+    console.log('✨ INVOICES: Opening create invoice form')
+    console.log('📋 INVOICES: User initiated new invoice creation')
+    toast.success('Create Invoice', {
+      description: 'Opening invoice creation form...'
+    })
+  }
+
+  const handleViewInvoice = (id: string) => {
+    console.log('✨ INVOICES: Viewing invoice details')
+    console.log('📋 INVOICES: Invoice ID: ' + id)
+    console.log('👁️ INVOICES: Opening invoice viewer')
+    toast.info('View Invoice', {
+      description: 'Opening invoice ' + id
+    })
+  }
+
+  const handleEditInvoice = (id: string) => {
+    console.log('✨ INVOICES: Opening edit mode')
+    console.log('📋 INVOICES: Invoice ID: ' + id)
+    console.log('✏️ INVOICES: User editing invoice')
+    toast.info('Edit Invoice', {
+      description: 'Opening editor for ' + id
+    })
+  }
+
+  const handleDeleteInvoice = (id: string) => {
+    console.log('✨ INVOICES: Delete invoice requested')
+    console.log('📋 INVOICES: Invoice ID: ' + id)
+    if (confirm('Delete?')) {
+      console.log('✅ INVOICES: Invoice deleted successfully')
+      console.log('🗑️ INVOICES: Removed invoice: ' + id)
+      toast.success('Invoice Deleted', {
+        description: 'Invoice ' + id + ' has been removed'
+      })
+    }
+  }
+
+  const handleSendInvoice = (id: string) => {
+    console.log('✨ INVOICES: Sending invoice to client')
+    console.log('📋 INVOICES: Invoice ID: ' + id)
+    console.log('📧 INVOICES: Email dispatched successfully')
+    toast.success('Invoice Sent', {
+      description: 'Invoice ' + id + ' sent to client'
+    })
+  }
+
+  const handleDownloadPDF = (id: string) => {
+    console.log('✨ INVOICES: Generating PDF document')
+    console.log('📋 INVOICES: Invoice ID: ' + id)
+    console.log('💾 INVOICES: PDF download initiated')
+    toast.success('PDF Downloaded', {
+      description: 'Invoice ' + id + ' downloaded as PDF'
+    })
+  }
+
+  const handleMarkPaid = (id: string) => {
+    console.log('✨ INVOICES: Marking invoice as paid')
+    console.log('📋 INVOICES: Invoice ID: ' + id)
+    console.log('✅ INVOICES: Payment status updated')
+    toast.success('Marked as Paid', {
+      description: 'Invoice ' + id + ' marked as paid'
+    })
+  }
+
+  const handleMarkUnpaid = (id: string) => {
+    console.log('✨ INVOICES: Marking invoice as unpaid')
+    console.log('📋 INVOICES: Invoice ID: ' + id)
+    console.log('❌ INVOICES: Payment status reverted')
+    toast.info('Marked as Unpaid', {
+      description: 'Invoice ' + id + ' marked as unpaid'
+    })
+  }
+
+  const handleDuplicateInvoice = (id: string) => {
+    console.log('✨ INVOICES: Duplicating invoice')
+    console.log('📋 INVOICES: Original Invoice ID: ' + id)
+    console.log('📋 INVOICES: Creating duplicate copy')
+    toast.success('Invoice Duplicated', {
+      description: 'Created copy of invoice ' + id
+    })
+  }
+
+  const handleSendReminder = (id: string) => {
+    console.log('✨ INVOICES: Sending payment reminder')
+    console.log('📋 INVOICES: Invoice ID: ' + id)
+    console.log('🔔 INVOICES: Reminder email sent to client')
+    toast.success('Reminder Sent', {
+      description: 'Payment reminder sent for ' + id
+    })
+  }
+
+  const handleRecordPayment = (id: string) => {
+    console.log('✨ INVOICES: Recording payment')
+    console.log('📋 INVOICES: Invoice ID: ' + id)
+    console.log('💰 INVOICES: Opening payment recording form')
+    toast.info('Record Payment', {
+      description: 'Recording payment for ' + id
+    })
+  }
+
+  const handleVoidInvoice = (id: string) => {
+    console.log('✨ INVOICES: Void invoice requested')
+    console.log('📋 INVOICES: Invoice ID: ' + id)
+    if (confirm('Void?')) {
+      console.log('✅ INVOICES: Invoice voided successfully')
+      console.log('❌ INVOICES: Invoice ' + id + ' is now void')
+      toast.success('Invoice Voided', {
+        description: 'Invoice ' + id + ' has been voided'
+      })
+    }
+  }
+
+  const handleExportInvoices = () => {
+    console.log('✨ INVOICES: Exporting invoices')
+    console.log('📊 INVOICES: Generating export file')
+    console.log('💾 INVOICES: Export completed successfully')
+    toast.success('Invoices Exported', {
+      description: 'Invoice data exported successfully'
+    })
+  }
+
+  const handleFilterStatus = (status: string) => {
+    console.log('✨ INVOICES: Filtering by status')
+    console.log('🔍 INVOICES: Status filter: ' + status)
+    setSelectedStatus(status)
+  }
+
+  const handleSearch = (query: string) => {
+    console.log('✨ INVOICES: Search query updated')
+    console.log('🔍 INVOICES: Search term: ' + query)
+    setSearchTerm(query)
+  }
+
+  const handleSort = (by: string) => {
+    console.log('✨ INVOICES: Sorting invoices')
+    console.log('📊 INVOICES: Sort criteria: ' + by)
+    console.log('🔃 INVOICES: Invoices reordered')
+    toast.info('Invoices Sorted', {
+      description: 'Sorted by ' + by
+    })
+  }
+
+  const handleBulkAction = (action: string) => {
+    console.log('✨ INVOICES: Bulk action initiated')
+    console.log('☑️ INVOICES: Action type: ' + action)
+    console.log('📋 INVOICES: Processing selected invoices')
+    toast.success('Bulk Action Complete', {
+      description: 'Applied ' + action + ' to selected invoices'
+    })
+  }
+
+  const handlePreview = (id: string) => {
+    console.log('✨ INVOICES: Opening preview')
+    console.log('📋 INVOICES: Invoice ID: ' + id)
+    console.log('👁️ INVOICES: Displaying invoice preview')
+    toast.info('Invoice Preview', {
+      description: 'Previewing invoice ' + id
+    })
+  }
+
+  const handleEmailTemplate = () => {
+    console.log('✨ INVOICES: Opening email template editor')
+    console.log('📧 INVOICES: Managing email templates')
+    console.log('⚙️ INVOICES: Template configuration loaded')
+    toast.info('Email Template', {
+      description: 'Opening email template settings'
+    })
+  }
+
+  const handleInvoiceSettings = () => {
+    console.log('✨ INVOICES: Opening invoice settings')
+    console.log('⚙️ INVOICES: Loading configuration panel')
+    console.log('🔧 INVOICES: Settings interface ready')
+    toast.info('Invoice Settings', {
+      description: 'Opening invoice configuration'
+    })
+  }
 
   // Mock invoice data
   const invoices = [
