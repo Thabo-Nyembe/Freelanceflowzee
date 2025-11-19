@@ -99,7 +99,7 @@ export function useCustomHook() {
   }, [])
 
   return { state, loading, error }
-
+}`
   }
 ]
 
@@ -116,17 +116,16 @@ export default function AICodeCompletionPage() {
   const handleComplete = useCallback(() => {
     setIsCompleting(true)
     setTimeout(() => {
-      const mockCompletion = `// AI-generated completion
-${codeInput}
-  try {
-    // Implementation logic here
-    const result = await processData(data)
-    return result
-  } catch (error) {
-    console.error('Error:', error)
-    throw new Error('Processing failed')
-  }
-`
+      const mockCompletion = '// AI-generated completion\n' +
+        codeInput + '\n' +
+        '  try {\n' +
+        '    // Implementation logic here\n' +
+        '    const result = await processData(data)\n' +
+        '    return result\n' +
+        '  } catch (error) {\n' +
+        '    console.error(\'Error:\', error)\n' +
+        '    throw new Error(\'Processing failed\')\n' +
+        '  }\n'
       setCompletion(mockCompletion)
       setSuggestions(['Add error handling', 'Optimize performance', 'Add TypeScript types'])
       setIsCompleting(false)
@@ -152,9 +151,9 @@ ${codeInput}
   }
 
   // Additional Handlers
-  const handleDownloadCode = () => { console.log('💾 DOWNLOAD'); const blob = new Blob([completion || codeInput], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `code.${selectedLanguage}`; a.click(); alert('💾 Code Downloaded') }
+  const handleDownloadCode = () => { console.log('💾 DOWNLOAD'); const blob = new Blob([completion || codeInput], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'code.' + selectedLanguage; a.click(); alert('💾 Code Downloaded') }
   const handleShareCode = () => { console.log('🔗 SHARE'); alert('🔗 Share Code\n\nGenerate shareable link or gist') }
-  const handleSaveSnippet = () => { console.log('💾 SAVE SNIPPET'); const name = prompt('Snippet name:'); name && alert(`💾 Snippet Saved: ${name}`) }
+  const handleSaveSnippet = () => { console.log('💾 SAVE SNIPPET'); const name = prompt('Snippet name:'); name && alert('💾 Snippet Saved: ' + name) }
   const handleLoadSnippet = (snippetId: string) => { console.log('📂 LOAD:', snippetId); alert('📂 Loading saved snippet...') }
   const handleOptimizeCode = () => { console.log('⚡ OPTIMIZE'); alert('⚡ AI Code Optimization\n\nAnalyzing performance...\nApplying optimizations...') }
   const handleRefactorCode = () => { console.log('🔄 REFACTOR'); alert('🔄 AI Refactoring\n\nImproving code structure\nApplying best practices\nEnhancing readability') }
@@ -168,7 +167,7 @@ ${codeInput}
   const handleSecurityScan = () => { console.log('🔒 SECURITY'); alert('🔒 Security Analysis\n\nScanning for:\n• SQL injection\n• XSS vulnerabilities\n• CSRF issues\n• Insecure dependencies') }
   const handlePerformanceProfile = () => { console.log('📊 PROFILE'); alert('📊 Performance Analysis\n\nAnalyzing:\n• Time complexity\n• Space complexity\n• Bottlenecks\n• Optimization opportunities') }
   const handleAddTypes = () => { console.log('📝 TYPES'); alert('📝 Add Type Definitions\n\nGenerating TypeScript interfaces\nAdding type annotations') }
-  const handleExportCode = (format: 'gist' | 'markdown' | 'pdf') => { console.log('📥 EXPORT:', format); alert(`📥 Exporting Code\n\nFormat: ${format.toUpperCase()}`) }
+  const handleExportCode = (format: 'gist' | 'markdown' | 'pdf') => { console.log('📥 EXPORT:', format); alert('📥 Exporting Code\n\nFormat: ' + format.toUpperCase()) }
   const handleImportCode = () => { console.log('📤 IMPORT'); const input = document.createElement('input'); input.type = 'file'; input.accept = '.js,.ts,.jsx,.tsx,.py,.java'; input.click(); alert('📤 Import code file') }
   const handleDiffCode = () => { console.log('🔍 DIFF'); alert('🔍 Code Diff\n\nComparing:\n• Original vs Optimized\n• Before vs After') }
   const handleVersionHistory = () => { console.log('📜 HISTORY'); alert('📜 Version History\n\nView previous completions') }
@@ -420,5 +419,7 @@ ${codeInput}
             </div>
           </div>
         </div>
+      </div>
       </ErrorBoundary>
     )
+}

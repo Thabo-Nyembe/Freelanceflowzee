@@ -123,25 +123,31 @@ const DesktopWindow = ({ app, os, width, height }: DesktopWindowProps) => {
   const getTitleBar = () => {
     const appInfo = DEMO_APPS.find(a => a.id === app)
     return (
-      <div className={`flex items-center justify-between border-b bg-gray-50 dark:bg-gray-800 ${os === 'macOS' ? '' : 'px-4'}
-                  <div><span className="text-purple-600">function</span> <span className="text-blue-600">App</span>() {`{`}</div>
-                  <div className="ml-4"><span className="text-blue-600">return</span> (</div>
-                  <div className="ml-8">&lt;<span className="text-red-600">div</span> <span className="text-green-600">className</span>=<span className="text-orange-600">"app"</span>&gt;</div>
-                  <div className="ml-12">&lt;<span className="text-red-600">h1</span>&gt;Hello Desktop App!&lt;/<span className="text-red-600">h1</span>&gt;</div>
-                  <div className="ml-8">&lt;/<span className="text-red-600">div</span>&gt;</div>
-                  <div className="ml-4">)</div>
-                  <div>{`}
-    <div className={`bg-white dark:bg-gray-900 rounded-lg shadow-2xl border overflow-hidden ${isMaximized ? 'w-full h-full' : ''}
-        text: `Check out this ${app.name} desktop application design`,
+      <div className={`flex items-center justify-between border-b bg-gray-50 dark:bg-gray-800 ${os === 'macOS' ? '' : 'px-4'}`}>
+        {os === 'macOS' && getWindowControls()}
+        <div className="flex-1 text-center text-sm font-medium text-gray-700 dark:text-gray-300">
+          {appInfo?.name || 'Desktop App'}
+        </div>
+        {os !== 'macOS' && getWindowControls()}
+      </div>
+    )
+  }
+
+  const shareDesign = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Desktop App Design',
+        text: 'Check out this desktop application design',
         url: window.location.href
       })
     } else {
       navigator.clipboard.writeText(window.location.href)
+      alert('Link copied to clipboard!')
     }
   }
 
   const generateCode = () => {
-    console.log('Generating desktop app code for', framework.name)
+    console.log('Generating desktop app code')
   }
 
   const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) => (
@@ -343,4 +349,38 @@ const DesktopWindow = ({ app, os, width, height }: DesktopWindowProps) => {
                           selectedApp === app.id
                             ? 'bg-primary text-primary-foreground'
                             : 'hover:bg-accent/10'
-                        }
+                        }                        }>`}
+                        <Icon className="w-5 h-5" />
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{app.name}</p>
+                          <p className="text-xs opacity-70">{app.description}</p>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ErrorBoundary>
+  )
+}
+
+export default function DesktopAppPage() {
+  const [selectedApp, setSelectedApp] = React.useState('code-editor')
+  const [selectedDevice, setSelectedDevice] = React.useState('macbook-14')
+  const [framework, setFramework] = React.useState(APP_FRAMEWORKS[0])
+  const [os, setOs] = React.useState('macOS')
+
+  const device = DESKTOP_PRESETS.find(d => d.id === selectedDevice) || DESKTOP_PRESETS[0]
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Desktop App Builder</h1>
+      <p className="text-muted-foreground mb-8">Design, preview, and generate native desktop applications</p>
+      <DesktopWindow app={selectedApp} os={device.os} width={device.width} height={device.height} />
+    </div>
+  )
+}

@@ -116,6 +116,16 @@ interface MockScreenProps {
 }
 
 const MockScreen = ({ screen, deviceWidth, deviceHeight }: MockScreenProps) => {
+  const [selectedDevice, setSelectedDevice] = useState('iphone-15-pro')
+  const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait')
+  const [zoom, setZoom] = useState([100])
+  const [showGrid, setShowGrid] = useState(false)
+  const [showSafeArea, setShowSafeArea] = useState(false)
+  const [currentScreen, setCurrentScreen] = useState('home')
+
+  const device = DEVICE_PRESETS.find(d => d.id === selectedDevice) || DEVICE_PRESETS[0]
+  const scaleFactor = zoom[0] / 100
+
   const getStatusBarContent = () => (
     <div className="flex items-center justify-between px-4 py-2 text-xs">
       <div className="flex items-center gap-1">
@@ -138,10 +148,25 @@ const MockScreen = ({ screen, deviceWidth, deviceHeight }: MockScreenProps) => {
             key={item.id}
             className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${
               screen === item.id ? 'text-blue-500' : 'text-gray-500'
-            }
-                <div key={i} className={`flex items-start gap-3 p-3 rounded-lg ${notif.unread ? 'bg-blue-50 dark:bg-blue-950' : 'bg-gray-50 dark:bg-gray-800'}
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${notif.unread ? 'bg-blue-500' : 'bg-gray-300'}
-        text: `Check out this ${template.name} mobile app design`,
+            }`}
+          >
+            <Icon className="w-5 h-5" />
+            <span className="text-xs">{item.name}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+
+  const exportAsImage = () => {
+    console.log('Exporting mobile preview as image')
+  }
+
+  const sharePreview = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Mobile App Design',
+        text: 'Check out this mobile app design',
         url: window.location.href
       })
     } else {
@@ -337,4 +362,23 @@ const MockScreen = ({ screen, deviceWidth, deviceHeight }: MockScreenProps) => {
                           currentScreen === screen.id
                             ? 'bg-primary text-primary-foreground'
                             : 'hover:bg-accent/10'
-                        }
+                        }                        }`}
+                      >
+                        <Icon className="w-5 h-5" />
+                        {screen.name}
+                      </button>
+                    )
+                  })}
+                </div>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+      </ErrorBoundary>
+    )
+}
+
+export default function MobileAppPage() {
+  return <MockScreen screen="home" deviceWidth={393} deviceHeight={852} />
+}
