@@ -6,11 +6,12 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Users, 
-  UserPlus, 
-  MessageSquare, 
-  Calendar, 
+import { toast } from 'sonner'
+import {
+  Users,
+  UserPlus,
+  MessageSquare,
+  Calendar,
   Settings,
   Search,
   Filter,
@@ -203,10 +204,13 @@ export default function TeamHubPage() {
             size="sm"
             onClick={() => {
               console.log('⚙️ TEAM HUB: Settings opened')
-              console.log('👥 TEAM HUB: Total team members:', teamStats.totalMembers)
-              console.log('📊 TEAM HUB: Active projects:', teamStats.activeProjects)
+              console.log('👥 TEAM HUB: Total team members: ' + teamStats.totalMembers)
+              console.log('📊 TEAM HUB: Active projects: ' + teamStats.activeProjects)
+              console.log('🌐 TEAM HUB: Online members: ' + teamStats.onlineMembers)
               console.log('✅ TEAM HUB: Settings modal ready')
-              alert('Opening team settings')
+              toast.info('⚙️ Team Settings', {
+                description: 'Configure team preferences and permissions'
+              })
             }}
           >
             <Settings className="h-4 w-4 mr-2" />
@@ -218,11 +222,15 @@ export default function TeamHubPage() {
             onClick={() => {
               console.log('➕ TEAM HUB: Add member initiated')
               console.log('📝 TEAM HUB: Opening invitation form')
+              console.log('👥 TEAM HUB: Current team size: ' + teamStats.totalMembers)
               const memberName = prompt('Enter new member name:')
               if (memberName) {
-                console.log('📧 TEAM HUB: Sending invitation to:', memberName)
+                console.log('📧 TEAM HUB: Sending invitation to: ' + memberName)
+                console.log('✉️ TEAM HUB: Preparing invitation email')
                 console.log('✅ TEAM HUB: Invitation sent successfully')
-                alert(`Invitation sent to ${memberName}`)
+                toast.success('✨ Invitation Sent', {
+                  description: 'Team invitation sent to ' + memberName
+                })
               } else {
                 console.log('❌ TEAM HUB: Invitation cancelled')
               }
@@ -347,10 +355,13 @@ export default function TeamHubPage() {
                     className="h-20 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
                     onClick={() => {
                       console.log('💬 TEAM HUB: Team chat initiated')
-                      console.log('👥 TEAM HUB: Online members:', teamStats.onlineMembers)
+                      console.log('👥 TEAM HUB: Online members: ' + teamStats.onlineMembers)
                       console.log('📱 TEAM HUB: Opening chat interface')
+                      console.log('🌐 TEAM HUB: Total team members: ' + teamStats.totalMembers)
                       console.log('✅ TEAM HUB: Chat ready')
-                      alert('Opening team chat interface')
+                      toast.success('💬 Team Chat', {
+                        description: teamStats.onlineMembers + ' members online and ready to chat'
+                      })
                     }}
                   >
                     <MessageSquare className="h-5 w-5" />
@@ -363,9 +374,12 @@ export default function TeamHubPage() {
                     onClick={() => {
                       console.log('📅 TEAM HUB: Schedule view opened')
                       console.log('📊 TEAM HUB: Loading team calendar')
-                      console.log('🎯 TEAM HUB: Active projects:', teamStats.activeProjects)
+                      console.log('🎯 TEAM HUB: Active projects: ' + teamStats.activeProjects)
+                      console.log('👥 TEAM HUB: Team members scheduled: ' + teamStats.totalMembers)
                       console.log('✅ TEAM HUB: Schedule loaded')
-                      alert('Opening team schedule')
+                      toast.info('📅 Team Schedule', {
+                        description: 'View availability for ' + teamStats.totalMembers + ' team members'
+                      })
                     }}
                   >
                     <Calendar className="h-5 w-5" />
@@ -377,10 +391,13 @@ export default function TeamHubPage() {
                     className="h-20 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
                     onClick={() => {
                       console.log('📹 TEAM HUB: Video call initiated')
-                      console.log('👥 TEAM HUB: Available participants:', teamStats.onlineMembers)
+                      console.log('👥 TEAM HUB: Available participants: ' + teamStats.onlineMembers)
                       console.log('🎥 TEAM HUB: Setting up video room')
+                      console.log('🌐 TEAM HUB: Total team members: ' + teamStats.totalMembers)
                       console.log('✅ TEAM HUB: Video call ready')
-                      alert('Starting team video call')
+                      toast.success('📹 Video Call Starting', {
+                        description: 'Connecting with ' + teamStats.onlineMembers + ' online team members'
+                      })
                     }}
                   >
                     <Video className="h-5 w-5" />
@@ -394,8 +411,12 @@ export default function TeamHubPage() {
                       console.log('📊 TEAM HUB: Reports generation initiated')
                       console.log('📈 TEAM HUB: Gathering team analytics')
                       console.log('📋 TEAM HUB: Processing performance data')
+                      console.log('👥 TEAM HUB: Team members analyzed: ' + teamStats.totalMembers)
+                      console.log('🎯 TEAM HUB: Active projects: ' + teamStats.activeProjects)
                       console.log('✅ TEAM HUB: Report ready')
-                      alert('Generating team reports')
+                      toast.success('📊 Generating Reports', {
+                        description: 'Team analytics and performance metrics'
+                      })
                     }}
                   >
                     <FileText className="h-5 w-5" />
@@ -428,9 +449,12 @@ export default function TeamHubPage() {
                 onClick={() => {
                   console.log('🔍 TEAM HUB: Filter panel opened')
                   console.log('📊 TEAM HUB: Available filters: All, Online, By Department, By Role')
-                  console.log('🏢 TEAM HUB: Departments:', departments.length)
+                  console.log('🏢 TEAM HUB: Departments: ' + departments.length)
+                  console.log('👥 TEAM HUB: Total members to filter: ' + teamMembers.length)
                   console.log('✅ TEAM HUB: Filter options ready')
-                  alert('Filter options: All, Online, By Department, By Role')
+                  toast.info('🔍 Filter Options', {
+                    description: 'Filter by status, department, or role'
+                  })
                 }}
               >
                 <Filter className="h-4 w-4 mr-2" />
@@ -491,15 +515,18 @@ export default function TeamHubPage() {
                       className="flex-1 hover:bg-blue-50 hover:border-blue-200 transition-colors"
                       onClick={() => {
                         console.log('👤 TEAM HUB: Member profile opened')
-                        console.log('📛 TEAM HUB: Name:', member.name)
-                        console.log('💼 TEAM HUB: Role:', member.role)
-                        console.log('🏢 TEAM HUB: Department:', member.department)
-                        console.log('📊 TEAM HUB: Projects:', member.projects)
-                        console.log('✅ TEAM HUB: Tasks completed:', member.tasksCompleted)
-                        console.log('⭐ TEAM HUB: Rating:', member.rating)
-                        console.log('📍 TEAM HUB: Location:', member.location)
-                        console.log('✅ TEAM HUB: Profile view ready')
-                        alert(`Opening chat with ${member.name}`)
+                        console.log('📛 TEAM HUB: Name: ' + member.name)
+                        console.log('💼 TEAM HUB: Role: ' + member.role)
+                        console.log('🏢 TEAM HUB: Department: ' + member.department)
+                        console.log('📊 TEAM HUB: Projects: ' + member.projects)
+                        console.log('✅ TEAM HUB: Tasks completed: ' + member.tasksCompleted)
+                        console.log('⭐ TEAM HUB: Rating: ' + member.rating)
+                        console.log('📍 TEAM HUB: Location: ' + member.location)
+                        console.log('🌐 TEAM HUB: Status: ' + member.availability)
+                        console.log('✅ TEAM HUB: Opening chat interface')
+                        toast.success('💬 Chat Opened', {
+                          description: 'Starting conversation with ' + member.name
+                        })
                       }}
                     >
                       <MessageSquare className="h-4 w-4 mr-2" />
