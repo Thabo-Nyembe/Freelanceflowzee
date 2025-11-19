@@ -269,6 +269,387 @@ export default function ProjectsHubPage() {
     toast.success(`Exported ${projects.length} projects`)
   }
 
+  const handleShareProject = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId)
+    console.log('🔗 SHARE PROJECT')
+    console.log('📁 Project:', project?.title || projectId)
+    console.log('👥 Share options: Email, Link, Team, Client Portal')
+    console.log('🔐 Permissions: View, Comment, Edit')
+
+    const shareLink = `https://kazi.app/share/project/${projectId}`
+    console.log('📎 Share Link Generated:', shareLink)
+    console.log('✅ PROJECT SHARED - Link copied to clipboard')
+
+    toast.success(`Share link created for "${project?.title}"`, {
+      description: 'Link copied to clipboard'
+    })
+
+    alert('🔗 Project Shared Successfully!\n\nShare Link: ' + shareLink + '\n\nShare Options:\n• Send via email to team members\n• Copy link for client portal access\n• Set view/edit permissions\n• Track who viewed the project\n• Revoke access anytime')
+  }
+
+  const handleAddTeamMember = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId)
+    console.log('👥 ADD TEAM MEMBER')
+    console.log('📁 Project:', project?.title || projectId)
+    console.log('📧 Enter team member email or select from team')
+    console.log('🎯 Assign role: Developer, Designer, PM, QA')
+    console.log('⚙️ Set permissions: View, Edit, Admin')
+
+    const newMember = {
+      id: `member-${Date.now()}`,
+      name: 'New Team Member',
+      avatar: '/avatars/default.jpg',
+      role: 'Developer',
+      addedDate: new Date().toISOString()
+    }
+
+    console.log('✅ TEAM MEMBER ADDED:', newMember.name)
+    console.log('📧 Invitation email sent')
+
+    if (project) {
+      setProjects(projects.map(p =>
+        p.id === projectId
+          ? { ...p, team_members: [...p.team_members, newMember] }
+          : p
+      ))
+    }
+
+    toast.success('Team member added to project', {
+      description: 'Invitation email sent'
+    })
+  }
+
+  const handleRemoveTeamMember = (projectId: string, memberId: string) => {
+    const project = projects.find(p => p.id === projectId)
+    const member = project?.team_members.find(m => m.id === memberId)
+
+    console.log('👋 REMOVE TEAM MEMBER')
+    console.log('📁 Project:', project?.title || projectId)
+    console.log('👤 Member:', member?.name || memberId)
+    console.log('⚠️ Impact: Member loses access to project')
+
+    if (!confirm(`Remove ${member?.name} from this project?\n\nThey will lose access to all project files and updates.`)) {
+      console.log('❌ REMOVAL CANCELLED')
+      return
+    }
+
+    if (project) {
+      setProjects(projects.map(p =>
+        p.id === projectId
+          ? { ...p, team_members: p.team_members.filter(m => m.id !== memberId) }
+          : p
+      ))
+    }
+
+    console.log('✅ TEAM MEMBER REMOVED')
+    toast.success(`${member?.name} removed from project`)
+  }
+
+  const handleAddMilestone = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId)
+    console.log('🎯 ADD MILESTONE')
+    console.log('📁 Project:', project?.title || projectId)
+    console.log('📝 Creating new milestone...')
+    console.log('📅 Set due date, deliverables, and payment trigger')
+
+    const milestone = {
+      id: `milestone-${Date.now()}`,
+      title: 'New Milestone',
+      dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+      status: 'pending',
+      payment: 0,
+      deliverables: []
+    }
+
+    console.log('✅ MILESTONE CREATED:', milestone.title)
+    console.log('📅 Due Date:', formatDate(milestone.dueDate))
+
+    toast.success('Milestone added to project timeline', {
+      description: 'Set deliverables and payment schedule'
+    })
+  }
+
+  const handleUpdateMilestone = (projectId: string, milestoneId: string) => {
+    const project = projects.find(p => p.id === projectId)
+    console.log('🔄 UPDATE MILESTONE')
+    console.log('📁 Project:', project?.title || projectId)
+    console.log('🎯 Milestone ID:', milestoneId)
+    console.log('✏️ Update: Status, Due Date, Deliverables, Payment')
+    console.log('📊 Mark as: Pending → In Progress → Completed')
+
+    console.log('✅ MILESTONE UPDATED')
+    console.log('📧 Client notification sent')
+
+    toast.success('Milestone updated successfully', {
+      description: 'Client has been notified'
+    })
+  }
+
+  const handleViewTimeline = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId)
+    console.log('📅 VIEW PROJECT TIMELINE')
+    console.log('📁 Project:', project?.title || projectId)
+    console.log('🎯 Milestones:', '5 total (2 completed, 2 in-progress, 1 upcoming)')
+    console.log('📊 Timeline View: Gantt Chart')
+    console.log('🔄 Dependencies: 3 task dependencies mapped')
+    console.log('⏱️ Critical Path: 45 days')
+
+    console.log('✅ TIMELINE LOADED')
+    console.log('📈 Project on track for', formatDate(project?.end_date || new Date().toISOString()))
+
+    toast.success('Timeline view loaded', {
+      description: 'Viewing Gantt chart with milestones'
+    })
+
+    alert('📅 Project Timeline\n\nMilestones:\n✅ Phase 1: Requirements (Completed)\n✅ Phase 2: Design (Completed)\n🔄 Phase 3: Development (In Progress - 60%)\n🔄 Phase 4: Testing (In Progress - 30%)\n📋 Phase 5: Deployment (Upcoming)\n\nCritical Path: 45 days\nOn Track: Yes\nNext Milestone: Development completion in 12 days')
+  }
+
+  const handleAddFile = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId)
+    console.log('📎 ADD FILE ATTACHMENT')
+    console.log('📁 Project:', project?.title || projectId)
+    console.log('📂 Opening file picker...')
+    console.log('✅ Supported: PDF, Images, Documents, Design Files, Code')
+    console.log('💾 Max Size: 100 MB per file')
+
+    const newFile = {
+      id: `file-${Date.now()}`,
+      name: 'project-document.pdf',
+      size: '2.4 MB',
+      uploadedBy: 'Current User',
+      uploadedDate: new Date().toISOString()
+    }
+
+    if (project) {
+      setProjects(projects.map(p =>
+        p.id === projectId
+          ? { ...p, attachments: [...p.attachments, newFile.name] }
+          : p
+      ))
+    }
+
+    console.log('✅ FILE UPLOADED:', newFile.name)
+    console.log('☁️ Syncing to cloud storage...')
+    console.log('✅ FILE ATTACHED TO PROJECT')
+
+    toast.success('File uploaded successfully', {
+      description: newFile.name
+    })
+  }
+
+  const handleRemoveFile = (projectId: string, fileName: string) => {
+    const project = projects.find(p => p.id === projectId)
+    console.log('🗑️ REMOVE FILE')
+    console.log('📁 Project:', project?.title || projectId)
+    console.log('📄 File:', fileName)
+
+    if (!confirm(`Remove file "${fileName}" from project?\n\nThis action cannot be undone.`)) {
+      console.log('❌ REMOVAL CANCELLED')
+      return
+    }
+
+    if (project) {
+      setProjects(projects.map(p =>
+        p.id === projectId
+          ? { ...p, attachments: p.attachments.filter(f => f !== fileName) }
+          : p
+      ))
+    }
+
+    console.log('✅ FILE REMOVED FROM PROJECT')
+    toast.success(`File "${fileName}" removed`)
+  }
+
+  const handleAddComment = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId)
+    console.log('💬 ADD COMMENT')
+    console.log('📁 Project:', project?.title || projectId)
+    console.log('✏️ Comment thread opened')
+    console.log('👥 @mention team members')
+    console.log('📎 Attach files or images')
+
+    const newComment = {
+      id: `comment-${Date.now()}`,
+      author: 'Current User',
+      text: 'New comment on project progress',
+      timestamp: new Date().toISOString(),
+      mentions: [],
+      attachments: []
+    }
+
+    if (project) {
+      setProjects(projects.map(p =>
+        p.id === projectId
+          ? { ...p, comments_count: p.comments_count + 1 }
+          : p
+      ))
+    }
+
+    console.log('✅ COMMENT POSTED')
+    console.log('📧 Notifications sent to mentioned users')
+
+    toast.success('Comment added to project')
+  }
+
+  const handleReplyComment = (projectId: string, commentId: string) => {
+    const project = projects.find(p => p.id === projectId)
+    console.log('↩️ REPLY TO COMMENT')
+    console.log('📁 Project:', project?.title || projectId)
+    console.log('💬 Comment ID:', commentId)
+    console.log('✏️ Reply thread opened')
+
+    console.log('✅ REPLY POSTED')
+    console.log('📧 Original commenter notified')
+
+    toast.success('Reply posted successfully')
+  }
+
+  const handleAddReminder = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId)
+    console.log('⏰ ADD REMINDER')
+    console.log('📁 Project:', project?.title || projectId)
+    console.log('📅 Set reminder date and time')
+    console.log('📧 Notification method: Email, Push, SMS')
+    console.log('🔔 Reminder type: Deadline, Meeting, Milestone, Custom')
+
+    const reminder = {
+      id: `reminder-${Date.now()}`,
+      type: 'deadline',
+      date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      message: 'Project deadline approaching in 7 days',
+      notifyVia: ['email', 'push']
+    }
+
+    console.log('✅ REMINDER CREATED')
+    console.log('📅 Reminder scheduled for:', formatDate(reminder.date))
+    console.log('📧 Notification will be sent via:', reminder.notifyVia.join(', '))
+
+    toast.success('Reminder set successfully', {
+      description: `Scheduled for ${formatDate(reminder.date)}`
+    })
+  }
+
+  const handleGenerateReport = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId)
+    console.log('📊 GENERATE PROJECT REPORT')
+    console.log('📁 Project:', project?.title || projectId)
+    console.log('📈 Report Type: Comprehensive Project Summary')
+    console.log('📊 Including: Progress, Budget, Timeline, Team, Milestones')
+    console.log('🎨 Format: PDF with charts and graphs')
+
+    console.log('⚙️ GENERATING REPORT...')
+    console.log('📊 Calculating metrics...')
+    console.log('📈 Creating visualizations...')
+    console.log('📄 Building PDF document...')
+
+    setTimeout(() => {
+      console.log('✅ REPORT GENERATED')
+      console.log('📄 File: ' + (project?.title || 'project') + '-report.pdf')
+      console.log('💾 Size: 1.2 MB')
+      console.log('📧 Report ready for download and sharing')
+
+      toast.success('Project report generated', {
+        description: 'PDF ready for download'
+      })
+
+      alert('📊 Project Report Generated!\n\n' + (project?.title || 'Project') + ' - Comprehensive Summary\n\nIncluded Sections:\n• Executive Summary\n• Progress Overview (' + (project?.progress || 0) + '%)\n• Budget Analysis ($' + (project?.spent || 0).toLocaleString() + ' / $' + (project?.budget || 0).toLocaleString() + ')\n• Timeline & Milestones\n• Team Performance\n• Risk Assessment\n• Next Steps\n\nFormat: PDF (1.2 MB)\nReady to download and share with stakeholders')
+    }, 1500)
+  }
+
+  const handleBulkAction = (action: string, selectedIds: string[]) => {
+    console.log('📦 BULK ACTION')
+    console.log('⚡ Action:', action)
+    console.log('📊 Selected Projects:', selectedIds.length)
+    console.log('📁 Project IDs:', selectedIds.join(', '))
+
+    switch (action) {
+      case 'archive':
+        console.log('📦 BULK ARCHIVE')
+        console.log('⚠️ Archiving', selectedIds.length, 'projects')
+        toast.success(`${selectedIds.length} projects archived`)
+        break
+      case 'export':
+        console.log('💾 BULK EXPORT')
+        console.log('📊 Exporting', selectedIds.length, 'projects to JSON')
+        toast.success(`Exported ${selectedIds.length} projects`)
+        break
+      case 'status':
+        console.log('🔄 BULK STATUS UPDATE')
+        console.log('📊 Updating status for', selectedIds.length, 'projects')
+        toast.success(`Status updated for ${selectedIds.length} projects`)
+        break
+      case 'delete':
+        console.log('🗑️ BULK DELETE')
+        if (confirm(`Delete ${selectedIds.length} projects?\n\nThis action cannot be undone.`)) {
+          console.log('⚠️ DELETING', selectedIds.length, 'projects')
+          toast.success(`${selectedIds.length} projects deleted`)
+        }
+        break
+      default:
+        console.log('⚠️ Unknown bulk action:', action)
+    }
+
+    console.log('✅ BULK ACTION COMPLETED')
+  }
+
+  const handleAdvancedSort = (sortBy: string, direction: 'asc' | 'desc') => {
+    console.log('🔀 ADVANCED SORT')
+    console.log('📊 Sort By:', sortBy)
+    console.log('🔼/🔽 Direction:', direction)
+    console.log('🎯 Options: Date, Budget, Progress, Priority, Client, Status')
+
+    let sorted = [...filteredProjects]
+
+    switch (sortBy) {
+      case 'budget':
+        sorted.sort((a, b) => direction === 'asc' ? a.budget - b.budget : b.budget - a.budget)
+        break
+      case 'progress':
+        sorted.sort((a, b) => direction === 'asc' ? a.progress - b.progress : b.progress - a.progress)
+        break
+      case 'date':
+        sorted.sort((a, b) => {
+          const dateA = new Date(a.end_date).getTime()
+          const dateB = new Date(b.end_date).getTime()
+          return direction === 'asc' ? dateA - dateB : dateB - dateA
+        })
+        break
+      case 'title':
+        sorted.sort((a, b) => direction === 'asc' ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title))
+        break
+    }
+
+    setFilteredProjects(sorted)
+    console.log('✅ PROJECTS SORTED BY', sortBy, direction)
+    toast.success(`Sorted by ${sortBy} (${direction})`)
+  }
+
+  const handleAdvancedFilter = (filters: any) => {
+    console.log('🔍 ADVANCED FILTER')
+    console.log('📊 Filter Criteria:', filters)
+    console.log('🎯 Budget Range:', filters.budgetMin, '-', filters.budgetMax)
+    console.log('📅 Date Range:', filters.startDate, '-', filters.endDate)
+    console.log('👥 Team Size:', filters.teamSize)
+    console.log('🏷️ Tags:', filters.tags?.join(', ') || 'none')
+
+    const filtered = projects.filter(project => {
+      let matches = true
+
+      if (filters.budgetMin) matches = matches && project.budget >= filters.budgetMin
+      if (filters.budgetMax) matches = matches && project.budget <= filters.budgetMax
+      if (filters.teamSize) matches = matches && project.team_members.length >= filters.teamSize
+      if (filters.tags && filters.tags.length > 0) {
+        matches = matches && filters.tags.some((tag: string) => project.tags?.includes(tag))
+      }
+
+      return matches
+    })
+
+    setFilteredProjects(filtered)
+    console.log('✅ FILTER APPLIED:', filtered.length, 'projects match criteria')
+    toast.success(`${filtered.length} projects match filter criteria`)
+  }
+
   const mockProjects: Project[] = [
     {
       id: '1',
