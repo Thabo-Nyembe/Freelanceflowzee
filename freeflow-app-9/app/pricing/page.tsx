@@ -1,15 +1,10 @@
-import { Metadata } from 'next'
+'use client'
+
 import Link from 'next/link'
 import { Zap, Crown, Sparkles } from 'lucide-react'
 import { PricingCard } from '@/components/pricing-card'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-
-export const metadata: Metadata = {
-  title: 'Pricing | KAZI - Choose Your Perfect Plan',
-  description: 'Simple, transparent pricing for freelancers. Start free and scale as you grow with KAZI\'s enterprise features.',
-  keywords: 'KAZI pricing, freelance software cost, AI platform pricing, enterprise features'
-}
 
 export default function PricingPage() {
   const plans = [

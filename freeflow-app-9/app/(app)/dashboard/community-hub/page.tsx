@@ -734,7 +734,12 @@ export default function CommunityHubPage() {
       })
     }
   }
-  const handleCommentOnPost = (id: string) => { console.log('💬 COMMENT:', id); alert('💬 Add comment') }
+  const handleCommentOnPost = (id: string) => {
+    console.log('💬 COMMUNITY: Comment on post initiated')
+    console.log('📝 COMMUNITY: Post ID:', id)
+    console.log('✅ COMMUNITY: Opening comment dialog')
+    alert('💬 Add comment')
+  }
   const handleSharePost = async (id: string) => {
     console.log('🔗 SHARE POST - ID:', id)
 
@@ -836,7 +841,12 @@ export default function CommunityHubPage() {
       })
     }
   }
-  const handleUnfollowMember = (id: string) => { console.log('➖ UNFOLLOW:', id); alert('➖ Unfollowed') }
+  const handleUnfollowMember = (id: string) => {
+    console.log('➖ COMMUNITY: Unfollow member initiated')
+    console.log('👤 COMMUNITY: Member ID:', id)
+    console.log('✅ COMMUNITY: Unfollowed successfully')
+    alert('➖ Unfollowed')
+  }
   const handleConnectWithMember = async (id: string) => {
     console.log('🤝 CONNECT WITH MEMBER - ID:', id)
 
@@ -874,20 +884,92 @@ export default function CommunityHubPage() {
       })
     }
   }
-  const handleMessageMember = (id: string) => { console.log('💬 MESSAGE:', id); alert('💬 Opening chat...') }
-  const handleJoinEvent = (id: string) => { console.log('📅 JOIN EVENT:', id); alert('📅 Registered for event!') }
-  const handleCreateEvent = () => { console.log('➕ EVENT'); alert('➕ Create community event') }
-  const handleJoinGroup = (id: string) => { console.log('👥 JOIN GROUP:', id); alert('👥 Joined group!') }
-  const handleCreateGroup = () => { console.log('➕ GROUP'); alert('➕ Create new group') }
-  const handlePostJob = () => { console.log('💼 JOB'); alert('💼 Post job opportunity') }
-  const handleApplyToJob = (id: string) => { console.log('📝 APPLY:', id); alert('📝 Application submitted!') }
-  const handleSearchMembers = (query: string) => { console.log('🔍 SEARCH:', query); alert(`Searching: ${query}`) }
-  const handleFilterBySkill = (skill: string) => { console.log('🏷️ FILTER:', skill); alert(`Filter by: ${skill}`) }
-  const handleViewProfile = (id: string) => { console.log('👤 PROFILE:', id); alert('👤 Viewing profile') }
-  const handleEditProfile = () => { console.log('✏️ EDIT PROFILE'); alert('✏️ Edit your profile') }
-  const handleSendEndorsement = (id: string) => { console.log('⭐ ENDORSE:', id); alert('⭐ Endorsement sent!') }
-  const handleReportContent = (id: string) => { console.log('⚠️ REPORT:', id); alert('⚠️ Content reported') }
-  const handleBlockUser = (id: string) => { console.log('🚫 BLOCK:', id); confirm('Block user?') && alert('🚫 User blocked') }
+  const handleMessageMember = (id: string) => {
+    console.log('💬 COMMUNITY: Message member initiated')
+    console.log('👤 COMMUNITY: Member ID:', id)
+    console.log('📨 COMMUNITY: Opening chat interface')
+    alert('💬 Opening chat...')
+  }
+  const handleJoinEvent = (id: string) => {
+    console.log('📅 COMMUNITY: Join event initiated')
+    console.log('🎟️ COMMUNITY: Event ID:', id)
+    console.log('✅ COMMUNITY: Registered for event!')
+    alert('📅 Registered for event!')
+  }
+  const handleCreateEvent = () => {
+    console.log('➕ COMMUNITY: Create event initiated')
+    console.log('📋 COMMUNITY: Opening event creation form')
+    console.log('✅ COMMUNITY: Event form ready')
+    alert('➕ Create community event')
+  }
+  const handleJoinGroup = (id: string) => {
+    console.log('👥 COMMUNITY: Join group initiated')
+    console.log('🔗 COMMUNITY: Group ID:', id)
+    console.log('✅ COMMUNITY: Joined group!')
+    alert('👥 Joined group!')
+  }
+  const handleCreateGroup = () => {
+    console.log('➕ COMMUNITY: Create group initiated')
+    console.log('📋 COMMUNITY: Opening group creation form')
+    console.log('✅ COMMUNITY: Group form ready')
+    alert('➕ Create new group')
+  }
+  const handlePostJob = () => {
+    console.log('💼 COMMUNITY: Post job initiated')
+    console.log('📋 COMMUNITY: Opening job posting form')
+    console.log('✅ COMMUNITY: Job form ready')
+    alert('💼 Post job opportunity')
+  }
+  const handleApplyToJob = (id: string) => {
+    console.log('📝 COMMUNITY: Apply to job initiated')
+    console.log('💼 COMMUNITY: Job ID:', id)
+    console.log('✅ COMMUNITY: Application submitted!')
+    alert('📝 Application submitted!')
+  }
+  const handleSearchMembers = (query: string) => {
+    console.log('🔍 COMMUNITY: Search members initiated')
+    console.log('📝 COMMUNITY: Query:', query)
+    console.log('✅ COMMUNITY: Searching...')
+    alert(`Searching: ${query}`)
+  }
+  const handleFilterBySkill = (skill: string) => {
+    console.log('🏷️ COMMUNITY: Filter by skill initiated')
+    console.log('💼 COMMUNITY: Skill:', skill)
+    console.log('✅ COMMUNITY: Filter applied')
+    alert(`Filter by: ${skill}`)
+  }
+  const handleViewProfile = (id: string) => {
+    console.log('👤 COMMUNITY: View profile initiated')
+    console.log('👤 COMMUNITY: Profile ID:', id)
+    console.log('✅ COMMUNITY: Loading profile')
+    alert('👤 Viewing profile')
+  }
+  const handleEditProfile = () => {
+    console.log('✏️ COMMUNITY: Edit profile initiated')
+    console.log('📋 COMMUNITY: Opening profile editor')
+    console.log('✅ COMMUNITY: Editor ready')
+    alert('✏️ Edit your profile')
+  }
+  const handleSendEndorsement = (id: string) => {
+    console.log('⭐ COMMUNITY: Send endorsement initiated')
+    console.log('👤 COMMUNITY: Member ID:', id)
+    console.log('✅ COMMUNITY: Endorsement sent!')
+    alert('⭐ Endorsement sent!')
+  }
+  const handleReportContent = (id: string) => {
+    console.log('⚠️ COMMUNITY: Report content initiated')
+    console.log('📋 COMMUNITY: Content ID:', id)
+    console.log('✅ COMMUNITY: Content reported')
+    alert('⚠️ Content reported')
+  }
+  const handleBlockUser = (id: string) => {
+    console.log('🚫 COMMUNITY: Block user initiated')
+    console.log('👤 COMMUNITY: User ID:', id)
+    if (confirm('Block user?')) {
+      console.log('✅ COMMUNITY: User blocked')
+      alert('🚫 User blocked')
+    }
+  }
 
   const mockMembers: CommunityMember[] = [
     {
@@ -1569,6 +1651,7 @@ export default function CommunityHubPage() {
             
             <div className="flex gap-2">
               <Button
+                data-testid={`${member.isConnected ? 'disconnect' : 'connect'}-member-${member.id}-btn`}
                 size="sm"
                 variant={member.isConnected ? "outline" : "default"}
                 onClick={() => handleMemberAction(member.isConnected ? 'disconnect' : 'connect', member.id)}
@@ -1576,8 +1659,9 @@ export default function CommunityHubPage() {
                 {member.isConnected ? <UserCheck className="w-4 h-4 mr-1" /> : <UserPlus className="w-4 h-4 mr-1" />}
                 {member.isConnected ? 'Connected' : 'Connect'}
               </Button>
-              
+
               <Button
+                data-testid={`message-member-${member.id}-btn`}
                 size="sm"
                 variant="outline"
                 onClick={() => handleMemberAction('message', member.id)}
@@ -1585,9 +1669,10 @@ export default function CommunityHubPage() {
                 <MessageSquare className="w-4 h-4 mr-1" />
                 Message
               </Button>
-              
+
               {member.category === 'freelancer' && (
                 <Button
+                  data-testid={`hire-member-${member.id}-btn`}
                   size="sm"
                   variant="outline"
                   onClick={() => handleMemberAction('hire', member.id)}
@@ -1709,6 +1794,7 @@ export default function CommunityHubPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <Button
+                    data-testid={`like-post-${post.id}-btn`}
                     variant="ghost"
                     size="sm"
                     onClick={() => handlePostAction(post.isLiked ? 'unlike' : 'like', post.id)}
@@ -1717,8 +1803,9 @@ export default function CommunityHubPage() {
                     <Heart className={`w-4 h-4 mr-1 ${post.isLiked ? 'fill-current' : ''}`} />
                     {post.likes}
                   </Button>
-                  
+
                   <Button
+                    data-testid={`comment-post-${post.id}-btn`}
                     variant="ghost"
                     size="sm"
                     onClick={() => handlePostAction('comment', post.id)}
@@ -1727,8 +1814,9 @@ export default function CommunityHubPage() {
                     <MessageSquare className="w-4 h-4 mr-1" />
                     {post.comments}
                   </Button>
-                  
+
                   <Button
+                    data-testid={`share-post-${post.id}-btn`}
                     variant="ghost"
                     size="sm"
                     onClick={() => handlePostAction('share', post.id)}
@@ -1741,6 +1829,7 @@ export default function CommunityHubPage() {
                 
                 <div className="flex items-center gap-2">
                   <Button
+                    data-testid={`bookmark-post-${post.id}-btn`}
                     variant="ghost"
                     size="sm"
                     onClick={() => handlePostAction(post.isBookmarked ? 'unbookmark' : 'bookmark', post.id)}
@@ -1748,8 +1837,13 @@ export default function CommunityHubPage() {
                   >
                     <BookmarkPlus className={`w-4 h-4 ${post.isBookmarked ? 'fill-current' : ''}`} />
                   </Button>
-                  
-                  <Button variant="ghost" size="sm" className="text-gray-500">
+
+                  <Button
+                    data-testid={`post-menu-${post.id}-btn`}
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-500"
+                  >
                     <MoreHorizontal className="w-4 h-4" />
                   </Button>
                 </div>
@@ -1794,7 +1888,7 @@ export default function CommunityHubPage() {
             
             <Dialog open={state.showCreatePost} onOpenChange={(open) => dispatch({ type: 'SET_SHOW_CREATE_POST', payload: open })}>
               <DialogTrigger asChild>
-                <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
+                <Button data-testid="open-create-post-dialog-btn" size="sm" className="bg-purple-600 hover:bg-purple-700">
                   <Plus className="w-4 h-4 mr-2" />
                   Create Post
                 </Button>
@@ -1835,10 +1929,18 @@ export default function CommunityHubPage() {
                   </div>
                   
                   <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={() => dispatch({ type: 'SET_SHOW_CREATE_POST', payload: false })}>
+                    <Button
+                      data-testid="cancel-create-post-btn"
+                      variant="outline"
+                      onClick={() => dispatch({ type: 'SET_SHOW_CREATE_POST', payload: false })}
+                    >
                       Cancel
                     </Button>
-                    <Button onClick={handleCreatePost} disabled={!state.newPost.content}>
+                    <Button
+                      data-testid="submit-create-post-btn"
+                      onClick={handleCreatePost}
+                      disabled={!state.newPost.content}
+                    >
                       <Send className="w-4 h-4 mr-2" />
                       Post
                     </Button>
@@ -2035,7 +2137,7 @@ export default function CommunityHubPage() {
           <TabsContent value="events" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Community Events</h2>
-              <Button>
+              <Button data-testid="create-event-btn">
                 <Plus className="w-4 h-4 mr-2" />
                 Create Event
               </Button>
@@ -2098,8 +2200,8 @@ export default function CommunityHubPage() {
                       </div>
                     </div>
                     <div className="flex gap-2 mt-4">
-                      <Button size="sm" className="flex-1">Join Event</Button>
-                      <Button size="sm" variant="outline">
+                      <Button data-testid={`join-event-${event.id}-btn`} size="sm" className="flex-1">Join Event</Button>
+                      <Button data-testid={`favorite-event-${event.id}-btn`} size="sm" variant="outline">
                         <Heart className="w-4 h-4" />
                       </Button>
                     </div>
@@ -2112,7 +2214,7 @@ export default function CommunityHubPage() {
           <TabsContent value="groups" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Community Groups</h2>
-              <Button>
+              <Button data-testid="create-group-btn">
                 <Plus className="w-4 h-4 mr-2" />
                 Create Group
               </Button>
@@ -2195,7 +2297,7 @@ export default function CommunityHubPage() {
                       </Badge>
                     </div>
                     
-                    <Button className="w-full" size="sm">
+                    <Button data-testid={`join-group-${group.id}-btn`} className="w-full" size="sm">
                       Join Group
                     </Button>
                   </CardContent>

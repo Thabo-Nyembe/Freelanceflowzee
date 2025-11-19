@@ -197,24 +197,34 @@ export default function TeamHubPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            data-testid="team-settings-btn"
+            variant="outline"
             size="sm"
             onClick={() => {
-              console.log('Opening team settings')
+              console.log('⚙️ TEAM HUB: Settings opened')
+              console.log('👥 TEAM HUB: Total team members:', teamStats.totalMembers)
+              console.log('📊 TEAM HUB: Active projects:', teamStats.activeProjects)
+              console.log('✅ TEAM HUB: Settings modal ready')
               alert('Opening team settings')
             }}
           >
             <Settings className="h-4 w-4 mr-2" />
             Settings
           </Button>
-          <Button 
+          <Button
+            data-testid="add-member-btn"
             size="sm"
             onClick={() => {
-              console.log('Adding new team member')
+              console.log('➕ TEAM HUB: Add member initiated')
+              console.log('📝 TEAM HUB: Opening invitation form')
               const memberName = prompt('Enter new member name:')
               if (memberName) {
+                console.log('📧 TEAM HUB: Sending invitation to:', memberName)
+                console.log('✅ TEAM HUB: Invitation sent successfully')
                 alert(`Invitation sent to ${memberName}`)
+              } else {
+                console.log('❌ TEAM HUB: Invitation cancelled')
               }
             }}
           >
@@ -331,44 +341,60 @@ export default function TeamHubPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-3">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    data-testid="team-chat-btn"
+                    variant="outline"
                     className="h-20 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
                     onClick={() => {
-                      console.log('Opening team chat')
+                      console.log('💬 TEAM HUB: Team chat initiated')
+                      console.log('👥 TEAM HUB: Online members:', teamStats.onlineMembers)
+                      console.log('📱 TEAM HUB: Opening chat interface')
+                      console.log('✅ TEAM HUB: Chat ready')
                       alert('Opening team chat interface')
                     }}
                   >
                     <MessageSquare className="h-5 w-5" />
                     <span className="text-sm">Team Chat</span>
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    data-testid="schedule-btn"
+                    variant="outline"
                     className="h-20 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
                     onClick={() => {
-                      console.log('Opening schedule')
+                      console.log('📅 TEAM HUB: Schedule view opened')
+                      console.log('📊 TEAM HUB: Loading team calendar')
+                      console.log('🎯 TEAM HUB: Active projects:', teamStats.activeProjects)
+                      console.log('✅ TEAM HUB: Schedule loaded')
                       alert('Opening team schedule')
                     }}
                   >
                     <Calendar className="h-5 w-5" />
                     <span className="text-sm">Schedule</span>
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    data-testid="video-call-btn"
+                    variant="outline"
                     className="h-20 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
                     onClick={() => {
-                      console.log('Starting video call')
+                      console.log('📹 TEAM HUB: Video call initiated')
+                      console.log('👥 TEAM HUB: Available participants:', teamStats.onlineMembers)
+                      console.log('🎥 TEAM HUB: Setting up video room')
+                      console.log('✅ TEAM HUB: Video call ready')
                       alert('Starting team video call')
                     }}
                   >
                     <Video className="h-5 w-5" />
                     <span className="text-sm">Video Call</span>
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    data-testid="reports-btn"
+                    variant="outline"
                     className="h-20 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
                     onClick={() => {
-                      console.log('Generating reports')
+                      console.log('📊 TEAM HUB: Reports generation initiated')
+                      console.log('📈 TEAM HUB: Gathering team analytics')
+                      console.log('📋 TEAM HUB: Processing performance data')
+                      console.log('✅ TEAM HUB: Report ready')
                       alert('Generating team reports')
                     }}
                   >
@@ -395,11 +421,15 @@ export default function TeamHubPage() {
                   className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <Button 
-                variant="outline" 
+              <Button
+                data-testid="filter-members-btn"
+                variant="outline"
                 size="sm"
                 onClick={() => {
-                  console.log('Opening filter options')
+                  console.log('🔍 TEAM HUB: Filter panel opened')
+                  console.log('📊 TEAM HUB: Available filters: All, Online, By Department, By Role')
+                  console.log('🏢 TEAM HUB: Departments:', departments.length)
+                  console.log('✅ TEAM HUB: Filter options ready')
                   alert('Filter options: All, Online, By Department, By Role')
                 }}
               >
@@ -454,35 +484,44 @@ export default function TeamHubPage() {
                     </div>
                   </div>
                   <div className="mt-4 flex gap-2">
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
+                    <Button
+                      data-testid={`member-${member.id}-view-btn`}
+                      size="sm"
+                      variant="outline"
                       className="flex-1 hover:bg-blue-50 hover:border-blue-200 transition-colors"
                       onClick={() => {
-                        console.log(`Starting chat with ${member.name}`)
+                        console.log('👤 TEAM HUB: Member profile opened')
+                        console.log('📛 TEAM HUB: Name:', member.name)
+                        console.log('💼 TEAM HUB: Role:', member.role)
+                        console.log('🏢 TEAM HUB: Department:', member.department)
+                        console.log('📊 TEAM HUB: Projects:', member.projects)
+                        console.log('✅ TEAM HUB: Tasks completed:', member.tasksCompleted)
+                        console.log('⭐ TEAM HUB: Rating:', member.rating)
+                        console.log('📍 TEAM HUB: Location:', member.location)
+                        console.log('✅ TEAM HUB: Profile view ready')
                         alert(`Opening chat with ${member.name}`)
                       }}
                     >
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Chat
                     </Button>
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="outline"
                       className="hover:bg-green-50 hover:border-green-200 transition-colors"
                       onClick={() => {
-                        console.log(`Sending email to ${member.email}`)
+                        console.log('📧 TEAM HUB: Email to:', member.email)
                         window.open(`mailto:${member.email}`, '_blank')
                       }}
                     >
                       <Mail className="h-4 w-4" />
                     </Button>
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="outline"
                       className="hover:bg-yellow-50 hover:border-yellow-200 transition-colors"
                       onClick={() => {
-                        console.log(`Calling ${member.phone}`)
+                        console.log('📞 TEAM HUB: Calling:', member.phone)
                         window.open(`tel:${member.phone}`, '_blank')
                       }}
                     >

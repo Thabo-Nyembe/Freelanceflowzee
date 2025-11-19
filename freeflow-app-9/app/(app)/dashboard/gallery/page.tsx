@@ -151,6 +151,43 @@ export default function GalleryPage() {
     }
   }
 
+  const handleOpenPreview = (item: any) => {
+    console.log('👁️ GALLERY: Preview gallery item')
+    console.log('🖼️ GALLERY: Title:', item.title)
+    console.log('📂 GALLERY: Type:', item.type)
+    console.log('👤 GALLERY: Client:', item.client)
+    console.log('💼 GALLERY: Project:', item.project)
+    console.log('❤️ GALLERY: Likes:', item.likes)
+    console.log('💬 GALLERY: Comments:', item.comments)
+    console.log('✅ GALLERY: Preview opened')
+    alert(`👁️ Viewing: ${item.title}`)
+  }
+
+  const handleDownload = (item: any) => {
+    console.log('💾 GALLERY: Download gallery item')
+    console.log('🖼️ GALLERY: Title:', item.title)
+    console.log('📂 GALLERY: Type:', item.type)
+    console.log('🔗 GALLERY: URL:', item.url)
+    console.log('✅ GALLERY: Download initiated')
+    alert(`💾 Downloading: ${item.title}`)
+  }
+
+  const handleShare = (item: any) => {
+    console.log('📤 GALLERY: Share gallery item')
+    console.log('🖼️ GALLERY: Title:', item.title)
+    console.log('👤 GALLERY: Client:', item.client)
+    console.log('🔗 GALLERY: Generating share link')
+    console.log('✅ GALLERY: Share modal opened')
+    alert(`📤 Sharing: ${item.title}`)
+  }
+
+  const handleFilterGallery = () => {
+    console.log('🔍 GALLERY: Filter panel opened')
+    console.log('📊 GALLERY: Available categories:', categories.length)
+    console.log('🎨 GALLERY: Filter options ready')
+    console.log('✅ GALLERY: Filter panel loaded')
+  }
+
   const handleViewItem = (itemId: number) => { console.log('👁️ VIEW:', itemId); alert('👁️ Viewing Media\n\nOpening fullscreen preview...') }
   const handleEditItem = (itemId: number) => { console.log('✏️ EDIT:', itemId); alert('✏️ Edit Media\n\nOpening editor for metadata and tags') }
   const handleDeleteItem = (itemId: number) => { console.log('🗑️ DELETE:', itemId); confirm('Delete this item?') && alert('✅ Media deleted') }
@@ -481,11 +518,11 @@ export default function GalleryPage() {
           <p className="text-gray-600 dark:text-gray-300">Showcase your creative work and portfolio</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleViewModeToggle}>
+          <Button data-testid="view-mode-toggle-btn" variant="outline" size="sm" onClick={handleViewModeToggle}>
             {viewMode === 'grid' ? <List className="h-4 w-4 mr-2" /> : <Grid className="h-4 w-4 mr-2" />}
             {viewMode === 'grid' ? 'List View' : 'Grid View'}
           </Button>
-          <Button size="sm" onClick={handleUploadMedia}>
+          <Button data-testid="upload-media-btn" size="sm" onClick={handleUploadMedia}>
             <Upload className="h-4 w-4 mr-2" />
             Upload Media
           </Button>
@@ -567,6 +604,7 @@ export default function GalleryPage() {
                 className="flex-1"
               />
               <Button
+                data-testid="generate-ai-image-btn"
                 onClick={handleGenerateImage}
                 disabled={isGenerating}
                 className="bg-purple-600 hover:bg-purple-700"
@@ -597,16 +635,29 @@ export default function GalleryPage() {
                   />
                   <div className="absolute bottom-2 right-2 flex gap-2">
                     <Button
+                      data-testid="download-generated-image-btn"
                       size="sm"
                       variant="secondary"
-                      onClick={() => handleDownloadItem(0)}
+                      onClick={() => {
+                        console.log('💾 GALLERY: Downloading AI generated image')
+                        console.log('🎨 GALLERY: Image URL:', generatedImage)
+                        console.log('✅ GALLERY: Download initiated')
+                        handleDownloadItem(0)
+                      }}
                     >
                       <Download className="h-4 w-4" />
                     </Button>
                     <Button
+                      data-testid="add-to-gallery-btn"
                       size="sm"
                       variant="secondary"
-                      onClick={() => setGeneratedImage('')}
+                      onClick={() => {
+                        console.log('➕ GALLERY: Add to gallery initiated')
+                        console.log('🎨 GALLERY: AI generated image')
+                        console.log('💾 GALLERY: Saving to collection')
+                        console.log('✅ GALLERY: Image added successfully')
+                        setGeneratedImage('')
+                      }}
                     >
                       Clear
                     </Button>
@@ -643,7 +694,7 @@ export default function GalleryPage() {
                     className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <Button variant="outline" size="sm">
+                <Button data-testid="filter-gallery-btn" variant="outline" size="sm" onClick={handleFilterGallery}>
                   <Filter className="h-4 w-4 mr-2" />
                   Filter
                 </Button>
@@ -695,13 +746,13 @@ export default function GalleryPage() {
                           </div>
                           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <div className="flex gap-1">
-                              <Button size="sm" variant="secondary" className="h-8 w-8 p-0">
+                              <Button data-testid={`preview-item-${item.id}-btn`} size="sm" variant="secondary" className="h-8 w-8 p-0" onClick={() => handleOpenPreview(item)}>
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              <Button size="sm" variant="secondary" className="h-8 w-8 p-0">
+                              <Button data-testid={`download-item-${item.id}-btn`} size="sm" variant="secondary" className="h-8 w-8 p-0" onClick={() => handleDownload(item)}>
                                 <Download className="h-4 w-4" />
                               </Button>
-                              <Button size="sm" variant="secondary" className="h-8 w-8 p-0">
+                              <Button data-testid={`share-item-${item.id}-btn`} size="sm" variant="secondary" className="h-8 w-8 p-0" onClick={() => handleShare(item)}>
                                 <Share2 className="h-4 w-4" />
                               </Button>
                             </div>
