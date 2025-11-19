@@ -218,47 +218,34 @@ export default function ModelingStudioPage() {
                 borderBottom: `${size}px solid ${material?.color || '#888'}`
               }}
             />
-        )}
-
-        {/* 3D Objects */}
-        {objects.map((obj, index) => renderObject(obj, index))}
-
-        {/* Lights visualization */}
-        {showLights && lights.filter(l => l.enabled).map((light) => (
-          <div
-            key={light.id}
-            className="absolute w-4 h-4 rounded-full border-2 border-yellow-400 bg-yellow-200"
-            style={{
-              left: 250 + light.position.x * 50 - 8,
-              top: 200 - light.position.y * 30 - 8
-            }}
-          />
-        ))}
-
-        {/* Selection indicator */}
-        {selectedObject && (
-          <div className="absolute top-4 left-4 text-sm bg-black/50 text-white px-2 py-1 rounded">
-            Selected: {objects.find(o => o.id === selectedObject)?.name}
-          </div>
-        )}
-
-        {/* Tool indicator */}
-        <div className="absolute top-4 right-4 text-sm bg-black/50 text-white px-2 py-1 rounded capitalize">
-          {selectedTool} Tool
-        </div>
-
-        {/* View mode indicator */}
-        <div className="absolute bottom-4 left-4 text-sm bg-black/50 text-white px-2 py-1 rounded capitalize">
-          {viewMode} Mode
-        </div>
-      </div>
-    )
-  }
+          )
+        default:
+          return null
+      }
+    }
 
   const addObject = (type: string) => {
     const newObject: SceneObject = {
       id: Date.now().toString(),
-      name: `${type.charAt(0).toUpperCase() + type.slice(1)} ${objects.length + 1}
+      name: `${type.charAt(0).toUpperCase() + type.slice(1)} ${objects.length + 1}`,
+      type: type as SceneObject['type'],
+      visible: true,
+      locked: false,
+      position: { x: 0, y: 0, z: 0 },
+      rotation: { x: 0, y: 0, z: 0 },
+      scale: { x: 1, y: 1, z: 1 },
+      material: materials[0]?.id || 'default'
+    }
+    setObjects(prev => [...prev, newObject])
+    setSelectedObject(newObject.id)
+  }
+
+  const duplicateObject = (id: string) => {
+    const obj = objects.find(o => o.id === id)
+    if (obj) {
+      const newObject: SceneObject = {
+        ...obj,
+        id: Date.now().toString(),
         name: `${obj.name} Copy`,
         position: { ...obj.position, x: obj.position.x + 1 }
       }

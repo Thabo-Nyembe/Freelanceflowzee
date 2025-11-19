@@ -146,10 +146,26 @@ const DesktopWindow = ({ app, os, width, height }: DesktopWindowProps) => {
 export default function DesktopAppPage() {
   const [selectedApp, setSelectedApp] = React.useState('code-editor')
   const [selectedDevice, setSelectedDevice] = React.useState('macbook-14')
-  const [framework, setFramework] = React.useState(APP_FRAMEWORKS[0])
-  const [os, setOs] = React.useState('macOS')
+  const [selectedFramework, setSelectedFramework] = React.useState(APP_FRAMEWORKS[0]?.id || 'electron')
+  const [zoom, setZoom] = React.useState([75])
+  const [showMenuBar, setShowMenuBar] = React.useState(true)
+  const [showTaskbar, setShowTaskbar] = React.useState(true)
 
   const device = DESKTOP_PRESETS.find(d => d.id === selectedDevice) || DESKTOP_PRESETS[0]
+  const framework = APP_FRAMEWORKS.find(f => f.id === selectedFramework) || APP_FRAMEWORKS[0]
+  const scaleFactor = zoom[0] / 100
+
+  const exportAsImage = () => {
+    console.log('📸 Exporting as image...')
+  }
+
+  const sharePreview = () => {
+    console.log('🔗 Sharing preview...')
+  }
+
+  const generateCode = () => {
+    console.log('💻 Generating code...')
+  }
 
   return (
     <div>
