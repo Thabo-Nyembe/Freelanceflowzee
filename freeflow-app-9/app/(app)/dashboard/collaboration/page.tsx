@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import {
   MessageCircle,
   Users,
@@ -52,7 +53,9 @@ export default function CollaborationPage() {
     console.log('👥 COLLABORATION: Participants ready: 3')
     console.log('📞 COLLABORATION: Connecting audio stream...')
     console.log('✅ COLLABORATION: Audio call started')
-    alert('🎤 Starting audio call...')
+    toast.success('🎤 Audio call started', {
+      description: '3 participants connected'
+    })
   }
 
   const handleStartVideoCall = () => {
@@ -60,7 +63,9 @@ export default function CollaborationPage() {
     console.log('👥 COLLABORATION: Participants ready: 3')
     console.log('🎥 COLLABORATION: Starting video stream...')
     console.log('✅ COLLABORATION: Video call active')
-    alert('📹 Starting video call...')
+    toast.success('📹 Video call started', {
+      description: '3 participants connected'
+    })
   }
 
   const handleSendMessage = () => {
@@ -68,14 +73,16 @@ export default function CollaborationPage() {
     console.log('📝 COLLABORATION: Message content ready')
     console.log('📤 COLLABORATION: Sending to server...')
     console.log('✅ COLLABORATION: Message sent successfully')
-    alert('💬 Message sent!')
+    toast.success('💬 Message sent!')
   }
 
   const handleAddPinpointFeedback = () => {
     console.log('📌 COLLABORATION: Pinpoint feedback mode activated')
     console.log('🎯 COLLABORATION: Click on media to add feedback')
     console.log('✅ COLLABORATION: Ready for pinpoint selection')
-    alert('📌 Click on media to add pinpoint feedback')
+    toast.info('📌 Pinpoint feedback mode active', {
+      description: 'Click on media to add feedback'
+    })
   }
 
   const handleUploadFile = () => {
@@ -85,28 +92,30 @@ export default function CollaborationPage() {
     input.type = 'file'
     input.click()
     console.log('✅ COLLABORATION: File dialog opened')
-    alert('📎 File upload dialog opened')
+    toast.info('📎 File upload dialog opened')
   }
 
   const handleAddVoiceNote = () => {
     console.log('🎙️ COLLABORATION: Voice note recording started')
     console.log('🔴 COLLABORATION: Microphone access requested')
     console.log('✅ COLLABORATION: Recording in progress')
-    alert('🎙️ Recording voice note...')
+    toast.success('🎙️ Recording voice note...', {
+      description: 'Microphone access granted'
+    })
   }
 
   const handleShareScreen = () => {
     console.log('🖥️ COLLABORATION: Screen sharing initiated')
     console.log('📺 COLLABORATION: Requesting screen access...')
     console.log('✅ COLLABORATION: Screen sharing active')
-    alert('🖥️ Screen sharing started')
+    toast.success('🖥️ Screen sharing started')
   }
 
   const handleEditFeedback = (id: number) => {
     console.log('✏️ COLLABORATION: Edit feedback:', id)
     console.log('📝 COLLABORATION: Loading feedback content...')
     console.log('✅ COLLABORATION: Edit mode ready')
-    alert('✏️ Edit feedback')
+    toast.info('✏️ Edit mode active')
   }
 
   const handleDeleteFeedback = (id: number) => {
@@ -114,7 +123,7 @@ export default function CollaborationPage() {
     console.log('⚠️ COLLABORATION: Confirming deletion...')
     if (confirm('Delete feedback?')) {
       console.log('✅ COLLABORATION: Feedback deleted')
-      alert('✅ Deleted')
+      toast.success('✅ Feedback deleted')
     }
   }
 
@@ -122,35 +131,37 @@ export default function CollaborationPage() {
     console.log('💬 COLLABORATION: Reply to message:', id)
     console.log('📝 COLLABORATION: Opening reply composer...')
     console.log('✅ COLLABORATION: Reply mode active')
-    alert('💬 Reply to message')
+    toast.info('💬 Reply mode active')
   }
 
   const handleReactToMessage = (id: number, emoji: string) => {
     console.log('😀 COLLABORATION: React to message:', id)
     console.log('✨ COLLABORATION: Emoji reaction:', emoji)
     console.log('✅ COLLABORATION: Reaction added')
-    alert(`Reacted with ${emoji}`)
+    toast.success('Reaction added: ' + emoji)
   }
 
   const handlePinMessage = (id: number) => {
     console.log('📌 COLLABORATION: Pin message:', id)
     console.log('📍 COLLABORATION: Adding to pinned messages...')
     console.log('✅ COLLABORATION: Message pinned')
-    alert('📌 Message pinned')
+    toast.success('📌 Message pinned')
   }
 
   const handleArchiveConversation = () => {
     console.log('📦 COLLABORATION: Archive conversation')
     console.log('💾 COLLABORATION: Moving to archive...')
     console.log('✅ COLLABORATION: Conversation archived')
-    alert('📦 Conversation archived')
+    toast.success('📦 Conversation archived')
   }
 
   const handleAddParticipants = () => {
     console.log('➕ COLLABORATION: Add participants')
     console.log('👥 COLLABORATION: Opening participant selector...')
     console.log('✅ COLLABORATION: Ready to add users')
-    alert('➕ Add participants to collaboration')
+    toast.info('➕ Add participants', {
+      description: 'Select users to add'
+    })
   }
 
   const handleRemoveParticipant = (id: number) => {
@@ -158,7 +169,7 @@ export default function CollaborationPage() {
     console.log('⚠️ COLLABORATION: Confirming removal...')
     if (confirm('Remove participant?')) {
       console.log('✅ COLLABORATION: Participant removed')
-      alert('✅ Removed')
+      toast.success('✅ Participant removed')
     }
   }
 
@@ -166,49 +177,49 @@ export default function CollaborationPage() {
     console.log('💾 COLLABORATION: Export chat history')
     console.log('📄 COLLABORATION: Generating export file...')
     console.log('✅ COLLABORATION: Export complete')
-    alert('💾 Exporting chat history...')
+    toast.success('💾 Chat history exported')
   }
 
   const handleMuteNotifications = () => {
     console.log('🔕 COLLABORATION: Mute notifications')
     console.log('🔇 COLLABORATION: Disabling notifications...')
     console.log('✅ COLLABORATION: Notifications muted')
-    alert('🔕 Notifications muted')
+    toast.success('🔕 Notifications muted')
   }
 
   const handleCreateCanvas = () => {
     console.log('🎨 COLLABORATION: Create canvas')
     console.log('🖌️ COLLABORATION: Initializing canvas workspace...')
     console.log('✅ COLLABORATION: Canvas ready')
-    alert('🎨 Creating new canvas...')
+    toast.success('🎨 Canvas created')
   }
 
   const handleAddDrawing = () => {
     console.log('✏️ COLLABORATION: Drawing mode activated')
     console.log('🎨 COLLABORATION: Pen tool selected')
     console.log('✅ COLLABORATION: Ready to draw')
-    alert('✏️ Drawing mode activated')
+    toast.info('✏️ Drawing mode activated')
   }
 
   const handleSaveCanvas = () => {
     console.log('💾 COLLABORATION: Save canvas')
     console.log('🖼️ COLLABORATION: Saving current state...')
     console.log('✅ COLLABORATION: Canvas saved!')
-    alert('💾 Canvas saved!')
+    toast.success('💾 Canvas saved!')
   }
 
   const handleExportMedia = () => {
     console.log('📥 COLLABORATION: Export media files')
     console.log('📦 COLLABORATION: Gathering all media...')
     console.log('✅ COLLABORATION: Media export complete')
-    alert('📥 Exporting all media files...')
+    toast.success('📥 Media files exported')
   }
 
   const handleViewMediaPreview = (type: string) => {
     console.log('👁️ COLLABORATION: View media preview')
     console.log('📺 COLLABORATION: Media type:', type)
     console.log('✅ COLLABORATION: Preview loaded')
-    alert(`👁️ Viewing ${type} preview`)
+    toast.info('👁️ Viewing ' + type + ' preview')
   }
 
   // NEW ENTERPRISE HANDLERS - Meeting Enhancement
@@ -216,54 +227,129 @@ export default function CollaborationPage() {
     console.log('🎥 COLLABORATION: Record meeting initiated')
     console.log('📹 COLLABORATION: Active meetings: 3')
     console.log('💾 COLLABORATION: Setting up recording...')
+    console.log('📊 COLLABORATION: Recording settings:')
+    console.log('  • Quality: 1080p HD video')
+    console.log('  • Audio: High-quality stereo')
+    console.log('  • Chat: Transcript included')
+    console.log('  • Captions: Auto-generated')
+    console.log('💾 COLLABORATION: Storage:')
+    console.log('  • Cloud storage enabled')
+    console.log('  • Transcription: Automatic')
+    console.log('  • Key moments: AI-detected')
+    console.log('  • Chapters: Auto-generated')
     console.log('✅ COLLABORATION: Recording started')
-    alert(`🎥 Recording Meeting\n\nRecording Settings:\n• Quality: 1080p HD video\n• Audio: High-quality stereo\n• Chat: Transcript included\n• Captions: Auto-generated\n\nStorage:\n• Cloud storage enabled\n• Transcription: Automatic\n• Key moments: AI-detected\n• Chapters: Auto-generated\n\nNext Steps:\n• Recording will save automatically\n• Access in "Recordings" section\n• AI summary generated (~2 min)`)
+    console.log('📝 COLLABORATION: Next steps:')
+    console.log('  • Recording will save automatically')
+    console.log('  • Access in "Recordings" section')
+    console.log('  • AI summary generated (~2 min)')
+    toast.success('🎥 Meeting recording started', {
+      description: '1080p HD with auto-transcription'
+    })
   }
 
   const handleCreateBreakoutRoom = () => {
     console.log('🚪 COLLABORATION: Breakout room creation initiated')
     console.log('👥 COLLABORATION: Total participants: 12')
     console.log('🎯 COLLABORATION: Online participants: 8')
+    console.log('📊 COLLABORATION: Setup options:')
+    console.log('  • Number of rooms: 2-10')
+    console.log('  • Auto-assign participants')
+    console.log('  • Manual assignment')
+    console.log('  • Time limit: 5-60 minutes')
+    console.log('  • Broadcast to all rooms')
+    console.log('📊 COLLABORATION: Features:')
+    console.log('  • Private discussions')
+    console.log('  • Host can join any room')
+    console.log('  • Timer countdown visible')
+    console.log('  • Quick regroup function')
     console.log('✅ COLLABORATION: Breakout rooms ready')
-    alert(`🚪 Create Breakout Rooms\n\nSetup Options:\n• Number of rooms: 2-10\n• Auto-assign participants\n• Manual assignment\n• Time limit: 5-60 minutes\n• Broadcast to all rooms\n\nFeatures:\n• Private discussions\n• Host can join any room\n• Timer countdown visible\n• Quick regroup function\n\nParticipants: 8 online, 12 total`)
+    toast.success('🚪 Breakout rooms ready', {
+      description: '8 online participants'
+    })
   }
 
   const handleLiveCaptions = () => {
     console.log('💬 COLLABORATION: Live captions activated')
     console.log('🌐 COLLABORATION: Language: English')
-    console.log('📊 COLLABORATION: Accuracy: 95%+')
+    console.log('📊 COLLABORATION: Caption features:')
+    console.log('  • Real-time transcription')
+    console.log('  • Multi-language support (30+ languages)')
+    console.log('  • Speaker identification')
+    console.log('  • Adjustable text size')
+    console.log('  • Position customization')
+    console.log('📊 COLLABORATION: Quality:')
+    console.log('  • Accuracy: 95%+')
+    console.log('  • Latency: <1 second')
+    console.log('  • Translation: Available')
+    console.log('  • Save transcripts')
     console.log('✅ COLLABORATION: Captions streaming')
-    alert(`💬 Live Captions\n\nCaption Features:\n• Real-time transcription\n• Multi-language support (30+ languages)\n• Speaker identification\n• Adjustable text size\n• Position customization\n\nQuality:\n• Accuracy: 95%+\n• Latency: <1 second\n• Translation: Available\n• Save transcripts\n\nAccessibility:\nImproves meeting accessibility for hearing impaired and non-native speakers.`)
+    console.log('♿ COLLABORATION: Accessibility: Improves meeting accessibility for hearing impaired and non-native speakers')
+    toast.success('💬 Live captions activated', {
+      description: '95%+ accuracy, 30+ languages'
+    })
   }
 
   const handleVirtualBackground = () => {
     console.log('🎨 COLLABORATION: Virtual background activated')
     console.log('🖼️ COLLABORATION: Background options loading...')
+    console.log('📊 COLLABORATION: Background options:')
+    console.log('  • Blur background')
+    console.log('  • Office scenes (12 options)')
+    console.log('  • Nature scenes (8 options)')
+    console.log('  • Custom images')
+    console.log('  • Brand logos')
+    console.log('📊 COLLABORATION: Features:')
+    console.log('  • AI-powered edge detection')
+    console.log('  • High quality rendering')
+    console.log('  • No green screen needed')
+    console.log('  • Preview before apply')
     console.log('✅ COLLABORATION: Background ready')
-    alert(`🎨 Virtual Background\n\nBackground Options:\n• Blur background\n• Office scenes (12 options)\n• Nature scenes (8 options)\n• Custom images\n• Brand logos\n\nFeatures:\n• AI-powered edge detection\n• High quality rendering\n• No green screen needed\n• Preview before apply\n\nProfessional appearance from anywhere!`)
+    console.log('💼 COLLABORATION: Professional appearance from anywhere!')
+    toast.success('🎨 Virtual background ready', {
+      description: '20+ options available'
+    })
   }
 
   const handleMuteParticipant = (name: string) => {
     console.log('🔇 COLLABORATION: Mute participant requested')
     console.log('👤 COLLABORATION: Participant:', name)
     console.log('🔕 COLLABORATION: Sending mute command...')
-    console.log('✅ COLLABORATION: Participant muted')
-    alert(`🔇 Mute Participant\n\nParticipant: ${name}\n\nActions:\n• Audio muted\n• Participant notified\n• Can self-unmute if needed\n\nMuted successfully.`)
+    console.log('📊 COLLABORATION: Actions:')
+    console.log('  • Audio muted')
+    console.log('  • Participant notified')
+    console.log('  • Can self-unmute if needed')
+    console.log('✅ COLLABORATION: Participant muted:', name)
+    toast.success('🔇 Participant muted: ' + name)
   }
 
   const handleSpotlightParticipant = (name: string) => {
     console.log('⭐ COLLABORATION: Spotlight participant')
     console.log('👤 COLLABORATION: Participant:', name)
     console.log('📺 COLLABORATION: Pinning to main view...')
-    console.log('✅ COLLABORATION: Spotlight active')
-    alert(`⭐ Spotlight Participant\n\nParticipant: ${name}\n\nFeatures:\n• Pinned to main view\n• Visible to all participants\n• Great for presentations\n• Override speaker view\n• Remove spotlight anytime\n\nSpotlight activated!`)
+    console.log('📊 COLLABORATION: Features:')
+    console.log('  • Pinned to main view')
+    console.log('  • Visible to all participants')
+    console.log('  • Great for presentations')
+    console.log('  • Override speaker view')
+    console.log('  • Remove spotlight anytime')
+    console.log('✅ COLLABORATION: Spotlight activated:', name)
+    toast.success('⭐ Spotlight: ' + name, {
+      description: 'Pinned to main view'
+    })
   }
 
   const handleRaiseHand = () => {
     console.log('✋ COLLABORATION: Raise hand feature activated')
     console.log('👥 COLLABORATION: Participants notified')
+    console.log('📊 COLLABORATION: Visibility:')
+    console.log('  • Visible to host and all participants')
+    console.log('  • Shows in participant list')
+    console.log('  • Host notification sent')
+    console.log('  • Lower hand anytime')
     console.log('✅ COLLABORATION: Hand raised')
-    alert(`✋ Raise Hand\n\nStatus: Hand Raised\n\nVisibility:\n• Visible to host and all participants\n• Shows in participant list\n• Host notification sent\n• Lower hand anytime\n\nYour hand is now raised!`)
+    toast.success('✋ Hand raised', {
+      description: 'Visible to all participants'
+    })
   }
 
   // NEW ENTERPRISE HANDLERS - Chat Enhancement
@@ -271,16 +357,44 @@ export default function CollaborationPage() {
     console.log('🔍 COLLABORATION: Message search activated')
     console.log('📊 COLLABORATION: Indexing messages...')
     console.log('💬 COLLABORATION: Query: ""')
+    console.log('📊 COLLABORATION: Search features:')
+    console.log('  • Full-text search')
+    console.log('  • @mention search')
+    console.log('  • Date range filters')
+    console.log('  • Sender filters')
+    console.log('  • Attachment filters')
+    console.log('  • Jump to message')
+    console.log('  • Export results')
     console.log('✅ COLLABORATION: 247 results found')
-    alert(`🔍 Search Messages\n\nSearch Features:\n• Full-text search\n• @mention search\n• Date range filters\n• Sender filters\n• Attachment filters\n• Jump to message\n• Export results\n\nResults: 247 messages found\n\nTip: Use advanced filters for precise results.`)
+    console.log('💡 COLLABORATION: Tip: Use advanced filters for precise results')
+    toast.info('🔍 Search activated', {
+      description: '247 messages indexed'
+    })
   }
 
   const handleSendFile = () => {
     console.log('📎 COLLABORATION: File send initiated')
     console.log('💬 COLLABORATION: Chat messages: 247')
     console.log('📁 COLLABORATION: Opening file picker...')
+    console.log('📊 COLLABORATION: Supported types:')
+    console.log('  • Documents (PDF, DOC, XLSX)')
+    console.log('  • Images (JPG, PNG, GIF)')
+    console.log('  • Videos (MP4, MOV)')
+    console.log('  • Archives (ZIP, RAR)')
+    console.log('  • Code files')
+    console.log('📊 COLLABORATION: Features:')
+    console.log('  • Drag & drop support')
+    console.log('  • Multiple file upload')
+    console.log('  • Preview before send')
+    console.log('  • Cloud storage integration')
+    console.log('  • Virus scanning')
+    console.log('📊 COLLABORATION: Limits:')
+    console.log('  • Max 100MB per file')
+    console.log('  • 500MB total per chat')
     console.log('✅ COLLABORATION: Ready to send')
-    alert(`📎 Send File\n\nSupported Types:\n• Documents (PDF, DOC, XLSX)\n• Images (JPG, PNG, GIF)\n• Videos (MP4, MOV)\n• Archives (ZIP, RAR)\n• Code files\n\nFeatures:\n• Drag & drop support\n• Multiple file upload\n• Preview before send\n• Cloud storage integration\n• Virus scanning\n\nLimits:\n• Max 100MB per file\n• 500MB total per chat`)
+    toast.info('📎 Select file to send', {
+      description: 'Max 100MB per file'
+    })
   }
 
   // NEW ENTERPRISE HANDLERS - Collaboration Tools
@@ -288,16 +402,45 @@ export default function CollaborationPage() {
     console.log('🖌️ COLLABORATION: Whiteboard initiated')
     console.log('👥 COLLABORATION: Collaborators: 8')
     console.log('🎨 COLLABORATION: Loading whiteboard tools...')
+    console.log('📊 COLLABORATION: Whiteboard tools:')
+    console.log('  • Drawing tools (pen, marker, highlighter)')
+    console.log('  • Shapes & diagrams')
+    console.log('  • Text annotations')
+    console.log('  • Sticky notes')
+    console.log('  • Templates library')
+    console.log('📊 COLLABORATION: Collaboration features:')
+    console.log('  • Real-time sync')
+    console.log('  • Multi-cursor support')
+    console.log('  • Version history')
+    console.log('  • Export options (PNG, PDF)')
     console.log('✅ COLLABORATION: Whiteboard ready')
-    alert(`🖌️ Start Whiteboard\n\nWhiteboard Tools:\n• Drawing tools (pen, marker, highlighter)\n• Shapes & diagrams\n• Text annotations\n• Sticky notes\n• Templates library\n\nCollaboration:\n• Real-time sync\n• Multi-cursor support\n• Version history\n• Export options (PNG, PDF)\n\nCollaborators: 8 online\n\nStart creating together!`)
+    console.log('🎨 COLLABORATION: Start creating together with 8 collaborators!')
+    toast.success('🖌️ Whiteboard ready', {
+      description: '8 collaborators online'
+    })
   }
 
   const handleCreatePoll = () => {
     console.log('📊 COLLABORATION: Create poll initiated')
     console.log('👥 COLLABORATION: Participants available: 12')
     console.log('📝 COLLABORATION: Opening poll creator...')
+    console.log('📊 COLLABORATION: Poll types:')
+    console.log('  • Multiple choice')
+    console.log('  • Yes/No')
+    console.log('  • Rating scale (1-5)')
+    console.log('  • Open text')
+    console.log('  • Ranking')
+    console.log('📊 COLLABORATION: Features:')
+    console.log('  • Real-time results')
+    console.log('  • Anonymous voting option')
+    console.log('  • Export results')
+    console.log('  • Auto-close after time')
+    console.log('  • Share results instantly')
     console.log('✅ COLLABORATION: Poll ready')
-    alert(`📊 Create Poll\n\nPoll Types:\n• Multiple choice\n• Yes/No\n• Rating scale (1-5)\n• Open text\n• Ranking\n\nFeatures:\n• Real-time results\n• Anonymous voting option\n• Export results\n• Auto-close after time\n• Share results instantly\n\nParticipants: 12 available\n\nEngage your audience!`)
+    console.log('👥 COLLABORATION: Engage your audience with 12 participants!')
+    toast.success('📊 Poll creator opened', {
+      description: '12 participants available'
+    })
   }
 
   // NEW ENTERPRISE HANDLERS - Meeting Scheduling
@@ -305,8 +448,28 @@ export default function CollaborationPage() {
     console.log('🔁 COLLABORATION: Recurring meeting setup')
     console.log('📅 COLLABORATION: Current meetings: 12')
     console.log('⏰ COLLABORATION: Opening scheduler...')
+    console.log('📊 COLLABORATION: Recurrence options:')
+    console.log('  • Daily')
+    console.log('  • Weekly')
+    console.log('  • Bi-weekly')
+    console.log('  • Monthly')
+    console.log('  • Custom patterns')
+    console.log('📊 COLLABORATION: Settings:')
+    console.log('  • Start date & time')
+    console.log('  • End date or occurrence count')
+    console.log('  • Days of week selection')
+    console.log('  • Time zone settings')
+    console.log('  • Host rotation option')
+    console.log('📊 COLLABORATION: Integration:')
+    console.log('  • Auto-calendar sync')
+    console.log('  • Email reminders')
+    console.log('  • Participant management')
+    console.log('  • Template agendas')
     console.log('✅ COLLABORATION: Recurrence options ready')
-    alert(`🔁 Schedule Recurring Meeting\n\nRecurrence Options:\n• Daily\n• Weekly\n• Bi-weekly\n• Monthly\n• Custom patterns\n\nSettings:\n• Start date & time\n• End date or occurrence count\n• Days of week selection\n• Time zone settings\n• Host rotation option\n\nIntegration:\n• Auto-calendar sync\n• Email reminders\n• Participant management\n• Template agendas\n\nCurrent meetings: 12 scheduled`)
+    console.log('📅 COLLABORATION: Current meetings: 12 scheduled')
+    toast.success('🔁 Recurring meeting setup', {
+      description: '12 meetings currently scheduled'
+    })
   }
 
   // NEW ENTERPRISE HANDLERS - Workspace Management
@@ -315,8 +478,20 @@ export default function CollaborationPage() {
     console.log('🏢 COLLABORATION: Workspace ID:', workspaceId)
     console.log('📄 COLLABORATION: Format: ZIP')
     console.log('📥 COLLABORATION: Generating export...')
+    console.log('📊 COLLABORATION: Export contents:')
+    console.log('  • All files and assets')
+    console.log('  • Comments and feedback')
+    console.log('  • Version history')
+    console.log('  • Team members list')
+    console.log('  • Activity timeline')
+    console.log('📊 COLLABORATION: Formats:')
+    console.log('  • ZIP (complete archive)')
+    console.log('  • PDF (documentation)')
     console.log('✅ COLLABORATION: Export complete')
-    alert(`📦 Export Workspace\n\nWorkspace: ${workspaceId}\n\nExport Contents:\n• All files and assets\n• Comments and feedback\n• Version history\n• Team members list\n• Activity timeline\n\nFormats:\n• ZIP (complete archive)\n• PDF (documentation)\n\nFilename: workspace-${workspaceId}-export.zip\n\nDownload starting...`)
+    console.log('📥 COLLABORATION: Filename: workspace-' + workspaceId + '-export.zip')
+    toast.success('📦 Workspace exported', {
+      description: 'Download starting...'
+    })
   }
 
   // NEW ENTERPRISE HANDLERS - Analytics & Reporting
@@ -326,8 +501,23 @@ export default function CollaborationPage() {
     console.log('📈 COLLABORATION: Active projects: 27')
     console.log('📅 COLLABORATION: Meetings analyzed: 12')
     console.log('💾 COLLABORATION: Generating PDF report...')
+    console.log('📊 COLLABORATION: Report contents:')
+    console.log('  • Team performance metrics')
+    console.log('  • Meeting statistics (12 meetings, 8.5h)')
+    console.log('  • Communication patterns')
+    console.log('  • Productivity insights')
+    console.log('  • Collaboration efficiency')
+    console.log('📊 COLLABORATION: Key metrics:')
+    console.log('  • Response time: 2.3h avg')
+    console.log('  • Project completion: 87%')
+    console.log('  • Collaboration score: 94%')
+    console.log('  • Team satisfaction: 9.1/10')
     console.log('✅ COLLABORATION: Report ready')
-    alert(`📊 Generate Team Report\n\nReport Contents:\n• Team performance metrics\n• Meeting statistics (12 meetings, 8.5h)\n• Communication patterns\n• Productivity insights\n• Collaboration efficiency\n\nKey Metrics:\n• Response time: 2.3h avg\n• Project completion: 87%\n• Collaboration score: 94%\n• Team satisfaction: 9.1/10\n\nFormat: PDF\nGeneration time: ~30 seconds\n\nPreparing comprehensive report...`)
+    console.log('📄 COLLABORATION: Format: PDF')
+    console.log('⏱️ COLLABORATION: Generation time: ~30 seconds')
+    toast.success('📊 Team report generated', {
+      description: 'PDF ready for download'
+    })
   }
 
   // Additional missing handlers
@@ -335,59 +525,121 @@ export default function CollaborationPage() {
     console.log('➕ COLLABORATION: Invite member initiated')
     console.log('👥 COLLABORATION: Current team size: 12')
     console.log('📧 COLLABORATION: Opening invite dialog...')
+    console.log('📊 COLLABORATION: Invite options:')
+    console.log('  • Email invitation')
+    console.log('  • Invitation link')
+    console.log('  • Role selection')
+    console.log('  • Access permissions')
     console.log('✅ COLLABORATION: Ready to invite')
-    alert(`➕ Invite Team Member\n\nInvite Options:\n• Email invitation\n• Invitation link\n• Role selection\n• Access permissions\n\nCurrent team: 12 members\n\nSend invitation?`)
+    console.log('👥 COLLABORATION: Current team: 12 members')
+    toast.info('➕ Invite team member', {
+      description: 'Current team: 12 members'
+    })
   }
 
   const handleBulkInvite = () => {
     console.log('📧 COLLABORATION: Bulk invite initiated')
     console.log('👥 COLLABORATION: Team capacity available')
     console.log('📋 COLLABORATION: Opening bulk import...')
+    console.log('📊 COLLABORATION: Bulk options:')
+    console.log('  • CSV file upload')
+    console.log('  • Email list paste')
+    console.log('  • Integration sync')
+    console.log('📊 COLLABORATION: Features:')
+    console.log('  • Mass role assignment')
+    console.log('  • Welcome email templates')
+    console.log('  • Auto-onboarding')
     console.log('✅ COLLABORATION: Ready for bulk invite')
-    alert(`📧 Bulk Invite Members\n\nBulk Options:\n• CSV file upload\n• Email list paste\n• Integration sync\n\nFeatures:\n• Mass role assignment\n• Welcome email templates\n• Auto-onboarding\n\nStart bulk invite?`)
+    toast.info('📧 Bulk invite members', {
+      description: 'CSV, email list, or integration'
+    })
   }
 
   const handleViewProfile = (memberId: string) => {
     console.log('👤 COLLABORATION: View profile:', memberId)
     console.log('📊 COLLABORATION: Loading member data...')
+    console.log('📊 COLLABORATION: Profile details:')
+    console.log('  • Activity history')
+    console.log('  • Project contributions')
+    console.log('  • Skills & expertise')
+    console.log('  • Contact information')
     console.log('✅ COLLABORATION: Profile loaded')
-    alert(`👤 View Profile\n\nMember: ${memberId}\n\nProfile Details:\n• Activity history\n• Project contributions\n• Skills & expertise\n• Contact information\n\nView full profile?`)
+    toast.info('👤 Viewing profile: ' + memberId)
   }
 
   const handleEditPermissions = (memberId: string) => {
     console.log('🔐 COLLABORATION: Edit permissions:', memberId)
     console.log('⚙️ COLLABORATION: Current permissions loading...')
+    console.log('📊 COLLABORATION: Permission levels:')
+    console.log('  • Admin (full access)')
+    console.log('  • Editor (create & edit)')
+    console.log('  • Contributor (edit only)')
+    console.log('  • Viewer (read only)')
+    console.log('📊 COLLABORATION: Current: Editor')
     console.log('✅ COLLABORATION: Permissions ready')
-    alert(`🔐 Edit Permissions\n\nMember: ${memberId}\n\nPermission Levels:\n• Admin (full access)\n• Editor (create & edit)\n• Contributor (edit only)\n• Viewer (read only)\n\nCurrent: Editor\n\nUpdate permissions?`)
+    toast.info('🔐 Edit permissions: ' + memberId, {
+      description: 'Current: Editor'
+    })
   }
 
   const handleStartMeeting = () => {
     console.log('🎥 COLLABORATION: Start meeting initiated')
     console.log('👥 COLLABORATION: Inviting participants...')
     console.log('📹 COLLABORATION: Initializing video stream...')
+    console.log('📊 COLLABORATION: Meeting options:')
+    console.log('  • Instant meeting')
+    console.log('  • Scheduled meeting')
+    console.log('  • Recurring meeting')
+    console.log('📊 COLLABORATION: Features:')
+    console.log('  • HD video & audio')
+    console.log('  • Screen sharing')
+    console.log('  • Recording')
+    console.log('  • Live captions')
     console.log('✅ COLLABORATION: Meeting started')
-    alert(`🎥 Start Meeting\n\nMeeting Options:\n• Instant meeting\n• Scheduled meeting\n• Recurring meeting\n\nFeatures:\n• HD video & audio\n• Screen sharing\n• Recording\n• Live captions\n\nStart now?`)
+    toast.success('🎥 Meeting started', {
+      description: 'HD video with recording'
+    })
   }
 
   const handleJoinMeeting = (meetingId: string) => {
     console.log('🚪 COLLABORATION: Join meeting:', meetingId)
     console.log('📹 COLLABORATION: Connecting to meeting...')
+    console.log('📊 COLLABORATION: Joining with:')
+    console.log('  • Video enabled')
+    console.log('  • Audio enabled')
+    console.log('  • High quality')
     console.log('✅ COLLABORATION: Joined successfully')
-    alert(`🚪 Join Meeting\n\nMeeting ID: ${meetingId}\n\nJoining with:\n• Video enabled\n• Audio enabled\n• High quality\n\nConnecting...`)
+    toast.success('🚪 Joined meeting: ' + meetingId, {
+      description: 'Connected with HD quality'
+    })
   }
 
   const handleCreateWorkspace = () => {
     console.log('🏢 COLLABORATION: Create workspace initiated')
     console.log('📁 COLLABORATION: Opening workspace creator...')
+    console.log('📊 COLLABORATION: Workspace options:')
+    console.log('  • Private workspace')
+    console.log('  • Team workspace')
+    console.log('  • Public workspace')
+    console.log('📊 COLLABORATION: Features:')
+    console.log('  • File storage')
+    console.log('  • Real-time collaboration')
+    console.log('  • Version control')
+    console.log('  • Access management')
     console.log('✅ COLLABORATION: Ready to create')
-    alert(`🏢 Create Workspace\n\nWorkspace Options:\n• Private workspace\n• Team workspace\n• Public workspace\n\nFeatures:\n• File storage\n• Real-time collaboration\n• Version control\n• Access management\n\nCreate new workspace?`)
+    toast.info('🏢 Create workspace', {
+      description: 'Private, team, or public'
+    })
   }
 
   const handleJoinWorkspace = (workspaceId: string) => {
     console.log('🚪 COLLABORATION: Join workspace:', workspaceId)
     console.log('🔐 COLLABORATION: Checking permissions...')
+    console.log('📊 COLLABORATION: Access level: Contributor')
     console.log('✅ COLLABORATION: Access granted')
-    alert(`🚪 Join Workspace\n\nWorkspace: ${workspaceId}\n\nAccess Level: Contributor\n\nJoining workspace...`)
+    toast.success('🚪 Joined workspace: ' + workspaceId, {
+      description: 'Access level: Contributor'
+    })
   }
 
   return (
@@ -619,7 +871,7 @@ export default function CollaborationPage() {
                       data-testid="add-emoji-btn"
                       size="sm"
                       variant="outline"
-                      onClick={() => alert('😀 Emoji picker opened')}
+                      onClick={() => toast.info('😀 Emoji picker', { description: 'Select an emoji to react' })}
                     >
                       <Smile className="h-4 w-4 mr-2" />
                       Emoji
@@ -1732,7 +1984,7 @@ export default function CollaborationPage() {
                   <Button
                     data-testid="view-all-media-btn"
                     variant="outline"
-                    onClick={() => alert('View all media')}
+                    onClick={() => toast.info('📁 View all media', { description: 'Loading media gallery...' })}
                   >
                     View All
                   </Button>
