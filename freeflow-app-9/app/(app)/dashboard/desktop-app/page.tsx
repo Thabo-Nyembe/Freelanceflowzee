@@ -133,36 +133,26 @@ const DesktopWindow = ({ app, os, width, height }: DesktopWindowProps) => {
     )
   }
 
-  const shareDesign = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'Desktop App Design',
-        text: 'Check out this desktop application design',
-        url: window.location.href
-      })
-    } else {
-      navigator.clipboard.writeText(window.location.href)
-      alert('Link copied to clipboard!')
-    }
-  }
-
-  const generateCode = () => {
-    console.log('Generating desktop app code')
-  }
-
-  const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) => (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Something went wrong in Desktop App Builder</h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">{error.message}</p>
-        <button onClick={resetErrorBoundary}>Try again</button>
+  return (
+    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-hidden" style={{ width, height }}>
+      {getTitleBar()}
+      <div className="p-6">
+        <p className="text-sm text-gray-600 dark:text-gray-400">Desktop application preview</p>
       </div>
     </div>
   )
+}
+
+export default function DesktopAppPage() {
+  const [selectedApp, setSelectedApp] = React.useState('code-editor')
+  const [selectedDevice, setSelectedDevice] = React.useState('macbook-14')
+  const [framework, setFramework] = React.useState(APP_FRAMEWORKS[0])
+  const [os, setOs] = React.useState('macOS')
+
+  const device = DESKTOP_PRESETS.find(d => d.id === selectedDevice) || DESKTOP_PRESETS[0]
 
   return (
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <div>
+    <div>
         <div className="container mx-auto px-4 py-8 space-y-8">
           {/* Header */}
           <motion.div
@@ -366,23 +356,6 @@ const DesktopWindow = ({ app, os, width, height }: DesktopWindowProps) => {
           </div>
         </div>
       </div>
-    </ErrorBoundary>
-  )
-}
-
-export default function DesktopAppPage() {
-  const [selectedApp, setSelectedApp] = React.useState('code-editor')
-  const [selectedDevice, setSelectedDevice] = React.useState('macbook-14')
-  const [framework, setFramework] = React.useState(APP_FRAMEWORKS[0])
-  const [os, setOs] = React.useState('macOS')
-
-  const device = DESKTOP_PRESETS.find(d => d.id === selectedDevice) || DESKTOP_PRESETS[0]
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Desktop App Builder</h1>
-      <p className="text-muted-foreground mb-8">Design, preview, and generate native desktop applications</p>
-      <DesktopWindow app={selectedApp} os={device.os} width={device.width} height={device.height} />
     </div>
   )
 }

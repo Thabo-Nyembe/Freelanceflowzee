@@ -467,12 +467,5 @@ export default function MotionGraphicsPage() {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}
-                            className={`flex items-center gap-3 p-3 rounded-lg border transition-all cursor-pointer ${
-                              selectedLayer === layer.id
-                                ? 'border-primary bg-primary/10'
-                                : 'border-border bg-card hover:bg-accent/10'
-                            }
-                          className={`p-3 rounded-lg border transition-all ${
-                            effect.enabled ? 'border-primary bg-primary/10' : 'border-border bg-card'
-                          }
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }

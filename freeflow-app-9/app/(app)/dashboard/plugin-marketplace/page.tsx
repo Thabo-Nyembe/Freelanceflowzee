@@ -498,40 +498,6 @@ export default function PluginMarketplacePage() {
       )}
     </motion.div>
   )
-
-                  <TabsContent value="developers" className="space-y-4">
-                    <div className="space-y-3">
-                      {DEMO_DEVELOPERS.map((developer) => (
-                        <motion.div
-                          key={developer.id}
-                          whileHover={{ scale: 1.02 }}
-                          className="p-3 rounded border bg-card cursor-pointer hover:bg-accent/10"
-                        >
-                          <div className="flex items-center gap-3 mb-2">
-                            <Avatar className="w-8 h-8">
-                              <AvatarImage src={developer.avatar} />
-                              <AvatarFallback>{developer.name.slice(0, 2)}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-1">
-                                <span className="font-medium text-sm">{developer.name}</span>
-                                {developer.verified && <Verified className="w-3 h-3 text-blue-500" />}
-                              </div>
-                              <div className="text-xs text-muted-foreground">
-                                {developer.plugins} plugins • {formatNumber(developer.totalDownloads)} downloads
-                              </div>
-                            </div>
-                          </div>
-                          <p className="text-xs text-muted-foreground">{developer.description}</p>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </div>
-            </div>
-
-            {/* Main Content */}
             <div className="lg:col-span-3">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
