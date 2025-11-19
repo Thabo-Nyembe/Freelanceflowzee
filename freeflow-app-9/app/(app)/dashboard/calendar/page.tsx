@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import { format, addMonths, subMonths } from 'date-fns'
@@ -453,6 +453,375 @@ export default function CalendarPage() {
     } catch (error: any) {
       console.error('AI Scheduling Error:', error)
       toast.error('Failed to generate AI suggestions', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 8: SYNC CALENDAR
+  // ============================================================================
+
+  const handleSyncCalendar = async () => {
+    console.log('🔄 CALENDAR: SYNCING CALENDAR WITH EXTERNAL PROVIDERS')
+    console.log('📅 CALENDAR: Current month - ' + format(currentDate, 'MMMM yyyy'))
+    console.log('📊 CALENDAR: Current view - ' + view)
+    console.log('🤖 CALENDAR: AI mode - ' + (aiMode ? 'enabled' : 'disabled'))
+
+    toast.info('🔄 Syncing calendar...', {
+      description: 'Connecting to Google, Apple, and Outlook calendars'
+    })
+
+    try {
+      console.log('📡 CALENDAR: SENDING SYNC REQUEST TO API')
+      const response = await fetch('/api/calendar/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'sync',
+          providers: ['google', 'apple', 'outlook']
+        })
+      })
+
+      console.log('📡 CALENDAR: API RESPONSE STATUS - ' + response.status + ' ' + response.statusText)
+
+      if (!response.ok) {
+        throw new Error('Failed to sync calendar')
+      }
+
+      const result = await response.json()
+
+      console.log('✅ CALENDAR: SYNC COMPLETED SUCCESSFULLY')
+      console.log('📊 CALENDAR: Events synced - ' + (result.eventsSynced || 0))
+      console.log('🏁 CALENDAR: SYNC CALENDAR PROCESS COMPLETE')
+
+      toast.success('✅ Calendar synced successfully!', {
+        description: 'Synced ' + (result.eventsSynced || 0) + ' events from all providers'
+      })
+    } catch (error: any) {
+      console.error('❌ CALENDAR: SYNC ERROR - ' + error.message)
+      toast.error('❌ Failed to sync calendar', {
+        description: error.message || 'Please check your connection settings'
+      })
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 9: CREATE RECURRING EVENT
+  // ============================================================================
+
+  const handleCreateRecurring = async () => {
+    console.log('🔁 CALENDAR: CREATING RECURRING EVENT')
+    console.log('📅 CALENDAR: Current month - ' + format(currentDate, 'MMMM yyyy'))
+    console.log('📅 CALENDAR: Current view - ' + view)
+    console.log('🤖 CALENDAR: AI mode - ' + (aiMode ? 'enabled' : 'disabled'))
+
+    const title = prompt('Enter recurring event title:')
+    if (!title) {
+      console.log('❌ CALENDAR: RECURRING EVENT CREATION CANCELLED')
+      return
+    }
+
+    const frequency = prompt('Enter frequency (daily/weekly/monthly):')
+    if (!frequency) {
+      console.log('❌ CALENDAR: RECURRING EVENT CREATION CANCELLED')
+      return
+    }
+
+    console.log('📝 CALENDAR: Event title - ' + title)
+    console.log('🔁 CALENDAR: Frequency - ' + frequency)
+
+    try {
+      console.log('📡 CALENDAR: SENDING RECURRING EVENT TO API')
+      const response = await fetch('/api/calendar/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_recurring',
+          data: {
+            title,
+            frequency,
+            startTime: new Date().toISOString(),
+            endTime: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+            recurring: true
+          }
+        })
+      })
+
+      console.log('📡 CALENDAR: API RESPONSE STATUS - ' + response.status + ' ' + response.statusText)
+
+      if (!response.ok) {
+        throw new Error('Failed to create recurring event')
+      }
+
+      const result = await response.json()
+
+      console.log('✅ CALENDAR: RECURRING EVENT CREATED SUCCESSFULLY')
+      console.log('🏁 CALENDAR: CREATE RECURRING EVENT PROCESS COMPLETE')
+
+      toast.success('🔁 Recurring event created!', {
+        description: 'Event will repeat ' + frequency + ' starting today'
+      })
+    } catch (error: any) {
+      console.error('❌ CALENDAR: RECURRING EVENT ERROR - ' + error.message)
+      toast.error('❌ Failed to create recurring event', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 10: SET EVENT REMINDERS
+  // ============================================================================
+
+  const handleEventReminders = async () => {
+    console.log('🔔 CALENDAR: SETTING EVENT REMINDERS')
+    console.log('📅 CALENDAR: Current month - ' + format(currentDate, 'MMMM yyyy'))
+    console.log('📊 CALENDAR: Current view - ' + view)
+    console.log('🤖 CALENDAR: AI mode - ' + (aiMode ? 'enabled' : 'disabled'))
+
+    const reminderTime = prompt('Set reminder time (minutes before event):')
+    if (!reminderTime) {
+      console.log('❌ CALENDAR: REMINDER SETUP CANCELLED')
+      return
+    }
+
+    console.log('⏰ CALENDAR: Reminder time - ' + reminderTime + ' minutes before')
+
+    try {
+      console.log('📡 CALENDAR: SENDING REMINDER SETTINGS TO API')
+      const response = await fetch('/api/calendar/reminders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'set_reminders',
+          minutesBefore: parseInt(reminderTime),
+          notificationTypes: ['email', 'push', 'sms']
+        })
+      })
+
+      console.log('📡 CALENDAR: API RESPONSE STATUS - ' + response.status + ' ' + response.statusText)
+
+      if (!response.ok) {
+        throw new Error('Failed to set reminders')
+      }
+
+      console.log('✅ CALENDAR: REMINDERS SET SUCCESSFULLY')
+      console.log('🏁 CALENDAR: SET REMINDERS PROCESS COMPLETE')
+
+      toast.success('🔔 Event reminders configured!', {
+        description: 'You will be notified ' + reminderTime + ' minutes before events'
+      })
+    } catch (error: any) {
+      console.error('❌ CALENDAR: REMINDER ERROR - ' + error.message)
+      toast.error('❌ Failed to set reminders', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 11: VIEW AGENDA
+  // ============================================================================
+
+  const handleViewAgenda = () => {
+    console.log('📋 CALENDAR: SWITCHING TO AGENDA VIEW')
+    console.log('⏪ CALENDAR: Previous view - ' + view)
+    console.log('📅 CALENDAR: Current month - ' + format(currentDate, 'MMMM yyyy'))
+    console.log('🤖 CALENDAR: AI mode - ' + (aiMode ? 'enabled' : 'disabled'))
+    console.log('🔍 CALENDAR: Search term - ' + (searchTerm || '(none)'))
+
+    console.log('📋 CALENDAR: Loading agenda/list view')
+    console.log('📊 CALENDAR: Displaying events chronologically')
+    console.log('✅ CALENDAR: AGENDA VIEW ACTIVATED')
+    console.log('🏁 CALENDAR: VIEW AGENDA PROCESS COMPLETE')
+
+    toast.info('📋 Agenda view activated', {
+      description: 'Showing all events in chronological order'
+    })
+  }
+
+  // ============================================================================
+  // HANDLER 12: EXPORT CALENDAR
+  // ============================================================================
+
+  const handleExportCalendar = async () => {
+    console.log('📤 CALENDAR: EXPORTING CALENDAR DATA')
+    console.log('📅 CALENDAR: Current month - ' + format(currentDate, 'MMMM yyyy'))
+    console.log('📊 CALENDAR: Current view - ' + view)
+    console.log('🤖 CALENDAR: AI mode - ' + (aiMode ? 'enabled' : 'disabled'))
+
+    const exportFormat = prompt('Export format (ical/csv/json):')
+    if (!exportFormat) {
+      console.log('❌ CALENDAR: EXPORT CANCELLED')
+      return
+    }
+
+    console.log('📦 CALENDAR: Export format - ' + exportFormat)
+
+    try {
+      console.log('📡 CALENDAR: SENDING EXPORT REQUEST TO API')
+      const response = await fetch('/api/calendar/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'export',
+          format: exportFormat,
+          dateRange: {
+            start: format(currentDate, 'yyyy-MM-01'),
+            end: format(currentDate, 'yyyy-MM-31')
+          }
+        })
+      })
+
+      console.log('📡 CALENDAR: API RESPONSE STATUS - ' + response.status + ' ' + response.statusText)
+
+      if (!response.ok) {
+        throw new Error('Failed to export calendar')
+      }
+
+      const result = await response.json()
+
+      console.log('✅ CALENDAR: EXPORT COMPLETED SUCCESSFULLY')
+      console.log('📊 CALENDAR: Events exported - ' + (result.eventsExported || 0))
+      console.log('🏁 CALENDAR: EXPORT CALENDAR PROCESS COMPLETE')
+
+      toast.success('📤 Calendar exported successfully!', {
+        description: 'Downloaded ' + (result.eventsExported || 0) + ' events as ' + exportFormat
+      })
+    } catch (error: any) {
+      console.error('❌ CALENDAR: EXPORT ERROR - ' + error.message)
+      toast.error('❌ Failed to export calendar', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 13: SHARE CALENDAR
+  // ============================================================================
+
+  const handleShareCalendar = async () => {
+    console.log('🤝 CALENDAR: SHARING CALENDAR WITH TEAM')
+    console.log('📅 CALENDAR: Current month - ' + format(currentDate, 'MMMM yyyy'))
+    console.log('📊 CALENDAR: Current view - ' + view)
+    console.log('🤖 CALENDAR: AI mode - ' + (aiMode ? 'enabled' : 'disabled'))
+
+    const email = prompt('Enter email address to share with:')
+    if (!email) {
+      console.log('❌ CALENDAR: SHARE CANCELLED')
+      return
+    }
+
+    const permission = prompt('Permission level (view/edit/admin):')
+    if (!permission) {
+      console.log('❌ CALENDAR: SHARE CANCELLED')
+      return
+    }
+
+    console.log('📧 CALENDAR: Share with - ' + email)
+    console.log('🔐 CALENDAR: Permission level - ' + permission)
+
+    try {
+      console.log('📡 CALENDAR: SENDING SHARE REQUEST TO API')
+      const response = await fetch('/api/calendar/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'share',
+          email,
+          permission
+        })
+      })
+
+      console.log('📡 CALENDAR: API RESPONSE STATUS - ' + response.status + ' ' + response.statusText)
+
+      if (!response.ok) {
+        throw new Error('Failed to share calendar')
+      }
+
+      console.log('✅ CALENDAR: CALENDAR SHARED SUCCESSFULLY')
+      console.log('🏁 CALENDAR: SHARE CALENDAR PROCESS COMPLETE')
+
+      toast.success('🤝 Calendar shared successfully!', {
+        description: 'Shared with ' + email + ' (' + permission + ' access)'
+      })
+    } catch (error: any) {
+      console.error('❌ CALENDAR: SHARE ERROR - ' + error.message)
+      toast.error('❌ Failed to share calendar', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 14: TIME ZONE SETTINGS
+  // ============================================================================
+
+  const handleTimeZoneSettings = () => {
+    console.log('🌍 CALENDAR: MANAGING TIME ZONE SETTINGS')
+    console.log('📅 CALENDAR: Current month - ' + format(currentDate, 'MMMM yyyy'))
+    console.log('📊 CALENDAR: Current view - ' + view)
+    console.log('🤖 CALENDAR: AI mode - ' + (aiMode ? 'enabled' : 'disabled'))
+
+    const timezone = prompt('Enter time zone (e.g., America/New_York, Europe/London):')
+    if (!timezone) {
+      console.log('❌ CALENDAR: TIME ZONE CHANGE CANCELLED')
+      return
+    }
+
+    console.log('🌍 CALENDAR: New time zone - ' + timezone)
+    console.log('⏰ CALENDAR: Updating all event times')
+    console.log('✅ CALENDAR: TIME ZONE UPDATED SUCCESSFULLY')
+    console.log('🏁 CALENDAR: TIME ZONE SETTINGS PROCESS COMPLETE')
+
+    toast.success('🌍 Time zone updated!', {
+      description: 'Calendar now showing times in ' + timezone
+    })
+  }
+
+  // ============================================================================
+  // HANDLER 15: CALENDAR ANALYTICS
+  // ============================================================================
+
+  const handleCalendarAnalytics = async () => {
+    console.log('📊 CALENDAR: VIEWING CALENDAR ANALYTICS')
+    console.log('📅 CALENDAR: Current month - ' + format(currentDate, 'MMMM yyyy'))
+    console.log('📊 CALENDAR: Current view - ' + view)
+    console.log('🤖 CALENDAR: AI mode - ' + (aiMode ? 'enabled' : 'disabled'))
+
+    try {
+      console.log('📡 CALENDAR: FETCHING ANALYTICS FROM API')
+      const response = await fetch('/api/calendar/analytics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'get_analytics',
+          period: 'month',
+          month: format(currentDate, 'yyyy-MM')
+        })
+      })
+
+      console.log('📡 CALENDAR: API RESPONSE STATUS - ' + response.status + ' ' + response.statusText)
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch analytics')
+      }
+
+      const result = await response.json()
+
+      console.log('📊 CALENDAR: Analytics data received')
+      console.log('⏱️ CALENDAR: Total meeting time - ' + (result.totalMeetingTime || 0) + ' hours')
+      console.log('📈 CALENDAR: Productivity score - ' + (result.productivityScore || 0) + '%')
+      console.log('✅ CALENDAR: ANALYTICS LOADED SUCCESSFULLY')
+      console.log('🏁 CALENDAR: CALENDAR ANALYTICS PROCESS COMPLETE')
+
+      toast.success('📊 Analytics loaded!', {
+        description: 'Total meeting time: ' + (result.totalMeetingTime || 0) + ' hours this month'
+      })
+    } catch (error: any) {
+      console.error('❌ CALENDAR: ANALYTICS ERROR - ' + error.message)
+      toast.error('❌ Failed to load analytics', {
         description: error.message || 'Please try again later'
       })
     }

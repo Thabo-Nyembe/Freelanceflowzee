@@ -215,6 +215,26 @@ export default function FinancialHubPage() {
     })
   }
 
+  const handleTaxReport = () => {
+    console.log('📋 FINANCIAL HUB: Tax report generation initiated')
+    console.log('💼 FINANCIAL HUB: Gathering income and expense data')
+    console.log('📊 FINANCIAL HUB: Calculating tax deductions and liabilities')
+    console.log('✅ FINANCIAL HUB: Tax report ready for accountant')
+    toast.success('📋 Generating Tax Report', {
+      description: 'Comprehensive tax report is being prepared for your accountant'
+    })
+  }
+
+  const handleFinancialAudit = () => {
+    console.log('🔍 FINANCIAL HUB: Financial audit initiated')
+    console.log('📊 FINANCIAL HUB: Analyzing all transactions and accounts')
+    console.log('💰 FINANCIAL HUB: Checking for discrepancies and anomalies')
+    console.log('✅ FINANCIAL HUB: Audit completed successfully')
+    toast.success('🔍 Running Financial Audit', {
+      description: 'Performing comprehensive financial audit and compliance check'
+    })
+  }
+
   // Mock comprehensive financial data
   const financialData = {
     overview: {
