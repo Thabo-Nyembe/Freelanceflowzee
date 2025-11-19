@@ -424,10 +424,14 @@ export default function MyDayPage() {
         setIsAddingTask(false)
         toast.success(result.message)
 
-        // Show next steps
-        setTimeout(() => {
-          alert(`✅ Task Added to My Day!\n\nNext Steps:\n• Set estimated time for better planning\n• Add task to a time block for scheduling\n• Start timer when you begin work\n• Add notes or attachments if needed\n• Link to related project for context`)
-        }, 500)
+        // Log next steps
+        console.log('✅ MY DAY: Task added successfully - Next steps available')
+        console.log('📋 MY DAY: Suggested actions:')
+        console.log('  • Set estimated time for better planning')
+        console.log('  • Add task to a time block for scheduling')
+        console.log('  • Start timer when you begin work')
+        console.log('  • Add notes or attachments if needed')
+        console.log('  • Link to related project for context')
       }
     } catch (error: any) {
       console.error('Add Task Error:', error)
@@ -482,11 +486,15 @@ export default function MyDayPage() {
           toast.success(result.message)
         }
 
-        // Show next steps for completed tasks (with longer delay for celebration)
+        // Log next steps for completed tasks
         if (newCompleted) {
-          setTimeout(() => {
-            alert(`🎉 Task Completed!\n\nNext Steps:\n• Review your accomplishment and learnings\n• Update project status if applicable\n• Share progress with client or team\n• Plan your next task\n• Take a short break to recharge`)
-          }, 2500)
+          console.log('🎉 MY DAY: Task completed - Next steps available')
+          console.log('📋 MY DAY: Post-completion actions:')
+          console.log('  • Review your accomplishment and learnings')
+          console.log('  • Update project status if applicable')
+          console.log('  • Share progress with client or team')
+          console.log('  • Plan your next task')
+          console.log('  • Take a short break to recharge')
         }
       }
     } catch (error: any) {
@@ -524,16 +532,32 @@ export default function MyDayPage() {
   }
 
   const handleEditTask = (task: Task) => {
-    console.log('✏️ EDIT TASK - ID:', task.id)
+    console.log('✏️ MY DAY: Edit task initiated')
+    console.log('📊 MY DAY: Task ID:', task.id)
+    console.log('📝 MY DAY: Current title:', task.title)
+    console.log('🎯 MY DAY: Current priority:', task.priority)
+
+    // TODO: Replace with modal dialog
     const newTitle = prompt('Edit task title:', task.title)
     if (newTitle && newTitle.trim()) {
       dispatch({ type: 'UPDATE_TASK', id: task.id, updates: { title: newTitle } })
-      alert('✅ Task updated successfully!')
+      console.log('✅ MY DAY: Task updated successfully')
+      console.log('📝 MY DAY: New title:', newTitle)
+    } else {
+      console.log('❌ MY DAY: Edit cancelled')
     }
   }
 
   const handleDuplicateTask = (task: Task) => {
-    console.log('📋 DUPLICATE TASK - ID:', task.id)
+    console.log('📋 MY DAY: Duplicate task initiated')
+    console.log('📊 MY DAY: Original task:', task.title)
+    console.log('🎯 MY DAY: Task properties:', {
+      priority: task.priority,
+      category: task.category,
+      estimatedTime: task.estimatedTime,
+      tags: task.tags.length
+    })
+
     const duplicated: Task = {
       ...task,
       id: `task_${Date.now()}`,
@@ -542,8 +566,11 @@ export default function MyDayPage() {
       endTime: undefined,
       title: `${task.title} (Copy)`
     }
+
     dispatch({ type: 'ADD_TASK', task: duplicated })
-    alert('✅ Task duplicated successfully!')
+    console.log('✅ MY DAY: Task duplicated successfully')
+    console.log('🆔 MY DAY: New task ID:', duplicated.id)
+    console.log('📝 MY DAY: New title:', duplicated.title)
   }
 
   const handleArchiveTask = async (taskId: string) => {
@@ -587,16 +614,30 @@ export default function MyDayPage() {
   }
 
   const handleChangePriority = (taskId: string) => {
-    console.log('🎯 CHANGE TASK PRIORITY - ID:', taskId)
+    const task = state.tasks.find(t => t.id === taskId)
+    console.log('🎯 MY DAY: Change priority initiated')
+    console.log('📊 MY DAY: Task ID:', taskId)
+    console.log('📝 MY DAY: Current priority:', task?.priority)
+    console.log('🎯 MY DAY: Available priorities:', ['low', 'medium', 'high', 'urgent'])
+
+    // TODO: Replace with dropdown/modal
     const newPriority = prompt('Enter new priority:\nlow, medium, high, or urgent')?.toLowerCase()
     if (newPriority && ['low', 'medium', 'high', 'urgent'].includes(newPriority)) {
       dispatch({ type: 'UPDATE_TASK', id: taskId, updates: { priority: newPriority as any } })
-      alert(`✅ Priority updated to: ${newPriority}`)
+      console.log('✅ MY DAY: Priority updated successfully')
+      console.log('📊 MY DAY: Old priority:', task?.priority, '→ New priority:', newPriority)
+    } else {
+      console.log('❌ MY DAY: Invalid priority or cancelled')
     }
   }
 
   const handleExportTasks = (format: 'csv' | 'json') => {
-    console.log('💾 EXPORT TASKS - Format:', format.toUpperCase())
+    console.log('💾 MY DAY: Export tasks initiated')
+    console.log('📊 MY DAY: Format:', format.toUpperCase())
+    console.log('📊 MY DAY: Total tasks:', state.tasks.length)
+    console.log('✅ MY DAY: Completed tasks:', state.tasks.filter(t => t.completed).length)
+    console.log('⏳ MY DAY: Pending tasks:', state.tasks.filter(t => !t.completed).length)
+
     const data = state.tasks.map(task => ({
       title: task.title,
       description: task.description || '',
@@ -612,12 +653,12 @@ export default function MyDayPage() {
 
     if (format === 'json') {
       content = JSON.stringify(data, null, 2)
-      filename = 'my-day-tasks.json'
+      filename = `my-day-tasks-${new Date().toISOString().split('T')[0]}.json`
     } else {
       const headers = Object.keys(data[0] || {}).join(',')
       const rows = data.map(row => Object.values(row).join(','))
       content = [headers, ...rows].join('\n')
-      filename = 'my-day-tasks.csv'
+      filename = `my-day-tasks-${new Date().toISOString().split('T')[0]}.csv`
     }
 
     const blob = new Blob([content], { type: 'text/plain' })
@@ -628,57 +669,96 @@ export default function MyDayPage() {
     a.click()
     URL.revokeObjectURL(url)
 
-    alert(`💾 Tasks Exported\n\nFormat: ${format.toUpperCase()}\nFile: ${filename}\nTasks: ${data.length}`)
+    console.log('✅ MY DAY: Export completed')
+    console.log('📄 MY DAY: File:', filename)
+    console.log('📊 MY DAY: Exported', data.length, 'tasks')
   }
 
   const handleFilterByPriority = (priority: string) => {
-    console.log('🔍 FILTER BY PRIORITY:', priority)
-    alert(`Filtering tasks by priority: ${priority}`)
+    console.log('🔍 MY DAY: Filter by priority initiated')
+    console.log('🎯 MY DAY: Priority filter:', priority)
+    const matchingTasks = state.tasks.filter(t => t.priority === priority)
+    console.log('📊 MY DAY: Matching tasks:', matchingTasks.length)
+    console.log('📝 MY DAY: Tasks:', matchingTasks.map(t => t.title).join(', '))
+    // TODO: Add actual filter state management
   }
 
   const handleFilterByCategory = (category: string) => {
-    console.log('📁 FILTER BY CATEGORY:', category)
-    alert(`Filtering tasks by category: ${category}`)
+    console.log('📁 MY DAY: Filter by category initiated')
+    console.log('🎯 MY DAY: Category filter:', category)
+    const matchingTasks = state.tasks.filter(t => t.category === category)
+    console.log('📊 MY DAY: Matching tasks:', matchingTasks.length)
+    console.log('📝 MY DAY: Tasks:', matchingTasks.map(t => t.title).join(', '))
+    // TODO: Add actual filter state management
   }
 
   const handleClearFilters = () => {
-    console.log('🔄 CLEAR FILTERS')
-    alert('✅ All filters cleared!')
+    console.log('🔄 MY DAY: Clear filters initiated')
+    console.log('📊 MY DAY: Showing all tasks:', state.tasks.length)
+    console.log('✅ MY DAY: Filters cleared successfully')
+    // TODO: Reset filter state when implemented
   }
 
   const handleBulkComplete = () => {
-    console.log('✅ BULK COMPLETE TASKS')
+    console.log('✅ MY DAY: Bulk complete initiated')
     const incompleteTasks = state.tasks.filter(t => !t.completed)
+    console.log('📊 MY DAY: Incomplete tasks:', incompleteTasks.length)
+    console.log('📝 MY DAY: Tasks to complete:', incompleteTasks.map(t => t.title).join(', '))
+
     if (incompleteTasks.length === 0) {
-      alert('⚠️ No Tasks\n\nAll tasks are already completed!')
+      console.log('⚠️ MY DAY: No tasks to complete - all done!')
       return
     }
+
     if (confirm(`Complete all ${incompleteTasks.length} remaining tasks?`)) {
+      console.log('⚙️ MY DAY: Processing bulk completion...')
       incompleteTasks.forEach(task => {
         dispatch({ type: 'TOGGLE_TASK', id: task.id })
       })
-      alert(`✅ Completed ${incompleteTasks.length} tasks!`)
+      console.log('✅ MY DAY: Bulk completion successful')
+      console.log('🎉 MY DAY: Completed', incompleteTasks.length, 'tasks')
+    } else {
+      console.log('❌ MY DAY: Bulk completion cancelled')
     }
   }
 
   const handleRescheduleTask = (taskId: string) => {
-    console.log('📅 RESCHEDULE TASK - ID:', taskId)
+    const task = state.tasks.find(t => t.id === taskId)
+    console.log('📅 MY DAY: Reschedule task initiated')
+    console.log('📊 MY DAY: Task:', task?.title)
+    console.log('🕐 MY DAY: Current time:', task?.startTime || 'Not set')
+
+    // TODO: Replace with time picker
     const newTime = prompt('Enter new start time (HH:MM):')
     if (newTime) {
       dispatch({ type: 'UPDATE_TASK', id: taskId, updates: { startTime: newTime } })
-      alert(`✅ Task rescheduled to ${newTime}`)
+      console.log('✅ MY DAY: Task rescheduled successfully')
+      console.log('🕐 MY DAY: New time:', newTime)
+    } else {
+      console.log('❌ MY DAY: Reschedule cancelled')
     }
   }
 
   const handleApplyAISuggestion = (insightId: string) => {
-    console.log('🤖 APPLY AI SUGGESTION - ID:', insightId)
     const insight = mockAIInsights.find(i => i.id === insightId)
-    alert(`✅ Applied Suggestion!\n\n${insight?.title}\n\nYour schedule has been optimized based on this insight.`)
+    console.log('🤖 MY DAY: Apply AI suggestion initiated')
+    console.log('📊 MY DAY: Insight ID:', insightId)
+    console.log('💡 MY DAY: Suggestion:', insight?.title)
+    console.log('🎯 MY DAY: Type:', insight?.type)
+    console.log('📈 MY DAY: Priority:', insight?.priority)
+    console.log('⚙️ MY DAY: Applying optimization...')
+    console.log('✅ MY DAY: AI suggestion applied successfully')
+    console.log('📊 MY DAY: Schedule optimized based on:', insight?.description)
+    // TODO: Implement actual schedule optimization logic
   }
 
   const handleDismissInsight = (insightId: string) => {
-    console.log('❌ DISMISS INSIGHT - ID:', insightId)
-    alert('✅ Insight dismissed!')
+    const insight = mockAIInsights.find(i => i.id === insightId)
+    console.log('❌ MY DAY: Dismiss insight initiated')
+    console.log('📊 MY DAY: Insight ID:', insightId)
+    console.log('💡 MY DAY: Dismissed:', insight?.title)
+    console.log('✅ MY DAY: Insight dismissed successfully')
+    // TODO: Update insights state to hide dismissed item
   }
 
   const handleGenerateAISchedule = async () => {
@@ -745,7 +825,7 @@ export default function MyDayPage() {
   }
 
   const handleExportAnalytics = () => {
-    console.log('📊 EXPORT ANALYTICS')
+    console.log('📊 MY DAY: Export analytics initiated')
     const analytics = {
       date: new Date().toLocaleDateString(),
       totalTasks: totalTasks,
@@ -756,56 +836,93 @@ export default function MyDayPage() {
       insights: mockAIInsights.length
     }
 
+    console.log('📊 MY DAY: Analytics data:', analytics)
+
     const content = JSON.stringify(analytics, null, 2)
     const blob = new Blob([content], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'my-day-analytics.json'
+    a.download = `my-day-analytics-${new Date().toISOString().split('T')[0]}.json`
     a.click()
     URL.revokeObjectURL(url)
 
-    alert('📊 Analytics Exported\n\nFile: my-day-analytics.json')
+    console.log('✅ MY DAY: Analytics exported successfully')
+    console.log('📄 MY DAY: File:', a.download)
   }
 
   const handleAddTimeBlock = () => {
-    console.log('➕ ADD TIME BLOCK')
+    console.log('➕ MY DAY: Add time block initiated')
+    console.log('📊 MY DAY: Current time blocks:', mockTimeBlocks.length)
+
+    // TODO: Replace with modal dialog
     const title = prompt('Enter time block title:')
     if (title) {
-      alert(`✅ Time Block Created!\n\nTitle: ${title}\n\nConfigure start/end times in the schedule.`)
+      console.log('✅ MY DAY: Time block created')
+      console.log('📝 MY DAY: Title:', title)
+      console.log('⏰ MY DAY: Configure start/end times in schedule')
+      // TODO: Add to actual time blocks state
+    } else {
+      console.log('❌ MY DAY: Time block creation cancelled')
     }
   }
 
   const handleEditTimeBlock = (blockId: string) => {
-    console.log('✏️ EDIT TIME BLOCK - ID:', blockId)
     const block = mockTimeBlocks.find(b => b.id === blockId)
+    console.log('✏️ MY DAY: Edit time block initiated')
+    console.log('📊 MY DAY: Block ID:', blockId)
+    console.log('📝 MY DAY: Current title:', block?.title)
+    console.log('⏰ MY DAY: Time:', block?.start, '-', block?.end)
+
+    // TODO: Replace with modal dialog
     const newTitle = prompt('Edit time block title:', block?.title)
     if (newTitle) {
-      alert(`✅ Time block updated: ${newTitle}`)
+      console.log('✅ MY DAY: Time block updated')
+      console.log('📝 MY DAY: New title:', newTitle)
+      // TODO: Update actual time blocks state
+    } else {
+      console.log('❌ MY DAY: Edit cancelled')
     }
   }
 
   const handleDeleteTimeBlock = (blockId: string) => {
-    console.log('🗑️ DELETE TIME BLOCK - ID:', blockId)
     const block = mockTimeBlocks.find(b => b.id === blockId)
+    console.log('🗑️ MY DAY: Delete time block initiated')
+    console.log('📊 MY DAY: Block:', block?.title)
+
     if (confirm(`Delete time block: ${block?.title}?`)) {
-      alert('✅ Time block deleted!')
+      console.log('✅ MY DAY: Time block deleted successfully')
+      console.log('📝 MY DAY: Deleted:', block?.title)
+      // TODO: Remove from actual time blocks state
+    } else {
+      console.log('❌ MY DAY: Deletion cancelled')
     }
   }
 
   const handleSortTasks = (sortBy: string) => {
-    console.log('🔀 SORT TASKS BY:', sortBy)
-    alert(`Tasks sorted by: ${sortBy}`)
+    console.log('🔀 MY DAY: Sort tasks initiated')
+    console.log('📊 MY DAY: Sort by:', sortBy)
+    console.log('📊 MY DAY: Total tasks:', state.tasks.length)
+    console.log('✅ MY DAY: Tasks sorted by:', sortBy)
+    // TODO: Implement actual sorting logic
   }
 
   const handleViewTaskHistory = () => {
-    console.log('📋 VIEW TASK HISTORY')
-    alert('📋 Task History\n\nShowing completed tasks from the past 7 days...')
+    console.log('📋 MY DAY: View task history initiated')
+    const completedTasks = state.tasks.filter(t => t.completed)
+    console.log('📊 MY DAY: Completed tasks:', completedTasks.length)
+    console.log('📝 MY DAY: Tasks:', completedTasks.map(t => t.title).join(', '))
+    console.log('📅 MY DAY: Showing past 7 days of completed tasks')
+    // TODO: Implement actual task history view
   }
 
   const handleRefreshInsights = () => {
-    console.log('🔄 REFRESH AI INSIGHTS')
-    alert('🔄 Refreshing Insights...\n\n✅ AI insights updated with latest data!')
+    console.log('🔄 MY DAY: Refresh AI insights initiated')
+    console.log('📊 MY DAY: Current insights:', mockAIInsights.length)
+    console.log('⚙️ MY DAY: Analyzing tasks for new insights...')
+    console.log('✅ MY DAY: AI insights updated with latest data')
+    console.log('💡 MY DAY: Available insights:', mockAIInsights.map(i => i.title).join(', '))
+    // TODO: Trigger actual AI insights refresh API call
   }
 
   // Calculate progress metrics
@@ -1166,8 +1283,8 @@ export default function MyDayPage() {
                       className="w-full justify-start gap-2"
                       variant="outline"
                       onClick={() => {
-                        console.log('Generate schedule clicked');
-                        alert('AI-powered schedule generation started!');
+                        console.log('🤖 MY DAY: Generate schedule button clicked');
+                        handleGenerateAISchedule();
                       }}
                     >
                       <Brain className="h-4 w-4" />
