@@ -296,7 +296,7 @@ const CustomReportBuilder: React.FC = () => {
     const template = templateId ? templates.find(t => t.id === templateId) : null
 
     const newReport: CustomReport = {
-      id: `report-${Date.now()}
+      id: `report-${Date.now()}`,
       name: template ? `${template.name} - Custom` : 'New Custom Report',
       description: template?.description || 'Custom report description',
       template: templateId,
@@ -372,23 +372,29 @@ const CustomReportBuilder: React.FC = () => {
         <div>
           <h3 className="text-lg font-semibold">Report Builder</h3>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            {currentReport ? `Editing: ${currentReport.name}
-              <div className={`px-2 py-1 rounded text-xs ${
-                report.status === 'published' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                report.status === 'scheduled' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                report.status === 'draft' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-                'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
-              }
-              <span className={`px-2 py-1 rounded text-xs ${
-                template.category === 'business' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                template.category === 'analytics' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                template.category === 'financial' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-                template.category === 'operational' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
-                'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
-              }
-              <span className={`px-2 py-1 rounded text-xs ${
-                source.type === 'database' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                source.type === 'api' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                source.type === 'file' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-                'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
-              }
+            {currentReport ? `Editing: ${currentReport.name}` : 'Create a new custom report'}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {currentReport && (
+            <span className="px-2 py-1 rounded text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+              Editing
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <p className="text-sm text-gray-600 dark:text-gray-400">Report builder interface coming soon...</p>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Custom Reports</h1>
+      {renderBuilder()}
+    </div>
+  )
+}
+
+export default CustomReportBuilder

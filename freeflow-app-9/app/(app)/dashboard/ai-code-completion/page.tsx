@@ -126,7 +126,7 @@ ${codeInput}
     console.error('Error:', error)
     throw new Error('Processing failed')
   }
-
+`
       setCompletion(mockCompletion)
       setSuggestions(['Add error handling', 'Optimize performance', 'Add TypeScript types'])
       setIsCompleting(false)
