@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -41,8 +42,10 @@ export default function MicroFeaturesShowcase() {
 
   // Demo handler for buttons
   const handleDemoAction = (feature: string) => {
-    console.log(`Demo: ${feature}`)
-    alert(`Demo action: ${feature}`)
+    console.log('🎯 MICRO FEATURES: Demo action:', feature)
+    toast.success('🎯 Demo: ' + feature, {
+      description: 'Feature demonstration activated'
+    })
   }
 
   return (

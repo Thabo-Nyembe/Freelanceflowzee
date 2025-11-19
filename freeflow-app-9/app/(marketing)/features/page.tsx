@@ -115,46 +115,74 @@ export default function FeaturesPage() {
 
   // Handler: Start Revolution (Hero Section)
   const handleStartRevolution = () => {
-    toast.success('Starting your revolution!')
-    setTimeout(() => {
-      alert(`🚀 Join the Creative Revolution\n\nNext Steps:\n• Create your account for free\n• Access all enterprise features\n• Explore quantum AI capabilities\n• Build with world-first technologies\n• Join 12K+ revolutionary creators\n• Transform your creative workflow`)
-    }, 500)
+    console.log('🚀 FEATURES: Start Revolution clicked')
+    console.log('📝 FEATURES: Next steps:')
+    console.log('  • Create your account for free')
+    console.log('  • Access all enterprise features')
+    console.log('  • Explore quantum AI capabilities')
+    console.log('  • Build with world-first technologies')
+    console.log('  • Join 12K+ revolutionary creators')
+    console.log('  • Transform your creative workflow')
+    toast.success('🚀 Join the Creative Revolution', {
+      description: 'Creating account - access all enterprise features'
+    })
     setTimeout(() => {
       router.push('/signup')
-    }, 2000)
+    }, 1500)
   }
 
   // Handler: View Pricing (Hero Section)
   const handleViewPricing = () => {
-    toast.success('Loading enterprise pricing...')
-    setTimeout(() => {
-      alert(`💎 Enterprise Pricing\n\nWhat You'll Find:\n• Transparent pricing tiers\n• Enterprise feature comparison\n• Custom plan options\n• Volume discounts available\n• Flexible payment terms\n• Talk to sales for custom needs`)
-    }, 500)
+    console.log('💎 FEATURES: View Pricing clicked')
+    console.log('📝 FEATURES: What you\'ll find:')
+    console.log('  • Transparent pricing tiers')
+    console.log('  • Enterprise feature comparison')
+    console.log('  • Custom plan options')
+    console.log('  • Volume discounts available')
+    console.log('  • Flexible payment terms')
+    console.log('  • Talk to sales for custom needs')
+    toast.success('💎 Enterprise Pricing', {
+      description: 'Loading pricing tiers and feature comparison'
+    })
     setTimeout(() => {
       router.push('/pricing')
-    }, 2000)
+    }, 1500)
   }
 
   // Handler: Feature Card Clicks
   const handleFeatureClick = (title: string, href: string) => {
-    toast.success(`Opening ${title}...`)
-    setTimeout(() => {
-      alert(`✨ ${title}\n\nExplore:\n• Live demonstration\n• Interactive tools and features\n• Real-world use cases\n• Workflow examples\n• Integration capabilities\n• Try it now for free`)
-    }, 500)
+    console.log('✨ FEATURES: Feature clicked:', title)
+    console.log('📝 FEATURES: Explore:')
+    console.log('  • Live demonstration')
+    console.log('  • Interactive tools and features')
+    console.log('  • Real-world use cases')
+    console.log('  • Workflow examples')
+    console.log('  • Integration capabilities')
+    console.log('  • Try it now for free')
+    toast.success('✨ Opening ' + title, {
+      description: 'Loading feature demonstration'
+    })
     setTimeout(() => {
       router.push(href)
-    }, 2000)
+    }, 1500)
   }
 
   // Handler: Schedule Demo (CTA Section)
   const handleScheduleDemo = () => {
-    toast.success('Scheduling your demo...')
-    setTimeout(() => {
-      alert(`📅 Schedule Your Demo\n\nNext Steps:\n• Fill out the contact form\n• Choose preferred demo time\n• Meet with product specialist\n• See features in action\n• Discuss your specific needs\n• Get personalized recommendations`)
-    }, 500)
+    console.log('📅 FEATURES: Schedule Demo clicked')
+    console.log('📝 FEATURES: Next steps:')
+    console.log('  • Fill out the contact form')
+    console.log('  • Choose preferred demo time')
+    console.log('  • Meet with product specialist')
+    console.log('  • See features in action')
+    console.log('  • Discuss your specific needs')
+    console.log('  • Get personalized recommendations')
+    toast.success('📅 Schedule Your Demo', {
+      description: 'Opening contact form to schedule your demo'
+    })
     setTimeout(() => {
       router.push('/contact')
-    }, 2000)
+    }, 1500)
   }
 
   return (
