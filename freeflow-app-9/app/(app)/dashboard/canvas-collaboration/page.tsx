@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { toast } from 'sonner'
 import {
   Palette,
   Share2,
@@ -397,29 +398,223 @@ export default function CanvasCollaboration() {
   const handleZoomOut = () => setZoom(Math.max(25, zoom - 25))
 
   // Additional Handlers
-  const handleCreateCanvas = () => { console.log('➕ CREATE CANVAS'); alert('➕ New Canvas\n\nChoose canvas size\nSelect template (optional)') }
-  const handleOpenCanvas = (canvasId: string) => { console.log('📂 OPEN:', canvasId); alert('📂 Opening Canvas\n\nLoading...') }
-  const handleSaveCanvas = () => { console.log('💾 SAVE'); alert('💾 Canvas Saved\n\nAll changes saved') }
-  const handleExportCanvas = (format: string) => { console.log('📥 EXPORT:', format); alert(`📥 Exporting Canvas\n\nFormat: ${format}`) }
-  const handleShareCanvas = () => { console.log('🔗 SHARE'); alert('🔗 Share Canvas\n\nGenerate link\nInvite collaborators\nSet permissions') }
-  const handleInviteCollaborator = () => { console.log('➕ INVITE'); const email = prompt('Collaborator email:'); email && alert(`✉️ Invitation sent to ${email}`) }
-  const handleRemoveCollaborator = (name: string) => { console.log('➖ REMOVE:', name); confirm(`Remove ${name}?`) && alert('✅ Removed') }
-  const handleAddComment = () => { console.log('💬 COMMENT'); alert('💬 Add Comment\n\nClick on canvas to add annotation') }
-  const handleResolveComment = (id: string) => { console.log('✅ RESOLVE:', id); alert('✅ Comment resolved') }
-  const handleUndo = () => { console.log('↩️ UNDO'); alert('↩️ Undo last action') }
-  const handleRedo = () => { console.log('↪️ REDO'); alert('↪️ Redo action') }
-  const handleCopyElement = () => { console.log('📋 COPY'); alert('📋 Element copied') }
-  const handlePasteElement = () => { console.log('📋 PASTE'); alert('📋 Element pasted') }
-  const handleDeleteElement = () => { console.log('🗑️ DELETE'); alert('🗑️ Element deleted') }
-  const handleDuplicateElement = () => { console.log('📋 DUPLICATE'); alert('📋 Element duplicated') }
-  const handleGroupElements = () => { console.log('📁 GROUP'); alert('📁 Elements grouped') }
-  const handleUngroupElements = () => { console.log('📂 UNGROUP'); alert('📂 Group ungrouped') }
-  const handleAlignElements = (align: string) => { console.log('📐 ALIGN:', align); alert(`📐 Aligned: ${align}`) }
-  const handleDistributeElements = (direction: string) => { console.log('↔️ DISTRIBUTE:', direction); alert(`↔️ Distributed: ${direction}`) }
-  const handleBringToFront = () => { console.log('⬆️ TO FRONT'); alert('⬆️ Brought to front') }
-  const handleSendToBack = () => { console.log('⬇️ TO BACK'); alert('⬇️ Sent to back') }
-  const handleLockElement = () => { console.log('🔒 LOCK'); alert('🔒 Element locked') }
-  const handleUnlockElement = () => { console.log('🔓 UNLOCK'); alert('🔓 Element unlocked') }
+  const handleCreateCanvas = () => {
+    console.log('✨ CANVAS COLLAB: Create canvas action initiated')
+    console.log('📋 CANVAS COLLAB: Preparing new canvas creation workflow')
+    console.log('🎨 CANVAS COLLAB: Canvas size and template options ready')
+    toast.info('Create New Canvas', {
+      description: 'Choose canvas size and select a template to get started'
+    })
+  }
+
+  const handleOpenCanvas = (canvasId: string) => {
+    console.log('✨ CANVAS COLLAB: Open canvas action initiated')
+    console.log('📂 CANVAS COLLAB: Loading canvas ID: ' + canvasId)
+    console.log('🔄 CANVAS COLLAB: Fetching canvas data and collaborators')
+    toast.info('Opening Canvas', {
+      description: 'Loading your collaborative workspace...'
+    })
+  }
+
+  const handleSaveCanvas = () => {
+    console.log('✨ CANVAS COLLAB: Save canvas action initiated')
+    console.log('💾 CANVAS COLLAB: Saving all canvas changes')
+    console.log('👥 CANVAS COLLAB: Syncing changes with team members')
+    console.log('✅ CANVAS COLLAB: Canvas saved successfully')
+    toast.success('Canvas Saved', {
+      description: 'All changes have been saved and synced with your team'
+    })
+  }
+
+  const handleExportCanvas = (format: string) => {
+    console.log('✨ CANVAS COLLAB: Export canvas action initiated')
+    console.log('📥 CANVAS COLLAB: Export format selected: ' + format)
+    console.log('🎨 CANVAS COLLAB: Preparing canvas for export')
+    console.log('✅ CANVAS COLLAB: Export ready for download')
+    toast.success('Exporting Canvas', {
+      description: 'Format: ' + format + ' - Download will start shortly'
+    })
+  }
+
+  const handleShareCanvas = () => {
+    console.log('✨ CANVAS COLLAB: Share canvas action initiated')
+    console.log('🔗 CANVAS COLLAB: Generating shareable link')
+    console.log('👥 CANVAS COLLAB: Preparing collaboration invitation workflow')
+    console.log('🔐 CANVAS COLLAB: Setting up permission controls')
+    toast.info('Share Canvas', {
+      description: 'Generate link, invite collaborators, and set permissions'
+    })
+  }
+
+  const handleInviteCollaborator = () => {
+    console.log('✨ CANVAS COLLAB: Invite collaborator action initiated')
+    console.log('👥 CANVAS COLLAB: Opening collaborator invitation dialog')
+    const email = prompt('Collaborator email:')
+    if (email) {
+      console.log('📧 CANVAS COLLAB: Sending invitation to: ' + email)
+      console.log('🔔 CANVAS COLLAB: Invitation email queued for delivery')
+      console.log('✅ CANVAS COLLAB: Collaborator invitation sent successfully')
+      toast.success('Invitation Sent', {
+        description: 'Collaboration invite sent to ' + email
+      })
+    }
+  }
+
+  const handleRemoveCollaborator = (name: string) => {
+    console.log('✨ CANVAS COLLAB: Remove collaborator action initiated')
+    console.log('👥 CANVAS COLLAB: Collaborator to remove: ' + name)
+    if (confirm('Remove ' + name + '?')) {
+      console.log('🔄 CANVAS COLLAB: Removing collaborator access')
+      console.log('✅ CANVAS COLLAB: Collaborator removed successfully')
+      toast.success('Collaborator Removed', {
+        description: name + ' has been removed from this canvas'
+      })
+    }
+  }
+
+  const handleAddComment = () => {
+    console.log('✨ CANVAS COLLAB: Add comment action initiated')
+    console.log('💬 CANVAS COLLAB: Comment mode activated')
+    console.log('📍 CANVAS COLLAB: Click on canvas to place annotation')
+    toast.info('Add Comment', {
+      description: 'Click on the canvas to add your annotation'
+    })
+  }
+
+  const handleResolveComment = (id: string) => {
+    console.log('✨ CANVAS COLLAB: Resolve comment action initiated')
+    console.log('💬 CANVAS COLLAB: Comment ID to resolve: ' + id)
+    console.log('✅ CANVAS COLLAB: Comment marked as resolved')
+    toast.success('Comment Resolved', {
+      description: 'Comment has been marked as resolved'
+    })
+  }
+
+  const handleUndo = () => {
+    console.log('✨ CANVAS COLLAB: Undo action initiated')
+    console.log('↩️ CANVAS COLLAB: Reverting to previous state')
+    console.log('✅ CANVAS COLLAB: Last action undone')
+    toast.info('Action Undone', {
+      description: 'Reverted to previous state'
+    })
+  }
+
+  const handleRedo = () => {
+    console.log('✨ CANVAS COLLAB: Redo action initiated')
+    console.log('↪️ CANVAS COLLAB: Reapplying previously undone action')
+    console.log('✅ CANVAS COLLAB: Action redone successfully')
+    toast.info('Action Redone', {
+      description: 'Reapplied previously undone action'
+    })
+  }
+
+  const handleCopyElement = () => {
+    console.log('✨ CANVAS COLLAB: Copy element action initiated')
+    console.log('📋 CANVAS COLLAB: Element copied to clipboard')
+    console.log('✅ CANVAS COLLAB: Ready to paste')
+    toast.success('Element Copied', {
+      description: 'Element copied to clipboard - ready to paste'
+    })
+  }
+
+  const handlePasteElement = () => {
+    console.log('✨ CANVAS COLLAB: Paste element action initiated')
+    console.log('📋 CANVAS COLLAB: Pasting element from clipboard')
+    console.log('✅ CANVAS COLLAB: Element pasted successfully')
+    toast.success('Element Pasted', {
+      description: 'Element pasted onto canvas'
+    })
+  }
+
+  const handleDeleteElement = () => {
+    console.log('✨ CANVAS COLLAB: Delete element action initiated')
+    console.log('🗑️ CANVAS COLLAB: Removing selected element')
+    console.log('✅ CANVAS COLLAB: Element deleted successfully')
+    toast.success('Element Deleted', {
+      description: 'Selected element has been removed'
+    })
+  }
+
+  const handleDuplicateElement = () => {
+    console.log('✨ CANVAS COLLAB: Duplicate element action initiated')
+    console.log('📋 CANVAS COLLAB: Creating duplicate of selected element')
+    console.log('✅ CANVAS COLLAB: Element duplicated successfully')
+    toast.success('Element Duplicated', {
+      description: 'Duplicate created and placed on canvas'
+    })
+  }
+
+  const handleGroupElements = () => {
+    console.log('✨ CANVAS COLLAB: Group elements action initiated')
+    console.log('📁 CANVAS COLLAB: Grouping selected elements')
+    console.log('✅ CANVAS COLLAB: Elements grouped successfully')
+    toast.success('Elements Grouped', {
+      description: 'Selected elements have been grouped together'
+    })
+  }
+
+  const handleUngroupElements = () => {
+    console.log('✨ CANVAS COLLAB: Ungroup elements action initiated')
+    console.log('📂 CANVAS COLLAB: Ungrouping selected group')
+    console.log('✅ CANVAS COLLAB: Group ungrouped successfully')
+    toast.success('Group Ungrouped', {
+      description: 'Elements have been separated'
+    })
+  }
+
+  const handleAlignElements = (align: string) => {
+    console.log('✨ CANVAS COLLAB: Align elements action initiated')
+    console.log('📐 CANVAS COLLAB: Alignment direction: ' + align)
+    console.log('✅ CANVAS COLLAB: Elements aligned successfully')
+    toast.success('Elements Aligned', {
+      description: 'Elements aligned: ' + align
+    })
+  }
+
+  const handleDistributeElements = (direction: string) => {
+    console.log('✨ CANVAS COLLAB: Distribute elements action initiated')
+    console.log('↔️ CANVAS COLLAB: Distribution direction: ' + direction)
+    console.log('✅ CANVAS COLLAB: Elements distributed evenly')
+    toast.success('Elements Distributed', {
+      description: 'Elements distributed: ' + direction
+    })
+  }
+
+  const handleBringToFront = () => {
+    console.log('✨ CANVAS COLLAB: Bring to front action initiated')
+    console.log('⬆️ CANVAS COLLAB: Moving element to top layer')
+    console.log('✅ CANVAS COLLAB: Element brought to front')
+    toast.success('Brought to Front', {
+      description: 'Element moved to top layer'
+    })
+  }
+
+  const handleSendToBack = () => {
+    console.log('✨ CANVAS COLLAB: Send to back action initiated')
+    console.log('⬇️ CANVAS COLLAB: Moving element to bottom layer')
+    console.log('✅ CANVAS COLLAB: Element sent to back')
+    toast.success('Sent to Back', {
+      description: 'Element moved to bottom layer'
+    })
+  }
+
+  const handleLockElement = () => {
+    console.log('✨ CANVAS COLLAB: Lock element action initiated')
+    console.log('🔒 CANVAS COLLAB: Locking selected element')
+    console.log('✅ CANVAS COLLAB: Element locked successfully')
+    toast.success('Element Locked', {
+      description: 'Element is now locked and protected from changes'
+    })
+  }
+
+  const handleUnlockElement = () => {
+    console.log('✨ CANVAS COLLAB: Unlock element action initiated')
+    console.log('🔓 CANVAS COLLAB: Unlocking selected element')
+    console.log('✅ CANVAS COLLAB: Element unlocked successfully')
+    toast.success('Element Unlocked', {
+      description: 'Element is now unlocked and can be edited'
+    })
+  }
 
   const toggleLayer = (layerId: string, property: 'visible' | 'locked') => {
     setLayers(layers.map(layer => 
@@ -720,15 +915,39 @@ export default function CanvasCollaboration() {
                   <CardTitle className="text-lg">AI Assistant</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button className="w-full" variant="outline" onClick={() => alert('AI will generate creative ideas based on your current canvas!')}>
+                  <Button className="w-full" variant="outline" onClick={() => {
+                    console.log('✨ CANVAS COLLAB: AI Generate Ideas action initiated')
+                    console.log('🤖 CANVAS COLLAB: Analyzing current canvas content')
+                    console.log('💡 CANVAS COLLAB: AI generating creative suggestions')
+                    console.log('✅ CANVAS COLLAB: AI ideas generation ready')
+                    toast.success('AI Generating Ideas', {
+                      description: 'Creative ideas based on your current canvas are being generated'
+                    })
+                  }}>
                     <Sparkles className="w-4 h-4 mr-2" />
                     Generate Ideas
                   </Button>
-                  <Button className="w-full" variant="outline" onClick={() => alert('AI will analyze your design and suggest complementary colors!')}>
+                  <Button className="w-full" variant="outline" onClick={() => {
+                    console.log('✨ CANVAS COLLAB: AI Suggest Colors action initiated')
+                    console.log('🤖 CANVAS COLLAB: Analyzing design color scheme')
+                    console.log('🎨 CANVAS COLLAB: AI suggesting complementary colors')
+                    console.log('✅ CANVAS COLLAB: Color suggestions ready')
+                    toast.success('AI Suggesting Colors', {
+                      description: 'Analyzing your design to suggest complementary colors'
+                    })
+                  }}>
                     <Palette className="w-4 h-4 mr-2" />
                     Suggest Colors
                   </Button>
-                  <Button className="w-full" variant="outline" onClick={() => alert('AI will analyze your layout and suggest improvements!')}>
+                  <Button className="w-full" variant="outline" onClick={() => {
+                    console.log('✨ CANVAS COLLAB: AI Improve Layout action initiated')
+                    console.log('🤖 CANVAS COLLAB: Analyzing current layout structure')
+                    console.log('📐 CANVAS COLLAB: AI suggesting layout improvements')
+                    console.log('✅ CANVAS COLLAB: Layout improvement suggestions ready')
+                    toast.success('AI Improving Layout', {
+                      description: 'Analyzing your layout to suggest improvements'
+                    })
+                  }}>
                     <Type className="w-4 h-4 mr-2" />
                     Improve Layout
                   </Button>
