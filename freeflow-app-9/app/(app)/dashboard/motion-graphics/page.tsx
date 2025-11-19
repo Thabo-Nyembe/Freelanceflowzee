@@ -469,3 +469,27 @@ export default function MotionGraphicsPage() {
     const secs = Math.floor(seconds % 60)
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
+
+  return (
+    <ErrorBoundary level="page" name="Motion Graphics">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6">Motion Graphics Studio</h1>
+        <p className="text-muted-foreground mb-8">Create and animate motion graphics with timeline editing</p>
+
+        <div className="grid gap-6">
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Canvas</h2>
+            <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+              <p className="text-muted-foreground">Motion graphics canvas</p>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Timeline</h2>
+            <Timeline />
+          </Card>
+        </div>
+      </div>
+    </ErrorBoundary>
+  )
+}

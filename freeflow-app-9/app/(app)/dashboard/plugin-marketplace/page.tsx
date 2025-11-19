@@ -498,131 +498,28 @@ export default function PluginMarketplacePage() {
       )}
     </motion.div>
   )
-            <div className="lg:col-span-3">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold">
-                    {selectedCategory === 'all' ? 'All Plugins' :
-                     PLUGIN_CATEGORIES.find(c => c.id === selectedCategory)?.name}
-                    <span className="text-muted-foreground ml-2">({sortedPlugins.length})</span>
-                  </h2>
-                  <div className="flex items-center gap-4">
-                    <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger className="w-40">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="featured">Featured</SelectItem>
-                        <SelectItem value="popular">Most Popular</SelectItem>
-                        <SelectItem value="rating">Highest Rated</SelectItem>
-                        <SelectItem value="newest">Newest</SelectItem>
-                        <SelectItem value="price-low">Price: Low to High</SelectItem>
-                        <SelectItem value="price-high">Price: High to Low</SelectItem>
-                      </SelectContent>
-                    </Select>
 
-                    <div className="flex gap-1">
-                      <button
-                        variant={viewMode === 'grid' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => {
-                          setViewMode('grid')
-                          console.log('ℹ️ View mode changed to grid')
-                        }}
-                        data-testid="grid-view-btn"
-                      >
-                        <Grid3x3 className="w-4 h-4" />
-                      </button>
-                      <button
-                        variant={viewMode === 'list' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => {
-                          setViewMode('list')
-                          console.log('ℹ️ View mode changed to list')
-                        }}
-                        data-testid="list-view-btn"
-                      >
-                        <List className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
+  return (
+    <ErrorBoundary level="page" name="Plugin Marketplace">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6">Plugin Marketplace</h1>
+        <p className="text-muted-foreground mb-8">Browse and install plugins to extend functionality</p>
 
-                {/* Plugin Grid/List */}
-                <div className={
-                  viewMode === 'grid'
-                    ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6'
-                    : 'space-y-4'
-                }>
-                  {sortedPlugins.map((plugin) =>
-                    viewMode === 'grid' ? (
-                      <PluginCard key={plugin.id} plugin={plugin} />
-                    ) : (
-                      <PluginListItem key={plugin.id} plugin={plugin} />
-                    )
-                  )}
-                </div>
-
-                {sortedPlugins.length === 0 && (
-                  <div className="text-center py-12">
-                    <Package className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No plugins found</h3>
-                    <p className="text-muted-foreground">
-                      Try adjusting your search criteria or browse different categories.
-                    </p>
-                  </div>
-                )}
-              </div>
+        <div className="grid gap-6">
+          {sortedPlugins.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {sortedPlugins.map(plugin => (
+                <PluginCard key={plugin.id} plugin={plugin} />
+              ))}
             </div>
-          </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No plugins found</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </ErrorBoundary>
+  )
+}
 
-          {/* Plugin Detail Modal */}
-          <AnimatePresence>
-            {selectedPlugin && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-                onClick={() => setSelectedPlugin(null)}
-              >
-                <motion.div
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.9, opacity: 0 }}
-                  className="bg-background rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="p-6">
-                    <div className="flex items-start gap-6 mb-6">
-                      <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white font-bold text-xl">
-                        {selectedPlugin.name.charAt(0)}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h2 className="text-2xl font-bold">{selectedPlugin.name}</h2>
-                          {selectedPlugin.verified && <Verified className="w-5 h-5 text-blue-500" />}
-                          {selectedPlugin.featured && <Crown className="w-5 h-5 text-yellow-500" />}
-                        </div>
-                        <p className="text-muted-foreground mb-4">{selectedPlugin.description}</p>
-                        <div className="flex items-center gap-6">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                            <span className="font-medium">{selectedPlugin.rating}</span>
-                            <span className="text-muted-foreground">({selectedPlugin.reviews} reviews)</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Download className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">{formatNumber(selectedPlugin.downloads)} downloads</span>
-                          </div>
-                          <Badge variant="outline">{selectedPlugin.category}</Badge>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold mb-2">
-                          {selectedPlugin.price === 0 ? 'Free' : `$${selectedPlugin.price}
-                                        className={`w-3 h-3 ${
-                                          i < review.rating
-                                            ? 'fill-yellow-400 text-yellow-400'
-                                            : 'text-gray-300'
-                                        }
