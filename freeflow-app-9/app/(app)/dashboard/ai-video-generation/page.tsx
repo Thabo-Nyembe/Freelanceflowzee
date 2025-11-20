@@ -1,407 +1,588 @@
 'use client'
 
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Card, CardContent } from '@/components/ui/card'
+/**
+ * World-Class AI Video Generation Page
+ * Text-to-video AI with templates, customization, and export
+ */
+
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  Video, Sparkles, Wand2, Play, Download, Share2, Settings,
+  CheckCircle, Clock, Zap, Star, TrendingUp, Music, Mic,
+  FileVideo, Image as ImageIcon, Type, Palette, LayoutTemplate,
+  ArrowRight, X, Loader2, Info, ChevronDown, ChevronUp
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Video, Wand2 } from 'lucide-react'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
-import { toast } from 'sonner'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { GlowEffect } from '@/components/ui/glow-effect'
+import { BorderTrail } from '@/components/ui/border-trail'
+import { ScrollReveal } from '@/components/ui/scroll-reveal'
+import { cn } from '@/lib/utils'
+import {
+  VideoStyle,
+  VideoFormat,
+  VideoQuality,
+  AIModel,
+  GenerationStatus,
+  GeneratedVideo,
+  VideoTemplate
+} from '@/lib/ai-video-types'
+import {
+  VIDEO_TEMPLATES,
+  PROMPT_SUGGESTIONS,
+  VOICE_OPTIONS,
+  MUSIC_LIBRARY,
+  VIDEO_FORMATS,
+  QUALITY_SETTINGS,
+  estimateGenerationTime,
+  formatDuration
+} from '@/lib/ai-video-utils'
 
-const VIDEO_STYLES = [
-  { id: 'cinematic', name: 'Cinematic', description: 'Hollywood-style cinematic videos', image: '/Cinematic' },
-  { id: 'documentary', name: 'Documentary', description: 'Professional documentary style', image: '/Documentary' },
-  { id: 'corporate', name: 'Corporate', description: 'Professional business videos', image: '/Corporate' },
-  { id: 'animated', name: 'Animated', description: 'Cartoon and animated style', image: '/Animated' },
-  { id: 'minimalist', name: 'Minimalist', description: 'Clean and simple design', image: '/Minimalist' },
-  { id: 'retro', name: 'Retro', description: 'Vintage and retro aesthetics', image: '/Retro' }
-]
-
-const AI_MODELS = [
-  { id: 'kazi-pro', name: 'KAZI Pro', speed: 'Fast', quality: 'Excellent', cost: '$$$$' },
-  { id: 'kazi-standard', name: 'KAZI Standard', speed: 'Medium', quality: 'Good', cost: '$$' },
-  { id: 'kazi-quick', name: 'KAZI Quick', speed: 'Very Fast', quality: 'Standard', cost: '$' }
-]
+type GenerationStep = 'template' | 'prompt' | 'customize' | 'generate' | 'result'
 
 export default function AIVideoGenerationPage() {
+  const [step, setStep] = useState<GenerationStep>('template')
+  const [selectedTemplate, setSelectedTemplate] = useState<VideoTemplate | null>(null)
   const [prompt, setPrompt] = useState('')
-  const [selectedStyle, setSelectedStyle] = useState('cinematic')
-  const [selectedModel, setSelectedModel] = useState('kazi-pro')
-  const [duration, setDuration] = useState('30')
-  const [aspectRatio, setAspectRatio] = useState('16:9')
+  const [style, setStyle] = useState<VideoStyle>('professional')
+  const [format, setFormat] = useState<VideoFormat>('landscape')
+  const [quality, setQuality] = useState<VideoQuality>('hd')
+  const [aiModel, setAiModel] = useState<AIModel>('kazi-ai')
+  const [includeMusic, setIncludeMusic] = useState(true)
+  const [includeVoiceover, setIncludeVoiceover] = useState(false)
+  const [includeCaptions, setIncludeCaptions] = useState(true)
+  const [selectedMusic, setSelectedMusic] = useState(MUSIC_LIBRARY[0].id)
+  const [selectedVoice, setSelectedVoice] = useState(VOICE_OPTIONS[0].id)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [generationProgress, setGenerationProgress] = useState(0)
+  const [generationStatus, setGenerationStatus] = useState<GenerationStatus>('idle')
+  const [generatedVideo, setGeneratedVideo] = useState<GeneratedVideo | null>(null)
+  const [showAdvanced, setShowAdvanced] = useState(false)
 
-  // Handlers
-  const handleGenerate = () => {
-    console.log('✨ AI VIDEO GENERATION: Initiating video generation')
-    console.log('📝 AI VIDEO GENERATION: Prompt - ' + prompt)
-    console.log('🎨 AI VIDEO GENERATION: Style - ' + selectedStyle)
-    console.log('🤖 AI VIDEO GENERATION: Model - ' + selectedModel)
-    console.log('⏱️ AI VIDEO GENERATION: Duration - ' + duration + 's')
-    console.log('📐 AI VIDEO GENERATION: Aspect Ratio - ' + aspectRatio)
-    toast.success('🎬 Generating AI Video', {
-      description: 'Style: ' + selectedStyle + ' | Model: ' + selectedModel + ' | Duration: ' + duration + 's'
-    })
+  const handleTemplateSelect = (template: VideoTemplate) => {
+    setSelectedTemplate(template)
+    setStyle(template.style)
+    setFormat(template.format)
+    setIncludeMusic(template.musicIncluded)
+    setIncludeVoiceover(template.voiceoverIncluded)
+    setStep('prompt')
   }
 
-  const handleSelectStyle = (styleId: string, styleName: string) => {
-    setSelectedStyle(styleId)
-    console.log('✨ AI VIDEO GENERATION: Style selected - ' + styleName)
-    console.log('🎨 AI VIDEO GENERATION: Style ID - ' + styleId)
-    toast.info('🎨 Style Selected', {
-      description: styleName
-    })
-  }
+  const handleGenerate = async () => {
+    setIsGenerating(true)
+    setGenerationStatus('analyzing')
+    setStep('generate')
 
-  const handleSelectModel = (modelId: string, modelName: string) => {
-    setSelectedModel(modelId)
-    console.log('✨ AI VIDEO GENERATION: Model selected - ' + modelName)
-    console.log('🤖 AI VIDEO GENERATION: Model ID - ' + modelId)
-    toast.info('🤖 AI Model Selected', {
-      description: modelName
-    })
-  }
+    // Simulate AI video generation
+    const stages = [
+      { status: 'analyzing' as GenerationStatus, progress: 20, delay: 1000 },
+      { status: 'generating' as GenerationStatus, progress: 50, delay: 3000 },
+      { status: 'rendering' as GenerationStatus, progress: 80, delay: 2000 },
+      { status: 'completed' as GenerationStatus, progress: 100, delay: 1000 }
+    ]
 
-  const handleSaveVideo = (videoId: string) => {
-    console.log('✨ AI VIDEO GENERATION: Saving video to library')
-    console.log('💾 AI VIDEO GENERATION: Video ID - ' + videoId)
-    toast.success('💾 Video Saved', {
-      description: 'Added to your library'
-    })
-  }
-
-  const handleExportVideo = (format: 'mp4' | 'mov' | 'webm') => {
-    console.log('✨ AI VIDEO GENERATION: Exporting video')
-    console.log('📥 AI VIDEO GENERATION: Format - ' + format.toUpperCase())
-    console.log('📥 AI VIDEO GENERATION: Preparing download...')
-    toast.success('📥 Exporting Video', {
-      description: 'Format: ' + format.toUpperCase() + ' - Preparing download...'
-    })
-  }
-
-  const handleShareVideo = (videoId: string) => {
-    console.log('✨ AI VIDEO GENERATION: Sharing video')
-    console.log('🔗 AI VIDEO GENERATION: Video ID - ' + videoId)
-    toast.info('🔗 Share Video', {
-      description: 'Generate link or share to social media'
-    })
-  }
-
-  const handleDeleteVideo = (videoId: string) => {
-    console.log('✨ AI VIDEO GENERATION: Delete video requested')
-    console.log('🗑️ AI VIDEO GENERATION: Video ID - ' + videoId)
-    if (confirm('Delete this video?')) {
-      console.log('✅ AI VIDEO GENERATION: Video deleted - ' + videoId)
-      toast.success('✅ Video Deleted', {
-        description: 'Video removed from library'
-      })
+    for (const stage of stages) {
+      await new Promise(resolve => setTimeout(resolve, stage.delay))
+      setGenerationStatus(stage.status)
+      setGenerationProgress(stage.progress)
     }
-  }
 
-  const handleRegenerateVideo = () => {
-    console.log('✨ AI VIDEO GENERATION: Regenerating video')
-    console.log('🔄 AI VIDEO GENERATION: Creating new version with same settings')
-    toast.info('🔄 Regenerating Video', {
-      description: 'Creating new version with same settings...'
-    })
-  }
-
-  const handleEditVideo = (videoId: string) => {
-    console.log('✨ AI VIDEO GENERATION: Opening video editor')
-    console.log('✏️ AI VIDEO GENERATION: Video ID - ' + videoId)
-    toast.info('✏️ Video Editor', {
-      description: 'Opening advanced editor...'
-    })
-  }
-
-  const handleViewHistory = () => {
-    console.log('✨ AI VIDEO GENERATION: Opening video generation history')
-    console.log('📜 AI VIDEO GENERATION: Loading all generated videos')
-    toast.info('📜 Video Generation History', {
-      description: 'View all generated videos'
-    })
-  }
-
-  const handleSavePreset = () => {
-    console.log('✨ AI VIDEO GENERATION: Saving preset')
-    const name = prompt('Preset name:')
-    if (name) {
-      console.log('💾 AI VIDEO GENERATION: Preset saved - ' + name)
-      toast.success('💾 Preset Saved', {
-        description: name
-      })
+    // Create mock generated video
+    const mockVideo: GeneratedVideo = {
+      id: `vid_${Math.random().toString(36).substr(2, 9)}`,
+      requestId: 'req_123',
+      status: 'completed',
+      progress: 100,
+      videoUrl: '/videos/generated-sample.mp4',
+      thumbnailUrl: '/videos/thumbnail.jpg',
+      duration: 30,
+      format: format,
+      quality: quality,
+      fileSize: 15728640, // 15MB
+      scenes: [],
+      metadata: {
+        width: VIDEO_FORMATS[format].width,
+        height: VIDEO_FORMATS[format].height,
+        fps: 30,
+        codec: 'h264',
+        bitrate: QUALITY_SETTINGS[quality].bitrate
+      },
+      createdAt: new Date(),
+      completedAt: new Date()
     }
+
+    setGeneratedVideo(mockVideo)
+    setIsGenerating(false)
+    setStep('result')
   }
 
-  const handleLoadPreset = (presetId: string) => {
-    console.log('✨ AI VIDEO GENERATION: Loading preset')
-    console.log('📂 AI VIDEO GENERATION: Preset ID - ' + presetId)
-    toast.success('📂 Preset Loaded', {
-      description: 'Settings applied'
-    })
-  }
-
-  const handleAddBackgroundMusic = () => {
-    console.log('✨ AI VIDEO GENERATION: Adding background music')
-    console.log('🎵 AI VIDEO GENERATION: Opening royalty-free music library')
-    toast.info('🎵 Background Music', {
-      description: 'Browse royalty-free music library'
-    })
-  }
-
-  const handleAddVoiceover = () => {
-    console.log('✨ AI VIDEO GENERATION: Adding voiceover')
-    console.log('🎤 AI VIDEO GENERATION: Record, upload, or generate AI voiceover')
-    toast.info('🎤 Add Voiceover', {
-      description: 'Record or upload audio, or generate AI voiceover'
-    })
-  }
-
-  const handleGenerateSubtitles = () => {
-    console.log('✨ AI VIDEO GENERATION: Generating subtitles')
-    console.log('📝 AI VIDEO GENERATION: Auto-generating captions and subtitles')
-    toast.info('📝 Generate Subtitles', {
-      description: 'Auto-generate captions and subtitles'
-    })
-  }
-
-  const handleDuplicateVideo = (videoId: string) => {
-    console.log('✨ AI VIDEO GENERATION: Duplicating video')
-    console.log('📋 AI VIDEO GENERATION: Video ID - ' + videoId)
-    toast.success('📋 Video Duplicated', {
-      description: 'Copy created in library'
-    })
-  }
-
-  const handleVideoAnalytics = (videoId: string) => {
-    console.log('✨ AI VIDEO GENERATION: Opening video analytics')
-    console.log('📊 AI VIDEO GENERATION: Video ID - ' + videoId)
-    toast.info('📊 Video Analytics', {
-      description: 'Views, engagement, and performance metrics'
-    })
-  }
-
-  const handleBatchGenerate = () => {
-    console.log('✨ AI VIDEO GENERATION: Opening batch generation')
-    console.log('📦 AI VIDEO GENERATION: Generate multiple videos from CSV/template')
-    toast.info('📦 Batch Generation', {
-      description: 'Generate multiple videos from CSV/template'
-    })
-  }
-
-  const handleTemplateManager = () => {
-    console.log('✨ AI VIDEO GENERATION: Opening template manager')
-    console.log('📋 AI VIDEO GENERATION: Save and load video templates')
-    toast.info('📋 Template Manager', {
-      description: 'Save and load video templates'
-    })
-  }
-
-  const handleQualitySettings = () => {
-    console.log('✨ AI VIDEO GENERATION: Opening quality settings')
-    console.log('⚙️ AI VIDEO GENERATION: Resolution, bitrate, frame rate settings')
-    toast.info('⚙️ Quality Settings', {
-      description: 'Resolution: 4K/1080p/720p, Bitrate, Frame rate'
-    })
-  }
-
-  const handleScheduleGeneration = () => {
-    console.log('✨ AI VIDEO GENERATION: Scheduling video generation')
-    console.log('📅 AI VIDEO GENERATION: Queue video for later processing')
-    toast.info('📅 Schedule Generation', {
-      description: 'Queue video for later processing'
-    })
-  }
-
-  const handleCancelGeneration = (jobId: string) => {
-    console.log('✨ AI VIDEO GENERATION: Cancel generation requested')
-    console.log('❌ AI VIDEO GENERATION: Job ID - ' + jobId)
-    if (confirm('Cancel generation?')) {
-      console.log('❌ AI VIDEO GENERATION: Generation cancelled - ' + jobId)
-      toast.info('❌ Generation Cancelled', {
-        description: 'Video generation stopped'
-      })
-    }
-  }
-
-  const handlePreviewVideo = (videoId: string) => {
-    console.log('✨ AI VIDEO GENERATION: Opening video preview')
-    console.log('👁️ AI VIDEO GENERATION: Video ID - ' + videoId)
-    toast.info('👁️ Video Preview', {
-      description: 'Opening preview player...'
-    })
-  }
+  const estimatedTime = estimateGenerationTime(30, quality, 'moderate')
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center space-y-4"
-      >
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full text-sm font-medium">
-          <Video className="w-4 h-4" />
-          AI Video Generation
-        </div>
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-          Create Videos with AI
-        </h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Transform your ideas into professional videos using advanced AI technology
-        </p>
-      </motion.div>
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Premium Background */}
+      <div className="fixed inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-transparent to-transparent opacity-50" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Generation Panel */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="p-6">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <Wand2 className="w-6 h-6 text-primary" />
-              Video Generation
-            </h2>
+      {/* Animated Gradient Orbs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 -right-4 w-96 h-96 bg-gradient-to-r from-blue-500/30 to-cyan-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-700"></div>
+      </div>
 
-            <div className="space-y-6">
-              {/* Prompt Input */}
-              <div>
-                <Label className="block text-sm font-medium mb-2">Video Description</Label>
-                <Textarea
-                  placeholder="Describe the video you want to create... e.g., 'A professional product demonstration showing a smartphone with sleek animations and modern background music'"
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  className="min-h-24"
-                />
-              </div>
-
-              {/* Video Style */}
-              <div>
-                <Label className="block text-sm font-medium mb-3">Video Style</Label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {VIDEO_STYLES.map((style) => (
-                    <motion.div
-                      key={style.id}
-                      data-testid={`video-style-${style.id}`}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setSelectedStyle(style.id)}
-                      className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${
-                        selectedStyle === style.id
-                          ? 'border-primary bg-primary/10'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-lg mb-2 flex items-center justify-center">
-                        <img src={style.image} alt={style.name} className="w-full h-full object-cover rounded-lg" />
-                      </div>
-                      <h3 className="font-semibold text-sm mb-1">{style.name}</h3>
-                      <p className="text-xs text-muted-foreground">{style.description}</p>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Duration */}
-              <div>
-                <Label className="block text-sm font-medium mb-2">Duration: {duration} seconds</Label>
-                <input
-                  data-testid="video-duration-slider"
-                  type="range"
-                  min="10"
-                  max="180"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-
-              {/* Aspect Ratio */}
-              <div>
-                <Label className="block text-sm font-medium mb-2">Aspect Ratio</Label>
-                <Select value={aspectRatio} onValueChange={setAspectRatio}>
-                  <SelectTrigger data-testid="aspect-ratio-select">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
-                    <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
-                    <SelectItem value="1:1">1:1 (Square)</SelectItem>
-                    <SelectItem value="4:3">4:3 (Standard)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* AI Model */}
-              <div>
-                <Label className="block text-sm font-medium mb-3">AI Model</Label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {AI_MODELS.map((model) => (
-                    <motion.div
-                      key={model.id}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setSelectedModel(model.id)}
-                      className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${
-                        selectedModel === model.id
-                          ? 'border-primary bg-primary/10'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <h3 className="font-semibold mb-2">{model.name}</h3>
-                      <div className="space-y-1 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Speed:</span>
-                          <span className="font-medium">{model.speed}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Quality:</span>
-                          <span className="font-medium">{model.quality}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Cost:</span>
-                          <span className="font-medium">{model.cost}</span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Generate Button */}
-              <Button
-                onClick={() => { handleGenerate(); console.log("🎬 Generating AI video..."); }} data-testid="generate-video-btn"
-                disabled={!prompt.trim()}
-                className="w-full h-12 text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+      <div className="container mx-auto px-4 py-12 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <ScrollReveal variant="slide-up" duration={0.6}>
+            <div className="text-center mb-12">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", duration: 0.6 }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 rounded-full text-sm font-medium mb-6 border border-purple-500/30"
               >
-                <Wand2 className="w-5 h-5 mr-2" />
-                Generate Video
-              </Button>
-            </div>
-          </Card>
-        </div>
+                <Video className="w-4 h-4" />
+                AI Video Generation
+                <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                  Live
+                </Badge>
+              </motion.div>
 
-        {/* Pro Tips Sidebar */}
-        <div className="space-y-6">
-          <Card className="p-6">
-            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-              <Wand2 className="w-5 h-5 text-primary" />
-              Pro Tips
-            </h3>
-            <div className="space-y-3 text-sm">
-              <p className="text-muted-foreground">
-                Be specific in your descriptions for better results
-              </p>
-              <p className="text-muted-foreground">
-                Include details about mood, style, and visual elements
-              </p>
-              <p className="text-muted-foreground">
-                Longer videos take more time to generate
-              </p>
-              <p className="text-muted-foreground">
-                Higher quality models produce better results
+              <TextShimmer className="text-5xl md:text-6xl font-bold mb-6" duration={2}>
+                Create Videos with AI
+              </TextShimmer>
+
+              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+                Transform text prompts into professional videos in minutes with our AI-powered video generation platform
               </p>
             </div>
-          </Card>
+          </ScrollReveal>
+
+          {/* Features Bar */}
+          <ScrollReveal variant="scale" duration={0.6} delay={0.2}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+              {[
+                { icon: Sparkles, label: '4 AI Models', value: 'Multiple engines' },
+                { icon: Clock, label: 'Fast Generation', value: '2-5 minutes' },
+                { icon: Star, label: '8+ Templates', value: 'Professional' },
+                { icon: FileVideo, label: 'HD Quality', value: 'Up to 4K' }
+              ].map((feature, index) => (
+                <LiquidGlassCard key={index} className="p-4 text-center">
+                  <feature.icon className="w-6 h-6 mx-auto mb-2 text-purple-400" />
+                  <p className="text-xs text-gray-400 mb-1">{feature.label}</p>
+                  <p className="text-sm font-semibold text-white">{feature.value}</p>
+                </LiquidGlassCard>
+              ))}
+            </div>
+          </ScrollReveal>
+
+          {/* Main Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - Main Flow */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Step 1: Template Selection */}
+              {step === 'template' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <LiquidGlassCard className="p-6">
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <h2 className="text-2xl font-bold text-white">Choose a Template</h2>
+                        <p className="text-gray-400">Start with a pre-designed template or start from scratch</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        onClick={() => setStep('prompt')}
+                        className="border-gray-700 hover:bg-slate-800"
+                      >
+                        Skip
+                      </Button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {VIDEO_TEMPLATES.map((template) => (
+                        <motion.div
+                          key={template.id}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => handleTemplateSelect(template)}
+                          className="cursor-pointer"
+                        >
+                          <LiquidGlassCard className="p-4 hover:border-purple-500/50 transition-all">
+                            <div className="aspect-video bg-gradient-to-br from-purple-900/20 to-blue-900/20 rounded-lg mb-3 flex items-center justify-center">
+                              <LayoutTemplate className="w-12 h-12 text-purple-400" />
+                            </div>
+
+                            <div className="flex items-start justify-between mb-2">
+                              <h3 className="font-semibold text-white">{template.name}</h3>
+                              {template.premium && (
+                                <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30">
+                                  <Star className="w-3 h-3 mr-1" />
+                                  Pro
+                                </Badge>
+                              )}
+                            </div>
+
+                            <p className="text-xs text-gray-400 mb-3">{template.description}</p>
+
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <Clock className="w-3 h-3" />
+                              <span>{formatDuration(template.duration)}</span>
+                              <span>•</span>
+                              <span>{template.scenes} scenes</span>
+                              <span>•</span>
+                              <span className="capitalize">{template.format}</span>
+                            </div>
+                          </LiquidGlassCard>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </LiquidGlassCard>
+                </motion.div>
+              )}
+
+              {/* Step 2: Prompt Input */}
+              {step === 'prompt' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <LiquidGlassCard className="p-6">
+                    <h2 className="text-2xl font-bold text-white mb-6">Describe Your Video</h2>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-sm text-gray-400 mb-2 block">Video Prompt</label>
+                        <textarea
+                          value={prompt}
+                          onChange={(e) => setPrompt(e.target.value)}
+                          placeholder="Describe the video you want to create... Be specific about scenes, style, mood, and details."
+                          className="w-full h-32 p-4 bg-slate-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none resize-none"
+                        />
+                        <p className="text-xs text-gray-500 mt-2">
+                          {prompt.length}/500 characters
+                        </p>
+                      </div>
+
+                      {/* Prompt Suggestions */}
+                      <div>
+                        <label className="text-sm text-gray-400 mb-2 block">Quick Suggestions</label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {PROMPT_SUGGESTIONS.slice(0, 4).map((suggestion) => (
+                            <button
+                              key={suggestion.id}
+                              onClick={() => setPrompt(suggestion.prompt)}
+                              className="text-left p-3 bg-slate-900/50 border border-gray-700 rounded-lg hover:border-purple-500/50 transition-all text-sm"
+                            >
+                              <p className="text-purple-400 font-medium text-xs mb-1">{suggestion.category}</p>
+                              <p className="text-gray-300 text-xs line-clamp-2">{suggestion.prompt}</p>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <Button
+                          variant="outline"
+                          onClick={() => setStep('template')}
+                          className="flex-1 border-gray-700 hover:bg-slate-800"
+                        >
+                          Back
+                        </Button>
+                        <Button
+                          onClick={() => setStep('customize')}
+                          disabled={!prompt}
+                          className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                        >
+                          Continue
+                          <ArrowRight className="w-5 h-5 ml-2" />
+                        </Button>
+                      </div>
+                    </div>
+                  </LiquidGlassCard>
+                </motion.div>
+              )}
+
+              {/* Step 3: Customize */}
+              {step === 'customize' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <LiquidGlassCard className="p-6">
+                    <h2 className="text-2xl font-bold text-white mb-6">Customize Video</h2>
+
+                    <div className="space-y-6">
+                      {/* Style Selection */}
+                      <div>
+                        <label className="text-sm text-gray-400 mb-2 block">Video Style</label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {(['cinematic', 'professional', 'casual', 'animated', 'explainer', 'social-media'] as VideoStyle[]).map((s) => (
+                            <button
+                              key={s}
+                              onClick={() => setStyle(s)}
+                              className={cn(
+                                "p-3 rounded-lg border text-sm font-medium transition-all capitalize",
+                                style === s
+                                  ? "bg-purple-600 border-purple-500 text-white"
+                                  : "bg-slate-900/50 border-gray-700 text-gray-400 hover:border-purple-500/50"
+                              )}
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Format Selection */}
+                      <div>
+                        <label className="text-sm text-gray-400 mb-2 block">Video Format</label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {(Object.keys(VIDEO_FORMATS) as VideoFormat[]).map((f) => (
+                            <button
+                              key={f}
+                              onClick={() => setFormat(f)}
+                              className={cn(
+                                "p-3 rounded-lg border text-sm transition-all",
+                                format === f
+                                  ? "bg-purple-600 border-purple-500 text-white"
+                                  : "bg-slate-900/50 border-gray-700 text-gray-400 hover:border-purple-500/50"
+                              )}
+                            >
+                              <div className="font-medium">{VIDEO_FORMATS[f].aspectRatio}</div>
+                              <div className="text-xs opacity-75">{VIDEO_FORMATS[f].label}</div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Quality Selection */}
+                      <div>
+                        <label className="text-sm text-gray-400 mb-2 block">Quality</label>
+                        <div className="grid grid-cols-4 gap-2">
+                          {(Object.keys(QUALITY_SETTINGS) as VideoQuality[]).map((q) => (
+                            <button
+                              key={q}
+                              onClick={() => setQuality(q)}
+                              className={cn(
+                                "p-3 rounded-lg border text-sm transition-all",
+                                quality === q
+                                  ? "bg-purple-600 border-purple-500 text-white"
+                                  : "bg-slate-900/50 border-gray-700 text-gray-400 hover:border-purple-500/50"
+                              )}
+                            >
+                              <div className="font-medium uppercase">{q}</div>
+                              <div className="text-xs opacity-75">{QUALITY_SETTINGS[q].resolution}</div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <Button
+                          variant="outline"
+                          onClick={() => setStep('prompt')}
+                          className="flex-1 border-gray-700 hover:bg-slate-800"
+                        >
+                          Back
+                        </Button>
+                        <Button
+                          onClick={handleGenerate}
+                          className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                        >
+                          <Wand2 className="w-5 h-5 mr-2" />
+                          Generate Video
+                        </Button>
+                      </div>
+                    </div>
+                  </LiquidGlassCard>
+                </motion.div>
+              )}
+
+              {/* Step 4: Generating */}
+              {step === 'generate' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <LiquidGlassCard className="p-8">
+                    <div className="text-center space-y-6">
+                      <div className="relative mx-auto w-32 h-32">
+                        <GlowEffect className="absolute -inset-4 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-full blur-xl animate-pulse" />
+                        <div className="relative w-full h-full bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center animate-pulse">
+                          <Sparkles className="w-16 h-16 text-white" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <h2 className="text-2xl font-bold text-white mb-2">
+                          {generationStatus === 'analyzing' && 'Analyzing Prompt...'}
+                          {generationStatus === 'generating' && 'Generating Scenes...'}
+                          {generationStatus === 'rendering' && 'Rendering Video...'}
+                          {generationStatus === 'completed' && 'Video Ready!'}
+                        </h2>
+                        <p className="text-gray-400">AI is creating your video</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Progress value={generationProgress} className="h-2" />
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-400">Progress</span>
+                          <span className="text-white font-medium">{generationProgress}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </LiquidGlassCard>
+                </motion.div>
+              )}
+
+              {/* Step 5: Result */}
+              {step === 'result' && generatedVideo && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <LiquidGlassCard className="p-6">
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <h2 className="text-2xl font-bold text-white">Your Video is Ready!</h2>
+                        <p className="text-gray-400">Generated in {estimatedTime}</p>
+                      </div>
+                      <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Completed
+                      </Badge>
+                    </div>
+
+                    {/* Video Preview */}
+                    <div className="aspect-video bg-gradient-to-br from-purple-900/20 to-blue-900/20 rounded-lg mb-6 flex items-center justify-center border border-gray-700">
+                      <div className="text-center">
+                        <Play className="w-16 h-16 text-purple-400 mx-auto mb-4" />
+                        <p className="text-gray-400">Video preview would appear here</p>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">
+                        <Download className="w-4 h-4 mr-2" />
+                        Download
+                      </Button>
+                      <Button variant="outline" className="border-gray-700 hover:bg-slate-800">
+                        <Share2 className="w-4 h-4 mr-2" />
+                        Share
+                      </Button>
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setStep('template')
+                        setPrompt('')
+                        setGeneratedVideo(null)
+                        setGenerationProgress(0)
+                      }}
+                      className="w-full mt-3 border-gray-700 hover:bg-slate-800"
+                    >
+                      Create Another Video
+                    </Button>
+                  </LiquidGlassCard>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Right Column - Info & Stats */}
+            <div className="space-y-6">
+              {/* AI Models */}
+              <LiquidGlassCard className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="w-5 h-5 text-purple-400" />
+                  <h3 className="font-semibold text-white">AI Model</h3>
+                </div>
+
+                <div className="space-y-2">
+                  {(['kazi-ai', 'runway-gen3', 'pika-labs', 'stable-video'] as AIModel[]).map((model) => (
+                    <button
+                      key={model}
+                      onClick={() => setAiModel(model)}
+                      className={cn(
+                        "w-full p-3 rounded-lg border text-left transition-all",
+                        aiModel === model
+                          ? "bg-purple-600 border-purple-500 text-white"
+                          : "bg-slate-900/50 border-gray-700 text-gray-400 hover:border-purple-500/50"
+                      )}
+                    >
+                      <p className="font-medium capitalize">{model.replace('-', ' ')}</p>
+                      <p className="text-xs opacity-75">
+                        {model === 'kazi-ai' && 'Fastest, Best Quality'}
+                        {model === 'runway-gen3' && 'Cinematic Results'}
+                        {model === 'pika-labs' && 'Creative Styles'}
+                        {model === 'stable-video' && 'Consistent Output'}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </LiquidGlassCard>
+
+              {/* Stats */}
+              <LiquidGlassCard className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <TrendingUp className="w-5 h-5 text-purple-400" />
+                  <h3 className="font-semibold text-white">Your Stats</h3>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-slate-900/50 rounded-lg">
+                    <span className="text-sm text-gray-400">Videos Created</span>
+                    <span className="font-semibold text-white">12</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-slate-900/50 rounded-lg">
+                    <span className="text-sm text-gray-400">Total Duration</span>
+                    <span className="font-semibold text-white">6m 30s</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-slate-900/50 rounded-lg">
+                    <span className="text-sm text-gray-400">Credits Used</span>
+                    <span className="font-semibold text-white">48 / 100</span>
+                  </div>
+                </div>
+              </LiquidGlassCard>
+
+              {/* Tips */}
+              <LiquidGlassCard className="p-6 bg-gradient-to-br from-blue-900/20 to-purple-900/20 border-blue-500/30">
+                <div className="flex items-center gap-2 mb-4">
+                  <Info className="w-5 h-5 text-blue-400" />
+                  <h3 className="font-semibold text-white">Pro Tips</h3>
+                </div>
+
+                <ul className="space-y-2 text-sm text-gray-300">
+                  <li className="flex gap-2">
+                    <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
+                    <span>Be specific in your prompts for better results</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
+                    <span>Use templates for faster generation</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
+                    <span>HD quality recommended for professional use</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
+                    <span>Portrait format works best for social media</span>
+                  </li>
+                </ul>
+              </LiquidGlassCard>
+            </div>
+          </div>
         </div>
       </div>
     </div>
