@@ -30,20 +30,15 @@ export function RouteProgress({
     setLoading(true)
     setProgress(0)
 
-    // Simulate progress during route change
-    const timer1 = setTimeout(() => setProgress(30), 100)
-    const timer2 = setTimeout(() => setProgress(60), 300)
-    const timer3 = setTimeout(() => setProgress(90), 600)
-    const timer4 = setTimeout(() => {
-      setProgress(100)
-      setTimeout(() => setLoading(false), 300)
-    }, 800)
+    // Fast progress simulation
+    const timer1 = setTimeout(() => setProgress(60), 50)
+    const timer2 = setTimeout(() => setProgress(100), 150)
+    const timer3 = setTimeout(() => setLoading(false), 200)
 
     return () => {
       clearTimeout(timer1)
       clearTimeout(timer2)
       clearTimeout(timer3)
-      clearTimeout(timer4)
     }
   }, [pathname])
 
@@ -55,7 +50,7 @@ export function RouteProgress({
             initial={{ scaleX: 0, opacity: 1 }}
             animate={{ scaleX: progress / 100, opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
             className={cn(
               'fixed top-0 left-0 right-0 z-[100] origin-left',
               `bg-gradient-to-r ${color}`,
@@ -123,7 +118,7 @@ export function MinimalRouteProgress() {
 
   useEffect(() => {
     setIsNavigating(true)
-    const timer = setTimeout(() => setIsNavigating(false), 500)
+    const timer = setTimeout(() => setIsNavigating(false), 200)
     return () => clearTimeout(timer)
   }, [pathname])
 

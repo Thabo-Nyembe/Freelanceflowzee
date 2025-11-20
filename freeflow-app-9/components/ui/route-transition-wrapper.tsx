@@ -19,31 +19,31 @@ const transitionVariants = {
     initial: { opacity: 0 },
     animate: { opacity: 1 },
     exit: { opacity: 0 },
-    transition: { duration: 0.3 }
+    transition: { duration: 0.15 }
   },
   slide: {
-    initial: { opacity: 0, x: 20 },
+    initial: { opacity: 0, x: 10 },
     animate: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -20 },
-    transition: { duration: 0.4, ease: [0.48, 0.15, 0.25, 0.96] }
+    exit: { opacity: 0, x: -10 },
+    transition: { duration: 0.2, ease: [0.48, 0.15, 0.25, 0.96] }
   },
   scale: {
-    initial: { opacity: 0, scale: 0.95 },
+    initial: { opacity: 0, scale: 0.98 },
     animate: { opacity: 1, scale: 1 },
-    exit: { opacity: 0, scale: 1.05 },
-    transition: { duration: 0.4, ease: [0.48, 0.15, 0.25, 0.96] }
+    exit: { opacity: 0, scale: 1.02 },
+    transition: { duration: 0.2, ease: [0.48, 0.15, 0.25, 0.96] }
   },
   blur: {
-    initial: { opacity: 0, filter: 'blur(10px)' },
+    initial: { opacity: 0, filter: 'blur(4px)' },
     animate: { opacity: 1, filter: 'blur(0px)' },
-    exit: { opacity: 0, filter: 'blur(10px)' },
-    transition: { duration: 0.5, ease: [0.48, 0.15, 0.25, 0.96] }
+    exit: { opacity: 0, filter: 'blur(4px)' },
+    transition: { duration: 0.25, ease: [0.48, 0.15, 0.25, 0.96] }
   },
   premium: {
-    initial: { opacity: 0, y: 20, scale: 0.98, filter: 'blur(5px)' },
-    animate: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' },
-    exit: { opacity: 0, y: -20, scale: 0.98, filter: 'blur(5px)' },
-    transition: { duration: 0.5, ease: [0.48, 0.15, 0.25, 0.96] }
+    initial: { opacity: 0, y: 10, scale: 0.99 },
+    animate: { opacity: 1, y: 0, scale: 1 },
+    exit: { opacity: 0, y: -10, scale: 0.99 },
+    transition: { duration: 0.2, ease: [0.48, 0.15, 0.25, 0.96] }
   }
 }
 

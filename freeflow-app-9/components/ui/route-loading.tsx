@@ -20,7 +20,7 @@ interface RouteLoadingProps {
 export function RouteLoading({
   className,
   variant = 'minimal',
-  delay = 200
+  delay = 100
 }: RouteLoadingProps) {
   const pathname = usePathname()
   const [isLoading, setIsLoading] = useState(false)
@@ -28,7 +28,7 @@ export function RouteLoading({
   useEffect(() => {
     setIsLoading(true)
 
-    // Add delay to prevent flash for fast navigations
+    // Fast transition - minimal delay
     const showTimer = setTimeout(() => {
       setIsLoading(false)
     }, delay)
@@ -177,7 +177,7 @@ export function RouteLoadingIndicator() {
 
   useEffect(() => {
     setIsLoading(true)
-    const timer = setTimeout(() => setIsLoading(false), 400)
+    const timer = setTimeout(() => setIsLoading(false), 150)
     return () => clearTimeout(timer)
   }, [pathname])
 
