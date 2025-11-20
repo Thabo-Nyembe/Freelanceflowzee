@@ -18,6 +18,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import {
   Play,
   Pause,
@@ -936,13 +939,15 @@ export default function VideoStudioPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <Video className="w-6 h-6 text-purple-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Video Studio</h1>
-              <Badge className="bg-gradient-to-r from-purple-500 to-violet-600 text-white">A+++</Badge>
+              <Video className="w-8 h-8 text-red-600 dark:text-red-400" />
+              <TextShimmer className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-red-900 to-orange-900 dark:from-gray-100 dark:via-red-100 dark:to-orange-100 bg-clip-text text-transparent">
+                Video Studio
+              </TextShimmer>
+              <Badge className="bg-gradient-to-r from-red-500 to-orange-600 text-white">A+++</Badge>
             </div>
-            <div className="flex items-center gap-2">
-              <Activity className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-600">Professional video editing</span>
+            <div className="flex items-center gap-2 ml-2">
+              <Activity className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+              <span className="text-sm text-gray-600 dark:text-gray-300">Professional video editing</span>
             </div>
           </div>
           
@@ -1617,57 +1622,68 @@ onClick={() => {
           
           <TabsContent value="analytics" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card>
-                <CardContent className="p-6">
+              <LiquidGlassCard variant="gradient" hoverEffect={true}>
+                <div className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Total Videos</p>
-                      <p className="text-2xl font-bold text-gray-900">{mockProjects.length}</p>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Videos</p>
+                      <NumberFlow value={mockProjects.length} className="text-2xl font-bold text-gray-900 dark:text-gray-100" />
                     </div>
-                    <Video className="w-8 h-8 text-purple-600" />
+                    <div className="p-3 bg-gradient-to-br from-red-400/20 to-orange-400/20 dark:from-red-400/10 dark:to-orange-400/10 rounded-xl backdrop-blur-sm">
+                      <Video className="w-6 h-6 text-red-600 dark:text-red-400" />
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </LiquidGlassCard>
               
-              <Card>
-                <CardContent className="p-6">
+              <LiquidGlassCard variant="tinted" hoverEffect={true}>
+                <div className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Total Views</p>
-                      <p className="text-2xl font-bold text-blue-600">
-                        {mockProjects.reduce((sum, p) => sum + p.views, 0).toLocaleString()}
-                      </p>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Views</p>
+                      <NumberFlow
+                        value={mockProjects.reduce((sum, p) => sum + p.views, 0)}
+                        format="compact"
+                        className="text-2xl font-bold text-blue-600 dark:text-blue-400"
+                      />
                     </div>
-                    <Eye className="w-8 h-8 text-blue-600" />
+                    <div className="p-3 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 dark:from-blue-400/10 dark:to-cyan-400/10 rounded-xl backdrop-blur-sm">
+                      <Eye className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </LiquidGlassCard>
               
-              <Card>
-                <CardContent className="p-6">
+              <LiquidGlassCard variant="gradient" hoverEffect={true}>
+                <div className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Total Likes</p>
-                      <p className="text-2xl font-bold text-green-600">
-                        {mockProjects.reduce((sum, p) => sum + p.likes, 0)}
-                      </p>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Likes</p>
+                      <NumberFlow
+                        value={mockProjects.reduce((sum, p) => sum + p.likes, 0)}
+                        className="text-2xl font-bold text-green-600 dark:text-green-400"
+                      />
                     </div>
-                    <Star className="w-8 h-8 text-green-600" />
+                    <div className="p-3 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 dark:from-emerald-400/10 dark:to-teal-400/10 rounded-xl backdrop-blur-sm">
+                      <Star className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </LiquidGlassCard>
               
-              <Card>
-                <CardContent className="p-6">
+              <LiquidGlassCard variant="tinted" hoverEffect={true}>
+                <div className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Avg. Engagement</p>
-                      <p className="text-2xl font-bold text-orange-600">87%</p>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Avg. Engagement</p>
+                      <NumberFlow value={87} suffix="%" className="text-2xl font-bold text-orange-600 dark:text-orange-400" />
                     </div>
-                    <TrendingUp className="w-8 h-8 text-orange-600" />
+                    <div className="p-3 bg-gradient-to-br from-orange-400/20 to-amber-400/20 dark:from-orange-400/10 dark:to-amber-400/10 rounded-xl backdrop-blur-sm">
+                      <TrendingUp className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </LiquidGlassCard>
             </div>
 
             <div className="flex gap-4">
