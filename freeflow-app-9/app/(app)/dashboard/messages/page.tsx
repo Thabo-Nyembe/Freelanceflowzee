@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Send, Search, Filter, MessageSquare, Paperclip, Image, Mic, Plus, Pin, Bell, BellOff, Archive, Trash2, CheckCheck, Reply, Forward, Smile } from 'lucide-react'
 import { toast } from 'sonner'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { TextShimmer } from '@/components/ui/text-shimmer'
 
 interface Message {
   id: number
@@ -264,7 +266,9 @@ export default function MessagesPage() {
             <CardTitle className="flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <MessageSquare className="h-5 w-5 text-primary" />
-                Messages
+                <TextShimmer className="text-xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 dark:from-gray-100 dark:via-blue-100 dark:to-purple-100 bg-clip-text text-transparent">
+                  Messages
+                </TextShimmer>
               </span>
               <Button variant="ghost" size="sm">
                 <Filter className="h-4 w-4" />
@@ -308,7 +312,7 @@ export default function MessagesPage() {
                         <p className="font-medium truncate">{chat.name}</p>
                         {chat.unread > 0 && (
                           <span className="bg-primary text-primary-foreground text-xs rounded-full px-1.5 py-0.5 min-w-[1.25rem] text-center">
-                            {chat.unread}
+                            <NumberFlow value={chat.unread} className="inline-block" />
                           </span>
                         )}
                       </div>
