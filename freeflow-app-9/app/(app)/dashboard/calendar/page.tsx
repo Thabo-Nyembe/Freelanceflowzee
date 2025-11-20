@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { TextShimmer } from '@/components/ui/text-shimmer'
 import {
   Calendar,
   Clock,
@@ -48,27 +50,6 @@ const FloatingParticle = ({ delay = 0, color = 'blue' }: { delay?: number; color
   )
 }
 
-const TextShimmer = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
-  return (
-    <motion.div
-      className={`relative inline-block ${className}`}
-      initial={{ backgroundPosition: '200% 0' }}
-      animate={{ backgroundPosition: '-200% 0' }}
-      transition={{
-        duration: 2,
-        repeat: Infinity,
-        ease: 'linear'
-      }}
-      style={{
-        background: 'linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.4), transparent)',
-        backgroundSize: '200% 100%',
-        WebkitBackgroundClip: 'text'
-      }}
-    >
-      {children}
-    </motion.div>
-  )
-}
 
 // ============================================================================
 // CALENDAR DATA MODEL
@@ -838,9 +819,9 @@ export default function CalendarPage() {
                 <FloatingParticle delay={0} color="blue" />
                 <FloatingParticle delay={1} color="indigo" />
               </div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2 relative z-10">
+              <TextShimmer className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-cyan-900 dark:from-gray-100 dark:via-blue-100 dark:to-cyan-100 bg-clip-text text-transparent mb-2 relative z-10">
                 Calendar
-              </h1>
+              </TextShimmer>
               <p className="text-lg text-gray-600">
                 Manage your schedule and appointments
               </p>
@@ -1123,19 +1104,23 @@ export default function CalendarPage() {
                   <CardContent className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Total Meetings</span>
-                      <span className="font-bold text-purple-900">{KAZI_CALENDAR_DATA.metrics.totalMeetings}</span>
+                      <NumberFlow value={KAZI_CALENDAR_DATA.metrics.totalMeetings} className="font-bold text-purple-900" />
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">This Month</span>
-                      <span className="font-bold text-purple-900">{KAZI_CALENDAR_DATA.metrics.monthlyMeetings}</span>
+                      <NumberFlow value={KAZI_CALENDAR_DATA.metrics.monthlyMeetings} className="font-bold text-purple-900" />
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Efficiency</span>
-                      <span className="font-bold text-purple-900">{KAZI_CALENDAR_DATA.metrics.meetingEfficiencyScore}%</span>
+                      <span className="font-bold text-purple-900">
+                        <NumberFlow value={KAZI_CALENDAR_DATA.metrics.meetingEfficiencyScore} decimals={1} className="inline-block" />%
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Satisfaction</span>
-                      <span className="font-bold text-purple-900">{KAZI_CALENDAR_DATA.metrics.clientSatisfactionScore}/10</span>
+                      <span className="font-bold text-purple-900">
+                        <NumberFlow value={KAZI_CALENDAR_DATA.metrics.clientSatisfactionScore} decimals={1} className="inline-block" />/10
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
