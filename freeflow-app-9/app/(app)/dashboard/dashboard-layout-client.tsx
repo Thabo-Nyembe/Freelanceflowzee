@@ -3,7 +3,6 @@
 import { User } from '@supabase/supabase-js'
 import { SidebarEnhanced } from '@/components/navigation/sidebar-enhanced'
 import { FloatingThemeToggle } from '@/components/ui/premium-theme-toggle'
-import { RouteTransitionWrapper } from '@/components/ui/route-transition-wrapper'
 import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav'
 import { ROUTE_LABELS } from '@/lib/route-utils'
 
@@ -38,10 +37,8 @@ export default function DashboardLayoutClient({
             <BreadcrumbNav labels={ROUTE_LABELS} />
           </div>
 
-          {/* Route Transition Wrapper */}
-          <RouteTransitionWrapper variant="premium">
-            {children}
-          </RouteTransitionWrapper>
+          {/* Instant page loading - no transition wrapper */}
+          {children}
         </div>
       </main>
 
