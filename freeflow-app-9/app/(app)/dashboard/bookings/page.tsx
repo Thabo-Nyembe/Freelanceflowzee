@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { TextShimmer } from '@/components/ui/text-shimmer'
 import {
   Calendar,
   Clock,
@@ -1298,9 +1300,9 @@ export default function BookingsPage() {
               <Calendar className="h-6 w-6 kazi-text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold kazi-text-dark dark:kazi-text-light">
+              <TextShimmer className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-cyan-900 dark:from-gray-100 dark:via-blue-100 dark:to-cyan-100 bg-clip-text text-transparent">
                 Bookings
-              </h1>
+              </TextShimmer>
               <p className="text-muted-foreground text-sm">
                 Manage appointments, services and client bookings
               </p>
@@ -1332,7 +1334,7 @@ export default function BookingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Upcoming</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.upcoming}</p>
+                  <NumberFlow value={stats.upcoming} className="text-2xl font-bold text-gray-900" />
                 </div>
                 <div className="p-2 bg-blue-100 rounded-lg">
                   <Calendar className="h-5 w-5 text-blue-600" />
@@ -1346,7 +1348,7 @@ export default function BookingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Confirmed</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.confirmed}</p>
+                  <NumberFlow value={stats.confirmed} className="text-2xl font-bold text-gray-900" />
                 </div>
                 <div className="p-2 bg-green-100 rounded-lg">
                   <CheckCircle className="h-5 w-5 text-green-600" />
@@ -1360,7 +1362,7 @@ export default function BookingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Pending</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
+                  <NumberFlow value={stats.pending} className="text-2xl font-bold text-gray-900" />
                 </div>
                 <div className="p-2 bg-yellow-100 rounded-lg">
                   <AlertCircle className="h-5 w-5 text-yellow-600" />
@@ -1374,7 +1376,7 @@ export default function BookingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Revenue</p>
-                  <p className="text-2xl font-bold text-gray-900">${stats.revenue}</p>
+                  <NumberFlow value={stats.revenue} format="currency" className="text-2xl font-bold text-gray-900" />
                 </div>
                 <div className="p-2 bg-purple-100 rounded-lg">
                   <Clock className="h-5 w-5 text-purple-600" />
