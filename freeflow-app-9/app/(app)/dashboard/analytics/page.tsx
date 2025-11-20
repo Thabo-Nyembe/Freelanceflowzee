@@ -10,6 +10,9 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { TextShimmer as TextShimmerComponent } from '@/components/ui/text-shimmer'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import {
   TrendingUp,
   DollarSign,
@@ -642,9 +645,9 @@ export default function AnalyticsPage() {
                 <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg">
                   <TrendingUp className="h-6 w-6 text-white" />
                 </div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+                <TextShimmerComponent className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 dark:from-gray-100 dark:via-blue-100 dark:to-indigo-100 bg-clip-text text-transparent">
                   Analytics Dashboard
-                </h1>
+                </TextShimmerComponent>
               </div>
               <p className="text-lg text-gray-600 font-light">
                 Comprehensive business intelligence and performance metrics 📊
@@ -789,28 +792,26 @@ export default function AnalyticsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0 }}
             >
-              <Card className="kazi-card relative overflow-hidden group hover:shadow-xl transition-shadow">
-                <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                  <FloatingParticle delay={0} color="green" />
-                  <FloatingParticle delay={1} color="emerald" />
-                </div>
-                <CardContent className="p-6 relative z-10">
+              <LiquidGlassCard variant="gradient" hoverEffect={true}>
+                <div className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                      <p className="text-3xl font-bold text-gray-900">
-                        {formatCurrency(KAZI_ANALYTICS_DATA.overview.monthlyRevenue)}
-                      </p>
-                      <p className="text-sm text-green-600 font-medium">
-                        +{KAZI_ANALYTICS_DATA.overview.revenueGrowth}% from last month
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Revenue</p>
+                      <NumberFlow
+                        value={KAZI_ANALYTICS_DATA.overview.monthlyRevenue}
+                        format="currency"
+                        className="text-3xl font-bold text-gray-900 dark:text-gray-100"
+                      />
+                      <p className="text-sm text-green-600 dark:text-green-400 font-medium">
+                        +<NumberFlow value={KAZI_ANALYTICS_DATA.overview.revenueGrowth} decimals={1} className="inline-block" />% from last month
                       </p>
                     </div>
-                    <div className="p-3 bg-green-100 rounded-xl">
-                      <DollarSign className="h-6 w-6 text-green-600" />
+                    <div className="p-3 bg-gradient-to-br from-green-400/20 to-emerald-400/20 dark:from-green-400/10 dark:to-emerald-400/10 rounded-xl backdrop-blur-sm">
+                      <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </LiquidGlassCard>
             </motion.div>
 
             <motion.div
@@ -818,28 +819,25 @@ export default function AnalyticsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
             >
-              <Card className="kazi-card relative overflow-hidden group hover:shadow-xl transition-shadow">
-                <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                  <FloatingParticle delay={0.5} color="blue" />
-                  <FloatingParticle delay={1.5} color="indigo" />
-                </div>
-                <CardContent className="p-6 relative z-10">
+              <LiquidGlassCard variant="tinted" hoverEffect={true}>
+                <div className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Active Projects</p>
-                      <p className="text-3xl font-bold text-gray-900">
-                        {KAZI_ANALYTICS_DATA.overview.activeProjects}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {KAZI_ANALYTICS_DATA.overview.totalProjects} total projects
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Active Projects</p>
+                      <NumberFlow
+                        value={KAZI_ANALYTICS_DATA.overview.activeProjects}
+                        className="text-3xl font-bold text-gray-900 dark:text-gray-100"
+                      />
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <NumberFlow value={KAZI_ANALYTICS_DATA.overview.totalProjects} className="inline-block" /> total projects
                       </p>
                     </div>
-                    <div className="p-3 bg-blue-100 rounded-xl">
-                      <FolderOpen className="h-6 w-6 text-blue-600" />
+                    <div className="p-3 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 dark:from-blue-400/10 dark:to-indigo-400/10 rounded-xl backdrop-blur-sm">
+                      <FolderOpen className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </LiquidGlassCard>
             </motion.div>
 
             <motion.div
@@ -847,28 +845,25 @@ export default function AnalyticsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <Card className="kazi-card relative overflow-hidden group hover:shadow-xl transition-shadow">
-                <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                  <FloatingParticle delay={1} color="purple" />
-                  <FloatingParticle delay={2} color="violet" />
-                </div>
-                <CardContent className="p-6 relative z-10">
+              <LiquidGlassCard variant="gradient" hoverEffect={true}>
+                <div className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Total Clients</p>
-                      <p className="text-3xl font-bold text-gray-900">
-                        {KAZI_ANALYTICS_DATA.overview.totalClients}
-                      </p>
-                      <p className="text-sm text-blue-600 font-medium">
-                        {KAZI_ANALYTICS_DATA.overview.newClients} new this month
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Clients</p>
+                      <NumberFlow
+                        value={KAZI_ANALYTICS_DATA.overview.totalClients}
+                        className="text-3xl font-bold text-gray-900 dark:text-gray-100"
+                      />
+                      <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                        <NumberFlow value={KAZI_ANALYTICS_DATA.overview.newClients} className="inline-block" /> new this month
                       </p>
                     </div>
-                    <div className="p-3 bg-purple-100 rounded-xl">
-                      <Users className="h-6 w-6 text-purple-600" />
+                    <div className="p-3 bg-gradient-to-br from-purple-400/20 to-pink-400/20 dark:from-purple-400/10 dark:to-pink-400/10 rounded-xl backdrop-blur-sm">
+                      <Users className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </LiquidGlassCard>
             </motion.div>
 
             <motion.div
@@ -876,28 +871,28 @@ export default function AnalyticsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-              <Card className="kazi-card relative overflow-hidden group hover:shadow-xl transition-shadow">
-                <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                  <FloatingParticle delay={1.5} color="orange" />
-                  <FloatingParticle delay={2.5} color="amber" />
-                </div>
-                <CardContent className="p-6 relative z-10">
+              <LiquidGlassCard variant="tinted" hoverEffect={true}>
+                <div className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Efficiency</p>
-                      <p className="text-3xl font-bold text-gray-900">
-                        {KAZI_ANALYTICS_DATA.overview.efficiency}%
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {KAZI_ANALYTICS_DATA.overview.billableHours}h billable
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Efficiency</p>
+                      <div className="flex items-baseline">
+                        <NumberFlow
+                          value={KAZI_ANALYTICS_DATA.overview.efficiency}
+                          className="text-3xl font-bold text-gray-900 dark:text-gray-100"
+                        />
+                        <span className="text-3xl font-bold text-gray-900 dark:text-gray-100">%</span>
+                      </div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <NumberFlow value={KAZI_ANALYTICS_DATA.overview.billableHours} className="inline-block" />h billable
                       </p>
                     </div>
-                    <div className="p-3 bg-orange-100 rounded-xl">
-                      <TrendingUp className="h-6 w-6 text-orange-600" />
+                    <div className="p-3 bg-gradient-to-br from-orange-400/20 to-amber-400/20 dark:from-orange-400/10 dark:to-amber-400/10 rounded-xl backdrop-blur-sm">
+                      <TrendingUp className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </LiquidGlassCard>
             </motion.div>
           </div>
         </div>
