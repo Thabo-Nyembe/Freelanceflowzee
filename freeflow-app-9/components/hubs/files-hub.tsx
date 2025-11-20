@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { TextShimmer } from '@/components/ui/text-shimmer'
 import {
   Dialog,
   DialogContent,
@@ -776,11 +778,11 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
             <div className="flex items-center gap-4 text-xs text-gray-500">
               <div className="flex items-center gap-1">
                 <Eye className="w-3 h-3" />
-                {file.views}
+                <NumberFlow value={file.views} className="inline-block" />
               </div>
               <div className="flex items-center gap-1">
                 <Download className="w-3 h-3" />
-                {file.downloads}
+                <NumberFlow value={file.downloads} className="inline-block" />
               </div>
               {file.shared && (
                 <div className="flex items-center gap-1">
@@ -809,7 +811,9 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Files Hub</h1>
+          <TextShimmer className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-cyan-900 dark:from-gray-100 dark:via-blue-100 dark:to-cyan-100 bg-clip-text text-transparent">
+            Files Hub
+          </TextShimmer>
           <p className="text-gray-600 mt-1">
             Manage and share your files with clients and team members
           </p>
@@ -866,7 +870,7 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Files</p>
-                <p className="text-2xl font-bold">{files.length}</p>
+                <NumberFlow value={files.length} className="text-2xl font-bold" />
               </div>
               <FileText className="w-8 h-8 text-blue-500" />
             </div>
@@ -888,7 +892,7 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Downloads</p>
-                <p className="text-2xl font-bold">{totalDownloads}</p>
+                <NumberFlow value={totalDownloads} className="text-2xl font-bold" />
               </div>
               <Download className="w-8 h-8 text-green-500" />
             </div>
@@ -899,7 +903,7 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Shared Files</p>
-                <p className="text-2xl font-bold">{files.filter(f => f.shared).length}</p>
+                <NumberFlow value={files.filter(f => f.shared).length} className="text-2xl font-bold" />
               </div>
               <Share2 className="w-8 h-8 text-orange-500" />
             </div>
@@ -913,7 +917,7 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <span className="font-medium text-blue-900">
-                {selectedFiles.length} file(s) selected
+                <NumberFlow value={selectedFiles.length} className="inline-block" /> file(s) selected
               </span>
               <div className="flex gap-2">
                 <Button data-testid="bulk-download-btn" variant="outline" size="sm" onClick={handleBulkDownload}>
