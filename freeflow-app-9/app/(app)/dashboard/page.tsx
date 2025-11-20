@@ -58,6 +58,8 @@ import { cn } from '@/lib/utils'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { GlowEffect } from '@/components/ui/glow-effect'
+import { LiquidGlassCard, LiquidGlassCardHeader, LiquidGlassCardTitle, LiquidGlassCardContent } from '@/components/ui/liquid-glass-card'
+import { BorderTrail } from '@/components/ui/border-trail'
 
 /* ------------------------------------------------------------------
  * Phase 6 hooks temporarily disabled to avoid unresolved imports.
@@ -603,102 +605,103 @@ export default function DashboardPage() {
       <div className="space-y-8 pr-4">
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow">
-            <CardContent className="p-6">
+          <LiquidGlassCard variant="gradient" hoverEffect={true}>
+            <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Earnings</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Earnings</p>
                   <NumberFlow
                     value={mockData.earnings}
                     format="currency"
-                    className="text-3xl font-bold text-gray-900"
+                    className="text-3xl font-bold text-gray-900 dark:text-gray-100"
                   />
-                  <p className="text-sm text-green-600">+12% from last month</p>
+                  <p className="text-sm text-green-600 dark:text-green-400">+12% from last month</p>
                 </div>
-                <div className="p-3 bg-green-100 rounded-xl">
-                  <DollarSign className="h-6 w-6 text-green-600" />
+                <div className="p-3 bg-gradient-to-br from-green-400/20 to-emerald-400/20 dark:from-green-400/10 dark:to-emerald-400/10 rounded-xl backdrop-blur-sm">
+                  <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </LiquidGlassCard>
 
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow">
-            <CardContent className="p-6">
+          <LiquidGlassCard variant="tinted" hoverEffect={true}>
+            <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Active Projects</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Active Projects</p>
                   <NumberFlow
                     value={mockData.activeProjects}
-                    className="text-3xl font-bold text-gray-900"
+                    className="text-3xl font-bold text-gray-900 dark:text-gray-100"
                   />
-                  <p className="text-sm text-blue-600">
+                  <p className="text-sm text-blue-600 dark:text-blue-400">
                     <NumberFlow value={mockData.completedProjects} className="inline-block" /> completed
                   </p>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-xl">
-                  <FolderOpen className="h-6 w-6 text-blue-600" />
+                <div className="p-3 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 dark:from-blue-400/10 dark:to-indigo-400/10 rounded-xl backdrop-blur-sm">
+                  <FolderOpen className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </LiquidGlassCard>
 
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow">
-            <CardContent className="p-6">
+          <LiquidGlassCard variant="gradient" hoverEffect={true}>
+            <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Clients</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Clients</p>
                   <NumberFlow
                     value={mockData.totalClients}
-                    className="text-3xl font-bold text-gray-900"
+                    className="text-3xl font-bold text-gray-900 dark:text-gray-100"
                   />
-                  <p className="text-sm text-purple-600">+8 this month</p>
+                  <p className="text-sm text-purple-600 dark:text-purple-400">+8 this month</p>
                 </div>
-                <div className="p-3 bg-purple-100 rounded-xl">
-                  <Users className="h-6 w-6 text-purple-600" />
+                <div className="p-3 bg-gradient-to-br from-purple-400/20 to-pink-400/20 dark:from-purple-400/10 dark:to-pink-400/10 rounded-xl backdrop-blur-sm">
+                  <Users className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </LiquidGlassCard>
 
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow">
-            <CardContent className="p-6">
+          <LiquidGlassCard variant="tinted" hoverEffect={true}>
+            <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Hours This Month</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Hours This Month</p>
                   <NumberFlow
                     value={mockData.hoursThisMonth}
-                    className="text-3xl font-bold text-gray-900"
+                    className="text-3xl font-bold text-gray-900 dark:text-gray-100"
                   />
-                  <p className="text-sm text-orange-600">23h this week</p>
+                  <p className="text-sm text-orange-600 dark:text-orange-400">23h this week</p>
                 </div>
-                <div className="p-3 bg-orange-100 rounded-xl">
-                  <Clock className="h-6 w-6 text-orange-600" />
+                <div className="p-3 bg-gradient-to-br from-orange-400/20 to-amber-400/20 dark:from-orange-400/10 dark:to-amber-400/10 rounded-xl backdrop-blur-sm">
+                  <Clock className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </LiquidGlassCard>
         </div>
 
         {/* Active Projects */}
-        <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Briefcase className="h-5 w-5" />
-                Active Projects
-              </CardTitle>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigateToPage('projects-hub')}
-                className="gap-2"
-              >
-                View All
-                <ArrowRight className="h-3 w-3" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <BorderTrail trailColor="rgba(59, 130, 246, 0.4)" duration={6}>
+          <LiquidGlassCard variant="default" hoverEffect={false}>
+            <LiquidGlassCardHeader>
+              <div className="flex items-center justify-between">
+                <LiquidGlassCardTitle className="flex items-center gap-2">
+                  <Briefcase className="h-5 w-5" />
+                  Active Projects
+                </LiquidGlassCardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigateToPage('projects-hub')}
+                  className="gap-2"
+                >
+                  View All
+                  <ArrowRight className="h-3 w-3" />
+                </Button>
+              </div>
+            </LiquidGlassCardHeader>
+          <LiquidGlassCardContent className="space-y-4">
             {projects.map(project => (
               <div key={project.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                 <div className="flex items-center justify-between mb-3">
@@ -741,18 +744,19 @@ export default function DashboardPage() {
                 </div>
               </div>
             ))}
-          </CardContent>
-        </Card>
+          </LiquidGlassCardContent>
+        </LiquidGlassCard>
+      </BorderTrail>
 
         {/* AI Insights Section */}
-        <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 border-blue-200 dark:border-blue-800 shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <LiquidGlassCard variant="tinted" hoverEffect={false}>
+          <LiquidGlassCardHeader>
+            <LiquidGlassCardTitle className="flex items-center gap-2">
               <Lightbulb className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               AI Insights
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+            </LiquidGlassCardTitle>
+          </LiquidGlassCardHeader>
+          <LiquidGlassCardContent className="space-y-3">
             {insights.map(insight => (
               <div
                 key={insight.id}
@@ -808,18 +812,18 @@ export default function DashboardPage() {
                 </div>
               </div>
             ))}
-          </CardContent>
-        </Card>
+          </LiquidGlassCardContent>
+        </LiquidGlassCard>
 
         {/* Quick Actions */}
-        <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <LiquidGlassCard variant="default" hoverEffect={false}>
+          <LiquidGlassCardHeader>
+            <LiquidGlassCardTitle className="flex items-center gap-2">
               <Zap className="h-5 w-5" />
               Quick Actions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            </LiquidGlassCardTitle>
+          </LiquidGlassCardHeader>
+          <LiquidGlassCardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <GlowEffect glowColor="rgb(59, 130, 246)" intensity="medium">
                 <Button
@@ -862,8 +866,8 @@ export default function DashboardPage() {
                 </Button>
               </GlowEffect>
             </div>
-          </CardContent>
-        </Card>
+          </LiquidGlassCardContent>
+        </LiquidGlassCard>
       </div>
     </ScrollArea>
   )
