@@ -38,6 +38,9 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { TextShimmer as TextShimmerComponent } from '@/components/ui/text-shimmer'
+import { LiquidGlassCard, LiquidGlassCardHeader, LiquidGlassCardTitle, LiquidGlassCardContent } from '@/components/ui/liquid-glass-card'
 
 // Type definitions
 interface Task {
@@ -946,10 +949,10 @@ export default function MyDayPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-purple-900 to-violet-900 bg-clip-text text-transparent mb-2">
-                <TextShimmer>My Day Today</TextShimmer>
-              </h1>
-              <p className="text-lg text-gray-600 font-light">
+              <TextShimmerComponent className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-orange-900 to-amber-900 dark:from-gray-100 dark:via-orange-100 dark:to-amber-100 bg-clip-text text-transparent mb-2 block">
+                My Day Today
+              </TextShimmerComponent>
+              <p className="text-lg text-gray-600 dark:text-gray-300 font-light">
                 AI-powered daily planning and productivity optimization ✨
               </p>
             </div>
@@ -980,70 +983,75 @@ export default function MyDayPage() {
 
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg relative overflow-hidden">
-              <CardContent className="p-6">
+            <LiquidGlassCard variant="gradient" hoverEffect={true}>
+              <div className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Tasks Progress</p>
-                    <p className="text-3xl font-bold text-gray-900">{state.completedTasks}/{totalTasks}</p>
-                    <p className="text-sm text-gray-500">{completionRate}% complete</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Tasks Progress</p>
+                    <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                      <NumberFlow value={state.completedTasks} className="inline-block" />/<NumberFlow value={totalTasks} className="inline-block" />
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <NumberFlow value={completionRate} suffix="%" className="inline-block" /> complete
+                    </p>
                   </div>
-                  <div className="p-3 bg-purple-100 rounded-xl">
-                    <Target className="h-6 w-6 text-purple-600" />
+                  <div className="p-3 bg-gradient-to-br from-purple-400/20 to-pink-400/20 dark:from-purple-400/10 dark:to-pink-400/10 rounded-xl backdrop-blur-sm">
+                    <Target className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                   </div>
                 </div>
-                {/* Floating particles */}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                  <FloatingParticle delay={0} color="purple" />
-                  <FloatingParticle delay={1} color="pink" />
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            </LiquidGlassCard>
             
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-              <CardContent className="p-6">
+            <LiquidGlassCard variant="tinted" hoverEffect={true}>
+              <div className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Focus Time</p>
-                    <p className="text-3xl font-bold text-gray-900">{focusHours}h {focusMinutes}m</p>
-                    <p className="text-sm text-gray-500">Today's work</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Focus Time</p>
+                    <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                      <NumberFlow value={focusHours} className="inline-block" />h <NumberFlow value={focusMinutes} className="inline-block" />m
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Today's work</p>
                   </div>
-                  <div className="p-3 bg-blue-100 rounded-xl">
-                    <Timer className="h-6 w-6 text-blue-600" />
+                  <div className="p-3 bg-gradient-to-br from-orange-400/20 to-amber-400/20 dark:from-orange-400/10 dark:to-amber-400/10 rounded-xl backdrop-blur-sm">
+                    <Timer className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </LiquidGlassCard>
             
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-              <CardContent className="p-6">
+            <LiquidGlassCard variant="gradient" hoverEffect={true}>
+              <div className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Productivity</p>
-                    <p className="text-3xl font-bold text-gray-900">{productivityScore}%</p>
-                    <p className="text-sm text-gray-500">Efficiency score</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Productivity</p>
+                    <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                      <NumberFlow value={productivityScore} suffix="%" className="inline-block" />
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Efficiency score</p>
                   </div>
-                  <div className="p-3 bg-emerald-100 rounded-xl">
-                    <TrendingUp className="h-6 w-6 text-emerald-600" />
+                  <div className="p-3 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 dark:from-emerald-400/10 dark:to-teal-400/10 rounded-xl backdrop-blur-sm">
+                    <TrendingUp className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </LiquidGlassCard>
             
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-              <CardContent className="p-6">
+            <LiquidGlassCard variant="tinted" hoverEffect={true}>
+              <div className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">AI Insights</p>
-                    <p className="text-3xl font-bold text-gray-900">{mockAIInsights.length}</p>
-                    <p className="text-sm text-gray-500">Recommendations</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">AI Insights</p>
+                    <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                      <NumberFlow value={mockAIInsights.length} className="inline-block" />
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Recommendations</p>
                   </div>
-                  <div className="p-3 bg-rose-100 rounded-xl">
-                    <Brain className="h-6 w-6 text-rose-600" />
+                  <div className="p-3 bg-gradient-to-br from-purple-400/20 to-indigo-400/20 dark:from-purple-400/10 dark:to-indigo-400/10 rounded-xl backdrop-blur-sm">
+                    <Brain className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </LiquidGlassCard>
           </div>
         </div>
 
