@@ -11,6 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import {
   UserCheck,
   FolderOpen,
@@ -63,28 +66,6 @@ const FloatingParticle = ({ delay = 0, color = 'blue' }: { delay?: number; color
         delay: delay
       }}
     />
-  )
-}
-
-const TextShimmer = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
-  return (
-    <motion.div
-      className={`relative inline-block ${className}`}
-      initial={{ backgroundPosition: '200% 0' }}
-      animate={{ backgroundPosition: '-200% 0' }}
-      transition={{
-        duration: 2,
-        repeat: Infinity,
-        ease: 'linear'
-      }}
-      style={{
-        background: 'linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.4), transparent)',
-        backgroundSize: '200% 100%',
-        WebkitBackgroundClip: 'text'
-      }}
-    >
-      {children}
-    </motion.div>
   )
 }
 
@@ -989,10 +970,10 @@ export default function ClientZonePage() {
               <UserCheck className="h-8 w-8" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <TextShimmer className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 dark:from-gray-100 dark:via-blue-100 dark:to-indigo-100 bg-clip-text text-transparent">
                 My Projects
-              </h1>
-              <p className="text-gray-600 mt-2 text-lg">
+              </TextShimmer>
+              <p className="text-gray-600 dark:text-gray-300 mt-2 text-lg">
                 Welcome back, {KAZI_CLIENT_DATA.clientInfo.contactPerson}! Here's your project overview.
               </p>
             </div>
@@ -1016,19 +997,19 @@ export default function ClientZonePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0 }}
           >
-            <Card className="kazi-card relative overflow-hidden group hover:shadow-xl transition-shadow bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+            <LiquidGlassCard variant="gradient" hoverEffect={true} className="relative overflow-hidden">
               <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 <FloatingParticle delay={0} color="blue" />
                 <FloatingParticle delay={1} color="indigo" />
               </div>
-              <CardContent className="p-6 text-center relative z-10">
-                <div className="p-3 bg-blue-100 rounded-xl inline-block mb-4">
-                  <FolderOpen className="h-8 w-8 text-blue-600" />
+              <div className="p-6 text-center relative z-10">
+                <div className="inline-flex p-3 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 dark:from-blue-400/10 dark:to-indigo-400/10 rounded-xl backdrop-blur-sm mb-4">
+                  <FolderOpen className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                 </div>
-                <p className="text-2xl font-bold text-blue-600">{KAZI_CLIENT_DATA.clientInfo.activeProjects}</p>
-                <p className="text-gray-600">Active Projects</p>
-              </CardContent>
-            </Card>
+                <NumberFlow value={KAZI_CLIENT_DATA.clientInfo.activeProjects} className="text-2xl font-bold text-blue-600 dark:text-blue-400 block" />
+                <p className="text-gray-600 dark:text-gray-400">Active Projects</p>
+              </div>
+            </LiquidGlassCard>
           </motion.div>
 
           <motion.div
@@ -1036,19 +1017,19 @@ export default function ClientZonePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <Card className="kazi-card relative overflow-hidden group hover:shadow-xl transition-shadow bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+            <LiquidGlassCard variant="tinted" hoverEffect={true} className="relative overflow-hidden">
               <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 <FloatingParticle delay={0.5} color="green" />
                 <FloatingParticle delay={1.5} color="emerald" />
               </div>
-              <CardContent className="p-6 text-center relative z-10">
-                <div className="p-3 bg-green-100 rounded-xl inline-block mb-4">
-                  <CheckCircle className="h-8 w-8 text-green-600" />
+              <div className="p-6 text-center relative z-10">
+                <div className="inline-flex p-3 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 dark:from-emerald-400/10 dark:to-teal-400/10 rounded-xl backdrop-blur-sm mb-4">
+                  <CheckCircle className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <p className="text-2xl font-bold text-green-600">{KAZI_CLIENT_DATA.clientInfo.completedProjects}</p>
-                <p className="text-gray-600">Completed</p>
-              </CardContent>
-            </Card>
+                <NumberFlow value={KAZI_CLIENT_DATA.clientInfo.completedProjects} className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 block" />
+                <p className="text-gray-600 dark:text-gray-400">Completed</p>
+              </div>
+            </LiquidGlassCard>
           </motion.div>
 
           <motion.div
@@ -1056,19 +1037,19 @@ export default function ClientZonePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Card className="kazi-card relative overflow-hidden group hover:shadow-xl transition-shadow bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+            <LiquidGlassCard variant="gradient" hoverEffect={true} className="relative overflow-hidden">
               <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 <FloatingParticle delay={1} color="purple" />
                 <FloatingParticle delay={2} color="violet" />
               </div>
-              <CardContent className="p-6 text-center relative z-10">
-                <div className="p-3 bg-purple-100 rounded-xl inline-block mb-4">
-                  <DollarSign className="h-8 w-8 text-purple-600" />
+              <div className="p-6 text-center relative z-10">
+                <div className="inline-flex p-3 bg-gradient-to-br from-purple-400/20 to-indigo-400/20 dark:from-purple-400/10 dark:to-indigo-400/10 rounded-xl backdrop-blur-sm mb-4">
+                  <DollarSign className="h-8 w-8 text-purple-600 dark:text-purple-400" />
                 </div>
-                <p className="text-2xl font-bold text-purple-600">{formatCurrency(KAZI_CLIENT_DATA.clientInfo.totalInvestment)}</p>
-                <p className="text-gray-600">Total Investment</p>
-              </CardContent>
-            </Card>
+                <NumberFlow value={KAZI_CLIENT_DATA.clientInfo.totalInvestment} format="currency" className="text-2xl font-bold text-purple-600 dark:text-purple-400 block" />
+                <p className="text-gray-600 dark:text-gray-400">Total Investment</p>
+              </div>
+            </LiquidGlassCard>
           </motion.div>
 
           <motion.div
@@ -1076,19 +1057,19 @@ export default function ClientZonePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <Card className="kazi-card relative overflow-hidden group hover:shadow-xl transition-shadow bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+            <LiquidGlassCard variant="tinted" hoverEffect={true} className="relative overflow-hidden">
               <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 <FloatingParticle delay={1.5} color="yellow" />
                 <FloatingParticle delay={2.5} color="amber" />
               </div>
-              <CardContent className="p-6 text-center relative z-10">
-                <div className="p-3 bg-yellow-100 rounded-xl inline-block mb-4">
-                  <Star className="h-8 w-8 text-yellow-600" />
+              <div className="p-6 text-center relative z-10">
+                <div className="inline-flex p-3 bg-gradient-to-br from-amber-400/20 to-yellow-400/20 dark:from-amber-400/10 dark:to-yellow-400/10 rounded-xl backdrop-blur-sm mb-4">
+                  <Star className="h-8 w-8 text-amber-600 dark:text-amber-400" />
                 </div>
-                <p className="text-2xl font-bold text-yellow-600">{KAZI_CLIENT_DATA.clientInfo.satisfaction}</p>
-                <p className="text-gray-600">Satisfaction Rating</p>
-              </CardContent>
-            </Card>
+                <NumberFlow value={parseFloat(KAZI_CLIENT_DATA.clientInfo.satisfaction)} decimals={1} className="text-2xl font-bold text-amber-600 dark:text-amber-400 block" />
+                <p className="text-gray-600 dark:text-gray-400">Satisfaction Rating</p>
+              </div>
+            </LiquidGlassCard>
           </motion.div>
         </div>
 
