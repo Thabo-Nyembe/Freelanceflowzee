@@ -50,7 +50,11 @@ import {
   RotateCcw,
   Eye,
   EyeOff,
-  Crown
+  Crown,
+  Target,
+  Mail,
+  UserPlus,
+  BarChart2
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
@@ -81,6 +85,7 @@ import {
 } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
+import { AdminFavorites } from '@/components/admin/admin-favorites'
 
 interface SidebarItem {
   id: string
@@ -108,6 +113,50 @@ interface SidebarCategory {
 
 // Default navigation structure
 const DEFAULT_CATEGORIES: SidebarCategory[] = [
+  {
+    id: 'admin-overview',
+    name: 'Admin & Business',
+    icon: Briefcase,
+    visible: true,
+    subcategories: [
+      {
+        id: 'admin-dashboard',
+        name: 'Admin Dashboard',
+        visible: true,
+        items: [
+          { id: 'admin-overview', name: 'Admin Overview', href: '/dashboard/admin-overview', icon: BarChart2, description: 'Unified admin dashboard', badge: 'New' }
+        ]
+      },
+      {
+        id: 'admin-business',
+        name: 'Business Management',
+        visible: true,
+        items: [
+          { id: 'analytics-advanced', name: 'Analytics', href: '/dashboard/analytics-advanced', icon: TrendingUp, description: 'Business intelligence', badge: 'New' },
+          { id: 'crm', name: 'CRM & Sales', href: '/dashboard/crm', icon: Briefcase, description: 'Sales pipeline', badge: 'New' },
+          { id: 'invoicing', name: 'Invoicing', href: '/dashboard/invoicing', icon: Receipt, description: 'Billing management', badge: 'New' },
+          { id: 'client-portal-admin', name: 'Client Portal', href: '/dashboard/client-portal', icon: Users, description: 'Client management', badge: 'New' }
+        ]
+      },
+      {
+        id: 'admin-marketing',
+        name: 'Marketing & Sales',
+        visible: true,
+        items: [
+          { id: 'lead-generation', name: 'Lead Generation', href: '/dashboard/lead-generation', icon: Target, description: 'Lead capture', badge: 'New' },
+          { id: 'email-marketing', name: 'Email Marketing', href: '/dashboard/email-marketing', icon: Mail, description: 'Email campaigns', badge: 'New' }
+        ]
+      },
+      {
+        id: 'admin-operations',
+        name: 'Operations',
+        visible: true,
+        items: [
+          { id: 'user-management', name: 'User Management', href: '/dashboard/user-management', icon: UserPlus, description: 'Team & permissions', badge: 'New' }
+        ]
+      }
+    ]
+  },
   {
     id: 'business-intelligence',
     name: 'Business Intelligence',
@@ -422,6 +471,7 @@ export function SidebarEnhanced() {
   const pathname = usePathname()
   const [categories, setCategories] = useState<SidebarCategory[]>(DEFAULT_CATEGORIES)
   const [expandedCategories, setExpandedCategories] = useState<string[]>([
+    'admin-overview',
     'business-intelligence',
     'ai-creative-suite',
     'creative-studio'
@@ -548,6 +598,9 @@ export function SidebarEnhanced() {
   return (
     <aside className="fixed top-16 left-0 z-40 w-64 h-[calc(100vh-4rem)] bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 flex flex-col">
       <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-1">
+        {/* Admin Quick Access */}
+        <AdminFavorites />
+
         {/* Customize Navigation Button */}
         <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
           <DialogTrigger asChild>
