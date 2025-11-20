@@ -6,6 +6,7 @@ import { Analytics } from '@vercel/analytics/react'
 
 import { Context7Provider } from '@/components/providers/context7-provider'
 import { Providers } from '@/components/providers'
+import { RouteProgress } from '@/components/ui/route-progress'
 import '../styles/globals.css'
 import { ErrorBoundary } from "react-error-boundary"
 
@@ -32,21 +33,24 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-                <ErrorBoundary fallback={<div>Something went wrong</div>}>
+        <ErrorBoundary fallback={<div>Something went wrong</div>}>
           <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Providers>
-            <Context7Provider>
-              <Toaster />
-              {children}
-            </Context7Provider>
-          </Providers>
-          <Analytics />
-        </ThemeProvider>
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {/* Premium Route Progress Bar */}
+            <RouteProgress height={3} showSpinner={false} />
+
+            <Providers>
+              <Context7Provider>
+                <Toaster />
+                {children}
+              </Context7Provider>
+            </Providers>
+            <Analytics />
+          </ThemeProvider>
         </ErrorBoundary>
       </body>
     </html>

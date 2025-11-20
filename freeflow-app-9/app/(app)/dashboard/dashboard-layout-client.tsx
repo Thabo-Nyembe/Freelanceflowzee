@@ -2,6 +2,10 @@
 
 import { User } from '@supabase/supabase-js'
 import { SidebarEnhanced } from '@/components/navigation/sidebar-enhanced'
+import { FloatingThemeToggle } from '@/components/ui/premium-theme-toggle'
+import { RouteTransitionWrapper } from '@/components/ui/route-transition-wrapper'
+import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav'
+import { ROUTE_LABELS } from '@/lib/route-utils'
 
 interface DashboardLayoutClientProps {
   children: React.ReactNode
@@ -17,7 +21,7 @@ export default function DashboardLayoutClient({
       <div className="w-64 flex-shrink-0">
         <SidebarEnhanced />
       </div>
-      
+
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
         {/* Mobile Header with Sidebar Toggle */}
@@ -27,11 +31,22 @@ export default function DashboardLayoutClient({
             {/* Mobile menu will be handled by MobileNav in global header */}
           </div>
         </div>
-        
+
         <div className="container mx-auto p-4 lg:p-6">
-          {children}
+          {/* Premium Breadcrumb Navigation */}
+          <div className="mb-6">
+            <BreadcrumbNav labels={ROUTE_LABELS} />
+          </div>
+
+          {/* Route Transition Wrapper */}
+          <RouteTransitionWrapper variant="premium">
+            {children}
+          </RouteTransitionWrapper>
         </div>
       </main>
+
+      {/* Floating Theme Toggle - visible on all dashboard pages */}
+      <FloatingThemeToggle />
     </div>
   )
 }
