@@ -6,6 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { NumberFlow } from "@/components/ui/number-flow";
+import { TextShimmer } from "@/components/ui/text-shimmer";
+import { LiquidGlassCard } from "@/components/ui/liquid-glass-card";
 import {
   MessageCircle,
   Users,
@@ -649,9 +652,9 @@ export default function CollaborationPage() {
           <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
             <Users className="h-6 w-6 text-white" />
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <TextShimmer className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 dark:from-gray-100 dark:via-blue-100 dark:to-indigo-100 bg-clip-text text-transparent">
             Universal Collaboration Hub
-          </h1>
+          </TextShimmer>
         </div>
         <p className="text-lg text-gray-600">
           Revolutionary multi-media commenting, real-time collaboration, and AI-powered feedback analysis 
@@ -958,33 +961,39 @@ export default function CollaborationPage() {
               <div className="space-y-6">
                 {/* Team stats */}
                 <div className="grid grid-cols-3 gap-4">
-                  <Card>
-                    <CardContent className="pt-6">
+                  <LiquidGlassCard variant="gradient" hoverEffect={true}>
+                    <div className="pt-6 pb-6">
                       <div className="text-center">
-                        <Users className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-                        <p className="text-3xl font-bold">12</p>
-                        <p className="text-sm text-gray-600">Total Members</p>
+                        <div className="inline-flex p-3 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 dark:from-blue-400/10 dark:to-indigo-400/10 rounded-xl backdrop-blur-sm mb-2">
+                          <Users className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <NumberFlow value={12} className="text-3xl font-bold text-gray-900 dark:text-gray-100 block" />
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total Members</p>
                       </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="pt-6">
+                    </div>
+                  </LiquidGlassCard>
+                  <LiquidGlassCard variant="tinted" hoverEffect={true}>
+                    <div className="pt-6 pb-6">
                       <div className="text-center">
-                        <Activity className="h-8 w-8 mx-auto mb-2 text-green-600" />
-                        <p className="text-3xl font-bold">8</p>
-                        <p className="text-sm text-gray-600">Online Now</p>
+                        <div className="inline-flex p-3 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 dark:from-emerald-400/10 dark:to-teal-400/10 rounded-xl backdrop-blur-sm mb-2">
+                          <Activity className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <NumberFlow value={8} className="text-3xl font-bold text-gray-900 dark:text-gray-100 block" />
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Online Now</p>
                       </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="pt-6">
+                    </div>
+                  </LiquidGlassCard>
+                  <LiquidGlassCard variant="gradient" hoverEffect={true}>
+                    <div className="pt-6 pb-6">
                       <div className="text-center">
-                        <Briefcase className="h-8 w-8 mx-auto mb-2 text-purple-600" />
-                        <p className="text-3xl font-bold">27</p>
-                        <p className="text-sm text-gray-600">Active Projects</p>
+                        <div className="inline-flex p-3 bg-gradient-to-br from-purple-400/20 to-indigo-400/20 dark:from-purple-400/10 dark:to-indigo-400/10 rounded-xl backdrop-blur-sm mb-2">
+                          <Briefcase className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <NumberFlow value={27} className="text-3xl font-bold text-gray-900 dark:text-gray-100 block" />
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Active Projects</p>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </LiquidGlassCard>
                 </div>
 
                 {/* Team actions */}
