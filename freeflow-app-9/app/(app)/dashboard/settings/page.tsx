@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Label } from '@/components/ui/label'
 import { TextShimmer } from '@/components/ui/text-shimmer'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import {
   Settings,
   User,
@@ -511,9 +512,9 @@ If you lose access to your authenticator app, you can use these codes to sign in
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-950">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-6">
+      <LiquidGlassCard className="border-b border-slate-700/50 p-6 rounded-none">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
@@ -525,7 +526,7 @@ If you lose access to your authenticator app, you can use these codes to sign in
             </div>
             <div className="flex items-center gap-2">
               <Info className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-600">Customize your experience</span>
+              <span className="text-sm text-gray-400">Customize your experience</span>
             </div>
           </div>
           
@@ -545,7 +546,7 @@ If you lose access to your authenticator app, you can use these codes to sign in
             </Button>
           </div>
         </div>
-      </div>
+      </LiquidGlassCard>
 
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -579,26 +580,30 @@ If you lose access to your authenticator app, you can use these codes to sign in
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="lg:col-span-2">
+              <LiquidGlassCard className="lg:col-span-2">
                 <CardHeader>
-                  <CardTitle>Personal Information</CardTitle>
+                  <TextShimmer className="text-xl font-bold" duration={2}>
+                    Personal Information
+                  </TextShimmer>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="firstName">First Name</Label>
+                      <Label htmlFor="firstName" className="text-gray-300">First Name</Label>
                       <Input
                         id="firstName"
                         value={profile.firstName}
                         onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
+                        className="bg-slate-800/50 border-slate-700 text-white"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="lastName">Last Name</Label>
+                      <Label htmlFor="lastName" className="text-gray-300">Last Name</Label>
                       <Input
                         id="lastName"
                         value={profile.lastName}
                         onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
+                        className="bg-slate-800/50 border-slate-700 text-white"
                       />
                     </div>
                   </div>
@@ -691,9 +696,9 @@ If you lose access to your authenticator app, you can use these codes to sign in
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </LiquidGlassCard>
 
-              <Card>
+              <LiquidGlassCard>
                 <CardHeader>
                   <CardTitle>Profile Picture</CardTitle>
                 </CardHeader>
@@ -717,12 +722,12 @@ If you lose access to your authenticator app, you can use these codes to sign in
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div className="text-center text-sm text-gray-500">
                     <p>Recommended: Square image, at least 400x400px</p>
                   </div>
                 </CardContent>
-              </Card>
+              </LiquidGlassCard>
             </div>
           </TabsContent>
           

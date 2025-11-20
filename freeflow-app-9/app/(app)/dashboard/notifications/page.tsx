@@ -2,7 +2,7 @@
 
 import { useState, useReducer, useEffect } from 'react'
 import { toast } from 'sonner'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -12,6 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Label } from '@/components/ui/label'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer } from '@/components/ui/text-shimmer'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { 
   Bell, 
   Search, 
@@ -453,9 +454,9 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-950">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-6">
+      <LiquidGlassCard className="border-b border-slate-700/50 p-6 rounded-none">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
@@ -463,12 +464,12 @@ export default function NotificationsPage() {
               <TextShimmer className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-purple-900 to-violet-900 dark:from-gray-100 dark:via-purple-100 dark:to-violet-100 bg-clip-text text-transparent">
                 Notifications
               </TextShimmer>
-              <Badge className="bg-gradient-to-r from-purple-500 to-violet-600 text-white">A+++</Badge>
+              <Badge className="bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-lg">A+++</Badge>
             </div>
             {unreadCount > 0 && (
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                <span className="text-sm text-gray-600">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                <span className="text-sm text-gray-300">
                   <NumberFlow value={unreadCount} className="inline-block" /> unread
                 </span>
               </div>
@@ -492,7 +493,7 @@ export default function NotificationsPage() {
             </Button>
           </div>
         </div>
-      </div>
+      </LiquidGlassCard>
 
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -508,12 +509,12 @@ export default function NotificationsPage() {
             {/* Filters and Search */}
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-3 w-4 h-4 text-gray-500" />
                 <Input
                   placeholder="Search notifications..."
                   value={state.search}
                   onChange={(e) => dispatch({ type: 'SET_SEARCH', payload: e.target.value })}
-                  className="pl-10"
+                  className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-gray-500"
                 />
               </div>
               
@@ -545,15 +546,15 @@ export default function NotificationsPage() {
             {/* Notifications List */}
             <div className="space-y-2">
               {filteredNotifications.length === 0 ? (
-                <Card>
+                <LiquidGlassCard>
                   <CardContent className="p-8 text-center">
-                    <Bell className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications found</h3>
-                    <p className="text-gray-600">
+                    <Bell className="w-12 h-12 mx-auto mb-4 text-gray-500" />
+                    <h3 className="text-lg font-medium text-white mb-2">No notifications found</h3>
+                    <p className="text-gray-400">
                       {state.search ? 'Try adjusting your search terms' : 'You\'re all caught up!'}
                     </p>
                   </CardContent>
-                </Card>
+                </LiquidGlassCard>
               ) : (
                 filteredNotifications.map((notification) => {
                   const TypeIcon = getTypeIcon(notification.type)
@@ -561,10 +562,10 @@ export default function NotificationsPage() {
                   const priorityColor = getPriorityColor(notification.priority)
                   
                   return (
-                    <Card 
-                      key={notification.id} 
-                      className={`cursor-pointer transition-all hover:shadow-md ${
-                        !notification.read ? 'bg-blue-50/50 border-blue-200' : 'bg-white'
+                    <LiquidGlassCard
+                      key={notification.id}
+                      className={`cursor-pointer transition-all hover:shadow-lg hover:shadow-blue-500/25 ${
+                        !notification.read ? 'bg-blue-500/10 border-blue-500/30' : ''
                       }`}
                       onClick={() => handleNotificationClick(notification)}
                     >
@@ -576,7 +577,7 @@ export default function NotificationsPage() {
                           
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between mb-2">
-                              <h3 className={`font-medium ${!notification.read ? 'text-gray-900' : 'text-gray-700'}`}>
+                              <h3 className={`font-medium ${!notification.read ? 'text-white' : 'text-gray-300'}`}>
                                 {notification.title}
                               </h3>
                               <div className="flex items-center gap-2">
@@ -584,8 +585,8 @@ export default function NotificationsPage() {
                                 <span className="text-xs text-gray-500">{formatTimestamp(notification.timestamp)}</span>
                               </div>
                             </div>
-                            
-                            <p className="text-sm text-gray-600 mb-3">{notification.message}</p>
+
+                            <p className="text-sm text-gray-400 mb-3">{notification.message}</p>
                             
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
@@ -625,23 +626,25 @@ export default function NotificationsPage() {
                           </div>
                         </div>
                       </CardContent>
-                    </Card>
+                    </LiquidGlassCard>
                   )
                 })
               )}
             </div>
           </TabsContent>
-          
+
           <TabsContent value="settings" className="space-y-6">
-            <Card>
+            <LiquidGlassCard>
               <CardHeader>
-                <CardTitle>Notification Preferences</CardTitle>
+                <TextShimmer className="text-xl font-bold" duration={2}>
+                  Notification Preferences
+                </TextShimmer>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="sound">Sound Notifications</Label>
-                    <p className="text-sm text-gray-500">Play sound when new notifications arrive</p>
+                    <Label htmlFor="sound" className="text-white">Sound Notifications</Label>
+                    <p className="text-sm text-gray-400">Play sound when new notifications arrive</p>
                   </div>
                   <Switch
                     id="sound"
@@ -649,11 +652,11 @@ export default function NotificationsPage() {
                     onCheckedChange={() => dispatch({ type: 'TOGGLE_SOUND' })}
                   />
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="previews">Show Previews</Label>
-                    <p className="text-sm text-gray-500">Show notification content in previews</p>
+                    <Label htmlFor="previews" className="text-white">Show Previews</Label>
+                    <p className="text-sm text-gray-400">Show notification content in previews</p>
                   </div>
                   <Switch
                     id="previews"
@@ -661,9 +664,9 @@ export default function NotificationsPage() {
                     onCheckedChange={() => dispatch({ type: 'TOGGLE_PREVIEWS' })}
                   />
                 </div>
-                
+
                 <div className="space-y-4">
-                  <h4 className="font-medium">Notification Types</h4>
+                  <h4 className="font-medium text-white">Notification Types</h4>
                   {[
                     { type: 'Messages', enabled: true, description: 'New messages and communications' },
                     { type: 'Payments', enabled: true, description: 'Payment confirmations and alerts' },
@@ -671,32 +674,34 @@ export default function NotificationsPage() {
                     { type: 'System', enabled: false, description: 'System updates and maintenance' },
                     { type: 'Marketing', enabled: false, description: 'Product updates and promotions' }
                   ].map((setting, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div key={index} className="flex items-center justify-between p-3 border border-slate-700 rounded-lg bg-slate-800/30">
                       <div>
-                        <Label>{setting.type}</Label>
-                        <p className="text-sm text-gray-500">{setting.description}</p>
+                        <Label className="text-white">{setting.type}</Label>
+                        <p className="text-sm text-gray-400">{setting.description}</p>
                       </div>
                       <Switch defaultChecked={setting.enabled} />
                     </div>
                   ))}
                 </div>
               </CardContent>
-            </Card>
+            </LiquidGlassCard>
           </TabsContent>
-          
+
           <TabsContent value="archive" className="space-y-6">
-            <Card>
+            <LiquidGlassCard>
               <CardHeader>
-                <CardTitle>Archived Notifications</CardTitle>
+                <TextShimmer className="text-xl font-bold" duration={2}>
+                  Archived Notifications
+                </TextShimmer>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8">
-                  <Archive className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No archived notifications</h3>
-                  <p className="text-gray-600">Archived notifications will appear here</p>
+                  <Archive className="w-12 h-12 mx-auto mb-4 text-gray-500" />
+                  <h3 className="text-lg font-medium text-white mb-2">No archived notifications</h3>
+                  <p className="text-gray-400">Archived notifications will appear here</p>
                 </div>
               </CardContent>
-            </Card>
+            </LiquidGlassCard>
           </TabsContent>
         </Tabs>
       </div>

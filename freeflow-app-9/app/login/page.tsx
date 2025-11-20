@@ -21,6 +21,11 @@ import {
   ArrowRight
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { GlowEffect } from '@/components/ui/glow-effect'
+import { BorderTrail } from '@/components/ui/border-trail'
+import { NumberFlow } from '@/components/ui/number-flow'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -69,70 +74,83 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 flex items-center justify-center p-4">
-      {/* Background decorations */}
+    <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">
+      {/* Enhanced Pattern Craft Background - Radial Gradient with Glow */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-900 to-slate-950" />
+
+      {/* Animated Gradient Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 -right-4 w-96 h-96 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-700"></div>
+        <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-blue-500/30 to-purple-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 -right-4 w-96 h-96 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-700"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000"></div>
       </div>
+
+      {/* Grid Pattern Overlay */}
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
 
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center relative z-10">
         {/* Left side - Branding and Features */}
         <div className="hidden lg:block space-y-8">
           <div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent mb-4">
+            <TextShimmer className="text-5xl font-bold mb-4" duration={2}>
               Welcome to KAZI
-            </h1>
-            <p className="text-xl text-gray-600 leading-relaxed">
-              Your complete creative business platform with 25+ integrated tools for freelancers and agencies.
+            </TextShimmer>
+            <p className="text-xl text-gray-300 leading-relaxed">
+              Your complete creative business platform with <NumberFlow value={25} /> integrated tools for freelancers and agencies.
             </p>
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center gap-3 p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-white/40">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Zap className="h-5 w-5 text-blue-600" />
+            <LiquidGlassCard className="flex items-center gap-3 p-4">
+              <div className="p-2 bg-blue-500/20 rounded-lg">
+                <Zap className="h-5 w-5 text-blue-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">AI-Powered Tools</h3>
-                <p className="text-gray-600 text-sm">Generate content, designs, and automate workflows</p>
+                <h3 className="font-semibold text-white">AI-Powered Tools</h3>
+                <p className="text-gray-400 text-sm">Generate content, designs, and automate workflows</p>
               </div>
-            </div>
+            </LiquidGlassCard>
 
-            <div className="flex items-center gap-3 p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-white/40">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Users className="h-5 w-5 text-purple-600" />
+            <LiquidGlassCard className="flex items-center gap-3 p-4">
+              <div className="p-2 bg-purple-500/20 rounded-lg">
+                <Users className="h-5 w-5 text-purple-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Team Collaboration</h3>
-                <p className="text-gray-600 text-sm">Real-time collaboration with clients and teams</p>
+                <h3 className="font-semibold text-white">Team Collaboration</h3>
+                <p className="text-gray-400 text-sm">Real-time collaboration with clients and teams</p>
               </div>
-            </div>
+            </LiquidGlassCard>
 
-            <div className="flex items-center gap-3 p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-white/40">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Star className="h-5 w-5 text-green-600" />
+            <LiquidGlassCard className="flex items-center gap-3 p-4">
+              <div className="p-2 bg-green-500/20 rounded-lg">
+                <Star className="h-5 w-5 text-green-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Premium Features</h3>
-                <p className="text-gray-600 text-sm">Advanced analytics, project management, and more</p>
+                <h3 className="font-semibold text-white">Premium Features</h3>
+                <p className="text-gray-400 text-sm">Advanced analytics, project management, and more</p>
               </div>
-            </div>
+            </LiquidGlassCard>
           </div>
 
-          <div className="text-center text-gray-500">
-            <p>Trusted by 2,800+ creative professionals worldwide</p>
+          <div className="text-center text-gray-400">
+            <p>Trusted by <NumberFlow value={2800} /> creative professionals worldwide</p>
           </div>
         </div>
 
         {/* Right side - Login Form */}
-        <div className="w-full max-w-md mx-auto">
-          <Card className="bg-white/80 backdrop-blur-xl border border-white/40 shadow-2xl">
+        <div className="w-full max-w-md mx-auto relative">
+          <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-30" />
+          <LiquidGlassCard className="relative">
+            <BorderTrail
+              className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
+              size={100}
+              duration={8}
+            />
             <CardHeader className="text-center pb-6">
-              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+              <TextShimmer className="text-2xl font-bold mb-2" duration={2}>
                 Sign In to KAZI
-              </CardTitle>
-              <p className="text-gray-600 mt-2">
+              </TextShimmer>
+              <p className="text-gray-400 mt-2">
                 Access your creative workspace
               </p>
             </CardHeader>
@@ -141,18 +159,18 @@ export default function LoginPage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Email Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                  <Label htmlFor="email" className="text-sm font-medium text-gray-300">
                     Email Address
                   </Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
                     <Input
                       id="email"
                       type="email"
                       placeholder="thabo@kaleidocraft.co.za"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="pl-10"
+                      className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-gray-500"
                       required
                     />
                   </div>
@@ -160,24 +178,24 @@ export default function LoginPage() {
 
                 {/* Password Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                  <Label htmlFor="password" className="text-sm font-medium text-gray-300">
                     Password
                   </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
                     <Input
                       id="password"
                       type={showPassword ? 'text' : 'password'}
                       placeholder="password1234"
                       value={formData.password}
                       onChange={(e) => handleInputChange('password', e.target.value)}
-                      className="pl-10 pr-10"
+                      className="pl-10 pr-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-gray-500"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300"
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -187,24 +205,24 @@ export default function LoginPage() {
                 {/* Remember Me & Forgot Password */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <Checkbox 
+                    <Checkbox
                       id="remember"
                       checked={formData.rememberMe}
                       onCheckedChange={(checked) => handleInputChange('rememberMe', !!checked)}
                     />
-                    <Label htmlFor="remember" className="text-sm text-gray-600">
+                    <Label htmlFor="remember" className="text-sm text-gray-400">
                       Remember me
                     </Label>
                   </div>
-                  <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
+                  <Link href="/forgot-password" className="text-sm text-blue-400 hover:text-blue-300">
                     Forgot password?
                   </Link>
                 </div>
 
                 {/* Submit Button */}
-                <Button 
-                  type="submit" 
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2.5"
+                <Button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2.5 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -221,17 +239,17 @@ export default function LoginPage() {
                 </Button>
 
                 {/* Demo Credentials */}
-                <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                  <p className="text-xs font-medium text-blue-800 mb-1">Demo Credentials:</p>
-                  <p className="text-xs text-blue-600">Email: thabo@kaleidocraft.co.za</p>
-                  <p className="text-xs text-blue-600">Password: password1234</p>
-                </div>
+                <LiquidGlassCard className="p-3">
+                  <p className="text-xs font-medium text-blue-400 mb-1">Demo Credentials:</p>
+                  <p className="text-xs text-gray-400">Email: thabo@kaleidocraft.co.za</p>
+                  <p className="text-xs text-gray-400">Password: password1234</p>
+                </LiquidGlassCard>
 
                 {/* Sign Up Link */}
-                <div className="text-center pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-600">
+                <div className="text-center pt-4 border-t border-slate-700">
+                  <p className="text-sm text-gray-400">
                     Don't have an account?{' '}
-                    <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-700 inline-flex items-center gap-1">
+                    <Link href="/signup" className="font-medium text-blue-400 hover:text-blue-300 inline-flex items-center gap-1">
                       Sign up for free
                       <ArrowRight className="h-3 w-3" />
                     </Link>
@@ -239,16 +257,16 @@ export default function LoginPage() {
                 </div>
               </form>
             </CardContent>
-          </Card>
+          </LiquidGlassCard>
 
           {/* Additional Links */}
           <div className="mt-6 text-center space-y-2">
             <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
-              <Link href="/privacy" className="hover:text-gray-700">Privacy</Link>
+              <Link href="/privacy" className="hover:text-gray-300">Privacy</Link>
               <span>•</span>
-              <Link href="/terms" className="hover:text-gray-700">Terms</Link>
+              <Link href="/terms" className="hover:text-gray-300">Terms</Link>
               <span>•</span>
-              <Link href="/support" className="hover:text-gray-700">Support</Link>
+              <Link href="/support" className="hover:text-gray-300">Support</Link>
             </div>
           </div>
         </div>

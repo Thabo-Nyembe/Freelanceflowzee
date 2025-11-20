@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { TextShimmer } from '@/components/ui/text-shimmer'
 import {
   Sparkles,
   Palette,
@@ -482,10 +484,10 @@ export default function AIDesignStudioPage() {
         <div className="mb-6 kazi-card p-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold kazi-text-dark dark:kazi-text-light mb-1 kazi-headline flex items-center gap-2">
+              <TextShimmer className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-purple-900 to-pink-900 dark:from-gray-100 dark:via-purple-100 dark:to-pink-100 bg-clip-text text-transparent mb-1 flex items-center gap-2">
                 <Sparkles className="w-8 h-8 text-purple-500" />
                 AI Design Studio
-              </h1>
+              </TextShimmer>
               <p className="text-sm text-gray-600 dark:text-gray-300 kazi-body">
                 Powered by GPT-4 Vision, DALL-E 3, and Midjourney V6 - Professional AI design tools
               </p>
@@ -767,7 +769,7 @@ export default function AIDesignStudioPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600 dark:text-gray-300 kazi-body">Total Designs</p>
-                      <h3 className="text-3xl font-bold kazi-headline mt-1">1,247</h3>
+                      <NumberFlow value={1247} className="text-3xl font-bold kazi-headline mt-1" />
                       <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
                         <TrendingUp className="w-3 h-3" />
                         +12% this month
@@ -783,7 +785,7 @@ export default function AIDesignStudioPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600 dark:text-gray-300 kazi-body">AI Generations</p>
-                      <h3 className="text-3xl font-bold kazi-headline mt-1">3,892</h3>
+                      <NumberFlow value={3892} className="text-3xl font-bold kazi-headline mt-1" />
                       <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
                         <TrendingUp className="w-3 h-3" />
                         +28% this month
@@ -799,7 +801,7 @@ export default function AIDesignStudioPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600 dark:text-gray-300 kazi-body">Templates Used</p>
-                      <h3 className="text-3xl font-bold kazi-headline mt-1">456</h3>
+                      <NumberFlow value={456} className="text-3xl font-bold kazi-headline mt-1" />
                       <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
                         <TrendingUp className="w-3 h-3" />
                         +8% this month
@@ -815,7 +817,7 @@ export default function AIDesignStudioPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600 dark:text-gray-300 kazi-body">Team Members</p>
-                      <h3 className="text-3xl font-bold kazi-headline mt-1">12</h3>
+                      <NumberFlow value={12} className="text-3xl font-bold kazi-headline mt-1" />
                       <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
                         <TrendingUp className="w-3 h-3" />
                         +2 new this month

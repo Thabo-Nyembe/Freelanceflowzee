@@ -2,6 +2,9 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import FilesHub from '@/components/hubs/files-hub'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { BorderTrail } from '@/components/ui/border-trail'
+import { GlowEffect } from '@/components/ui/glow-effect'
 
 // Mock data for the FilesHub component
 const mockFiles = [
@@ -429,31 +432,47 @@ export default function FilesHubPage() {
   }
 
   return (
-    <div className="h-full">
-      <FilesHub
-        userId="current-user"
-        files={files}
-        onUpload={handleUploadFile}
-        onDelete={handleDeleteFile}
-        onDownload={handleDownloadFile}
-        onShare={handleShareFile}
-        onToggleStar={handleToggleStar}
-        onMove={handleMoveFile}
-        onRename={handleRenameFile}
-        onBulkDelete={handleBulkDelete}
-        onBulkDownload={handleBulkDownload}
-        onRefresh={handleRefresh}
-        onSearch={handleSearch}
-        onExport={handleExport}
-        onAIOrganize={handleAIOrganize}
-        onVersionHistory={handleVersionHistory}
-        onCloudSync={handleCloudSync}
-        onStorageAnalytics={handleStorageAnalytics}
-        onPreview={handlePreview}
-        onDuplicateDetection={handleDuplicateDetection}
-        onAdvancedFilter={handleAdvancedFilter}
-        isLoading={isLoading}
-      />
+    <div className="h-full min-h-screen relative">
+      {/* Pattern Craft Background */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
+      <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0"></div>
+      <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000 dark:opacity-100 opacity-0"></div>
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-10" />
+
+      <div className="relative h-full p-2">
+        <div className="relative h-full">
+          <GlowEffect className="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-2xl blur opacity-40" />
+          <LiquidGlassCard className="relative h-full overflow-hidden">
+            <BorderTrail className="bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500" size={80} duration={8} />
+            <div className="h-full overflow-auto">
+              <FilesHub
+                userId="current-user"
+                files={files}
+                onUpload={handleUploadFile}
+                onDelete={handleDeleteFile}
+                onDownload={handleDownloadFile}
+                onShare={handleShareFile}
+                onToggleStar={handleToggleStar}
+                onMove={handleMoveFile}
+                onRename={handleRenameFile}
+                onBulkDelete={handleBulkDelete}
+                onBulkDownload={handleBulkDownload}
+                onRefresh={handleRefresh}
+                onSearch={handleSearch}
+                onExport={handleExport}
+                onAIOrganize={handleAIOrganize}
+                onVersionHistory={handleVersionHistory}
+                onCloudSync={handleCloudSync}
+                onStorageAnalytics={handleStorageAnalytics}
+                onPreview={handlePreview}
+                onDuplicateDetection={handleDuplicateDetection}
+                onAdvancedFilter={handleAdvancedFilter}
+                isLoading={isLoading}
+              />
+            </div>
+          </LiquidGlassCard>
+        </div>
+      </div>
     </div>
   )
 }

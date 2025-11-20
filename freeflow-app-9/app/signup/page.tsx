@@ -6,10 +6,15 @@ import Link from 'next/link'
 import { toast } from 'sonner'
 import { ArrowRight, Check, Mail, User, Lock, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { GlowEffect } from '@/components/ui/glow-effect'
+import { BorderTrail } from '@/components/ui/border-trail'
+import { NumberFlow } from '@/components/ui/number-flow'
 
 export default function SignUpPage() {
   const router = useRouter()
@@ -73,77 +78,99 @@ export default function SignUpPage() {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="container mx-auto px-4 py-16">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Enhanced Pattern Craft Background */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-900 to-slate-950" />
+
+      {/* Animated Gradient Orbs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-blue-500/30 to-purple-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 -right-4 w-96 h-96 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-700"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000"></div>
+      </div>
+
+      {/* Grid Pattern Overlay */}
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+
+      <div className="container mx-auto px-4 py-16 relative z-10">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left side - Benefits */}
             <div className="space-y-8">
               <div>
-                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
+                <TextShimmer className="text-4xl md:text-5xl font-bold mb-6" duration={2}>
                   Start Your Freelance Success Story
-                </h1>
-                <p className="text-lg text-gray-600 mb-6">
-                  Join thousands of freelancers who've transformed their business with KAZI's 
-                  AI-powered platform featuring multi-model studio, universal feedback, 
+                </TextShimmer>
+                <p className="text-lg text-gray-300 mb-6">
+                  Join thousands of freelancers who've transformed their business with KAZI's
+                  AI-powered platform featuring multi-model studio, universal feedback,
                   real-time collaboration, and secure payment protection.
                 </p>
               </div>
 
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <Check className="w-4 h-4 text-green-600" />
+              <div className="space-y-4">
+                <LiquidGlassCard className="flex items-start gap-4 p-4">
+                  <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <Check className="w-4 h-4 text-green-400" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">AI-Powered Project Management</h3>
-                    <p className="text-gray-600">Automate project workflows, generate content, and streamline client communication with intelligent AI assistance.</p>
+                    <h3 className="font-semibold text-lg mb-2 text-white">AI-Powered Project Management</h3>
+                    <p className="text-gray-400">Automate project workflows, generate content, and streamline client communication with intelligent AI assistance.</p>
                   </div>
-                </div>
+                </LiquidGlassCard>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <Check className="w-4 h-4 text-green-600" />
+                <LiquidGlassCard className="flex items-start gap-4 p-4">
+                  <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <Check className="w-4 h-4 text-green-400" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">Secure Payment Processing</h3>
-                    <p className="text-gray-600">Built-in escrow system, milestone payments, and automated invoicing to ensure you get paid on time.</p>
+                    <h3 className="font-semibold text-lg mb-2 text-white">Secure Payment Processing</h3>
+                    <p className="text-gray-400">Built-in escrow system, milestone payments, and automated invoicing to ensure you get paid on time.</p>
                   </div>
-                </div>
+                </LiquidGlassCard>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <Check className="w-4 h-4 text-green-600" />
+                <LiquidGlassCard className="flex items-start gap-4 p-4">
+                  <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <Check className="w-4 h-4 text-green-400" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">Advanced Video Studio</h3>
-                    <p className="text-gray-600">Create professional presentations, record client reviews, and collaborate with AI-enhanced video tools.</p>
+                    <h3 className="font-semibold text-lg mb-2 text-white">Advanced Video Studio</h3>
+                    <p className="text-gray-400">Create professional presentations, record client reviews, and collaborate with AI-enhanced video tools.</p>
                   </div>
-                </div>
+                </LiquidGlassCard>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <Check className="w-4 h-4 text-green-600" />
+                <LiquidGlassCard className="flex items-start gap-4 p-4">
+                  <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <Check className="w-4 h-4 text-green-400" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">Community & Networking</h3>
-                    <p className="text-gray-600">Connect with other freelancers, share resources, and grow your professional network.</p>
+                    <h3 className="font-semibold text-lg mb-2 text-white">Community & Networking</h3>
+                    <p className="text-gray-400">Connect with other freelancers, share resources, and grow your professional network.</p>
                   </div>
-                </div>
+                </LiquidGlassCard>
               </div>
 
-              <div className="bg-gradient-to-r from-blue-100 to-purple-100 p-6 rounded-2xl">
-                <p className="text-sm text-gray-700 mb-2">🎉 <strong>Limited Time Offer</strong></p>
-                <p className="text-lg font-semibold mb-1">Get 30 days free when you sign up today!</p>
-                <p className="text-sm text-gray-600">No credit card required. Cancel anytime.</p>
-              </div>
+              <LiquidGlassCard className="p-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+                <p className="text-sm text-blue-400 mb-2">🎉 <strong>Limited Time Offer</strong></p>
+                <p className="text-lg font-semibold mb-1 text-white">Get <NumberFlow value={30} /> days free when you sign up today!</p>
+                <p className="text-sm text-gray-400">No credit card required. Cancel anytime.</p>
+              </LiquidGlassCard>
             </div>
 
             {/* Right side - Sign up form */}
-            <Card className="p-8">
+            <div className="relative">
+              <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-30" />
+              <LiquidGlassCard className="relative p-8">
+                <BorderTrail
+                  className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
+                  size={100}
+                  duration={8}
+                />
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Create Your Account</CardTitle>
-                <CardDescription>
+                <TextShimmer className="text-2xl mb-2" duration={2}>
+                  Create Your Account
+                </TextShimmer>
+                <CardDescription className="text-gray-400">
                   Start your free trial and transform your freelance business
                 </CardDescription>
               </CardHeader>
@@ -151,13 +178,13 @@ export default function SignUpPage() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="firstName">First Name</Label>
+                      <Label htmlFor="firstName" className="text-gray-300">First Name</Label>
                       <div className="relative">
-                        <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input 
-                          id="firstName" 
-                          placeholder="John" 
-                          className="pl-10" 
+                        <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                        <Input
+                          id="firstName"
+                          placeholder="John"
+                          className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-gray-500"
                           value={formData.firstName}
                           onChange={(e) => handleInputChange('firstName', e.target.value)}
                           required
@@ -165,13 +192,13 @@ export default function SignUpPage() {
                       </div>
                     </div>
                     <div>
-                      <Label htmlFor="lastName">Last Name</Label>
+                      <Label htmlFor="lastName" className="text-gray-300">Last Name</Label>
                       <div className="relative">
-                        <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input 
-                          id="lastName" 
-                          placeholder="Doe" 
-                          className="pl-10" 
+                        <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                        <Input
+                          id="lastName"
+                          placeholder="Doe"
+                          className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-gray-500"
                           value={formData.lastName}
                           onChange={(e) => handleInputChange('lastName', e.target.value)}
                           required
@@ -179,32 +206,32 @@ export default function SignUpPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div>
-                    <Label htmlFor="email">Email Address</Label>
+                    <Label htmlFor="email" className="text-gray-300">Email Address</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input 
-                        id="email" 
-                        type="email" 
-                        placeholder="john@example.com" 
-                        className="pl-10" 
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="john@example.com"
+                        className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-gray-500"
                         value={formData.email}
                         onChange={(e) => handleInputChange('email', e.target.value)}
                         required
                       />
                     </div>
                   </div>
-                  
+
                   <div>
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password" className="text-gray-300">Password</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input 
-                        id="password" 
-                        type={showPassword ? 'text' : 'password'} 
-                        placeholder="Create a strong password" 
-                        className="pl-10 pr-10" 
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                      <Input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Create a strong password"
+                        className="pl-10 pr-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-gray-500"
                         value={formData.password}
                         onChange={(e) => handleInputChange('password', e.target.value)}
                         required
@@ -213,46 +240,46 @@ export default function SignUpPage() {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-3 h-4 w-4 text-gray-400 cursor-pointer hover:text-gray-600"
+                        className="absolute right-3 top-3 h-4 w-4 text-gray-500 cursor-pointer hover:text-gray-300"
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">At least 8 characters with numbers and symbols</p>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="terms" 
+                    <Checkbox
+                      id="terms"
                       checked={formData.agreedToTerms}
                       onCheckedChange={(checked) => handleInputChange('agreedToTerms', !!checked)}
                     />
-                    <Label htmlFor="terms" className="text-sm">
+                    <Label htmlFor="terms" className="text-sm text-gray-400">
                       I agree to the{' '}
-                      <Link href="/terms" className="text-blue-600 hover:underline">
+                      <Link href="/terms" className="text-blue-400 hover:text-blue-300">
                         Terms of Service
                       </Link>
                       {' '}and{' '}
-                      <Link href="/privacy" className="text-blue-600 hover:underline">
+                      <Link href="/privacy" className="text-blue-400 hover:text-blue-300">
                         Privacy Policy
                       </Link>
                     </Label>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="newsletter" 
+                    <Checkbox
+                      id="newsletter"
                       checked={formData.subscribeToNewsletter}
                       onCheckedChange={(checked) => handleInputChange('subscribeToNewsletter', !!checked)}
                     />
-                    <Label htmlFor="newsletter" className="text-sm">
+                    <Label htmlFor="newsletter" className="text-sm text-gray-400">
                       Send me tips, updates, and special offers
                     </Label>
                   </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full text-lg py-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+
+                  <Button
+                    type="submit"
+                    className="w-full text-lg py-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300"
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -270,21 +297,22 @@ export default function SignUpPage() {
                 </form>
 
                 <div className="mt-6 text-center">
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-400">
                     Already have an account?{' '}
-                    <Link href="/login" className="text-blue-600 hover:underline font-medium">
+                    <Link href="/login" className="text-blue-400 hover:text-blue-300 font-medium">
                       Sign in here
                     </Link>
                   </p>
                 </div>
 
-                <div className="mt-6 pt-6 border-t text-center">
+                <div className="mt-6 pt-6 border-t border-slate-700 text-center">
                   <p className="text-xs text-gray-500">
                     🔒 Your data is protected with enterprise-grade security
                   </p>
                 </div>
               </CardContent>
-            </Card>
+            </LiquidGlassCard>
+            </div>
           </div>
         </div>
       </div>

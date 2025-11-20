@@ -3,11 +3,12 @@
 import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Send, Search, Filter, MessageSquare, Paperclip, Image, Mic, Plus, Pin, Bell, BellOff, Archive, Trash2, CheckCheck, Reply, Forward, Smile } from 'lucide-react'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer } from '@/components/ui/text-shimmer'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 
 interface Message {
   id: number
@@ -260,8 +261,8 @@ export default function MessagesPage() {
   return (
     <div className="h-full flex">
       {/* Chat List Sidebar */}
-      <div className="w-1/3 border-r bg-background" data-testid="chat-list">
-        <Card className="h-full rounded-none border-0">
+      <div className="w-1/3 border-r border-slate-700/50 bg-slate-900/30" data-testid="chat-list">
+        <LiquidGlassCard className="h-full rounded-none border-0">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center justify-between">
               <span className="flex items-center gap-2">
@@ -280,7 +281,7 @@ export default function MessagesPage() {
                 placeholder="Search conversations..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8"
+                className="pl-8 bg-slate-800/50 border-slate-700 text-white placeholder:text-gray-500"
               />
             </div>
           </CardHeader>
@@ -304,42 +305,45 @@ export default function MessagesPage() {
                   onClick={() => setSelectedChat(chat)}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-white flex items-center justify-center text-sm font-medium shadow-lg">
                       {chat.avatar}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <p className="font-medium truncate">{chat.name}</p>
+                        <p className="font-medium truncate text-white">{chat.name}</p>
                         {chat.unread > 0 && (
-                          <span className="bg-primary text-primary-foreground text-xs rounded-full px-1.5 py-0.5 min-w-[1.25rem] text-center">
+                          <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[1.25rem] text-center shadow-lg">
                             <NumberFlow value={chat.unread} className="inline-block" />
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground truncate">{chat.lastMessage}</p>
+                      <p className="text-sm text-gray-400 truncate">{chat.lastMessage}</p>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           </CardContent>
-        </Card>
+        </LiquidGlassCard>
       </div>
 
       {/* Chat Messages Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col bg-slate-900/20">
         {selectedChat ? (
           <>
             {/* Chat Header */}
-            <div className="border-b p-4 bg-white">
+            <LiquidGlassCard className="border-b border-slate-700/50 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-white flex items-center justify-center text-sm font-medium shadow-lg">
                     {selectedChat.avatar}
                   </div>
                   <div>
-                    <h3 className="font-medium">{selectedChat.name}</h3>
-                    <p className="text-sm text-muted-foreground">Active now</p>
+                    <h3 className="font-medium text-white">{selectedChat.name}</h3>
+                    <p className="text-sm text-green-400 flex items-center gap-1">
+                      <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                      Active now
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -375,7 +379,7 @@ export default function MessagesPage() {
                   </Button>
                 </div>
               </div>
-            </div>
+            </LiquidGlassCard>
 
             {/* Messages */}
             <div className="flex-1 p-4 overflow-y-auto" data-testid="chat-messages">
@@ -385,27 +389,25 @@ export default function MessagesPage() {
                     key={message.id}
                     className={`flex ${message.sender === 'You' ? 'justify-end' : 'justify-start'}`}
                   >
-                    <div
-                      className={`max-w-xs lg:max-w-md px-3 py-2 rounded-lg ${
+                    <LiquidGlassCard
+                      className={`max-w-xs lg:max-w-md px-3 py-2 ${
                         message.sender === 'You'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted'
+                          ? 'bg-gradient-to-br from-blue-600/80 to-purple-600/80'
+                          : 'bg-slate-800/50'
                       }`}
                     >
-                      <p className="text-sm">{message.text}</p>
-                      <p className={`text-xs mt-1 ${
-                        message.sender === 'You' ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                      }`}>
+                      <p className="text-sm text-white">{message.text}</p>
+                      <p className="text-xs mt-1 text-gray-400">
                         {message.timestamp}
                       </p>
-                    </div>
+                    </LiquidGlassCard>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Message Input */}
-            <div className="border-t p-4">
+            <LiquidGlassCard className="border-t border-slate-700/50 p-4">
               <div className="flex gap-2">
                 <Input
                   data-testid="message-input"
@@ -417,17 +419,18 @@ export default function MessagesPage() {
                       handleSendMessage()
                     }
                   }}
-                  className="flex-1"
+                  className="flex-1 bg-slate-800/50 border-slate-700 text-white placeholder:text-gray-500"
                 />
-                <Button 
+                <Button
                   data-testid="send-button"
                   onClick={handleSendMessage}
                   size="sm"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg shadow-blue-500/25"
                 >
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
+            </LiquidGlassCard>
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">

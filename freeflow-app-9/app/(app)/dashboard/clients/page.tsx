@@ -20,7 +20,6 @@ import {
 } from 'lucide-react'
 
 import {
-  Card,
   CardHeader,
   CardTitle,
   CardDescription,
@@ -37,6 +36,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { NumberFlow } from '@/components/ui/number-flow'
 
 // ------------------------------------------------------------------//
 // mocked client dataset – replace with real API later
@@ -288,19 +290,19 @@ export default function ClientsPage() {
   }
 
   return (
-    <div className="kazi-bg-light dark:kazi-bg-dark min-h-screen py-8">
+    <div className="min-h-screen bg-slate-950 py-8">
       {/* Header */}
       <div className="container mx-auto px-4 mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-violet-bolt/10 dark:bg-violet-bolt/20">
-              <Users className="h-6 w-6 kazi-text-primary" />
+            <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/20">
+              <Users className="h-6 w-6 text-purple-400" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold kazi-text-dark dark:kazi-text-light">
+              <TextShimmer className="text-3xl font-bold" duration={2}>
                 Clients
-              </h1>
-              <p className="text-muted-foreground text-sm">
+              </TextShimmer>
+              <p className="text-gray-400 text-sm">
                 Relationship & project management
               </p>
             </div>
@@ -315,25 +317,25 @@ export default function ClientsPage() {
 
       {/* Stat cards */}
       <div className="container mx-auto px-4 mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
+        <LiquidGlassCard>
           <CardContent className="p-4 flex items-center gap-3">
-            <Users className="h-5 w-5 text-blue-600" />
+            <Users className="h-5 w-5 text-blue-400" />
             <div>
-              <p className="text-xs text-muted-foreground">Total Clients</p>
-              <p className="text-xl font-semibold">{stats.total}</p>
+              <p className="text-xs text-gray-400">Total Clients</p>
+              <p className="text-xl font-semibold text-white"><NumberFlow value={stats.total} /></p>
             </div>
           </CardContent>
-        </Card>
-        <Card>
+        </LiquidGlassCard>
+        <LiquidGlassCard>
           <CardContent className="p-4 flex items-center gap-3">
-            <Star className="h-5 w-5 text-yellow-600" />
+            <Star className="h-5 w-5 text-yellow-400" />
             <div>
-              <p className="text-xs text-muted-foreground">VIP</p>
-              <p className="text-xl font-semibold">{stats.vip}</p>
+              <p className="text-xs text-gray-400">VIP</p>
+              <p className="text-xl font-semibold text-white"><NumberFlow value={stats.vip} /></p>
             </div>
           </CardContent>
-        </Card>
-        <Card>
+        </LiquidGlassCard>
+        <LiquidGlassCard>
           <CardContent className="p-4 flex items-center gap-3">
             <Briefcase className="h-5 w-5 text-green-600" />
             <div>
@@ -341,8 +343,8 @@ export default function ClientsPage() {
               <p className="text-xl font-semibold">{stats.active}</p>
             </div>
           </CardContent>
-        </Card>
-        <Card>
+        </LiquidGlassCard>
+        <LiquidGlassCard>
           <CardContent className="p-4 flex items-center gap-3">
             <UserPlus className="h-5 w-5 text-blue-600" />
             <div>
@@ -350,7 +352,7 @@ export default function ClientsPage() {
               <p className="text-xl font-semibold">{stats.leads}</p>
             </div>
           </CardContent>
-        </Card>
+        </LiquidGlassCard>
       </div>
 
       {/* Search & filter */}
@@ -373,7 +375,7 @@ export default function ClientsPage() {
       {/* Client grid */}
       <div className="container mx-auto px-4 pb-12 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filtered.map((c) => (
-          <Card key={c.id} className="group hover:shadow-lg transition-shadow">
+          <LiquidGlassCard key={c.id} className="group hover:shadow-lg transition-shadow">
             <CardHeader className="flex items-start gap-3 pb-1">
               <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center font-medium text-blue-600">
                 {c.name.charAt(0)}
@@ -432,7 +434,7 @@ export default function ClientsPage() {
                 <Badge className={statusColour[c.status]}>{c.status}</Badge>
               </div>
             </CardContent>
-          </Card>
+          </LiquidGlassCard>
         ))}
       </div>
     </div>
