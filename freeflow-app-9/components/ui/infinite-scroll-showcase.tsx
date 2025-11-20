@@ -1,15 +1,48 @@
 "use client"
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from './button'
 import { Card } from './card'
-
-// Simple InfiniteScrollContainer replacement
-const InfiniteScrollContainer = ({ children, onIntersect, ...props }: any) => {
-  return <div {...props}>{children}</div>
-}
 import { Loader2, Plus, Zap } from 'lucide-react'
+import { GlowEffect } from './glow-effect'
+import { BorderTrail } from './border-trail'
+
+// Enhanced InfiniteScrollContainer with intersection observer
+const InfiniteScrollContainer = ({ children, onLoadMore, hasMore, ...props }: any) => {
+  const observerRef = useRef<IntersectionObserver | null>(null)
+  const loadMoreRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!hasMore || !onLoadMore) return
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          onLoadMore()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current)
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect()
+      }
+    }
+  }, [hasMore, onLoadMore])
+
+  return (
+    <div {...props}>
+      {children}
+      {hasMore && <div ref={loadMoreRef} className="h-10" />}
+    </div>
+  )
+}
 
 // Enhanced Infinite Scroll Showcase for KAZI
 interface InfiniteScrollShowcaseProps {
@@ -54,29 +87,32 @@ export function InfiniteScrollShowcase({
 
   return (
     <div className={`space-y-6 ${className}`}>
-      {/* Enhanced Header */}
+      {/* Enhanced Header with Premium Effects */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
+        className="flex items-center justify-between relative group/header"
       >
-        <h2 className="text-2xl font-bold text-gradient">{title}</h2>
-        <div className="flex items-center gap-2">
+        <GlowEffect className="absolute -inset-2 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-purple-500/10 rounded-lg blur opacity-0 group-hover/header:opacity-100 transition-opacity duration-500" />
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 bg-clip-text text-transparent relative z-10">{title}</h2>
+        <div className="flex items-center gap-2 relative z-10">
           <Button
             variant="glass"
             size="sm"
-            className="gap-2"
+            className="gap-2 relative group/btn"
           >
-            <Plus className="w-4 h-4" />
-            Add New
+            <GlowEffect className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-lg blur opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
+            <Plus className="w-4 h-4 relative z-10" />
+            <span className="relative z-10">Add New</span>
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className="gap-2"
+            className="gap-2 relative group/btn"
           >
-            <Zap className="w-4 h-4" />
-            AI Enhance
+            <GlowEffect className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg blur opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
+            <Zap className="w-4 h-4 relative z-10" />
+            <span className="relative z-10">AI Enhance</span>
           </Button>
         </div>
       </motion.div>
@@ -102,9 +138,10 @@ export function InfiniteScrollShowcase({
                   delay: (index % 12) * 0.05
                 }}
                 whileHover={{ scale: 1.02, y: -2 }}
-                className="group"
+                className="group relative"
               >
-                <Card variant="default" className="h-full p-0 overflow-hidden">
+                <GlowEffect className="absolute -inset-1 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-purple-500/10 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <Card variant="premium" hover glow className="h-full p-0 overflow-hidden relative z-10">
                   {renderItem(item, index)}
                 </Card>
               </motion.div>
@@ -112,31 +149,41 @@ export function InfiniteScrollShowcase({
           </AnimatePresence>
         </div>
 
-        {/* Loading State */}
+        {/* Premium Loading State */}
         {loading && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-center py-8"
+            className="flex items-center justify-center py-8 relative"
           >
-            <Card className="px-6 py-4">
-              <div className="flex items-center gap-3 text-muted-foreground">
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span className="text-sm font-medium">Loading more amazing content...</span>
+            <GlowEffect className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-lg blur-xl" />
+            <Card variant="premium" className="px-6 py-4 relative z-10">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <Loader2 className="w-5 h-5 animate-spin text-purple-400" />
+                  <div className="absolute inset-0 w-5 h-5 animate-ping text-purple-400/30">
+                    <Loader2 className="w-5 h-5" />
+                  </div>
+                </div>
+                <span className="text-sm font-medium bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                  Loading more amazing content...
+                </span>
               </div>
             </Card>
           </motion.div>
         )}
 
-        {/* End of Content */}
+        {/* Premium End of Content */}
         {!hasMoreItems && items.length > 0 && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex items-center justify-center py-8"
+            className="flex items-center justify-center py-8 relative"
           >
-            <Card className="px-6 py-4 text-center">
-              <div className="text-muted-foreground text-sm">
+            <GlowEffect className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg blur-xl" />
+            <Card variant="gradient" className="px-8 py-6 text-center relative z-10">
+              <BorderTrail className="bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500" size={40} duration={6} />
+              <div className="text-sm font-medium bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
                 ✨ You've reached the end! All items loaded.
               </div>
             </Card>

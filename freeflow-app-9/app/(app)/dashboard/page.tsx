@@ -12,6 +12,7 @@ import { EnhancedButton } from '@/components/ui/enhanced-button'
 import { EnhancedBadge } from '@/components/ui/enhanced-badge'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import {
   LayoutDashboard,
   FolderOpen,
@@ -601,7 +602,7 @@ export default function DashboardPage() {
   }
 
   const renderOverviewTab = () => (
-    <ScrollArea className="h-[calc(100vh-300px)]">
+    <ScrollArea variant="premium" className="h-[calc(100vh-300px)]">
       <div className="space-y-8 pr-4">
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
