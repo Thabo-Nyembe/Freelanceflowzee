@@ -9,6 +9,8 @@ import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { TextShimmer } from '@/components/ui/text-shimmer'
 import {
   DollarSign,
   TrendingUp,
@@ -57,27 +59,6 @@ const FloatingParticle = ({ delay = 0, color = 'emerald' }: { delay?: number; co
   )
 }
 
-const TextShimmer = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
-  return (
-    <motion.div
-      className={`relative inline-block ${className}`}
-      initial={{ backgroundPosition: '200% 0' }}
-      animate={{ backgroundPosition: '-200% 0' }}
-      transition={{
-        duration: 2,
-        repeat: Infinity,
-        ease: 'linear'
-      }}
-      style={{
-        background: 'linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.4), transparent)',
-        backgroundSize: '200% 100%',
-        WebkitBackgroundClip: 'text'
-      }}
-    >
-      {children}
-    </motion.div>
-  )
-}
 
 export default function FinancialPage() {
   const [_selectedPeriod, setSelectedPeriod] = useState<any>('monthly')
@@ -796,9 +777,9 @@ export default function FinancialPage() {
             <div className="p-2 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg">
               <Wallet className="h-6 w-6 text-white" />
             </div>
-            <h1 className="text-3xl font-bold kazi-text-dark dark:kazi-text-light">
+            <TextShimmer className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-emerald-900 to-teal-900 dark:from-gray-100 dark:via-emerald-100 dark:to-teal-100 bg-clip-text text-transparent">
               Financial Dashboard
-            </h1>
+            </TextShimmer>
           </div>
           <p className="text-gray-600 dark:text-gray-300">
             Track your business finances and performance
@@ -843,10 +824,10 @@ export default function FinancialPage() {
               </div>
             </CardHeader>
             <CardContent className="relative z-10">
-              <div className="text-3xl font-bold text-emerald-600">{formatCurrency(financialData.totalRevenue)}</div>
+              <NumberFlow value={financialData.totalRevenue} format="currency" className="text-3xl font-bold text-emerald-600" />
               <p className="text-sm text-green-600 flex items-center gap-1">
                 <ArrowUpRight className="h-3 w-3" />
-                +{financialData.yearlyGrowth}% YoY
+                +<NumberFlow value={financialData.yearlyGrowth} decimals={1} className="inline-block" />% YoY
               </p>
             </CardContent>
           </Card>
@@ -858,7 +839,7 @@ export default function FinancialPage() {
             <CreditCard className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">${financialData.totalExpenses.toLocaleString()}</div>
+            <NumberFlow value={financialData.totalExpenses} format="currency" className="text-2xl font-bold text-red-600" />
             <p className="text-xs text-gray-500 flex items-center gap-1">
               <ArrowDownRight className="h-3 w-3 text-red-500" />
               -5.2% from last month
@@ -872,7 +853,7 @@ export default function FinancialPage() {
             <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">${financialData.netProfit.toLocaleString()}</div>
+            <NumberFlow value={financialData.netProfit} format="currency" className="text-2xl font-bold text-green-600" />
             <p className="text-xs text-gray-500">Profit margin: 59.1%</p>
           </CardContent>
         </Card>
@@ -883,8 +864,10 @@ export default function FinancialPage() {
             <FileText className="h-4 w-4 kazi-text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold kazi-text-primary">{financialData.pendingInvoices}</div>
-            <p className="text-xs text-gray-500">{financialData.overdueInvoices} overdue</p>
+            <NumberFlow value={financialData.pendingInvoices} className="text-2xl font-bold kazi-text-primary" />
+            <p className="text-xs text-gray-500">
+              <NumberFlow value={financialData.overdueInvoices} className="inline-block" /> overdue
+            </p>
           </CardContent>
         </Card>
       </div>
