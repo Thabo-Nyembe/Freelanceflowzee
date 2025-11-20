@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { TextShimmer } from '@/components/ui/text-shimmer'
 import {
   Briefcase,
   Award,
@@ -532,9 +534,9 @@ export default function CVPortfolioPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold kazi-text-dark dark:kazi-text-light mb-2 kazi-headline">
+              <TextShimmer className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-purple-900 to-blue-900 dark:from-gray-100 dark:via-purple-100 dark:to-blue-100 bg-clip-text text-transparent mb-2">
                 CV & Portfolio
-              </h1>
+              </TextShimmer>
               <p className="text-lg text-gray-600 dark:text-gray-300 kazi-body">
                 Professional profile and showcase
               </p>
@@ -627,7 +629,9 @@ export default function CVPortfolioPage() {
                     <div className="flex justify-between items-center mb-2">
                       <span className="font-medium kazi-body-medium">{skillCategory.category}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-600 dark:text-gray-300">{skillCategory.level}%</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">
+                          <NumberFlow value={skillCategory.level} className="inline-block" />%
+                        </span>
                         <Button
                           size="sm"
                           variant="ghost"
@@ -684,19 +688,25 @@ export default function CVPortfolioPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Card className="kazi-card">
                     <CardContent className="p-6 text-center">
-                      <div className="text-3xl font-bold kazi-text-primary mb-2">8+</div>
+                      <div className="text-3xl font-bold kazi-text-primary mb-2">
+                        <NumberFlow value={8} className="inline-block" />+
+                      </div>
                       <div className="text-gray-600 dark:text-gray-300 kazi-body">Years Experience</div>
                     </CardContent>
                   </Card>
                   <Card className="kazi-card">
                     <CardContent className="p-6 text-center">
-                      <div className="text-3xl font-bold kazi-text-primary mb-2">50+</div>
+                      <div className="text-3xl font-bold kazi-text-primary mb-2">
+                        <NumberFlow value={50} className="inline-block" />+
+                      </div>
                       <div className="text-gray-600 dark:text-gray-300 kazi-body">Projects Completed</div>
                     </CardContent>
                   </Card>
                   <Card className="kazi-card">
                     <CardContent className="p-6 text-center">
-                      <div className="text-3xl font-bold kazi-text-primary mb-2">25+</div>
+                      <div className="text-3xl font-bold kazi-text-primary mb-2">
+                        <NumberFlow value={25} className="inline-block" />+
+                      </div>
                       <div className="text-gray-600 dark:text-gray-300 kazi-body">Happy Clients</div>
                     </CardContent>
                   </Card>
