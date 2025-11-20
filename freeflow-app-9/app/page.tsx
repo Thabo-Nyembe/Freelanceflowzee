@@ -5,6 +5,14 @@ import React, { Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { ErrorBoundary } from "@/components/error-boundary"
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { BorderTrail } from '@/components/ui/border-trail'
+import { GlowEffect } from '@/components/ui/glow-effect'
+import { ScrollProgress } from '@/components/ui/scroll-progress'
+import { ScrollReveal } from '@/components/ui/scroll-reveal'
+import { ParallaxScroll } from '@/components/ui/parallax-scroll'
 import {
   Zap,
   Upload,
@@ -15,77 +23,86 @@ import {
   Star,
   Globe,
   ArrowRight,
-  Play
+  Play,
+  Video,
+  Users,
+  MessageSquare,
+  Calendar,
+  FileText,
+  DollarSign
 } from 'lucide-react'
 
 const features = [
   {
-    title: 'AI Create Studio',
-    description: 'Premium AI content generation with GPT-4o, Claude, DALL-E, and Google AI for instant creative production.',
+    title: 'Multi-Model AI Studio',
+    description: 'Access 4 premium AI models (GPT-4o, Claude, DALL-E, Google AI) for instant content generation across creative fields.',
     icon: Brain,
     href: '/dashboard/ai-create',
-    benefits: [
-      'Access to 4 premium AI models (GPT-4o, Claude, DALL-E, Google AI)',
-      'Generate images, copy, code, and multimedia content instantly',
-      'Industry-specific templates for design, photography, music & video',
-      'Cost-optimized AI usage with intelligent model switching'
-    ]
+    color: 'from-purple-500 to-purple-700'
   },
   {
-    title: 'Universal Feedback',
-    description: 'Revolutionary commenting system for videos, PDFs, designs with AI analysis and voice notes.',
-    icon: Target,
+    title: 'Professional Video Studio',
+    description: 'Complete video editing with AI transcription, screen recording, timestamp comments, and client collaboration.',
+    icon: Video,
+    href: '/dashboard/video-studio',
+    color: 'from-red-500 to-red-700'
+  },
+  {
+    title: 'Universal Pinpoint Feedback',
+    description: 'Revolutionary multi-media commenting on images, videos, PDFs, and code with AI analysis and voice notes.',
+    icon: MessageSquare,
     href: '/dashboard/collaboration',
-    benefits: [
-      'Comment on images, videos, PDFs, code files with precise positioning',
-      'AI-powered feedback categorization and priority assessment',
-      'Voice recording with waveform visualization and transcription',
-      'Real-time collaboration with @mentions and emoji reactions'
-    ]
+    color: 'from-pink-500 to-pink-700'
   },
   {
     title: 'Secure Escrow Payments',
-    description: 'Milestone-based payment protection with automated invoicing and multi-currency support.',
+    description: 'Milestone-based payment protection with Stripe integration, automated invoicing, and global processing.',
     icon: Shield,
     href: '/dashboard/escrow',
-    benefits: [
-      'Milestone-based escrow with automatic release triggers',
-      'Stripe integration with global payment processing',
-      'Professional invoice generation with tax calculations',
-      'Real-time payment tracking and comprehensive analytics'
-    ]
+    color: 'from-blue-500 to-blue-700'
   },
   {
-    title: 'My Day AI Planner',
-    description: 'AI-powered daily productivity tool with intelligent scheduling and task optimization.',
-    icon: Zap,
+    title: 'AI Daily Planning',
+    description: 'Intelligent task management with productivity optimization, time estimates, and automated scheduling.',
+    icon: Calendar,
     href: '/dashboard/my-day',
-    benefits: [
-      'AI-powered daily schedule optimization and task prioritization',
-      'Smart time estimates with productivity pattern analysis',
-      'Automated client meeting scheduling across time zones',
-      'Progress tracking with insights and efficiency recommendations'
-    ]
+    color: 'from-orange-500 to-orange-700'
   },
   {
-    title: 'Multi-Cloud Storage',
-    description: 'Smart file management with version control and 70% cost savings through intelligent routing.',
+    title: 'Multi-Cloud Storage System',
+    description: 'Enterprise storage with 70% cost savings through intelligent Supabase + Wasabi routing and version control.',
     icon: Upload,
     href: '/dashboard/files-hub',
-    benefits: [
-      'Hybrid cloud storage (Supabase + Wasabi S3) with smart routing',
-      '70% cost optimization with automated file tier management',
-      'Professional file sharing with WeTransfer-like experience',
-      'Version control, permissions, and comprehensive analytics'
-    ]
+    color: 'from-cyan-500 to-cyan-700'
+  },
+  {
+    title: 'Real-Time Collaboration',
+    description: 'Live multi-user editing with cursor tracking, instant messaging, presence indicators, and conflict resolution.',
+    icon: Users,
+    href: '/dashboard/collaboration',
+    color: 'from-green-500 to-green-700'
+  },
+  {
+    title: 'Professional Invoicing',
+    description: 'Automated invoice generation with multiple templates, tax calculations, and comprehensive financial tracking.',
+    icon: DollarSign,
+    href: '/dashboard/financial-hub',
+    color: 'from-emerald-500 to-emerald-700'
+  },
+  {
+    title: 'Client Zone Galleries',
+    description: 'Professional client portals with secure file access, watermarked previews, and approval workflows.',
+    icon: FileText,
+    href: '/dashboard/client-zone',
+    color: 'from-yellow-500 to-yellow-700'
   }
 ]
 
 const stats = [
-  { value: '$15M+', label: 'Invoices Paid', subtext: 'Processed securely' },
-  { value: '40+', label: 'Countries Served', subtext: 'Global reach' },
-  { value: '<10min', label: 'Payout Release', subtext: 'Lightning fast' },
-  { value: '25,000+', label: 'Creators & Teams', subtext: 'Growing community' }
+  { value: '25,000+', label: 'Active Users', subtext: 'Growing community' },
+  { value: '40+', label: 'Countries', subtext: 'Global reach' },
+  { value: '4.9/5', label: 'User Rating', subtext: '2,500+ reviews' },
+  { value: '99.9%', label: 'Uptime', subtext: 'Always available' }
 ]
 
 const testimonials = [
@@ -158,6 +175,8 @@ export default function Home() {
     <Suspense fallback={<div>Loading...</div>}>
       <ErrorBoundary fallback={<div>Something went wrong</div>}>
         <div className="min-h-screen kazi-bg-light dark:kazi-bg-dark">
+      {/* Premium Scroll Progress */}
+      <ScrollProgress position="top" height={3} showPercentage={false} />
       {/* Navigation Header */}
       <nav className="fixed top-0 w-full z-50 glass-nav">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -215,16 +234,27 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden kazi-fade-in pt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="text-center">
+        {/* Pattern Craft Background with Parallax */}
+        <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-900 to-slate-950 -z-10" />
+        <ParallaxScroll speed={0.3} direction="down">
+          <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-blue-500/30 to-purple-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+        </ParallaxScroll>
+        <ParallaxScroll speed={0.4} direction="up">
+          <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000"></div>
+        </ParallaxScroll>
+        <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-10" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative">
+          <ScrollReveal variant="blur" duration={0.8}>
+            <div className="text-center">
             <div className="inline-flex items-center px-4 py-2 bg-violet-bolt/10 dark:bg-violet-bolt/20 rounded-full kazi-text-primary text-sm font-medium mb-8 kazi-hover-scale">
               <Globe className="w-4 h-4 mr-2" />
               <span className="kazi-body-medium">Built in Africa. Engineered for the World.</span>
             </div>
-            
-            <h1 className="text-5xl md:text-7xl font-bold kazi-text-dark dark:kazi-text-light mb-6 kazi-headline">
+
+            <TextShimmer className="text-5xl md:text-7xl font-bold mb-6" duration={2}>
               Forget 6 tools. <span className="kazi-text-primary">Use one.</span>
-            </h1>
+            </TextShimmer>
             
             <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto mb-12 kazi-body">
               Create, collaborate, manage projects, and handle payments—all beautifully integrated in one elegant workspace.
@@ -240,7 +270,8 @@ export default function Home() {
                 Watch Demo
               </button>
             </div>
-          </div>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -292,12 +323,12 @@ export default function Home() {
       </section>
 
       {/* Core Features */}
-      <section className="py-20 kazi-bg-light dark:kazi-bg-dark">
+      <section className="py-20 kazi-bg-light dark:kazi-bg-dark relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold kazi-text-dark dark:kazi-text-light mb-6 kazi-headline">
+            <TextShimmer className="text-4xl font-bold mb-6" duration={2}>
               Everything You Need in One Place
-            </h2>
+            </TextShimmer>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto kazi-body">
               Powerful features designed for modern freelancers, agencies, and creative teams
             </p>
@@ -305,19 +336,25 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="kazi-card kazi-hover-scale kazi-fade-in">
-                <div className="p-6">
-                  <div className="w-12 h-12 bg-violet-bolt/10 dark:bg-violet-bolt/20 rounded-lg flex items-center justify-center mb-4">
-                    <feature.icon className="w-6 h-6 kazi-text-primary" />
-                  </div>
-                  <h3 className="text-xl font-bold kazi-text-dark dark:kazi-text-light mb-2 kazi-headline">{feature.title}</h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-4 kazi-body">{feature.description}</p>
-                  <button onClick={() => handleFeatureClick(feature.title, feature.href)} className="btn-kazi-secondary w-full kazi-ripple kazi-focus">
-                    Learn More
-                    <ArrowRight className="ml-2 w-4 h-4" />
-                  </button>
+              <ScrollReveal key={index} variant="slide-up" delay={index * 0.1} duration={0.5}>
+                <div className="relative kazi-hover-scale h-full">
+                  <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-2xl blur opacity-30" />
+                  <LiquidGlassCard className="relative h-full">
+                    <BorderTrail className={`bg-gradient-to-r ${feature.color}`} size={60} duration={8} />
+                    <div className="p-6">
+                      <div className={`w-12 h-12 bg-gradient-to-br ${feature.color} bg-opacity-20 rounded-lg flex items-center justify-center mb-4`}>
+                        <feature.icon className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="text-xl font-bold text-white mb-2 kazi-headline">{feature.title}</h3>
+                      <p className="text-gray-300 mb-4 kazi-body">{feature.description}</p>
+                      <button onClick={() => handleFeatureClick(feature.title, feature.href)} className={`bg-gradient-to-r ${feature.color} hover:opacity-90 text-white w-full py-2 px-4 rounded-lg transition-all duration-300 kazi-ripple kazi-focus`}>
+                        Learn More
+                        <ArrowRight className="ml-2 w-4 h-4 inline" />
+                      </button>
+                    </div>
+                  </LiquidGlassCard>
                 </div>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -327,9 +364,9 @@ export default function Home() {
       <section className="py-20 bg-white dark:bg-jet-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold kazi-text-dark dark:kazi-text-light mb-6 kazi-headline">
+            <TextShimmer className="text-4xl font-bold mb-6" duration={2}>
               Trusted by Leading Global Brands
-            </h2>
+            </TextShimmer>
             <p className="text-xl text-gray-600 dark:text-gray-300 kazi-body">
               Startups, agencies, and freelancers worldwide choose Kazi
             </p>
@@ -337,17 +374,17 @@ export default function Home() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center kazi-hover-scale">
-                <div className="text-4xl font-bold kazi-text-primary mb-2 kazi-headline">
+              <LiquidGlassCard key={index} className="text-center kazi-hover-scale p-6">
+                <div className="text-4xl font-bold text-blue-400 mb-2 kazi-headline">
                   {stat.value}
                 </div>
-                <div className="text-lg font-semibold kazi-text-dark dark:kazi-text-light kazi-body-medium">
+                <div className="text-lg font-semibold text-white kazi-body-medium">
                   {stat.label}
                 </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 kazi-body">
+                <div className="text-sm text-gray-400 kazi-body">
                   {stat.subtext}
                 </div>
-              </div>
+              </LiquidGlassCard>
             ))}
           </div>
 
@@ -368,27 +405,31 @@ export default function Home() {
       <section className="py-20 bg-violet-bolt/5 dark:bg-violet-bolt/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold kazi-text-dark dark:kazi-text-light mb-6 kazi-headline">
+            <TextShimmer className="text-4xl font-bold mb-6" duration={2}>
               What Our Users Say
-            </h2>
+            </TextShimmer>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="kazi-card kazi-hover-scale">
-                <div className="p-8">
-                  <div className="flex mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 kazi-text-accent fill-current" />
-                    ))}
+              <div key={index} className="relative kazi-hover-scale">
+                <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl blur opacity-30" />
+                <LiquidGlassCard className="relative">
+                  <BorderTrail className="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500" size={60} duration={6} />
+                  <div className="p-8">
+                    <div className="flex mb-4">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                      ))}
+                    </div>
+                    <blockquote className="text-lg text-gray-300 mb-6 kazi-body">
+                      "{testimonial.quote}"
+                    </blockquote>
+                    <cite className="text-white font-semibold kazi-body-medium">
+                      — {testimonial.author}, {testimonial.company}
+                    </cite>
                   </div>
-                  <blockquote className="text-lg text-gray-700 dark:text-gray-300 mb-6 kazi-body">
-                    "{testimonial.quote}"
-                  </blockquote>
-                  <cite className="kazi-text-dark dark:kazi-text-light font-semibold kazi-body-medium">
-                    — {testimonial.author}, {testimonial.company}
-                  </cite>
-                </div>
+                </LiquidGlassCard>
               </div>
             ))}
           </div>
