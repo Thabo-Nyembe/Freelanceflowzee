@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import {
   DollarSign,
   TrendingUp,
@@ -312,9 +315,9 @@ export default function FinancialHubPage() {
             <div className="p-2 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg">
               <DollarSign className="h-6 w-6 text-white" />
             </div>
-            <h1 className="text-3xl font-bold kazi-text-dark dark:kazi-text-light">
+            <TextShimmer className="text-3xl font-bold kazi-text-dark dark:kazi-text-light">
               Financial Hub
-            </h1>
+            </TextShimmer>
           </div>
           <p className="text-gray-600 dark:text-gray-300">
             Comprehensive financial management and analytics
@@ -342,55 +345,82 @@ export default function FinancialHubPage() {
 
       {/* Financial Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card data-testid="revenue-card" className="kazi-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 kazi-text-accent" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold kazi-text-accent">${financialData.overview.totalRevenue.toLocaleString()}</div>
-            <p className="text-xs text-gray-500 flex items-center gap-1">
+        <LiquidGlassCard data-testid="revenue-card" variant="gradient" hoverEffect={true}>
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Revenue</p>
+              <div className="p-2 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 dark:from-emerald-400/10 dark:to-teal-400/10 rounded-lg backdrop-blur-sm">
+                <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              </div>
+            </div>
+            <NumberFlow
+              value={financialData.overview.totalRevenue}
+              format="currency"
+              className="text-2xl font-bold text-emerald-600 dark:text-emerald-400"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-1">
               <ArrowUpRight className="h-3 w-3 text-green-500" />
-              +{financialData.overview.monthlyGrowth}% from last month
+              +<NumberFlow value={financialData.overview.monthlyGrowth} decimals={1} className="inline-block" />% from last month
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </LiquidGlassCard>
 
-        <Card data-testid="profit-card" className="kazi-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Net Profit</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">${financialData.overview.netProfit.toLocaleString()}</div>
-            <p className="text-xs text-gray-500">Margin: {financialData.overview.profitMargin}%</p>
-          </CardContent>
-        </Card>
+        <LiquidGlassCard data-testid="profit-card" variant="tinted" hoverEffect={true}>
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Net Profit</p>
+              <div className="p-2 bg-gradient-to-br from-green-400/20 to-emerald-400/20 dark:from-green-400/10 dark:to-emerald-400/10 rounded-lg backdrop-blur-sm">
+                <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
+            <NumberFlow
+              value={financialData.overview.netProfit}
+              format="currency"
+              className="text-2xl font-bold text-green-600 dark:text-green-400"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Margin: <NumberFlow value={financialData.overview.profitMargin} decimals={1} className="inline-block" />%
+            </p>
+          </div>
+        </LiquidGlassCard>
 
-        <Card data-testid="expenses-card" className="kazi-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
-            <CreditCard className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">${financialData.overview.totalExpenses.toLocaleString()}</div>
-            <p className="text-xs text-gray-500 flex items-center gap-1">
+        <LiquidGlassCard data-testid="expenses-card" variant="gradient" hoverEffect={true}>
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Expenses</p>
+              <div className="p-2 bg-gradient-to-br from-red-400/20 to-orange-400/20 dark:from-red-400/10 dark:to-orange-400/10 rounded-lg backdrop-blur-sm">
+                <CreditCard className="h-4 w-4 text-red-600 dark:text-red-400" />
+              </div>
+            </div>
+            <NumberFlow
+              value={financialData.overview.totalExpenses}
+              format="currency"
+              className="text-2xl font-bold text-red-600 dark:text-red-400"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-1">
               <ArrowDownRight className="h-3 w-3 text-red-500" />
               -5.2% from last month
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </LiquidGlassCard>
 
-        <Card data-testid="clients-card" className="kazi-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Clients</CardTitle>
-            <Users className="h-4 w-4 kazi-text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold kazi-text-primary">{financialData.clients.active}</div>
-            <p className="text-xs text-gray-500">{financialData.clients.new} new this month</p>
-          </CardContent>
-        </Card>
+        <LiquidGlassCard data-testid="clients-card" variant="tinted" hoverEffect={true}>
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Active Clients</p>
+              <div className="p-2 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 dark:from-blue-400/10 dark:to-indigo-400/10 rounded-lg backdrop-blur-sm">
+                <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
+            <NumberFlow
+              value={financialData.clients.active}
+              className="text-2xl font-bold text-blue-600 dark:text-blue-400"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <NumberFlow value={financialData.clients.new} className="inline-block" /> new this month
+            </p>
+          </div>
+        </LiquidGlassCard>
       </div>
 
       {/* Main Content Tabs */}
