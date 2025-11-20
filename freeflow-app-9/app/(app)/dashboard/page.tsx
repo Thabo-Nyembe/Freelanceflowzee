@@ -55,6 +55,9 @@ import {
   Sparkles
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { GlowEffect } from '@/components/ui/glow-effect'
 
 /* ------------------------------------------------------------------
  * Phase 6 hooks temporarily disabled to avoid unresolved imports.
@@ -605,7 +608,11 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Earnings</p>
-                  <p className="text-3xl font-bold text-gray-900">${mockData.earnings.toLocaleString()}</p>
+                  <NumberFlow
+                    value={mockData.earnings}
+                    format="currency"
+                    className="text-3xl font-bold text-gray-900"
+                  />
                   <p className="text-sm text-green-600">+12% from last month</p>
                 </div>
                 <div className="p-3 bg-green-100 rounded-xl">
@@ -620,8 +627,13 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Active Projects</p>
-                  <p className="text-3xl font-bold text-gray-900">{mockData.activeProjects}</p>
-                  <p className="text-sm text-blue-600">{mockData.completedProjects} completed</p>
+                  <NumberFlow
+                    value={mockData.activeProjects}
+                    className="text-3xl font-bold text-gray-900"
+                  />
+                  <p className="text-sm text-blue-600">
+                    <NumberFlow value={mockData.completedProjects} className="inline-block" /> completed
+                  </p>
                 </div>
                 <div className="p-3 bg-blue-100 rounded-xl">
                   <FolderOpen className="h-6 w-6 text-blue-600" />
@@ -635,7 +647,10 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Clients</p>
-                  <p className="text-3xl font-bold text-gray-900">{mockData.totalClients}</p>
+                  <NumberFlow
+                    value={mockData.totalClients}
+                    className="text-3xl font-bold text-gray-900"
+                  />
                   <p className="text-sm text-purple-600">+8 this month</p>
                 </div>
                 <div className="p-3 bg-purple-100 rounded-xl">
@@ -650,7 +665,10 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Hours This Month</p>
-                  <p className="text-3xl font-bold text-gray-900">{mockData.hoursThisMonth}</p>
+                  <NumberFlow
+                    value={mockData.hoursThisMonth}
+                    className="text-3xl font-bold text-gray-900"
+                  />
                   <p className="text-sm text-orange-600">23h this week</p>
                 </div>
                 <div className="p-3 bg-orange-100 rounded-xl">
@@ -803,38 +821,46 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Button 
-                className="h-auto p-4 flex-col gap-2" 
-                variant="outline"
-                onClick={() => navigateToPage('projects-hub')}
-              >
-                <Plus className="h-5 w-5" />
-                New Project
-              </Button>
-              <Button 
-                className="h-auto p-4 flex-col gap-2" 
-                variant="outline"
-                onClick={() => navigateToPage('ai-create')}
-              >
-                <Brain className="h-5 w-5" />
-                AI Create
-              </Button>
-              <Button 
-                className="h-auto p-4 flex-col gap-2" 
-                variant="outline"
-                onClick={() => navigateToPage('my-day')}
-              >
-                <Calendar className="h-5 w-5" />
-                My Day
-              </Button>
-              <Button 
-                className="h-auto p-4 flex-col gap-2" 
-                variant="outline"
-                onClick={() => navigateToPage('messages')}
-              >
-                <MessageSquare className="h-5 w-5" />
-                Messages
-              </Button>
+              <GlowEffect glowColor="rgb(59, 130, 246)" intensity="medium">
+                <Button
+                  className="h-auto p-4 flex-col gap-2 w-full"
+                  variant="outline"
+                  onClick={() => navigateToPage('projects-hub')}
+                >
+                  <Plus className="h-5 w-5" />
+                  New Project
+                </Button>
+              </GlowEffect>
+              <GlowEffect glowColor="rgb(168, 85, 247)" intensity="medium">
+                <Button
+                  className="h-auto p-4 flex-col gap-2 w-full"
+                  variant="outline"
+                  onClick={() => navigateToPage('ai-create')}
+                >
+                  <Brain className="h-5 w-5" />
+                  AI Create
+                </Button>
+              </GlowEffect>
+              <GlowEffect glowColor="rgb(34, 197, 94)" intensity="low">
+                <Button
+                  className="h-auto p-4 flex-col gap-2 w-full"
+                  variant="outline"
+                  onClick={() => navigateToPage('my-day')}
+                >
+                  <Calendar className="h-5 w-5" />
+                  My Day
+                </Button>
+              </GlowEffect>
+              <GlowEffect glowColor="rgb(234, 88, 12)" intensity="low">
+                <Button
+                  className="h-auto p-4 flex-col gap-2 w-full"
+                  variant="outline"
+                  onClick={() => navigateToPage('messages')}
+                >
+                  <MessageSquare className="h-5 w-5" />
+                  Messages
+                </Button>
+              </GlowEffect>
             </div>
           </CardContent>
         </Card>
@@ -925,9 +951,9 @@ export default function DashboardPage() {
           <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 dark:from-gray-100 dark:via-blue-100 dark:to-purple-100 bg-clip-text text-transparent mb-2">
+                <TextShimmer className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 dark:from-gray-100 dark:via-blue-100 dark:to-purple-100 bg-clip-text text-transparent mb-2">
                   Welcome to KAZI
-                </h1>
+                </TextShimmer>
                 <p className="text-sm sm:text-base lg:text-lg text-secondary font-light">
                   Your complete creative business platform with 25+ integrated tools
                 </p>
