@@ -13,6 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { toast } from 'sonner'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { TextShimmer } from '@/components/ui/text-shimmer'
 import {
   Shield,
   DollarSign,
@@ -890,7 +892,9 @@ export default function EscrowPage() {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <Shield className="w-6 h-6 text-purple-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Secure Escrow</h1>
+              <TextShimmer className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-purple-900 to-violet-900 dark:from-gray-100 dark:via-purple-100 dark:to-violet-100 bg-clip-text text-transparent">
+                Secure Escrow
+              </TextShimmer>
               <Badge className="bg-gradient-to-r from-purple-500 to-violet-600 text-white">KAZI</Badge>
             </div>
             <div className="flex items-center gap-2">
@@ -1115,7 +1119,7 @@ export default function EscrowPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-gray-600">Total Escrow Value</p>
-                      <p className="text-2xl font-bold text-gray-900">${stats.totalValue.toLocaleString()}</p>
+                      <NumberFlow value={stats.totalValue} format="currency" className="text-2xl font-bold text-gray-900" />
                     </div>
                     <DollarSign className="w-8 h-8 text-green-600" />
                   </div>
@@ -1127,7 +1131,7 @@ export default function EscrowPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-gray-600">Active Deposits</p>
-                      <p className="text-2xl font-bold text-blue-600">{stats.activeDeposits}</p>
+                      <NumberFlow value={stats.activeDeposits} className="text-2xl font-bold text-blue-600" />
                     </div>
                     <Shield className="w-8 h-8 text-blue-600" />
                   </div>
@@ -1139,7 +1143,7 @@ export default function EscrowPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-gray-600">Completed Projects</p>
-                      <p className="text-2xl font-bold text-emerald-600">{stats.completedProjects}</p>
+                      <NumberFlow value={stats.completedProjects} className="text-2xl font-bold text-emerald-600" />
                     </div>
                     <CheckCircle className="w-8 h-8 text-emerald-600" />
                   </div>
@@ -1151,7 +1155,9 @@ export default function EscrowPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-gray-600">Success Rate</p>
-                      <p className="text-2xl font-bold text-purple-600">{stats.successRate}%</p>
+                      <p className="text-2xl font-bold text-purple-600">
+                        <NumberFlow value={stats.successRate} decimals={1} className="inline-block" />%
+                      </p>
                     </div>
                     <Target className="w-8 h-8 text-purple-600" />
                   </div>
