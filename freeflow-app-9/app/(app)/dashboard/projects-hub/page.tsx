@@ -9,6 +9,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { TextShimmer as TextShimmerComponent } from '@/components/ui/text-shimmer'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { 
   FolderOpen, 
   Plus, 
@@ -1051,9 +1054,9 @@ export default function ProjectsHubPage() {
                 <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg">
                   <FolderOpen className="h-6 w-6 text-white" />
                 </div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+                <TextShimmerComponent className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 dark:from-gray-100 dark:via-blue-100 dark:to-indigo-100 bg-clip-text text-transparent">
                   Projects Hub
-                </h1>
+                </TextShimmerComponent>
               </div>
               <p className="text-lg text-gray-600 font-light">
                 Manage and track all your creative projects in one place 🚀
@@ -1090,70 +1093,84 @@ export default function ProjectsHubPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0 }}
             >
-              <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow relative overflow-hidden">
-                <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                  <FloatingParticle delay={0} color="blue" />
-                  <FloatingParticle delay={1} color="indigo" />
-                </div>
-                <CardContent className="p-6 relative z-10">
+              <LiquidGlassCard variant="gradient" hoverEffect={true}>
+                <div className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Total Projects</p>
-                      <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
-                      <p className="text-sm text-gray-500">{stats.active} active</p>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Projects</p>
+                      <NumberFlow
+                        value={stats.total}
+                        className="text-3xl font-bold text-gray-900 dark:text-gray-100"
+                      />
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <NumberFlow value={stats.active} className="inline-block" /> active
+                      </p>
                     </div>
-                    <div className="p-3 bg-blue-100 rounded-xl">
-                      <Briefcase className="h-6 w-6 text-blue-600" />
+                    <div className="p-3 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 dark:from-blue-400/10 dark:to-indigo-400/10 rounded-xl backdrop-blur-sm">
+                      <Briefcase className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </LiquidGlassCard>
             </motion.div>
             
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-              <CardContent className="p-6">
+            <LiquidGlassCard variant="tinted" hoverEffect={true}>
+              <div className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Completed</p>
-                    <p className="text-3xl font-bold text-gray-900">{stats.completed}</p>
-                    <p className="text-sm text-gray-500">Projects finished</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Completed</p>
+                    <NumberFlow
+                      value={stats.completed}
+                      className="text-3xl font-bold text-gray-900 dark:text-gray-100"
+                    />
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Projects finished</p>
                   </div>
-                  <div className="p-3 bg-green-100 rounded-xl">
-                    <CheckCircle className="h-6 w-6 text-green-600" />
+                  <div className="p-3 bg-gradient-to-br from-green-400/20 to-emerald-400/20 dark:from-green-400/10 dark:to-emerald-400/10 rounded-xl backdrop-blur-sm">
+                    <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-              <CardContent className="p-6">
+              </div>
+            </LiquidGlassCard>
+
+            <LiquidGlassCard variant="gradient" hoverEffect={true}>
+              <div className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Revenue</p>
-                    <p className="text-3xl font-bold text-gray-900">${stats.revenue.toLocaleString()}</p>
-                    <p className="text-sm text-gray-500">Total earned</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Revenue</p>
+                    <NumberFlow
+                      value={stats.revenue}
+                      format="currency"
+                      className="text-3xl font-bold text-gray-900 dark:text-gray-100"
+                    />
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Total earned</p>
                   </div>
-                  <div className="p-3 bg-emerald-100 rounded-xl">
-                    <DollarSign className="h-6 w-6 text-emerald-600" />
+                  <div className="p-3 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 dark:from-emerald-400/10 dark:to-teal-400/10 rounded-xl backdrop-blur-sm">
+                    <DollarSign className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-              <CardContent className="p-6">
+              </div>
+            </LiquidGlassCard>
+
+            <LiquidGlassCard variant="tinted" hoverEffect={true}>
+              <div className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Efficiency</p>
-                    <p className="text-3xl font-bold text-gray-900">{stats.efficiency}%</p>
-                    <p className="text-sm text-gray-500">Average progress</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Efficiency</p>
+                    <div className="flex items-baseline">
+                      <NumberFlow
+                        value={stats.efficiency}
+                        className="text-3xl font-bold text-gray-900 dark:text-gray-100"
+                      />
+                      <span className="text-3xl font-bold text-gray-900 dark:text-gray-100">%</span>
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Average progress</p>
                   </div>
-                  <div className="p-3 bg-purple-100 rounded-xl">
-                    <TrendingUp className="h-6 w-6 text-purple-600" />
+                  <div className="p-3 bg-gradient-to-br from-purple-400/20 to-pink-400/20 dark:from-purple-400/10 dark:to-pink-400/10 rounded-xl backdrop-blur-sm">
+                    <TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </LiquidGlassCard>
           </div>
         </div>
 
