@@ -7,6 +7,9 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { NumberFlow } from '@/components/ui/number-flow'
 import {
   User,
   Settings,
@@ -33,6 +36,8 @@ import {
   Heart,
   MessageSquare
 } from 'lucide-react'
+import { BorderTrail } from '@/components/ui/border-trail'
+import { GlowEffect } from '@/components/ui/glow-effect'
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<any>('overview')
@@ -359,12 +364,29 @@ export default function ProfilePage() {
   ]
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold kazi-text-dark dark:kazi-text-light">Profile</h1>
-          <p className="text-gray-600 dark:text-gray-300">Manage your professional profile and portfolio</p>
-        </div>
+    <div className="min-h-screen relative">
+      {/* Pattern Craft Background */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
+      <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0"></div>
+      <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-cyan-500/20 to-teal-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000 dark:opacity-100 opacity-0"></div>
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-10" />
+
+      <div className="container mx-auto p-6 space-y-6 relative">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <GlowEffect className="absolute -inset-2 bg-gradient-to-r from-blue-500/50 to-cyan-500/50 rounded-lg blur opacity-75" />
+              <div className="relative p-2 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-lg">
+                <User className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div>
+              <TextShimmer className="text-3xl font-bold text-white" duration={2}>
+                Profile
+              </TextShimmer>
+              <p className="text-gray-400">Manage your professional profile and portfolio</p>
+            </div>
+          </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm">
             <Share2 className="h-4 w-4 mr-2" />
@@ -378,8 +400,11 @@ export default function ProfilePage() {
       </div>
 
       {/* Profile Header */}
-      <Card>
-        <CardContent className="p-6">
+      <div className="relative group">
+        <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+        <LiquidGlassCard className="relative">
+          <BorderTrail className="bg-gradient-to-r from-blue-500 to-cyan-600" size={60} duration={6} />
+          <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex flex-col items-center md:items-start">
               <div className="relative group">
@@ -417,15 +442,28 @@ export default function ProfilePage() {
             </div>
             <div className="flex-1">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                {stats.map((stat) => {
+                {stats.map((stat, index) => {
                   const IconComponent = stat.icon
+                  const statGradients = [
+                    { from: 'blue-500', to: 'cyan-600', iconColor: 'blue-400' },
+                    { from: 'green-500', to: 'emerald-600', iconColor: 'green-400' },
+                    { from: 'purple-500', to: 'pink-600', iconColor: 'purple-400' },
+                    { from: 'orange-500', to: 'amber-600', iconColor: 'orange-400' }
+                  ]
+                  const gradient = statGradients[index % 4]
+
                   return (
-                    <div key={stat.label} className="text-center">
-                      <div className="flex items-center justify-center mb-2">
-                        <IconComponent className="h-5 w-5 text-gray-400" />
+                    <div key={stat.label} className="relative group text-center">
+                      <GlowEffect className={`absolute -inset-1 bg-gradient-to-r from-${gradient.from}/20 to-${gradient.to}/20 rounded-lg blur opacity-20 group-hover:opacity-40 transition-opacity`} />
+                      <div className="relative p-3 rounded-lg backdrop-blur-sm bg-slate-800/30 border border-slate-700/50">
+                        <div className="flex items-center justify-center mb-2">
+                          <div className={`p-2 bg-gradient-to-r from-${gradient.from} to-${gradient.to} rounded-lg`}>
+                            <IconComponent className="h-4 w-4 text-white" />
+                          </div>
+                        </div>
+                        <NumberFlow value={stat.value} className={`text-2xl font-bold text-${gradient.iconColor}`} />
+                        <div className="text-xs text-gray-400 mt-1">{stat.label}</div>
                       </div>
-                      <div className="text-2xl font-bold">{stat.value}</div>
-                      <div className="text-xs text-gray-500">{stat.label}</div>
                     </div>
                   )
                 })}
@@ -448,7 +486,8 @@ export default function ProfilePage() {
             </div>
           </div>
         </CardContent>
-      </Card>
+        </LiquidGlassCard>
+      </div>
 
       {/* Profile Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
@@ -646,6 +685,7 @@ export default function ProfilePage() {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   )
 }

@@ -6,6 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { toast } from 'sonner'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { BorderTrail } from '@/components/ui/border-trail'
+import { GlowEffect } from '@/components/ui/glow-effect'
 import {
   Users,
   UserPlus,
@@ -401,12 +406,21 @@ export default function TeamPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold kazi-text-dark dark:kazi-text-light">Team</h1>
-          <p className="text-gray-600 dark:text-gray-300">Manage and collaborate with your team members</p>
-        </div>
+    <div className="min-h-screen relative">
+      {/* Pattern Craft Background */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
+      <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0"></div>
+      <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000 dark:opacity-100 opacity-0"></div>
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-10" />
+
+      <div className="container mx-auto p-6 space-y-6 relative">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <TextShimmer className="text-3xl font-bold" duration={2}>
+              Team
+            </TextShimmer>
+            <p className="text-gray-600 dark:text-gray-300 mt-2">Manage and collaborate with your team members</p>
+          </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm">
             <Settings className="h-4 w-4 mr-2" />
@@ -421,60 +435,80 @@ export default function TeamPage() {
 
       {/* Team Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card className="kazi-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Members</CardTitle>
-            <Users className="h-4 w-4 kazi-text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold kazi-text-primary">{teamStats.totalMembers}</div>
-            <p className="text-xs text-gray-500">Active team members</p>
-          </CardContent>
-        </Card>
+        <div className="relative group">
+          <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500/20 to-indigo-600/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+          <LiquidGlassCard className="relative">
+            <BorderTrail className="bg-gradient-to-r from-indigo-500 to-indigo-700" size={60} duration={6} />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Members</CardTitle>
+              <Users className="h-4 w-4 text-indigo-400" />
+            </CardHeader>
+            <CardContent>
+              <NumberFlow value={teamStats.totalMembers} className="text-2xl font-bold text-indigo-400" />
+              <p className="text-xs text-gray-400 dark:text-gray-500">Active team members</p>
+            </CardContent>
+          </LiquidGlassCard>
+        </div>
 
-        <Card className="kazi-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Online Now</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{teamStats.onlineMembers}</div>
-            <p className="text-xs text-gray-500">Available for work</p>
-          </CardContent>
-        </Card>
+        <div className="relative group">
+          <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+          <LiquidGlassCard className="relative">
+            <BorderTrail className="bg-gradient-to-r from-green-500 to-emerald-500" size={60} duration={6} />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Online Now</CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-400" />
+            </CardHeader>
+            <CardContent>
+              <NumberFlow value={teamStats.onlineMembers} className="text-2xl font-bold text-green-400" />
+              <p className="text-xs text-gray-400 dark:text-gray-500">Available for work</p>
+            </CardContent>
+          </LiquidGlassCard>
+        </div>
 
-        <Card className="kazi-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
-            <Target className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{teamStats.activeProjects}</div>
-            <p className="text-xs text-gray-500">In progress</p>
-          </CardContent>
-        </Card>
+        <div className="relative group">
+          <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-blue-600/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+          <LiquidGlassCard className="relative">
+            <BorderTrail className="bg-gradient-to-r from-blue-500 to-blue-700" size={60} duration={6} />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
+              <Target className="h-4 w-4 text-blue-400" />
+            </CardHeader>
+            <CardContent>
+              <NumberFlow value={teamStats.activeProjects} className="text-2xl font-bold text-blue-400" />
+              <p className="text-xs text-gray-400 dark:text-gray-500">In progress</p>
+            </CardContent>
+          </LiquidGlassCard>
+        </div>
 
-        <Card className="kazi-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tasks Completed</CardTitle>
-            <Award className="h-4 w-4 text-purple-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{teamStats.completedTasks}</div>
-            <p className="text-xs text-gray-500">This month</p>
-          </CardContent>
-        </Card>
+        <div className="relative group">
+          <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/20 to-purple-600/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+          <LiquidGlassCard className="relative">
+            <BorderTrail className="bg-gradient-to-r from-purple-500 to-purple-700" size={60} duration={6} />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Tasks Completed</CardTitle>
+              <Award className="h-4 w-4 text-purple-400" />
+            </CardHeader>
+            <CardContent>
+              <NumberFlow value={teamStats.completedTasks} className="text-2xl font-bold text-purple-400" />
+              <p className="text-xs text-gray-400 dark:text-gray-500">This month</p>
+            </CardContent>
+          </LiquidGlassCard>
+        </div>
 
-        <Card className="kazi-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Rating</CardTitle>
-            <Star className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{teamStats.averageRating.toFixed(1)}</div>
-            <p className="text-xs text-gray-500">Team performance</p>
-          </CardContent>
-        </Card>
+        <div className="relative group">
+          <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+          <LiquidGlassCard className="relative">
+            <BorderTrail className="bg-gradient-to-r from-yellow-500 to-amber-500" size={60} duration={6} />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Avg Rating</CardTitle>
+              <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+            </CardHeader>
+            <CardContent>
+              <NumberFlow value={parseFloat(teamStats.averageRating.toFixed(1))} className="text-2xl font-bold text-yellow-400" />
+              <p className="text-xs text-gray-400 dark:text-gray-500">Team performance</p>
+            </CardContent>
+          </LiquidGlassCard>
+        </div>
       </div>
 
       {/* Search and Filter */}
@@ -622,6 +656,7 @@ export default function TeamPage() {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }

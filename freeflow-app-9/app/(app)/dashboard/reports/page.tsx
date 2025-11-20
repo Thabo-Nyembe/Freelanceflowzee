@@ -5,6 +5,11 @@ import { toast } from 'sonner'
 import { PageHeader } from '@/components/ui/page-header'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { BorderTrail } from '@/components/ui/border-trail'
+import { GlowEffect } from '@/components/ui/glow-effect'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -268,8 +273,15 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6 kazi-bg-light min-h-screen">
-      <PageHeader
+    <div className="min-h-screen relative">
+      {/* Pattern Craft Background */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
+      <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0"></div>
+      <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000 dark:opacity-100 opacity-0"></div>
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-10" />
+
+      <div className="p-6 space-y-6 min-h-screen relative">
+        <PageHeader
         title="Reports"
         description="Comprehensive analytics and reporting dashboard"
         icon={BarChart3}
@@ -281,76 +293,92 @@ export default function ReportsPage() {
 
       {/* Report Overview Metrics */}
       <div className="grid gap-6 md:grid-cols-4">
-        <Card className="kazi-card">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Reports</p>
-                <p className="text-2xl font-bold">256</p>
-                <div className="flex items-center mt-1">
-                  <ArrowUpRight className="h-4 w-4 text-green-500 mr-1" />
-                  <span className="text-xs text-green-500">+12% from last period</span>
+        <div className="relative group">
+          <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+          <LiquidGlassCard className="relative">
+            <BorderTrail className="bg-gradient-to-r from-blue-500 to-indigo-600" size={60} duration={6} />
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-400">Total Reports</p>
+                  <NumberFlow value={256} className="text-2xl font-bold text-blue-400" />
+                  <div className="flex items-center mt-1">
+                    <ArrowUpRight className="h-4 w-4 text-green-400 mr-1" />
+                    <span className="text-xs text-green-400">+12% from last period</span>
+                  </div>
+                </div>
+                <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full">
+                  <FileText className="h-5 w-5 text-white" />
                 </div>
               </div>
-              <div className="p-2 bg-blue-100 rounded-full">
-                <FileText className="h-5 w-5 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </LiquidGlassCard>
+        </div>
         
-        <Card className="kazi-card">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Scheduled Reports</p>
-                <p className="text-2xl font-bold">28</p>
-                <div className="flex items-center mt-1">
-                  <ArrowUpRight className="h-4 w-4 text-green-500 mr-1" />
-                  <span className="text-xs text-green-500">+8% from last period</span>
+        <div className="relative group">
+          <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+          <LiquidGlassCard className="relative">
+            <BorderTrail className="bg-gradient-to-r from-green-500 to-emerald-600" size={60} duration={6} />
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-400">Scheduled Reports</p>
+                  <NumberFlow value={28} className="text-2xl font-bold text-green-400" />
+                  <div className="flex items-center mt-1">
+                    <ArrowUpRight className="h-4 w-4 text-green-400 mr-1" />
+                    <span className="text-xs text-green-400">+8% from last period</span>
+                  </div>
+                </div>
+                <div className="p-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full">
+                  <Calendar className="h-5 w-5 text-white" />
                 </div>
               </div>
-              <div className="p-2 bg-green-100 rounded-full">
-                <Calendar className="h-5 w-5 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </LiquidGlassCard>
+        </div>
         
-        <Card className="kazi-card">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Report Exports</p>
-                <p className="text-2xl font-bold">1,458</p>
-                <div className="flex items-center mt-1">
-                  <ArrowUpRight className="h-4 w-4 text-green-500 mr-1" />
-                  <span className="text-xs text-green-500">+15% from last period</span>
+        <div className="relative group">
+          <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/20 to-purple-600/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+          <LiquidGlassCard className="relative">
+            <BorderTrail className="bg-gradient-to-r from-purple-500 to-purple-700" size={60} duration={6} />
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-400">Report Exports</p>
+                  <NumberFlow value={1458} className="text-2xl font-bold text-purple-400" />
+                  <div className="flex items-center mt-1">
+                    <ArrowUpRight className="h-4 w-4 text-green-400 mr-1" />
+                    <span className="text-xs text-green-400">+15% from last period</span>
+                  </div>
+                </div>
+                <div className="p-2 bg-gradient-to-r from-purple-500 to-purple-700 rounded-full">
+                  <Download className="h-5 w-5 text-white" />
                 </div>
               </div>
-              <div className="p-2 bg-purple-100 rounded-full">
-                <Download className="h-5 w-5 text-purple-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </LiquidGlassCard>
+        </div>
         
-        <Card className="kazi-card">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Data Sources</p>
-                <p className="text-2xl font-bold">12</p>
-                <div className="flex items-center mt-1">
-                  <span className="text-xs text-muted-foreground">No change from last period</span>
+        <div className="relative group">
+          <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+          <LiquidGlassCard className="relative">
+            <BorderTrail className="bg-gradient-to-r from-yellow-500 to-amber-600" size={60} duration={6} />
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-400">Data Sources</p>
+                  <NumberFlow value={12} className="text-2xl font-bold text-yellow-400" />
+                  <div className="flex items-center mt-1">
+                    <span className="text-xs text-gray-500">No change from last period</span>
+                  </div>
+                </div>
+                <div className="p-2 bg-gradient-to-r from-yellow-500 to-amber-600 rounded-full">
+                  <HardDrive className="h-5 w-5 text-white" />
                 </div>
               </div>
-              <div className="p-2 bg-yellow-100 rounded-full">
-                <HardDrive className="h-5 w-5 text-yellow-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </LiquidGlassCard>
+        </div>
       </div>
 
       {/* Main Content */}
@@ -431,6 +459,7 @@ export default function ReportsPage() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }

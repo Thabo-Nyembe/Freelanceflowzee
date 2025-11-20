@@ -3,11 +3,16 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { NumberFlow } from '@/components/ui/number-flow'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Play, Pause, Clock, BarChart3, Calendar, FileText, Edit, Trash2, Plus, Copy, Download, Filter, RotateCcw } from 'lucide-react'
 import { toast } from 'sonner'
+import { BorderTrail } from '@/components/ui/border-trail'
+import { GlowEffect } from '@/components/ui/glow-effect'
 
 interface TimeEntry {
   id: string
@@ -499,22 +504,39 @@ export default function TimeTrackingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-violet-50/30 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent mb-2">
-            Time Tracking
-          </h1>
-          <p className="text-gray-600">Track time across projects and tasks</p>
+    <div className="min-h-screen relative p-6">
+      {/* Pattern Craft Background */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
+      <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0"></div>
+      <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-teal-500/20 to-cyan-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000 dark:opacity-100 opacity-0"></div>
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-10" />
+
+      <div className="max-w-7xl mx-auto relative">
+        <div className="mb-8 flex items-center gap-4">
+          <div className="relative">
+            <GlowEffect className="absolute -inset-2 bg-gradient-to-r from-emerald-500/50 to-teal-500/50 rounded-lg blur opacity-75" />
+            <div className="relative p-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg">
+              <Clock className="h-8 w-8 text-white" />
+            </div>
+          </div>
+          <div>
+            <TextShimmer className="text-4xl font-bold text-white mb-2" duration={2}>
+              Time Tracking
+            </TextShimmer>
+            <p className="text-gray-400">Track time across projects and tasks</p>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Timer Section */}
           <div className="lg:col-span-2">
-            <Card className="bg-white/60 backdrop-blur-xl border-0 shadow-2xl">
-              <CardHeader>
-                <CardTitle>Timer</CardTitle>
-              </CardHeader>
+            <div className="relative group">
+              <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+              <LiquidGlassCard className="relative">
+                <BorderTrail className="bg-gradient-to-r from-emerald-500 to-teal-600" size={60} duration={6} />
+                <CardHeader>
+                  <CardTitle className="text-white">Timer</CardTitle>
+                </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex justify-between mb-4">
@@ -623,13 +645,17 @@ export default function TimeTrackingPage() {
                   </div>
                 </div>
               </CardContent>
-            </Card>
+              </LiquidGlassCard>
+            </div>
 
             {/* Recent Time Entries */}
-            <Card className="mt-6 bg-white/60 backdrop-blur-xl border-0 shadow-2xl">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Recent Time Entries</CardTitle>
+            <div className="relative group mt-6">
+              <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+              <LiquidGlassCard className="relative">
+                <BorderTrail className="bg-gradient-to-r from-cyan-500 to-blue-600" size={60} duration={6} />
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-white">Recent Time Entries</CardTitle>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={handleFilterByProject}>
                       <Filter className="h-4 w-4 mr-2" />
@@ -698,15 +724,19 @@ export default function TimeTrackingPage() {
                   )}
                 </div>
               </CardContent>
-            </Card>
+              </LiquidGlassCard>
+            </div>
           </div>
 
           {/* Reports Section */}
           <div>
-            <Card className="bg-white/60 backdrop-blur-xl border-0 shadow-2xl">
-              <CardHeader>
-                <CardTitle>Reports</CardTitle>
-              </CardHeader>
+            <div className="relative group">
+              <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+              <LiquidGlassCard className="relative">
+                <BorderTrail className="bg-gradient-to-r from-purple-500 to-pink-600" size={60} duration={6} />
+                <CardHeader>
+                  <CardTitle className="text-white">Reports</CardTitle>
+                </CardHeader>
               <CardContent>
                 <Tabs defaultValue="daily">
                   <TabsList className="grid w-full grid-cols-3">
@@ -781,7 +811,8 @@ export default function TimeTrackingPage() {
                   </Button>
                 </div>
               </CardContent>
-            </Card>
+              </LiquidGlassCard>
+            </div>
           </div>
         </div>
       </div>

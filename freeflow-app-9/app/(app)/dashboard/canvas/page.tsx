@@ -5,6 +5,9 @@ import { Card, CardContent } from '@/components/ui/card'
 import { AIEnhancedCanvasCollaboration } from '@/components/collaboration/ai-enhanced-canvas-collaboration'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { NumberFlow } from '@/components/ui/number-flow'
 import {
   Palette,
   Monitor,
@@ -14,6 +17,8 @@ import {
   MousePointer,
   MessageCircle
 } from 'lucide-react'
+import { BorderTrail } from '@/components/ui/border-trail'
+import { GlowEffect } from '@/components/ui/glow-effect'
 
 export default function CanvasPage() {
   // Handlers
@@ -292,7 +297,13 @@ export default function CanvasPage() {
   ]
 
   return (
-    <div className="p-6 space-y-6 kazi-bg-light min-h-screen">
+    <div className="p-6 space-y-6 min-h-screen relative">
+      {/* Pattern Craft Background */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
+      <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-indigo-500/20 to-violet-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0"></div>
+      <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-violet-500/20 to-purple-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000 dark:opacity-100 opacity-0"></div>
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-10" />
+
       <PageHeader
         title="Canvas Collaboration"
         description="Professional design and prototyping workspace with real-time collaboration"
@@ -304,32 +315,52 @@ export default function CanvasPage() {
       />
 
       <div className="grid gap-6">
-        <Card className="kazi-card">
-          <CardContent className="p-6">
-            <AIEnhancedCanvasCollaboration projectId="demo-project" />
-          </CardContent>
-        </Card>
+        <div className="relative group">
+          <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500/20 to-violet-500/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+          <LiquidGlassCard className="relative">
+            <BorderTrail className="bg-gradient-to-r from-indigo-500 to-violet-600" size={60} duration={6} />
+            <CardContent className="p-6">
+              <AIEnhancedCanvasCollaboration projectId="demo-project" />
+            </CardContent>
+          </LiquidGlassCard>
+        </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {features.map((feature, index) => (
-            <Card key={index} className="kazi-card">
-              <CardContent className="p-6">
-                <div className="flex items-start space-x-4">
-                  <div className="p-2 rounded-lg kazi-bg-tertiary">
-                    <feature.icon className="h-5 w-5 kazi-text-secondary" />
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    <h3 className="font-semibold kazi-text-primary">
-                      {feature.title}
-                    </h3>
-                    <p className="kazi-body text-sm">
-                      {feature.description}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {features.map((feature, index) => {
+            const gradients = [
+              { from: 'blue-500', to: 'indigo-600', iconColor: 'blue-400' },
+              { from: 'green-500', to: 'emerald-600', iconColor: 'green-400' },
+              { from: 'purple-500', to: 'pink-600', iconColor: 'purple-400' },
+              { from: 'orange-500', to: 'red-600', iconColor: 'orange-400' },
+              { from: 'cyan-500', to: 'teal-600', iconColor: 'cyan-400' },
+              { from: 'yellow-500', to: 'amber-600', iconColor: 'yellow-400' }
+            ]
+            const gradient = gradients[index]
+
+            return (
+              <div key={index} className="relative group">
+                <GlowEffect className={`absolute -inset-0.5 bg-gradient-to-r from-${gradient.from}/20 to-${gradient.to}/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity`} />
+                <LiquidGlassCard className="relative">
+                  <BorderTrail className={`bg-gradient-to-r from-${gradient.from} to-${gradient.to}`} size={60} duration={6} />
+                  <CardContent className="p-6">
+                    <div className="flex items-start space-x-4">
+                      <div className={`relative p-2 bg-gradient-to-r from-${gradient.from} to-${gradient.to} rounded-lg`}>
+                        <feature.icon className="h-5 w-5 text-white" />
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <h3 className="font-semibold text-white">
+                          {feature.title}
+                        </h3>
+                        <p className="text-gray-400 text-sm">
+                          {feature.description}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </LiquidGlassCard>
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>

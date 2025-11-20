@@ -6,6 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { BorderTrail } from '@/components/ui/border-trail'
+import { GlowEffect } from '@/components/ui/glow-effect'
 import {
   FileText,
   Plus,
@@ -286,22 +291,32 @@ export default function InvoicesPage() {
   const overdueAmount = invoices.filter(inv => inv.status === 'overdue').reduce((sum, inv) => sum + inv.amount, 0)
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            {/* Gradient icon container */}
-            <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg">
-              <Receipt className="h-6 w-6 text-white" />
+    <div className="min-h-screen relative">
+      {/* Pattern Craft Background */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
+      <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0"></div>
+      <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000 dark:opacity-100 opacity-0"></div>
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-10" />
+
+      <div className="container mx-auto p-6 space-y-6 relative">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3">
+              {/* Gradient icon container */}
+              <div className="relative">
+                <GlowEffect className="absolute -inset-1 bg-gradient-to-r from-blue-500/50 to-indigo-500/50 rounded-lg blur opacity-75" />
+                <div className="relative p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg">
+                  <Receipt className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <TextShimmer className="text-3xl font-bold" duration={2}>
+                Invoices
+              </TextShimmer>
             </div>
-            <h1 className="text-3xl font-bold kazi-text-dark dark:kazi-text-light">
-              Invoices
-            </h1>
+            <p className="text-gray-600 dark:text-gray-300 mt-2">
+              Manage your invoices and payments
+            </p>
           </div>
-          <p className="text-gray-600 dark:text-gray-300">
-            Manage your invoices and payments
-          </p>
-        </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
@@ -316,49 +331,65 @@ export default function InvoicesPage() {
 
       {/* Invoice Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="kazi-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Amount</CardTitle>
-            <DollarSign className="h-4 w-4 kazi-text-accent" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold kazi-text-accent">${totalAmount.toLocaleString()}</div>
-            <p className="text-xs text-gray-500">{invoices.length} invoices</p>
-          </CardContent>
-        </Card>
+        <div className="relative group">
+          <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+          <LiquidGlassCard className="relative">
+            <BorderTrail className="bg-gradient-to-r from-blue-500 to-indigo-600" size={60} duration={6} />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Amount</CardTitle>
+              <DollarSign className="h-4 w-4 text-blue-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-400">${totalAmount.toLocaleString()}</div>
+              <p className="text-xs text-gray-400 dark:text-gray-500">{invoices.length} invoices</p>
+            </CardContent>
+          </LiquidGlassCard>
+        </div>
 
-        <Card className="kazi-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Paid</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">${paidAmount.toLocaleString()}</div>
-            <p className="text-xs text-gray-500">{invoices.filter(inv => inv.status === 'paid').length} paid</p>
-          </CardContent>
-        </Card>
+        <div className="relative group">
+          <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+          <LiquidGlassCard className="relative">
+            <BorderTrail className="bg-gradient-to-r from-green-500 to-emerald-600" size={60} duration={6} />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Paid</CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-400">${paidAmount.toLocaleString()}</div>
+              <p className="text-xs text-gray-400 dark:text-gray-500">{invoices.filter(inv => inv.status === 'paid').length} paid</p>
+            </CardContent>
+          </LiquidGlassCard>
+        </div>
 
-        <Card className="kazi-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">${pendingAmount.toLocaleString()}</div>
-            <p className="text-xs text-gray-500">{invoices.filter(inv => inv.status === 'pending').length} pending</p>
-          </CardContent>
-        </Card>
+        <div className="relative group">
+          <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+          <LiquidGlassCard className="relative">
+            <BorderTrail className="bg-gradient-to-r from-yellow-500 to-amber-600" size={60} duration={6} />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pending</CardTitle>
+              <Clock className="h-4 w-4 text-yellow-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-yellow-400">${pendingAmount.toLocaleString()}</div>
+              <p className="text-xs text-gray-400 dark:text-gray-500">{invoices.filter(inv => inv.status === 'pending').length} pending</p>
+            </CardContent>
+          </LiquidGlassCard>
+        </div>
 
-        <Card className="kazi-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Overdue</CardTitle>
-            <XCircle className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">${overdueAmount.toLocaleString()}</div>
-            <p className="text-xs text-gray-500">{invoices.filter(inv => inv.status === 'overdue').length} overdue</p>
-          </CardContent>
-        </Card>
+        <div className="relative group">
+          <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-red-500/20 to-rose-500/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+          <LiquidGlassCard className="relative">
+            <BorderTrail className="bg-gradient-to-r from-red-500 to-rose-600" size={60} duration={6} />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Overdue</CardTitle>
+              <XCircle className="h-4 w-4 text-red-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-400">${overdueAmount.toLocaleString()}</div>
+              <p className="text-xs text-gray-400 dark:text-gray-500">{invoices.filter(inv => inv.status === 'overdue').length} overdue</p>
+            </CardContent>
+          </LiquidGlassCard>
+        </div>
       </div>
 
       {/* Invoice Management */}
@@ -457,6 +488,7 @@ export default function InvoicesPage() {
           </Tabs>
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }

@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { TextShimmer } from '@/components/ui/text-shimmer'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { NumberFlow } from '@/components/ui/number-flow'
 import {
   Users,
   MessageSquare,
@@ -45,6 +47,8 @@ import {
   Bookmark,
   Globe
 } from 'lucide-react'
+import { BorderTrail } from '@/components/ui/border-trail'
+import { GlowEffect } from '@/components/ui/glow-effect'
 
 interface CommunityMember {
   id: string
@@ -1867,14 +1871,25 @@ export default function CommunityHubPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen relative">
+      {/* Pattern Craft Background */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
+      <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0"></div>
+      <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-pink-500/20 to-rose-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000 dark:opacity-100 opacity-0"></div>
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-10" />
+
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-6">
+      <div className="relative backdrop-blur-sm bg-slate-900/50 border-b border-slate-700 p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <Globe className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-              <TextShimmer className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-purple-900 to-pink-900 dark:from-gray-100 dark:via-purple-100 dark:to-pink-100 bg-clip-text text-transparent">
+              <div className="relative">
+                <GlowEffect className="absolute -inset-2 bg-gradient-to-r from-purple-500/50 to-pink-500/50 rounded-lg blur opacity-75" />
+                <div className="relative p-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg">
+                  <Globe className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <TextShimmer className="text-4xl font-bold text-white" duration={2}>
                 Community Hub
               </TextShimmer>
               <Badge className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">KAZI</Badge>
@@ -2180,16 +2195,27 @@ export default function CommunityHubPage() {
                   type: 'review',
                   image: 'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=400&h=200&fit=crop'
                 }
-              ].map(event => (
-                <Card key={event.id} className="hover:shadow-lg transition-shadow">
-                  <div className="relative">
-                    <img src={event.image} alt={event.title} className="w-full h-32 object-cover rounded-t-lg" />
-                    <Badge className="absolute top-2 right-2" variant="secondary">
-                      {event.type}
-                    </Badge>
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold mb-2">{event.title}</h3>
+              ].map((event, index) => {
+                const eventGradients = [
+                  { from: 'blue-500', to: 'indigo-600' },
+                  { from: 'purple-500', to: 'pink-600' },
+                  { from: 'green-500', to: 'emerald-600' }
+                ]
+                const gradient = eventGradients[index % 3]
+
+                return (
+                  <div key={event.id} className="relative group">
+                    <GlowEffect className={`absolute -inset-0.5 bg-gradient-to-r from-${gradient.from}/20 to-${gradient.to}/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity`} />
+                    <LiquidGlassCard className="relative hover:shadow-2xl transition-shadow">
+                      <BorderTrail className={`bg-gradient-to-r from-${gradient.from} to-${gradient.to}`} size={60} duration={6} />
+                      <div className="relative">
+                        <img src={event.image} alt={event.title} className="w-full h-32 object-cover rounded-t-lg" />
+                        <Badge className="absolute top-2 right-2" variant="secondary">
+                          {event.type}
+                        </Badge>
+                      </div>
+                      <CardContent className="p-4">
+                        <h3 className="font-semibold mb-2 text-white">{event.title}</h3>
                     <div className="space-y-2 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
@@ -2204,15 +2230,17 @@ export default function CommunityHubPage() {
                         {event.attendees} attending
                       </div>
                     </div>
-                    <div className="flex gap-2 mt-4">
-                      <Button data-testid={`join-event-${event.id}-btn`} size="sm" className="flex-1">Join Event</Button>
-                      <Button data-testid={`favorite-event-${event.id}-btn`} size="sm" variant="outline">
-                        <Heart className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                        <div className="flex gap-2 mt-4">
+                          <Button data-testid={`join-event-${event.id}-btn`} size="sm" className="flex-1">Join Event</Button>
+                          <Button data-testid={`favorite-event-${event.id}-btn`} size="sm" variant="outline">
+                            <Heart className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </LiquidGlassCard>
+                  </div>
+                )
+              })}
             </div>
           </TabsContent>
           
@@ -2260,18 +2288,29 @@ export default function CommunityHubPage() {
                   posts: 423,
                   activity: 'Very Active'
                 }
-              ].map(group => (
-                <Card key={group.id} className="hover:shadow-lg transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3 mb-3">
-                      <img 
-                        src={group.avatar} 
-                        alt={group.name}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold">{group.name}</h3>
+              ].map((group, index) => {
+                const groupGradients = [
+                  { from: 'cyan-500', to: 'blue-600' },
+                  { from: 'orange-500', to: 'red-600' },
+                  { from: 'yellow-500', to: 'amber-600' }
+                ]
+                const gradient = groupGradients[index % 3]
+
+                return (
+                  <div key={group.id} className="relative group">
+                    <GlowEffect className={`absolute -inset-0.5 bg-gradient-to-r from-${gradient.from}/20 to-${gradient.to}/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity`} />
+                    <LiquidGlassCard className="relative hover:shadow-2xl transition-shadow">
+                      <BorderTrail className={`bg-gradient-to-r from-${gradient.from} to-${gradient.to}`} size={60} duration={6} />
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3 mb-3">
+                          <img
+                            src={group.avatar}
+                            alt={group.name}
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold text-white">{group.name}</h3>
                           {!group.isPrivate && (
                             <Badge variant="outline" className="text-xs">Public</Badge>
                           )}
@@ -2302,12 +2341,14 @@ export default function CommunityHubPage() {
                       </Badge>
                     </div>
                     
-                    <Button data-testid={`join-group-${group.id}-btn`} className="w-full" size="sm">
-                      Join Group
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
+                        <Button data-testid={`join-group-${group.id}-btn`} className="w-full" size="sm">
+                          Join Group
+                        </Button>
+                      </CardContent>
+                    </LiquidGlassCard>
+                  </div>
+                )
+              })}
             </div>
           </TabsContent>
           
