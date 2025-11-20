@@ -16,6 +16,10 @@ import {
 } from 'lucide-react'
 
 import { AICreate } from '@/components/ai/ai-create'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { GlowEffect } from '@/components/ui/glow-effect'
 
 export default function AICreatePage() {
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({})
@@ -269,11 +273,13 @@ export default function AICreatePage() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="flex items-center gap-2 text-3xl font-bold kazi-text-dark dark:kazi-text-light kazi-headline">
-            <Brain className="h-6 w-6 kazi-text-primary" data-testid="ai-create-icon" />
-            AI Create Settings
-          </h1>
-          <p className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mt-2">
+          <div className="flex items-center gap-2">
+            <Brain className="h-8 w-8 text-purple-600 dark:text-purple-400" data-testid="ai-create-icon" />
+            <TextShimmer className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-purple-900 to-pink-900 dark:from-gray-100 dark:via-purple-100 dark:to-pink-100 bg-clip-text text-transparent">
+              AI Create Studio
+            </TextShimmer>
+          </div>
+          <p className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mt-3">
             <SettingsIcon className="h-4 w-4 flex-shrink-0" />
             Configure your AI provider settings and API keys
           </p>
@@ -281,42 +287,58 @@ export default function AICreatePage() {
 
         {/* Stats Bar */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
-            <div className="flex items-center gap-2">
-              <Key className="h-4 w-4 text-blue-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">API Keys</span>
+          <LiquidGlassCard variant="gradient" hoverEffect={true}>
+            <div className="p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="p-1.5 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 dark:from-blue-400/10 dark:to-cyan-400/10 rounded-lg backdrop-blur-sm">
+                  <Key className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">API Keys</span>
+              </div>
+              <NumberFlow value={Object.keys(apiKeys).length} className="text-2xl font-bold text-gray-900 dark:text-gray-100" />
             </div>
-            <p className="text-2xl font-bold mt-1">{Object.keys(apiKeys).length}</p>
-          </div>
+          </LiquidGlassCard>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
-            <div className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-yellow-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">Active Provider</span>
+          <LiquidGlassCard variant="tinted" hoverEffect={true}>
+            <div className="p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="p-1.5 bg-gradient-to-br from-purple-400/20 to-pink-400/20 dark:from-purple-400/10 dark:to-pink-400/10 rounded-lg backdrop-blur-sm">
+                  <Zap className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                </div>
+                <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">Active Provider</span>
+              </div>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 capitalize">{activeProvider}</p>
             </div>
-            <p className="text-2xl font-bold mt-1 capitalize">{activeProvider}</p>
-          </div>
+          </LiquidGlassCard>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
-            <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4 text-green-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">Status</span>
+          <LiquidGlassCard variant="gradient" hoverEffect={true}>
+            <div className="p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="p-1.5 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 dark:from-emerald-400/10 dark:to-teal-400/10 rounded-lg backdrop-blur-sm">
+                  <Shield className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">Status</span>
+              </div>
+              <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <CheckCircle className="h-4 w-4" />
+                Configured
+              </p>
             </div>
-            <p className="text-sm font-bold mt-1 text-green-600 flex items-center gap-1">
-              <CheckCircle className="h-4 w-4" />
-              Configured
-            </p>
-          </div>
+          </LiquidGlassCard>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
-            <div className="flex items-center gap-2">
-              <RefreshCw className="h-4 w-4 text-purple-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">Last Saved</span>
+          <LiquidGlassCard variant="tinted" hoverEffect={true}>
+            <div className="p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="p-1.5 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 dark:from-indigo-400/10 dark:to-purple-400/10 rounded-lg backdrop-blur-sm">
+                  <RefreshCw className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">Last Saved</span>
+              </div>
+              <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                {lastSaved ? lastSaved.toLocaleTimeString() : 'Never'}
+              </p>
             </div>
-            <p className="text-sm font-bold mt-1">
-              {lastSaved ? lastSaved.toLocaleTimeString() : 'Never'}
-            </p>
-          </div>
+          </LiquidGlassCard>
         </div>
 
         {/* Main Content */}
