@@ -10,6 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Label } from '@/components/ui/label'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { TextShimmer } from '@/components/ui/text-shimmer'
 import { 
   Bell, 
   Search, 
@@ -458,13 +460,17 @@ export default function NotificationsPage() {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <Bell className="w-6 h-6 text-purple-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+              <TextShimmer className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-purple-900 to-violet-900 dark:from-gray-100 dark:via-purple-100 dark:to-violet-100 bg-clip-text text-transparent">
+                Notifications
+              </TextShimmer>
               <Badge className="bg-gradient-to-r from-purple-500 to-violet-600 text-white">A+++</Badge>
             </div>
             {unreadCount > 0 && (
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                <span className="text-sm text-gray-600">{unreadCount} unread</span>
+                <span className="text-sm text-gray-600">
+                  <NumberFlow value={unreadCount} className="inline-block" /> unread
+                </span>
               </div>
             )}
           </div>
@@ -491,7 +497,9 @@ export default function NotificationsPage() {
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger data-testid="inbox-tab" value="inbox">Inbox ({filteredNotifications.length})</TabsTrigger>
+            <TabsTrigger data-testid="inbox-tab" value="inbox">
+              Inbox (<NumberFlow value={filteredNotifications.length} className="inline-block" />)
+            </TabsTrigger>
             <TabsTrigger data-testid="notification-settings-tab" value="settings">Settings</TabsTrigger>
             <TabsTrigger data-testid="archive-tab" value="archive">Archive</TabsTrigger>
           </TabsList>
