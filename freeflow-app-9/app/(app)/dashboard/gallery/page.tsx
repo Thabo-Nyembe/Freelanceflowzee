@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { TextShimmer } from '@/components/ui/text-shimmer'
 import {
   Image,
   Video,
@@ -672,7 +674,9 @@ export default function GalleryPage() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold kazi-text-dark dark:kazi-text-light">Gallery</h1>
+          <TextShimmer className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-pink-900 to-purple-900 dark:from-gray-100 dark:via-pink-100 dark:to-purple-100 bg-clip-text text-transparent">
+            Gallery
+          </TextShimmer>
           <p className="text-gray-600 dark:text-gray-300">Showcase your creative work and portfolio</p>
         </div>
         <div className="flex gap-2">
@@ -726,11 +730,11 @@ export default function GalleryPage() {
                     <div className="flex items-center gap-3">
                       <span className="flex items-center gap-1">
                         <Heart className="h-4 w-4" />
-                        {item.likes}
+                        <NumberFlow value={item.likes} className="inline-block" />
                       </span>
                       <span className="flex items-center gap-1">
                         <MessageCircle className="h-4 w-4" />
-                        {item.comments}
+                        <NumberFlow value={item.comments} className="inline-block" />
                       </span>
                     </div>
                   </div>
@@ -924,11 +928,11 @@ export default function GalleryPage() {
                             <div className="flex items-center gap-2">
                               <span className="flex items-center gap-1">
                                 <Heart className="h-3 w-3" />
-                                {item.likes}
+                                <NumberFlow value={item.likes} className="inline-block" />
                               </span>
                               <span className="flex items-center gap-1">
                                 <MessageCircle className="h-3 w-3" />
-                                {item.comments}
+                                <NumberFlow value={item.comments} className="inline-block" />
                               </span>
                             </div>
                           </div>
@@ -969,11 +973,11 @@ export default function GalleryPage() {
                                 </span>
                                 <span className="flex items-center gap-1">
                                   <Heart className="h-4 w-4" />
-                                  {item.likes}
+                                  <NumberFlow value={item.likes} className="inline-block" />
                                 </span>
                                 <span className="flex items-center gap-1">
                                   <MessageCircle className="h-4 w-4" />
-                                  {item.comments}
+                                  <NumberFlow value={item.comments} className="inline-block" />
                                 </span>
                               </div>
                             </div>
