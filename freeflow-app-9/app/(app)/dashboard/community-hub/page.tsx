@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { TextShimmer } from '@/components/ui/text-shimmer'
 import {
   Users,
   MessageSquare,
@@ -1872,9 +1873,11 @@ export default function CommunityHubPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <Globe className="w-6 h-6 text-purple-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Community Hub</h1>
-              <Badge className="bg-gradient-to-r from-purple-500 to-violet-600 text-white">KAZI</Badge>
+              <Globe className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+              <TextShimmer className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-purple-900 to-pink-900 dark:from-gray-100 dark:via-purple-100 dark:to-pink-100 bg-clip-text text-transparent">
+                Community Hub
+              </TextShimmer>
+              <Badge className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">KAZI</Badge>
             </div>
             <div className="flex items-center gap-2">
               <Activity className="w-4 h-4 text-gray-500" />
