@@ -12,6 +12,7 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Label } from '@/components/ui/label'
+import { TextShimmer } from '@/components/ui/text-shimmer'
 import {
   Settings,
   User,
@@ -517,7 +518,9 @@ If you lose access to your authenticator app, you can use these codes to sign in
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <Settings className="w-6 h-6 text-purple-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Settings & Preferences</h1>
+              <TextShimmer className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-purple-900 to-violet-900 dark:from-gray-100 dark:via-purple-100 dark:to-violet-100 bg-clip-text text-transparent">
+                Settings & Preferences
+              </TextShimmer>
               <Badge className="bg-gradient-to-r from-purple-500 to-violet-600 text-white">A+++</Badge>
             </div>
             <div className="flex items-center gap-2">
