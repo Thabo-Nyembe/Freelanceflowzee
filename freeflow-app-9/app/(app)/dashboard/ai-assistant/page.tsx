@@ -39,6 +39,11 @@ import {
   Star
 } from 'lucide-react'
 
+// A+++ UTILITIES
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 interface Message {
   id: string
   content: string
@@ -79,6 +84,11 @@ interface ProjectAnalysis {
 }
 
 export default function AIAssistantPage() {
+  // A+++ STATE MANAGEMENT
+  const [isPageLoading, setIsPageLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -93,11 +103,41 @@ export default function AIAssistantPage() {
       ]
     }
   ])
-  
+
   const [inputMessage, setInputMessage] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [activeTab, setActiveTab] = useState<string>('chat')
   const [selectedModel, setSelectedModel] = useState<string>('anthropic')
+
+  // A+++ LOAD AI ASSISTANT DATA
+  useEffect(() => {
+    const loadAIAssistantData = async () => {
+      try {
+        setIsPageLoading(true)
+        setError(null)
+
+        // Simulate data loading with potential error
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load AI assistant'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsPageLoading(false)
+        announce('AI assistant loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load AI assistant')
+        setIsPageLoading(false)
+        announce('Error loading AI assistant', 'assertive')
+      }
+    }
+
+    loadAIAssistantData()
+  }, [announce])
   const [isVoiceMode, setIsVoiceMode] = useState<boolean>(false)
   const [isListening, setIsListening] = useState<boolean>(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -540,6 +580,36 @@ export default function AIAssistantPage() {
     toast.success('📦 Conversation Archived', {
       description: 'Moved to archive'
     })
+  }
+
+  // A+++ LOADING STATE
+  if (isPageLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="space-y-6">
+          <CardSkeleton />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <CardSkeleton />
+            </div>
+            <CardSkeleton />
+          </div>
+          <ListSkeleton items={4} />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <ErrorEmptyState
+          error={error}
+          onRetry={() => window.location.reload()}
+        />
+      </div>
+    )
   }
 
   return (
