@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -39,9 +39,49 @@ import {
 import { BorderTrail } from '@/components/ui/border-trail'
 import { GlowEffect } from '@/components/ui/glow-effect'
 
+// A+++ UTILITIES
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 export default function ProfilePage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
   const [activeTab, setActiveTab] = useState<any>('overview')
   const [isEditing, setIsEditing] = useState<any>(false)
+
+  // A+++ LOAD PROFILE DATA
+  useEffect(() => {
+    const loadProfileData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate data loading with potential error
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load profile'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsLoading(false)
+        announce('Profile loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load profile')
+        setIsLoading(false)
+        announce('Error loading profile', 'assertive')
+      }
+    }
+
+    loadProfileData()
+  }, [announce])
 
   // Handlers
   const handleEditProfile = () => {
@@ -362,6 +402,36 @@ export default function ProfilePage() {
     { label: 'Total Reviews', value: userProfile.reviews, icon: MessageSquare },
     { label: 'Followers', value: userProfile.followers, icon: Users }
   ]
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="min-h-screen relative p-6">
+        <div className="space-y-6">
+          <CardSkeleton />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+          <ListSkeleton items={5} />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="min-h-screen relative p-6">
+        <ErrorEmptyState
+          error={error}
+          onRetry={() => window.location.reload()}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen relative">
