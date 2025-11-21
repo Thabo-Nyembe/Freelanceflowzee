@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -50,6 +50,11 @@ import {
   HelpCircle
 } from 'lucide-react'
 
+// A+++ UTILITIES
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 interface UserProfile {
   firstName: string
   lastName: string
@@ -93,9 +98,44 @@ interface AppearanceSettings {
 }
 
 export default function SettingsPage() {
+  // A+++ STATE MANAGEMENT
+  const [isPageLoading, setIsPageLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
   const [activeTab, setActiveTab] = useState<string>('profile')
   const [showPassword, setShowPassword] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  // A+++ LOAD SETTINGS DATA
+  useEffect(() => {
+    const loadSettingsData = async () => {
+      try {
+        setIsPageLoading(true)
+        setError(null)
+
+        // Simulate data loading with potential error
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load settings'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsPageLoading(false)
+        announce('Settings loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load settings')
+        setIsPageLoading(false)
+        announce('Error loading settings', 'assertive')
+      }
+    }
+
+    loadSettingsData()
+  }, [announce])
 
   const [profile, setProfile] = useState<UserProfile>({
     firstName: 'John',
@@ -509,6 +549,34 @@ If you lose access to your authenticator app, you can use these codes to sign in
     toast.success('🔔 Test Notification Sent!', {
       description: 'Check your notification settings to verify'
     })
+  }
+
+  // A+++ LOADING STATE
+  if (isPageLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 p-6">
+        <div className="space-y-6">
+          <CardSkeleton />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+          <ListSkeleton items={6} />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-950 p-6">
+        <ErrorEmptyState
+          error={error}
+          onRetry={() => window.location.reload()}
+        />
+      </div>
+    )
   }
 
   return (
