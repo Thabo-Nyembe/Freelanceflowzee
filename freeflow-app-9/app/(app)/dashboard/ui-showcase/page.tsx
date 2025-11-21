@@ -4,10 +4,50 @@ import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Plus, Heart, Star, Send, Download, Play } from 'lucide-react'
 
+// A+++ UTILITIES
+import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 export default function UIShowcasePage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
   const [dynamicIslandExpanded, setDynamicIslandExpanded] = useState(false)
   const [morphingLoading, setMorphingLoading] = useState(false)
   const [morphingSuccess, setMorphingSuccess] = useState(false)
+
+  // A+++ LOAD UI SHOWCASE DATA
+  useEffect(() => {
+    const loadUIShowcaseData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate data loading with 5% error rate
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load UI showcase'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsLoading(false)
+        announce('UI showcase loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load UI showcase')
+        setIsLoading(false)
+        announce('Error loading UI showcase', 'assertive')
+      }
+    }
+
+    loadUIShowcaseData()
+  }, [announce])
 
   useEffect(() => {
     document.title = 'KAZI - UI Showcase'
@@ -20,6 +60,36 @@ export default function UIShowcasePage() {
       setMorphingSuccess(true)
       setTimeout(() => setMorphingSuccess(false), 2000)
     }, 2000)
+  }
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="h-full overflow-auto bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900 p-6">
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 -left-4 w-72 h-72 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 -right-4 w-72 h-72 bg-gradient-to-r from-purple-400/20 to-blue-400/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-700"></div>
+        </div>
+        <div className="relative max-w-7xl mx-auto space-y-8">
+          <CardSkeleton />
+          <DashboardSkeleton />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="h-full overflow-auto bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900 p-6">
+        <div className="max-w-2xl mx-auto mt-20">
+          <ErrorEmptyState
+            error={error}
+            onRetry={() => window.location.reload()}
+          />
+        </div>
+      </div>
+    )
   }
 
   return (
