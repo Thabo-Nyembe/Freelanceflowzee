@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
@@ -36,7 +36,17 @@ import {
   Building
 } from 'lucide-react'
 
+// A+++ UTILITIES
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 export default function TeamHubPage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
   const [selectedMember, setSelectedMember] = useState<any>(null)
   const [activeTab, setActiveTab] = useState<string>('overview')
   const [searchTerm, setSearchTerm] = useState<string>('')
@@ -168,6 +178,36 @@ export default function TeamHubPage() {
     completedTasks: teamMembers.reduce((sum, m) => sum + m.tasksCompleted, 0),
     averageRating: teamMembers.reduce((sum, m) => sum + m.rating, 0) / teamMembers.length
   }
+
+  // A+++ LOAD TEAM DATA
+  useEffect(() => {
+    const loadTeamData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate data loading with potential error
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load team data'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsLoading(false)
+        announce('Team data loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load team data')
+        setIsLoading(false)
+        announce('Error loading team data', 'assertive')
+      }
+    }
+
+    loadTeamData()
+  }, [announce])
 
   // ============================================================
   // 16 NEW ENTERPRISE-GRADE HANDLERS FOR INVESTOR READINESS
@@ -377,11 +417,68 @@ export default function TeamHubPage() {
     }
   }
 
-  const filteredMembers = teamMembers.filter(member => 
+  const filteredMembers = teamMembers.filter(member =>
     member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     member.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
     member.department.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="min-h-screen relative p-6">
+        <div className="container mx-auto space-y-6">
+          <CardSkeleton />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+          <ListSkeleton items={6} />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="min-h-screen relative p-6">
+        <div className="container mx-auto">
+          <ErrorEmptyState
+            error={error}
+            onRetry={() => window.location.reload()}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ EMPTY STATE
+  if (filteredMembers.length === 0 && !isLoading) {
+    return (
+      <div className="min-h-screen relative p-6">
+        <div className="container mx-auto">
+          <NoDataEmptyState
+            entityName="team members"
+            description={
+              searchTerm
+                ? "No team members match your search criteria. Try a different search term."
+                : "Get started by inviting your first team member."
+            }
+            action={{
+              label: searchTerm ? 'Clear Search' : 'Invite Member',
+              onClick: searchTerm
+                ? () => setSearchTerm('')
+                : () => toast.info('Invite Member', { description: 'Team invitation feature' })
+            }}
+          />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen relative">
