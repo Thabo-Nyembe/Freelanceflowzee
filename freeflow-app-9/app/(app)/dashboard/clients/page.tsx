@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------ */
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import {
   Users,
@@ -40,10 +40,17 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { NumberFlow } from '@/components/ui/number-flow'
 
+// ============================================================================
+// A+++ UTILITIES
+// ============================================================================
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 // ------------------------------------------------------------------//
 // mocked client dataset – replace with real API later
 // ------------------------------------------------------------------//
-const clients = [
+const mockClients = [
   {
     id: 'CL-001',
     name: 'Alex Johnson',
@@ -80,7 +87,7 @@ const clients = [
     rating: 4,
     status: 'lead',
   },
-] as const
+]
 
 // badge colour helper
 const statusColour: Record<string, string> = {
@@ -90,7 +97,52 @@ const statusColour: Record<string, string> = {
 }
 
 export default function ClientsPage() {
+  // ============================================================================
+  // A+++ STATE MANAGEMENT
+  // ============================================================================
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [clients, setClients] = useState<typeof mockClients>([])
+  const { announce } = useAnnouncer()
+
+  // Regular state
   const [query, setQuery] = useState('')
+
+  // ============================================================================
+  // A+++ LOAD CLIENTS DATA
+  // ============================================================================
+  useEffect(() => {
+    const loadClientsData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate API call with potential failure
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            // Simulate occasional errors (5% failure rate)
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load clients'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setClients(mockClients)
+        setIsLoading(false)
+
+        // A+++ Accessibility announcement
+        announce(`${mockClients.length} clients loaded successfully`, 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load clients')
+        setIsLoading(false)
+        announce('Error loading clients', 'assertive')
+      }
+    }
+
+    loadClientsData()
+  }, [announce])
 
   // Handlers
   const handleAddClient = () => {
@@ -287,6 +339,71 @@ export default function ClientsPage() {
     vip: clients.filter((c) => c.status === 'vip').length,
     active: clients.filter((c) => c.status === 'active').length,
     leads: clients.filter((c) => c.status === 'lead').length,
+  }
+
+  // ============================================================================
+  // A+++ LOADING STATE
+  // ============================================================================
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 py-8">
+        <div className="container mx-auto px-4 space-y-6">
+          <CardSkeleton />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <ListSkeleton items={8} />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ============================================================================
+  // A+++ ERROR STATE
+  // ============================================================================
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-950 py-8">
+        <div className="container mx-auto px-4">
+          <ErrorEmptyState
+            error={error}
+            action={{
+              label: 'Retry',
+              onClick: () => window.location.reload()
+            }}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // ============================================================================
+  // A+++ EMPTY STATE (when no clients exist after filtering)
+  // ============================================================================
+  if (filtered.length === 0 && !isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 py-8">
+        <div className="container mx-auto px-4">
+          <NoDataEmptyState
+            entityName="clients"
+            description={
+              query
+                ? "No clients match your search criteria. Try adjusting your search terms."
+                : "Get started by adding your first client to the system."
+            }
+            action={{
+              label: query ? 'Clear Search' : 'Add Client',
+              onClick: query ? () => setQuery('') : handleAddClient
+            }}
+          />
+        </div>
+      </div>
+    )
   }
 
   return (
