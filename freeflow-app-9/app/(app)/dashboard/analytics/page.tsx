@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
@@ -37,6 +37,11 @@ import {
   ArrowUpRight,
   ArrowDownRight
 } from 'lucide-react'
+
+// A+++ UTILITIES
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
 
 // ============================================================================
 // FRAMER MOTION COMPONENTS
@@ -233,6 +238,11 @@ const getGrowthIndicator = (growth: number) => {
 export default function AnalyticsPage() {
   const router = useRouter()
 
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
   // State Management
   const [activeTab, setActiveTab] = useState('overview')
   const [dateRange, setDateRange] = useState('last-30-days')
@@ -241,6 +251,36 @@ export default function AnalyticsPage() {
   const [predictiveMode, setPredictiveMode] = useState(false)
   const [aiMode, setAiMode] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+
+  // A+++ LOAD ANALYTICS DATA
+  useEffect(() => {
+    const loadAnalyticsData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate data loading with potential error
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load analytics'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsLoading(false)
+        announce('Analytics loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load analytics')
+        setIsLoading(false)
+        announce('Error loading analytics', 'assertive')
+      }
+    }
+
+    loadAnalyticsData()
+  }, [announce])
 
   // ============================================================================
   // FILTERED DATA (useMemo for performance)
@@ -632,6 +672,44 @@ export default function AnalyticsPage() {
   // ============================================================================
   // RENDER
   // ============================================================================
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="space-y-6">
+            <CardSkeleton />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <CardSkeleton />
+              <CardSkeleton />
+            </div>
+            <ListSkeleton items={4} />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6">
+        <div className="max-w-7xl mx-auto">
+          <ErrorEmptyState
+            error={error}
+            onRetry={() => window.location.reload()}
+          />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6">
