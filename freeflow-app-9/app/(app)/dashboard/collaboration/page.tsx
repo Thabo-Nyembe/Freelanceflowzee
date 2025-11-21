@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -47,8 +47,48 @@ import {
   MoreVertical
 } from "lucide-react";
 
+// A+++ UTILITIES
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 export default function CollaborationPage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
   const [activeTab, setActiveTab] = useState<any>("chat");
+
+  // A+++ LOAD COLLABORATION DATA
+  useEffect(() => {
+    const loadCollaborationData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate data loading with potential error
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load collaboration data'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsLoading(false)
+        announce('Collaboration data loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load collaboration data')
+        setIsLoading(false)
+        announce('Error loading collaboration data', 'assertive')
+      }
+    }
+
+    loadCollaborationData()
+  }, [announce])
 
   // Handlers with enhanced logging
   const handleStartAudioCall = () => {
@@ -643,6 +683,35 @@ export default function CollaborationPage() {
     toast.success('🚪 Joined workspace: ' + workspaceId, {
       description: 'Access level: Contributor'
     })
+  }
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="p-6 max-w-7xl mx-auto">
+        <div className="space-y-6">
+          <CardSkeleton />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+          <ListSkeleton items={5} />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="p-6 max-w-7xl mx-auto">
+        <ErrorEmptyState
+          error={error}
+          onRetry={() => window.location.reload()}
+        />
+      </div>
+    )
   }
 
   return (
