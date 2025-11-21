@@ -28,7 +28,6 @@ import { FormValidator, ValidationSchemas } from '@/lib/validation'
 import { useAnnouncer, AriaHelpers } from '@/lib/accessibility'
 import { useKeyboardShortcuts } from '@/lib/keyboard-shortcuts'
 import { generateMetadata } from '@/lib/seo'
-import { KeyboardShortcutsModal } from '@/components/ui/keyboard-shortcuts-modal'
 
 type DemoSection = 'loading' | 'empty' | 'validation' | 'keyboard' | 'accessibility' | 'seo'
 
@@ -547,9 +546,6 @@ export default function APlusShowcase() {
           </ScrollReveal>
         )}
       </div>
-
-      {/* Keyboard Shortcuts Modal */}
-      <KeyboardShortcutsModal />
     </div>
   )
 }

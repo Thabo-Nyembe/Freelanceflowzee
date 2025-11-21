@@ -6,6 +6,7 @@ import { FloatingThemeToggle } from '@/components/ui/premium-theme-toggle'
 import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav'
 import { AdminSearch } from '@/components/admin/admin-search'
 import { MobileAdminNav } from '@/components/admin/mobile-admin-nav'
+import { KeyboardShortcutsModal } from '@/components/ui/keyboard-shortcuts-modal'
 import { ROUTE_LABELS } from '@/lib/route-utils'
 
 interface DashboardLayoutClientProps {
@@ -50,6 +51,9 @@ export default function DashboardLayoutClient({
 
       {/* Floating Theme Toggle - visible on all dashboard pages */}
       <FloatingThemeToggle />
+
+      {/* Keyboard Shortcuts Modal - Press ? to open */}
+      <KeyboardShortcutsModal />
     </div>
   )
 }
