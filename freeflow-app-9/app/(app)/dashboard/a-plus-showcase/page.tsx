@@ -10,7 +10,7 @@ import { Loader2, FileX, CheckCircle2, Keyboard as KeyboardIcon, Eye, Search, Li
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
-import { Tooltip, InfoTooltip } from '@/components/ui/tooltip'
+import { SimpleTooltip, InfoTooltip } from '@/components/ui/tooltip'
 
 // A+++ Utilities
 import {
@@ -31,6 +31,9 @@ import { generateMetadata } from '@/lib/seo'
 import { KeyboardShortcutsModal } from '@/components/ui/keyboard-shortcuts-modal'
 
 type DemoSection = 'loading' | 'empty' | 'validation' | 'keyboard' | 'accessibility' | 'seo'
+
+// Force dynamic rendering for this interactive page
+export const dynamic = 'force-dynamic'
 
 export default function APlusShowcase() {
   const [activeSection, setActiveSection] = useState<DemoSection>('loading')
@@ -138,7 +141,7 @@ export default function APlusShowcase() {
             {sections.map((section) => {
               const Icon = section.Icon
               return (
-                <Tooltip key={section.id} content={`Alt + ${sections.indexOf(section) + 1}`} position="bottom">
+                <SimpleTooltip key={section.id} content={`Alt + ${sections.indexOf(section) + 1}`} position="bottom">
                   <button
                     onClick={() => setActiveSection(section.id)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
@@ -151,7 +154,7 @@ export default function APlusShowcase() {
                     <Icon className="w-4 h-4" />
                     {section.label}
                   </button>
-                </Tooltip>
+                </SimpleTooltip>
               )
             })}
           </div>
