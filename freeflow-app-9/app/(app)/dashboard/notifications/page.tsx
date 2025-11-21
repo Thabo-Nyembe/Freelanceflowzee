@@ -13,12 +13,12 @@ import { Label } from '@/components/ui/label'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
-import { 
-  Bell, 
-  Search, 
-  Filter, 
-  CheckCircle, 
-  X, 
+import {
+  Bell,
+  Search,
+  Filter,
+  CheckCircle,
+  X,
   Check,
   Archive,
   Trash2,
@@ -45,6 +45,11 @@ import {
   Share2,
   RefreshCw
 } from 'lucide-react'
+
+// A+++ UTILITIES
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
 
 interface Notification {
   id: string
@@ -134,8 +139,43 @@ function notificationReducer(state: NotificationState, action: NotificationActio
 }
 
 export default function NotificationsPage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
   const [state, dispatch] = useReducer(notificationReducer, initialState)
   const [activeTab, setActiveTab] = useState<string>('inbox')
+
+  // A+++ LOAD NOTIFICATIONS DATA
+  useEffect(() => {
+    const loadNotificationsData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate data loading with potential error
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load notifications'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsLoading(false)
+        announce('Notifications loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load notifications')
+        setIsLoading(false)
+        announce('Error loading notifications', 'assertive')
+      }
+    }
+
+    loadNotificationsData()
+  }, [announce])
 
   useEffect(() => {
     const mockNotifications: Notification[] = [
@@ -451,6 +491,60 @@ export default function NotificationsPage() {
       // Graceful degradation - still update UI even if API fails
       dispatch({ type: 'MARK_AS_READ', payload: notification.id })
     }
+  }
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 p-6">
+        <div className="space-y-6">
+          <CardSkeleton />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+          <ListSkeleton items={8} />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-950 p-6">
+        <ErrorEmptyState
+          error={error}
+          onRetry={() => window.location.reload()}
+        />
+      </div>
+    )
+  }
+
+  // A+++ EMPTY STATE
+  if (filteredNotifications.length === 0 && !isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 p-6">
+        <NoDataEmptyState
+          entityName="notifications"
+          description={
+            state.search || state.filter !== 'all'
+              ? "No notifications match your filters. Try adjusting your search or filter settings."
+              : "You're all caught up! No new notifications at the moment."
+          }
+          action={{
+            label: state.search || state.filter !== 'all' ? 'Clear Filters' : 'Refresh',
+            onClick: state.search || state.filter !== 'all'
+              ? () => {
+                  dispatch({ type: 'SET_SEARCH', payload: '' })
+                  dispatch({ type: 'SET_FILTER', payload: 'all' })
+                }
+              : () => window.location.reload()
+          }}
+        />
+      </div>
+    )
   }
 
   return (
