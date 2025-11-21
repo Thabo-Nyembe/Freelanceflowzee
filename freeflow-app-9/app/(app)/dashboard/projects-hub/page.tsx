@@ -35,6 +35,11 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 
+// A+++ Utilities
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 interface Project {
   id: string
   title: string
@@ -110,6 +115,7 @@ export default function ProjectsHubPage() {
   const [projects, setProjects] = useState<Project[]>([])
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null) // A+++ Error State
   const [activeTab, setActiveTab] = useState('overview')
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -127,6 +133,9 @@ export default function ProjectsHubPage() {
     priority: 'medium',
     category: 'web-development'
   })
+
+  // A+++ Accessibility
+  const { announce } = useAnnouncer()
 
   // Enhanced Handlers with Full Implementations
   const handleViewProject = (project: Project) => {
@@ -769,23 +778,46 @@ export default function ProjectsHubPage() {
 
   useEffect(() => {
     const loadProjects = async () => {
-      console.log('📂 LOADING PROJECTS...')
-      setLoading(true)
-      // Simulate API call
-      setTimeout(() => {
+      try {
+        console.log('📂 LOADING PROJECTS...')
+        setLoading(true)
+        setError(null) // A+++ Reset error state
+
+        // Simulate API call with potential failure
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            // Simulate occasional errors (remove in production)
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load projects'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
         console.log('✅ PROJECTS LOADED:', mockProjects.length, 'projects')
         console.log('📊 Active:', mockProjects.filter(p => p.status === 'active').length)
         console.log('✔️ Completed:', mockProjects.filter(p => p.status === 'completed').length)
         console.log('⏸️ Paused:', mockProjects.filter(p => p.status === 'paused').length)
         console.log('📝 Draft:', mockProjects.filter(p => p.status === 'draft').length)
+
         setProjects(mockProjects)
         setFilteredProjects(mockProjects)
         setLoading(false)
-      }, 1000)
+
+        // A+++ Accessibility announcement
+        announce(`${mockProjects.length} projects loaded successfully`, 'polite')
+      } catch (err) {
+        console.error('❌ LOAD PROJECTS ERROR:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load projects')
+        setLoading(false)
+        // A+++ Accessibility error announcement
+        announce('Error loading projects', 'assertive')
+      }
     }
 
     loadProjects()
-  }, [])
+  }, [announce])
 
   useEffect(() => {
     console.log('🔍 FILTERING PROJECTS')
@@ -1024,12 +1056,52 @@ export default function ProjectsHubPage() {
     })
   }
 
+  // A+++ Loading State
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading projects...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <CardSkeleton />
+          <ListSkeleton items={8} />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ Error State
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6">
+        <div className="max-w-7xl mx-auto">
+          <ErrorEmptyState
+            error={error}
+            action={{
+              label: 'Retry',
+              onClick: () => window.location.reload()
+            }}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ Empty State (when no projects exist after filtering)
+  if (filteredProjects.length === 0 && !loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6">
+        <div className="max-w-7xl mx-auto">
+          <NoDataEmptyState
+            entityName="projects"
+            description={
+              searchTerm || statusFilter !== 'all' || priorityFilter !== 'all'
+                ? "No projects match your search criteria. Try adjusting your filters."
+                : undefined
+            }
+            action={{
+              label: 'Create Your First Project',
+              onClick: () => setIsCreateModalOpen(true)
+            }}
+          />
         </div>
       </div>
     )
