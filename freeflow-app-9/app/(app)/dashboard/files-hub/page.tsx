@@ -6,6 +6,11 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { BorderTrail } from '@/components/ui/border-trail'
 import { GlowEffect } from '@/components/ui/glow-effect'
 
+// A+++ UTILITIES
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 // Mock data for the FilesHub component
 const mockFiles = [
   {
@@ -108,13 +113,45 @@ const mockFiles = [
 ]
 
 export default function FilesHubPage() {
+  // A+++ STATE MANAGEMENT
+  const [isPageLoading, setIsPageLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
   const [files, setFiles] = useState(mockFiles)
   const [isLoading, setIsLoading] = useState(false)
 
+  // A+++ LOAD FILES DATA
   useEffect(() => {
-    console.log('📁 FILES HUB: Loading files...')
-    console.log('✅ FILES HUB: Loaded', mockFiles.length, 'files')
-  }, [])
+    const loadFilesData = async () => {
+      try {
+        setIsPageLoading(true)
+        setError(null)
+
+        // Simulate data loading with potential error
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load files'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsPageLoading(false)
+        announce('Files loaded successfully', 'polite')
+        console.log('📁 FILES HUB: Loading files...')
+        console.log('✅ FILES HUB: Loaded', mockFiles.length, 'files')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load files')
+        setIsPageLoading(false)
+        announce('Error loading files', 'assertive')
+      }
+    }
+
+    loadFilesData()
+  }, [announce])
 
   // Upload file handler
   const handleUploadFile = useCallback(async (file: File) => {
@@ -429,6 +466,52 @@ export default function FilesHubPage() {
     if (['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext || '')) return 'video'
     if (['pdf', 'doc', 'docx', 'txt', 'ppt', 'pptx', 'xls', 'xlsx'].includes(ext || '')) return 'document'
     return 'other'
+  }
+
+  // A+++ LOADING STATE
+  if (isPageLoading) {
+    return (
+      <div className="h-full min-h-screen relative p-6">
+        <div className="space-y-6">
+          <CardSkeleton />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+          <ListSkeleton items={6} />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="h-full min-h-screen relative p-6">
+        <ErrorEmptyState
+          error={error}
+          onRetry={() => window.location.reload()}
+        />
+      </div>
+    )
+  }
+
+  // A+++ EMPTY STATE
+  if (files.length === 0 && !isPageLoading) {
+    return (
+      <div className="h-full min-h-screen relative p-6">
+        <NoDataEmptyState
+          entityName="files"
+          description="No files uploaded yet. Start by uploading your first file."
+          action={{
+            label: 'Upload File',
+            onClick: () => document.getElementById('file-upload-input')?.click()
+          }}
+        />
+      </div>
+    )
   }
 
   return (
