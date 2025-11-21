@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
@@ -41,14 +41,54 @@ import {
   calculatePipelineMetrics
 } from '@/lib/crm-utils'
 
+// A+++ UTILITIES
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 type ViewMode = 'overview' | 'contacts' | 'deals' | 'pipeline' | 'activities'
 
 export default function CRMPage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
   const [contactSearch, setContactSearch] = useState('')
   const [dealSearch, setDealSearch] = useState('')
   const [contactSort, setContactSort] = useState('name')
   const [dealSort, setDealSort] = useState('value')
+
+  // A+++ LOAD CRM DATA
+  useEffect(() => {
+    const loadCRMData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate data loading with potential error
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load CRM data'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsLoading(false)
+        announce('CRM data loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load CRM data')
+        setIsLoading(false)
+        announce('Error loading CRM data', 'assertive')
+      }
+    }
+
+    loadCRMData()
+  }, [announce])
 
   const stats = MOCK_CRM_STATS
   const pipelineMetrics = calculatePipelineMetrics(MOCK_PIPELINE)
@@ -62,6 +102,48 @@ export default function CRMPage() {
     filterDeals(MOCK_DEALS, { search: dealSearch }),
     dealSort
   )
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="min-h-screen p-6 pb-20 relative overflow-hidden">
+        <div className="fixed inset-0 -z-10">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5" />
+        </div>
+        <div className="space-y-6">
+          <CardSkeleton />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <CardSkeleton />
+            </div>
+            <CardSkeleton />
+          </div>
+          <ListSkeleton items={5} />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="min-h-screen p-6 pb-20 relative overflow-hidden">
+        <div className="fixed inset-0 -z-10">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5" />
+        </div>
+        <ErrorEmptyState
+          error={error}
+          onRetry={() => window.location.reload()}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen p-6 pb-20 relative overflow-hidden">
