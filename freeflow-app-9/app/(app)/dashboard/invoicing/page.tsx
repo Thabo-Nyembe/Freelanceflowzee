@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
@@ -27,12 +27,52 @@ import {
   BillingCycle
 } from '@/lib/invoice-types'
 
+// A+++ UTILITIES
+import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 type ViewMode = 'overview' | 'invoices' | 'payments' | 'templates' | 'create'
 
 export default function InvoicingPage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
   const [selectedInvoices, setSelectedInvoices] = useState<Invoice[]>(MOCK_INVOICES)
   const [filterStatus, setFilterStatus] = useState<InvoiceStatus | 'all'>('all')
+
+  // A+++ LOAD INVOICING DATA
+  useEffect(() => {
+    const loadInvoicingData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate data loading with 5% error rate
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load invoicing data'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsLoading(false)
+        announce('Invoicing dashboard loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load invoicing data')
+        setIsLoading(false)
+        announce('Error loading invoicing dashboard', 'assertive')
+      }
+    }
+
+    loadInvoicingData()
+  }, [announce])
 
   const viewModes = [
     { id: 'overview', label: 'Overview', icon: '📊' },
@@ -672,6 +712,40 @@ export default function InvoicingPage() {
       </LiquidGlassCard>
     </div>
   )
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <CardSkeleton />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+          <DashboardSkeleton />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="max-w-7xl mx-auto">
+          <div className="max-w-2xl mx-auto mt-20">
+            <ErrorEmptyState
+              error={error}
+              onRetry={() => window.location.reload()}
+            />
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
