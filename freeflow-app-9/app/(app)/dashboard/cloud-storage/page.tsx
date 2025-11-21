@@ -1,16 +1,16 @@
 
 "use client"
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { 
-  Cloud, 
-  HardDrive, 
-  Upload, 
-  Download, 
+import {
+  Cloud,
+  HardDrive,
+  Upload,
+  Download,
   RefreshCw,
   Settings,
   Shield,
@@ -25,7 +25,46 @@ import {
   Link
 } from 'lucide-react'
 
+// A+++ UTILITIES
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 export default function CloudStoragePage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
+  // A+++ LOAD CLOUD STORAGE DATA
+  useEffect(() => {
+    const loadCloudStorageData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate data loading with potential error
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load cloud storage'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsLoading(false)
+        announce('Cloud storage loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load cloud storage')
+        setIsLoading(false)
+        announce('Error loading cloud storage', 'assertive')
+      }
+    }
+
+    loadCloudStorageData()
+  }, [announce])
 
   // Mock cloud storage data
   const cloudProviders = [
@@ -140,6 +179,40 @@ export default function CloudStoragePage() {
       case 'error': return <AlertCircle className="h-4 w-4" />
       default: return <AlertCircle className="h-4 w-4" />
     }
+  }
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="space-y-6">
+          <CardSkeleton />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+          <ListSkeleton items={4} />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="container mx-auto p-6">
+        <ErrorEmptyState
+          error={error}
+          onRetry={() => window.location.reload()}
+        />
+      </div>
+    )
   }
 
   return (
