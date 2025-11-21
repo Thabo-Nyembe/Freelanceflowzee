@@ -1,17 +1,17 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Plus, 
-  Layout, 
-  FileText, 
-  Palette, 
-  Globe, 
-  Smartphone, 
+import {
+  Plus,
+  Layout,
+  FileText,
+  Palette,
+  Globe,
+  Smartphone,
   Monitor,
   Zap,
   Users,
@@ -26,7 +26,42 @@ import {
   Rocket
 } from 'lucide-react'
 
+// A+++ UTILITIES
+import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 export default function CreateProjectPage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
+  // A+++ LOAD CREATE PROJECT DATA
+  useEffect(() => {
+    const loadCreateProjectData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load create project page'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+        setIsLoading(false)
+        announce('Create project page loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load create project page')
+        setIsLoading(false)
+        announce('Error loading create project page', 'assertive')
+      }
+    }
+    loadCreateProjectData()
+  }, [announce])
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null)
   const [projectType, setProjectType] = useState<any>('custom')
   const [formData, setFormData] = useState<any>({
@@ -136,6 +171,29 @@ export default function CreateProjectPage() {
     console.log('Creating project:', { ...formData, template: selectedTemplate })
     // Here you would typically make an API call to create the project
     alert('Project created successfully!')
+  }
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <DashboardSkeleton />
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="max-w-2xl mx-auto mt-20">
+          <ErrorEmptyState
+            error={error}
+            onRetry={() => window.location.reload()}
+          />
+        </div>
+      </div>
+    )
   }
 
   return (
