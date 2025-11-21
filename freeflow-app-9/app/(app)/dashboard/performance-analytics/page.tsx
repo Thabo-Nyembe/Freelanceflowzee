@@ -1,18 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  BarChart3, 
-  PieChart, 
-  LineChart, 
-  Target, 
+import {
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
+  PieChart,
+  LineChart,
+  Target,
   Award,
   Clock,
   DollarSign,
@@ -37,9 +37,49 @@ import {
   MoreHorizontal
 } from 'lucide-react'
 
+// A+++ UTILITIES
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 export default function PerformanceAnalyticsPage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
   const [activeTab, setActiveTab] = useState('overview')
   const [timeRange, setTimeRange] = useState('30d')
+
+  // A+++ LOAD PERFORMANCE ANALYTICS DATA
+  useEffect(() => {
+    const loadPerformanceAnalyticsData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate data loading with potential error
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load performance analytics'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsLoading(false)
+        announce('Performance analytics loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load performance analytics')
+        setIsLoading(false)
+        announce('Error loading performance analytics', 'assertive')
+      }
+    }
+
+    loadPerformanceAnalyticsData()
+  }, [announce])
 
   const performanceMetrics = {
     revenue: {
@@ -178,6 +218,44 @@ export default function PerformanceAnalyticsPage() {
       case 'ahead': return 'bg-blue-100 text-blue-800'
       default: return 'bg-gray-100 text-gray-800'
     }
+  }
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40">
+        <div className="container mx-auto p-6 space-y-8">
+          <div className="space-y-8">
+            <CardSkeleton />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <CardSkeleton />
+              <CardSkeleton />
+            </div>
+            <ListSkeleton items={4} />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40">
+        <div className="container mx-auto p-6">
+          <ErrorEmptyState
+            error={error}
+            onRetry={() => window.location.reload()}
+          />
+        </div>
+      </div>
+    )
   }
 
   return (
