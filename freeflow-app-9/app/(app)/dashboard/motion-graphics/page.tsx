@@ -5,7 +5,7 @@
  * Complete implementation of motion design and animation tools
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   Play, Pause, Square, SkipBack, SkipForward, Film, Layers,
@@ -47,10 +47,20 @@ import {
   getAnimationIcon
 } from '@/lib/motion-graphics-utils'
 
+// A+++ UTILITIES
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 type ViewMode = 'projects' | 'editor' | 'templates' | 'assets'
 type EditorPanel = 'layers' | 'timeline' | 'properties' | 'effects'
 
 export default function MotionGraphicsPage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
   const [viewMode, setViewMode] = useState<ViewMode>('projects')
   const [selectedProject, setSelectedProject] = useState<MotionProject | null>(null)
   const [activePanel, setActivePanel] = useState<EditorPanel>('layers')
@@ -64,8 +74,106 @@ export default function MotionGraphicsPage() {
     MOCK_MOTION_STATS.storageLimit
   )
 
+  // A+++ LOAD MOTION GRAPHICS DATA
+  useEffect(() => {
+    const loadMotionGraphicsData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate data loading with 5% error rate
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load motion graphics studio'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsLoading(false)
+        announce('Motion graphics studio loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load motion graphics studio')
+        setIsLoading(false)
+        announce('Error loading motion graphics studio', 'assertive')
+      }
+    }
+
+    loadMotionGraphicsData()
+  }, [announce])
+
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying)
+  }
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="min-h-screen relative overflow-hidden">
+        {/* Premium Background */}
+        <div className="fixed inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
+        <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-900/20 via-transparent to-transparent opacity-50" />
+
+        {/* Animated Gradient Orbs */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-violet-500/30 to-purple-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 -right-4 w-96 h-96 bg-gradient-to-r from-purple-500/30 to-fuchsia-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-700"></div>
+        </div>
+
+        <div className="container mx-auto px-4 py-12 relative z-10">
+          <div className="max-w-7xl mx-auto space-y-8">
+            <div className="text-center">
+              <CardSkeleton />
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
+            </div>
+            <CardSkeleton />
+            <div className="flex justify-center gap-2">
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <CardSkeleton />
+              <CardSkeleton />
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="min-h-screen relative overflow-hidden">
+        {/* Premium Background */}
+        <div className="fixed inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
+        <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-900/20 via-transparent to-transparent opacity-50" />
+
+        {/* Animated Gradient Orbs */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-violet-500/30 to-purple-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 -right-4 w-96 h-96 bg-gradient-to-r from-purple-500/30 to-fuchsia-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-700"></div>
+        </div>
+
+        <div className="container mx-auto px-4 py-12 relative z-10">
+          <div className="max-w-2xl mx-auto">
+            <ErrorEmptyState
+              error={error}
+              onRetry={() => window.location.reload()}
+            />
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
