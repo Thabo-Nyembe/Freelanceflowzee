@@ -37,6 +37,11 @@ import {
   Trash2
 } from 'lucide-react'
 
+// A+++ UTILITIES
+import { CardSkeleton, ListSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 interface EscrowMilestone {
   id: string
   title: string
@@ -173,6 +178,11 @@ function escrowReducer(state: EscrowState, action: EscrowAction): EscrowState {
 }
 
 export default function EscrowPage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
   const [state, dispatch] = useReducer(escrowReducer, {
     deposits: [],
     selectedDeposit: null,
@@ -427,6 +437,36 @@ export default function EscrowPage() {
   ]
 
   const memoizedMockDeposits = useMemo(() => mockDeposits, [])
+
+  // A+++ LOAD ESCROW DATA
+  useEffect(() => {
+    const loadEscrowData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate data loading with potential error
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load escrow deposits'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsLoading(false)
+        announce('Escrow deposits loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load escrow deposits')
+        setIsLoading(false)
+        announce('Error loading escrow deposits', 'assertive')
+      }
+    }
+
+    loadEscrowData()
+  }, [announce])
 
   useEffect(() => {
     dispatch({ type: 'SET_DEPOSITS', deposits: memoizedMockDeposits })
@@ -882,6 +922,61 @@ export default function EscrowPage() {
     toast.info('Viewing Details', {
       description: 'Loading detailed deposit information'
     })
+  }
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="space-y-6">
+          <CardSkeleton />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+          <ListSkeleton items={3} />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <ErrorEmptyState
+          error={error}
+          onRetry={() => window.location.reload()}
+        />
+      </div>
+    )
+  }
+
+  // A+++ EMPTY STATE
+  if (filteredDeposits.length === 0 && !isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <NoDataEmptyState
+          entityName="escrow deposits"
+          description={
+            state.searchTerm || state.filter !== 'all'
+              ? "No escrow deposits match your search criteria. Try adjusting your filters."
+              : "Get started by creating your first secure escrow deposit."
+          }
+          action={{
+            label: state.searchTerm || state.filter !== 'all' ? 'Clear Filters' : 'Create Escrow',
+            onClick: state.searchTerm || state.filter !== 'all'
+              ? () => {
+                  dispatch({ type: 'SET_SEARCH', searchTerm: '' })
+                  dispatch({ type: 'SET_FILTER', filter: 'all' })
+                }
+              : () => setIsCreateModalOpen(true)
+          }}
+        />
+      </div>
+    )
   }
 
   return (
