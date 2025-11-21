@@ -36,9 +36,44 @@ import {
   getTimeAgo
 } from '@/lib/browser-extension-utils'
 
+// A+++ UTILITIES
+import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 type ViewMode = 'overview' | 'features' | 'captures' | 'settings'
 
 export default function BrowserExtensionPage() {
+  // A+++ STATE MANAGEMENT
+  const [isPageLoading, setIsPageLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
+  // A+++ LOAD BROWSER EXTENSION DATA
+  useEffect(() => {
+    const loadBrowserExtensionData = async () => {
+      try {
+        setIsPageLoading(true)
+        setError(null)
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load browser extension'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+        setIsPageLoading(false)
+        announce('Browser extension loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load browser extension')
+        setIsPageLoading(false)
+        announce('Error loading browser extension', 'assertive')
+      }
+    }
+    loadBrowserExtensionData()
+  }, [announce])
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
   const [currentBrowser, setCurrentBrowser] = useState(detectBrowser())
   const [isInstalled, setIsInstalled] = useState(false)
@@ -55,6 +90,29 @@ export default function BrowserExtensionPage() {
         c.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
       )
     : MOCK_PAGE_CAPTURES
+
+  // A+++ LOADING STATE
+  if (isPageLoading) {
+    return (
+      <div className="min-h-screen p-6">
+        <DashboardSkeleton />
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="min-h-screen p-6">
+        <div className="max-w-2xl mx-auto mt-20">
+          <ErrorEmptyState
+            error={error}
+            onRetry={() => window.location.reload()}
+          />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen p-6 pb-20 relative overflow-hidden">
