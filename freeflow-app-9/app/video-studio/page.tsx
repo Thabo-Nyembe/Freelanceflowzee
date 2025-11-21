@@ -1,25 +1,65 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { EnhancedCard, EnhancedCardContent, EnhancedCardHeader, EnhancedCardTitle } from '@/components/ui/enhanced-card'
 // import { AIVideoRecordingSystem } from '@/components/collaboration/ai-video-recording-system'
 import { EnhancedButton } from '@/components/ui/enhanced-button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Video, 
-  Monitor, 
-  Upload, 
-  Play, 
-  Settings, 
+import {
+  Video,
+  Monitor,
+  Upload,
+  Play,
+  Settings,
   Zap,
   Camera,
   Mic,
   Square
 } from 'lucide-react'
 
+// A+++ UTILITIES
+import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 export default function VideoStudioPage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce} = useAnnouncer()
+
   const [isRecording, setIsRecording] = useState(false)
   const [recordingTime, setRecordingTime] = useState(0)
+
+  // A+++ LOAD VIDEO STUDIO DATA
+  useEffect(() => {
+    const loadVideoStudioData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate data loading with 5% error rate
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load video studio'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsLoading(false)
+        announce('Video studio loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load video studio')
+        setIsLoading(false)
+        announce('Error loading video studio', 'assertive')
+      }
+    }
+
+    loadVideoStudioData()
+  }, [announce])
 
   const handleStartRecording = () => {
     setIsRecording(true)
@@ -30,6 +70,33 @@ export default function VideoStudioPage() {
     setIsRecording(false)
     setRecordingTime(0)
     // In a real implementation, this would stop the recording and save the video
+  }
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4 py-8">
+          <DashboardSkeleton />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-2xl mx-auto mt-20">
+            <ErrorEmptyState
+              error={error}
+              onRetry={() => window.location.reload()}
+            />
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
