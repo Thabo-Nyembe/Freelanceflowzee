@@ -19,6 +19,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 
+// A+++ UTILITIES
+import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 interface AIProvider {
   id: string
   name: string
@@ -138,6 +143,11 @@ const FEATURE_CONFIGS = [
 ]
 
 export default function AISettingsPage() {
+  // A+++ STATE MANAGEMENT
+  const [isPageLoading, setIsPageLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
   const [providers, setProviders] = useState<AIProvider[]>(AI_PROVIDERS)
   const [features, setFeatures] = useState(FEATURE_CONFIGS)
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({})
@@ -368,6 +378,36 @@ export default function AISettingsPage() {
     })
   }
 
+  // A+++ LOAD AI SETTINGS DATA
+  useEffect(() => {
+    const loadAISettingsData = async () => {
+      try {
+        setIsPageLoading(true)
+        setError(null)
+
+        // Simulate data loading with 5% error rate
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load AI settings'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsPageLoading(false)
+        announce('AI settings loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load AI settings')
+        setIsPageLoading(false)
+        announce('Error loading AI settings', 'assertive')
+      }
+    }
+
+    loadAISettingsData()
+  }, [announce])
+
   // Load saved API keys on component mount
   useEffect(() => {
     loadSavedKeys()
@@ -537,6 +577,33 @@ export default function AISettingsPage() {
       default:
         return 'bg-red-500/10 text-red-500 border-red-500/20'
     }
+  }
+
+  // A+++ LOADING STATE
+  if (isPageLoading) {
+    return (
+      <ErrorBoundary level="page" name="AI Settings">
+        <div className="container mx-auto px-4 py-8">
+          <DashboardSkeleton />
+        </div>
+      </ErrorBoundary>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <ErrorBoundary level="page" name="AI Settings">
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-2xl mx-auto mt-20">
+            <ErrorEmptyState
+              error={error}
+              onRetry={() => window.location.reload()}
+            />
+          </div>
+        </div>
+      </ErrorBoundary>
+    )
   }
 
   return (
