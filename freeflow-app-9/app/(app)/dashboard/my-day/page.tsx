@@ -9,6 +9,11 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { toast } from 'sonner'
+
+// A+++ UTILITIES
+import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
 import {
   Clock,
   CheckCircle,
@@ -262,6 +267,11 @@ const mockTimeBlocks: TimeBlock[] = [
 ]
 
 export default function MyDayPage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('today')
   const [newTaskTitle, setNewTaskTitle] = useState('')
@@ -349,6 +359,36 @@ export default function MyDayPage() {
   }
 
   const [state, dispatch] = useReducer(taskReducer, initialState)
+
+  // A+++ LOAD MY DAY DATA
+  useEffect(() => {
+    const loadMyDayData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate data loading with 5% error rate
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load My Day dashboard'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsLoading(false)
+        announce('My Day dashboard loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load My Day dashboard')
+        setIsLoading(false)
+        announce('Error loading My Day dashboard', 'assertive')
+      }
+    }
+
+    loadMyDayData()
+  }, [announce])
 
   // Timer effect
   useEffect(() => {
@@ -935,6 +975,50 @@ export default function MyDayPage() {
   const focusMinutes = state.totalFocusTime % 60
   const targetHours = 8 * 60 // 8 hours in minutes
   const productivityScore = Math.min(Math.round((state.totalFocusTime / targetHours) * 100), 100)
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40 p-6">
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 -left-4 w-72 h-72 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 -right-4 w-72 h-72 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-700"></div>
+        </div>
+        <div className="relative max-w-7xl mx-auto space-y-8">
+          <div className="mb-8">
+            <CardSkeleton />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
+            </div>
+          </div>
+          <DashboardSkeleton />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40 p-6">
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 -left-4 w-72 h-72 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 -right-4 w-72 h-72 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-700"></div>
+        </div>
+        <div className="relative max-w-7xl mx-auto">
+          <div className="max-w-2xl mx-auto mt-20">
+            <ErrorEmptyState
+              error={error}
+              onRetry={() => window.location.reload()}
+            />
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40 p-6">
