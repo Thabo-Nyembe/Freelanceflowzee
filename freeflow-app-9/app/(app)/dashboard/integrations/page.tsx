@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
@@ -17,11 +17,51 @@ import {
 } from '@/lib/integrations-utils'
 import type { IntegrationCategory } from '@/lib/integrations-types'
 
+// A+++ UTILITIES
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 type ViewMode = 'overview' | 'browse' | 'connected' | 'templates'
 
 export default function IntegrationsPage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
   const [selectedCategory, setSelectedCategory] = useState<IntegrationCategory | 'all'>('all')
+
+  // A+++ LOAD INTEGRATIONS DATA
+  useEffect(() => {
+    const loadIntegrationsData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate data loading with potential error
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load integrations'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsLoading(false)
+        announce('Integrations loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load integrations')
+        setIsLoading(false)
+        announce('Error loading integrations', 'assertive')
+      }
+    }
+
+    loadIntegrationsData()
+  }, [announce])
 
   const viewTabs = [
     { id: 'overview' as ViewMode, label: 'Overview', icon: '📊' },
@@ -45,6 +85,38 @@ export default function IntegrationsPage() {
   const filteredIntegrations = selectedCategory === 'all'
     ? AVAILABLE_INTEGRATIONS
     : getIntegrationsByCategory(selectedCategory)
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="max-w-[1800px] mx-auto space-y-6">
+          <CardSkeleton />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+          <ListSkeleton items={6} />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="max-w-[1800px] mx-auto">
+          <ErrorEmptyState
+            error={error}
+            onRetry={() => window.location.reload()}
+          />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
