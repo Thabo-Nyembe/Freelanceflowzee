@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -8,6 +8,13 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer } from '@/components/ui/text-shimmer'
+
+// ============================================================================
+// A+++ UTILITIES
+// ============================================================================
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
 import {
   Sparkles,
   Palette,
@@ -42,9 +49,52 @@ import {
 } from 'lucide-react'
 
 export default function AIDesignStudioPage() {
+  // ============================================================================
+  // A+++ STATE MANAGEMENT
+  // ============================================================================
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
+  // Regular state
   const [activeTab, setActiveTab] = useState('tools')
   const [activeAITool, setActiveAITool] = useState<string | null>(null)
   const [generationInProgress, setGenerationInProgress] = useState(false)
+
+  // ============================================================================
+  // A+++ LOAD AI DESIGN DATA
+  // ============================================================================
+  useEffect(() => {
+    const loadAIDesignData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate API call with potential failure
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            // Simulate occasional errors (5% failure rate)
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load AI design tools'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsLoading(false)
+
+        // A+++ Accessibility announcement
+        announce(`${aiTools.length} AI design tools loaded successfully`, 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load AI design tools')
+        setIsLoading(false)
+        announce('Error loading AI design tools', 'assertive')
+      }
+    }
+
+    loadAIDesignData()
+  }, [announce])
 
   // AI Tools data
   const aiTools = [
@@ -475,6 +525,65 @@ export default function AIDesignStudioPage() {
         description: tool.model + ' - ' + tool.rating + ' stars (' + tool.uses.toLocaleString() + ' uses)'
       })
     }
+  }
+
+  // ============================================================================
+  // A+++ LOADING STATE
+  // ============================================================================
+  if (isLoading) {
+    return (
+      <div className="min-h-screen kazi-bg-light dark:kazi-bg-dark p-6">
+        <div className="max-w-[1920px] mx-auto space-y-6">
+          <CardSkeleton />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+          <ListSkeleton items={6} />
+        </div>
+      </div>
+    )
+  }
+
+  // ============================================================================
+  // A+++ ERROR STATE
+  // ============================================================================
+  if (error) {
+    return (
+      <div className="min-h-screen kazi-bg-light dark:kazi-bg-dark p-6">
+        <div className="max-w-[1920px] mx-auto">
+          <ErrorEmptyState
+            error={error}
+            action={{
+              label: 'Retry',
+              onClick: () => window.location.reload()
+            }}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // ============================================================================
+  // A+++ EMPTY STATE (when no AI tools available)
+  // ============================================================================
+  if (aiTools.length === 0 && !isLoading) {
+    return (
+      <div className="min-h-screen kazi-bg-light dark:kazi-bg-dark p-6">
+        <div className="max-w-[1920px] mx-auto">
+          <NoDataEmptyState
+            entityName="AI design tools"
+            description="AI design tools are currently unavailable. Please check back later."
+            action={{
+              label: 'Refresh',
+              onClick: () => window.location.reload()
+            }}
+          />
+        </div>
+      </div>
+    )
   }
 
   return (
