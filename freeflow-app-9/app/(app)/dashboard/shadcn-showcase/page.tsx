@@ -84,6 +84,11 @@ import {
   X
 } from 'lucide-react'
 
+// A+++ UTILITIES
+import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 // Sample data for the data table
 const sampleData = [
   { id: '1', name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active' },
@@ -116,10 +121,45 @@ const columns = [
 ]
 
 export default function ShadcnShowcasePage() {
+  // A+++ STATE MANAGEMENT
+  const [isPageLoading, setIsPageLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
   const [date, setDate] = React.useState<Date | undefined>(new Date())
   const [progress, setProgress] = React.useState(65)
   const [isLoading, setIsLoading] = React.useState(false)
   const [sliderValue, setSliderValue] = React.useState([50])
+
+  // A+++ LOAD SHADCN SHOWCASE DATA
+  React.useEffect(() => {
+    const loadShadcnShowcaseData = async () => {
+      try {
+        setIsPageLoading(true)
+        setError(null)
+
+        // Simulate data loading with 5% error rate
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load component showcase'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsPageLoading(false)
+        announce('Component showcase loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load component showcase')
+        setIsPageLoading(false)
+        announce('Error loading component showcase', 'assertive')
+      }
+    }
+
+    loadShadcnShowcaseData()
+  }, [announce])
 
   const breadcrumbItems = [
     { label: 'Dashboard', href: '/dashboard', title: 'Main Dashboard' },
@@ -134,6 +174,36 @@ export default function ShadcnShowcasePage() {
   const simulateLoading = () => {
     setIsLoading(true)
     setTimeout(() => setIsLoading(false), 2000)
+  }
+
+  // A+++ LOADING STATE
+  if (isPageLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-indigo-50/40 p-6">
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 -left-4 w-72 h-72 bg-gradient-to-r from-purple-400/20 to-indigo-400/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 -right-4 w-72 h-72 bg-gradient-to-r from-indigo-400/20 to-purple-400/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-700"></div>
+        </div>
+        <div className="relative max-w-7xl mx-auto space-y-8">
+          <CardSkeleton />
+          <DashboardSkeleton />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-indigo-50/40 p-6">
+        <div className="max-w-2xl mx-auto mt-20">
+          <ErrorEmptyState
+            error={error}
+            onRetry={() => window.location.reload()}
+          />
+        </div>
+      </div>
+    )
   }
 
   return (
