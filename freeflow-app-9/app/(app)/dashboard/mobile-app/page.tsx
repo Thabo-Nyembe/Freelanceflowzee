@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { ErrorBoundary } from '@/components/ui/error-boundary-system'
@@ -20,6 +20,11 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Progress } from '@/components/ui/progress'
+
+// A+++ UTILITIES
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
 
 const DEVICE_PRESETS = [
   { id: 'iphone-15-pro', name: 'iPhone 15 Pro', width: 393, height: 852, ratio: '19.5:9', category: 'phone' },
@@ -391,5 +396,73 @@ const MockScreen = ({ screen, deviceWidth, deviceHeight }: MockScreenProps) => {
 }
 
 export default function MobileAppPage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
+  // A+++ LOAD MOBILE APP DATA
+  useEffect(() => {
+    const loadMobileAppData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate data loading with potential error
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load mobile app studio'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsLoading(false)
+        announce('Mobile app studio loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load mobile app studio')
+        setIsLoading(false)
+        announce('Error loading mobile app studio', 'assertive')
+      }
+    }
+
+    loadMobileAppData()
+  }, [announce])
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        <div className="space-y-8">
+          <CardSkeleton />
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="lg:col-span-3">
+              <CardSkeleton />
+            </div>
+            <div className="space-y-6">
+              <CardSkeleton />
+              <CardSkeleton />
+            </div>
+          </div>
+          <ListSkeleton items={4} />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <ErrorEmptyState
+          error={error}
+          onRetry={() => window.location.reload()}
+        />
+      </div>
+    )
+  }
+
   return <MockScreen screen="home" deviceWidth={393} deviceHeight={852} />
 }
