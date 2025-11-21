@@ -10,6 +10,11 @@ import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 
+// A+++ Utilities
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
 interface Message {
   id: number
   text: string
@@ -38,6 +43,14 @@ const mockMessages: Message[] = [
 ]
 
 export default function MessagesPage() {
+  // A+++ Loading & Error State
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [chats, setChats] = useState<Chat[]>([])
+
+  // A+++ Accessibility
+  const { announce } = useAnnouncer()
+
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null)
   const [newMessage, setNewMessage] = useState<string>('')
   const [searchTerm, setSearchTerm] = useState<string>('')
@@ -45,9 +58,44 @@ export default function MessagesPage() {
   const [messages, setMessages] = useState<Message[]>(mockMessages)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const filteredChats = mockChats.filter(chat => 
+  const filteredChats = chats.filter(chat =>
     chat.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  // A+++ Load Messages Data
+  useEffect(() => {
+    const loadChats = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate API call with potential failure
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            // Simulate occasional errors (remove in production)
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load messages'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setChats(mockChats)
+        setIsLoading(false)
+
+        // A+++ Accessibility announcement
+        announce(`${mockChats.length} conversations loaded`, 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load messages')
+        setIsLoading(false)
+        // A+++ Accessibility error announcement
+        announce('Error loading messages', 'assertive')
+      }
+    }
+
+    loadChats()
+  }, [announce])
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedChat) return
@@ -256,6 +304,58 @@ export default function MessagesPage() {
         description: 'Message permanently removed'
       })
     }
+  }
+
+  // A+++ Loading State
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <CardSkeleton />
+          <div className="grid grid-cols-3 gap-6">
+            <ListSkeleton items={5} />
+            <div className="col-span-2">
+              <CardSkeleton />
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ Error State
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
+        <div className="max-w-7xl mx-auto">
+          <ErrorEmptyState
+            error={error}
+            action={{
+              label: 'Retry',
+              onClick: () => window.location.reload()
+            }}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ Empty State (when no chats exist)
+  if (chats.length === 0 && !isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
+        <div className="max-w-7xl mx-auto">
+          <NoDataEmptyState
+            entityName="messages"
+            description="Start a conversation to get connected with your team and clients."
+            action={{
+              label: 'Start a Conversation',
+              onClick: () => toast.info('New conversation feature coming soon!')
+            }}
+          />
+        </div>
+      </div>
+    )
   }
 
   return (
