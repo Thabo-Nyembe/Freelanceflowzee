@@ -76,9 +76,13 @@ import {
 import {
   saveVersion,
   loadVersionTree,
+  getAllVersions,
+  compareVersions,
+  rollbackToVersion,
   enableAutoSave as enableVersionAutoSave,
   disableAutoSave as disableVersionAutoSave,
-  type ContentVersion
+  type ContentVersion,
+  type VersionDiff
 } from '@/lib/ai-create-versions'
 import {
   trackGeneration,
@@ -249,6 +253,8 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
   const [voiceSupported] = React.useState(isSpeechRecognitionSupported())
   const [analytics, setAnalytics] = React.useState<AnalyticsSummary | null>(null)
   const [showAnalytics, setShowAnalytics] = React.useState(false)
+  const [showVersionPanel, setShowVersionPanel] = React.useState(false)
+  const [selectedVersionDiff, setSelectedVersionDiff] = React.useState<VersionDiff | null>(null)
 
   // Load data on mount
   React.useEffect(() => {
@@ -631,6 +637,59 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
     }
   }, [showAnalytics])
 
+  // A++++ Phase 2: Version history handlers
+  const loadVersionHistory = () => {
+    if (currentGenerationId) {
+      const versions = getAllVersions(currentGenerationId)
+      setVersionHistory(versions)
+      setShowVersionPanel(true)
+    } else {
+      toast.error('No generation selected')
+    }
+  }
+
+  const viewVersionDiff = (versionId: string) => {
+    if (!currentGenerationId || versionHistory.length < 2) return
+
+    const currentVersion = versionHistory[versionHistory.length - 1]
+    const selectedVersion = versionHistory.find(v => v.id === versionId)
+
+    if (!selectedVersion) return
+
+    const diff = compareVersions(
+      currentGenerationId,
+      selectedVersion.id,
+      currentVersion.id
+    )
+
+    setSelectedVersionDiff(diff)
+    toast.info('Showing version comparison')
+  }
+
+  const handleRollback = (versionId: string) => {
+    if (!currentGenerationId) return
+
+    try {
+      const restoredVersionId = rollbackToVersion({
+        generationId: currentGenerationId,
+        versionId,
+        createBackup: true
+      })
+
+      const versions = getAllVersions(currentGenerationId)
+      const restoredVersion = versions.find(v => v.id === restoredVersionId)
+
+      if (restoredVersion) {
+        setResult(restoredVersion.content)
+        setVersionHistory(versions)
+        setSelectedVersionDiff(null)
+        toast.success('Content restored to selected version')
+      }
+    } catch (error: any) {
+      toast.error(`Rollback failed: ${error.message}`)
+    }
+  }
+
   // Search & Filter Handler
   const filteredHistory = React.useMemo(() => {
     let filtered = history
@@ -973,6 +1032,15 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
                               SEO: {seoAnalysis.score}/100 ({seoAnalysis.grade})
                             </Badge>
                           )}
+                          {currentGenerationId && (
+                            <Badge
+                              className="bg-purple-500 text-white cursor-pointer"
+                              onClick={loadVersionHistory}
+                            >
+                              <GitBranch className="h-3 w-3 mr-1" />
+                              Versions ({versionHistory.length || getAllVersions(currentGenerationId).length})
+                            </Badge>
+                          )}
                         </div>
                         <div className="flex gap-2">
                           <Select value={exportFormat} onValueChange={setExportFormat}>
@@ -1079,6 +1147,143 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
                                   {strength}
                                 </div>
                               ))}
+                            </div>
+                          )}
+                        </motion.div>
+                      )}
+
+                      {/* Version History Panel */}
+                      {showVersionPanel && currentGenerationId && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800 space-y-3"
+                        >
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-semibold text-sm flex items-center gap-2">
+                              <GitBranch className="h-4 w-4" />
+                              Version History ({versionHistory.length})
+                            </h4>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setShowVersionPanel(false)
+                                setSelectedVersionDiff(null)
+                              }}
+                            >
+                              ✕
+                            </Button>
+                          </div>
+
+                          {versionHistory.length === 0 ? (
+                            <div className="text-xs text-gray-600 dark:text-gray-400 text-center py-4">
+                              No versions saved yet
+                            </div>
+                          ) : (
+                            <div className="space-y-2 max-h-80 overflow-y-auto">
+                              {versionHistory.map((version, index) => (
+                                <div
+                                  key={version.id}
+                                  className="p-3 bg-white dark:bg-gray-800 rounded border border-purple-200 dark:border-purple-700 space-y-2"
+                                >
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">
+                                          v{versionHistory.length - index}
+                                        </span>
+                                        <span className="text-xs text-gray-600 dark:text-gray-400">
+                                          {version.label}
+                                        </span>
+                                        {version.isAutoSave && (
+                                          <Badge variant="outline" className="text-xs px-1 py-0">
+                                            Auto
+                                          </Badge>
+                                        )}
+                                      </div>
+                                      <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                                        {new Date(version.timestamp).toLocaleString()} • {version.content.split(/\s+/).length} words
+                                      </div>
+                                    </div>
+                                    <div className="flex gap-1">
+                                      {index < versionHistory.length - 1 && (
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="h-7 text-xs"
+                                          onClick={() => viewVersionDiff(version.id)}
+                                        >
+                                          Diff
+                                        </Button>
+                                      )}
+                                      {index < versionHistory.length - 1 && (
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="h-7 text-xs text-purple-600 dark:text-purple-400"
+                                          onClick={() => handleRollback(version.id)}
+                                        >
+                                          Restore
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Version Diff Display */}
+                          {selectedVersionDiff && (
+                            <div className="mt-4 p-3 bg-white dark:bg-gray-800 rounded border border-purple-200 dark:border-purple-700 space-y-2">
+                              <div className="flex items-center justify-between">
+                                <h5 className="text-xs font-semibold">Changes</h5>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-6 text-xs"
+                                  onClick={() => setSelectedVersionDiff(null)}
+                                >
+                                  Close
+                                </Button>
+                              </div>
+                              <div className="text-xs space-y-1">
+                                <div className="flex gap-4 text-gray-600 dark:text-gray-400">
+                                  <span className="text-green-600 dark:text-green-400">
+                                    +{selectedVersionDiff.summary.addedLines} added
+                                  </span>
+                                  <span className="text-red-600 dark:text-red-400">
+                                    -{selectedVersionDiff.summary.removedLines} removed
+                                  </span>
+                                  <span>
+                                    {selectedVersionDiff.summary.unchangedLines} unchanged
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="max-h-40 overflow-y-auto font-mono text-xs">
+                                {selectedVersionDiff.lines.slice(0, 20).map((line, i) => (
+                                  <div
+                                    key={i}
+                                    className={`${
+                                      line.type === 'added' ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' :
+                                      line.type === 'removed' ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300' :
+                                      'text-gray-600 dark:text-gray-400'
+                                    } px-2 py-0.5`}
+                                  >
+                                    <span className="text-gray-400 mr-2">{line.lineNumber}</span>
+                                    {line.type === 'added' && '+ '}
+                                    {line.type === 'removed' && '- '}
+                                    {line.content}
+                                  </div>
+                                ))}
+                                {selectedVersionDiff.lines.length > 20 && (
+                                  <div className="text-center text-gray-500 py-2">
+                                    ... {selectedVersionDiff.lines.length - 20} more lines
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           )}
                         </motion.div>
