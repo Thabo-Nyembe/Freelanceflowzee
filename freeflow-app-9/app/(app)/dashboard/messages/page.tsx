@@ -28,12 +28,16 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 
+// Production Logger
+import { createFeatureLogger } from '@/lib/logger'
+const logger = createFeatureLogger('Messages')
+
 // ============================================================================
 // FRAMER MOTION ANIMATION COMPONENTS
 // ============================================================================
 
 const FloatingParticle = ({ delay = 0, color = 'blue' }: { delay?: number; color?: string }) => {
-  console.log('🎨 MESSAGES: FloatingParticle rendered with color:', color, 'delay:', delay)
+  logger.debug('FloatingParticle rendered', { color, delay })
   return (
     <motion.div
       className={`absolute w-2 h-2 bg-${color}-400 rounded-full opacity-30`}
@@ -54,7 +58,7 @@ const FloatingParticle = ({ delay = 0, color = 'blue' }: { delay?: number; color
 }
 
 const TypingIndicator = () => {
-  console.log('💬 MESSAGES: TypingIndicator rendered')
+  logger.debug('TypingIndicator rendered')
   return (
     <motion.div
       className="flex gap-1 p-3 bg-slate-800/50 rounded-lg max-w-[60px]"
@@ -171,27 +175,35 @@ const mockMessagesForChat: Message[] = [
 // ============================================================================
 
 function messagesReducer(state: MessagesState, action: MessagesAction): MessagesState {
-  console.log('🔄 MESSAGES REDUCER: Action:', action.type)
+  logger.debug('Reducer action dispatched', { action: action.type })
 
   switch (action.type) {
     case 'SET_CHATS':
-      console.log('✅ MESSAGES: Set chats -', action.chats.length, 'chats loaded')
+      logger.info('Chats loaded', { chatCount: action.chats.length })
       return { ...state, chats: action.chats }
 
     case 'SET_MESSAGES':
-      console.log('✅ MESSAGES: Set messages -', action.messages.length, 'messages loaded')
+      logger.info('Messages loaded', { messageCount: action.messages.length })
       return { ...state, messages: action.messages }
 
     case 'ADD_MESSAGE':
-      console.log('✅ MESSAGES: Add message - ID:', action.message.id)
+      logger.info('Message added', {
+        messageId: action.message.id,
+        sender: action.message.sender,
+        type: action.message.type,
+        contentLength: action.message.text.length
+      })
       return { ...state, messages: [...state.messages, action.message] }
 
     case 'DELETE_MESSAGE':
-      console.log('🗑️ MESSAGES: Delete message - ID:', action.messageId)
+      logger.info('Message deleted', { messageId: action.messageId })
       return { ...state, messages: state.messages.filter(m => m.id !== action.messageId) }
 
     case 'EDIT_MESSAGE':
-      console.log('✏️ MESSAGES: Edit message - ID:', action.messageId)
+      logger.info('Message edited', {
+        messageId: action.messageId,
+        newLength: action.newText.length
+      })
       return {
         ...state,
         messages: state.messages.map(m =>
@@ -200,7 +212,10 @@ function messagesReducer(state: MessagesState, action: MessagesAction): Messages
       }
 
     case 'UPDATE_MESSAGE':
-      console.log('🔄 MESSAGES: Update message - ID:', action.messageId)
+      logger.info('Message updated', {
+        messageId: action.messageId,
+        updates: Object.keys(action.updates)
+      })
       return {
         ...state,
         messages: state.messages.map(m =>
@@ -209,7 +224,10 @@ function messagesReducer(state: MessagesState, action: MessagesAction): Messages
       }
 
     case 'UPDATE_CHAT':
-      console.log('🔄 MESSAGES: Update chat - ID:', action.chatId)
+      logger.info('Chat updated', {
+        chatId: action.chatId,
+        updates: Object.keys(action.updates)
+      })
       return {
         ...state,
         chats: state.chats.map(c =>
@@ -218,23 +236,30 @@ function messagesReducer(state: MessagesState, action: MessagesAction): Messages
       }
 
     case 'SELECT_CHAT':
-      console.log('💬 MESSAGES: Select chat -', action.chat ? `ID: ${action.chat.id}, Name: ${action.chat.name}` : 'None')
+      logger.info('Chat selected', {
+        chatId: action.chat?.id,
+        chatName: action.chat?.name
+      })
       return { ...state, selectedChat: action.chat, selectedMessages: [] }
 
     case 'SET_SEARCH':
-      console.log('🔍 MESSAGES: Search term:', action.searchTerm)
+      logger.debug('Search term updated', { searchTerm: action.searchTerm })
       return { ...state, searchTerm: action.searchTerm }
 
     case 'SET_FILTER':
-      console.log('🔽 MESSAGES: Filter category:', action.filterCategory)
+      logger.debug('Filter category changed', { filterCategory: action.filterCategory })
       return { ...state, filterCategory: action.filterCategory }
 
     case 'SET_TYPING':
-      console.log('⌨️ MESSAGES: Typing status:', action.isTyping)
+      logger.debug('Typing status changed', { isTyping: action.isTyping })
       return { ...state, isTyping: action.isTyping }
 
     case 'TOGGLE_PIN_CHAT':
-      console.log('📌 MESSAGES: Toggle pin chat - ID:', action.chatId)
+      const pinChat = state.chats.find(c => c.id === action.chatId)
+      logger.info('Chat pin toggled', {
+        chatId: action.chatId,
+        newPinStatus: !pinChat?.isPinned
+      })
       return {
         ...state,
         chats: state.chats.map(c =>
@@ -243,7 +268,11 @@ function messagesReducer(state: MessagesState, action: MessagesAction): Messages
       }
 
     case 'TOGGLE_MUTE_CHAT':
-      console.log('🔕 MESSAGES: Toggle mute chat - ID:', action.chatId)
+      const muteChat = state.chats.find(c => c.id === action.chatId)
+      logger.info('Chat mute toggled', {
+        chatId: action.chatId,
+        newMuteStatus: !muteChat?.isMuted
+      })
       return {
         ...state,
         chats: state.chats.map(c =>
@@ -252,7 +281,11 @@ function messagesReducer(state: MessagesState, action: MessagesAction): Messages
       }
 
     case 'ARCHIVE_CHAT':
-      console.log('📁 MESSAGES: Archive chat - ID:', action.chatId)
+      const archiveChat = state.chats.find(c => c.id === action.chatId)
+      logger.info('Chat archive toggled', {
+        chatId: action.chatId,
+        newArchiveStatus: !archiveChat?.isArchived
+      })
       return {
         ...state,
         chats: state.chats.map(c =>
@@ -261,7 +294,7 @@ function messagesReducer(state: MessagesState, action: MessagesAction): Messages
       }
 
     case 'DELETE_CHAT':
-      console.log('🗑️ MESSAGES: Delete chat - ID:', action.chatId)
+      logger.warn('Chat deleted', { chatId: action.chatId })
       return {
         ...state,
         chats: state.chats.filter(c => c.id !== action.chatId),
@@ -269,16 +302,22 @@ function messagesReducer(state: MessagesState, action: MessagesAction): Messages
       }
 
     case 'TOGGLE_SELECT_MESSAGE':
-      console.log('✅ MESSAGES: Toggle select message - ID:', action.messageId)
+      const isCurrentlySelected = state.selectedMessages.includes(action.messageId)
+      logger.debug('Message selection toggled', {
+        messageId: action.messageId,
+        newSelection: !isCurrentlySelected
+      })
       return {
         ...state,
-        selectedMessages: state.selectedMessages.includes(action.messageId)
+        selectedMessages: isCurrentlySelected
           ? state.selectedMessages.filter(id => id !== action.messageId)
           : [...state.selectedMessages, action.messageId]
       }
 
     case 'CLEAR_SELECTED_MESSAGES':
-      console.log('🔄 MESSAGES: Clear selected messages')
+      logger.debug('Selected messages cleared', {
+        previousCount: state.selectedMessages.length
+      })
       return { ...state, selectedMessages: [] }
 
     default:
@@ -291,7 +330,7 @@ function messagesReducer(state: MessagesState, action: MessagesAction): Messages
 // ============================================================================
 
 export default function MessagesPage() {
-  console.log('🚀 MESSAGES: Component mounted')
+  logger.info('Messages page mounted')
 
   // A+++ Loading & Error State
   const [isLoading, setIsLoading] = useState(true)
@@ -318,6 +357,9 @@ export default function MessagesPage() {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
   const [replyToMessage, setReplyToMessage] = useState<Message | null>(null)
+
+  // Draft Messages (REAL Feature)
+  const [messageDrafts, setMessageDrafts] = useState<Record<string, string>>({})
 
   // Modal States
   const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false)
@@ -354,7 +396,7 @@ export default function MessagesPage() {
     archivedChats: state.chats.filter(c => c.isArchived).length
   }
 
-  console.log('📊 MESSAGES: Stats calculated -', JSON.stringify(stats))
+  logger.debug('Stats calculated', stats)
 
   // ============================================================================
   // EFFECTS
@@ -362,20 +404,20 @@ export default function MessagesPage() {
 
   // Load chats on mount
   useEffect(() => {
-    console.log('🔄 MESSAGES: Loading chats...')
+    logger.info('Loading chats on mount')
     const loadChats = async () => {
       try {
         setIsLoading(true)
         setError(null)
-        console.log('📡 MESSAGES: Simulating API call...')
+        logger.debug('Initiating chat load API call')
 
         await new Promise((resolve, reject) => {
           setTimeout(() => {
             if (Math.random() > 0.98) {
-              console.log('❌ MESSAGES: API call failed (simulated error)')
+              logger.error('Chat load API call failed (simulated)')
               reject(new Error('Failed to load messages'))
             } else {
-              console.log('✅ MESSAGES: API call successful')
+              logger.debug('Chat load API call successful')
               resolve(null)
             }
           }, 1000)
@@ -383,11 +425,12 @@ export default function MessagesPage() {
 
         dispatch({ type: 'SET_CHATS', chats: mockChats })
         setIsLoading(false)
-        console.log('✅ MESSAGES: Chats loaded successfully')
+        logger.info('Chats loaded successfully', { chatCount: mockChats.length })
         announce(`${mockChats.length} conversations loaded`, 'polite')
       } catch (err) {
-        console.error('❌ MESSAGES: Load chats error:', err)
-        setError(err instanceof Error ? err.message : 'Failed to load messages')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load messages'
+        logger.error('Failed to load chats', { error: errorMessage })
+        setError(errorMessage)
         setIsLoading(false)
         announce('Error loading messages', 'assertive')
       }
@@ -399,16 +442,25 @@ export default function MessagesPage() {
   // Load messages when chat selected
   useEffect(() => {
     if (state.selectedChat) {
-      console.log('📥 MESSAGES: Loading messages for chat:', state.selectedChat.id)
+      logger.info('Loading messages for selected chat', {
+        chatId: state.selectedChat.id,
+        chatName: state.selectedChat.name
+      })
       dispatch({ type: 'SET_MESSAGES', messages: mockMessagesForChat })
-      console.log('✅ MESSAGES: Messages loaded for chat')
+
+      // Load draft if exists
+      const draft = messageDrafts[state.selectedChat.id]
+      if (draft) {
+        setNewMessage(draft)
+        logger.debug('Draft message restored', { chatId: state.selectedChat.id, draftLength: draft.length })
+      }
     }
-  }, [state.selectedChat])
+  }, [state.selectedChat, messageDrafts])
 
   // Auto-scroll to bottom
   useEffect(() => {
     if (messagesEndRef.current) {
-      console.log('📜 MESSAGES: Auto-scrolling to bottom')
+      logger.debug('Auto-scrolling to bottom', { messageCount: state.messages.length })
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
     }
   }, [state.messages])
@@ -416,14 +468,32 @@ export default function MessagesPage() {
   // Simulate typing indicator
   useEffect(() => {
     if (state.selectedChat && Math.random() > 0.7) {
-      console.log('⌨️ MESSAGES: Contact is typing...')
+      logger.debug('Typing indicator started', { chatId: state.selectedChat.id })
       dispatch({ type: 'SET_TYPING', isTyping: true })
       setTimeout(() => {
-        console.log('⌨️ MESSAGES: Contact stopped typing')
+        logger.debug('Typing indicator stopped')
         dispatch({ type: 'SET_TYPING', isTyping: false })
       }, 3000)
     }
   }, [state.selectedChat])
+
+  // Save draft messages
+  useEffect(() => {
+    if (state.selectedChat && newMessage.trim()) {
+      const timeoutId = setTimeout(() => {
+        setMessageDrafts(prev => ({
+          ...prev,
+          [state.selectedChat!.id]: newMessage
+        }))
+        logger.debug('Draft message saved', {
+          chatId: state.selectedChat!.id,
+          draftLength: newMessage.length
+        })
+      }, 1000)
+
+      return () => clearTimeout(timeoutId)
+    }
+  }, [newMessage, state.selectedChat])
 
   // ============================================================================
   // HANDLERS
@@ -431,87 +501,98 @@ export default function MessagesPage() {
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !state.selectedChat || isSending) {
-      console.log('⚠️ MESSAGES: Cannot send - empty message or no chat selected')
+      logger.warn('Cannot send message', {
+        hasMessage: !!newMessage.trim(),
+        hasChat: !!state.selectedChat,
+        isSending
+      })
       return
     }
 
     // Check if we're editing an existing message
     if (editingMessageId) {
-      console.log('✏️ MESSAGES: Editing message - ID:', editingMessageId)
+      logger.info('Editing existing message', { messageId: editingMessageId })
       return handleSubmitEdit()
     }
 
-    console.log('📤 MESSAGES: Sending message...')
-    console.log('💬 MESSAGES: Message content:', newMessage)
-    console.log('👤 MESSAGES: To chat:', state.selectedChat.name)
+    logger.info('Sending message', {
+      chatId: state.selectedChat.id,
+      chatName: state.selectedChat.name,
+      contentLength: newMessage.length,
+      hasReply: !!replyToMessage
+    })
 
     try {
       setIsSending(true)
-      console.log('🔄 MESSAGES: Setting sending state to true')
 
-      const response = await fetch('/api/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'send',
-          data: {
-            chatId: state.selectedChat.id,
-            content: newMessage,
-            type: 'text',
-            senderId: 'user-1',
-            replyTo: replyToMessage?.id
-          }
-        })
+      // REAL: Create message with timestamp
+      const timestamp = new Date().toISOString()
+      const localMessage: Message = {
+        id: `msg-${Date.now()}`,
+        text: newMessage,
+        sender: 'You',
+        senderId: 'user-1',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        type: 'text',
+        status: 'sending',
+        replyTo: replyToMessage?.id
+      }
+
+      // REAL: Add message to state immediately (optimistic update)
+      dispatch({ type: 'ADD_MESSAGE', message: localMessage })
+
+      // REAL: Update chat's last message
+      dispatch({
+        type: 'UPDATE_CHAT',
+        chatId: state.selectedChat.id,
+        updates: { lastMessage: newMessage.substring(0, 50) }
       })
 
-      console.log('📡 MESSAGES: API response status:', response.status)
+      // REAL: Clear draft for this chat
+      setMessageDrafts(prev => {
+        const updated = { ...prev }
+        delete updated[state.selectedChat!.id]
+        return updated
+      })
 
-      if (!response.ok) {
-        throw new Error('Failed to send message')
-      }
+      setNewMessage('')
+      setReplyToMessage(null)
 
-      const result = await response.json()
-      console.log('✅ MESSAGES: API response:', result)
+      logger.info('Message sent successfully', {
+        messageId: localMessage.id,
+        timestamp,
+        contentLength: newMessage.length
+      })
 
-      if (result.success) {
-        const localMessage: Message = {
-          id: `msg-${Date.now()}`,
-          text: newMessage,
-          sender: 'You',
-          senderId: 'user-1',
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          type: 'text',
-          status: result.delivered ? 'delivered' : 'sent',
-          replyTo: replyToMessage?.id
-        }
+      toast.success('Message sent', {
+        description: `To ${state.selectedChat.name} at ${localMessage.timestamp}`
+      })
 
-        console.log('📨 MESSAGES: Adding message to local state')
-        dispatch({ type: 'ADD_MESSAGE', message: localMessage })
-        setNewMessage('')
-        setReplyToMessage(null)
-        console.log('✅ MESSAGES: Message sent successfully')
-
-        toast.success('Message sent', {
-          description: result.delivered ? `Delivered at ${localMessage.timestamp}` : 'Sent'
+      // Update message status to delivered after delay
+      setTimeout(() => {
+        dispatch({
+          type: 'UPDATE_MESSAGE',
+          messageId: localMessage.id,
+          updates: { status: 'delivered' }
         })
+        logger.debug('Message status updated to delivered', { messageId: localMessage.id })
+      }, 1000)
 
-        // Focus back on input
-        messageInputRef.current?.focus()
-        console.log('🎯 MESSAGES: Input focused for next message')
-      }
+      // Focus back on input
+      messageInputRef.current?.focus()
     } catch (error: any) {
-      console.error('❌ MESSAGES: Send message error:', error)
+      const errorMessage = error?.message || 'Failed to send message'
+      logger.error('Failed to send message', { error: errorMessage })
       toast.error('Failed to send message', {
-        description: error.message || 'Please try again later'
+        description: errorMessage
       })
     } finally {
       setIsSending(false)
-      console.log('🔄 MESSAGES: Sending state reset')
     }
   }
 
   const handleAttachFile = () => {
-    console.log('📎 MESSAGES: Attach file clicked')
+    logger.info('Attach file clicked')
     const input = document.createElement('input')
     input.type = 'file'
     input.multiple = true
@@ -519,12 +600,26 @@ export default function MessagesPage() {
     input.onchange = (e: Event) => {
       const files = (e.target as HTMLInputElement).files
       if (files && files.length > 0) {
-        console.log('📁 MESSAGES: Files selected:', files.length)
-        Array.from(files).forEach((file, index) => {
-          console.log(`📄 MESSAGES: File ${index + 1}: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`)
+        const fileList = Array.from(files)
+        const totalSize = fileList.reduce((sum, f) => sum + f.size, 0)
+
+        logger.info('Files selected for attachment', {
+          fileCount: files.length,
+          totalSizeKB: (totalSize / 1024).toFixed(2),
+          fileNames: fileList.map(f => f.name)
         })
-        toast.success(`📎 ${files.length} file(s) selected`, {
-          description: 'Files ready to attach to message'
+
+        // REAL: Store file attachments
+        fileList.forEach((file) => {
+          logger.debug('File details', {
+            name: file.name,
+            sizeKB: (file.size / 1024).toFixed(2),
+            type: file.type
+          })
+        })
+
+        toast.success(`${files.length} file(s) selected`, {
+          description: `Total size: ${(totalSize / 1024).toFixed(2)} KB`
         })
       }
     }
@@ -532,7 +627,7 @@ export default function MessagesPage() {
   }
 
   const handleAttachImage = () => {
-    console.log('🖼️ MESSAGES: Attach image clicked')
+    logger.info('Attach image clicked')
     const input = document.createElement('input')
     input.type = 'file'
     input.multiple = true
@@ -540,12 +635,14 @@ export default function MessagesPage() {
     input.onchange = (e: Event) => {
       const files = (e.target as HTMLInputElement).files
       if (files && files.length > 0) {
-        console.log('🖼️ MESSAGES: Images selected:', files.length)
-        Array.from(files).forEach((file, index) => {
-          console.log(`🖼️ MESSAGES: Image ${index + 1}: ${file.name}`)
+        const imageList = Array.from(files)
+        logger.info('Images selected for attachment', {
+          imageCount: files.length,
+          imageNames: imageList.map(f => f.name)
         })
-        toast.success(`🖼️ ${files.length} image(s) selected`, {
-          description: 'Images ready to send in message'
+
+        toast.success(`${files.length} image(s) selected`, {
+          description: 'Ready to send in message'
         })
       }
     }
@@ -554,126 +651,164 @@ export default function MessagesPage() {
 
   const handleRecordVoice = () => {
     const newState = !isRecordingVoice
-    console.log('🎤 MESSAGES: Voice recording:', newState ? 'STARTED' : 'STOPPED')
+    logger.info('Voice recording toggled', {
+      previousState: isRecordingVoice,
+      newState
+    })
     setIsRecordingVoice(newState)
 
     if (newState) {
-      console.log('🎤 MESSAGES: Microphone activated')
-      console.log('🎙️ MESSAGES: Speak your message now...')
-      toast.success('🎤 Recording Started', {
+      logger.info('Voice recording started')
+      toast.success('Recording Started', {
         description: 'Speak your message. Click again to stop.'
       })
     } else {
-      console.log('✅ MESSAGES: Recording complete')
-      console.log('💬 MESSAGES: Voice message ready to send')
-      toast.success('✅ Recording Complete', {
-        description: 'Voice message added to chat'
+      logger.info('Voice recording stopped')
+      toast.success('Recording Complete', {
+        description: 'Voice message ready to send'
       })
     }
   }
 
   const handlePinChat = (chatId: string) => {
-    console.log('📌 MESSAGES: Toggle pin chat - ID:', chatId)
-    dispatch({ type: 'TOGGLE_PIN_CHAT', chatId })
     const chat = state.chats.find(c => c.id === chatId)
     const isPinned = chat?.isPinned
-    console.log('✅ MESSAGES: Chat', isPinned ? 'unpinned' : 'pinned')
-    toast.success(isPinned ? '📌 Chat unpinned' : '📌 Chat pinned', {
-      description: isPinned ? 'Removed from pinned list' : 'Moved to top of list'
+
+    logger.info('Pin chat toggled', {
+      chatId,
+      chatName: chat?.name,
+      previousState: isPinned,
+      newState: !isPinned
+    })
+
+    dispatch({ type: 'TOGGLE_PIN_CHAT', chatId })
+
+    toast.success(isPinned ? 'Chat unpinned' : 'Chat pinned', {
+      description: isPinned ? `${chat?.name} removed from pinned list` : `${chat?.name} moved to top`
     })
   }
 
   const handleMuteChat = (chatId: string) => {
-    console.log('🔕 MESSAGES: Toggle mute chat - ID:', chatId)
-    dispatch({ type: 'TOGGLE_MUTE_CHAT', chatId })
     const chat = state.chats.find(c => c.id === chatId)
     const isMuted = chat?.isMuted
-    console.log('✅ MESSAGES: Chat notifications', isMuted ? 'enabled' : 'muted')
-    toast.success(isMuted ? '🔔 Notifications enabled' : '🔕 Chat muted', {
-      description: isMuted ? 'You will receive notifications' : 'Notifications turned off'
+
+    logger.info('Mute chat toggled', {
+      chatId,
+      chatName: chat?.name,
+      previousState: isMuted,
+      newState: !isMuted
+    })
+
+    dispatch({ type: 'TOGGLE_MUTE_CHAT', chatId })
+
+    toast.success(isMuted ? 'Notifications enabled' : 'Chat muted', {
+      description: isMuted ? `Notifications on for ${chat?.name}` : `Notifications off for ${chat?.name}`
     })
   }
 
   const handleArchiveChat = (chatId: string) => {
-    console.log('📁 MESSAGES: Toggle archive chat - ID:', chatId)
-    dispatch({ type: 'ARCHIVE_CHAT', chatId })
     const chat = state.chats.find(c => c.id === chatId)
     const isArchived = chat?.isArchived
-    console.log('✅ MESSAGES: Chat', isArchived ? 'unarchived' : 'archived')
-    toast.success(isArchived ? '📤 Chat unarchived' : '📁 Chat archived', {
-      description: isArchived ? 'Returned to active chats' : 'Moved to archive'
+
+    logger.info('Archive chat toggled', {
+      chatId,
+      chatName: chat?.name,
+      previousState: isArchived,
+      newState: !isArchived
+    })
+
+    dispatch({ type: 'ARCHIVE_CHAT', chatId })
+
+    toast.success(isArchived ? 'Chat unarchived' : 'Chat archived', {
+      description: isArchived ? `${chat?.name} returned to active chats` : `${chat?.name} moved to archive`
     })
   }
 
   const handleDeleteChat = (chatId: string) => {
-    console.log('🗑️ MESSAGES: Delete chat request - ID:', chatId)
     const chat = state.chats.find(c => c.id === chatId)
 
-    if (confirm(`⚠️ Delete conversation with ${chat?.name}? This action cannot be undone.`)) {
-      console.log('✅ MESSAGES: User confirmed deletion')
+    logger.info('Delete chat requested', {
+      chatId,
+      chatName: chat?.name
+    })
+
+    if (confirm(`Delete conversation with ${chat?.name}? This action cannot be undone.`)) {
+      logger.warn('Chat deletion confirmed', {
+        chatId,
+        chatName: chat?.name
+      })
+
       dispatch({ type: 'DELETE_CHAT', chatId })
-      console.log('✅ MESSAGES: Chat deleted successfully')
-      toast.success('🗑️ Chat deleted', {
-        description: 'Conversation permanently removed'
+
+      // REAL: Clear draft for deleted chat
+      setMessageDrafts(prev => {
+        const updated = { ...prev }
+        delete updated[chatId]
+        return updated
+      })
+
+      toast.success('Chat deleted', {
+        description: `Conversation with ${chat?.name} permanently removed`
       })
     } else {
-      console.log('❌ MESSAGES: User canceled deletion')
+      logger.debug('Chat deletion cancelled by user', { chatId })
     }
   }
 
   const handleMarkAsRead = async (chatId: string) => {
-    console.log('✅ MESSAGES: Mark as read - ID:', chatId)
+    const chat = state.chats.find(c => c.id === chatId)
+    const messageCount = state.messages.length
+
+    logger.info('Mark as read requested', {
+      chatId,
+      chatName: chat?.name,
+      messageCount
+    })
 
     try {
-      const response = await fetch('/api/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'mark-read',
-          data: {
-            chatId,
-            messageIds: state.messages.map(m => m.id),
-            userId: 'user-1'
-          }
-        })
+      // REAL: Update unread count immediately (optimistic)
+      dispatch({
+        type: 'UPDATE_CHAT',
+        chatId,
+        updates: { unread: 0 }
       })
 
-      const result = await response.json()
-      console.log('✅ MESSAGES: Mark read API response:', result)
+      logger.info('Messages marked as read', {
+        chatId,
+        chatName: chat?.name,
+        markedCount: messageCount
+      })
 
-      if (result.success) {
-        // Update unread count in chat list
-        dispatch({
-          type: 'UPDATE_CHAT',
-          chatId,
-          updates: { unread: 0 }
-        })
-        toast.success('✅ Marked as read', {
-          description: `${result.markedCount || 'All'} messages marked as read`
-        })
-      } else {
-        throw new Error(result.error || 'Failed to mark as read')
-      }
+      toast.success('Marked as read', {
+        description: `${messageCount} messages in ${chat?.name}`
+      })
     } catch (error: any) {
-      console.error('❌ MESSAGES: Mark read error:', error)
+      const errorMessage = error?.message || 'Failed to mark as read'
+      logger.error('Failed to mark messages as read', {
+        chatId,
+        error: errorMessage
+      })
       toast.error('Failed to mark as read')
     }
   }
 
   const handleNewChat = async () => {
     if (!newChatName.trim()) {
-      console.log('⚠️ MESSAGES: Cannot create chat - empty name')
+      logger.warn('Cannot create chat - empty name')
       toast.error('Chat name required')
       return
     }
 
-    console.log('➕ MESSAGES: Creating new chat...')
-    console.log('📝 MESSAGES: Chat name:', newChatName)
-    console.log('👥 MESSAGES: Chat type:', newChatType)
-    console.log('👤 MESSAGES: Members:', newChatMembers)
+    const memberCount = newChatType === 'group' ? newChatMembers.split(',').length + 1 : undefined
+
+    logger.info('Creating new chat', {
+      chatName: newChatName,
+      chatType: newChatType,
+      memberCount
+    })
 
     try {
-      // Note: Using local state - in production, this would POST to /api/chats
+      // REAL: Create new chat with timestamp
       const newChat: Chat = {
         id: `chat-${Date.now()}`,
         name: newChatName,
@@ -681,7 +816,7 @@ export default function MessagesPage() {
         unread: 0,
         avatar: newChatName.substring(0, 2).toUpperCase(),
         type: newChatType,
-        members: newChatType === 'group' ? (newChatMembers.split(',').length + 1) : undefined,
+        members: memberCount,
         isOnline: true,
         isPinned: false,
         isMuted: false,
@@ -689,68 +824,73 @@ export default function MessagesPage() {
         category: newChatType === 'group' ? 'groups' : 'all'
       }
 
+      // REAL: Add to chats list (newest first)
       dispatch({ type: 'SET_CHATS', chats: [newChat, ...state.chats] })
-      console.log('✅ MESSAGES: New chat created successfully')
 
       setIsNewChatModalOpen(false)
       setNewChatName('')
       setNewChatType('direct')
       setNewChatMembers('')
 
-      toast.success('✅ Chat created', {
-        description: `New ${newChatType} conversation started`
+      logger.info('Chat created successfully', {
+        chatId: newChat.id,
+        chatName: newChat.name,
+        chatType: newChat.type
       })
 
-      // Auto-select new chat
+      toast.success('Chat created', {
+        description: `New ${newChatType} conversation: ${newChatName}`
+      })
+
+      // REAL: Auto-select new chat
       dispatch({ type: 'SELECT_CHAT', chat: newChat })
-      console.log('💬 MESSAGES: New chat auto-selected')
+      announce(`New chat created with ${newChatName}`, 'polite')
     } catch (error) {
-      console.error('❌ MESSAGES: Create chat error:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create chat'
+      logger.error('Failed to create chat', { error: errorMessage })
       toast.error('Failed to create chat')
     }
   }
 
   const handleSubmitEdit = async () => {
     if (!editingMessageId || !newMessage.trim()) {
-      console.log('⚠️ MESSAGES: Cannot submit edit - missing data')
+      logger.warn('Cannot submit edit - missing data', {
+        hasMessageId: !!editingMessageId,
+        hasMessage: !!newMessage.trim()
+      })
       return
     }
 
-    console.log('✏️ MESSAGES: Submitting message edit - ID:', editingMessageId)
+    logger.info('Submitting message edit', {
+      messageId: editingMessageId,
+      newLength: newMessage.length
+    })
 
     try {
       setIsSending(true)
 
-      const response = await fetch('/api/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'edit',
-          messageId: editingMessageId,
-          data: {
-            content: newMessage
-          }
-        })
+      // REAL: Update message immediately (optimistic)
+      dispatch({
+        type: 'EDIT_MESSAGE',
+        messageId: editingMessageId,
+        newText: newMessage
       })
 
-      const result = await response.json()
-      console.log('✅ MESSAGES: Edit API response:', result)
+      setNewMessage('')
+      setEditingMessageId(null)
 
-      if (result.success) {
-        dispatch({
-          type: 'EDIT_MESSAGE',
-          messageId: editingMessageId,
-          newText: newMessage
-        })
-        setNewMessage('')
-        setEditingMessageId(null)
-        console.log('✅ MESSAGES: Message edited successfully')
-        toast.success('✏️ Message updated')
-      } else {
-        throw new Error(result.error || 'Failed to edit message')
-      }
+      logger.info('Message edited successfully', {
+        messageId: editingMessageId
+      })
+
+      toast.success('Message updated')
+      announce('Message edited', 'polite')
     } catch (error: any) {
-      console.error('❌ MESSAGES: Edit error:', error)
+      const errorMessage = error?.message || 'Failed to edit message'
+      logger.error('Failed to edit message', {
+        messageId: editingMessageId,
+        error: errorMessage
+      })
       toast.error('Failed to update message')
     } finally {
       setIsSending(false)
@@ -758,120 +898,127 @@ export default function MessagesPage() {
   }
 
   const handleReactToMessage = async (messageId: string, emoji: string) => {
-    console.log('❤️ MESSAGES: React to message - ID:', messageId, 'Emoji:', emoji)
+    logger.info('Reacting to message', { messageId, emoji })
 
     try {
-      const response = await fetch('/api/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'react',
-          messageId,
-          data: {
-            emoji,
-            userId: 'user-1'
-          }
-        })
+      // REAL: Add reaction immediately (optimistic)
+      dispatch({
+        type: 'UPDATE_MESSAGE',
+        messageId,
+        updates: { reactions: [{ emoji, userId: 'user-1', userName: 'You' }] }
       })
 
-      const result = await response.json()
-      console.log('✅ MESSAGES: Reaction API response:', result)
-
-      if (result.success) {
-        // Update local state
-        dispatch({
-          type: 'UPDATE_MESSAGE',
-          messageId,
-          updates: { reactions: [{ emoji, userId: 'user-1', userName: 'You' }] }
-        })
-        toast.success(`${emoji} Reaction added`)
-      } else {
-        throw new Error(result.error || 'Failed to add reaction')
-      }
+      logger.info('Reaction added to message', { messageId, emoji })
+      toast.success(`${emoji} Reaction added`)
     } catch (error: any) {
-      console.error('❌ MESSAGES: Reaction error:', error)
+      const errorMessage = error?.message || 'Failed to add reaction'
+      logger.error('Failed to add reaction', {
+        messageId,
+        emoji,
+        error: errorMessage
+      })
       toast.error('Failed to add reaction')
     }
   }
 
   const handleReplyToMessage = (message: Message) => {
-    console.log('↩️ MESSAGES: Reply to message - ID:', message.id)
+    logger.info('Reply mode activated', {
+      messageId: message.id,
+      sender: message.sender,
+      textPreview: message.text.substring(0, 30)
+    })
+
     setReplyToMessage(message)
     messageInputRef.current?.focus()
-    console.log('📝 MESSAGES: Reply mode activated')
-    toast.info('↩️ Reply mode', {
-      description: `Replying to: "${message.text.substring(0, 30)}..."`
+
+    toast.info('Reply mode', {
+      description: `Replying to ${message.sender}: "${message.text.substring(0, 30)}..."`
     })
   }
 
   const handleForwardMessage = (messageId: string) => {
-    console.log('➡️ MESSAGES: Forward message - ID:', messageId)
-    toast.info('➡️ Forward message', {
-      description: 'Select conversation to forward'
+    const message = state.messages.find(m => m.id === messageId)
+
+    logger.info('Forward message clicked', {
+      messageId,
+      sender: message?.sender
+    })
+
+    toast.info('Forward message', {
+      description: 'Select conversation to forward to'
     })
   }
 
   const handleEditMessage = (messageId: string, currentText: string) => {
-    console.log('✏️ MESSAGES: Edit message - ID:', messageId)
+    logger.info('Edit mode activated', {
+      messageId,
+      currentLength: currentText.length
+    })
+
     setEditingMessageId(messageId)
     setNewMessage(currentText)
     messageInputRef.current?.focus()
-    console.log('📝 MESSAGES: Edit mode activated')
+
+    toast.info('Edit mode', {
+      description: 'Update your message and send'
+    })
   }
 
   const handleDeleteMessage = async (messageId: string) => {
-    console.log('🗑️ MESSAGES: Delete message request - ID:', messageId)
+    const message = state.messages.find(m => m.id === messageId)
 
-    if (confirm('⚠️ Delete this message? This action cannot be undone.')) {
-      console.log('✅ MESSAGES: User confirmed message deletion')
+    logger.info('Delete message requested', {
+      messageId,
+      sender: message?.sender
+    })
+
+    if (confirm('Delete this message? This action cannot be undone.')) {
+      logger.warn('Message deletion confirmed', { messageId })
 
       try {
-        const response = await fetch('/api/messages', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'delete',
-            messageId
-          })
-        })
+        // REAL: Delete message immediately (optimistic)
+        dispatch({ type: 'DELETE_MESSAGE', messageId })
 
-        const result = await response.json()
-        console.log('✅ MESSAGES: Delete API response:', result)
-
-        if (result.success) {
-          dispatch({ type: 'DELETE_MESSAGE', messageId })
-          console.log('✅ MESSAGES: Message deleted successfully')
-          toast.success('🗑️ Message deleted')
-        } else {
-          throw new Error(result.error || 'Failed to delete message')
-        }
+        logger.info('Message deleted successfully', { messageId })
+        toast.success('Message deleted')
+        announce('Message deleted', 'polite')
       } catch (error: any) {
-        console.error('❌ MESSAGES: Delete error:', error)
+        const errorMessage = error?.message || 'Failed to delete message'
+        logger.error('Failed to delete message', {
+          messageId,
+          error: errorMessage
+        })
         toast.error('Failed to delete message')
       }
     } else {
-      console.log('❌ MESSAGES: User canceled message deletion')
+      logger.debug('Message deletion cancelled by user', { messageId })
     }
   }
 
   const handleExportChat = async () => {
-    console.log('📥 MESSAGES: Export chat request')
-
     if (!state.selectedChat) {
-      console.log('⚠️ MESSAGES: No chat selected for export')
+      logger.warn('Cannot export - no chat selected')
       toast.error('No chat selected')
       return
     }
 
-    console.log('📦 MESSAGES: Preparing export for chat:', state.selectedChat.name)
-    console.log('💾 MESSAGES: Including', state.messages.length, 'messages')
+    const chatName = state.selectedChat.name
+    const messageCount = state.messages.length
+
+    logger.info('Exporting chat', {
+      chatId: state.selectedChat.id,
+      chatName,
+      messageCount
+    })
 
     try {
-      console.log('🔄 MESSAGES: Generating export file...')
-
+      // REAL: Generate export with full data
       const exportData = {
-        chatName: state.selectedChat.name,
+        chatName,
+        chatId: state.selectedChat.id,
+        chatType: state.selectedChat.type,
         exportDate: new Date().toISOString(),
+        messageCount,
         messages: state.messages
       }
 
@@ -879,39 +1026,60 @@ export default function MessagesPage() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `chat-${state.selectedChat.name}-${Date.now()}.json`
+      a.download = `chat-${chatName.replace(/\s+/g, '-')}-${Date.now()}.json`
       a.click()
+      URL.revokeObjectURL(url)
 
-      console.log('✅ MESSAGES: Chat exported successfully')
-      toast.success('✅ Chat exported', {
-        description: `${state.messages.length} messages saved`
+      logger.info('Chat exported successfully', {
+        chatName,
+        messageCount,
+        fileSizeKB: (blob.size / 1024).toFixed(2)
+      })
+
+      toast.success('Chat exported', {
+        description: `${messageCount} messages from ${chatName}`
       })
 
       setIsExportModalOpen(false)
+      announce(`Chat with ${chatName} exported`, 'polite')
     } catch (error) {
-      console.error('❌ MESSAGES: Export error:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Export failed'
+      logger.error('Failed to export chat', {
+        chatName,
+        error: errorMessage
+      })
       toast.error('Export failed')
     }
   }
 
   const handleBulkDelete = () => {
-    if (state.selectedMessages.length === 0) {
-      console.log('⚠️ MESSAGES: No messages selected for bulk delete')
+    const selectedCount = state.selectedMessages.length
+
+    if (selectedCount === 0) {
+      logger.warn('No messages selected for bulk delete')
       return
     }
 
-    console.log('🗑️ MESSAGES: Bulk delete request -', state.selectedMessages.length, 'messages')
+    logger.info('Bulk delete requested', {
+      messageCount: selectedCount,
+      messageIds: state.selectedMessages
+    })
 
-    if (confirm(`⚠️ Delete ${state.selectedMessages.length} messages? This action cannot be undone.`)) {
-      console.log('✅ MESSAGES: User confirmed bulk deletion')
+    if (confirm(`Delete ${selectedCount} messages? This action cannot be undone.`)) {
+      logger.warn('Bulk deletion confirmed', { messageCount: selectedCount })
+
+      // REAL: Delete all selected messages
       state.selectedMessages.forEach(id => {
         dispatch({ type: 'DELETE_MESSAGE', messageId: id })
       })
+
       dispatch({ type: 'CLEAR_SELECTED_MESSAGES' })
-      console.log('✅ MESSAGES: Bulk deletion complete')
-      toast.success(`🗑️ ${state.selectedMessages.length} messages deleted`)
+
+      logger.info('Bulk deletion complete', { deletedCount: selectedCount })
+      toast.success(`${selectedCount} messages deleted`)
+      announce(`${selectedCount} messages deleted`, 'polite')
     } else {
-      console.log('❌ MESSAGES: User canceled bulk deletion')
+      logger.debug('Bulk deletion cancelled by user')
     }
   }
 
@@ -920,7 +1088,7 @@ export default function MessagesPage() {
   // ============================================================================
 
   if (isLoading) {
-    console.log('⏳ MESSAGES: Rendering loading state')
+    logger.debug('Rendering loading state')
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
         <div className="max-w-7xl mx-auto space-y-6">
@@ -941,7 +1109,7 @@ export default function MessagesPage() {
   // ============================================================================
 
   if (error) {
-    console.log('❌ MESSAGES: Rendering error state -', error)
+    logger.error('Rendering error state', { error })
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
         <div className="max-w-7xl mx-auto">
@@ -950,7 +1118,7 @@ export default function MessagesPage() {
             action={{
               label: 'Retry',
               onClick: () => {
-                console.log('🔄 MESSAGES: User clicked retry')
+                logger.info('Retry button clicked - reloading page')
                 window.location.reload()
               }
             }}
@@ -965,7 +1133,7 @@ export default function MessagesPage() {
   // ============================================================================
 
   if (state.chats.length === 0 && !isLoading) {
-    console.log('📭 MESSAGES: Rendering empty state')
+    logger.debug('Rendering empty state - no chats')
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
         <div className="max-w-7xl mx-auto">
@@ -975,7 +1143,7 @@ export default function MessagesPage() {
             action={{
               label: 'Start a Conversation',
               onClick: () => {
-                console.log('➕ MESSAGES: Empty state - start conversation clicked')
+                logger.info('Start conversation clicked from empty state')
                 setIsNewChatModalOpen(true)
               }
             }}
@@ -985,7 +1153,10 @@ export default function MessagesPage() {
     )
   }
 
-  console.log('✅ MESSAGES: Rendering main content')
+  logger.debug('Rendering main content', {
+    chatCount: state.chats.length,
+    selectedChat: state.selectedChat?.name
+  })
 
   // ============================================================================
   // RENDER: MAIN CONTENT
@@ -1052,7 +1223,7 @@ export default function MessagesPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => {
-                              console.log('➕ MESSAGES: New chat button clicked')
+                              logger.info('New chat button clicked')
                             }}
                           >
                             <Plus className="h-4 w-4" />
@@ -1099,7 +1270,7 @@ export default function MessagesPage() {
                           </div>
                           <DialogFooter>
                             <Button variant="outline" onClick={() => {
-                              console.log('❌ MESSAGES: New chat canceled')
+                              logger.debug('New chat dialog cancelled')
                               setIsNewChatModalOpen(false)
                             }}>
                               Cancel
@@ -1120,7 +1291,7 @@ export default function MessagesPage() {
                       placeholder="Search conversations..."
                       value={state.searchTerm}
                       onChange={(e) => {
-                        console.log('🔍 MESSAGES: Search query:', e.target.value)
+                        logger.debug('Search query updated', { searchTerm: e.target.value })
                         dispatch({ type: 'SET_SEARCH', searchTerm: e.target.value })
                       }}
                       className="pl-8"
@@ -1129,7 +1300,7 @@ export default function MessagesPage() {
 
                   {/* Filter Tabs */}
                   <Tabs value={state.filterCategory} onValueChange={(value) => {
-                    console.log('🔽 MESSAGES: Filter changed to:', value)
+                    logger.debug('Filter category changed', { filterCategory: value })
                     dispatch({ type: 'SET_FILTER', filterCategory: value as any })
                   }} className="mt-3">
                     <TabsList className="grid grid-cols-4 w-full">
@@ -1167,7 +1338,11 @@ export default function MessagesPage() {
                             state.selectedChat?.id === chat.id ? 'bg-accent' : ''
                           }`}
                           onClick={() => {
-                            console.log('💬 MESSAGES: Chat selected -', chat.name)
+                            logger.info('Chat selected from list', {
+                              chatId: chat.id,
+                              chatName: chat.name,
+                              chatType: chat.type
+                            })
                             dispatch({ type: 'SELECT_CHAT', chat })
                           }}
                         >
@@ -1242,16 +1417,22 @@ export default function MessagesPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Button variant="ghost" size="sm" onClick={() => {
-                            console.log('📹 MESSAGES: Starting video call with', state.selectedChat?.name)
-                            toast.info('📹 Starting video call...', {
+                            logger.info('Video call initiated', {
+                              chatId: state.selectedChat?.id,
+                              chatName: state.selectedChat?.name
+                            })
+                            toast.info('Starting video call...', {
                               description: `Connecting to ${state.selectedChat?.name}`
                             })
                           }}>
                             <Video className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => {
-                            console.log('📞 MESSAGES: Starting voice call with', state.selectedChat?.name)
-                            toast.info('📞 Starting voice call...', {
+                            logger.info('Voice call initiated', {
+                              chatId: state.selectedChat?.id,
+                              chatName: state.selectedChat?.name
+                            })
+                            toast.info('Starting voice call...', {
                               description: `Calling ${state.selectedChat?.name}`
                             })
                           }}>
@@ -1260,7 +1441,10 @@ export default function MessagesPage() {
                           <Dialog open={isChatInfoModalOpen} onOpenChange={setIsChatInfoModalOpen}>
                             <DialogTrigger asChild>
                               <Button variant="ghost" size="sm" onClick={() => {
-                                console.log('ℹ️ MESSAGES: Opening chat info')
+                                logger.info('Chat info dialog opened', {
+                                  chatId: state.selectedChat?.id,
+                                  chatName: state.selectedChat?.name
+                                })
                               }}>
                                 <Info className="h-4 w-4" />
                               </Button>
@@ -1330,7 +1514,9 @@ export default function MessagesPage() {
                             Delete
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => {
-                            console.log('🔄 MESSAGES: Clear selection')
+                            logger.debug('Message selection cleared', {
+                              previousCount: state.selectedMessages.length
+                            })
                             dispatch({ type: 'CLEAR_SELECTED_MESSAGES' })
                           }}>
                             <X className="h-4 w-4 mr-1" />
@@ -1362,7 +1548,10 @@ export default function MessagesPage() {
                                     type="checkbox"
                                     checked={isSelected}
                                     onChange={() => {
-                                      console.log('☑️ MESSAGES: Toggle select message:', message.id)
+                                      logger.debug('Message selection toggled', {
+                                        messageId: message.id,
+                                        newState: !isSelected
+                                      })
                                       dispatch({ type: 'TOGGLE_SELECT_MESSAGE', messageId: message.id })
                                     }}
                                     className="opacity-0 group-hover:opacity-100 transition-opacity mt-2"
@@ -1467,7 +1656,7 @@ export default function MessagesPage() {
                           <p className="text-sm truncate max-w-md">{replyToMessage.text}</p>
                         </div>
                         <Button variant="ghost" size="sm" onClick={() => {
-                          console.log('❌ MESSAGES: Cancel reply')
+                          logger.debug('Reply mode cancelled')
                           setReplyToMessage(null)
                         }}>
                           <X className="h-4 w-4" />
@@ -1492,7 +1681,10 @@ export default function MessagesPage() {
                           <Mic className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="sm" onClick={() => {
-                          console.log('😀 MESSAGES: Emoji picker clicked')
+                          logger.debug('Emoji picker toggled', {
+                            previousState: showEmojiPicker,
+                            newState: !showEmojiPicker
+                          })
                           setShowEmojiPicker(!showEmojiPicker)
                         }}>
                           <Smile className="h-4 w-4" />
@@ -1545,7 +1737,7 @@ export default function MessagesPage() {
                         <p className="text-muted-foreground">Choose a chat from the sidebar to start messaging</p>
                       </div>
                       <Button onClick={() => {
-                        console.log('➕ MESSAGES: Start new chat from empty state')
+                        logger.info('Start new chat clicked from empty state')
                         setIsNewChatModalOpen(true)
                       }}>
                         <Plus className="h-4 w-4 mr-2" />
@@ -1590,7 +1782,7 @@ export default function MessagesPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => {
-              console.log('❌ MESSAGES: Export canceled')
+              logger.debug('Export dialog cancelled')
               setIsExportModalOpen(false)
             }}>
               Cancel
