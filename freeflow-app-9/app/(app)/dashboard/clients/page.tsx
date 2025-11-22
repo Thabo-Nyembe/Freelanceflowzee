@@ -44,13 +44,15 @@ import { GlowEffect } from '@/components/ui/glow-effect'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Clients')
 
 // ============================================================================
 // FRAMER MOTION ANIMATION COMPONENTS
 // ============================================================================
 
 const FloatingParticle = ({ delay = 0, color = 'blue' }: { delay?: number; color?: string }) => {
-  console.log('🎨 CLIENTS: FloatingParticle rendered with color:', color, 'delay:', delay)
   return (
     <motion.div
       className={`absolute w-2 h-2 bg-${color}-400 rounded-full opacity-30`}
@@ -300,19 +302,19 @@ const mockProjects: Record<string, Project[]> = {
 // ============================================================================
 
 function clientsReducer(state: ClientsState, action: ClientsAction): ClientsState {
-  console.log('🔄 CLIENTS REDUCER: Action:', action.type)
+  logger.debug('Reducer action', { action: action.type })
 
   switch (action.type) {
     case 'SET_CLIENTS':
-      console.log('✅ CLIENTS: Set clients -', action.clients.length, 'clients loaded')
+      logger.info('Clients loaded', { count: action.clients.length })
       return { ...state, clients: action.clients }
 
     case 'ADD_CLIENT':
-      console.log('✅ CLIENTS: Add client - ID:', action.client.id, 'Name:', action.client.name)
+      logger.info('Client added', { clientId: action.client.id, name: action.client.name })
       return { ...state, clients: [action.client, ...state.clients] }
 
     case 'UPDATE_CLIENT':
-      console.log('✅ CLIENTS: Update client - ID:', action.client.id)
+      logger.info('Client updated', { clientId: action.client.id })
       return {
         ...state,
         clients: state.clients.map(c =>
@@ -321,7 +323,7 @@ function clientsReducer(state: ClientsState, action: ClientsAction): ClientsStat
       }
 
     case 'DELETE_CLIENT':
-      console.log('🗑️ CLIENTS: Delete client - ID:', action.clientId)
+      logger.info('Client deleted', { clientId: action.clientId })
       return {
         ...state,
         clients: state.clients.filter(c => c.id !== action.clientId),
@@ -329,23 +331,26 @@ function clientsReducer(state: ClientsState, action: ClientsAction): ClientsStat
       }
 
     case 'SELECT_CLIENT':
-      console.log('👤 CLIENTS: Select client -', action.client ? `${action.client.name} (${action.client.id})` : 'None')
+      logger.debug('Client selected', {
+        clientId: action.client?.id,
+        name: action.client?.name
+      })
       return { ...state, selectedClient: action.client }
 
     case 'SET_SEARCH':
-      console.log('🔍 CLIENTS: Search term:', action.searchTerm)
+      logger.debug('Search updated', { searchTerm: action.searchTerm })
       return { ...state, searchTerm: action.searchTerm }
 
     case 'SET_FILTER':
-      console.log('🔽 CLIENTS: Filter status:', action.filterStatus)
+      logger.debug('Filter updated', { filterStatus: action.filterStatus })
       return { ...state, filterStatus: action.filterStatus }
 
     case 'SET_SORT':
-      console.log('🔃 CLIENTS: Sort by:', action.sortBy)
+      logger.debug('Sort updated', { sortBy: action.sortBy })
       return { ...state, sortBy: action.sortBy }
 
     case 'TOGGLE_SELECT_CLIENT':
-      console.log('☑️ CLIENTS: Toggle select client - ID:', action.clientId)
+      logger.debug('Toggle client selection', { clientId: action.clientId })
       return {
         ...state,
         selectedClients: state.selectedClients.includes(action.clientId)
@@ -354,11 +359,11 @@ function clientsReducer(state: ClientsState, action: ClientsAction): ClientsStat
       }
 
     case 'CLEAR_SELECTED_CLIENTS':
-      console.log('🔄 CLIENTS: Clear selected clients')
+      logger.debug('Cleared selected clients')
       return { ...state, selectedClients: [] }
 
     case 'SET_VIEW_MODE':
-      console.log('👁️ CLIENTS: View mode:', action.viewMode)
+      logger.debug('View mode changed', { viewMode: action.viewMode })
       return { ...state, viewMode: action.viewMode }
 
     default:
@@ -383,7 +388,7 @@ const statusConfig: Record<Client['status'], { color: string; icon: any; label: 
 // ============================================================================
 
 export default function ClientsPage() {
-  console.log('🚀 CLIENTS: Component mounted')
+  logger.debug('Clients page mounted')
 
   // A+++ Loading & Error State
   const [isLoading, setIsLoading] = useState(true)
@@ -415,8 +420,6 @@ export default function ClientsPage() {
 
   // Filtered and Sorted Clients
   const filteredAndSortedClients = useMemo(() => {
-    console.log('🔄 CLIENTS: Computing filtered and sorted clients')
-
     let filtered = state.clients.filter(client => {
       const matchesSearch =
         client.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
@@ -449,7 +452,12 @@ export default function ClientsPage() {
       }
     })
 
-    console.log('✅ CLIENTS: Filtered to', filtered.length, 'clients')
+    logger.debug('Clients filtered and sorted', {
+      count: filtered.length,
+      searchTerm: state.searchTerm,
+      filterStatus: state.filterStatus,
+      sortBy: state.sortBy
+    })
     return filtered
   }, [state.clients, state.searchTerm, state.filterStatus, state.sortBy])
 
@@ -471,7 +479,7 @@ export default function ClientsPage() {
         ? state.clients.reduce((sum, c) => sum + c.rating, 0) / state.clients.length
         : 0
     }
-    console.log('📊 CLIENTS: Stats calculated -', JSON.stringify(s))
+    logger.debug('Stats calculated', s)
     return s
   }, [state.clients])
 
@@ -480,20 +488,17 @@ export default function ClientsPage() {
   // ============================================================================
 
   useEffect(() => {
-    console.log('🔄 CLIENTS: Loading clients...')
+    logger.info('Loading clients')
     const loadClients = async () => {
       try {
         setIsLoading(true)
         setError(null)
-        console.log('📡 CLIENTS: Simulating API call...')
 
         await new Promise((resolve, reject) => {
           setTimeout(() => {
             if (Math.random() > 0.98) {
-              console.log('❌ CLIENTS: API call failed (simulated error)')
               reject(new Error('Failed to load clients'))
             } else {
-              console.log('✅ CLIENTS: API call successful')
               resolve(null)
             }
           }, 1000)
@@ -501,10 +506,10 @@ export default function ClientsPage() {
 
         dispatch({ type: 'SET_CLIENTS', clients: mockClients })
         setIsLoading(false)
-        console.log('✅ CLIENTS: Clients loaded successfully')
+        logger.info('Clients loaded successfully', { count: mockClients.length })
         announce(`${mockClients.length} clients loaded successfully`, 'polite')
       } catch (err) {
-        console.error('❌ CLIENTS: Load clients error:', err)
+        logger.error('Failed to load clients', { error: err })
         setError(err instanceof Error ? err.message : 'Failed to load clients')
         setIsLoading(false)
         announce('Error loading clients', 'assertive')
@@ -520,19 +525,24 @@ export default function ClientsPage() {
 
   const handleAddClient = async () => {
     if (!formData.name || !formData.email) {
-      console.log('⚠️ CLIENTS: Validation failed - missing required fields')
+      logger.warn('Validation failed for add client', {
+        hasName: !!formData.name,
+        hasEmail: !!formData.email
+      })
       toast.error('Required fields missing', {
         description: 'Please fill in name and email'
       })
       return
     }
 
-    console.log('➕ CLIENTS: Adding new client...')
-    console.log('📝 CLIENTS: Form data:', formData)
+    logger.info('Adding new client', {
+      name: formData.name,
+      email: formData.email,
+      company: formData.company
+    })
 
     try {
       setIsSaving(true)
-      console.log('🔄 CLIENTS: Setting saving state to true')
 
       const response = await fetch('/api/clients', {
         method: 'POST',
@@ -543,22 +553,21 @@ export default function ClientsPage() {
         })
       })
 
-      console.log('📡 CLIENTS: API response status:', response.status)
-
       if (!response.ok) {
         throw new Error('Failed to create client')
       }
 
       const result = await response.json()
-      console.log('✅ CLIENTS: API response:', result)
 
       if (result.success) {
-        console.log('✅ CLIENTS: New client created:', result.client.id)
+        logger.info('Client created successfully', {
+          clientId: result.client.id,
+          name: result.client.name
+        })
         dispatch({ type: 'ADD_CLIENT', client: result.client })
 
         setIsAddClientModalOpen(false)
         setFormData({})
-        console.log('🔄 CLIENTS: Form reset, modal closed')
 
         toast.success('✅ Client added', {
           description: `${result.client.name} has been added to your client list`
@@ -567,25 +576,30 @@ export default function ClientsPage() {
         throw new Error(result.error || 'Failed to create client')
       }
     } catch (error: any) {
-      console.error('❌ CLIENTS: Add client error:', error)
+      logger.error('Failed to add client', { error, name: formData.name })
       toast.error('Failed to add client', {
         description: error.message || 'Please try again later'
       })
     } finally {
       setIsSaving(false)
-      console.log('🔄 CLIENTS: Saving state reset')
     }
   }
 
   const handleUpdateClient = async () => {
     if (!state.selectedClient || !formData.name || !formData.email) {
-      console.log('⚠️ CLIENTS: Update validation failed')
+      logger.warn('Update validation failed', {
+        hasClient: !!state.selectedClient,
+        hasName: !!formData.name,
+        hasEmail: !!formData.email
+      })
       toast.error('Required fields missing')
       return
     }
 
-    console.log('✏️ CLIENTS: Updating client:', state.selectedClient.id)
-    console.log('📝 CLIENTS: Updated data:', formData)
+    logger.info('Updating client', {
+      clientId: state.selectedClient.id,
+      name: formData.name
+    })
 
     try {
       setIsSaving(true)
@@ -601,7 +615,6 @@ export default function ClientsPage() {
       })
 
       const result = await response.json()
-      console.log('✅ CLIENTS: Update API response:', result)
 
       if (result.success) {
         const updatedClient: Client = {
@@ -610,7 +623,10 @@ export default function ClientsPage() {
           updatedAt: new Date().toISOString()
         } as Client
 
-        console.log('✅ CLIENTS: Client updated successfully')
+        logger.info('Client updated successfully', {
+          clientId: updatedClient.id,
+          name: updatedClient.name
+        })
         dispatch({ type: 'UPDATE_CLIENT', client: updatedClient })
 
         setIsEditClientModalOpen(false)
@@ -623,7 +639,10 @@ export default function ClientsPage() {
         throw new Error(result.error || 'Failed to update client')
       }
     } catch (error: any) {
-      console.error('❌ CLIENTS: Update client error:', error)
+      logger.error('Failed to update client', {
+        error,
+        clientId: state.selectedClient.id
+      })
       toast.error('Failed to update client', {
         description: error.message || 'Please try again later'
       })
@@ -634,10 +653,10 @@ export default function ClientsPage() {
 
   const handleDeleteClient = async (clientId: string) => {
     const client = state.clients.find(c => c.id === clientId)
-    console.log('🗑️ CLIENTS: Delete request for:', clientId)
+    logger.info('Delete client requested', { clientId, name: client?.name })
 
     if (confirm(`⚠️ Delete client ${client?.name}? This action cannot be undone.`)) {
-      console.log('✅ CLIENTS: User confirmed deletion')
+      logger.info('Delete client confirmed', { clientId })
 
       try {
         const response = await fetch('/api/clients', {
@@ -650,11 +669,10 @@ export default function ClientsPage() {
         })
 
         const result = await response.json()
-        console.log('✅ CLIENTS: Delete API response:', result)
 
         if (result.success) {
           dispatch({ type: 'DELETE_CLIENT', clientId })
-          console.log('✅ CLIENTS: Client deleted successfully')
+          logger.info('Client deleted successfully', { clientId, name: client?.name })
 
           toast.success('🗑️ Client deleted', {
             description: `${client?.name} has been removed`
@@ -663,68 +681,64 @@ export default function ClientsPage() {
           throw new Error(result.error || 'Failed to delete client')
         }
       } catch (error: any) {
-        console.error('❌ CLIENTS: Delete error:', error)
+        logger.error('Failed to delete client', { error, clientId })
         toast.error('Failed to delete client', {
           description: error.message || 'Please try again later'
         })
       }
     } else {
-      console.log('❌ CLIENTS: User canceled deletion')
+      logger.debug('Delete client canceled', { clientId })
     }
   }
 
   const handleViewClient = (client: Client) => {
-    console.log('👁️ CLIENTS: View client:', client.name, `(${client.id})`)
+    logger.info('View client', { clientId: client.id, name: client.name })
     dispatch({ type: 'SELECT_CLIENT', client })
     setIsViewClientModalOpen(true)
-    console.log('✅ CLIENTS: View modal opened')
   }
 
   const handleEditClient = (client: Client) => {
-    console.log('✏️ CLIENTS: Edit client:', client.name, `(${client.id})`)
+    logger.info('Edit client', { clientId: client.id, name: client.name })
     dispatch({ type: 'SELECT_CLIENT', client })
     setFormData(client)
     setIsEditClientModalOpen(true)
-    console.log('✅ CLIENTS: Edit modal opened')
   }
 
   const handleSendMessage = (client: Client) => {
-    console.log('💬 CLIENTS: Send message to:', client.name)
+    logger.info('Send message to client', { clientId: client.id, name: client.name })
     toast.info('💬 Opening message composer', {
       description: `Starting conversation with ${client.name}`
     })
   }
 
   const handleSendEmail = (client: Client) => {
-    console.log('📧 CLIENTS: Send email to:', client.email)
+    logger.info('Send email to client', { clientId: client.id, email: client.email })
     window.location.href = `mailto:${client.email}`
     toast.success('📧 Email client opened')
   }
 
   const handleCallClient = (client: Client) => {
-    console.log('📞 CLIENTS: Call client:', client.phone)
+    logger.info('Call client', { clientId: client.id, phone: client.phone })
     toast.info('📞 Initiating call', {
       description: `Calling ${client.name} at ${client.phone}`
     })
   }
 
   const handleScheduleMeeting = (client: Client) => {
-    console.log('📅 CLIENTS: Schedule meeting with:', client.name)
+    logger.info('Schedule meeting with client', { clientId: client.id, name: client.name })
     toast.info('📅 Opening calendar', {
       description: `Scheduling meeting with ${client.name}`
     })
   }
 
   const handleViewAnalytics = (client: Client) => {
-    console.log('📊 CLIENTS: View analytics for:', client.name)
+    logger.info('View analytics for client', { clientId: client.id, name: client.name })
     dispatch({ type: 'SELECT_CLIENT', client })
     setIsAnalyticsModalOpen(true)
-    console.log('✅ CLIENTS: Analytics modal opened')
   }
 
   const handleExport = async () => {
-    console.log('💾 CLIENTS: Export clients')
-    console.log('📦 CLIENTS: Preparing', state.clients.length, 'clients for export')
+    logger.info('Export clients initiated', { count: state.clients.length })
 
     try {
       const exportData = {
@@ -740,28 +754,28 @@ export default function ClientsPage() {
       a.download = `clients-export-${Date.now()}.json`
       a.click()
 
-      console.log('✅ CLIENTS: Export successful')
+      logger.info('Clients exported successfully', { count: state.clients.length })
       toast.success('💾 Export complete', {
         description: `${state.clients.length} clients exported`
       })
 
       setIsExportModalOpen(false)
     } catch (error) {
-      console.error('❌ CLIENTS: Export error:', error)
+      logger.error('Failed to export clients', { error, count: state.clients.length })
       toast.error('Export failed')
     }
   }
 
   const handleBulkDelete = async () => {
     if (state.selectedClients.length === 0) {
-      console.log('⚠️ CLIENTS: No clients selected for bulk delete')
+      logger.warn('Bulk delete attempted with no selection')
       return
     }
 
-    console.log('🗑️ CLIENTS: Bulk delete request -', state.selectedClients.length, 'clients')
+    logger.info('Bulk delete clients requested', { count: state.selectedClients.length })
 
     if (confirm(`⚠️ Delete ${state.selectedClients.length} clients? This action cannot be undone.`)) {
-      console.log('✅ CLIENTS: User confirmed bulk deletion')
+      logger.info('Bulk delete confirmed', { count: state.selectedClients.length })
 
       try {
         const response = await fetch('/api/clients', {
@@ -774,34 +788,36 @@ export default function ClientsPage() {
         })
 
         const result = await response.json()
-        console.log('✅ CLIENTS: Bulk delete API response:', result)
 
         if (result.success) {
           state.selectedClients.forEach(id => {
             dispatch({ type: 'DELETE_CLIENT', clientId: id })
           })
           dispatch({ type: 'CLEAR_SELECTED_CLIENTS' })
-          console.log('✅ CLIENTS: Bulk deletion complete')
+          logger.info('Bulk delete completed', { deletedCount: result.deletedCount })
           toast.success(`🗑️ ${result.deletedCount} clients deleted`)
         } else {
           throw new Error(result.error || 'Failed to delete clients')
         }
       } catch (error: any) {
-        console.error('❌ CLIENTS: Bulk delete error:', error)
+        logger.error('Failed to bulk delete clients', {
+          error,
+          count: state.selectedClients.length
+        })
         toast.error('Failed to delete clients', {
           description: error.message || 'Please try again later'
         })
       }
     } else {
-      console.log('❌ CLIENTS: User canceled bulk deletion')
+      logger.debug('Bulk delete canceled')
     }
   }
 
   const handleStatusChange = async (clientId: string, newStatus: Client['status']) => {
-    console.log('🔄 CLIENTS: Status change for:', clientId, 'New status:', newStatus)
-
     const client = state.clients.find(c => c.id === clientId)
     if (!client) return
+
+    logger.info('Status change initiated', { clientId, oldStatus: client.status, newStatus })
 
     try {
       const response = await fetch('/api/clients', {
@@ -815,7 +831,6 @@ export default function ClientsPage() {
       })
 
       const result = await response.json()
-      console.log('✅ CLIENTS: Status change API response:', result)
 
       if (result.success) {
         const updatedClient = {
@@ -825,7 +840,11 @@ export default function ClientsPage() {
         }
 
         dispatch({ type: 'UPDATE_CLIENT', client: updatedClient })
-        console.log('✅ CLIENTS: Status updated successfully')
+        logger.info('Status updated successfully', {
+          clientId,
+          name: client.name,
+          newStatus
+        })
 
         toast.success('✅ Status updated', {
           description: `${client.name} is now ${newStatus}`
@@ -834,7 +853,7 @@ export default function ClientsPage() {
         throw new Error(result.error || 'Failed to update status')
       }
     } catch (error: any) {
-      console.error('❌ CLIENTS: Status change error:', error)
+      logger.error('Failed to update status', { error, clientId, newStatus })
       toast.error('Failed to update status', {
         description: error.message || 'Please try again later'
       })
@@ -846,7 +865,6 @@ export default function ClientsPage() {
   // ============================================================================
 
   if (isLoading) {
-    console.log('⏳ CLIENTS: Rendering loading state')
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
         <div className="max-w-7xl mx-auto space-y-6">
@@ -872,7 +890,6 @@ export default function ClientsPage() {
   // ============================================================================
 
   if (error) {
-    console.log('❌ CLIENTS: Rendering error state -', error)
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
         <div className="max-w-7xl mx-auto">
@@ -881,7 +898,7 @@ export default function ClientsPage() {
             action={{
               label: 'Retry',
               onClick: () => {
-                console.log('🔄 CLIENTS: User clicked retry')
+                logger.info('User clicked retry')
                 window.location.reload()
               }
             }}
@@ -896,7 +913,6 @@ export default function ClientsPage() {
   // ============================================================================
 
   if (filteredAndSortedClients.length === 0 && !isLoading) {
-    console.log('📭 CLIENTS: Rendering empty state')
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
         <div className="max-w-7xl mx-auto">
@@ -911,11 +927,11 @@ export default function ClientsPage() {
               label: state.searchTerm ? 'Clear Search' : 'Add Client',
               onClick: state.searchTerm
                 ? () => {
-                    console.log('🔄 CLIENTS: Clearing search')
+                    logger.debug('Clearing search from empty state')
                     dispatch({ type: 'SET_SEARCH', searchTerm: '' })
                   }
                 : () => {
-                    console.log('➕ CLIENTS: Opening add client modal from empty state')
+                    logger.info('Opening add client modal from empty state')
                     setIsAddClientModalOpen(true)
                   }
             }}
@@ -924,8 +940,6 @@ export default function ClientsPage() {
       </div>
     )
   }
-
-  console.log('✅ CLIENTS: Rendering main content')
 
   // ============================================================================
   // RENDER: MAIN CONTENT
@@ -956,7 +970,7 @@ export default function ClientsPage() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  console.log('📥 CLIENTS: Import button clicked')
+                  logger.info('Import button clicked')
                   setIsImportModalOpen(true)
                 }}
               >
@@ -966,7 +980,7 @@ export default function ClientsPage() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  console.log('💾 CLIENTS: Export button clicked')
+                  logger.info('Export button clicked')
                   setIsExportModalOpen(true)
                 }}
               >
@@ -977,9 +991,6 @@ export default function ClientsPage() {
                 <DialogTrigger asChild>
                   <Button
                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                    onClick={() => {
-                      console.log('➕ CLIENTS: Add client button clicked')
-                    }}
                   >
                     <UserPlus className="h-4 w-4 mr-2" />
                     Add Client
@@ -1096,7 +1107,7 @@ export default function ClientsPage() {
                     <Button
                       variant="outline"
                       onClick={() => {
-                        console.log('❌ CLIENTS: Add client canceled')
+                        logger.debug('Add client canceled')
                         setIsAddClientModalOpen(false)
                         setFormData({})
                       }}
@@ -1161,7 +1172,6 @@ export default function ClientsPage() {
                     placeholder="Search clients..."
                     value={state.searchTerm}
                     onChange={(e) => {
-                      console.log('🔍 CLIENTS: Search query:', e.target.value)
                       dispatch({ type: 'SET_SEARCH', searchTerm: e.target.value })
                     }}
                     className="pl-9"
@@ -1170,7 +1180,6 @@ export default function ClientsPage() {
                 <Select
                   value={state.filterStatus}
                   onValueChange={(value) => {
-                    console.log('🔽 CLIENTS: Filter changed to:', value)
                     dispatch({ type: 'SET_FILTER', filterStatus: value as ClientsState['filterStatus'] })
                   }}
                 >
@@ -1189,7 +1198,6 @@ export default function ClientsPage() {
                 <Select
                   value={state.sortBy}
                   onValueChange={(value) => {
-                    console.log('🔃 CLIENTS: Sort changed to:', value)
                     dispatch({ type: 'SET_SORT', sortBy: value as ClientsState['sortBy'] })
                   }}
                 >
@@ -1230,7 +1238,6 @@ export default function ClientsPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      console.log('🔄 CLIENTS: Clear selection')
                       dispatch({ type: 'CLEAR_SELECTED_CLIENTS' })
                     }}
                   >
@@ -1270,7 +1277,6 @@ export default function ClientsPage() {
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => {
-                              console.log('☑️ CLIENTS: Toggle select client:', client.id)
                               dispatch({ type: 'TOGGLE_SELECT_CLIENT', clientId: client.id })
                             }}
                             className="mt-1"
@@ -1624,7 +1630,7 @@ export default function ClientsPage() {
             <Button
               variant="outline"
               onClick={() => {
-                console.log('❌ CLIENTS: Edit canceled')
+                logger.debug('Edit client canceled')
                 setIsEditClientModalOpen(false)
                 setFormData({})
               }}
@@ -1709,7 +1715,7 @@ export default function ClientsPage() {
             <Button
               variant="outline"
               onClick={() => {
-                console.log('❌ CLIENTS: Export canceled')
+                logger.debug('Export canceled')
                 setIsExportModalOpen(false)
               }}
             >
@@ -1747,7 +1753,7 @@ export default function ClientsPage() {
             <Button
               variant="outline"
               onClick={() => {
-                console.log('❌ CLIENTS: Import canceled')
+                logger.debug('Import canceled')
                 setIsImportModalOpen(false)
               }}
             >
