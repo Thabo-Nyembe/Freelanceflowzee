@@ -744,13 +744,13 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
               {/* Tab List with Animated Indicator */}
               <div className="relative">
-                <TabsList className="grid w-full grid-cols-4 bg-gray-100 dark:bg-gray-900 relative overflow-hidden">
+                <TabsList className="grid w-full grid-cols-5 bg-gray-100 dark:bg-gray-900 relative overflow-hidden">
                   <motion.div
                     className="absolute top-2 bottom-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-md"
                     layoutId="activeAITab"
                     style={{
-                      left: `${['settings', 'studio', 'templates', 'history'].indexOf(activeTab) * 25}%`,
-                      width: '25%'
+                      left: `${['settings', 'studio', 'templates', 'history', 'analytics'].indexOf(activeTab) * 20}%`,
+                      width: '20%'
                     }}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
@@ -769,6 +769,10 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
                   <TabsTrigger value="history" className="relative z-10" data-testid="history-tab">
                     <HistoryIcon className="h-4 w-4 mr-2" />
                     History
+                  </TabsTrigger>
+                  <TabsTrigger value="analytics" className="relative z-10" data-testid="analytics-tab">
+                    <BarChart className="h-4 w-4 mr-2" />
+                    Analytics
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -1351,6 +1355,210 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
                         </motion.div>
                       ))}
                     </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              {/* Analytics Tab - A++++ Phase 2 */}
+              <TabsContent value="analytics" className="space-y-6">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Usage Analytics</h3>
+                    <Button
+                      onClick={() => {
+                        const summary = getAnalyticsSummary('week')
+                        setAnalytics(summary)
+                        toast.success('Analytics refreshed')
+                      }}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <Activity className="h-4 w-4 mr-2" />
+                      Refresh
+                    </Button>
+                  </div>
+
+                  {!analytics ? (
+                    <Card>
+                      <CardContent className="p-12 text-center">
+                        <BarChart className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                        <p className="text-gray-600 dark:text-gray-400 mb-4">No analytics data yet</p>
+                        <Button
+                          onClick={() => {
+                            const summary = getAnalyticsSummary('week')
+                            setAnalytics(summary)
+                          }}
+                          variant="outline"
+                        >
+                          Load Analytics
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <>
+                      {/* Overview Cards */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <Card>
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Total Generations</p>
+                                <p className="text-2xl font-bold">{analytics.metrics.totalGenerations}</p>
+                              </div>
+                              <Sparkles className="h-8 w-8 text-purple-500" />
+                            </div>
+                            <p className="text-xs text-green-600 mt-2">
+                              {analytics.metrics.successfulGenerations} successful
+                            </p>
+                          </CardContent>
+                        </Card>
+
+                        <Card>
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Total Cost</p>
+                                <p className="text-2xl font-bold">${analytics.metrics.totalCost.toFixed(4)}</p>
+                              </div>
+                              <TrendingUp className="h-8 w-8 text-green-500" />
+                            </div>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                              ${(analytics.metrics.totalCost / Math.max(analytics.metrics.successfulGenerations, 1)).toFixed(6)} avg
+                            </p>
+                          </CardContent>
+                        </Card>
+
+                        <Card>
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Total Tokens</p>
+                                <p className="text-2xl font-bold">{analytics.metrics.totalTokens.toLocaleString()}</p>
+                              </div>
+                              <Cpu className="h-8 w-8 text-blue-500" />
+                            </div>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                              {Math.floor(analytics.metrics.totalTokens / Math.max(analytics.metrics.successfulGenerations, 1))} avg per gen
+                            </p>
+                          </CardContent>
+                        </Card>
+
+                        <Card>
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Avg Response</p>
+                                <p className="text-2xl font-bold">{(analytics.metrics.averageResponseTime / 1000).toFixed(1)}s</p>
+                              </div>
+                              <Clock className="h-8 w-8 text-orange-500" />
+                            </div>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                              Average time
+                            </p>
+                          </CardContent>
+                        </Card>
+                      </div>
+
+                      {/* Model Performance */}
+                      {analytics.modelStats.length > 0 && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-base">Model Performance</CardTitle>
+                            <CardDescription>Usage statistics by AI model</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-3">
+                              {analytics.modelStats.slice(0, 5).map((model, idx) => (
+                                <div key={model.model} className="flex items-center gap-4">
+                                  <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className="text-sm font-medium">{model.model}</span>
+                                      <Badge variant="outline">{model.generations} uses</Badge>
+                                    </div>
+                                    <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
+                                      <span>${model.cost.toFixed(4)} total</span>
+                                      <span>{model.tokens.toLocaleString()} tokens</span>
+                                      <span>{(model.averageResponseTime / 1000).toFixed(1)}s avg</span>
+                                      <span className={model.successRate >= 90 ? 'text-green-600' : 'text-yellow-600'}>
+                                        {model.successRate.toFixed(0)}% success
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {/* Insights */}
+                      {analytics.insights.length > 0 && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-base">Insights & Recommendations</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-2">
+                              {analytics.insights.map((insight, idx) => (
+                                <div key={idx} className="flex items-start gap-2 text-sm">
+                                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                  <span>{insight}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {/* Additional Stats */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-base">Activity Summary</CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-600 dark:text-gray-400">Exports</span>
+                              <Badge variant="secondary">{analytics.metrics.totalExports}</Badge>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-600 dark:text-gray-400">Comparisons</span>
+                              <Badge variant="secondary">{analytics.metrics.totalComparisons}</Badge>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-600 dark:text-gray-400">Versions Saved</span>
+                              <Badge variant="secondary">{analytics.metrics.totalVersions}</Badge>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-600 dark:text-gray-400">Success Rate</span>
+                              <Badge variant={analytics.metrics.successfulGenerations / Math.max(analytics.metrics.totalGenerations, 1) >= 0.9 ? 'default' : 'secondary'}>
+                                {((analytics.metrics.successfulGenerations / Math.max(analytics.metrics.totalGenerations, 1)) * 100).toFixed(0)}%
+                              </Badge>
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-base">Time Period</CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-600 dark:text-gray-400">Period</span>
+                              <Badge>{analytics.period}</Badge>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-600 dark:text-gray-400">Start Date</span>
+                              <span className="text-xs">{analytics.startDate.toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-600 dark:text-gray-400">End Date</span>
+                              <span className="text-xs">{analytics.endDate.toLocaleDateString()}</span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </>
                   )}
                 </div>
               </TabsContent>
