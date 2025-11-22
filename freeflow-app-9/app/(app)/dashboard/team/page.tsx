@@ -11,11 +11,14 @@ import { TextShimmer } from '@/components/ui/text-shimmer'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { BorderTrail } from '@/components/ui/border-trail'
 import { GlowEffect } from '@/components/ui/glow-effect'
+import { createFeatureLogger } from '@/lib/logger'
 
 // A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+
+const logger = createFeatureLogger('Team')
 import {
   Users,
   UserPlus,
@@ -48,241 +51,7 @@ export default function TeamPage() {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [selectedRole, setSelectedRole] = useState<string>('all')
   const [viewMode, setViewMode] = useState<string>('grid')
-
-  // A+++ LOAD TEAM DATA
-  useEffect(() => {
-    const loadTeamData = async () => {
-      try {
-        setIsLoading(true)
-        setError(null)
-
-        // Simulate data loading with 5% error rate
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load team data'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
-
-        setIsLoading(false)
-        announce('Team dashboard loaded successfully', 'polite')
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load team data')
-        setIsLoading(false)
-        announce('Error loading team dashboard', 'assertive')
-      }
-    }
-
-    loadTeamData()
-  }, [announce])
-
-  // Handlers
-  const handleInviteMember = () => {
-    console.log('✨ TEAM: Invite member dialog initiated')
-    console.log('👥 TEAM: Opening team member invitation form')
-    console.log('📧 TEAM: Ready to send invitation email')
-    toast.info('👥 Invite Team Member', {
-      description: 'Opening invitation form to add new team members'
-    })
-  }
-
-  const handleViewMember = (id: number) => {
-    console.log('👁️ TEAM: View member profile initiated')
-    console.log('👤 TEAM: Loading member details for ID: ' + id)
-    console.log('📊 TEAM: Fetching member activity and statistics')
-    toast.info('👁️ Viewing Member Profile', {
-      description: 'Loading detailed member information and activity'
-    })
-  }
-
-  const handleEditMember = (id: number) => {
-    console.log('✏️ TEAM: Edit member initiated')
-    console.log('👤 TEAM: Opening edit form for member ID: ' + id)
-    console.log('🔧 TEAM: Loading current member settings and permissions')
-    toast.info('✏️ Edit Team Member', {
-      description: 'Opening member profile editor with current settings'
-    })
-  }
-
-  const handleRemoveMember = (id: number) => {
-    console.log('⚠️ TEAM: Remove member confirmation requested')
-    console.log('👤 TEAM: Member ID to remove: ' + id)
-    if (confirm('Remove?')) {
-      console.log('✅ TEAM: Member removal confirmed')
-      console.log('🗑️ TEAM: Processing member removal for ID: ' + id)
-      console.log('📧 TEAM: Sending removal notification to member')
-      console.log('🔄 TEAM: Updating team roster and permissions')
-      toast.success('✅ Member Removed', {
-        description: 'Team member has been successfully removed from the team'
-      })
-    }
-  }
-
-  const handleChangeRole = (id: number) => {
-    console.log('🔄 TEAM: Change role dialog initiated')
-    console.log('👤 TEAM: Changing role for member ID: ' + id)
-    console.log('🔒 TEAM: Loading available roles and permissions')
-    console.log('📝 TEAM: Ready to update member role assignment')
-    toast.info('🔄 Change Member Role', {
-      description: 'Select new role and permissions for team member'
-    })
-  }
-
-  const handleSetPermissions = (id: number) => {
-    console.log('🔒 TEAM: Set permissions dialog initiated')
-    console.log('👤 TEAM: Configuring permissions for member ID: ' + id)
-    console.log('📋 TEAM: Loading current permission settings')
-    console.log('⚙️ TEAM: Ready to update access controls')
-    toast.info('🔒 Set Permissions', {
-      description: 'Configure access rights and permissions for team member'
-    })
-  }
-
-  const handleSendMessage = (id: number) => {
-    console.log('💬 TEAM: Send message initiated')
-    console.log('👤 TEAM: Opening message composer for member ID: ' + id)
-    console.log('📧 TEAM: Loading member contact preferences')
-    console.log('✉️ TEAM: Ready to send direct message')
-    toast.info('💬 Send Message', {
-      description: 'Opening message composer to contact team member'
-    })
-  }
-
-  const handleViewActivity = (id: number) => {
-    console.log('📊 TEAM: View activity initiated')
-    console.log('👤 TEAM: Loading activity log for member ID: ' + id)
-    console.log('📈 TEAM: Fetching recent tasks and contributions')
-    console.log('⏱️ TEAM: Analyzing member productivity metrics')
-    toast.info('📊 View Activity', {
-      description: 'Loading member activity log and performance metrics'
-    })
-  }
-
-  const handleAssignProject = (id: number) => {
-    console.log('📁 TEAM: Assign project dialog initiated')
-    console.log('👤 TEAM: Assigning project to member ID: ' + id)
-    console.log('📋 TEAM: Loading available projects list')
-    console.log('🎯 TEAM: Ready to assign project responsibilities')
-    toast.info('📁 Assign Project', {
-      description: 'Select projects to assign to team member'
-    })
-  }
-
-  const handleViewProjects = (id: number) => {
-    console.log('📂 TEAM: View projects initiated')
-    console.log('👤 TEAM: Loading projects for member ID: ' + id)
-    console.log('📊 TEAM: Fetching project assignments and status')
-    console.log('🎯 TEAM: Analyzing member project portfolio')
-    toast.info('📂 View Projects', {
-      description: 'Loading all projects assigned to team member'
-    })
-  }
-
-  const handleTeamAnalytics = () => {
-    console.log('📊 TEAM: Team analytics dashboard initiated')
-    console.log('📈 TEAM: Loading team performance metrics')
-    console.log('👥 TEAM: Analyzing collaboration patterns')
-    console.log('🎯 TEAM: Generating productivity insights')
-    toast.info('📊 Team Analytics', {
-      description: 'Opening analytics dashboard with team performance data'
-    })
-  }
-
-  const handleTeamSettings = () => {
-    console.log('⚙️ TEAM: Team settings dialog initiated')
-    console.log('🔧 TEAM: Loading team configuration options')
-    console.log('👥 TEAM: Accessing team-wide preferences')
-    console.log('🔒 TEAM: Ready to manage team settings')
-    toast.info('⚙️ Team Settings', {
-      description: 'Configure team-wide settings and preferences'
-    })
-  }
-
-  const handleExportTeam = () => {
-    console.log('💾 TEAM: Export team data initiated')
-    console.log('📊 TEAM: Preparing team roster export')
-    console.log('👥 TEAM: Compiling member information and statistics')
-    console.log('📁 TEAM: Generating export file')
-    toast.success('💾 Export Team Data', {
-      description: 'Team roster and statistics are being exported'
-    })
-  }
-
-  const handleBulkInvite = () => {
-    console.log('📧 TEAM: Bulk invite dialog initiated')
-    console.log('👥 TEAM: Opening bulk invitation interface')
-    console.log('📋 TEAM: Ready to process multiple team invitations')
-    console.log('✉️ TEAM: Preparing to send invitation emails')
-    toast.info('📧 Bulk Invite', {
-      description: 'Invite multiple team members at once via email list'
-    })
-  }
-
-  const handleTeamChat = () => {
-    console.log('💬 TEAM: Team chat initiated')
-    console.log('👥 TEAM: Opening team-wide chat interface')
-    console.log('📨 TEAM: Loading recent team conversations')
-    console.log('🗨️ TEAM: Ready for team collaboration')
-    toast.info('💬 Team Chat', {
-      description: 'Opening team chat for real-time collaboration'
-    })
-  }
-
-  const handleScheduleMeeting = () => {
-    console.log('📅 TEAM: Schedule meeting initiated')
-    console.log('👥 TEAM: Opening meeting scheduler')
-    console.log('🕐 TEAM: Checking team member availability')
-    console.log('📧 TEAM: Ready to send meeting invitations')
-    toast.info('📅 Schedule Meeting', {
-      description: 'Create and schedule a team meeting with invitations'
-    })
-  }
-
-  const handleViewCalendar = () => {
-    console.log('📅 TEAM: View calendar initiated')
-    console.log('🗓️ TEAM: Loading team calendar view')
-    console.log('👥 TEAM: Displaying team schedules and meetings')
-    console.log('⏰ TEAM: Showing upcoming team events')
-    toast.info('📅 Team Calendar', {
-      description: 'View team schedules, meetings, and availability'
-    })
-  }
-
-  const handlePerformanceReview = (id: number) => {
-    console.log('📈 TEAM: Performance review initiated')
-    console.log('👤 TEAM: Opening review form for member ID: ' + id)
-    console.log('📊 TEAM: Loading member performance metrics')
-    console.log('⭐ TEAM: Ready to conduct performance evaluation')
-    toast.info('📈 Performance Review', {
-      description: 'Conduct performance review and provide feedback'
-    })
-  }
-
-  const handleTimeTracking = (id: number) => {
-    console.log('⏱️ TEAM: Time tracking initiated')
-    console.log('👤 TEAM: Viewing time logs for member ID: ' + id)
-    console.log('📊 TEAM: Loading work hours and time entries')
-    console.log('🕐 TEAM: Analyzing time allocation patterns')
-    toast.info('⏱️ Time Tracking', {
-      description: 'View time logs and work hours for team member'
-    })
-  }
-
-  const handleFilter = (filter: string) => {
-    console.log('🔍 TEAM: Apply filter initiated')
-    console.log('📋 TEAM: Filter type: ' + filter)
-    console.log('👥 TEAM: Filtering team member list')
-    console.log('✅ TEAM: Filter applied successfully')
-    toast.success('🔍 Filter Applied', {
-      description: 'Team member list filtered by: ' + filter
-    })
-  }
-
-  // Mock team data
-  const teamMembers = [
+  const [teamMembers, setTeamMembers] = useState<any[]>([
     {
       id: 1,
       name: 'Sarah Johnson',
@@ -397,7 +166,408 @@ export default function TeamPage() {
       workHours: '8:00 AM - 5:00 PM MST',
       timezone: 'MST'
     }
-  ]
+  ])
+
+  // A+++ LOAD TEAM DATA
+  useEffect(() => {
+    const loadTeamData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate data loading with 5% error rate
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() > 0.95) {
+              reject(new Error('Failed to load team data'))
+            } else {
+              resolve(null)
+            }
+          }, 1000)
+        })
+
+        setIsLoading(false)
+        announce('Team dashboard loaded successfully', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load team data')
+        setIsLoading(false)
+        announce('Error loading team dashboard', 'assertive')
+      }
+    }
+
+    loadTeamData()
+  }, [announce])
+
+  // Handlers
+  const handleInviteMember = () => {
+    const email = prompt('Enter new member email:')
+    if (!email) return
+
+    const name = prompt('Enter member name:')
+    if (!name) return
+
+    const role = prompt('Enter role:') || 'Team Member'
+
+    const newMember = {
+      id: teamMembers.length + 1,
+      name,
+      role,
+      department: 'New',
+      email,
+      phone: '+1 (555) 000-0000',
+      location: 'Remote',
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`,
+      status: 'offline',
+      joinDate: new Date().toISOString().split('T')[0],
+      projects: 0,
+      completedTasks: 0,
+      rating: 5.0,
+      skills: [],
+      availability: 'Pending',
+      workHours: '9:00 AM - 6:00 PM',
+      timezone: 'UTC'
+    }
+
+    setTeamMembers([...teamMembers, newMember])
+
+    logger.info('Team member invited', {
+      memberId: newMember.id,
+      name,
+      email,
+      role,
+      totalMembers: teamMembers.length + 1
+    })
+
+    toast.success('Invitation Sent!', {
+      description: `Invited ${name} as ${role} - Total team: ${teamMembers.length + 1} members`
+    })
+  }
+
+  const handleViewMember = (id: number) => {
+    const member = teamMembers.find(m => m.id === id)
+    if (!member) return
+
+    logger.info('Viewing member profile', {
+      memberId: id,
+      memberName: member.name,
+      role: member.role,
+      projects: member.projects,
+      completedTasks: member.completedTasks
+    })
+
+    toast.info(`${member.name} Profile`, {
+      description: `${member.role} • ${member.projects} projects • ${member.completedTasks} tasks • ${member.rating}⭐`
+    })
+  }
+
+  const handleEditMember = (id: number) => {
+    const member = teamMembers.find(m => m.id === id)
+    if (!member) return
+
+    logger.info('Edit member dialog opened', {
+      memberId: id,
+      memberName: member.name,
+      currentRole: member.role
+    })
+
+    toast.info('Edit Team Member', {
+      description: `Editing ${member.name} - ${member.role}`
+    })
+  }
+
+  const handleRemoveMember = (id: number) => {
+    const member = teamMembers.find(m => m.id === id)
+    if (!member) return
+
+    if (!confirm(`Remove ${member.name} from the team?`)) {
+      logger.info('Member removal cancelled', {
+        memberId: id,
+        memberName: member.name
+      })
+      return
+    }
+
+    setTeamMembers(teamMembers.filter(m => m.id !== id))
+
+    logger.info('Team member removed', {
+      memberId: id,
+      memberName: member.name,
+      role: member.role,
+      remainingMembers: teamMembers.length - 1
+    })
+
+    toast.success('Member Removed', {
+      description: `${member.name} removed from team - ${teamMembers.length - 1} members remaining`
+    })
+  }
+
+  const handleChangeRole = (id: number) => {
+    const member = teamMembers.find(m => m.id === id)
+    if (!member) return
+
+    const roles = ['Lead Designer', 'Frontend Developer', 'Backend Developer', 'Project Manager', 'QA Engineer']
+    const newRole = prompt(`Select new role for ${member.name}:\n${roles.join('\n')}`)
+    if (!newRole) return
+
+    setTeamMembers(teamMembers.map(m =>
+      m.id === id ? { ...m, role: newRole } : m
+    ))
+
+    logger.info('Member role changed', {
+      memberId: id,
+      memberName: member.name,
+      previousRole: member.role,
+      newRole
+    })
+
+    toast.success('Role Updated', {
+      description: `${member.name} role changed from ${member.role} to ${newRole}`
+    })
+  }
+
+  const handleSetPermissions = (id: number) => {
+    const member = teamMembers.find(m => m.id === id)
+    if (!member) return
+
+    const permissions = ['Read', 'Write', 'Admin', 'Owner']
+
+    logger.info('Permissions dialog opened', {
+      memberId: id,
+      memberName: member.name,
+      role: member.role
+    })
+
+    toast.info('Set Permissions', {
+      description: `Configure ${permissions.length} permission levels for ${member.name}`
+    })
+  }
+
+  const handleSendMessage = (id: number) => {
+    const member = teamMembers.find(m => m.id === id)
+    if (!member) return
+
+    logger.info('Message composer opened', {
+      memberId: id,
+      memberName: member.name,
+      email: member.email,
+      status: member.status
+    })
+
+    toast.info('Send Message', {
+      description: `Composing message to ${member.name} (${member.email})`
+    })
+  }
+
+  const handleViewActivity = (id: number) => {
+    const member = teamMembers.find(m => m.id === id)
+    if (!member) return
+
+    logger.info('Viewing member activity', {
+      memberId: id,
+      memberName: member.name,
+      projects: member.projects,
+      completedTasks: member.completedTasks,
+      rating: member.rating
+    })
+
+    toast.info(`${member.name} Activity`, {
+      description: `${member.completedTasks} tasks completed • ${member.projects} active projects • ${member.rating}⭐ rating`
+    })
+  }
+
+  const handleAssignProject = (id: number) => {
+    const member = teamMembers.find(m => m.id === id)
+    if (!member) return
+
+    const projectName = prompt('Enter project name to assign:')
+    if (!projectName) return
+
+    setTeamMembers(teamMembers.map(m =>
+      m.id === id ? { ...m, projects: m.projects + 1 } : m
+    ))
+
+    logger.info('Project assigned to member', {
+      memberId: id,
+      memberName: member.name,
+      projectName,
+      newProjectCount: member.projects + 1
+    })
+
+    toast.success('Project Assigned', {
+      description: `${projectName} assigned to ${member.name} - Total: ${member.projects + 1} projects`
+    })
+  }
+
+  const handleViewProjects = (id: number) => {
+    const member = teamMembers.find(m => m.id === id)
+    if (!member) return
+
+    logger.info('Viewing member projects', {
+      memberId: id,
+      memberName: member.name,
+      activeProjects: member.projects
+    })
+
+    toast.info(`${member.name}'s Projects`, {
+      description: `${member.projects} active projects • ${member.completedTasks} tasks completed`
+    })
+  }
+
+  const handleTeamAnalytics = () => {
+    const stats = {
+      totalMembers: teamMembers.length,
+      online: teamMembers.filter(m => m.status === 'online').length,
+      projects: teamMembers.reduce((sum, m) => sum + m.projects, 0),
+      tasks: teamMembers.reduce((sum, m) => sum + m.completedTasks, 0)
+    }
+
+    logger.info('Team analytics accessed', stats)
+
+    toast.info('Team Analytics', {
+      description: `${stats.totalMembers} members • ${stats.online} online • ${stats.projects} projects • ${stats.tasks} tasks`
+    })
+  }
+
+  const handleTeamSettings = () => {
+    logger.info('Team settings accessed', {
+      totalMembers: teamMembers.length
+    })
+
+    toast.info('Team Settings', {
+      description: 'Configure team preferences, roles, and permissions'
+    })
+  }
+
+  const handleExportTeam = () => {
+    const csvData = [
+      ['Name', 'Role', 'Department', 'Email', 'Projects', 'Tasks', 'Rating'],
+      ...teamMembers.map(m => [
+        m.name,
+        m.role,
+        m.department,
+        m.email,
+        m.projects,
+        m.completedTasks,
+        m.rating
+      ])
+    ]
+
+    const csv = csvData.map(row => row.join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `team-roster-${Date.now()}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    logger.info('Team data exported', {
+      totalMembers: teamMembers.length,
+      fileSize: blob.size
+    })
+
+    toast.success('Team Data Exported', {
+      description: `${teamMembers.length} members exported - ${Math.round(blob.size / 1024)}KB`
+    })
+  }
+
+  const handleBulkInvite = () => {
+    const emails = prompt('Enter email addresses (comma-separated):')
+    if (!emails) return
+
+    const emailList = emails.split(',').map(e => e.trim()).filter(Boolean)
+
+    logger.info('Bulk invite initiated', {
+      emailCount: emailList.length,
+      emails: emailList
+    })
+
+    toast.success('Bulk Invitations Sent', {
+      description: `${emailList.length} invitation emails sent`
+    })
+  }
+
+  const handleTeamChat = () => {
+    const onlineMembers = teamMembers.filter(m => m.status === 'online').length
+
+    logger.info('Team chat opened', {
+      totalMembers: teamMembers.length,
+      onlineMembers
+    })
+
+    toast.info('Team Chat', {
+      description: `${onlineMembers}/${teamMembers.length} members online`
+    })
+  }
+
+  const handleScheduleMeeting = () => {
+    const availableMembers = teamMembers.filter(m => m.status === 'online' || m.status === 'away').length
+
+    logger.info('Meeting scheduler opened', {
+      totalMembers: teamMembers.length,
+      availableMembers
+    })
+
+    toast.info('Schedule Meeting', {
+      description: `${availableMembers}/${teamMembers.length} members available`
+    })
+  }
+
+  const handleViewCalendar = () => {
+    logger.info('Team calendar accessed', {
+      totalMembers: teamMembers.length
+    })
+
+    toast.info('Team Calendar', {
+      description: `View schedules for ${teamMembers.length} team members`
+    })
+  }
+
+  const handlePerformanceReview = (id: number) => {
+    const member = teamMembers.find(m => m.id === id)
+    if (!member) return
+
+    logger.info('Performance review opened', {
+      memberId: id,
+      memberName: member.name,
+      rating: member.rating,
+      completedTasks: member.completedTasks
+    })
+
+    toast.info(`Review ${member.name}`, {
+      description: `Current rating: ${member.rating}⭐ • ${member.completedTasks} tasks completed`
+    })
+  }
+
+  const handleTimeTracking = (id: number) => {
+    const member = teamMembers.find(m => m.id === id)
+    if (!member) return
+
+    const hoursWorked = Math.floor(Math.random() * 40) + 120
+
+    logger.info('Time tracking viewed', {
+      memberId: id,
+      memberName: member.name,
+      hoursWorked
+    })
+
+    toast.info(`${member.name} Time Tracking`, {
+      description: `${hoursWorked} hours this month • ${member.workHours}`
+    })
+  }
+
+  const handleFilter = (filter: string) => {
+    logger.info('Filter applied', {
+      filterType: filter,
+      totalMembers: teamMembers.length
+    })
+
+    toast.success('Filter Applied', {
+      description: `Filtering team by: ${filter}`
+    })
+  }
 
   const roles = [
     { value: 'all', label: 'All Roles' },
