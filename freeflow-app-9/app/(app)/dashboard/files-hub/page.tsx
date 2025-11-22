@@ -32,13 +32,15 @@ import { NumberFlow } from '@/components/ui/number-flow'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('FilesHub')
 
 // ============================================================================
 // FRAMER MOTION ANIMATION COMPONENTS
 // ============================================================================
 
 const FloatingParticle = ({ delay = 0, color = 'blue' }: { delay?: number; color?: string }) => {
-  console.log('🎨 FILES HUB: FloatingParticle rendered with color:', color, 'delay:', delay)
   return (
     <motion.div
       className={`absolute w-2 h-2 bg-${color}-400 rounded-full opacity-30`}
@@ -138,26 +140,27 @@ type FilesHubAction =
 // ============================================================================
 
 function filesHubReducer(state: FilesHubState, action: FilesHubAction): FilesHubState {
-  console.log('🔄 FILES HUB REDUCER: Action:', action.type)
+  logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
     case 'SET_FILES':
-      console.log('✅ FILES HUB: Set files -', action.files.length, 'files loaded')
+      logger.info('Setting files', { count: action.files.length })
       return { ...state, files: action.files }
 
     case 'ADD_FILE':
-      console.log('✅ FILES HUB: Add file - ID:', action.file.id, 'Name:', action.file.name)
+      logger.info('File added', { fileId: action.file.id, fileName: action.file.name, fileType: action.file.type })
       return { ...state, files: [action.file, ...state.files] }
 
     case 'UPDATE_FILE':
-      console.log('✅ FILES HUB: Update file - ID:', action.file.id)
+      logger.info('File updated', { fileId: action.file.id, fileName: action.file.name })
       return {
         ...state,
         files: state.files.map(f => f.id === action.file.id ? action.file : f)
       }
 
     case 'DELETE_FILE':
-      console.log('🗑️ FILES HUB: Delete file - ID:', action.fileId)
+      const deletedFile = state.files.find(f => f.id === action.fileId)
+      logger.info('File deleted', { fileId: action.fileId, fileName: deletedFile?.name })
       return {
         ...state,
         files: state.files.filter(f => f.id !== action.fileId),
@@ -165,28 +168,28 @@ function filesHubReducer(state: FilesHubState, action: FilesHubAction): FilesHub
       }
 
     case 'SELECT_FILE':
-      console.log('👁️ FILES HUB: Select file -', action.file?.name || 'None')
+      logger.debug('File selected', { fileName: action.file?.name || 'None', fileId: action.file?.id })
       return { ...state, selectedFile: action.file }
 
     case 'SET_SEARCH':
-      console.log('🔍 FILES HUB: Search term changed:', action.searchTerm)
+      logger.debug('Search term changed', { searchTerm: action.searchTerm })
       return { ...state, searchTerm: action.searchTerm }
 
     case 'SET_FILTER':
-      console.log('🔎 FILES HUB: Filter changed:', action.filterType)
+      logger.debug('Filter changed', { filterType: action.filterType })
       return { ...state, filterType: action.filterType }
 
     case 'SET_SORT':
-      console.log('🔀 FILES HUB: Sort changed:', action.sortBy)
+      logger.debug('Sort changed', { sortBy: action.sortBy })
       return { ...state, sortBy: action.sortBy }
 
     case 'SET_VIEW_MODE':
-      console.log('👁️ FILES HUB: View mode changed:', action.viewMode)
+      logger.debug('View mode changed', { viewMode: action.viewMode })
       return { ...state, viewMode: action.viewMode }
 
     case 'TOGGLE_SELECT_FILE':
       const isSelected = state.selectedFiles.includes(action.fileId)
-      console.log(isSelected ? '❌ FILES HUB: Deselect file' : '✅ FILES HUB: Select file', '- ID:', action.fileId)
+      logger.debug(isSelected ? 'File deselected' : 'File selected', { fileId: action.fileId })
       return {
         ...state,
         selectedFiles: isSelected
@@ -195,11 +198,12 @@ function filesHubReducer(state: FilesHubState, action: FilesHubAction): FilesHub
       }
 
     case 'CLEAR_SELECTED_FILES':
-      console.log('🔄 FILES HUB: Clear all selected files')
+      logger.info('Cleared selected files', { clearedCount: state.selectedFiles.length })
       return { ...state, selectedFiles: [] }
 
     case 'TOGGLE_STAR':
-      console.log('⭐ FILES HUB: Toggle star - ID:', action.fileId)
+      const starredFile = state.files.find(f => f.id === action.fileId)
+      logger.info('Toggled file star', { fileId: action.fileId, newStarred: !starredFile?.starred })
       return {
         ...state,
         files: state.files.map(f =>
@@ -208,7 +212,7 @@ function filesHubReducer(state: FilesHubState, action: FilesHubAction): FilesHub
       }
 
     case 'SET_FOLDER':
-      console.log('📂 FILES HUB: Change folder:', action.folder)
+      logger.info('Folder changed', { folder: action.folder })
       return { ...state, currentFolder: action.folder }
 
     default:
@@ -221,7 +225,7 @@ function filesHubReducer(state: FilesHubState, action: FilesHubAction): FilesHub
 // ============================================================================
 
 const generateMockFiles = (): FileItem[] => {
-  console.log('📁 FILES HUB: Generating mock file data...')
+  logger.debug('Generating mock file data')
 
   const fileTypes: Array<FileItem['type']> = ['document', 'image', 'video', 'audio', 'archive', 'code']
   const folders = ['Documents', 'Images', 'Videos', 'Downloads', 'Projects', 'Designs', 'Archive', 'Shared']
@@ -288,7 +292,7 @@ const generateMockFiles = (): FileItem[] => {
     })
   }
 
-  console.log('✅ FILES HUB: Generated', files.length, 'mock files')
+  logger.info('Generated mock files', { count: files.length })
   return files
 }
 
@@ -297,8 +301,6 @@ const generateMockFiles = (): FileItem[] => {
 // ============================================================================
 
 export default function FilesHubPage() {
-  console.log('🚀 FILES HUB: Component mounting...')
-
   // A+++ ANNOUNCER
   const { announce } = useAnnouncer()
 
@@ -338,7 +340,7 @@ export default function FilesHubPage() {
 
   useEffect(() => {
     const loadFilesData = async () => {
-      console.log('🔄 FILES HUB: Loading files data...')
+      logger.info('Loading files data')
       try {
         setIsPageLoading(true)
         setError(null)
@@ -358,10 +360,11 @@ export default function FilesHubPage() {
 
         setIsPageLoading(false)
         announce('Files loaded successfully', 'polite')
-        console.log('✅ FILES HUB: Data loaded successfully')
+        logger.info('Files data loaded successfully', { count: mockFiles.length })
       } catch (err) {
-        console.error('❌ FILES HUB: Load error:', err)
-        setError(err instanceof Error ? err.message : 'Failed to load files')
+        const error = err instanceof Error ? err.message : 'Failed to load files'
+        logger.error('Files load error', { error })
+        setError(error)
         setIsPageLoading(false)
         announce('Error loading files', 'assertive')
       }
@@ -386,7 +389,7 @@ export default function FilesHubPage() {
       totalDownloads: state.files.reduce((sum, f) => sum + f.downloads, 0),
       totalViews: state.files.reduce((sum, f) => sum + f.views, 0)
     }
-    console.log('📊 FILES HUB: Stats calculated -', JSON.stringify(s))
+    logger.debug('Stats calculated', s)
     return s
   }, [state.files])
 
@@ -395,11 +398,6 @@ export default function FilesHubPage() {
   // ============================================================================
 
   const filteredAndSortedFiles = useMemo(() => {
-    console.log('🔍 FILES HUB: Filtering and sorting files...')
-    console.log('📋 FILES HUB: Search term:', state.searchTerm)
-    console.log('🔎 FILES HUB: Filter type:', state.filterType)
-    console.log('🔀 FILES HUB: Sort by:', state.sortBy)
-
     let filtered = state.files
 
     // Filter by search term
@@ -408,7 +406,6 @@ export default function FilesHubPage() {
         file.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
         file.tags.some(tag => tag.toLowerCase().includes(state.searchTerm.toLowerCase()))
       )
-      console.log('🔍 FILES HUB: Search filtered to', filtered.length, 'files')
     }
 
     // Filter by type
@@ -418,13 +415,11 @@ export default function FilesHubPage() {
       } else {
         filtered = filtered.filter(f => f.type === state.filterType)
       }
-      console.log('🔎 FILES HUB: Type filtered to', filtered.length, 'files')
     }
 
     // Filter by folder
     if (state.currentFolder !== 'All Files') {
       filtered = filtered.filter(f => f.folder === state.currentFolder)
-      console.log('📂 FILES HUB: Folder filtered to', filtered.length, 'files')
     }
 
     // Sort
@@ -447,7 +442,15 @@ export default function FilesHubPage() {
       }
     })
 
-    console.log('✅ FILES HUB: Filtered and sorted to', sorted.length, 'files')
+    logger.debug('Files filtered and sorted', {
+      totalFiles: state.files.length,
+      filteredCount: sorted.length,
+      searchTerm: state.searchTerm,
+      filterType: state.filterType,
+      sortBy: state.sortBy,
+      currentFolder: state.currentFolder
+    })
+
     return sorted
   }, [state.files, state.searchTerm, state.filterType, state.sortBy, state.currentFolder])
 
