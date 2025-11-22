@@ -66,6 +66,10 @@ import { BorderTrail } from '@/components/ui/border-trail'
 import { DashboardSkeleton, CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+// Initialize logger
+const logger = createFeatureLogger('Dashboard')
 
 /*
  * A+++ SEO Note: This is a client component, so metadata must be set in parent layout.
@@ -215,12 +219,13 @@ export default function DashboardPage() {
 
         if (result.success) {
           // Dashboard data loaded successfully from API
-          console.log('📊 DASHBOARD: Data loaded from API', result.data)
+          logger.info('Dashboard data loaded from API', { data: result.data })
           announce('Dashboard loaded successfully', 'polite')
         }
 
         setIsLoading(false)
       } catch (err) {
+        logger.error('Failed to load dashboard data', { error: err })
         setError(err instanceof Error ? err.message : 'Failed to load dashboard data')
         announce('Error loading dashboard', 'assertive')
         setIsLoading(false)
@@ -250,13 +255,12 @@ export default function DashboardPage() {
   }
 
   // Handlers - Simple navigation handlers
-  const handleViewAllProjects = () => { console.log('📂 ALL'); navigateToPage('projects-hub') }
-  const handleCreateProject = () => { console.log('➕ NEW'); navigateToPage('projects-hub/create') }
-  const handleViewAnalytics = () => { console.log('📊 ANALYTICS'); navigateToPage('analytics') }
-  const handleViewFinancial = () => { console.log('💰 FINANCIAL'); navigateToPage('financial') }
+  const handleViewAllProjects = () => { logger.debug('Navigate to projects hub'); navigateToPage('projects-hub') }
+  const handleCreateProject = () => { logger.debug('Create new project'); navigateToPage('projects-hub/create') }
+  const handleViewAnalytics = () => { logger.debug('View analytics'); navigateToPage('analytics') }
+  const handleViewFinancial = () => { logger.debug('View financial'); navigateToPage('financial') }
   const handleQuickAction = (action: string) => {
-    console.log('⚡ QUICK ACTION: Initiating', action)
-    console.log('📊 QUICK ACTION: Processing request')
+    logger.info('Quick action initiated', { action })
 
     // Add to activity feed
     const newActivity = {
@@ -278,25 +282,21 @@ export default function DashboardPage() {
       navigateToPage('ai-create')
     }
 
-    console.log('✅ QUICK ACTION: Completed', action)
+    logger.info('Quick action completed', { action })
   }
 
   const handleViewMessages = () => {
-    console.log('💬 MESSAGES: Opening messages')
-    console.log('📊 MESSAGES: Unread count:', Math.floor(Math.random() * 10))
+    logger.debug('Opening messages view')
     navigateToPage('messages')
   }
 
   const handleViewCalendar = () => {
-    console.log('📅 CALENDAR: Opening calendar view')
-    console.log('📊 CALENDAR: Today\'s events:', Math.floor(Math.random() * 5))
+    logger.debug('Opening calendar view')
     navigateToPage('calendar')
   }
 
   const handleUpgradePlan = () => {
-    console.log('⭐ UPGRADE: Plan upgrade initiated')
-    console.log('📊 UPGRADE: Current plan: Free')
-    console.log('🎯 UPGRADE: Target plan: Pro ($29/month)')
+    logger.info('Plan upgrade initiated', { currentPlan: 'Free', targetPlan: 'Pro' })
     console.log('✨ UPGRADE: Features unlocked: AI, Team collaboration, Priority support')
 
     // Add to activity feed
