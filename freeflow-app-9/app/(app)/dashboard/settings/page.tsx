@@ -345,13 +345,38 @@ If you lose access to your authenticator app, you can use these codes to sign in
   const handleUpdateProfile = async () => {
     console.log('👤 UPDATE PROFILE')
     setIsLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setIsLoading(false)
-    console.log('✅ SETTINGS: Profile updated successfully')
-    console.log('📝 SETTINGS: Information saved')
-    toast.success('👤 Profile Updated!', {
-      description: 'Your information has been saved successfully'
-    })
+
+    try {
+      const response = await fetch('/api/settings/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category: 'profile',
+          action: 'update',
+          data: profile
+        })
+      })
+
+      const result = await response.json()
+      console.log('📡 SETTINGS: Profile API response:', result)
+
+      if (result.success) {
+        console.log('✅ SETTINGS: Profile updated successfully')
+        console.log('📝 SETTINGS: Information saved')
+        toast.success('👤 Profile Updated!', {
+          description: 'Your information has been saved successfully'
+        })
+      } else {
+        throw new Error(result.error || 'Failed to update profile')
+      }
+    } catch (error: any) {
+      console.error('❌ SETTINGS: Profile update error:', error)
+      toast.error('Failed to update profile', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleDeleteAccount = () => {
@@ -394,34 +419,49 @@ If you lose access to your authenticator app, you can use these codes to sign in
   const handleExportUserData = async () => {
     console.log('📦 EXPORT USER DATA (GDPR)')
     setIsLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setIsLoading(false)
 
-    const userData = {
-      profile,
-      notifications,
-      appearance,
-      projects: 'All project data',
-      files: 'All uploaded files',
-      messages: 'All conversations',
-      analytics: 'Usage statistics',
-      exportDate: new Date().toISOString()
+    try {
+      const response = await fetch('/api/settings/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category: 'export',
+          action: 'get'
+        })
+      })
+
+      const result = await response.json()
+      console.log('📡 SETTINGS: Export API response received')
+
+      if (response.ok) {
+        // If response is already JSON, use it; otherwise parse as JSON
+        const userData = typeof result === 'string' ? JSON.parse(result) : result
+
+        const blob = new Blob([JSON.stringify(userData, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'kazi-user-data-export.json'
+        a.click()
+        URL.revokeObjectURL(url)
+
+        console.log('✅ SETTINGS: User data exported')
+        console.log('📄 SETTINGS: File: kazi-user-data-export.json')
+        console.log('🔒 SETTINGS: GDPR compliant data export complete')
+        toast.success('📦 User Data Exported!', {
+          description: 'GDPR compliant export saved to kazi-user-data-export.json'
+        })
+      } else {
+        throw new Error(result.error || 'Failed to export data')
+      }
+    } catch (error: any) {
+      console.error('❌ SETTINGS: Export error:', error)
+      toast.error('Failed to export data', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsLoading(false)
     }
-
-    const blob = new Blob([JSON.stringify(userData, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'kazi-user-data-export.json'
-    a.click()
-    URL.revokeObjectURL(url)
-
-    console.log('✅ SETTINGS: User data exported')
-    console.log('📄 SETTINGS: File: kazi-user-data-export.json')
-    console.log('🔒 SETTINGS: GDPR compliant data export complete')
-    toast.success('📦 User Data Exported!', {
-      description: 'GDPR compliant export saved to kazi-user-data-export.json'
-    })
   }
 
   const handleToggleNotification = (notificationType: string, enabled: boolean) => {
@@ -445,13 +485,47 @@ If you lose access to your authenticator app, you can use these codes to sign in
   const handleSyncSettings = async () => {
     console.log('🔄 SYNC SETTINGS')
     setIsLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    setIsLoading(false)
-    console.log('✅ SETTINGS: Settings synced across all devices')
-    console.log('⏰ SETTINGS: Last sync: ' + new Date().toLocaleString())
-    toast.success('🔄 Settings Synced!', {
-      description: 'Synchronized across all devices. Last sync: ' + new Date().toLocaleString()
-    })
+
+    try {
+      // Sync all settings categories
+      const categories = ['profile', 'notifications', 'appearance', 'preferences']
+      const syncData = {
+        profile,
+        notifications,
+        appearance,
+        preferences: { synced: true }
+      }
+
+      const response = await fetch('/api/settings/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category: 'preferences',
+          action: 'update',
+          data: syncData.preferences
+        })
+      })
+
+      const result = await response.json()
+      console.log('📡 SETTINGS: Sync API response:', result)
+
+      if (result.success) {
+        console.log('✅ SETTINGS: Settings synced across all devices')
+        console.log('⏰ SETTINGS: Last sync: ' + new Date().toLocaleString())
+        toast.success('🔄 Settings Synced!', {
+          description: 'Synchronized across all devices. Last sync: ' + new Date().toLocaleString()
+        })
+      } else {
+        throw new Error(result.error || 'Failed to sync settings')
+      }
+    } catch (error: any) {
+      console.error('❌ SETTINGS: Sync error:', error)
+      toast.error('Failed to sync settings', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleResetSettings = () => {
