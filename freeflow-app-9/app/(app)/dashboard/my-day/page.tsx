@@ -14,6 +14,10 @@ import { toast } from 'sonner'
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+// Initialize logger
+const logger = createFeatureLogger('MyDay')
 import {
   Clock,
   CheckCircle,
@@ -431,10 +435,11 @@ export default function MyDayPage() {
   const addTask = async () => {
     if (!newTaskTitle.trim()) return
 
-    console.log('➕ ADDING NEW TASK')
-    console.log('📝 Title:', newTaskTitle)
-    console.log('🎯 Priority:', newTaskPriority)
-    console.log('💬 Description:', newTaskDescription || '(none)')
+    logger.info('Adding new task', {
+      title: newTaskTitle,
+      priority: newTaskPriority,
+      description: newTaskDescription || '(none)'
+    })
 
     try {
       const response = await fetch('/api/tasks', {
@@ -467,17 +472,13 @@ export default function MyDayPage() {
         setIsAddingTask(false)
         toast.success(result.message)
 
-        // Log next steps
-        console.log('✅ MY DAY: Task added successfully - Next steps available')
-        console.log('📋 MY DAY: Suggested actions:')
-        console.log('  • Set estimated time for better planning')
-        console.log('  • Add task to a time block for scheduling')
-        console.log('  • Start timer when you begin work')
-        console.log('  • Add notes or attachments if needed')
-        console.log('  • Link to related project for context')
+        logger.info('Task added successfully', {
+          taskId: result.task.id,
+          title: result.task.title
+        })
       }
     } catch (error: any) {
-      console.error('Add Task Error:', error)
+      logger.error('Failed to add task', { error, title: newTaskTitle })
       toast.error('Failed to add task', {
         description: error.message || 'Please try again later'
       })
@@ -488,11 +489,13 @@ export default function MyDayPage() {
     const task = state.tasks.find(t => t.id === taskId)
     if (!task) return
 
-    console.log('✓ TOGGLING TASK:', task.title)
-    console.log('📊 Current status:', task.completed ? 'completed' : 'pending')
-    console.log('🔄 New status:', !task.completed ? 'completed' : 'pending')
-
     const newCompleted = !task.completed
+    logger.info('Toggling task', {
+      taskId,
+      title: task.title,
+      from: task.completed ? 'completed' : 'pending',
+      to: newCompleted ? 'completed' : 'pending'
+    })
 
     try {
       const response = await fetch('/api/tasks', {
@@ -513,10 +516,9 @@ export default function MyDayPage() {
 
       if (result.success) {
         dispatch({ type: 'TOGGLE_TASK', id: taskId })
-        console.log('✅ TASK TOGGLED SUCCESSFULLY')
+        logger.info('Task toggled successfully', { taskId, completed: newCompleted })
 
         if (newCompleted) {
-          console.log('🎉 TASK COMPLETED - SHOWING CELEBRATION')
           setShowCelebration(true)
           setTimeout(() => setShowCelebration(false), 3000)
         }
@@ -525,24 +527,17 @@ export default function MyDayPage() {
           toast.success(`${result.message} ${result.celebration.message} +${result.celebration.points} points!`, {
             description: `Streak: ${result.celebration.streak} days`
           })
+          logger.info('Task celebration triggered', {
+            taskId,
+            points: result.celebration.points,
+            streak: result.celebration.streak
+          })
         } else {
           toast.success(result.message)
         }
-
-        // Log next steps for completed tasks
-        if (newCompleted) {
-          console.log('🎉 MY DAY: Task completed - Next steps available')
-          console.log('📋 MY DAY: Post-completion actions:')
-          console.log('  • Review your accomplishment and learnings')
-          console.log('  • Update project status if applicable')
-          console.log('  • Share progress with client or team')
-          console.log('  • Plan your next task')
-          console.log('  • Take a short break to recharge')
-        }
       }
     } catch (error: any) {
-      console.error('❌ TOGGLE TASK ERROR:', error)
-      console.log('⚠️ UPDATING UI OPTIMISTICALLY')
+      logger.error('Failed to toggle task', { error, taskId })
       toast.error('Failed to update task', {
         description: error.message || 'Please try again later'
       })
