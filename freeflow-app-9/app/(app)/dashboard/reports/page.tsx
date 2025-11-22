@@ -34,6 +34,10 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
+import { createFeatureLogger } from '@/lib/logger'
+
+// Initialize feature logger
+const logger = createFeatureLogger('Reports')
 
 // UI Components
 import { Button } from '@/components/ui/button'
@@ -135,26 +139,26 @@ type ReportsAction =
 // ============================================================================
 
 function reportsReducer(state: ReportsState, action: ReportsAction): ReportsState {
-  console.log('🔄 REPORTS REDUCER: Action:', action.type)
+  logger.debug('Reducer action', { action: action.type })
 
   switch (action.type) {
     case 'SET_REPORTS':
-      console.log('✅ REPORTS: Set reports -', action.reports.length, 'reports loaded')
+      logger.info('Reports loaded', { count: action.reports.length })
       return { ...state, reports: action.reports }
 
     case 'ADD_REPORT':
-      console.log('✅ REPORTS: Report added - ID:', action.report.id, 'Name:', action.report.name)
+      logger.info('Report added', { id: action.report.id, name: action.report.name })
       return { ...state, reports: [action.report, ...state.reports] }
 
     case 'UPDATE_REPORT':
-      console.log('✅ REPORTS: Report updated - ID:', action.report.id)
+      logger.info('Report updated', { id: action.report.id })
       return {
         ...state,
         reports: state.reports.map(r => r.id === action.report.id ? action.report : r)
       }
 
     case 'DELETE_REPORT':
-      console.log('✅ REPORTS: Report deleted - ID:', action.reportId)
+      logger.info('Report deleted', { id: action.reportId })
       return {
         ...state,
         reports: state.reports.filter(r => r.id !== action.reportId),
@@ -162,32 +166,32 @@ function reportsReducer(state: ReportsState, action: ReportsAction): ReportsStat
       }
 
     case 'SELECT_REPORT':
-      console.log('👁️ REPORTS: Report selected -', action.report ? action.report.name : 'None')
+      logger.debug('Report selected', { name: action.report?.name || 'None' })
       return { ...state, selectedReport: action.report }
 
     case 'SET_SEARCH':
-      console.log('🔍 REPORTS: Search term:', action.searchTerm)
+      logger.debug('Search term updated', { searchTerm: action.searchTerm })
       return { ...state, searchTerm: action.searchTerm }
 
     case 'SET_FILTER_TYPE':
-      console.log('🔍 REPORTS: Filter type:', action.filterType)
+      logger.debug('Filter type changed', { filterType: action.filterType })
       return { ...state, filterType: action.filterType }
 
     case 'SET_FILTER_STATUS':
-      console.log('🔍 REPORTS: Filter status:', action.filterStatus)
+      logger.debug('Filter status changed', { filterStatus: action.filterStatus })
       return { ...state, filterStatus: action.filterStatus }
 
     case 'SET_SORT':
-      console.log('🔀 REPORTS: Sort by:', action.sortBy)
+      logger.debug('Sort changed', { sortBy: action.sortBy })
       return { ...state, sortBy: action.sortBy }
 
     case 'SET_VIEW_MODE':
-      console.log('🖼️ REPORTS: View mode:', action.viewMode)
+      logger.debug('View mode changed', { viewMode: action.viewMode })
       return { ...state, viewMode: action.viewMode }
 
     case 'TOGGLE_SELECT_REPORT':
       const isSelected = state.selectedReports.includes(action.reportId)
-      console.log('☑️ REPORTS: Toggle select report:', action.reportId, isSelected ? 'deselected' : 'selected')
+      logger.debug('Report selection toggled', { id: action.reportId, selected: !isSelected })
       return {
         ...state,
         selectedReports: isSelected
@@ -196,7 +200,7 @@ function reportsReducer(state: ReportsState, action: ReportsAction): ReportsStat
       }
 
     case 'CLEAR_SELECTED_REPORTS':
-      console.log('✅ REPORTS: Cleared selected reports')
+      logger.debug('Selected reports cleared')
       return { ...state, selectedReports: [] }
 
     default:
@@ -209,7 +213,7 @@ function reportsReducer(state: ReportsState, action: ReportsAction): ReportsStat
 // ============================================================================
 
 const generateMockReports = (): Report[] => {
-  console.log('📊 REPORTS: Generating mock reports...')
+  logger.debug('Generating mock reports')
 
   const types: ReportType[] = ['analytics', 'financial', 'performance', 'sales', 'custom']
   const statuses: ReportStatus[] = ['draft', 'generating', 'ready', 'scheduled', 'failed']
@@ -246,7 +250,7 @@ const generateMockReports = (): Report[] => {
     tags: ['quarterly', 'important', 'automated'].slice(0, Math.floor(Math.random() * 3) + 1)
   }))
 
-  console.log('✅ REPORTS: Generated', reports.length, 'mock reports')
+  logger.debug('Mock reports generated', { count: reports.length })
   return reports
 }
 
@@ -255,7 +259,7 @@ const generateMockReports = (): Report[] => {
 // ============================================================================
 
 export default function ReportsPage() {
-  console.log('🚀 REPORTS: Component mounting...')
+  logger.debug('Component mounting')
 
   // A+++ UTILITIES
   const { announce } = useAnnouncer()
@@ -298,7 +302,7 @@ export default function ReportsPage() {
   // ============================================================================
 
   useEffect(() => {
-    console.log('📊 REPORTS: Loading reports data...')
+    logger.info('Loading reports data')
 
     const loadData = async () => {
       try {
@@ -309,13 +313,13 @@ export default function ReportsPage() {
 
         if (result.success && result.reports) {
           dispatch({ type: 'SET_REPORTS', reports: result.reports })
-          console.log('✅ REPORTS: Data loaded successfully -', result.reports.length, 'reports')
+          logger.info('Data loaded successfully', { count: result.reports.length })
           announce('Reports dashboard loaded', 'polite')
         } else {
           throw new Error(result.error || 'Failed to load reports')
         }
       } catch (error) {
-        console.error('❌ REPORTS: Load error:', error)
+        logger.error('Failed to load reports', { error })
         toast.error('Failed to load reports')
       } finally {
         setIsLoading(false)
