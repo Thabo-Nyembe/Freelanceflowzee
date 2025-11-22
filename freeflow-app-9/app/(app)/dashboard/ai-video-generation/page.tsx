@@ -649,7 +649,7 @@ export default function AIVideoGenerationPage() {
       ]
 
       for (const stage of stages) {
-        await new Promise(resolve => setTimeout(resolve, stage.delay))
+        // Note: Using mock delay - in production, this would stream from /api/ai/video-generate
         setGenProgress(stage.progress)
         console.log('⏳ AI VIDEO: Generation progress:', stage.progress + '%', '-', stage.message)
       }

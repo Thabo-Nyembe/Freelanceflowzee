@@ -615,16 +615,19 @@ export default function BrowserExtensionPage() {
     console.log('📥 BROWSER EXTENSION: Installing extension for:', state.currentBrowser)
 
     try {
-      console.log('⏳ BROWSER EXTENSION: Starting installation...')
-      toast.info('Installing extension...')
+      console.log('⏳ BROWSER EXTENSION: Starting installation (local state)...')
+      toast.info('🔌 Installing extension...', {
+        description: 'Setting up browser integration'
+      })
 
-      await new Promise(resolve => setTimeout(resolve, 2000))
-
+      // Note: Using local state - in production, this would install actual browser extension
       dispatch({ type: 'SET_INSTALLED', isInstalled: true })
       setShowInstallModal(false)
 
       console.log('✅ BROWSER EXTENSION: Extension installed successfully')
-      toast.success('Extension installed successfully')
+      toast.success('🎉 Extension installed', {
+        description: `Now active in ${state.currentBrowser}`
+      })
       announce('Extension installed', 'polite')
     } catch (error) {
       console.log('❌ BROWSER EXTENSION: Installation error:', error)

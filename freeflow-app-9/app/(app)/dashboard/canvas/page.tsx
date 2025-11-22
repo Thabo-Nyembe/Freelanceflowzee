@@ -527,13 +527,12 @@ export default function CanvasPage() {
   // ============================================================================
   useEffect(() => {
     const loadCanvases = async () => {
-      console.log('📊 CANVAS: Loading canvases...')
+      console.log('📊 CANVAS: Loading canvases (local state)...')
       try {
         setIsLoading(true)
         setError(null)
 
-        await new Promise(resolve => setTimeout(resolve, 1000))
-
+        // Note: Using mock data - in production, this would fetch from /api/canvases
         const mockCanvases = generateMockCanvases()
         dispatch({ type: 'SET_CANVASES', canvases: mockCanvases })
 
@@ -784,14 +783,17 @@ export default function CanvasPage() {
       return
     }
 
-    console.log('📥 CANVAS: Exporting:', state.selectedCanvas.name)
-    toast.info(`Exporting as ${exportFormat.toUpperCase()}...`)
+    console.log('📥 CANVAS: Exporting (local state):', state.selectedCanvas.name)
+    toast.info(`📥 Exporting as ${exportFormat.toUpperCase()}...`, {
+      description: 'Preparing canvas for download'
+    })
 
-    await new Promise(resolve => setTimeout(resolve, 2000))
-
+    // Note: Using local state - in production, this would POST to /api/canvases/export
     console.log('✅ CANVAS: Export completed successfully')
     setShowExportModal(false)
-    toast.success('Canvas exported successfully')
+    toast.success('🎨 Canvas exported', {
+      description: `${state.selectedCanvas.name} ready for download`
+    })
     announce('Canvas exported', 'polite')
   }
 

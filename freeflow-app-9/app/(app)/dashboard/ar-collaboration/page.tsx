@@ -581,11 +581,10 @@ export default function ARCollaborationPage() {
     }
 
     try {
-      console.log('⏳ AR COLLABORATION: Creating session...')
+      console.log('⏳ AR COLLABORATION: Creating session (local state)...')
       dispatch({ type: 'SET_LOADING', isLoading: true })
 
-      await new Promise(resolve => setTimeout(resolve, 1500))
-
+      // Note: Using local state - in production, this would POST to /api/ar-sessions
       const newSession: ARSession = {
         id: `AR-${Date.now()}`,
         name: sessionName,
@@ -617,7 +616,9 @@ export default function ARCollaborationPage() {
       setSessionIsLocked(false)
       setShowCreateSessionModal(false)
 
-      toast.success('AR session created successfully')
+      toast.success('🥽 AR session created', {
+        description: `${newSession.name} in ${sessionEnvironment} environment`
+      })
       announce('AR session created', 'polite')
     } catch (error) {
       console.log('❌ AR COLLABORATION: Create session error:', error)
@@ -656,11 +657,12 @@ export default function ARCollaborationPage() {
     }
 
     try {
-      console.log('⏳ AR COLLABORATION: Joining session...')
-      toast.info('Entering AR session...')
+      console.log('⏳ AR COLLABORATION: Joining session (local state)...')
+      toast.info('🥽 Entering AR session...', {
+        description: 'Initializing AR environment'
+      })
 
-      await new Promise(resolve => setTimeout(resolve, 2000))
-
+      // Note: Using local state - in production, this would POST to /api/ar-sessions/join
       const newParticipant: ARParticipant = {
         id: `PART-${Date.now()}`,
         userId: 'USER-CURRENT',
@@ -679,7 +681,9 @@ export default function ARCollaborationPage() {
       dispatch({ type: 'JOIN_SESSION', sessionId: session.id, participant: newParticipant })
       console.log('✅ AR COLLABORATION: Joined session successfully')
 
-      toast.success(`Joined ${session.name}`)
+      toast.success(`✅ Joined ${session.name}`, {
+        description: `Connected via ${newParticipant.device} • Latency: ${newParticipant.latency}ms`
+      })
       announce(`Joined ${session.name}`, 'polite')
     } catch (error) {
       console.log('❌ AR COLLABORATION: Join session error:', error)

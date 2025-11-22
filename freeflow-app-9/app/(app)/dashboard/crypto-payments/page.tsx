@@ -547,11 +547,10 @@ export default function CryptoPaymentsPage() {
     }
 
     try {
-      console.log('⏳ CRYPTO PAYMENT: Creating payment...')
+      console.log('⏳ CRYPTO PAYMENT: Creating payment (local state)...')
       dispatch({ type: 'SET_LOADING', isLoading: true })
 
-      await new Promise(resolve => setTimeout(resolve, 1500))
-
+      // Note: Using local state - in production, this would POST to /api/crypto/create-payment
       const cryptoAmount = paymentAmount / (paymentCurrency === 'BTC' ? 45000 : paymentCurrency === 'ETH' ? 2500 : 1)
 
       const newTransaction: CryptoTransaction = {

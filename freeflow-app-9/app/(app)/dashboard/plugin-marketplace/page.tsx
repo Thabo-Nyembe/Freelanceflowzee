@@ -432,13 +432,12 @@ export default function PluginMarketplacePage() {
   // ============================================================================
   useEffect(() => {
     const loadPlugins = async () => {
-      console.log('📊 PLUGIN: Loading plugins...')
+      console.log('📊 PLUGIN: Loading plugins (local state)...')
       try {
         setIsLoading(true)
         setError(null)
 
-        await new Promise(resolve => setTimeout(resolve, 1000))
-
+        // Note: Using mock data - in production, this would fetch from /api/plugins
         const mockPlugins = generateMockPlugins()
         dispatch({ type: 'SET_PLUGINS', plugins: mockPlugins })
 
@@ -583,14 +582,17 @@ export default function PluginMarketplacePage() {
       return
     }
 
-    toast.info(`Installing ${plugin.name}...`)
+    toast.info(`🔌 Installing ${plugin.name}...`, {
+      description: 'Setting up plugin dependencies'
+    })
 
-    await new Promise(resolve => setTimeout(resolve, 2000))
-
+    // Note: Using local state - in production, this would POST to /api/plugins/install
     dispatch({ type: 'INSTALL_PLUGIN', plugin })
 
     console.log('✅ PLUGIN: Plugin installed successfully')
-    toast.success(`${plugin.name} installed successfully`)
+    toast.success(`🎉 ${plugin.name} installed`, {
+      description: 'Plugin is now active and ready to use'
+    })
     announce(`${plugin.name} installed`, 'polite')
   }
 
