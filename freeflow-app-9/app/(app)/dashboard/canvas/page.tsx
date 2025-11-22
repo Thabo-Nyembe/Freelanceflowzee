@@ -45,6 +45,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
 import {
   Monitor,
   Palette,
@@ -90,6 +91,8 @@ import {
   Award,
   TrendingUp
 } from 'lucide-react'
+
+const logger = createFeatureLogger('Canvas')
 
 // ============================================================================
 // A++++ TYPES
@@ -184,19 +187,23 @@ type CanvasAction =
 // ============================================================================
 
 function canvasReducer(state: CanvasState, action: CanvasAction): CanvasState {
-  console.log('🔄 CANVAS REDUCER: Action:', action.type)
+  logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
     case 'SET_CANVASES':
-      console.log('📊 CANVAS REDUCER: Setting canvases - Count:', action.canvases.length)
+      logger.info('Setting canvases', { count: action.canvases.length })
       return { ...state, canvases: action.canvases }
 
     case 'ADD_CANVAS':
-      console.log('➕ CANVAS REDUCER: Adding canvas - ID:', action.canvas.id)
+      logger.info('Canvas added', {
+        canvasId: action.canvas.id,
+        name: action.canvas.name,
+        template: action.canvas.template
+      })
       return { ...state, canvases: [action.canvas, ...state.canvases] }
 
     case 'UPDATE_CANVAS':
-      console.log('✏️ CANVAS REDUCER: Updating canvas - ID:', action.canvas.id)
+      logger.info('Canvas updated', { canvasId: action.canvas.id })
       return {
         ...state,
         canvases: state.canvases.map(c => c.id === action.canvas.id ? action.canvas : c),
@@ -204,7 +211,7 @@ function canvasReducer(state: CanvasState, action: CanvasAction): CanvasState {
       }
 
     case 'DELETE_CANVAS':
-      console.log('🗑️ CANVAS REDUCER: Deleting canvas - ID:', action.canvasId)
+      logger.info('Canvas deleted', { canvasId: action.canvasId })
       return {
         ...state,
         canvases: state.canvases.filter(c => c.id !== action.canvasId),
@@ -212,31 +219,31 @@ function canvasReducer(state: CanvasState, action: CanvasAction): CanvasState {
       }
 
     case 'SELECT_CANVAS':
-      console.log('👁️ CANVAS REDUCER: Selecting canvas - ID:', action.canvas?.id)
+      logger.debug('Canvas selected', { canvasId: action.canvas?.id })
       return { ...state, selectedCanvas: action.canvas }
 
     case 'SET_SEARCH':
-      console.log('🔍 CANVAS REDUCER: Search term:', action.searchTerm)
+      logger.debug('Search term changed', { searchTerm: action.searchTerm })
       return { ...state, searchTerm: action.searchTerm }
 
     case 'SET_FILTER_STATUS':
-      console.log('🎯 CANVAS REDUCER: Filter status:', action.filterStatus)
+      logger.debug('Filter status changed', { filterStatus: action.filterStatus })
       return { ...state, filterStatus: action.filterStatus }
 
     case 'SET_FILTER_TEMPLATE':
-      console.log('🎨 CANVAS REDUCER: Filter template:', action.filterTemplate)
+      logger.debug('Filter template changed', { filterTemplate: action.filterTemplate })
       return { ...state, filterTemplate: action.filterTemplate }
 
     case 'SET_SORT':
-      console.log('🔀 CANVAS REDUCER: Sort by:', action.sortBy)
+      logger.debug('Sort order changed', { sortBy: action.sortBy })
       return { ...state, sortBy: action.sortBy }
 
     case 'SET_VIEW_MODE':
-      console.log('👁️ CANVAS REDUCER: View mode:', action.viewMode)
+      logger.debug('View mode changed', { viewMode: action.viewMode })
       return { ...state, viewMode: action.viewMode }
 
     case 'TOGGLE_SELECT_CANVAS':
-      console.log('☑️ CANVAS REDUCER: Toggle select canvas - ID:', action.canvasId)
+      logger.debug('Toggle select canvas', { canvasId: action.canvasId })
       return {
         ...state,
         selectedCanvases: state.selectedCanvases.includes(action.canvasId)
@@ -245,11 +252,11 @@ function canvasReducer(state: CanvasState, action: CanvasAction): CanvasState {
       }
 
     case 'CLEAR_SELECTED_CANVASES':
-      console.log('🧹 CANVAS REDUCER: Clearing selected canvases')
+      logger.debug('Clearing selected canvases')
       return { ...state, selectedCanvases: [] }
 
     case 'TOGGLE_STAR':
-      console.log('⭐ CANVAS REDUCER: Toggle star - ID:', action.canvasId)
+      logger.info('Toggle star', { canvasId: action.canvasId })
       return {
         ...state,
         canvases: state.canvases.map(c =>
@@ -258,7 +265,7 @@ function canvasReducer(state: CanvasState, action: CanvasAction): CanvasState {
       }
 
     case 'DUPLICATE_CANVAS':
-      console.log('📋 CANVAS REDUCER: Duplicating canvas - ID:', action.canvasId)
+      logger.info('Duplicating canvas', { canvasId: action.canvasId })
       const originalCanvas = state.canvases.find(c => c.id === action.canvasId)
       if (!originalCanvas) return state
 
@@ -270,6 +277,12 @@ function canvasReducer(state: CanvasState, action: CanvasAction): CanvasState {
         updatedAt: new Date().toISOString(),
         version: 1
       }
+
+      logger.info('Canvas duplicated', {
+        originalId: action.canvasId,
+        duplicateId: duplicatedCanvas.id,
+        name: duplicatedCanvas.name
+      })
 
       return { ...state, canvases: [duplicatedCanvas, ...state.canvases] }
 
@@ -283,7 +296,7 @@ function canvasReducer(state: CanvasState, action: CanvasAction): CanvasState {
 // ============================================================================
 
 function generateMockCanvases(): CanvasProject[] {
-  console.log('🎨 CANVAS: Generating mock canvases...')
+  logger.debug('Generating mock canvases')
 
   const templates: CanvasTemplate[] = ['ui-design', 'wireframe', 'illustration', 'presentation', 'infographic', 'social-media', 'logo-design', 'blank']
   const statuses: CanvasStatus[] = ['in-progress', 'completed', 'archived', 'shared']
@@ -395,7 +408,7 @@ function generateMockCanvases(): CanvasProject[] {
     }
   })
 
-  console.log('✅ CANVAS: Generated', canvases.length, 'mock canvases')
+  logger.info('Mock canvases generated', { count: canvases.length })
   return canvases
 }
 
@@ -484,7 +497,7 @@ const canvasTemplates: CanvasTemplateOption[] = [
 // ============================================================================
 
 export default function CanvasPage() {
-  console.log('🚀 CANVAS: Component mounting...')
+  logger.debug('Component mounting')
 
   // ============================================================================
   // A++++ STATE MANAGEMENT
@@ -527,7 +540,7 @@ export default function CanvasPage() {
   // ============================================================================
   useEffect(() => {
     const loadCanvases = async () => {
-      console.log('📊 CANVAS: Loading canvases (local state)...')
+      logger.info('Loading canvases')
       try {
         setIsLoading(true)
         setError(null)
@@ -536,11 +549,11 @@ export default function CanvasPage() {
         const mockCanvases = generateMockCanvases()
         dispatch({ type: 'SET_CANVASES', canvases: mockCanvases })
 
-        console.log('✅ CANVAS: Canvases loaded successfully - Count:', mockCanvases.length)
+        logger.info('Canvases loaded', { count: mockCanvases.length })
         setIsLoading(false)
         announce('Canvases loaded successfully', 'polite')
       } catch (err) {
-        console.log('❌ CANVAS: Load error:', err)
+        logger.error('Load error', { error: err })
         setError(err instanceof Error ? err.message : 'Failed to load canvases')
         setIsLoading(false)
         announce('Error loading canvases', 'assertive')
@@ -554,7 +567,7 @@ export default function CanvasPage() {
   // A++++ COMPUTED VALUES
   // ============================================================================
   const stats = useMemo(() => {
-    console.log('📊 CANVAS: Computing stats...')
+    logger.debug('Computing stats')
     const total = state.canvases.length
     const inProgress = state.canvases.filter(c => c.status === 'in-progress').length
     const completed = state.canvases.filter(c => c.status === 'completed').length
@@ -577,12 +590,12 @@ export default function CanvasPage() {
       totalSize
     }
 
-    console.log('📊 CANVAS: Stats computed -', JSON.stringify(computedStats))
+    logger.debug('Stats computed', computedStats)
     return computedStats
   }, [state.canvases])
 
   const filteredAndSortedCanvases = useMemo(() => {
-    console.log('🔍 CANVAS: Filtering and sorting canvases...')
+    logger.debug('Filtering and sorting canvases')
     let filtered = state.canvases
 
     // Search
@@ -592,19 +605,19 @@ export default function CanvasPage() {
         canvas.description.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
         canvas.tags.some(tag => tag.toLowerCase().includes(state.searchTerm.toLowerCase()))
       )
-      console.log('🔍 CANVAS: Search filtered to', filtered.length, 'canvases')
+      logger.debug('Search filtered', { count: filtered.length })
     }
 
     // Filter by status
     if (state.filterStatus !== 'all') {
       filtered = filtered.filter(canvas => canvas.status === state.filterStatus)
-      console.log('🎯 CANVAS: Status filtered to', filtered.length, 'canvases')
+      logger.debug('Status filtered', { count: filtered.length })
     }
 
     // Filter by template
     if (state.filterTemplate !== 'all') {
       filtered = filtered.filter(canvas => canvas.template === state.filterTemplate)
-      console.log('🎨 CANVAS: Template filtered to', filtered.length, 'canvases')
+      logger.debug('Template filtered', { count: filtered.length })
     }
 
     // Sort
@@ -627,7 +640,7 @@ export default function CanvasPage() {
       }
     })
 
-    console.log('🔀 CANVAS: Sorted by', state.sortBy, '- Final count:', sorted.length)
+    logger.debug('Sorted canvases', { sortBy: state.sortBy, count: sorted.length })
     return sorted
   }, [state.canvases, state.searchTerm, state.filterStatus, state.filterTemplate, state.sortBy])
 
@@ -636,12 +649,12 @@ export default function CanvasPage() {
   // ============================================================================
 
   const handleCreateCanvas = async () => {
-    console.log('➕ CANVAS: Creating new canvas...')
-    console.log('📝 CANVAS: Name:', canvasName)
-    console.log('🎨 CANVAS: Template:', selectedTemplate)
+    logger.info('Creating canvas', { name: canvasName, template: selectedTemplate })
+    
+    
 
     if (!canvasName.trim()) {
-      console.log('⚠️ CANVAS: Validation failed - Name required')
+      logger.warn('Canvas validation failed', { reason: 'Name required' })
       toast.error('Canvas name is required')
       return
     }
@@ -677,7 +690,7 @@ export default function CanvasPage() {
         tags: []
       }
 
-      console.log('✅ CANVAS: Canvas created - ID:', newCanvas.id)
+      logger.info('Canvas created', { canvasId: newCanvas.id, name: newCanvas.name, template: newCanvas.template })
       dispatch({ type: 'ADD_CANVAS', canvas: newCanvas })
 
       setShowCreateModal(false)
@@ -685,17 +698,19 @@ export default function CanvasPage() {
       setCanvasDescription('')
       setSelectedTemplate('blank')
 
-      toast.success('Canvas created successfully')
+      toast.success('Canvas created', {
+        description: `${newCanvas.name} - ${template?.name || newCanvas.template} - ${size.width}×${size.height}px - v${newCanvas.version}`
+      })
       announce('New canvas created', 'polite')
     } catch (err) {
-      console.log('❌ CANVAS: Create error:', err)
+      logger.error('Canvas creation failed', { error: err })
       toast.error('Failed to create canvas')
     }
   }
 
   const handleViewCanvas = (canvas: CanvasProject) => {
-    console.log('👁️ CANVAS: Opening canvas view - ID:', canvas.id)
-    console.log('📊 CANVAS: Canvas details:', {
+    logger.info('Opening canvas view', {
+      canvasId: canvas.id,
       name: canvas.name,
       artboards: canvas.artboards.length,
       layers: canvas.totalLayers,
@@ -707,37 +722,39 @@ export default function CanvasPage() {
   }
 
   const handleDeleteCanvas = async (canvasId: string) => {
-    console.log('🗑️ CANVAS: Deleting canvas - ID:', canvasId)
+    logger.info('Deleting canvas', { canvasId })
     const canvas = state.canvases.find(c => c.id === canvasId)
 
     if (!canvas) {
-      console.log('❌ CANVAS: Canvas not found')
+      logger.warn('Canvas not found', { canvasId })
       return
     }
 
-    console.log('🗑️ CANVAS: Canvas to delete:', canvas.name)
+    logger.info('Deleting canvas', { canvasId, canvasName: canvas.name })
 
     if (confirm(`Delete "${canvas.name}"?`)) {
-      console.log('✅ CANVAS: User confirmed deletion')
+      logger.info('Canvas deletion confirmed', { canvasId, canvasName: canvas.name })
       dispatch({ type: 'DELETE_CANVAS', canvasId })
-      toast.success('Canvas deleted successfully')
+      toast.success('Canvas deleted', {
+        description: `${canvas.name} - ${canvas.artboards.length} artboards - ${canvas.totalLayers} layers - ${canvas.size.toFixed(2)}MB`
+      })
       announce('Canvas deleted', 'polite')
     } else {
-      console.log('❌ CANVAS: User cancelled deletion')
+      logger.debug('Canvas deletion cancelled', { canvasId })
     }
   }
 
   const handleBulkDelete = async () => {
-    console.log('🗑️ CANVAS: Bulk delete initiated - Count:', state.selectedCanvases.length)
+    logger.info('Bulk delete initiated', { count: state.selectedCanvases.length })
 
     if (state.selectedCanvases.length === 0) {
-      console.log('⚠️ CANVAS: No canvases selected')
+      logger.warn('No canvases selected')
       toast.error('No canvases selected')
       return
     }
 
     if (confirm(`Delete ${state.selectedCanvases.length} canvas(es)?`)) {
-      console.log('✅ CANVAS: User confirmed bulk deletion')
+      logger.info('Bulk deletion confirmed', { count: state.selectedCanvases.length })
       state.selectedCanvases.forEach(canvasId => {
         dispatch({ type: 'DELETE_CANVAS', canvasId })
       })
@@ -745,51 +762,53 @@ export default function CanvasPage() {
       toast.success(`${state.selectedCanvases.length} canvas(es) deleted`)
       announce('Selected canvases deleted', 'polite')
     } else {
-      console.log('❌ CANVAS: User cancelled bulk deletion')
+      logger.debug('Bulk deletion cancelled')
     }
   }
 
   const handleDuplicateCanvas = (canvasId: string) => {
-    console.log('📋 CANVAS: Duplicating canvas - ID:', canvasId)
+    logger.info('Duplicating canvas', { canvasId })
     const canvas = state.canvases.find(c => c.id === canvasId)
 
     if (canvas) {
-      console.log('📋 CANVAS: Canvas to duplicate:', canvas.name)
+      logger.info('Canvas to duplicate', { canvasId, name: canvas.name, template: canvas.template })
       dispatch({ type: 'DUPLICATE_CANVAS', canvasId })
-      toast.success(`"${canvas.name}" duplicated successfully`)
+      toast.success(`Canvas duplicated`, {
+        description: `${canvas.name} (Copy) - ${canvas.template} - ${canvas.artboards.length} artboards - ${canvas.totalLayers} layers`
+      })
       announce('Canvas duplicated', 'polite')
     }
   }
 
   const handleToggleStar = (canvasId: string) => {
-    console.log('⭐ CANVAS: Toggling star - ID:', canvasId)
+    logger.info('Toggling star', { canvasId })
     const canvas = state.canvases.find(c => c.id === canvasId)
 
     if (canvas) {
-      console.log('⭐ CANVAS: Current starred state:', canvas.isStarred)
+      logger.debug('Current starred state', { canvasId, isStarred: canvas.isStarred })
       dispatch({ type: 'TOGGLE_STAR', canvasId })
       toast.success(canvas.isStarred ? 'Removed from favorites' : 'Added to favorites')
     }
   }
 
   const handleExportCanvas = async () => {
-    console.log('📥 CANVAS: Exporting canvas...')
-    console.log('📥 CANVAS: Format:', exportFormat)
-    console.log('📥 CANVAS: Quality:', exportQuality)
+    logger.info('Exporting canvas', { format: exportFormat, quality: exportQuality })
+    
+    
 
     if (!state.selectedCanvas) {
-      console.log('⚠️ CANVAS: No canvas selected')
+      logger.warn('No canvas selected for export')
       toast.error('No canvas selected')
       return
     }
 
-    console.log('📥 CANVAS: Exporting (local state):', state.selectedCanvas.name)
+    logger.info('Exporting canvas', { canvasName: state.selectedCanvas.name, format: exportFormat })
     toast.info(`📥 Exporting as ${exportFormat.toUpperCase()}...`, {
       description: 'Preparing canvas for download'
     })
 
     // Note: Using local state - in production, this would POST to /api/canvases/export
-    console.log('✅ CANVAS: Export completed successfully')
+    logger.info('Export completed', { canvasName: state.selectedCanvas.name, format: exportFormat })
     setShowExportModal(false)
     toast.success('🎨 Canvas exported', {
       description: `${state.selectedCanvas.name} ready for download`
@@ -798,23 +817,23 @@ export default function CanvasPage() {
   }
 
   const handleShareCanvas = async () => {
-    console.log('🔗 CANVAS: Sharing canvas...')
-    console.log('📧 CANVAS: Email:', shareEmail)
-    console.log('👤 CANVAS: Role:', shareRole)
+    logger.info('Sharing canvas', { email: shareEmail, role: shareRole })
+    
+    
 
     if (!state.selectedCanvas) {
-      console.log('⚠️ CANVAS: No canvas selected')
+      logger.warn('No canvas selected for export')
       toast.error('No canvas selected')
       return
     }
 
     if (!shareEmail.trim()) {
-      console.log('⚠️ CANVAS: Email required')
+      logger.warn('Email required')
       toast.error('Email address is required')
       return
     }
 
-    console.log('🔗 CANVAS: Sharing:', state.selectedCanvas.name, 'with', shareEmail)
+    logger.info('Sharing canvas', { canvasName: state.selectedCanvas.name, email: shareEmail, role: shareRole })
 
     const newCollaborator: CanvasCollaborator = {
       id: `COL-${Date.now()}`,
@@ -835,11 +854,13 @@ export default function CanvasPage() {
 
     dispatch({ type: 'UPDATE_CANVAS', canvas: updatedCanvas })
 
-    console.log('✅ CANVAS: Canvas shared successfully')
+    logger.info('Canvas shared', { canvasName: state.selectedCanvas.name, email: shareEmail, role: shareRole })
     setShowShareModal(false)
     setShareEmail('')
     setShareRole('viewer')
-    toast.success('Canvas shared successfully')
+    toast.success('Canvas shared', {
+      description: `${state.selectedCanvas.name} - Shared with ${shareEmail} as ${shareRole} - ${updatedCanvas.collaborators.length} total collaborators`
+    })
     announce('Canvas shared with collaborator', 'polite')
   }
 
