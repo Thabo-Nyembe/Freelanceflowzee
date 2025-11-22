@@ -44,6 +44,13 @@ import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 
 // ============================================================================
+// PRODUCTION LOGGER
+// ============================================================================
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Analytics')
+
+// ============================================================================
 // FRAMER MOTION COMPONENTS
 // ============================================================================
 
@@ -287,12 +294,12 @@ export default function AnalyticsPage() {
   // ============================================================================
 
   const filteredCategories = useMemo(() => {
-    console.log('🔍 FILTERING ANALYTICS DATA')
-    console.log('🔎 Search Term:', searchTerm || '(none)')
-    console.log('📊 Current tab:', activeTab)
-
     if (!searchTerm) {
-      console.log('✅ NO FILTER - Showing all data')
+      logger.debug('Analytics filter applied', {
+        searchTerm: '(none)',
+        tab: activeTab,
+        totalCategories: KAZI_ANALYTICS_DATA.projectCategories.length
+      })
       return KAZI_ANALYTICS_DATA.projectCategories
     }
 
@@ -300,10 +307,12 @@ export default function AnalyticsPage() {
       cat.category.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
-    console.log('✅ FILTERED RESULTS:', filtered.length, 'categories')
-    if (filtered.length < KAZI_ANALYTICS_DATA.projectCategories.length) {
-      console.log('📉 Filtered out:', KAZI_ANALYTICS_DATA.projectCategories.length - filtered.length, 'categories')
-    }
+    logger.debug('Analytics filter applied', {
+      searchTerm,
+      tab: activeTab,
+      resultsCount: filtered.length,
+      filteredOut: KAZI_ANALYTICS_DATA.projectCategories.length - filtered.length
+    })
 
     return filtered
   }, [searchTerm, activeTab])
@@ -313,16 +322,12 @@ export default function AnalyticsPage() {
   // ============================================================================
 
   const handleBackToDashboard = () => {
-    console.log('🔙 NAVIGATING BACK TO DASHBOARD')
-    console.log('📊 Current page: Analytics')
-    console.log('🎯 Target page: Dashboard Overview')
-    console.log('📅 Date range:', dateRange)
-    console.log('📊 Current tab:', activeTab)
-    console.log('✅ NAVIGATION INITIATED')
-
+    logger.info('Navigating back to dashboard', {
+      currentPage: 'Analytics',
+      dateRange,
+      activeTab
+    })
     router.push('/dashboard')
-
-    console.log('🏁 NAVIGATION COMPLETE')
   }
 
   // ============================================================================
@@ -330,21 +335,20 @@ export default function AnalyticsPage() {
   // ============================================================================
 
   const handleRefreshAnalytics = async () => {
-    console.log('🔄 REFRESHING ANALYTICS DATA')
-    console.log('📊 Current tab:', activeTab)
-    console.log('📅 Date range:', dateRange)
-    console.log('🤖 AI mode:', aiMode ? 'enabled' : 'disabled')
-    console.log('🔮 Predictive mode:', predictiveMode ? 'enabled' : 'disabled')
+    logger.info('Analytics data refresh started', {
+      activeTab,
+      dateRange,
+      aiMode: aiMode ? 'enabled' : 'disabled',
+      predictiveMode: predictiveMode ? 'enabled' : 'disabled'
+    })
 
     setIsRefreshing(true)
 
-    console.log('⏳ Fetching latest analytics data...')
     // Note: In production, this would fetch from /api/analytics
 
     setIsRefreshing(false)
 
-    console.log('✅ ANALYTICS DATA REFRESHED')
-    console.log('🏁 REFRESH COMPLETE')
+    logger.info('Analytics data refreshed successfully')
 
     toast.success('Analytics data refreshed!', {
       description: 'All metrics updated with latest data'
@@ -356,22 +360,19 @@ export default function AnalyticsPage() {
   // ============================================================================
 
   const handleExportReport = async () => {
-    console.log('📊 EXPORTING ANALYTICS REPORT')
-    console.log('📁 Report type: comprehensive')
-    console.log('📄 Format: CSV')
-    console.log('📅 Period: Last 180 days')
-    console.log('📊 Current tab:', activeTab)
-    console.log('🤖 AI mode:', aiMode ? 'enabled' : 'disabled')
+    logger.info('Report export started', {
+      reportType: 'comprehensive',
+      format: 'CSV',
+      period: 'Last 180 days',
+      activeTab,
+      aiMode: aiMode ? 'enabled' : 'disabled'
+    })
 
     setIsExporting(true)
 
     try {
       const startDate = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
       const endDate = new Date().toISOString().split('T')[0]
-
-      console.log('📅 Start date:', startDate)
-      console.log('📅 End date:', endDate)
-      console.log('📡 Calling API: /api/analytics/reports')
 
       const response = await fetch('/api/analytics/reports', {
         method: 'POST',
@@ -383,14 +384,8 @@ export default function AnalyticsPage() {
         })
       })
 
-      console.log('📡 API RESPONSE STATUS:', response.status, response.statusText)
-
       if (response.ok) {
-        console.log('✅ REPORT GENERATED SUCCESSFULLY')
-
         const blob = await response.blob()
-        console.log('📦 Blob size:', (blob.size / 1024).toFixed(2), 'KB')
-
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
@@ -401,29 +396,29 @@ export default function AnalyticsPage() {
         window.URL.revokeObjectURL(url)
         document.body.removeChild(a)
 
-        console.log('💾 FILE DOWNLOADED:', filename)
-        console.log('✅ EXPORT SUCCESSFUL')
+        logger.info('Report exported successfully', {
+          filename,
+          blobSize: `${(blob.size / 1024).toFixed(2)} KB`,
+          startDate,
+          endDate
+        })
 
         toast.success('Analytics report exported successfully!', {
           description: `Downloaded ${filename}`
         })
       } else {
-        console.log('❌ EXPORT FAILED: Response not OK')
-        console.log('📊 Status:', response.status)
+        logger.warn('Report export failed', { status: response.status })
         toast.error('Export failed. Please try again.', {
           description: 'Could not generate report'
         })
       }
     } catch (error) {
-      console.error('❌ EXPORT ERROR:', error)
-      console.log('⚠️ Network or server error occurred')
-      console.log('📊 Error details:', error instanceof Error ? error.message : String(error))
+      logger.error('Report export error', { error })
       toast.error('Export failed. Please try again.', {
         description: 'Network or server error'
       })
     } finally {
       setIsExporting(false)
-      console.log('🏁 EXPORT PROCESS COMPLETE')
     }
   }
 
@@ -435,23 +430,17 @@ export default function AnalyticsPage() {
     const previousValue = searchTerm
     const newValue = e.target.value
 
-    console.log('🔍 ANALYTICS SEARCH')
-    console.log('⏪ Previous search:', previousValue || '(empty)')
-    console.log('⏩ New search:', newValue || '(empty)')
-    console.log('📊 Search length:', newValue.length, 'characters')
-    console.log('📅 Current date range:', dateRange)
-    console.log('📊 Current tab:', activeTab)
-
     setSearchTerm(newValue)
 
-    if (newValue.length >= 2) {
-      console.log('✅ SEARCH ACTIVE - Filtering analytics data')
-      console.log('🔎 Searching for:', newValue)
-    } else if (newValue.length === 0 && previousValue.length > 0) {
-      console.log('🧹 SEARCH CLEARED - Showing all data')
-    }
-
-    console.log('🏁 SEARCH UPDATE COMPLETE')
+    logger.debug('Analytics search updated', {
+      previousValue: previousValue || '(empty)',
+      newValue: newValue || '(empty)',
+      searchLength: newValue.length,
+      dateRange,
+      activeTab,
+      isActive: newValue.length >= 2,
+      wasCleared: newValue.length === 0 && previousValue.length > 0
+    })
   }
 
   // ============================================================================
@@ -462,18 +451,15 @@ export default function AnalyticsPage() {
     const previousValue = dateRange
     const newValue = e.target.value
 
-    console.log('📅 DATE RANGE CHANGED')
-    console.log('⏪ Previous range:', previousValue)
-    console.log('⏩ New range:', newValue)
-    console.log('📊 Current tab:', activeTab)
-    console.log('🤖 AI mode:', aiMode ? 'enabled' : 'disabled')
-    console.log('🔮 Predictive mode:', predictiveMode ? 'enabled' : 'disabled')
-
     setDateRange(newValue)
 
-    console.log('✅ DATE RANGE UPDATED')
-    console.log('🔄 Analytics data will refresh for new period')
-    console.log('🏁 DATE RANGE CHANGE COMPLETE')
+    logger.info('Date range changed', {
+      previousValue,
+      newValue,
+      activeTab,
+      aiMode: aiMode ? 'enabled' : 'disabled',
+      predictiveMode: predictiveMode ? 'enabled' : 'disabled'
+    })
 
     toast.success(`Date range changed to: ${newValue.replace(/-/g, ' ')}`)
   }
@@ -483,19 +469,13 @@ export default function AnalyticsPage() {
   // ============================================================================
 
   const handleFilters = () => {
-    console.log('🔍 OPENING ANALYTICS FILTERS')
-    console.log('📊 Current tab:', activeTab)
-    console.log('📅 Current date range:', dateRange)
-    console.log('🤖 AI mode:', aiMode ? 'enabled' : 'disabled')
-    console.log('🔮 Predictive mode:', predictiveMode ? 'enabled' : 'disabled')
-    console.log('⚙️ Filter options:')
-    console.log('  - Project filter: All projects')
-    console.log('  - Client filter: All clients')
-    console.log('  - Status filter: All statuses')
-    console.log('  - Priority filter: All priorities')
-    console.log('  - Team member filter: All members')
-    console.log('✅ FILTERS PANEL OPENED')
-    console.log('🏁 FILTER PROCESS COMPLETE')
+    logger.info('Filters panel opened', {
+      activeTab,
+      dateRange,
+      aiMode: aiMode ? 'enabled' : 'disabled',
+      predictiveMode: predictiveMode ? 'enabled' : 'disabled',
+      filterOptions: ['All projects', 'All clients', 'All statuses', 'All priorities', 'All members']
+    })
 
     toast.success('Advanced filters applied!')
   }
@@ -505,21 +485,21 @@ export default function AnalyticsPage() {
   // ============================================================================
 
   const handleSettings = () => {
-    console.log('⚙️ OPENING ANALYTICS SETTINGS')
-    console.log('📊 Current tab:', activeTab)
-    console.log('📅 Current date range:', dateRange)
-    console.log('🤖 AI mode:', aiMode ? 'enabled' : 'disabled')
-    console.log('🔮 Predictive mode:', predictiveMode ? 'enabled' : 'disabled')
-    console.log('⚙️ Available settings:')
-    console.log('  - Default view:', activeTab)
-    console.log('  - Refresh interval: Auto')
-    console.log('  - Data retention: 180 days')
-    console.log('  - Export format: CSV')
-    console.log('  - Notifications: Enabled')
-    console.log('  - AI insights:', aiMode ? 'On' : 'Off')
-    console.log('  - Predictive analytics:', predictiveMode ? 'On' : 'Off')
-    console.log('✅ SETTINGS PANEL OPENED')
-    console.log('🏁 SETTINGS PROCESS COMPLETE')
+    logger.info('Settings panel opened', {
+      activeTab,
+      dateRange,
+      aiMode: aiMode ? 'enabled' : 'disabled',
+      predictiveMode: predictiveMode ? 'enabled' : 'disabled',
+      settings: {
+        defaultView: activeTab,
+        refreshInterval: 'Auto',
+        dataRetention: '180 days',
+        exportFormat: 'CSV',
+        notifications: 'Enabled',
+        aiInsights: aiMode ? 'On' : 'Off',
+        predictiveAnalytics: predictiveMode ? 'On' : 'Off'
+      }
+    })
 
     toast.success('Analytics settings opened!')
   }
@@ -532,30 +512,16 @@ export default function AnalyticsPage() {
     const previousState = aiMode
     const newState = !aiMode
 
-    console.log('🤖 AI MODE TOGGLE')
-    console.log('⏪ Previous state:', previousState ? 'ENABLED' : 'DISABLED')
-    console.log('⏩ New state:', newState ? 'ENABLED' : 'DISABLED')
-    console.log('📊 Current tab:', activeTab)
-    console.log('📅 Date range:', dateRange)
-    console.log('🔮 Predictive mode:', predictiveMode ? 'enabled' : 'disabled')
-
-    if (newState) {
-      console.log('✨ AI FEATURES ENABLED:')
-      console.log('  - AI-generated insights')
-      console.log('  - Smart recommendations')
-      console.log('  - Trend analysis')
-      console.log('  - Anomaly detection')
-      console.log('  - Performance predictions')
-    } else {
-      console.log('⚠️ AI FEATURES DISABLED')
-      console.log('  - Switching to standard analytics')
-      console.log('  - AI insights will be hidden')
-    }
-
     setAiMode(newState)
 
-    console.log('✅ AI MODE UPDATED')
-    console.log('🏁 AI MODE TOGGLE COMPLETE')
+    logger.info('AI mode toggled', {
+      previousState: previousState ? 'ENABLED' : 'DISABLED',
+      newState: newState ? 'ENABLED' : 'DISABLED',
+      activeTab,
+      dateRange,
+      predictiveMode: predictiveMode ? 'enabled' : 'disabled',
+      features: newState ? ['AI-generated insights', 'Smart recommendations', 'Trend analysis', 'Anomaly detection', 'Performance predictions'] : ['Standard analytics']
+    })
 
     toast.success(newState ? 'AI mode enabled' : 'AI mode disabled', {
       description: newState ? 'AI insights and recommendations activated' : 'Switched to standard analytics'
@@ -570,31 +536,16 @@ export default function AnalyticsPage() {
     const previousState = predictiveMode
     const newState = !predictiveMode
 
-    console.log('🔮 PREDICTIVE MODE TOGGLE')
-    console.log('⏪ Previous state:', previousState ? 'ENABLED' : 'DISABLED')
-    console.log('⏩ New state:', newState ? 'ENABLED' : 'DISABLED')
-    console.log('📊 Current tab:', activeTab)
-    console.log('📅 Date range:', dateRange)
-    console.log('🤖 AI mode:', aiMode ? 'enabled' : 'disabled')
-
-    if (newState) {
-      console.log('📈 PREDICTIVE ANALYTICS ENABLED:')
-      console.log('  - Revenue forecasting')
-      console.log('  - Trend predictions')
-      console.log('  - Growth projections')
-      console.log('  - Resource planning')
-      console.log('  - Risk assessment')
-      console.log('  - Opportunity identification')
-    } else {
-      console.log('⚠️ PREDICTIVE ANALYTICS DISABLED')
-      console.log('  - Showing historical data only')
-      console.log('  - Predictions will be hidden')
-    }
-
     setPredictiveMode(newState)
 
-    console.log('✅ PREDICTIVE MODE UPDATED')
-    console.log('🏁 PREDICTIVE MODE TOGGLE COMPLETE')
+    logger.info('Predictive mode toggled', {
+      previousState: previousState ? 'ENABLED' : 'DISABLED',
+      newState: newState ? 'ENABLED' : 'DISABLED',
+      activeTab,
+      dateRange,
+      aiMode: aiMode ? 'enabled' : 'disabled',
+      features: newState ? ['Revenue forecasting', 'Trend predictions', 'Growth projections', 'Resource planning', 'Risk assessment', 'Opportunity identification'] : ['Historical data only']
+    })
 
     toast.success(newState ? 'Predictive mode enabled' : 'Predictive mode disabled', {
       description: newState ? 'Showing forecasts and predictions' : 'Showing historical data only'
@@ -608,19 +559,16 @@ export default function AnalyticsPage() {
   const handleTabChange = (newTab: string) => {
     const previousTab = activeTab
 
-    console.log('📊 TAB SWITCHED')
-    console.log('⏪ Previous tab:', previousTab)
-    console.log('⏩ New tab:', newTab)
-    console.log('📅 Date range:', dateRange)
-    console.log('🤖 AI mode:', aiMode ? 'enabled' : 'disabled')
-    console.log('🔮 Predictive mode:', predictiveMode ? 'enabled' : 'disabled')
-    console.log('🔍 Search term:', searchTerm || '(none)')
-
     setActiveTab(newTab)
 
-    console.log('✅ TAB CHANGED')
-    console.log('📈 Loading', newTab, 'analytics data')
-    console.log('🏁 TAB SWITCH COMPLETE')
+    logger.info('Tab switched', {
+      previousTab,
+      newTab,
+      dateRange,
+      aiMode: aiMode ? 'enabled' : 'disabled',
+      predictiveMode: predictiveMode ? 'enabled' : 'disabled',
+      searchTerm: searchTerm || '(none)'
+    })
   }
 
   // ============================================================================
@@ -628,13 +576,12 @@ export default function AnalyticsPage() {
   // ============================================================================
 
   const handleBookmarkView = () => {
-    console.log('⭐ BOOKMARK VIEW')
-    console.log('📊 Bookmarking:', activeTab)
-    console.log('📅 Date range:', dateRange)
-    console.log('🤖 AI mode:', aiMode ? 'enabled' : 'disabled')
-    console.log('🔮 Predictive mode:', predictiveMode ? 'enabled' : 'disabled')
-    console.log('✅ VIEW BOOKMARKED')
-    console.log('🏁 BOOKMARK COMPLETE')
+    logger.info('View bookmarked', {
+      activeTab,
+      dateRange,
+      aiMode: aiMode ? 'enabled' : 'disabled',
+      predictiveMode: predictiveMode ? 'enabled' : 'disabled'
+    })
 
     toast.success('Current view bookmarked!', {
       description: 'Access anytime from your bookmarks'
@@ -646,23 +593,16 @@ export default function AnalyticsPage() {
   // ============================================================================
 
   const handlePredictiveAnalytics = () => {
-    console.log('ANALYTICS: 🔮 INITIATING PREDICTIVE ANALYTICS')
-    console.log('ANALYTICS: 📊 Current tab:', activeTab)
-    console.log('ANALYTICS: 📅 Date range:', dateRange)
-    console.log('ANALYTICS: 🤖 AI mode:', aiMode ? 'enabled' : 'disabled')
-    console.log('ANALYTICS: 🔮 Predictive mode:', predictiveMode ? 'enabled' : 'disabled')
-    console.log('ANALYTICS: 📈 Analysis scope:')
-    console.log('ANALYTICS:   - Revenue forecasting (next 3-6 months)')
-    console.log('ANALYTICS:   - Project demand prediction')
-    console.log('ANALYTICS:   - Client growth trends')
-    console.log('ANALYTICS:   - Resource allocation recommendations')
-    console.log('ANALYTICS:   - Risk assessment and mitigation')
-    console.log('ANALYTICS:   - Market opportunity identification')
-    console.log('ANALYTICS: 💡 AI Engine: Machine Learning + Pattern Recognition')
-    console.log('ANALYTICS: 📊 Data points analyzed: ' + (KAZI_ANALYTICS_DATA.overview.totalProjects * KAZI_ANALYTICS_DATA.overview.totalClients))
-    console.log('ANALYTICS: 🎯 Confidence interval: 85-95%')
-    console.log('ANALYTICS: ✅ PREDICTIVE ANALYTICS GENERATED')
-    console.log('ANALYTICS: 🏁 PROCESS COMPLETE')
+    logger.info('Predictive analytics generated', {
+      activeTab,
+      dateRange,
+      aiMode: aiMode ? 'enabled' : 'disabled',
+      predictiveMode: predictiveMode ? 'enabled' : 'disabled',
+      analysisScope: ['Revenue forecasting (next 3-6 months)', 'Project demand prediction', 'Client growth trends', 'Resource allocation recommendations', 'Risk assessment and mitigation', 'Market opportunity identification'],
+      aiEngine: 'Machine Learning + Pattern Recognition',
+      dataPointsAnalyzed: KAZI_ANALYTICS_DATA.overview.totalProjects * KAZI_ANALYTICS_DATA.overview.totalClients,
+      confidenceInterval: '85-95%'
+    })
 
     toast.success('Predictive analytics generated! 🔮', {
       description: 'AI-powered forecasting and trend analysis ready'
