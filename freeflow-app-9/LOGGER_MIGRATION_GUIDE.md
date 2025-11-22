@@ -347,3 +347,214 @@ fi
 echo ""
 echo "Console statements:"
 grep -n "console\." "$PAGE" | head -20
+
+---
+
+## Automated Migration Tool
+
+### NEW: Logger Migration Script
+
+A comprehensive Node.js script to automate console statement analysis and migration guidance.
+
+**Location:** `scripts/migrate-logger.js`
+
+### Commands
+
+#### 1. Platform Statistics
+```bash
+node scripts/migrate-logger.js stats
+```
+
+**Output:**
+- Total files and console statements
+- Migration progress percentage
+- Top 15 pages by console count
+- Estimated effort remaining
+
+**Example:**
+```
+Total Files: 88
+Total Console Statements: 4531
+Files with Logger: 3
+Migration Progress: 3.4%
+
+Top 15 Pages:
+1. ⚠️ collaboration - 354 statements
+2. ⚠️ client-zone - 237 statements
+3. ⚠️ video-studio - 226 statements
+```
+
+#### 2. Analyze File
+```bash
+node scripts/migrate-logger.js analyze <file-path>
+```
+
+**Features:**
+- Count console statements by type
+- Show first 10 occurrences with line numbers
+- Check if logger already imported
+- Display file statistics
+
+**Example:**
+```bash
+node scripts/migrate-logger.js analyze "app/(app)/dashboard/analytics/page.tsx"
+```
+
+#### 3. Migration Guide
+```bash
+node scripts/migrate-logger.js migrate <file-path> <feature-name>
+```
+
+**Features:**
+- Shows logger import template
+- Provides migration examples
+- Suggests appropriate log levels
+- Estimates migration time
+- Best practices tips
+
+**Example:**
+```bash
+node scripts/migrate-logger.js migrate "app/(app)/dashboard/analytics/page.tsx" "Analytics"
+```
+
+**Output:**
+```
+1️⃣  Add logger import at the top:
+   import { createFeatureLogger } from '@/lib/logger'
+   const logger = createFeatureLogger('Analytics')
+
+2️⃣  Example Migrations:
+   Before: console.log('📊 Loading data...')
+   After:  logger.info('Loading data')
+   Level:  info
+
+3️⃣  Estimated Effort: 15 minutes
+```
+
+### Migration Workflow with Script
+
+**Step 1: Get Platform Overview**
+```bash
+node scripts/migrate-logger.js stats
+```
+This shows you which pages have the most console statements.
+
+**Step 2: Analyze Target Page**
+```bash
+node scripts/migrate-logger.js analyze "app/(app)/dashboard/collaboration/page.tsx"
+```
+Review the console statement breakdown.
+
+**Step 3: Get Migration Guide**
+```bash
+node scripts/migrate-logger.js migrate "app/(app)/dashboard/collaboration/page.tsx" "Collaboration"
+```
+Follow the generated migration guide.
+
+**Step 4: Migrate Manually**
+1. Copy the logger import template
+2. Paste at top of file
+3. Replace console statements one by one
+4. Use suggested log levels
+5. Add structured context
+
+**Step 5: Verify**
+```bash
+npx tsc --noEmit
+npm run build
+```
+
+### Script Features
+
+**Color-Coded Output:**
+- 🟢 Green: Completed/Success
+- 🟡 Yellow: Warnings/Remaining
+- 🔴 Red: Errors
+- 🔵 Blue: Information
+- 🟣 Magenta: Section Headers
+- 🔷 Cyan: Titles
+
+**Smart Suggestions:**
+- Detects error patterns → suggests logger.error
+- Detects success patterns → suggests logger.info
+- Detects debug patterns → suggests logger.debug
+- Provides context examples
+
+**Time Estimates:**
+- Calculates per-file migration time
+- Shows platform-wide effort remaining
+- Based on ~120 statements/hour rate
+
+### Quick Reference
+
+```bash
+# Show all commands
+node scripts/migrate-logger.js help
+
+# Get platform stats
+node scripts/migrate-logger.js stats
+
+# Analyze a file
+node scripts/migrate-logger.js analyze <file>
+
+# Get migration guide
+node scripts/migrate-logger.js migrate <file> <name>
+```
+
+### Integration with Workflow
+
+**Before Starting:**
+```bash
+# Check overall progress
+node scripts/migrate-logger.js stats
+
+# Pick highest priority page
+node scripts/migrate-logger.js analyze "app/(app)/dashboard/collaboration/page.tsx"
+```
+
+**During Migration:**
+```bash
+# Get migration examples
+node scripts/migrate-logger.js migrate "app/(app)/dashboard/collaboration/page.tsx" "Collaboration"
+
+# Follow the guide
+# Migrate console statements
+# Test with TypeScript
+```
+
+**After Completion:**
+```bash
+# Verify progress
+node scripts/migrate-logger.js stats
+
+# Should see:
+# Files with Logger: 4 (was 3)
+# Migration Progress: 4.5% (was 3.4%)
+```
+
+---
+
+## Summary
+
+This migration guide provides:
+- ✅ Manual migration patterns
+- ✅ Real-world examples
+- ✅ Automated analysis tool
+- ✅ Migration workflow
+- ✅ Best practices
+- ✅ Progress tracking
+
+Use the automated script to:
+- Track platform-wide progress
+- Identify high-priority pages
+- Get migration guidance
+- Estimate effort
+- Speed up migration
+
+**Next Steps:**
+1. Run `node scripts/migrate-logger.js stats` to see current state
+2. Pick a high-priority page from top 15
+3. Run analyze and migrate commands
+4. Follow the migration guide
+5. Test and commit changes
+
