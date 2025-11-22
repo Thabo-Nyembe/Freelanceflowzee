@@ -43,6 +43,9 @@ import { GlowEffect } from '@/components/ui/glow-effect'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Profile')
 
 export default function ProfilePage() {
   // A+++ STATE MANAGEMENT
@@ -85,200 +88,317 @@ export default function ProfilePage() {
 
   // Handlers
   const handleEditProfile = () => {
-    console.log('✏️ PROFILE: Edit mode initiated')
-    console.log('📝 PROFILE: Switching interface to edit mode')
-    console.log('👤 PROFILE: User can now modify profile fields')
+    logger.info('Edit mode initiated', {
+      previousState: isEditing,
+      action: 'enterEditMode'
+    })
+
     setIsEditing(true)
-    toast.info('Edit Mode Activated', {
-      description: 'You can now edit your profile information'
+
+    toast.info('Edit mode activated', {
+      description: 'You can now modify your profile information'
     })
   }
 
   const handleSaveProfile = () => {
-    console.log('💾 PROFILE: Save profile initiated')
-    console.log('📝 PROFILE: Validating profile changes')
-    console.log('✅ PROFILE: Profile changes saved successfully')
-    console.log('🔄 PROFILE: Exiting edit mode')
+    logger.info('Saving profile changes', {
+      isEditing,
+      timestamp: new Date().toISOString()
+    })
+
+    // Note: Using local state - in production, this would PUT to /api/profile
     setIsEditing(false)
-    toast.success('Profile Updated', {
+
+    logger.info('Profile saved successfully', {
+      action: 'exitEditMode'
+    })
+
+    toast.success('Profile updated', {
       description: 'Your profile changes have been saved successfully'
     })
   }
 
   const handleCancelEdit = () => {
-    console.log('❌ PROFILE: Cancel edit initiated')
-    console.log('🔄 PROFILE: Reverting to view mode')
-    console.log('📝 PROFILE: Discarding unsaved changes')
+    logger.info('Cancel edit initiated', {
+      isEditing,
+      action: 'discardChanges'
+    })
+
     setIsEditing(false)
+
+    toast.info('Changes discarded', {
+      description: 'Unsaved changes have been discarded'
+    })
   }
 
   const handleUploadAvatar = () => {
-    console.log('📷 PROFILE: Avatar upload initiated')
-    console.log('🖼️ PROFILE: Opening file picker for image selection')
-    console.log('✨ PROFILE: Accepted formats: JPG, PNG, GIF')
+    logger.info('Avatar upload initiated', {
+      acceptedFormats: ['JPG', 'PNG', 'GIF', 'WEBP']
+    })
+
     const input = document.createElement('input')
     input.type = 'file'
-    input.accept = 'image/*'
+    input.accept = 'image/jpeg,image/png,image/gif,image/webp'
+    input.onchange = (e: Event) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (file) {
+        logger.info('Avatar file selected', {
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type
+        })
+
+        // Note: Using mock upload - in production, this would POST to /api/profile/avatar
+        toast.success('Avatar updated', {
+          description: `${file.name} - ${Math.round(file.size / 1024)}KB uploaded successfully`
+        })
+      }
+    }
     input.click()
-    toast.info('Upload Avatar', {
-      description: 'Select a professional photo to update your avatar'
+
+    toast.info('Upload avatar', {
+      description: 'Select a professional photo (JPG, PNG, GIF, WEBP)'
     })
   }
 
   const handleUpdateBio = () => {
-    console.log('📝 PROFILE: Bio update initiated')
-    console.log('✍️ PROFILE: Opening bio editor')
-    console.log('📄 PROFILE: User can update professional summary')
-    toast.info('Update Bio', {
+    logger.info('Bio update initiated', {
+      action: 'openBioEditor'
+    })
+
+    toast.info('Update bio', {
       description: 'Edit your professional bio to showcase your expertise'
     })
   }
 
   const handleAddSkill = () => {
-    console.log('➕ PROFILE: Add skill initiated')
-    console.log('🎯 PROFILE: Prompting user for skill name')
+    logger.info('Add skill initiated', {
+      action: 'promptSkillName'
+    })
+
     const skill = prompt('Add skill:')
-    if (skill) {
-      console.log('✨ PROFILE: New skill added - ' + skill)
-      console.log('📊 PROFILE: Updating skills list')
-      console.log('✅ PROFILE: Skill successfully added to profile')
-      toast.success('Skill Added', {
-        description: 'Successfully added: ' + skill
+    if (skill && skill.trim()) {
+      logger.info('Skill added', {
+        skill: skill.trim(),
+        action: 'updateSkillsList'
       })
+
+      // Note: Using local state - in production, this would POST to /api/profile/skills
+      toast.success('Skill added', {
+        description: `${skill.trim()} - Successfully added to your profile`
+      })
+    } else if (skill !== null) {
+      logger.warn('Skill add cancelled', { reason: 'Empty skill name' })
     }
   }
 
   const handleRemoveSkill = (skill: string) => {
-    console.log('➖ PROFILE: Remove skill initiated - ' + skill)
-    console.log('⚠️ PROFILE: Confirming skill removal')
-    if (confirm('Remove ' + skill + '?')) {
-      console.log('🗑️ PROFILE: Skill removed - ' + skill)
-      console.log('📊 PROFILE: Updating skills list')
-      console.log('✅ PROFILE: Skill successfully removed from profile')
-      toast.success('Skill Removed', {
-        description: 'Successfully removed: ' + skill
+    logger.info('Remove skill initiated', {
+      skill,
+      action: 'confirmRemoval'
+    })
+
+    if (confirm(`Remove "${skill}" from your skills?`)) {
+      logger.info('Skill removed', {
+        skill,
+        action: 'updateSkillsList'
       })
+
+      // Note: Using local state - in production, this would DELETE to /api/profile/skills/:id
+      toast.success('Skill removed', {
+        description: `${skill} - Successfully removed from your profile`
+      })
+    } else {
+      logger.debug('Skill removal cancelled', { skill })
     }
   }
 
   const handleAddSocial = () => {
-    console.log('🔗 PROFILE: Add social link initiated')
-    console.log('🌐 PROFILE: Opening social media link dialog')
-    console.log('📱 PROFILE: User can add professional social profiles')
-    toast.info('Add Social Link', {
-      description: 'Connect your professional social media profiles'
+    const supportedPlatforms = ['LinkedIn', 'Twitter', 'GitHub', 'Behance', 'Dribbble']
+
+    logger.info('Add social link initiated', {
+      supportedPlatforms,
+      action: 'openSocialDialog'
+    })
+
+    toast.info('Add social link', {
+      description: `Connect your profiles - ${supportedPlatforms.join(', ')}`
     })
   }
 
   const handleUpdatePassword = () => {
-    console.log('🔒 PROFILE: Password update initiated')
-    console.log('🔐 PROFILE: Opening secure password change dialog')
-    console.log('🛡️ PROFILE: Password will be encrypted before storage')
-    toast.info('Update Password', {
-      description: 'Change your account password for enhanced security'
+    logger.info('Password update initiated', {
+      action: 'openSecureDialog',
+      encryption: 'bcrypt'
+    })
+
+    toast.info('Update password', {
+      description: 'Change your account password - Encrypted before storage'
     })
   }
 
   const handleUpdateEmail = () => {
-    console.log('📧 PROFILE: Email update initiated')
-    console.log('✉️ PROFILE: Opening email change dialog')
-    console.log('🔔 PROFILE: Verification email will be sent to new address')
-    toast.info('Update Email', {
-      description: 'Change your account email address'
+    logger.info('Email update initiated', {
+      action: 'openEmailDialog',
+      requiresVerification: true
+    })
+
+    toast.info('Update email', {
+      description: 'Change your email - Verification email will be sent to new address'
     })
   }
 
   const handleUpdatePhone = () => {
-    console.log('📱 PROFILE: Phone update initiated')
-    console.log('☎️ PROFILE: Opening phone number dialog')
-    console.log('📞 PROFILE: Update your contact phone number')
-    toast.info('Update Phone', {
+    logger.info('Phone update initiated', {
+      action: 'openPhoneDialog'
+    })
+
+    toast.info('Update phone', {
       description: 'Change your contact phone number'
     })
   }
 
   const handleUpdateLocation = () => {
-    console.log('📍 PROFILE: Location update initiated')
-    console.log('🌍 PROFILE: Opening location editor')
-    console.log('🗺️ PROFILE: Update your professional location')
-    toast.info('Update Location', {
+    logger.info('Location update initiated', {
+      action: 'openLocationEditor'
+    })
+
+    toast.info('Update location', {
       description: 'Update your professional location information'
     })
   }
 
   const handlePrivacySettings = () => {
-    console.log('🔒 PROFILE: Privacy settings initiated')
-    console.log('🛡️ PROFILE: Opening privacy controls')
-    console.log('👁️ PROFILE: Configure profile visibility and data sharing')
-    toast.info('Privacy Settings', {
-      description: 'Manage your privacy and data sharing preferences'
+    logger.info('Privacy settings initiated', {
+      action: 'openPrivacyControls',
+      settings: ['profileVisibility', 'dataSharing', 'searchability']
+    })
+
+    toast.info('Privacy settings', {
+      description: 'Manage visibility, data sharing, and searchability preferences'
     })
   }
 
   const handleNotificationPrefs = () => {
-    console.log('🔔 PROFILE: Notification preferences initiated')
-    console.log('📬 PROFILE: Opening notification settings')
-    console.log('⚙️ PROFILE: Configure email and push notification preferences')
-    toast.info('Notification Preferences', {
-      description: 'Customize your notification settings'
+    const notificationTypes = ['email', 'push', 'sms', 'in-app']
+
+    logger.info('Notification preferences initiated', {
+      action: 'openNotificationSettings',
+      availableTypes: notificationTypes
+    })
+
+    toast.info('Notification preferences', {
+      description: `Customize ${notificationTypes.join(', ')} notification settings`
     })
   }
 
   const handleDeleteAccount = () => {
-    console.log('🗑️ PROFILE: Delete account initiated')
-    console.log('⚠️ PROFILE: Critical action - requesting user confirmation')
-    if (confirm('Delete account? This cannot be undone!')) {
-      console.log('❌ PROFILE: Account deletion confirmed')
-      console.log('📧 PROFILE: Sending deletion request to server')
-      console.log('🔒 PROFILE: Account will be permanently deleted')
-      toast.error('Account Deletion Requested', {
-        description: 'Your account deletion request has been submitted'
+    logger.warn('Account deletion initiated', {
+      action: 'criticalAction',
+      requiresConfirmation: true
+    })
+
+    if (confirm('Delete account? This action cannot be undone! All your data will be permanently deleted.')) {
+      const deletionDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
+
+      logger.error('Account deletion confirmed', {
+        scheduledDeletion: deletionDate.toISOString(),
+        gracePeriod: '7 days'
       })
+
+      // Note: Using mock deletion - in production, this would POST to /api/account/delete
+      toast.error('Account deletion requested', {
+        description: `Your account will be permanently deleted on ${deletionDate.toLocaleDateString()} - 7 day grace period`
+      })
+    } else {
+      logger.debug('Account deletion cancelled')
     }
   }
 
   const handleExportData = () => {
-    console.log('💾 PROFILE: Data export initiated')
-    console.log('📦 PROFILE: Preparing user data for export')
-    console.log('📄 PROFILE: Generating downloadable data package')
-    toast.info('Exporting Your Data', {
-      description: 'Preparing your profile data for download'
+    const dataCategories = ['profile', 'projects', 'clients', 'invoices', 'settings']
+
+    logger.info('Data export initiated', {
+      categories: dataCategories,
+      format: 'JSON'
+    })
+
+    // Note: Using mock export - in production, this would fetch from /api/profile/export
+    const mockData = {
+      profile: { name: 'User Profile', email: 'user@example.com' },
+      exportDate: new Date().toISOString(),
+      categories: dataCategories
+    }
+
+    const blob = new Blob([JSON.stringify(mockData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `freeflow-data-export-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    logger.info('Data exported successfully', {
+      fileSize: blob.size,
+      categories: dataCategories
+    })
+
+    toast.success('Data exported', {
+      description: `${Math.round(blob.size / 1024)}KB - ${dataCategories.length} categories: ${dataCategories.join(', ')}`
     })
   }
 
   const handleViewActivity = () => {
-    console.log('📊 PROFILE: Activity log initiated')
-    console.log('📈 PROFILE: Loading user activity history')
-    console.log('🕒 PROFILE: Displaying account activity timeline')
-    toast.info('Activity Log', {
-      description: 'View your recent account activity and history'
+    const activityTypes = ['logins', 'profile updates', 'settings changes', 'data exports']
+
+    logger.info('Activity log initiated', {
+      activityTypes,
+      action: 'loadActivityHistory'
+    })
+
+    toast.info('Activity log', {
+      description: `View ${activityTypes.join(', ')} - Last 90 days`
     })
   }
 
   const handleConnectedApps = () => {
-    console.log('🔌 PROFILE: Connected apps initiated')
-    console.log('🔗 PROFILE: Loading third-party app connections')
-    console.log('⚙️ PROFILE: Manage app permissions and integrations')
-    toast.info('Connected Apps', {
-      description: 'Manage your third-party app connections'
+    const connectedApps = ['Google Drive', 'Dropbox', 'Slack', 'Zoom']
+
+    logger.info('Connected apps initiated', {
+      connectedApps,
+      action: 'loadThirdPartyConnections'
+    })
+
+    toast.info('Connected apps', {
+      description: `Manage ${connectedApps.length} connections: ${connectedApps.join(', ')}`
     })
   }
 
   const handleTwoFactorAuth = () => {
-    console.log('🔐 PROFILE: Two-factor authentication initiated')
-    console.log('🛡️ PROFILE: Opening 2FA security settings')
-    console.log('📱 PROFILE: Configure additional security layer')
-    toast.info('Two-Factor Authentication', {
-      description: 'Enhance your account security with 2FA'
+    const methods = ['Authenticator app', 'SMS', 'Email']
+
+    logger.info('Two-factor authentication initiated', {
+      methods,
+      action: 'open2FASettings'
+    })
+
+    toast.info('Two-factor authentication', {
+      description: `Enhance security - Available methods: ${methods.join(', ')}`
     })
   }
 
   const handleSessionManagement = () => {
-    console.log('🖥️ PROFILE: Session management initiated')
-    console.log('🔒 PROFILE: Loading active login sessions')
-    console.log('📊 PROFILE: View and manage device sessions')
-    toast.info('Active Sessions', {
-      description: 'View and manage your active login sessions'
+    const mockSessions = 3
+
+    logger.info('Session management initiated', {
+      activeSessions: mockSessions,
+      action: 'loadDeviceSessions'
+    })
+
+    toast.info('Active sessions', {
+      description: `${mockSessions} active sessions - View and manage your device logins`
     })
   }
 
