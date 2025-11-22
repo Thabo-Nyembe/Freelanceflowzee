@@ -97,11 +97,20 @@ import {
   type VoiceInputController
 } from '@/lib/ai-create-voice'
 import {
+  compareModels,
+  saveComparison,
+  loadComparisons,
+  type ComparisonRequest,
+  type ComparisonResult,
+  type ComparisonProgress
+} from '@/lib/ai-create-comparison'
+import {
   Mic,
   MicOff,
   GitBranch,
   BarChart,
-  Radio
+  Radio,
+  Scale
 } from 'lucide-react'
 
 // AI Models Configuration
@@ -255,6 +264,10 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
   const [showAnalytics, setShowAnalytics] = React.useState(false)
   const [showVersionPanel, setShowVersionPanel] = React.useState(false)
   const [selectedVersionDiff, setSelectedVersionDiff] = React.useState<VersionDiff | null>(null)
+  const [comparisonModels, setComparisonModels] = React.useState<string[]>([])
+  const [comparisonResult, setComparisonResult] = React.useState<ComparisonResult | null>(null)
+  const [comparisonProgress, setComparisonProgress] = React.useState<ComparisonProgress | null>(null)
+  const [isComparing, setIsComparing] = React.useState(false)
 
   // Load data on mount
   React.useEffect(() => {
@@ -690,6 +703,74 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
     }
   }
 
+  // A++++ Phase 2: Model comparison handlers
+  const toggleComparisonModel = (model: string) => {
+    setComparisonModels(prev => {
+      if (prev.includes(model)) {
+        return prev.filter(m => m !== model)
+      } else if (prev.length < 3) {
+        return [...prev, model]
+      } else {
+        toast.error('Maximum 3 models for comparison')
+        return prev
+      }
+    })
+  }
+
+  const handleCompareModels = async () => {
+    if (comparisonModels.length < 2) {
+      toast.error('Please select at least 2 models to compare')
+      return
+    }
+
+    if (!prompt.trim()) {
+      toast.error('Please enter a prompt first')
+      return
+    }
+
+    setIsComparing(true)
+    setComparisonResult(null)
+    setComparisonProgress(null)
+
+    try {
+      const result = await compareModels({
+        prompt,
+        models: comparisonModels,
+        temperature,
+        maxTokens: 1000,
+        parallelExecution: true,
+        onProgress: (progress) => {
+          setComparisonProgress(progress)
+        }
+      })
+
+      setComparisonResult(result)
+      saveComparison(result)
+      toast.success('Comparison complete!')
+
+      // Track comparison in analytics
+      comparisonModels.forEach(model => {
+        const output = result.outputs.find(o => o.model === model)
+        if (output && !output.errors) {
+          trackGeneration({
+            model,
+            tokens: output.metadata.tokensUsed,
+            cost: output.metadata.cost,
+            responseTime: output.metadata.responseTime,
+            success: true,
+            contentType: 'text',
+            promptLength: prompt.length
+          })
+        }
+      })
+    } catch (error: any) {
+      toast.error(`Comparison failed: ${error.message}`)
+    } finally {
+      setIsComparing(false)
+      setComparisonProgress(null)
+    }
+  }
+
   // Search & Filter Handler
   const filteredHistory = React.useMemo(() => {
     let filtered = history
@@ -803,13 +884,13 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
               {/* Tab List with Animated Indicator */}
               <div className="relative">
-                <TabsList className="grid w-full grid-cols-5 bg-gray-100 dark:bg-gray-900 relative overflow-hidden">
+                <TabsList className="grid w-full grid-cols-6 bg-gray-100 dark:bg-gray-900 relative overflow-hidden">
                   <motion.div
                     className="absolute top-2 bottom-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-md"
                     layoutId="activeAITab"
                     style={{
-                      left: `${['settings', 'studio', 'templates', 'history', 'analytics'].indexOf(activeTab) * 20}%`,
-                      width: '20%'
+                      left: `${['settings', 'studio', 'templates', 'history', 'analytics', 'compare'].indexOf(activeTab) * 16.666}%`,
+                      width: '16.666%'
                     }}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
@@ -832,6 +913,10 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
                   <TabsTrigger value="analytics" className="relative z-10" data-testid="analytics-tab">
                     <BarChart className="h-4 w-4 mr-2" />
                     Analytics
+                  </TabsTrigger>
+                  <TabsTrigger value="compare" className="relative z-10" data-testid="compare-tab">
+                    <Scale className="h-4 w-4 mr-2" />
+                    Compare
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -1763,6 +1848,244 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
                           </CardContent>
                         </Card>
                       </div>
+                    </>
+                  )}
+                </div>
+              </TabsContent>
+
+              {/* Compare Tab */}
+              <TabsContent value="compare" className="space-y-6">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Model Comparison</h3>
+                    {comparisonResult && (
+                      <Button
+                        onClick={() => setComparisonResult(null)}
+                        variant="outline"
+                        size="sm"
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Clear
+                      </Button>
+                    )}
+                  </div>
+
+                  {!comparisonResult ? (
+                    <Card>
+                      <CardContent className="p-6 space-y-6">
+                        <div className="text-center space-y-2">
+                          <Scale className="h-12 w-12 mx-auto text-purple-500" />
+                          <h4 className="font-semibold">Compare AI Models</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Select 2-3 models to compare side-by-side
+                          </p>
+                        </div>
+
+                        {/* Model Selection Grid */}
+                        <div className="space-y-3">
+                          <Label>Select Models ({comparisonModels.length}/3)</Label>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {Object.entries(AI_MODELS).slice(0, 6).map(([id, model]) => (
+                              <Card
+                                key={id}
+                                className={`cursor-pointer transition-all ${
+                                  comparisonModels.includes(id)
+                                    ? 'border-purple-500 border-2 bg-purple-50 dark:bg-purple-900/20'
+                                    : 'hover:border-gray-400'
+                                }`}
+                                onClick={() => toggleComparisonModel(id)}
+                              >
+                                <CardContent className="p-3">
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                      <div className="font-semibold text-sm">{model.name}</div>
+                                      <div className="text-xs text-gray-600 dark:text-gray-400">
+                                        {model.description}
+                                      </div>
+                                    </div>
+                                    {comparisonModels.includes(id) && (
+                                      <CheckCircle className="h-5 w-5 text-purple-500 flex-shrink-0" />
+                                    )}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Compare Button */}
+                        <Button
+                          onClick={handleCompareModels}
+                          disabled={comparisonModels.length < 2 || isComparing || !prompt.trim()}
+                          className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                        >
+                          {isComparing ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Comparing {comparisonProgress?.completedModels || 0}/{comparisonModels.length}...
+                            </>
+                          ) : (
+                            <>
+                              <Scale className="h-4 w-4 mr-2" />
+                              Compare {comparisonModels.length} Models
+                            </>
+                          )}
+                        </Button>
+
+                        {/* Progress Bar */}
+                        {comparisonProgress && (
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-gray-600 dark:text-gray-400">
+                                {comparisonProgress.stage === 'preparing' && 'Preparing comparison...'}
+                                {comparisonProgress.stage === 'generating' && `Generating with ${comparisonProgress.currentModel}...`}
+                                {comparisonProgress.stage === 'analyzing' && 'Analyzing results...'}
+                                {comparisonProgress.stage === 'complete' && 'Complete!'}
+                              </span>
+                              <span className="font-semibold">{Math.round(comparisonProgress.percentage)}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                              <div
+                                className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
+                                style={{ width: `${comparisonProgress.percentage}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <>
+                      {/* Comparison Results */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base">Rankings</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            {comparisonResult.ranked.map((output, index) => (
+                              <div
+                                key={output.model}
+                                className={`p-3 rounded-lg border-2 ${
+                                  index === 0
+                                    ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20'
+                                    : index === 1
+                                    ? 'border-gray-400 bg-gray-50 dark:bg-gray-800'
+                                    : 'border-orange-600 bg-orange-50 dark:bg-orange-900/20'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-3">
+                                    <div
+                                      className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                                        index === 0
+                                          ? 'bg-yellow-500 text-white'
+                                          : index === 1
+                                          ? 'bg-gray-400 text-white'
+                                          : 'bg-orange-600 text-white'
+                                      }`}
+                                    >
+                                      #{output.rank}
+                                    </div>
+                                    <div>
+                                      <div className="font-semibold">{AI_MODELS[output.model]?.name || output.model}</div>
+                                      <div className="text-xs text-gray-600 dark:text-gray-400">
+                                        Score: {output.overallScore.toFixed(1)}/100
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="text-right text-xs space-y-1">
+                                    <div className="text-gray-600 dark:text-gray-400">
+                                      {output.metadata.responseTime.toFixed(2)}s • ${output.metadata.cost.toFixed(4)}
+                                    </div>
+                                    <div className="text-gray-500 dark:text-gray-500">
+                                      {output.metrics.wordCount} words
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Score Breakdown */}
+                                <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
+                                  <div>
+                                    <div className="text-gray-600 dark:text-gray-400">Quality</div>
+                                    <div className="font-semibold text-green-600">{output.scoreBreakdown.quality}/100</div>
+                                  </div>
+                                  <div>
+                                    <div className="text-gray-600 dark:text-gray-400">Speed</div>
+                                    <div className="font-semibold text-blue-600">{output.scoreBreakdown.speed}/100</div>
+                                  </div>
+                                  <div>
+                                    <div className="text-gray-600 dark:text-gray-400">Cost</div>
+                                    <div className="font-semibold text-purple-600">{output.scoreBreakdown.cost}/100</div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Side-by-Side Results */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                        {comparisonResult.outputs.map((output) => (
+                          <Card key={output.model}>
+                            <CardHeader>
+                              <CardTitle className="text-sm flex items-center justify-between">
+                                <span>{AI_MODELS[output.model]?.name || output.model}</span>
+                                {comparisonResult.ranked.find(r => r.model === output.model)?.rank === 1 && (
+                                  <Badge className="bg-yellow-500 text-white">Best</Badge>
+                                )}
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              {output.errors && output.errors.length > 0 ? (
+                                <div className="text-sm text-red-600 dark:text-red-400">
+                                  Error: {output.errors[0]}
+                                </div>
+                              ) : (
+                                <>
+                                  <div className="text-xs space-y-2 mb-3">
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-600 dark:text-gray-400">Response Time</span>
+                                      <span className="font-semibold">{output.metadata.responseTime.toFixed(2)}s</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-600 dark:text-gray-400">Cost</span>
+                                      <span className="font-semibold">${output.metadata.cost.toFixed(4)}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-600 dark:text-gray-400">Words</span>
+                                      <span className="font-semibold">{output.metrics.wordCount}</span>
+                                    </div>
+                                  </div>
+                                  <div className="text-xs bg-gray-50 dark:bg-gray-900 p-3 rounded max-h-40 overflow-y-auto font-mono">
+                                    {output.content}
+                                  </div>
+                                </>
+                              )}
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+
+                      {/* Analysis */}
+                      {comparisonResult.analysis.recommendations.length > 0 && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-base">Recommendations</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-2">
+                              {comparisonResult.analysis.recommendations.map((rec, i) => (
+                                <div key={i} className="flex items-start gap-2 text-sm">
+                                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                  <span>{rec}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
                     </>
                   )}
                 </div>
