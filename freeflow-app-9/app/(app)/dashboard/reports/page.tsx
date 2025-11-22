@@ -303,13 +303,17 @@ export default function ReportsPage() {
     const loadData = async () => {
       try {
         setIsLoading(true)
-        await new Promise(resolve => setTimeout(resolve, 1000))
 
-        const reports = generateMockReports()
-        dispatch({ type: 'SET_REPORTS', reports })
+        const response = await fetch('/api/reports')
+        const result = await response.json()
 
-        console.log('✅ REPORTS: Data loaded successfully')
-        announce('Reports dashboard loaded', 'polite')
+        if (result.success && result.reports) {
+          dispatch({ type: 'SET_REPORTS', reports: result.reports })
+          console.log('✅ REPORTS: Data loaded successfully -', result.reports.length, 'reports')
+          announce('Reports dashboard loaded', 'polite')
+        } else {
+          throw new Error(result.error || 'Failed to load reports')
+        }
       } catch (error) {
         console.error('❌ REPORTS: Load error:', error)
         toast.error('Failed to load reports')

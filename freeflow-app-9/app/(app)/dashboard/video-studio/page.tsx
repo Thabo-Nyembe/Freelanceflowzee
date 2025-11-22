@@ -215,9 +215,7 @@ export default function VideoStudioPage() {
     toast.info('Creating video project...')
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
-
+      // Note: In production, this would POST to /api/video/projects
       const projectId = `proj_${Date.now()}`
 
       console.log('✅ VIDEO STUDIO: Project created successfully')

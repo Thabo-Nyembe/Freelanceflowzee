@@ -339,7 +339,7 @@ export default function AnalyticsPage() {
     setIsRefreshing(true)
 
     console.log('⏳ Fetching latest analytics data...')
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Note: In production, this would fetch from /api/analytics
 
     setIsRefreshing(false)
 

@@ -393,10 +393,8 @@ export default function ComprehensiveTestingPage() {
       const test = tests.find(t => t.id === testId)
       if (test) {
         router.push(test.path)
-        
-        // Simulate testing delay
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        
+
+        // Note: In production, use proper test verification instead of delay
         // Mark as passed (in real testing, this would be based on actual results)
         setTests(prev => prev.map(t => 
           t.id === testId 
@@ -417,14 +415,13 @@ export default function ComprehensiveTestingPage() {
 
   const runAllTests = async () => {
     setIsRunningTests(true)
-    
+
     for (const test of filteredTests) {
       if (test.status === 'pending') {
         await testFeature(test.id)
-        await new Promise(resolve => setTimeout(resolve, 1000))
       }
     }
-    
+
     setIsRunningTests(false)
   }
 

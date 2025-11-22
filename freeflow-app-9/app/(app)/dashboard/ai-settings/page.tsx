@@ -470,9 +470,7 @@ export default function AISettingsPage() {
     ))
 
     try {
-      // Mock API test - in production, make actual API calls
-      await new Promise(resolve => setTimeout(resolve, 2000))
-
+      // Note: In production, this would POST to /api/ai/test-connection
       const isValid = Math.random() > 0.2 // 80% success rate for demo
 
       if (isValid) {

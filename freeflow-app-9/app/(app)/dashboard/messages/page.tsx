@@ -673,9 +673,7 @@ export default function MessagesPage() {
     console.log('👤 MESSAGES: Members:', newChatMembers)
 
     try {
-      console.log('🔄 MESSAGES: Simulating API call...')
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
+      // Note: Using local state - in production, this would POST to /api/chats
       const newChat: Chat = {
         id: `chat-${Date.now()}`,
         name: newChatName,
@@ -870,7 +868,6 @@ export default function MessagesPage() {
 
     try {
       console.log('🔄 MESSAGES: Generating export file...')
-      await new Promise(resolve => setTimeout(resolve, 1500))
 
       const exportData = {
         chatName: state.selectedChat.name,

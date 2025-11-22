@@ -366,8 +366,7 @@ export default function APlusShowcasePage() {
         setIsLoading(true)
         setError(null)
 
-        await new Promise(resolve => setTimeout(resolve, 1000))
-
+        // Note: In production, this would fetch from /api/components
         const mockComponents = generateMockComponents()
         dispatch({ type: 'SET_COMPONENTS', components: mockComponents })
 

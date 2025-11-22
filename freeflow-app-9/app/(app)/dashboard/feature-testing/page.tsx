@@ -276,10 +276,8 @@ export default function FeatureTestingPage() {
     try {
       // Simulate navigation test
       const testWindow = window.open(test.path, '_blank', 'width=1200,height=800')
-      
-      // Wait a moment for the page to load
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
+
+      // Note: In production, use proper page load detection instead of delay
       if (testWindow && !testWindow.closed) {
         updateTestStatus(test.id, 'passed')
         testWindow.close()
@@ -297,8 +295,6 @@ export default function FeatureTestingPage() {
     for (const test of tests) {
       if (test.status === 'pending' || test.status === 'failed') {
         await testFeature(test)
-        // Small delay between tests
-        await new Promise(resolve => setTimeout(resolve, 1000))
       }
     }
   }

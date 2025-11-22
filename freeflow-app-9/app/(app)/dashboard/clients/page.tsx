@@ -727,8 +727,6 @@ export default function ClientsPage() {
     console.log('📦 CLIENTS: Preparing', state.clients.length, 'clients for export')
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
       const exportData = {
         exportDate: new Date().toISOString(),
         totalClients: state.clients.length,

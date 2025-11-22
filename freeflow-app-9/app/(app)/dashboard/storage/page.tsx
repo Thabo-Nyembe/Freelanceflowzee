@@ -318,13 +318,17 @@ export default function StoragePage() {
     const loadFiles = async () => {
       try {
         setIsLoading(true)
-        await new Promise(resolve => setTimeout(resolve, 1000))
 
-        const mockFiles = generateMockStorageFiles()
-        dispatch({ type: 'SET_FILES', files: mockFiles })
+        const response = await fetch('/api/files')
+        const result = await response.json()
 
-        console.log('✅ STORAGE: Files loaded successfully')
-        announce('Storage dashboard loaded', 'polite')
+        if (result.success && result.files) {
+          dispatch({ type: 'SET_FILES', files: result.files })
+          console.log('✅ STORAGE: Files loaded successfully -', result.files.length, 'files')
+          announce('Storage dashboard loaded', 'polite')
+        } else {
+          throw new Error(result.error || 'Failed to load files')
+        }
       } catch (error) {
         console.error('❌ STORAGE: Load error:', error)
         toast.error('Failed to load storage files')
