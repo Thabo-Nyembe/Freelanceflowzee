@@ -455,13 +455,12 @@ export default function WidgetsPage() {
       return
     }
 
-    console.log('➕ WIDGETS: Creating widget:', widgetName)
+    console.log('➕ WIDGETS: Creating widget (local state):', widgetName)
 
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
+      // Note: Using local state - in production, this would POST to /api/widgets
       const icons = {
         metric: '📊',
         chart: '📈',
@@ -497,9 +496,9 @@ export default function WidgetsPage() {
       setIsCreateModalOpen(false)
       setWidgetName('')
       setWidgetDescription('')
-      console.log('✅ WIDGETS: Widget created successfully')
+      console.log('✅ WIDGETS: Widget created successfully - ID:', newWidget.id)
 
-      toast.success('Widget created', {
+      toast.success('🎨 Widget created', {
         description: `${newWidget.name} has been added to your dashboard`
       })
     } catch (error) {
@@ -513,28 +512,31 @@ export default function WidgetsPage() {
   const handleDeleteWidget = async () => {
     if (!state.selectedWidget) return
 
-    console.log('🗑️ WIDGETS: Deleting widget:', state.selectedWidget.name)
+    console.log('🗑️ WIDGETS: Deleting widget (local state):', state.selectedWidget.name)
 
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 500))
-
+      // Note: Using local state - in production, this would POST to /api/widgets with action 'delete'
       dispatch({ type: 'DELETE_WIDGET', widgetId: state.selectedWidget.id })
       setIsDeleteModalOpen(false)
       console.log('✅ WIDGETS: Widget deleted successfully')
 
-      toast.success('Widget deleted')
-    } catch (error) {
+      toast.success('🗑️ Widget deleted', {
+        description: `${state.selectedWidget.name} removed from dashboard`
+      })
+    } catch (error: any) {
       console.error('❌ WIDGETS: Delete error:', error)
-      toast.error('Failed to delete widget')
+      toast.error('Failed to delete widget', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
   }
 
   const handleBulkDelete = async () => {
-    console.log('🗑️ WIDGETS: Bulk deleting', state.selectedWidgets.length, 'widgets')
+    console.log('🗑️ WIDGETS: Bulk deleting (local state)', state.selectedWidgets.length, 'widgets')
 
     if (state.selectedWidgets.length === 0) {
       toast.error('No widgets selected')
@@ -544,17 +546,22 @@ export default function WidgetsPage() {
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
+      // Note: Using local state - in production, this would POST to /api/widgets with action 'bulk-delete'
       state.selectedWidgets.forEach(widgetId => {
         dispatch({ type: 'DELETE_WIDGET', widgetId })
       })
 
+      const deletedCount = state.selectedWidgets.length
       dispatch({ type: 'CLEAR_SELECTED_WIDGETS' })
-      toast.success(`${state.selectedWidgets.length} widget(s) deleted`)
-    } catch (error) {
+      toast.success(`🗑️ Deleted ${deletedCount} widget(s)`, {
+        description: 'Selected widgets removed from dashboard'
+      })
+      console.log('✅ WIDGETS: Bulk delete successful -', deletedCount, 'widgets')
+    } catch (error: any) {
       console.error('❌ WIDGETS: Bulk delete error:', error)
-      toast.error('Failed to delete widgets')
+      toast.error('Failed to delete widgets', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }

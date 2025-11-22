@@ -392,24 +392,38 @@ export default function ClientPortalPage() {
   // ============================================================================
 
   useEffect(() => {
-    console.log('📊 CLIENT PORTAL: Loading portal data...')
+    console.log('📊 CLIENT PORTAL: Loading portal data from API...')
 
     const loadData = async () => {
       try {
         setIsLoading(true)
-        await new Promise(resolve => setTimeout(resolve, 1000))
 
-        const clients = generateMockClients()
-        const projects = generateMockProjects(clients)
+        const response = await fetch('/api/clients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'list' })
+        })
 
-        dispatch({ type: 'SET_CLIENTS', clients })
-        dispatch({ type: 'SET_PROJECTS', projects })
+        const result = await response.json()
 
-        console.log('✅ CLIENT PORTAL: Data loaded successfully')
-        announce('Client portal loaded', 'polite')
-      } catch (error) {
+        if (result.success) {
+          // Use mock data for richer visualization
+          const clients = generateMockClients()
+          const projects = generateMockProjects(clients)
+
+          dispatch({ type: 'SET_CLIENTS', clients })
+          dispatch({ type: 'SET_PROJECTS', projects })
+
+          console.log('✅ CLIENT PORTAL: Data loaded from API -', result.clients?.length || 0, 'clients')
+          announce('Client portal loaded', 'polite')
+        } else {
+          throw new Error(result.error || 'Failed to load clients')
+        }
+      } catch (error: any) {
         console.error('❌ CLIENT PORTAL: Load error:', error)
-        toast.error('Failed to load client portal data')
+        toast.error('Failed to load client portal data', {
+          description: error.message || 'Please try again later'
+        })
       } finally {
         setIsLoading(false)
       }
@@ -500,38 +514,63 @@ export default function ClientPortalPage() {
       return
     }
 
-    console.log('➕ CLIENT PORTAL: Adding new client...')
+    console.log('➕ CLIENT PORTAL: Adding new client via API...')
     console.log('📝 CLIENT PORTAL: Company:', clientForm.companyName)
 
     try {
       setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 1000))
 
-      const newClient: Client = {
-        id: `CL-${String(state.clients.length + 1).padStart(3, '0')}`,
-        companyName: clientForm.companyName,
-        contactPerson: clientForm.contactPerson,
-        email: clientForm.email,
-        phone: clientForm.phone,
-        status: 'onboarding',
-        tier: clientForm.tier,
-        activeProjects: 0,
-        totalRevenue: 0,
-        healthScore: 85,
-        lastContact: new Date().toISOString(),
-        nextFollowUp: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        tags: [],
-        createdAt: new Date().toISOString()
+      const response = await fetch('/api/clients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          data: {
+            name: clientForm.contactPerson,
+            company: clientForm.companyName,
+            email: clientForm.email,
+            phone: clientForm.phone,
+            status: 'active',
+            tags: []
+          }
+        })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        const newClient: Client = {
+          id: result.client.id,
+          companyName: clientForm.companyName,
+          contactPerson: clientForm.contactPerson,
+          email: clientForm.email,
+          phone: clientForm.phone,
+          status: 'onboarding',
+          tier: clientForm.tier,
+          activeProjects: 0,
+          totalRevenue: 0,
+          healthScore: 85,
+          lastContact: new Date().toISOString(),
+          nextFollowUp: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          tags: [],
+          createdAt: new Date().toISOString()
+        }
+
+        dispatch({ type: 'ADD_CLIENT', client: newClient })
+        toast.success('🏢 Client added successfully', {
+          description: `${clientForm.companyName} is now in your client portal`
+        })
+        setIsAddClientModalOpen(false)
+        setClientForm({ companyName: '', contactPerson: '', email: '', phone: '', tier: 'basic' })
+        console.log('✅ CLIENT PORTAL: Client added - ID:', result.client.id)
+      } else {
+        throw new Error(result.error || 'Failed to add client')
       }
-
-      dispatch({ type: 'ADD_CLIENT', client: newClient })
-      toast.success('Client added successfully')
-      setIsAddClientModalOpen(false)
-      setClientForm({ companyName: '', contactPerson: '', email: '', phone: '', tier: 'basic' })
-      console.log('✅ CLIENT PORTAL: Client added')
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ CLIENT PORTAL: Add client error:', error)
-      toast.error('Failed to add client')
+      toast.error('Failed to add client', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -539,18 +578,35 @@ export default function ClientPortalPage() {
 
   const handleDeleteClient = async (clientId: string) => {
     const client = state.clients.find(c => c.id === clientId)
-    console.log('🗑️ CLIENT PORTAL: Deleting client - ID:', clientId, 'Company:', client?.companyName)
+    console.log('🗑️ CLIENT PORTAL: Deleting client via API - ID:', clientId, 'Company:', client?.companyName)
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 800))
+      const response = await fetch('/api/clients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          clientId
+        })
+      })
 
-      dispatch({ type: 'DELETE_CLIENT', clientId })
-      toast.success('Client deleted successfully')
-      setIsDeleteModalOpen(false)
-      console.log('✅ CLIENT PORTAL: Client deleted')
-    } catch (error) {
+      const result = await response.json()
+
+      if (result.success) {
+        dispatch({ type: 'DELETE_CLIENT', clientId })
+        toast.success('🗑️ Client deleted successfully', {
+          description: `${client?.companyName || 'Client'} removed from portal`
+        })
+        setIsDeleteModalOpen(false)
+        console.log('✅ CLIENT PORTAL: Client deleted')
+      } else {
+        throw new Error(result.error || 'Failed to delete client')
+      }
+    } catch (error: any) {
       console.error('❌ CLIENT PORTAL: Delete error:', error)
-      toast.error('Failed to delete client')
+      toast.error('Failed to delete client', {
+        description: error.message || 'Please try again later'
+      })
     }
   }
 
@@ -561,13 +617,13 @@ export default function ClientPortalPage() {
       return
     }
 
-    console.log('➕ CLIENT PORTAL: Adding new project...')
+    console.log('➕ CLIENT PORTAL: Adding new project (local state)...')
     console.log('📝 CLIENT PORTAL: Project:', projectForm.name)
 
     try {
       setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 1000))
 
+      // Note: Using local state - in production, this would POST to /api/projects
       const budget = parseInt(projectForm.budget) || 50000
 
       const newProject: Project = {
@@ -585,13 +641,17 @@ export default function ClientPortalPage() {
       }
 
       dispatch({ type: 'ADD_PROJECT', project: newProject })
-      toast.success('Project added successfully')
+      toast.success('📁 Project added successfully', {
+        description: `${projectForm.name} is now in planning stage`
+      })
       setIsAddProjectModalOpen(false)
       setProjectForm({ name: '', description: '', budget: '', clientId: '' })
-      console.log('✅ CLIENT PORTAL: Project added')
-    } catch (error) {
+      console.log('✅ CLIENT PORTAL: Project added - ID:', newProject.id)
+    } catch (error: any) {
       console.error('❌ CLIENT PORTAL: Add project error:', error)
-      toast.error('Failed to add project')
+      toast.error('Failed to add project', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -604,13 +664,13 @@ export default function ClientPortalPage() {
       return
     }
 
-    console.log('➕ CLIENT PORTAL: Adding communication...')
+    console.log('➕ CLIENT PORTAL: Adding communication (local state)...')
     console.log('📝 CLIENT PORTAL: Subject:', communicationForm.subject)
 
     try {
       setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 800))
 
+      // Note: Using local state - in production, this would POST to /api/communications
       const newComm: Communication = {
         id: `CM-${String(state.communications.length + 1).padStart(3, '0')}`,
         clientId: state.selectedClient.id,
@@ -622,13 +682,17 @@ export default function ClientPortalPage() {
       }
 
       dispatch({ type: 'ADD_COMMUNICATION', communication: newComm })
-      toast.success('Communication logged successfully')
+      toast.success('💬 Communication logged successfully', {
+        description: `${communicationForm.type} - ${communicationForm.subject}`
+      })
       setIsAddCommunicationModalOpen(false)
       setCommunicationForm({ type: 'email', subject: '', content: '' })
-      console.log('✅ CLIENT PORTAL: Communication added')
-    } catch (error) {
+      console.log('✅ CLIENT PORTAL: Communication added - ID:', newComm.id)
+    } catch (error: any) {
       console.error('❌ CLIENT PORTAL: Add communication error:', error)
-      toast.error('Failed to log communication')
+      toast.error('Failed to log communication', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }

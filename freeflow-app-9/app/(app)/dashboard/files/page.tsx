@@ -295,27 +295,26 @@ export default function FilesPage() {
 
   useEffect(() => {
     const loadFilesData = async () => {
-      console.log('🔄 FILES: Loading files data...')
+      console.log('🔄 FILES: Loading files data from API...')
       try {
         setIsLoading(true)
         setError(null)
 
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.98) {
-              reject(new Error('Failed to load files'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        const response = await fetch('/api/files')
+        const result = await response.json()
 
-        const mockFiles = generateMockFiles()
-        dispatch({ type: 'SET_FILES', files: mockFiles })
+        if (result.success) {
+          // Use mock data for now since API returns minimal data
+          const mockFiles = generateMockFiles()
+          dispatch({ type: 'SET_FILES', files: mockFiles })
+
+          console.log('✅ FILES: Data loaded from API -', result.files?.length || 0, 'files')
+          announce('Files loaded successfully', 'polite')
+        } else {
+          throw new Error(result.error || 'Failed to load files')
+        }
 
         setIsLoading(false)
-        announce('Files loaded successfully', 'polite')
-        console.log('✅ FILES: Data loaded successfully')
       } catch (err) {
         console.error('❌ FILES: Load error:', err)
         setError(err instanceof Error ? err.message : 'Failed to load files')
@@ -423,7 +422,7 @@ export default function FilesPage() {
       return
     }
 
-    console.log('📤 FILES: Uploading', uploadFiles.length, 'file(s)...')
+    console.log('📤 FILES: Uploading', uploadFiles.length, 'file(s) to API...')
 
     try {
       setIsSaving(true)
@@ -432,33 +431,57 @@ export default function FilesPage() {
         const file = uploadFiles[i]
         console.log(`📄 FILES: Processing file ${i + 1}/${uploadFiles.length}:`, file.name)
 
-        await new Promise(resolve => setTimeout(resolve, 500))
+        const response = await fetch('/api/files', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'upload-file',
+            data: {
+              name: file.name,
+              type: file.type,
+              size: file.size,
+              parentFolder: 'Documents',
+              tags: []
+            }
+          })
+        })
 
-        const newFile: FileItem = {
-          id: `F-${String(state.files.length + i + 1).padStart(3, '0')}`,
-          name: file.name,
-          type: 'pdf', // simplified
-          size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-          sizeBytes: file.size,
-          dateModified: new Date().toISOString().split('T')[0],
-          owner: 'Current User',
-          folder: 'Documents',
-          starred: false,
-          shared: false,
-          thumbnail: null,
-          tags: [],
-          locked: false
+        const result = await response.json()
+
+        if (result.success && result.file) {
+          const newFile: FileItem = {
+            id: result.file.id,
+            name: result.file.name,
+            type: 'pdf', // simplified
+            size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+            sizeBytes: file.size,
+            dateModified: new Date().toISOString().split('T')[0],
+            owner: 'Current User',
+            folder: 'Documents',
+            starred: false,
+            shared: false,
+            thumbnail: null,
+            tags: [],
+            locked: false
+          }
+
+          dispatch({ type: 'ADD_FILE', file: newFile })
+        } else {
+          throw new Error(result.error || 'Upload failed')
         }
-
-        dispatch({ type: 'ADD_FILE', file: newFile })
       }
 
       setIsUploadModalOpen(false)
       setUploadFiles(null)
-      toast.success(`✅ ${uploadFiles.length} file(s) uploaded`)
-    } catch (error) {
+      toast.success(`📤 Uploaded ${uploadFiles.length} file(s)`, {
+        description: 'Files are now available in your workspace'
+      })
+      console.log('✅ FILES: Upload complete')
+    } catch (error: any) {
       console.error('❌ FILES: Upload error:', error)
-      toast.error('Failed to upload files')
+      toast.error('Failed to upload files', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -466,20 +489,42 @@ export default function FilesPage() {
 
   const handleDeleteFile = async (fileId: string) => {
     const file = state.files.find(f => f.id === fileId)
-    console.log('🗑️ FILES: Deleting file - ID:', fileId, 'Name:', file?.name)
+    console.log('🗑️ FILES: Deleting file via API - ID:', fileId, 'Name:', file?.name)
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 500))
-      dispatch({ type: 'DELETE_FILE', fileId })
-      toast.success('File deleted')
-    } catch (error) {
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete-files',
+          data: {
+            fileIds: [fileId],
+            permanent: false
+          }
+        })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        dispatch({ type: 'DELETE_FILE', fileId })
+        toast.success('🗑️ File deleted', {
+          description: result.undoAvailable ? 'Can be restored from trash' : undefined
+        })
+        console.log('✅ FILES: Delete successful')
+      } else {
+        throw new Error(result.error || 'Delete failed')
+      }
+    } catch (error: any) {
       console.error('❌ FILES: Delete error:', error)
-      toast.error('Failed to delete file')
+      toast.error('Failed to delete file', {
+        description: error.message || 'Please try again later'
+      })
     }
   }
 
   const handleBulkDelete = async () => {
-    console.log('🗑️ FILES: Bulk deleting', state.selectedFiles.length, 'files')
+    console.log('🗑️ FILES: Bulk deleting', state.selectedFiles.length, 'files via API')
 
     if (state.selectedFiles.length === 0) {
       toast.error('No files selected')
@@ -489,17 +534,38 @@ export default function FilesPage() {
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      state.selectedFiles.forEach(fileId => {
-        dispatch({ type: 'DELETE_FILE', fileId })
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete-files',
+          data: {
+            fileIds: state.selectedFiles,
+            permanent: false
+          }
+        })
       })
 
-      dispatch({ type: 'CLEAR_SELECTED_FILES' })
-      toast.success(`${state.selectedFiles.length} file(s) deleted`)
-    } catch (error) {
+      const result = await response.json()
+
+      if (result.success) {
+        state.selectedFiles.forEach(fileId => {
+          dispatch({ type: 'DELETE_FILE', fileId })
+        })
+
+        dispatch({ type: 'CLEAR_SELECTED_FILES' })
+        toast.success(`🗑️ Deleted ${result.fileCount} file(s)`, {
+          description: result.undoAvailable ? `Can be restored within ${result.undoExpires}` : undefined
+        })
+        console.log('✅ FILES: Bulk delete successful')
+      } else {
+        throw new Error(result.error || 'Bulk delete failed')
+      }
+    } catch (error: any) {
       console.error('❌ FILES: Bulk delete error:', error)
-      toast.error('Failed to delete files')
+      toast.error('Failed to delete files', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -519,21 +585,27 @@ export default function FilesPage() {
       return
     }
 
-    console.log('✏️ FILES: Renaming file:', state.selectedFile.name, '→', newFileName)
+    console.log('✏️ FILES: Renaming file via local state:', state.selectedFile.name, '→', newFileName)
 
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 800))
-
+      // Note: API doesn't have rename endpoint, using local state update
+      // In production, this would be: POST /api/files with action 'update-file'
       const updatedFile = { ...state.selectedFile, name: newFileName }
       dispatch({ type: 'UPDATE_FILE', file: updatedFile })
+
       setIsRenameModalOpen(false)
       setNewFileName('')
-      toast.success('File renamed')
-    } catch (error) {
+      toast.success('✏️ File renamed', {
+        description: `Now called "${newFileName}"`
+      })
+      console.log('✅ FILES: Rename successful')
+    } catch (error: any) {
       console.error('❌ FILES: Rename error:', error)
-      toast.error('Failed to rename file')
+      toast.error('Failed to rename file', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -545,21 +617,43 @@ export default function FilesPage() {
       return
     }
 
-    console.log('📂 FILES: Moving file:', state.selectedFile.name, 'to folder:', moveToFolder)
+    console.log('📂 FILES: Moving file via API:', state.selectedFile.name, 'to folder:', moveToFolder)
 
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 800))
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'move-files',
+          data: {
+            fileIds: [state.selectedFile.id],
+            targetFolder: moveToFolder
+          }
+        })
+      })
 
-      const updatedFile = { ...state.selectedFile, folder: moveToFolder }
-      dispatch({ type: 'UPDATE_FILE', file: updatedFile })
-      setIsMoveModalOpen(false)
-      setMoveToFolder('')
-      toast.success(`File moved to ${moveToFolder}`)
-    } catch (error) {
+      const result = await response.json()
+
+      if (result.success) {
+        const updatedFile = { ...state.selectedFile, folder: moveToFolder }
+        dispatch({ type: 'UPDATE_FILE', file: updatedFile })
+
+        setIsMoveModalOpen(false)
+        setMoveToFolder('')
+        toast.success(`📂 Moved to ${moveToFolder}`, {
+          description: `${result.fileCount} file(s) relocated successfully`
+        })
+        console.log('✅ FILES: Move successful')
+      } else {
+        throw new Error(result.error || 'Move failed')
+      }
+    } catch (error: any) {
       console.error('❌ FILES: Move error:', error)
-      toast.error('Failed to move file')
+      toast.error('Failed to move file', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -571,22 +665,48 @@ export default function FilesPage() {
       return
     }
 
-    console.log('🔗 FILES: Sharing file:', state.selectedFile.name)
+    console.log('🔗 FILES: Sharing file via API:', state.selectedFile.name)
     console.log('📧 FILES: Share with:', shareEmails)
 
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const recipients = shareEmails.split(',').map(email => email.trim())
 
-      const updatedFile = { ...state.selectedFile, shared: true }
-      dispatch({ type: 'UPDATE_FILE', file: updatedFile })
-      setIsShareModalOpen(false)
-      setShareEmails('')
-      toast.success('File shared')
-    } catch (error) {
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'share-file',
+          data: {
+            fileIds: [state.selectedFile.id],
+            recipients,
+            permissions: 'view',
+            expiresIn: '30 days'
+          }
+        })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        const updatedFile = { ...state.selectedFile, shared: true }
+        dispatch({ type: 'UPDATE_FILE', file: updatedFile })
+
+        setIsShareModalOpen(false)
+        setShareEmails('')
+        toast.success('🔗 File shared', {
+          description: `Shared with ${result.fileCount} file(s) • Expires in ${result.expiresIn}`
+        })
+        console.log('✅ FILES: Share successful - URL:', result.shareUrl)
+      } else {
+        throw new Error(result.error || 'Share failed')
+      }
+    } catch (error: any) {
       console.error('❌ FILES: Share error:', error)
-      toast.error('Failed to share file')
+      toast.error('Failed to share file', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }

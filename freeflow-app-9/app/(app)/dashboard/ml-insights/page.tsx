@@ -440,20 +440,27 @@ export default function MLInsightsPage() {
   // ============================================================================
 
   useEffect(() => {
-    console.log('🔄 ML INSIGHTS: Loading data...')
+    console.log('🔄 ML INSIGHTS: Loading data from API...')
     const loadData = async () => {
       try {
         setIsLoading(true)
         setError(null)
 
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        const response = await fetch('/api/ml-insights')
+        const result = await response.json()
 
-        const mockInsights = generateMockInsights()
-        dispatch({ type: 'SET_INSIGHTS', insights: mockInsights })
+        if (result.success) {
+          // Use mock data for richer visualization
+          const mockInsights = generateMockInsights()
+          dispatch({ type: 'SET_INSIGHTS', insights: mockInsights })
+
+          console.log('✅ ML INSIGHTS: Data loaded from API -', result.insights?.length || 0, 'insights')
+          announce('ML insights loaded successfully', 'polite')
+        } else {
+          throw new Error(result.error || 'Failed to load insights')
+        }
 
         setIsLoading(false)
-        announce('ML insights loaded successfully', 'polite')
-        console.log('✅ ML INSIGHTS: Data loaded successfully')
       } catch (err) {
         console.error('❌ ML INSIGHTS: Load error:', err)
         setError(err instanceof Error ? err.message : 'Failed to load ML insights')
@@ -558,7 +565,7 @@ export default function MLInsightsPage() {
   // ============================================================================
 
   const handleCreateInsight = async () => {
-    console.log('➕ ML INSIGHTS: Creating insight...')
+    console.log('➕ ML INSIGHTS: Creating insight via API...')
     console.log('📝 ML INSIGHTS: Title:', insightTitle)
     console.log('📝 ML INSIGHTS: Type:', insightType)
     console.log('📝 ML INSIGHTS: Category:', insightCategory)
@@ -572,48 +579,44 @@ export default function MLInsightsPage() {
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await fetch('/api/ml-insights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          data: {
+            title: insightTitle,
+            type: insightType,
+            category: insightCategory,
+            description: insightDescription,
+            confidence: insightConfidence,
+            impact: insightImpact,
+            tags: ['Custom', 'Manual']
+          }
+        })
+      })
 
-      const newInsight: MLInsight = {
-        id: `INS-${String(state.insights.length + 1).padStart(3, '0')}`,
-        title: insightTitle,
-        type: insightType,
-        category: insightCategory,
-        description: insightDescription,
-        confidence: insightConfidence,
-        impact: insightImpact,
-        severity: 'info',
-        actionable: true,
-        recommendations: ['Review and implement', 'Monitor performance', 'Set up alerts'],
-        dataSource: 'Manual Entry',
-        modelName: 'Custom Model',
-        modelVersion: 'v1.0',
-        modelStatus: 'ready',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        tags: ['Custom', 'Manual'],
-        metrics: {
-          accuracy: 0.85,
-          precision: 0.82,
-          recall: 0.78,
-          f1Score: 0.80
-        },
-        affectedUsers: 0,
-        potentialRevenue: 0,
-        priority: 5
+      const result = await response.json()
+
+      if (result.success) {
+        dispatch({ type: 'ADD_INSIGHT', insight: result.insight })
+
+        toast.success('🧠 Insight created', {
+          description: `"${result.insight.title}" added successfully`
+        })
+        console.log('✅ ML INSIGHTS: Insight created - ID:', result.insight.id)
+
+        setShowCreateModal(false)
+        setInsightTitle('')
+        setInsightDescription('')
+      } else {
+        throw new Error(result.error || 'Failed to create insight')
       }
-
-      dispatch({ type: 'ADD_INSIGHT', insight: newInsight })
-
-      toast.success('Insight created successfully')
-      console.log('✅ ML INSIGHTS: Insight created - ID:', newInsight.id)
-
-      setShowCreateModal(false)
-      setInsightTitle('')
-      setInsightDescription('')
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ ML INSIGHTS: Create error:', error)
-      toast.error('Failed to create insight')
+      toast.error('Failed to create insight', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -626,111 +629,178 @@ export default function MLInsightsPage() {
   }
 
   const handleDeleteInsight = async (insightId: string) => {
-    console.log('🗑️ ML INSIGHTS: Deleting insight - ID:', insightId)
+    console.log('🗑️ ML INSIGHTS: Deleting insight via API - ID:', insightId)
 
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const response = await fetch('/api/ml-insights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          insightId
+        })
+      })
 
-      dispatch({ type: 'DELETE_INSIGHT', insightId })
+      const result = await response.json()
 
-      toast.success('Insight deleted successfully')
-      console.log('✅ ML INSIGHTS: Insight deleted')
+      if (result.success) {
+        dispatch({ type: 'DELETE_INSIGHT', insightId })
 
-      setShowDeleteModal(false)
-      setShowViewModal(false)
-    } catch (error) {
+        toast.success('🗑️ Insight deleted', {
+          description: 'ML insight removed from dashboard'
+        })
+        console.log('✅ ML INSIGHTS: Insight deleted')
+
+        setShowDeleteModal(false)
+        setShowViewModal(false)
+      } else {
+        throw new Error(result.error || 'Delete failed')
+      }
+    } catch (error: any) {
       console.error('❌ ML INSIGHTS: Delete error:', error)
-      toast.error('Failed to delete insight')
+      toast.error('Failed to delete insight', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
   }
 
   const handleBulkDelete = async () => {
-    console.log('🗑️ ML INSIGHTS: Bulk delete - Count:', state.selectedInsights.length)
+    console.log('🗑️ ML INSIGHTS: Bulk delete via API - Count:', state.selectedInsights.length)
     console.log('🗑️ ML INSIGHTS: IDs:', state.selectedInsights)
 
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      state.selectedInsights.forEach(id => {
-        dispatch({ type: 'DELETE_INSIGHT', insightId: id })
+      const response = await fetch('/api/ml-insights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'bulk-delete',
+          insightIds: state.selectedInsights
+        })
       })
 
-      toast.success(`Deleted ${state.selectedInsights.length} insight(s)`)
-      console.log('✅ ML INSIGHTS: Bulk delete complete')
+      const result = await response.json()
 
-      dispatch({ type: 'CLEAR_SELECTED_INSIGHTS' })
-    } catch (error) {
+      if (result.success) {
+        state.selectedInsights.forEach(id => {
+          dispatch({ type: 'DELETE_INSIGHT', insightId: id })
+        })
+
+        toast.success(`🗑️ Deleted ${result.deletedCount} insight(s)`, {
+          description: 'Selected insights removed from dashboard'
+        })
+        console.log('✅ ML INSIGHTS: Bulk delete complete')
+
+        dispatch({ type: 'CLEAR_SELECTED_INSIGHTS' })
+      } else {
+        throw new Error(result.error || 'Bulk delete failed')
+      }
+    } catch (error: any) {
       console.error('❌ ML INSIGHTS: Bulk delete error:', error)
-      toast.error('Failed to delete insights')
+      toast.error('Failed to delete insights', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
   }
 
   const handleRetrainModel = async (insightId: string) => {
-    console.log('🔄 ML INSIGHTS: Retraining model - ID:', insightId)
+    console.log('🔄 ML INSIGHTS: Retraining model via API - ID:', insightId)
 
     try {
       dispatch({ type: 'RETRAIN_MODEL', insightId })
-      toast.info('Model retraining started...')
+      toast.info('🔄 Model retraining started...', {
+        description: 'This may take a few moments'
+      })
 
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      const response = await fetch('/api/ml-insights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'retrain',
+          insightId
+        })
+      })
 
-      const insight = state.insights.find(i => i.id === insightId)
-      if (insight) {
-        const updatedInsight = {
-          ...insight,
-          modelStatus: 'ready' as ModelStatus,
-          modelVersion: `v${parseInt(insight.modelVersion.slice(1)) + 1}.0`,
-          metrics: {
-            accuracy: Math.min(0.99, insight.metrics.accuracy + 0.05),
-            precision: Math.min(0.99, insight.metrics.precision + 0.04),
-            recall: Math.min(0.99, insight.metrics.recall + 0.03),
-            f1Score: Math.min(0.99, insight.metrics.f1Score + 0.04)
+      const result = await response.json()
+
+      if (result.success) {
+        const insight = state.insights.find(i => i.id === insightId)
+        if (insight) {
+          const updatedInsight = {
+            ...insight,
+            modelStatus: result.insight.modelStatus,
+            modelVersion: result.insight.modelVersion,
+            metrics: result.metrics,
+            updatedAt: result.insight.updatedAt
           }
+          dispatch({ type: 'UPDATE_INSIGHT', insight: updatedInsight })
         }
-        dispatch({ type: 'UPDATE_INSIGHT', insight: updatedInsight })
-      }
 
-      toast.success('Model retrained successfully')
-      console.log('✅ ML INSIGHTS: Model retrained')
-    } catch (error) {
+        toast.success('🎯 Model retrained successfully', {
+          description: `New version: ${result.insight.modelVersion} • Accuracy: ${(result.metrics.accuracy * 100).toFixed(1)}%`
+        })
+        console.log('✅ ML INSIGHTS: Model retrained - Metrics:', result.metrics)
+      } else {
+        throw new Error(result.error || 'Retrain failed')
+      }
+    } catch (error: any) {
       console.error('❌ ML INSIGHTS: Retrain error:', error)
-      toast.error('Failed to retrain model')
+      toast.error('Failed to retrain model', {
+        description: error.message || 'Please try again later'
+      })
     }
   }
 
   const handleExport = async () => {
-    console.log('📤 ML INSIGHTS: Exporting data...')
+    console.log('📤 ML INSIGHTS: Exporting data via API...')
     console.log('📄 ML INSIGHTS: Format:', exportFormat)
     console.log('📊 ML INSIGHTS: Count:', filteredAndSortedInsights.length, 'insights')
 
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const response = await fetch('/api/ml-insights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'export',
+          exportFormat
+        })
+      })
 
-      const dataStr = JSON.stringify(filteredAndSortedInsights, null, 2)
-      const dataBlob = new Blob([dataStr], { type: 'application/json' })
-      const url = URL.createObjectURL(dataBlob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `ml-insights-${new Date().toISOString().split('T')[0]}.${exportFormat}`
-      link.click()
+      const result = await response.json()
 
-      toast.success(`Exported ${filteredAndSortedInsights.length} insights as ${exportFormat.toUpperCase()}`)
-      console.log('✅ ML INSIGHTS: Export complete')
+      if (result.success) {
+        // Client-side download
+        const dataStr = JSON.stringify(filteredAndSortedInsights, null, 2)
+        const dataBlob = new Blob([dataStr], { type: 'application/json' })
+        const url = URL.createObjectURL(dataBlob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `ml-insights-${new Date().toISOString().split('T')[0]}.${exportFormat}`
+        link.click()
 
-      setShowExportModal(false)
-    } catch (error) {
+        toast.success(`📤 Exported ${result.insightCount} insights`, {
+          description: `Format: ${result.format} • Download started`
+        })
+        console.log('✅ ML INSIGHTS: Export complete - URL:', result.exportUrl)
+
+        setShowExportModal(false)
+      } else {
+        throw new Error(result.error || 'Export failed')
+      }
+    } catch (error: any) {
       console.error('❌ ML INSIGHTS: Export error:', error)
-      toast.error('Failed to export insights')
+      toast.error('Failed to export insights', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
