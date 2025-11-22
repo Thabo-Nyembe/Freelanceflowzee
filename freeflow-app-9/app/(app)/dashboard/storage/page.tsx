@@ -444,31 +444,50 @@ export default function StoragePage() {
         const file = uploadFiles[i]
         console.log(`📄 STORAGE: Processing file ${i + 1}/${uploadFiles.length}:`, file.name)
 
-        await new Promise(resolve => setTimeout(resolve, 500))
-
         const extension = file.name.split('.').pop() || 'file'
         const type = getFileType(extension)
 
-        const newFile: StorageFile = {
-          id: `SF-${String(state.files.length + i + 1).padStart(3, '0')}`,
-          name: file.name,
-          type,
-          size: file.size,
-          provider: uploadProvider,
-          status: 'synced',
-          path: `/storage/${uploadProvider}/${file.name}`,
-          extension,
-          uploadedAt: new Date().toISOString(),
-          modifiedAt: new Date().toISOString(),
-          sharedWith: [],
-          isPublic: false,
-          downloadCount: 0,
-          tags: [],
-          version: 1
-        }
+        const response = await fetch('/api/files', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'upload-file',
+            data: {
+              name: file.name,
+              type,
+              size: file.size,
+              parentFolder: uploadProvider
+            }
+          })
+        })
 
-        dispatch({ type: 'ADD_FILE', file: newFile })
-        console.log('✅ STORAGE: File uploaded -', file.name)
+        const result = await response.json()
+        console.log('📡 STORAGE: Upload API response:', result)
+
+        if (result.success && result.file) {
+          const newFile: StorageFile = {
+            id: result.file.id,
+            name: result.file.name,
+            type,
+            size: result.file.size,
+            provider: uploadProvider,
+            status: 'synced',
+            path: `/storage/${uploadProvider}/${file.name}`,
+            extension,
+            uploadedAt: result.file.uploadedAt,
+            modifiedAt: new Date().toISOString(),
+            sharedWith: [],
+            isPublic: false,
+            downloadCount: 0,
+            tags: [],
+            version: result.file.version
+          }
+
+          dispatch({ type: 'ADD_FILE', file: newFile })
+          console.log('✅ STORAGE: File uploaded -', file.name)
+        } else {
+          throw new Error(result.error || 'Failed to upload file')
+        }
       }
 
       toast.success(`Uploaded ${uploadFiles.length} file(s) successfully`)
@@ -487,15 +506,31 @@ export default function StoragePage() {
     console.log('🗑️ STORAGE: Deleting file - ID:', fileId, 'Name:', file?.name)
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 800))
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete-files',
+          data: { fileIds: [fileId] }
+        })
+      })
 
-      dispatch({ type: 'DELETE_FILE', fileId })
-      toast.success('File deleted successfully')
-      setIsDeleteModalOpen(false)
-      console.log('✅ STORAGE: File deleted')
-    } catch (error) {
+      const result = await response.json()
+      console.log('📡 STORAGE: Delete API response:', result)
+
+      if (result.success) {
+        dispatch({ type: 'DELETE_FILE', fileId })
+        toast.success('File deleted successfully')
+        setIsDeleteModalOpen(false)
+        console.log('✅ STORAGE: File deleted')
+      } else {
+        throw new Error(result.error || 'Failed to delete file')
+      }
+    } catch (error: any) {
       console.error('❌ STORAGE: Delete error:', error)
-      toast.error('Failed to delete file')
+      toast.error('Failed to delete file', {
+        description: error.message || 'Please try again later'
+      })
     }
   }
 
@@ -504,18 +539,35 @@ export default function StoragePage() {
 
     try {
       setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 1500))
 
-      state.selectedFiles.forEach(fileId => {
-        dispatch({ type: 'DELETE_FILE', fileId })
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete-files',
+          data: { fileIds: state.selectedFiles }
+        })
       })
 
-      toast.success(`Deleted ${state.selectedFiles.length} file(s)`)
-      dispatch({ type: 'CLEAR_SELECTED_FILES' })
-      console.log('✅ STORAGE: Bulk delete complete')
-    } catch (error) {
+      const result = await response.json()
+      console.log('📡 STORAGE: Bulk delete API response:', result)
+
+      if (result.success) {
+        state.selectedFiles.forEach(fileId => {
+          dispatch({ type: 'DELETE_FILE', fileId })
+        })
+
+        toast.success(`Deleted ${state.selectedFiles.length} file(s)`)
+        dispatch({ type: 'CLEAR_SELECTED_FILES' })
+        console.log('✅ STORAGE: Bulk delete complete')
+      } else {
+        throw new Error(result.error || 'Failed to delete files')
+      }
+    } catch (error: any) {
       console.error('❌ STORAGE: Bulk delete error:', error)
-      toast.error('Failed to delete files')
+      toast.error('Failed to delete files', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -533,22 +585,42 @@ export default function StoragePage() {
 
     try {
       setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 1000))
 
-      const updatedFile = {
-        ...state.selectedFile,
-        path: movePath,
-        modifiedAt: new Date().toISOString()
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'move-files',
+          data: {
+            fileIds: [state.selectedFile.id],
+            targetFolder: movePath
+          }
+        })
+      })
+
+      const result = await response.json()
+      console.log('📡 STORAGE: Move API response:', result)
+
+      if (result.success) {
+        const updatedFile = {
+          ...state.selectedFile,
+          path: movePath,
+          modifiedAt: new Date().toISOString()
+        }
+
+        dispatch({ type: 'UPDATE_FILE', file: updatedFile })
+        toast.success('File moved successfully')
+        setIsMoveModalOpen(false)
+        setMovePath('')
+        console.log('✅ STORAGE: File moved')
+      } else {
+        throw new Error(result.error || 'Failed to move file')
       }
-
-      dispatch({ type: 'UPDATE_FILE', file: updatedFile })
-      toast.success('File moved successfully')
-      setIsMoveModalOpen(false)
-      setMovePath('')
-      console.log('✅ STORAGE: File moved')
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ STORAGE: Move error:', error)
-      toast.error('Failed to move file')
+      toast.error('Failed to move file', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -565,22 +637,43 @@ export default function StoragePage() {
 
     try {
       setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 1000))
 
-      const updatedFile = {
-        ...state.selectedFile,
-        sharedWith: [...state.selectedFile.sharedWith, ...shareEmails]
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'share-file',
+          data: {
+            fileIds: [state.selectedFile.id],
+            recipients: shareEmails,
+            permissions: 'view'
+          }
+        })
+      })
+
+      const result = await response.json()
+      console.log('📡 STORAGE: Share API response:', result)
+
+      if (result.success) {
+        const updatedFile = {
+          ...state.selectedFile,
+          sharedWith: [...state.selectedFile.sharedWith, ...shareEmails]
+        }
+
+        dispatch({ type: 'UPDATE_FILE', file: updatedFile })
+        toast.success('File shared successfully')
+        setIsShareModalOpen(false)
+        setShareEmail('')
+        setShareEmails([])
+        console.log('✅ STORAGE: File shared')
+      } else {
+        throw new Error(result.error || 'Failed to share file')
       }
-
-      dispatch({ type: 'UPDATE_FILE', file: updatedFile })
-      toast.success('File shared successfully')
-      setIsShareModalOpen(false)
-      setShareEmail('')
-      setShareEmails([])
-      console.log('✅ STORAGE: File shared')
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ STORAGE: Share error:', error)
-      toast.error('Failed to share file')
+      toast.error('Failed to share file', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -591,21 +684,37 @@ export default function StoragePage() {
     console.log('📥 STORAGE: Downloading file - ID:', fileId, 'Name:', file?.name)
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'download-file',
+          data: { fileId }
+        })
+      })
 
-      if (file) {
-        const updatedFile = {
-          ...file,
-          downloadCount: file.downloadCount + 1
+      const result = await response.json()
+      console.log('📡 STORAGE: Download API response:', result)
+
+      if (result.success) {
+        if (file) {
+          const updatedFile = {
+            ...file,
+            downloadCount: file.downloadCount + 1
+          }
+          dispatch({ type: 'UPDATE_FILE', file: updatedFile })
         }
-        dispatch({ type: 'UPDATE_FILE', file: updatedFile })
-      }
 
-      toast.success('Download started')
-      console.log('✅ STORAGE: Download initiated')
-    } catch (error) {
+        toast.success('Download started')
+        console.log('✅ STORAGE: Download initiated')
+      } else {
+        throw new Error(result.error || 'Failed to download file')
+      }
+    } catch (error: any) {
       console.error('❌ STORAGE: Download error:', error)
-      toast.error('Failed to download file')
+      toast.error('Failed to download file', {
+        description: error.message || 'Please try again later'
+      })
     }
   }
 
