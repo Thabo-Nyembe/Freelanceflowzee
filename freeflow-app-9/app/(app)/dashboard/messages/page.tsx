@@ -133,6 +133,8 @@ type MessagesAction =
   | { type: 'ADD_MESSAGE'; message: Message }
   | { type: 'DELETE_MESSAGE'; messageId: string }
   | { type: 'EDIT_MESSAGE'; messageId: string; newText: string }
+  | { type: 'UPDATE_MESSAGE'; messageId: string; updates: Partial<Message> }
+  | { type: 'UPDATE_CHAT'; chatId: string; updates: Partial<Chat> }
   | { type: 'SELECT_CHAT'; chat: Chat | null }
   | { type: 'SET_SEARCH'; searchTerm: string }
   | { type: 'SET_FILTER'; filterCategory: 'all' | 'unread' | 'archived' | 'groups' }
@@ -194,6 +196,24 @@ function messagesReducer(state: MessagesState, action: MessagesAction): Messages
         ...state,
         messages: state.messages.map(m =>
           m.id === action.messageId ? { ...m, text: action.newText, isEdited: true } : m
+        )
+      }
+
+    case 'UPDATE_MESSAGE':
+      console.log('🔄 MESSAGES: Update message - ID:', action.messageId)
+      return {
+        ...state,
+        messages: state.messages.map(m =>
+          m.id === action.messageId ? { ...m, ...action.updates } : m
+        )
+      }
+
+    case 'UPDATE_CHAT':
+      console.log('🔄 MESSAGES: Update chat - ID:', action.chatId)
+      return {
+        ...state,
+        chats: state.chats.map(c =>
+          c.id === action.chatId ? { ...c, ...action.updates } : c
         )
       }
 
@@ -415,6 +435,12 @@ export default function MessagesPage() {
       return
     }
 
+    // Check if we're editing an existing message
+    if (editingMessageId) {
+      console.log('✏️ MESSAGES: Editing message - ID:', editingMessageId)
+      return handleSubmitEdit()
+    }
+
     console.log('📤 MESSAGES: Sending message...')
     console.log('💬 MESSAGES: Message content:', newMessage)
     console.log('👤 MESSAGES: To chat:', state.selectedChat.name)
@@ -595,11 +621,43 @@ export default function MessagesPage() {
     }
   }
 
-  const handleMarkAsRead = (chatId: string) => {
+  const handleMarkAsRead = async (chatId: string) => {
     console.log('✅ MESSAGES: Mark as read - ID:', chatId)
-    toast.success('✅ Marked as read', {
-      description: 'All messages in this chat'
-    })
+
+    try {
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'mark-read',
+          data: {
+            chatId,
+            messageIds: state.messages.map(m => m.id),
+            userId: 'user-1'
+          }
+        })
+      })
+
+      const result = await response.json()
+      console.log('✅ MESSAGES: Mark read API response:', result)
+
+      if (result.success) {
+        // Update unread count in chat list
+        dispatch({
+          type: 'UPDATE_CHAT',
+          chatId,
+          updates: { unread: 0 }
+        })
+        toast.success('✅ Marked as read', {
+          description: `${result.markedCount || 'All'} messages marked as read`
+        })
+      } else {
+        throw new Error(result.error || 'Failed to mark as read')
+      }
+    } catch (error: any) {
+      console.error('❌ MESSAGES: Mark read error:', error)
+      toast.error('Failed to mark as read')
+    }
   }
 
   const handleNewChat = async () => {
@@ -654,9 +712,88 @@ export default function MessagesPage() {
     }
   }
 
-  const handleReactToMessage = (messageId: string, emoji: string) => {
+  const handleSubmitEdit = async () => {
+    if (!editingMessageId || !newMessage.trim()) {
+      console.log('⚠️ MESSAGES: Cannot submit edit - missing data')
+      return
+    }
+
+    console.log('✏️ MESSAGES: Submitting message edit - ID:', editingMessageId)
+
+    try {
+      setIsSending(true)
+
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'edit',
+          messageId: editingMessageId,
+          data: {
+            content: newMessage
+          }
+        })
+      })
+
+      const result = await response.json()
+      console.log('✅ MESSAGES: Edit API response:', result)
+
+      if (result.success) {
+        dispatch({
+          type: 'EDIT_MESSAGE',
+          messageId: editingMessageId,
+          newText: newMessage
+        })
+        setNewMessage('')
+        setEditingMessageId(null)
+        console.log('✅ MESSAGES: Message edited successfully')
+        toast.success('✏️ Message updated')
+      } else {
+        throw new Error(result.error || 'Failed to edit message')
+      }
+    } catch (error: any) {
+      console.error('❌ MESSAGES: Edit error:', error)
+      toast.error('Failed to update message')
+    } finally {
+      setIsSending(false)
+    }
+  }
+
+  const handleReactToMessage = async (messageId: string, emoji: string) => {
     console.log('❤️ MESSAGES: React to message - ID:', messageId, 'Emoji:', emoji)
-    toast.success(`${emoji} Reaction added`)
+
+    try {
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'react',
+          messageId,
+          data: {
+            emoji,
+            userId: 'user-1'
+          }
+        })
+      })
+
+      const result = await response.json()
+      console.log('✅ MESSAGES: Reaction API response:', result)
+
+      if (result.success) {
+        // Update local state
+        dispatch({
+          type: 'UPDATE_MESSAGE',
+          messageId,
+          updates: { reactions: [{ emoji, userId: 'user-1', userName: 'You' }] }
+        })
+        toast.success(`${emoji} Reaction added`)
+      } else {
+        throw new Error(result.error || 'Failed to add reaction')
+      }
+    } catch (error: any) {
+      console.error('❌ MESSAGES: Reaction error:', error)
+      toast.error('Failed to add reaction')
+    }
   }
 
   const handleReplyToMessage = (message: Message) => {
@@ -684,14 +821,36 @@ export default function MessagesPage() {
     console.log('📝 MESSAGES: Edit mode activated')
   }
 
-  const handleDeleteMessage = (messageId: string) => {
+  const handleDeleteMessage = async (messageId: string) => {
     console.log('🗑️ MESSAGES: Delete message request - ID:', messageId)
 
     if (confirm('⚠️ Delete this message? This action cannot be undone.')) {
       console.log('✅ MESSAGES: User confirmed message deletion')
-      dispatch({ type: 'DELETE_MESSAGE', messageId })
-      console.log('✅ MESSAGES: Message deleted successfully')
-      toast.success('🗑️ Message deleted')
+
+      try {
+        const response = await fetch('/api/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'delete',
+            messageId
+          })
+        })
+
+        const result = await response.json()
+        console.log('✅ MESSAGES: Delete API response:', result)
+
+        if (result.success) {
+          dispatch({ type: 'DELETE_MESSAGE', messageId })
+          console.log('✅ MESSAGES: Message deleted successfully')
+          toast.success('🗑️ Message deleted')
+        } else {
+          throw new Error(result.error || 'Failed to delete message')
+        }
+      } catch (error: any) {
+        console.error('❌ MESSAGES: Delete error:', error)
+        toast.error('Failed to delete message')
+      }
     } else {
       console.log('❌ MESSAGES: User canceled message deletion')
     }
