@@ -67,6 +67,9 @@ import { EmptyState } from '@/components/ui/empty-states'
 import { useAnnouncer } from '@/lib/accessibility'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('CryptoPayments')
 
 // ========================================
 // TYPE DEFINITIONS
@@ -158,15 +161,19 @@ const cryptoPaymentReducer = (
   state: CryptoPaymentState,
   action: CryptoPaymentAction
 ): CryptoPaymentState => {
-  console.log('🔄 CRYPTO PAYMENT REDUCER: Action:', action.type)
+  logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
     case 'SET_TRANSACTIONS':
-      console.log('📊 CRYPTO PAYMENT REDUCER: Setting', action.transactions.length, 'transactions')
+      logger.info('Setting transactions', { count: action.transactions.length })
       return { ...state, transactions: action.transactions, isLoading: false }
 
     case 'ADD_TRANSACTION':
-      console.log('➕ CRYPTO PAYMENT REDUCER: Adding transaction -', action.transaction.id)
+      logger.info('Transaction added', {
+        transactionId: action.transaction.id,
+        currency: action.transaction.currency,
+        amount: action.transaction.amount
+      })
       return {
         ...state,
         transactions: [action.transaction, ...state.transactions],
@@ -174,7 +181,10 @@ const cryptoPaymentReducer = (
       }
 
     case 'UPDATE_TRANSACTION':
-      console.log('✏️ CRYPTO PAYMENT REDUCER: Updating transaction -', action.transaction.id)
+      logger.info('Transaction updated', {
+        transactionId: action.transaction.id,
+        status: action.transaction.status
+      })
       return {
         ...state,
         transactions: state.transactions.map(t => t.id === action.transaction.id ? action.transaction : t),
@@ -182,7 +192,7 @@ const cryptoPaymentReducer = (
       }
 
     case 'DELETE_TRANSACTION':
-      console.log('🗑️ CRYPTO PAYMENT REDUCER: Deleting transaction -', action.transactionId)
+      logger.info('Transaction deleted', { transactionId: action.transactionId })
       return {
         ...state,
         transactions: state.transactions.filter(t => t.id !== action.transactionId),
@@ -190,22 +200,25 @@ const cryptoPaymentReducer = (
       }
 
     case 'SELECT_TRANSACTION':
-      console.log('👁️ CRYPTO PAYMENT REDUCER: Selecting transaction -', action.transaction?.id || 'null')
+      logger.debug('Transaction selected', { transactionId: action.transaction?.id || 'null' })
       return { ...state, selectedTransaction: action.transaction }
 
     case 'SET_WALLETS':
-      console.log('📊 CRYPTO PAYMENT REDUCER: Setting', action.wallets.length, 'wallets')
+      logger.info('Setting wallets', { count: action.wallets.length })
       return { ...state, wallets: action.wallets }
 
     case 'ADD_WALLET':
-      console.log('➕ CRYPTO PAYMENT REDUCER: Adding wallet -', action.wallet.name)
+      logger.info('Wallet added', {
+        walletName: action.wallet.name,
+        currency: action.wallet.currency
+      })
       return {
         ...state,
         wallets: [action.wallet, ...state.wallets]
       }
 
     case 'UPDATE_WALLET':
-      console.log('✏️ CRYPTO PAYMENT REDUCER: Updating wallet -', action.wallet.id)
+      logger.info('Wallet updated', { walletId: action.wallet.id })
       return {
         ...state,
         wallets: state.wallets.map(w => w.id === action.wallet.id ? action.wallet : w),
@@ -213,7 +226,7 @@ const cryptoPaymentReducer = (
       }
 
     case 'DELETE_WALLET':
-      console.log('🗑️ CRYPTO PAYMENT REDUCER: Deleting wallet -', action.walletId)
+      logger.info('Wallet deleted', { walletId: action.walletId })
       return {
         ...state,
         wallets: state.wallets.filter(w => w.id !== action.walletId),
@@ -221,34 +234,34 @@ const cryptoPaymentReducer = (
       }
 
     case 'SELECT_WALLET':
-      console.log('👁️ CRYPTO PAYMENT REDUCER: Selecting wallet -', action.wallet?.name || 'null')
+      logger.debug('Wallet selected', { walletName: action.wallet?.name || 'null' })
       return { ...state, selectedWallet: action.wallet }
 
     case 'SET_SEARCH':
-      console.log('🔍 CRYPTO PAYMENT REDUCER: Search term:', action.searchTerm)
+      logger.debug('Search term changed', { searchTerm: action.searchTerm })
       return { ...state, searchTerm: action.searchTerm }
 
     case 'SET_FILTER_STATUS':
-      console.log('🔍 CRYPTO PAYMENT REDUCER: Filter status:', action.filterStatus)
+      logger.debug('Filter status changed', { filterStatus: action.filterStatus })
       return { ...state, filterStatus: action.filterStatus }
 
     case 'SET_FILTER_CURRENCY':
-      console.log('🔍 CRYPTO PAYMENT REDUCER: Filter currency:', action.filterCurrency)
+      logger.debug('Filter currency changed', { filterCurrency: action.filterCurrency })
       return { ...state, filterCurrency: action.filterCurrency }
 
     case 'SET_SORT':
-      console.log('🔀 CRYPTO PAYMENT REDUCER: Sort by:', action.sortBy)
+      logger.debug('Sort order changed', { sortBy: action.sortBy })
       return { ...state, sortBy: action.sortBy }
 
     case 'SET_VIEW_MODE':
-      console.log('👁️ CRYPTO PAYMENT REDUCER: View mode:', action.viewMode)
+      logger.debug('View mode changed', { viewMode: action.viewMode })
       return { ...state, viewMode: action.viewMode }
 
     case 'SET_LOADING':
       return { ...state, isLoading: action.isLoading }
 
     case 'SET_ERROR':
-      console.log('❌ CRYPTO PAYMENT REDUCER: Error:', action.error)
+      logger.error('Error occurred', { error: action.error })
       return { ...state, error: action.error, isLoading: false }
 
     default:
@@ -261,7 +274,7 @@ const cryptoPaymentReducer = (
 // ========================================
 
 const generateMockTransactions = (): CryptoTransaction[] => {
-  console.log('🎲 CRYPTO PAYMENT: Generating mock transactions...')
+  logger.debug('Generating mock transactions')
 
   const currencies: CryptoCurrency[] = ['BTC', 'ETH', 'USDT', 'USDC', 'BNB', 'SOL', 'ADA', 'DOGE']
   const statuses: PaymentStatus[] = ['pending', 'confirming', 'confirmed', 'completed', 'failed', 'cancelled', 'refunded']
@@ -304,12 +317,12 @@ const generateMockTransactions = (): CryptoTransaction[] => {
     })
   }
 
-  console.log('✅ CRYPTO PAYMENT: Generated', transactions.length, 'mock transactions')
+  logger.info('Mock transactions generated', { count: transactions.length })
   return transactions
 }
 
 const generateMockWallets = (): CryptoWallet[] => {
-  console.log('🎲 CRYPTO PAYMENT: Generating mock wallets...')
+  logger.debug('Generating mock wallets')
 
   const currencies: CryptoCurrency[] = ['BTC', 'ETH', 'USDT', 'USDC', 'BNB', 'SOL', 'ADA', 'DOGE']
   const walletTypes: WalletType[] = ['hot', 'cold', 'exchange', 'hardware']
@@ -332,7 +345,7 @@ const generateMockWallets = (): CryptoWallet[] => {
     }
   })
 
-  console.log('✅ CRYPTO PAYMENT: Generated', wallets.length, 'mock wallets')
+  logger.info('Mock wallets generated', { count: wallets.length })
   return wallets
 }
 
@@ -399,7 +412,7 @@ const getCurrencyIcon = (currency: CryptoCurrency): string => {
 // ========================================
 
 export default function CryptoPaymentsPage() {
-  console.log('🚀 CRYPTO PAYMENT: Component mounting...')
+  logger.debug('Component mounting')
 
   const announce = useAnnouncer()
 
@@ -434,7 +447,7 @@ export default function CryptoPaymentsPage() {
 
   // Load mock data
   useEffect(() => {
-    console.log('📊 CRYPTO PAYMENT: Loading mock data...')
+    logger.info('Loading initial data')
 
     const mockTransactions = generateMockTransactions()
     const mockWallets = generateMockWallets()
@@ -442,13 +455,16 @@ export default function CryptoPaymentsPage() {
     dispatch({ type: 'SET_TRANSACTIONS', transactions: mockTransactions })
     dispatch({ type: 'SET_WALLETS', wallets: mockWallets })
 
-    console.log('✅ CRYPTO PAYMENT: Mock data loaded successfully')
+    logger.info('Initial data loaded', {
+      transactionCount: mockTransactions.length,
+      walletCount: mockWallets.length
+    })
     announce('Crypto payments page loaded', 'polite')
   }, [announce])
 
   // Computed Stats
   const stats = useMemo(() => {
-    console.log('📊 CRYPTO PAYMENT: Calculating stats...')
+    logger.debug('Calculating stats')
 
     const totalTransactions = state.transactions.length
     const completedTransactions = state.transactions.filter(t => t.status === 'completed').length
@@ -467,17 +483,18 @@ export default function CryptoPaymentsPage() {
       avgTransactionValue: completedTransactions > 0 ? totalVolume / completedTransactions : 0
     }
 
-    console.log('📊 CRYPTO PAYMENT: Stats -', JSON.stringify(computed))
+    logger.debug('Stats calculated', computed)
     return computed
   }, [state.transactions, state.wallets])
 
   // Filtered and Sorted Transactions
   const filteredAndSortedTransactions = useMemo(() => {
-    console.log('🔍 CRYPTO PAYMENT: Filtering and sorting transactions...')
-    console.log('🔍 Search term:', state.searchTerm)
-    console.log('🔍 Filter status:', state.filterStatus)
-    console.log('🔍 Filter currency:', state.filterCurrency)
-    console.log('🔀 Sort by:', state.sortBy)
+    logger.debug('Filtering and sorting transactions', {
+      searchTerm: state.searchTerm,
+      filterStatus: state.filterStatus,
+      filterCurrency: state.filterCurrency,
+      sortBy: state.sortBy
+    })
 
     let filtered = state.transactions
 
@@ -489,19 +506,19 @@ export default function CryptoPaymentsPage() {
         tx.toAddress.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
         tx.metadata.customerEmail?.toLowerCase().includes(state.searchTerm.toLowerCase())
       )
-      console.log('🔍 CRYPTO PAYMENT: Search filtered to', filtered.length, 'transactions')
+      logger.debug('Search filtered', { count: filtered.length })
     }
 
     // Filter by status
     if (state.filterStatus !== 'all') {
       filtered = filtered.filter(tx => tx.status === state.filterStatus)
-      console.log('🔍 CRYPTO PAYMENT: Status filtered to', filtered.length, 'transactions')
+      logger.debug('Status filtered', { status: state.filterStatus, count: filtered.length })
     }
 
     // Filter by currency
     if (state.filterCurrency !== 'all') {
       filtered = filtered.filter(tx => tx.currency === state.filterCurrency)
-      console.log('🔍 CRYPTO PAYMENT: Currency filtered to', filtered.length, 'transactions')
+      logger.debug('Currency filtered', { currency: state.filterCurrency, count: filtered.length })
     }
 
     // Sort
@@ -519,7 +536,7 @@ export default function CryptoPaymentsPage() {
       }
     })
 
-    console.log('✅ CRYPTO PAYMENT: Final transaction count:', sorted.length)
+    logger.debug('Final filtered transactions', { count: sorted.length })
     return sorted
   }, [state.transactions, state.searchTerm, state.filterStatus, state.filterCurrency, state.sortBy])
 
@@ -528,30 +545,35 @@ export default function CryptoPaymentsPage() {
   // ========================================
 
   const handleCreatePayment = async () => {
-    console.log('➕ CRYPTO PAYMENT: Creating new payment...')
-    console.log('📝 CRYPTO PAYMENT: Amount:', paymentAmount)
-    console.log('📝 CRYPTO PAYMENT: Currency:', paymentCurrency)
+    logger.info('Creating crypto payment', {
+      amount: paymentAmount,
+      currency: paymentCurrency,
+      hasDescription: !!paymentDescription.trim(),
+      hasEmail: !!customerEmail
+    })
 
     if (paymentAmount <= 0) {
-      console.log('⚠️ CRYPTO PAYMENT: Validation failed - Invalid amount')
+      logger.warn('Payment validation failed', { reason: 'Invalid amount', amount: paymentAmount })
       toast.error('Please enter a valid amount')
       announce('Invalid payment amount', 'assertive')
       return
     }
 
     if (!paymentDescription.trim()) {
-      console.log('⚠️ CRYPTO PAYMENT: Validation failed - Description required')
+      logger.warn('Payment validation failed', { reason: 'Description required' })
       toast.error('Payment description is required')
       announce('Payment description required', 'assertive')
       return
     }
 
     try {
-      console.log('⏳ CRYPTO PAYMENT: Creating payment (local state)...')
       dispatch({ type: 'SET_LOADING', isLoading: true })
 
-      // Note: Using local state - in production, this would POST to /api/crypto/create-payment
+      // Calculate crypto amount and fee
       const cryptoAmount = paymentAmount / (paymentCurrency === 'BTC' ? 45000 : paymentCurrency === 'ETH' ? 2500 : 1)
+      const fee = Math.random() * 5
+      const network = paymentCurrency === 'BTC' ? 'Bitcoin' : paymentCurrency === 'SOL' ? 'Solana' : 'Ethereum'
+      const requiredConfirmations = paymentCurrency === 'BTC' ? 6 : 12
 
       const newTransaction: CryptoTransaction = {
         id: `TX-${Date.now()}`,
@@ -559,12 +581,12 @@ export default function CryptoPaymentsPage() {
         amount: cryptoAmount,
         currency: paymentCurrency,
         usdAmount: paymentAmount,
-        fee: Math.random() * 5,
+        fee,
         status: 'pending',
         toAddress: `0x${Math.random().toString(36).substr(2, 40)}`,
         confirmations: 0,
-        requiredConfirmations: paymentCurrency === 'BTC' ? 6 : 12,
-        network: paymentCurrency === 'BTC' ? 'Bitcoin' : paymentCurrency === 'SOL' ? 'Solana' : 'Ethereum',
+        requiredConfirmations,
+        network,
         description: paymentDescription,
         metadata: {
           customerEmail: customerEmail || undefined,
@@ -576,7 +598,15 @@ export default function CryptoPaymentsPage() {
       }
 
       dispatch({ type: 'ADD_TRANSACTION', transaction: newTransaction })
-      console.log('✅ CRYPTO PAYMENT: Payment created successfully - ID:', newTransaction.id)
+
+      logger.info('Crypto payment created', {
+        transactionId: newTransaction.id,
+        amount: cryptoAmount,
+        currency: paymentCurrency,
+        usdValue: paymentAmount,
+        network,
+        fee
+      })
 
       // Reset form
       setPaymentAmount(100)
@@ -584,10 +614,12 @@ export default function CryptoPaymentsPage() {
       setCustomerEmail('')
       setShowCreatePaymentModal(false)
 
-      toast.success('Payment created successfully')
+      toast.success('Payment created', {
+        description: `${formatCryptoAmount(cryptoAmount, paymentCurrency)} - ${formatUSD(paymentAmount)} - ${network} network - Fee: ${formatUSD(fee)} - Expires in 30m - ${requiredConfirmations} confirmations required`
+      })
       announce('Payment created', 'polite')
     } catch (error) {
-      console.log('❌ CRYPTO PAYMENT: Create payment error:', error)
+      logger.error('Payment creation failed', { error, amount: paymentAmount, currency: paymentCurrency })
       toast.error('Failed to create payment')
       announce('Failed to create payment', 'assertive')
       dispatch({ type: 'SET_ERROR', error: 'Failed to create payment' })
@@ -595,8 +627,13 @@ export default function CryptoPaymentsPage() {
   }
 
   const handleViewTransaction = (transaction: CryptoTransaction) => {
-    console.log('👁️ CRYPTO PAYMENT: Opening transaction view - ID:', transaction.id)
-    console.log('👁️ CRYPTO PAYMENT: Transaction:', transaction.description)
+    logger.info('Opening transaction view', {
+      transactionId: transaction.id,
+      description: transaction.description,
+      status: transaction.status,
+      amount: transaction.amount,
+      currency: transaction.currency
+    })
 
     dispatch({ type: 'SELECT_TRANSACTION', transaction })
     setViewTransactionTab('details')
@@ -605,23 +642,24 @@ export default function CryptoPaymentsPage() {
   }
 
   const handleCancelTransaction = (transactionId: string) => {
-    console.log('❌ CRYPTO PAYMENT: Cancelling transaction - ID:', transactionId)
+    logger.info('Cancelling transaction', { transactionId })
 
     const transaction = state.transactions.find(t => t.id === transactionId)
     if (!transaction) {
-      console.log('❌ CRYPTO PAYMENT: Transaction not found')
+      logger.warn('Transaction not found', { transactionId })
       return
     }
 
     if (transaction.status !== 'pending') {
-      console.log('⚠️ CRYPTO PAYMENT: Cannot cancel non-pending transaction')
+      logger.warn('Cannot cancel non-pending transaction', {
+        transactionId,
+        currentStatus: transaction.status
+      })
       toast.error('Only pending transactions can be cancelled')
       return
     }
 
     if (confirm(`Cancel transaction "${transaction.id}"?`)) {
-      console.log('✅ CRYPTO PAYMENT: User confirmed cancellation')
-
       const updatedTransaction: CryptoTransaction = {
         ...transaction,
         status: 'cancelled',
@@ -629,31 +667,42 @@ export default function CryptoPaymentsPage() {
       }
 
       dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })
-      toast.success('Transaction cancelled')
+
+      logger.info('Transaction cancelled', {
+        transactionId: transaction.id,
+        amount: transaction.amount,
+        currency: transaction.currency,
+        previousStatus: 'pending'
+      })
+
+      toast.success('Transaction cancelled', {
+        description: `${transaction.id} - ${formatCryptoAmount(transaction.amount, transaction.currency)} - ${transaction.description}`
+      })
       announce('Transaction cancelled', 'polite')
     } else {
-      console.log('❌ CRYPTO PAYMENT: User declined cancellation')
+      logger.debug('Transaction cancellation declined', { transactionId })
     }
   }
 
   const handleRefundTransaction = (transactionId: string) => {
-    console.log('💰 CRYPTO PAYMENT: Refunding transaction - ID:', transactionId)
+    logger.info('Refunding transaction', { transactionId })
 
     const transaction = state.transactions.find(t => t.id === transactionId)
     if (!transaction) {
-      console.log('❌ CRYPTO PAYMENT: Transaction not found')
+      logger.warn('Transaction not found', { transactionId })
       return
     }
 
     if (transaction.status !== 'completed') {
-      console.log('⚠️ CRYPTO PAYMENT: Cannot refund non-completed transaction')
+      logger.warn('Cannot refund non-completed transaction', {
+        transactionId,
+        currentStatus: transaction.status
+      })
       toast.error('Only completed transactions can be refunded')
       return
     }
 
     if (confirm(`Refund ${formatCryptoAmount(transaction.amount, transaction.currency)} to customer?`)) {
-      console.log('✅ CRYPTO PAYMENT: User confirmed refund')
-
       const updatedTransaction: CryptoTransaction = {
         ...transaction,
         status: 'refunded',
@@ -661,18 +710,34 @@ export default function CryptoPaymentsPage() {
       }
 
       dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })
-      toast.success('Transaction refunded')
+
+      logger.info('Transaction refunded', {
+        transactionId: transaction.id,
+        amount: transaction.amount,
+        currency: transaction.currency,
+        usdAmount: transaction.usdAmount,
+        customerEmail: transaction.metadata.customerEmail
+      })
+
+      toast.success('Transaction refunded', {
+        description: `${formatCryptoAmount(transaction.amount, transaction.currency)} - ${formatUSD(transaction.usdAmount)} - Refunded to ${transaction.metadata.customerEmail || 'customer'}`
+      })
       announce('Transaction refunded', 'polite')
     } else {
-      console.log('❌ CRYPTO PAYMENT: User declined refund')
+      logger.debug('Transaction refund declined', { transactionId })
     }
   }
 
   const handleCopyAddress = (address: string) => {
-    console.log('📋 CRYPTO PAYMENT: Copying address:', address)
+    logger.info('Copying address to clipboard', {
+      address: address.substring(0, 10) + '...'
+    })
 
     navigator.clipboard.writeText(address)
-    toast.success('Address copied to clipboard')
+
+    toast.success('Address copied', {
+      description: `${address.substring(0, 20)}... - Ready to paste`
+    })
     announce('Address copied', 'polite')
   }
 
@@ -680,8 +745,7 @@ export default function CryptoPaymentsPage() {
   // RENDER
   // ========================================
 
-  console.log('🎨 CRYPTO PAYMENT: Rendering component...')
-  console.log('📊 Current state:', {
+  logger.debug('Rendering component', {
     transactionsCount: state.transactions.length,
     walletsCount: state.wallets.length,
     viewMode: state.viewMode,
@@ -838,7 +902,7 @@ export default function CryptoPaymentsPage() {
                   key={mode.id}
                   variant={state.viewMode === mode.id ? "default" : "outline"}
                   onClick={() => {
-                    console.log('👁️ CRYPTO PAYMENT: Changing view mode to:', mode.id)
+                    logger.debug('Changing view mode', { viewMode: mode.id })
                     dispatch({ type: 'SET_VIEW_MODE', viewMode: mode.id })
                     announce(`Switched to ${mode.label}`, 'polite')
                   }}
@@ -864,7 +928,7 @@ export default function CryptoPaymentsPage() {
                       placeholder="Search transactions..."
                       value={state.searchTerm}
                       onChange={(e) => {
-                        console.log('🔍 CRYPTO PAYMENT: Search term changed:', e.target.value)
+                        logger.debug('Search term changed', { searchTerm: e.target.value })
                         dispatch({ type: 'SET_SEARCH', searchTerm: e.target.value })
                       }}
                       className="pl-10 bg-slate-900/50 border-gray-700 text-white"
@@ -872,7 +936,7 @@ export default function CryptoPaymentsPage() {
                   </div>
                   <Button
                     onClick={() => {
-                      console.log('➕ CRYPTO PAYMENT: Opening create payment modal')
+                      logger.debug('Opening create payment modal')
                       setShowCreatePaymentModal(true)
                     }}
                     className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
@@ -883,7 +947,7 @@ export default function CryptoPaymentsPage() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      console.log('📊 CRYPTO PAYMENT: Opening analytics modal')
+                      logger.debug('Opening analytics modal')
                       setShowAnalyticsModal(true)
                     }}
                     className="border-gray-700 hover:bg-slate-800"
@@ -902,7 +966,7 @@ export default function CryptoPaymentsPage() {
                       variant={state.filterStatus === status ? "default" : "outline"}
                       className={`cursor-pointer ${state.filterStatus === status ? 'bg-purple-600' : 'border-gray-700'}`}
                       onClick={() => {
-                        console.log('🔍 CRYPTO PAYMENT: Filter status changed:', status)
+                        logger.debug('Filter status changed', { status })
                         dispatch({ type: 'SET_FILTER_STATUS', filterStatus: status })
                       }}
                     >
@@ -917,7 +981,7 @@ export default function CryptoPaymentsPage() {
                       variant={state.filterCurrency === currency ? "default" : "outline"}
                       className={`cursor-pointer ${state.filterCurrency === currency ? 'bg-purple-600' : 'border-gray-700'}`}
                       onClick={() => {
-                        console.log('🔍 CRYPTO PAYMENT: Filter currency changed:', currency)
+                        logger.debug('Filter currency changed', { currency })
                         dispatch({ type: 'SET_FILTER_CURRENCY', filterCurrency: currency })
                       }}
                     >
@@ -929,7 +993,7 @@ export default function CryptoPaymentsPage() {
                   <Select
                     value={state.sortBy}
                     onValueChange={(value) => {
-                      console.log('🔀 CRYPTO PAYMENT: Sort changed:', value)
+                      logger.debug('Sort changed', { sortBy: value })
                       dispatch({ type: 'SET_SORT', sortBy: value as any })
                     }}
                   >
