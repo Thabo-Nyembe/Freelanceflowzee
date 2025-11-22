@@ -71,6 +71,9 @@ import { EmptyState } from '@/components/ui/empty-states'
 import { useAnnouncer } from '@/lib/accessibility'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('ARCollaboration')
 
 // ========================================
 // TYPE DEFINITIONS
@@ -170,15 +173,19 @@ const arCollaborationReducer = (
   state: ARCollaborationState,
   action: ARCollaborationAction
 ): ARCollaborationState => {
-  console.log('🔄 AR COLLABORATION REDUCER: Action:', action.type)
+  logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
     case 'SET_SESSIONS':
-      console.log('📊 AR COLLABORATION REDUCER: Setting', action.sessions.length, 'sessions')
+      logger.info('Setting sessions', { count: action.sessions.length })
       return { ...state, sessions: action.sessions, isLoading: false }
 
     case 'ADD_SESSION':
-      console.log('➕ AR COLLABORATION REDUCER: Adding session -', action.session.name)
+      logger.info('Session added', {
+        sessionId: action.session.id,
+        sessionName: action.session.name,
+        environment: action.session.environment
+      })
       return {
         ...state,
         sessions: [action.session, ...state.sessions],
@@ -186,7 +193,7 @@ const arCollaborationReducer = (
       }
 
     case 'UPDATE_SESSION':
-      console.log('✏️ AR COLLABORATION REDUCER: Updating session -', action.session.id)
+      logger.info('Session updated', { sessionId: action.session.id })
       return {
         ...state,
         sessions: state.sessions.map(s => s.id === action.session.id ? action.session : s),
@@ -194,7 +201,7 @@ const arCollaborationReducer = (
       }
 
     case 'DELETE_SESSION':
-      console.log('🗑️ AR COLLABORATION REDUCER: Deleting session -', action.sessionId)
+      logger.info('Session deleted', { sessionId: action.sessionId })
       return {
         ...state,
         sessions: state.sessions.filter(s => s.id !== action.sessionId),
@@ -202,38 +209,42 @@ const arCollaborationReducer = (
       }
 
     case 'SELECT_SESSION':
-      console.log('👁️ AR COLLABORATION REDUCER: Selecting session -', action.session?.name || 'null')
+      logger.debug('Session selected', { sessionName: action.session?.name || 'null' })
       return { ...state, selectedSession: action.session }
 
     case 'SET_SEARCH':
-      console.log('🔍 AR COLLABORATION REDUCER: Search term:', action.searchTerm)
+      logger.debug('Search term changed', { searchTerm: action.searchTerm })
       return { ...state, searchTerm: action.searchTerm }
 
     case 'SET_FILTER_ENVIRONMENT':
-      console.log('🔍 AR COLLABORATION REDUCER: Filter environment:', action.filterEnvironment)
+      logger.debug('Filter environment changed', { filterEnvironment: action.filterEnvironment })
       return { ...state, filterEnvironment: action.filterEnvironment }
 
     case 'SET_FILTER_STATUS':
-      console.log('🔍 AR COLLABORATION REDUCER: Filter status:', action.filterStatus)
+      logger.debug('Filter status changed', { filterStatus: action.filterStatus })
       return { ...state, filterStatus: action.filterStatus }
 
     case 'SET_SORT':
-      console.log('🔀 AR COLLABORATION REDUCER: Sort by:', action.sortBy)
+      logger.debug('Sort order changed', { sortBy: action.sortBy })
       return { ...state, sortBy: action.sortBy }
 
     case 'SET_VIEW_MODE':
-      console.log('👁️ AR COLLABORATION REDUCER: View mode:', action.viewMode)
+      logger.debug('View mode changed', { viewMode: action.viewMode })
       return { ...state, viewMode: action.viewMode }
 
     case 'SET_LOADING':
       return { ...state, isLoading: action.isLoading }
 
     case 'SET_ERROR':
-      console.log('❌ AR COLLABORATION REDUCER: Error:', action.error)
+      logger.error('Error occurred', { error: action.error })
       return { ...state, error: action.error, isLoading: false }
 
     case 'JOIN_SESSION':
-      console.log('🚪 AR COLLABORATION REDUCER: Joining session -', action.sessionId)
+      logger.info('Participant joining session', {
+        sessionId: action.sessionId,
+        participantId: action.participant.id,
+        device: action.participant.device
+      })
       return {
         ...state,
         sessions: state.sessions.map(s =>
@@ -248,7 +259,10 @@ const arCollaborationReducer = (
       }
 
     case 'LEAVE_SESSION':
-      console.log('🚪 AR COLLABORATION REDUCER: Leaving session -', action.sessionId)
+      logger.info('Participant leaving session', {
+        sessionId: action.sessionId,
+        participantId: action.participantId
+      })
       return {
         ...state,
         sessions: state.sessions.map(s =>
@@ -263,7 +277,7 @@ const arCollaborationReducer = (
       }
 
     case 'TOGGLE_RECORDING':
-      console.log('🎥 AR COLLABORATION REDUCER: Toggling recording -', action.sessionId)
+      logger.info('Toggling recording', { sessionId: action.sessionId })
       return {
         ...state,
         sessions: state.sessions.map(s =>
@@ -272,7 +286,7 @@ const arCollaborationReducer = (
       }
 
     case 'TOGGLE_LOCK':
-      console.log('🔒 AR COLLABORATION REDUCER: Toggling lock -', action.sessionId)
+      logger.info('Toggling session lock', { sessionId: action.sessionId })
       return {
         ...state,
         sessions: state.sessions.map(s =>
@@ -290,7 +304,7 @@ const arCollaborationReducer = (
 // ========================================
 
 const generateMockSessions = (): ARSession[] => {
-  console.log('🎲 AR COLLABORATION: Generating mock sessions...')
+  logger.debug('Generating mock sessions')
 
   const environments: AREnvironment[] = ['office', 'studio', 'park', 'abstract', 'conference', 'zen']
   const statuses: SessionStatus[] = ['active', 'scheduled', 'ended', 'archived']
@@ -335,7 +349,7 @@ const generateMockSessions = (): ARSession[] => {
     })
   }
 
-  console.log('✅ AR COLLABORATION: Generated', sessions.length, 'mock sessions')
+  logger.info('Mock sessions generated', { count: sessions.length })
   return sessions
 }
 
@@ -432,7 +446,7 @@ const getStatusColor = (status: SessionStatus): string => {
 // ========================================
 
 export default function ARCollaborationPage() {
-  console.log('🚀 AR COLLABORATION: Component mounting...')
+  logger.debug('Component mounting')
 
   const announce = useAnnouncer()
 
@@ -474,18 +488,18 @@ export default function ARCollaborationPage() {
 
   // Load mock data
   useEffect(() => {
-    console.log('📊 AR COLLABORATION: Loading mock data...')
+    logger.info('Loading initial data')
 
     const mockSessions = generateMockSessions()
     dispatch({ type: 'SET_SESSIONS', sessions: mockSessions })
 
-    console.log('✅ AR COLLABORATION: Mock data loaded successfully')
+    logger.info('Initial data loaded', { sessionCount: mockSessions.length })
     announce('AR collaboration page loaded', 'polite')
   }, [announce])
 
   // Computed Stats
   const stats = useMemo(() => {
-    console.log('📊 AR COLLABORATION: Calculating stats...')
+    logger.debug('Calculating stats')
 
     const activeSessions = state.sessions.filter(s => s.status === 'active').length
     const totalParticipants = state.sessions.reduce((sum, s) => sum + s.currentParticipants, 0)
@@ -503,17 +517,18 @@ export default function ARCollaborationPage() {
       avgParticipants: activeSessions > 0 ? Math.floor(totalParticipants / activeSessions) : 0
     }
 
-    console.log('📊 AR COLLABORATION: Stats -', JSON.stringify(computed))
+    logger.debug('Stats calculated', computed)
     return computed
   }, [state.sessions])
 
   // Filtered and Sorted Sessions
   const filteredAndSortedSessions = useMemo(() => {
-    console.log('🔍 AR COLLABORATION: Filtering and sorting sessions...')
-    console.log('🔍 Search term:', state.searchTerm)
-    console.log('🔍 Filter environment:', state.filterEnvironment)
-    console.log('🔍 Filter status:', state.filterStatus)
-    console.log('🔀 Sort by:', state.sortBy)
+    logger.debug('Filtering and sorting sessions', {
+      searchTerm: state.searchTerm,
+      filterEnvironment: state.filterEnvironment,
+      filterStatus: state.filterStatus,
+      sortBy: state.sortBy
+    })
 
     let filtered = state.sessions
 
@@ -523,19 +538,19 @@ export default function ARCollaborationPage() {
         session.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
         session.description.toLowerCase().includes(state.searchTerm.toLowerCase())
       )
-      console.log('🔍 AR COLLABORATION: Search filtered to', filtered.length, 'sessions')
+      logger.debug('Search filtered', { count: filtered.length })
     }
 
     // Filter by environment
     if (state.filterEnvironment !== 'all') {
       filtered = filtered.filter(session => session.environment === state.filterEnvironment)
-      console.log('🔍 AR COLLABORATION: Environment filtered to', filtered.length, 'sessions')
+      logger.debug('Environment filtered', { environment: state.filterEnvironment, count: filtered.length })
     }
 
     // Filter by status
     if (state.filterStatus !== 'all') {
       filtered = filtered.filter(session => session.status === state.filterStatus)
-      console.log('🔍 AR COLLABORATION: Status filtered to', filtered.length, 'sessions')
+      logger.debug('Status filtered', { status: state.filterStatus, count: filtered.length })
     }
 
     // Sort
@@ -553,7 +568,7 @@ export default function ARCollaborationPage() {
       }
     })
 
-    console.log('✅ AR COLLABORATION: Final session count:', sorted.length)
+    logger.debug('Final filtered sessions', { count: sorted.length })
     return sorted
   }, [state.sessions, state.searchTerm, state.filterEnvironment, state.filterStatus, state.sortBy])
 
@@ -562,29 +577,34 @@ export default function ARCollaborationPage() {
   // ========================================
 
   const handleCreateSession = async () => {
-    console.log('➕ AR COLLABORATION: Creating new session...')
-    console.log('📝 AR COLLABORATION: Name:', sessionName)
-    console.log('📝 AR COLLABORATION: Environment:', sessionEnvironment)
+    logger.info('Creating AR session', {
+      name: sessionName,
+      environment: sessionEnvironment,
+      maxParticipants,
+      isLocked: sessionIsLocked
+    })
 
     if (!sessionName.trim()) {
-      console.log('⚠️ AR COLLABORATION: Validation failed - Name required')
+      logger.warn('Session validation failed', { reason: 'Name required' })
       toast.error('Session name is required')
       announce('Session name is required', 'assertive')
       return
     }
 
     if (!sessionDescription.trim()) {
-      console.log('⚠️ AR COLLABORATION: Validation failed - Description required')
+      logger.warn('Session validation failed', { reason: 'Description required' })
       toast.error('Session description is required')
       announce('Session description is required', 'assertive')
       return
     }
 
     try {
-      console.log('⏳ AR COLLABORATION: Creating session (local state)...')
       dispatch({ type: 'SET_LOADING', isLoading: true })
 
-      // Note: Using local state - in production, this would POST to /api/ar-sessions
+      const enabledFeatures = Object.entries(sessionFeatures)
+        .filter(([_, enabled]) => enabled)
+        .map(([feature]) => feature)
+
       const newSession: ARSession = {
         id: `AR-${Date.now()}`,
         name: sessionName,
@@ -606,7 +626,13 @@ export default function ARCollaborationPage() {
       }
 
       dispatch({ type: 'ADD_SESSION', session: newSession })
-      console.log('✅ AR COLLABORATION: Session created successfully - ID:', newSession.id)
+
+      logger.info('AR session created', {
+        sessionId: newSession.id,
+        environment: sessionEnvironment,
+        maxParticipants,
+        featuresEnabled: enabledFeatures.length
+      })
 
       // Reset form
       setSessionName('')
@@ -616,12 +642,12 @@ export default function ARCollaborationPage() {
       setSessionIsLocked(false)
       setShowCreateSessionModal(false)
 
-      toast.success('🥽 AR session created', {
-        description: `${newSession.name} in ${sessionEnvironment} environment`
+      toast.success('AR session created', {
+        description: `${newSession.name} - ${getEnvironmentName(sessionEnvironment)} - ${maxParticipants} max participants - ${enabledFeatures.length} features enabled - ${sessionIsLocked ? 'Locked' : 'Open'}`
       })
       announce('AR session created', 'polite')
     } catch (error) {
-      console.log('❌ AR COLLABORATION: Create session error:', error)
+      logger.error('Session creation failed', { error, name: sessionName })
       toast.error('Failed to create session')
       announce('Failed to create session', 'assertive')
       dispatch({ type: 'SET_ERROR', error: 'Failed to create session' })
@@ -629,8 +655,12 @@ export default function ARCollaborationPage() {
   }
 
   const handleViewSession = (session: ARSession) => {
-    console.log('👁️ AR COLLABORATION: Opening session view - ID:', session.id)
-    console.log('👁️ AR COLLABORATION: Session:', session.name)
+    logger.info('Opening session view', {
+      sessionId: session.id,
+      sessionName: session.name,
+      status: session.status,
+      participants: session.currentParticipants
+    })
 
     dispatch({ type: 'SELECT_SESSION', session })
     setViewSessionTab('overview')
@@ -639,30 +669,32 @@ export default function ARCollaborationPage() {
   }
 
   const handleJoinSession = async (session: ARSession) => {
-    console.log('🚪 AR COLLABORATION: Joining session - ID:', session.id)
-    console.log('🚪 AR COLLABORATION: Session:', session.name)
+    logger.info('Joining AR session', {
+      sessionId: session.id,
+      sessionName: session.name,
+      currentParticipants: session.currentParticipants,
+      maxParticipants: session.maxParticipants
+    })
 
     if (session.currentParticipants >= session.maxParticipants) {
-      console.log('⚠️ AR COLLABORATION: Session is full')
+      logger.warn('Cannot join session', { reason: 'Session is full', sessionId: session.id })
       toast.error('Session is full')
       announce('Session is full', 'assertive')
       return
     }
 
     if (session.isLocked && !session.password) {
-      console.log('⚠️ AR COLLABORATION: Session is locked')
+      logger.warn('Cannot join session', { reason: 'Session is locked', sessionId: session.id })
       toast.error('Session is locked')
       announce('Session is locked', 'assertive')
       return
     }
 
     try {
-      console.log('⏳ AR COLLABORATION: Joining session (local state)...')
-      toast.info('🥽 Entering AR session...', {
+      toast.info('Entering AR session...', {
         description: 'Initializing AR environment'
       })
 
-      // Note: Using local state - in production, this would POST to /api/ar-sessions/join
       const newParticipant: ARParticipant = {
         id: `PART-${Date.now()}`,
         userId: 'USER-CURRENT',
@@ -679,57 +711,94 @@ export default function ARCollaborationPage() {
       }
 
       dispatch({ type: 'JOIN_SESSION', sessionId: session.id, participant: newParticipant })
-      console.log('✅ AR COLLABORATION: Joined session successfully')
 
-      toast.success(`✅ Joined ${session.name}`, {
-        description: `Connected via ${newParticipant.device} • Latency: ${newParticipant.latency}ms`
+      logger.info('Joined AR session', {
+        sessionId: session.id,
+        device: newParticipant.device,
+        latency: newParticipant.latency,
+        newParticipantCount: session.currentParticipants + 1
+      })
+
+      toast.success(`Joined ${session.name}`, {
+        description: `${getEnvironmentName(session.environment)} - ${getDeviceName(newParticipant.device)} - Latency: ${newParticipant.latency}ms - ${session.currentParticipants + 1}/${session.maxParticipants} participants`
       })
       announce(`Joined ${session.name}`, 'polite')
     } catch (error) {
-      console.log('❌ AR COLLABORATION: Join session error:', error)
+      logger.error('Join session failed', { error, sessionId: session.id })
       toast.error('Failed to join session')
       announce('Failed to join session', 'assertive')
     }
   }
 
   const handleDeleteSession = (sessionId: string) => {
-    console.log('🗑️ AR COLLABORATION: Deleting session - ID:', sessionId)
+    logger.info('Deleting session', { sessionId })
 
     const session = state.sessions.find(s => s.id === sessionId)
     if (!session) {
-      console.log('❌ AR COLLABORATION: Session not found')
+      logger.warn('Session not found', { sessionId })
       return
     }
 
     if (confirm(`Delete "${session.name}"? This action cannot be undone.`)) {
-      console.log('✅ AR COLLABORATION: User confirmed deletion')
       dispatch({ type: 'DELETE_SESSION', sessionId })
-      toast.success('Session deleted')
+
+      logger.info('Session deleted', {
+        sessionId: session.id,
+        sessionName: session.name,
+        environment: session.environment,
+        participants: session.currentParticipants
+      })
+
+      toast.success('Session deleted', {
+        description: `${session.name} - ${getEnvironmentName(session.environment)}`
+      })
       announce('Session deleted', 'polite')
     } else {
-      console.log('❌ AR COLLABORATION: User cancelled deletion')
+      logger.debug('Session deletion cancelled', { sessionId })
     }
   }
 
   const handleToggleRecording = (sessionId: string) => {
-    console.log('🎥 AR COLLABORATION: Toggling recording - ID:', sessionId)
+    logger.info('Toggling recording', { sessionId })
 
     const session = state.sessions.find(s => s.id === sessionId)
     if (!session) return
 
     dispatch({ type: 'TOGGLE_RECORDING', sessionId })
-    toast.success(session.isRecording ? 'Recording stopped' : 'Recording started')
+
+    const newStatus = !session.isRecording
+
+    logger.info('Recording toggled', {
+      sessionId: session.id,
+      sessionName: session.name,
+      recording: newStatus
+    })
+
+    toast.success(session.isRecording ? 'Recording stopped' : 'Recording started', {
+      description: `${session.name} - ${getEnvironmentName(session.environment)}`
+    })
     announce(session.isRecording ? 'Recording stopped' : 'Recording started', 'polite')
   }
 
   const handleToggleLock = (sessionId: string) => {
-    console.log('🔒 AR COLLABORATION: Toggling lock - ID:', sessionId)
+    logger.info('Toggling session lock', { sessionId })
 
     const session = state.sessions.find(s => s.id === sessionId)
     if (!session) return
 
     dispatch({ type: 'TOGGLE_LOCK', sessionId })
-    toast.success(session.isLocked ? 'Session unlocked' : 'Session locked')
+
+    const newStatus = !session.isLocked
+
+    logger.info('Session lock toggled', {
+      sessionId: session.id,
+      sessionName: session.name,
+      locked: newStatus
+    })
+
+    toast.success(session.isLocked ? 'Session unlocked' : 'Session locked', {
+      description: `${session.name} - ${session.isLocked ? 'Anyone can join' : 'Requires password'}`
+    })
     announce(session.isLocked ? 'Session unlocked' : 'Session locked', 'polite')
   }
 
@@ -737,8 +806,7 @@ export default function ARCollaborationPage() {
   // RENDER
   // ========================================
 
-  console.log('🎨 AR COLLABORATION: Rendering component...')
-  console.log('📊 Current state:', {
+  logger.debug('Rendering component', {
     sessionsCount: state.sessions.length,
     viewMode: state.viewMode,
     isLoading: state.isLoading
@@ -895,7 +963,7 @@ export default function ARCollaborationPage() {
                   key={mode.id}
                   variant={state.viewMode === mode.id ? "default" : "outline"}
                   onClick={() => {
-                    console.log('👁️ AR COLLABORATION: Changing view mode to:', mode.id)
+                    logger.debug('Changing view mode', { viewMode: mode.id })
                     dispatch({ type: 'SET_VIEW_MODE', viewMode: mode.id })
                     announce(`Switched to ${mode.label}`, 'polite')
                   }}
@@ -921,7 +989,7 @@ export default function ARCollaborationPage() {
                       placeholder="Search AR sessions..."
                       value={state.searchTerm}
                       onChange={(e) => {
-                        console.log('🔍 AR COLLABORATION: Search term changed:', e.target.value)
+                        logger.debug('Search term changed', { searchTerm: e.target.value })
                         dispatch({ type: 'SET_SEARCH', searchTerm: e.target.value })
                       }}
                       className="pl-10 bg-slate-900/50 border-gray-700 text-white"
@@ -929,7 +997,7 @@ export default function ARCollaborationPage() {
                   </div>
                   <Button
                     onClick={() => {
-                      console.log('➕ AR COLLABORATION: Opening create session modal')
+                      logger.debug('Opening create session modal')
                       setShowCreateSessionModal(true)
                     }}
                     className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700"
@@ -940,7 +1008,7 @@ export default function ARCollaborationPage() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      console.log('📊 AR COLLABORATION: Opening analytics modal')
+                      logger.debug('Opening analytics modal')
                       setShowAnalyticsModal(true)
                     }}
                     className="border-gray-700 hover:bg-slate-800"
@@ -959,7 +1027,7 @@ export default function ARCollaborationPage() {
                       variant={state.filterEnvironment === env ? "default" : "outline"}
                       className={`cursor-pointer ${state.filterEnvironment === env ? 'bg-cyan-600' : 'border-gray-700'}`}
                       onClick={() => {
-                        console.log('🔍 AR COLLABORATION: Filter environment changed:', env)
+                        logger.debug('Filter environment changed', { environment: env })
                         dispatch({ type: 'SET_FILTER_ENVIRONMENT', filterEnvironment: env })
                       }}
                     >
@@ -974,7 +1042,7 @@ export default function ARCollaborationPage() {
                       variant={state.filterStatus === status ? "default" : "outline"}
                       className={`cursor-pointer ${state.filterStatus === status ? 'bg-cyan-600' : 'border-gray-700'}`}
                       onClick={() => {
-                        console.log('🔍 AR COLLABORATION: Filter status changed:', status)
+                        logger.debug('Filter status changed', { status })
                         dispatch({ type: 'SET_FILTER_STATUS', filterStatus: status })
                       }}
                     >
@@ -986,7 +1054,7 @@ export default function ARCollaborationPage() {
                   <Select
                     value={state.sortBy}
                     onValueChange={(value) => {
-                      console.log('🔀 AR COLLABORATION: Sort changed:', value)
+                      logger.debug('Sort changed', { sortBy: value })
                       dispatch({ type: 'SET_SORT', sortBy: value as any })
                     }}
                   >
@@ -1326,7 +1394,7 @@ export default function ARCollaborationPage() {
                       <Checkbox
                         checked={value}
                         onCheckedChange={(checked) => {
-                          console.log('⚙️ AR COLLABORATION: Feature toggled:', key, checked)
+                          logger.debug('Feature toggled', { feature: key, enabled: checked })
                           setSessionFeatures(prev => ({ ...prev, [key]: checked as boolean }))
                         }}
                       />
