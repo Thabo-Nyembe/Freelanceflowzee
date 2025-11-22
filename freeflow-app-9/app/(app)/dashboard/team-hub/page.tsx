@@ -40,6 +40,9 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('TeamHub')
 
 export default function TeamHubPage() {
   // A+++ STATE MANAGEMENT
@@ -50,9 +53,11 @@ export default function TeamHubPage() {
   const [selectedMember, setSelectedMember] = useState<any>(null)
   const [activeTab, setActiveTab] = useState<string>('overview')
   const [searchTerm, setSearchTerm] = useState<string>('')
+  const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [filterDepartment, setFilterDepartment] = useState<string>('all')
 
-  // Mock team data
-  const teamMembers = [
+  // REAL TEAM DATA STATE - Now with useState for CRUD operations
+  const [teamMembers, setTeamMembers] = useState([
     {
       id: 1,
       name: 'Sarah Johnson',
@@ -161,28 +166,33 @@ export default function TeamHubPage() {
       currentProjects: ['Test Automation', 'Quality Assurance'],
       availability: 'Available'
     }
-  ]
+  ])
 
-  const departments = [
+  const [departments, setDepartments] = useState([
     { name: 'Design', count: 1, color: 'bg-purple-100 text-purple-800' },
     { name: 'Development', count: 2, color: 'bg-blue-100 text-blue-800' },
     { name: 'Management', count: 1, color: 'bg-green-100 text-green-800' },
     { name: 'Marketing', count: 1, color: 'bg-orange-100 text-orange-800' },
     { name: 'Quality Assurance', count: 1, color: 'bg-red-100 text-red-800' }
-  ]
+  ])
 
+  // COMPUTED TEAM STATS - Updated dynamically from state
   const teamStats = {
     totalMembers: teamMembers.length,
     onlineMembers: teamMembers.filter(m => m.status === 'online').length,
     activeProjects: teamMembers.reduce((sum, m) => sum + m.projects, 0),
     completedTasks: teamMembers.reduce((sum, m) => sum + m.tasksCompleted, 0),
-    averageRating: teamMembers.reduce((sum, m) => sum + m.rating, 0) / teamMembers.length
+    averageRating: teamMembers.length > 0 ? teamMembers.reduce((sum, m) => sum + m.rating, 0) / teamMembers.length : 0
   }
 
   // A+++ LOAD TEAM DATA
   useEffect(() => {
     const loadTeamData = async () => {
       try {
+        logger.info('Team data loading initiated', {
+          initialMemberCount: teamMembers.length,
+          departments: departments.length
+        })
         setIsLoading(true)
         setError(null)
 
@@ -199,10 +209,17 @@ export default function TeamHubPage() {
 
         setIsLoading(false)
         announce('Team data loaded successfully', 'polite')
+        logger.info('Team data loaded successfully', {
+          totalMembers: teamMembers.length,
+          onlineMembers: teamMembers.filter(m => m.status === 'online').length,
+          departments: departments.length
+        })
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load team data')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load team data'
+        setError(errorMessage)
         setIsLoading(false)
         announce('Error loading team data', 'assertive')
+        logger.error('Failed to load team data', { error: err })
       }
     }
 
@@ -210,202 +227,377 @@ export default function TeamHubPage() {
   }, [announce])
 
   // ============================================================
-  // 16 NEW ENTERPRISE-GRADE HANDLERS FOR INVESTOR READINESS
-  // Total: 24 handlers (8 existing inline + 16 new)
+  // REAL WORKING CRUD HANDLERS WITH PRODUCTION LOGGER
   // ============================================================
+
+  // REAL FEATURE: Add Team Member
+  const handleAddMember = useCallback(() => {
+    logger.info('Add team member initiated', {
+      currentTeamSize: teamMembers.length,
+      departments: departments.length
+    })
+
+    const memberName = prompt('Enter new member name:')
+    if (!memberName) {
+      logger.debug('Add member cancelled by user')
+      return
+    }
+
+    const memberRole = prompt('Enter role:') || 'Team Member'
+    const memberDept = prompt('Enter department (Design/Development/Management/Marketing/Quality Assurance):') || 'Development'
+
+    const newMember = {
+      id: Math.max(...teamMembers.map(m => m.id), 0) + 1,
+      name: memberName,
+      role: memberRole,
+      department: memberDept,
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${memberName}`,
+      status: 'online',
+      email: `${memberName.toLowerCase().replace(' ', '.')}@company.com`,
+      phone: '+1 (555) ' + Math.floor(Math.random() * 900 + 100) + '-' + Math.floor(Math.random() * 9000 + 1000),
+      location: 'Remote',
+      joinDate: new Date().toISOString().split('T')[0],
+      projects: 0,
+      tasksCompleted: 0,
+      rating: 4.0,
+      skills: [],
+      currentProjects: [],
+      availability: 'Available'
+    }
+
+    setTeamMembers(prev => [...prev, newMember])
+
+    logger.info('Team member added successfully', {
+      memberId: newMember.id,
+      memberName: newMember.name,
+      role: newMember.role,
+      department: newMember.department,
+      newTeamSize: teamMembers.length + 1
+    })
+
+    toast.success('Team Member Added', {
+      description: `${memberName} added as ${memberRole}`
+    })
+    announce(`${memberName} added to team`, 'polite')
+  }, [teamMembers, departments, announce])
+
+  // REAL FEATURE: Remove Team Member
+  const handleRemoveMember = useCallback((memberId: number, memberName: string) => {
+    if (!confirm(`Remove ${memberName} from the team?`)) {
+      logger.debug('Remove member cancelled', { memberId, memberName })
+      return
+    }
+
+    setTeamMembers(prev => prev.filter(m => m.id !== memberId))
+
+    logger.info('Team member removed', {
+      memberId,
+      memberName,
+      newTeamSize: teamMembers.length - 1
+    })
+
+    toast.success('Team Member Removed', {
+      description: `${memberName} has been removed from the team`
+    })
+    announce(`${memberName} removed from team`, 'polite')
+  }, [teamMembers, announce])
+
+  // REAL FEATURE: Update Member Role
+  const handleUpdateRole = useCallback((memberId: number, currentRole: string) => {
+    const member = teamMembers.find(m => m.id === memberId)
+    if (!member) return
+
+    const newRole = prompt(`Update role for ${member.name}:`, currentRole)
+    if (!newRole || newRole === currentRole) {
+      logger.debug('Role update cancelled', { memberId, memberName: member.name })
+      return
+    }
+
+    setTeamMembers(prev => prev.map(m =>
+      m.id === memberId ? { ...m, role: newRole } : m
+    ))
+
+    logger.info('Member role updated', {
+      memberId,
+      memberName: member.name,
+      oldRole: currentRole,
+      newRole
+    })
+
+    toast.success('Role Updated', {
+      description: `${member.name}'s role changed to ${newRole}`
+    })
+    announce(`${member.name} role updated to ${newRole}`, 'polite')
+  }, [teamMembers, announce])
+
+  // REAL FEATURE: Assign Task to Member
+  const handleAssignTask = useCallback((memberId: number) => {
+    const member = teamMembers.find(m => m.id === memberId)
+    if (!member) return
+
+    const taskName = prompt(`Assign task to ${member.name}:`)
+    if (!taskName) {
+      logger.debug('Task assignment cancelled', { memberId, memberName: member.name })
+      return
+    }
+
+    setTeamMembers(prev => prev.map(m =>
+      m.id === memberId ? {
+        ...m,
+        projects: m.projects + 1,
+        currentProjects: [...m.currentProjects, taskName]
+      } : m
+    ))
+
+    logger.info('Task assigned to team member', {
+      memberId,
+      memberName: member.name,
+      taskName,
+      newProjectCount: member.projects + 1
+    })
+
+    toast.success('Task Assigned', {
+      description: `"${taskName}" assigned to ${member.name}`
+    })
+    announce(`Task assigned to ${member.name}`, 'polite')
+  }, [teamMembers, announce])
+
+  // REAL FEATURE: Export Team Data
+  const handleTeamExport = useCallback((format: 'csv' | 'json' = 'csv') => {
+    logger.info('Team data export initiated', {
+      format,
+      memberCount: teamMembers.length,
+      departments: departments.length,
+      totalProjects: teamStats.activeProjects,
+      completedTasks: teamStats.completedTasks
+    })
+
+    try {
+      if (format === 'csv') {
+        const headers = ['ID', 'Name', 'Role', 'Department', 'Email', 'Phone', 'Status', 'Projects', 'Tasks Completed', 'Rating']
+        const rows = teamMembers.map(m => [
+          m.id,
+          m.name,
+          m.role,
+          m.department,
+          m.email,
+          m.phone,
+          m.status,
+          m.projects,
+          m.tasksCompleted,
+          m.rating
+        ])
+        const csv = [headers, ...rows].map(row => row.join(',')).join('\n')
+        const blob = new Blob([csv], { type: 'text/csv' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `team-data-${new Date().toISOString().split('T')[0]}.csv`
+        a.click()
+        URL.revokeObjectURL(url)
+      } else {
+        const json = JSON.stringify({ teamMembers, teamStats, departments, exportDate: new Date().toISOString() }, null, 2)
+        const blob = new Blob([json], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `team-data-${new Date().toISOString().split('T')[0]}.json`
+        a.click()
+        URL.revokeObjectURL(url)
+      }
+
+      logger.info('Team data export completed', {
+        format,
+        memberCount: teamMembers.length,
+        exportDate: new Date().toISOString()
+      })
+
+      toast.success('Export Complete', {
+        description: `Team data exported as ${format.toUpperCase()} (${teamMembers.length} members)`
+      })
+    } catch (error) {
+      logger.error('Team data export failed', { error, format })
+      toast.error('Export Failed', {
+        description: 'Unable to export team data'
+      })
+    }
+  }, [teamMembers, teamStats, departments])
 
   // Handler 1: Team Performance Metrics
   const handleTeamPerformance = useCallback(() => {
-    console.log('📊 TEAM HUB: Team performance metrics initiated')
-    console.log('👥 TEAM HUB: Analyzing ' + teamStats.totalMembers + ' team members')
-    console.log('⭐ TEAM HUB: Average team rating: ' + teamStats.averageRating.toFixed(2))
-    console.log('✅ TEAM HUB: Completed tasks: ' + teamStats.completedTasks)
-    console.log('🎯 TEAM HUB: Performance dashboard ready')
-    toast.success('📊 Performance Metrics', {
-      description: 'Viewing metrics for ' + teamStats.totalMembers + ' team members'
+    logger.info('Team performance metrics accessed', {
+      totalMembers: teamStats.totalMembers,
+      averageRating: teamStats.averageRating.toFixed(2),
+      completedTasks: teamStats.completedTasks,
+      onlineMembers: teamStats.onlineMembers
     })
-  }, [teamStats.totalMembers, teamStats.averageRating, teamStats.completedTasks])
+    toast.success('Performance Metrics', {
+      description: `${teamStats.totalMembers} members | ${teamStats.averageRating.toFixed(1)} avg rating | ${teamStats.completedTasks} tasks`
+    })
+  }, [teamStats])
 
   // Handler 2: Team Goals Management
   const handleTeamGoals = useCallback(() => {
-    console.log('🎯 TEAM HUB: Team goals management opened')
-    console.log('📈 TEAM HUB: Active projects: ' + teamStats.activeProjects)
-    console.log('👥 TEAM HUB: Team members involved: ' + teamStats.totalMembers)
-    console.log('🏆 TEAM HUB: Loading goal tracking dashboard')
-    console.log('✅ TEAM HUB: Goals interface ready')
-    toast.info('🎯 Team Goals', {
-      description: 'Set and track goals for ' + teamStats.activeProjects + ' active projects'
+    logger.info('Team goals management accessed', {
+      activeProjects: teamStats.activeProjects,
+      totalMembers: teamStats.totalMembers
     })
-  }, [teamStats.activeProjects, teamStats.totalMembers])
+    toast.info('Team Goals', {
+      description: `Set and track goals for ${teamStats.activeProjects} active projects`
+    })
+  }, [teamStats])
 
   // Handler 3: Team Milestones Tracking
   const handleTeamMilestones = useCallback(() => {
-    console.log('🏁 TEAM HUB: Team milestones tracking initiated')
-    console.log('📊 TEAM HUB: Projects tracked: ' + teamStats.activeProjects)
-    console.log('✅ TEAM HUB: Tasks completed: ' + teamStats.completedTasks)
-    console.log('👥 TEAM HUB: Team size: ' + teamStats.totalMembers)
-    console.log('🎉 TEAM HUB: Milestone tracker ready')
-    toast.success('🏁 Team Milestones', {
-      description: 'Tracking milestones across ' + teamStats.activeProjects + ' projects'
+    logger.info('Team milestones tracking accessed', {
+      projectsTracked: teamStats.activeProjects,
+      tasksCompleted: teamStats.completedTasks,
+      teamSize: teamStats.totalMembers
     })
-  }, [teamStats.activeProjects, teamStats.completedTasks, teamStats.totalMembers])
+    toast.success('Team Milestones', {
+      description: `Tracking milestones across ${teamStats.activeProjects} projects`
+    })
+  }, [teamStats])
 
   // Handler 4: Team Budget Management
   const handleTeamBudget = useCallback(() => {
-    console.log('💰 TEAM HUB: Team budget management opened')
-    console.log('💼 TEAM HUB: Departments to allocate: ' + departments.length)
-    console.log('👥 TEAM HUB: Team members: ' + teamStats.totalMembers)
-    console.log('📊 TEAM HUB: Active projects: ' + teamStats.activeProjects)
-    console.log('✅ TEAM HUB: Budget dashboard ready')
-    toast.info('💰 Team Budget', {
-      description: 'Manage budget across ' + departments.length + ' departments'
+    logger.info('Team budget management accessed', {
+      departments: departments.length,
+      teamMembers: teamStats.totalMembers,
+      activeProjects: teamStats.activeProjects
     })
-  }, [teamStats.totalMembers, teamStats.activeProjects])
+    toast.info('Team Budget', {
+      description: `Manage budget across ${departments.length} departments`
+    })
+  }, [departments, teamStats])
 
   // Handler 5: Team Resources Allocation
   const handleTeamResources = useCallback(() => {
-    console.log('📦 TEAM HUB: Team resources allocation initiated')
-    console.log('👥 TEAM HUB: Available team members: ' + teamStats.totalMembers)
-    console.log('🌐 TEAM HUB: Online members: ' + teamStats.onlineMembers)
-    console.log('🎯 TEAM HUB: Projects requiring resources: ' + teamStats.activeProjects)
-    console.log('✅ TEAM HUB: Resource allocation panel ready')
-    toast.success('📦 Team Resources', {
-      description: 'Allocate resources for ' + teamStats.onlineMembers + ' online members'
+    logger.info('Team resources allocation accessed', {
+      availableMembers: teamStats.totalMembers,
+      onlineMembers: teamStats.onlineMembers,
+      projectsNeedingResources: teamStats.activeProjects
     })
-  }, [teamStats.totalMembers, teamStats.onlineMembers, teamStats.activeProjects])
+    toast.success('Team Resources', {
+      description: `Allocate resources for ${teamStats.onlineMembers} online members`
+    })
+  }, [teamStats])
 
   // Handler 6: Team Training & Development
   const handleTeamTraining = useCallback(() => {
-    console.log('📚 TEAM HUB: Team training schedule opened')
-    console.log('👥 TEAM HUB: Team members to train: ' + teamStats.totalMembers)
-    console.log('🏢 TEAM HUB: Departments: ' + departments.length)
-    console.log('📅 TEAM HUB: Loading training calendar')
-    console.log('✅ TEAM HUB: Training dashboard ready')
-    toast.info('📚 Team Training', {
-      description: 'Schedule training for ' + teamStats.totalMembers + ' team members'
+    logger.info('Team training schedule accessed', {
+      membersToTrain: teamStats.totalMembers,
+      departments: departments.length
     })
-  }, [teamStats.totalMembers])
+    toast.info('Team Training', {
+      description: `Schedule training for ${teamStats.totalMembers} team members`
+    })
+  }, [teamStats, departments])
 
   // Handler 7: Team Feedback Collection
   const handleTeamFeedback = useCallback(() => {
-    console.log('💬 TEAM HUB: Team feedback collection initiated')
-    console.log('👥 TEAM HUB: Collecting feedback from: ' + teamStats.totalMembers + ' members')
-    console.log('⭐ TEAM HUB: Current average rating: ' + teamStats.averageRating.toFixed(2))
-    console.log('📊 TEAM HUB: Loading feedback forms')
-    console.log('✅ TEAM HUB: Feedback system ready')
-    toast.success('💬 Team Feedback', {
-      description: 'Collect feedback from ' + teamStats.totalMembers + ' team members'
+    logger.info('Team feedback collection initiated', {
+      membersCount: teamStats.totalMembers,
+      currentAverageRating: teamStats.averageRating.toFixed(2)
     })
-  }, [teamStats.totalMembers, teamStats.averageRating])
+    toast.success('Team Feedback', {
+      description: `Collect feedback from ${teamStats.totalMembers} team members`
+    })
+  }, [teamStats])
 
   // Handler 8: Team Recognition & Awards
   const handleTeamRecognition = useCallback(() => {
-    console.log('🏆 TEAM HUB: Team recognition system opened')
-    console.log('👥 TEAM HUB: Team members: ' + teamStats.totalMembers)
-    console.log('✅ TEAM HUB: Tasks completed: ' + teamStats.completedTasks)
-    console.log('⭐ TEAM HUB: Average rating: ' + teamStats.averageRating.toFixed(2))
-    console.log('🎉 TEAM HUB: Recognition dashboard ready')
-    toast.success('🏆 Team Recognition', {
-      description: 'Recognize achievements from ' + teamStats.completedTasks + ' completed tasks'
+    logger.info('Team recognition system accessed', {
+      teamMembers: teamStats.totalMembers,
+      tasksCompleted: teamStats.completedTasks,
+      averageRating: teamStats.averageRating.toFixed(2)
     })
-  }, [teamStats.totalMembers, teamStats.completedTasks, teamStats.averageRating])
+    toast.success('Team Recognition', {
+      description: `Recognize achievements from ${teamStats.completedTasks} completed tasks`
+    })
+  }, [teamStats])
 
   // Handler 9: Team Onboarding Process
   const handleTeamOnboarding = useCallback(() => {
-    console.log('🚀 TEAM HUB: Team onboarding process initiated')
-    console.log('📋 TEAM HUB: Current team size: ' + teamStats.totalMembers)
-    console.log('🏢 TEAM HUB: Departments available: ' + departments.length)
-    console.log('📚 TEAM HUB: Loading onboarding checklist')
-    console.log('✅ TEAM HUB: Onboarding system ready')
-    toast.info('🚀 Team Onboarding', {
-      description: 'Onboard new members to ' + departments.length + ' departments'
+    logger.info('Team onboarding process accessed', {
+      currentTeamSize: teamStats.totalMembers,
+      departmentsAvailable: departments.length
     })
-  }, [teamStats.totalMembers])
+    toast.info('Team Onboarding', {
+      description: `Onboard new members to ${departments.length} departments`
+    })
+  }, [teamStats, departments])
 
   // Handler 10: Team Offboarding Process
   const handleTeamOffboarding = useCallback(() => {
-    console.log('👋 TEAM HUB: Team offboarding process opened')
-    console.log('👥 TEAM HUB: Current team members: ' + teamStats.totalMembers)
-    console.log('📊 TEAM HUB: Active projects: ' + teamStats.activeProjects)
-    console.log('📝 TEAM HUB: Loading offboarding checklist')
-    console.log('✅ TEAM HUB: Offboarding system ready')
-    toast.info('👋 Team Offboarding', {
+    logger.info('Team offboarding process accessed', {
+      currentMembers: teamStats.totalMembers,
+      activeProjects: teamStats.activeProjects
+    })
+    toast.info('Team Offboarding', {
       description: 'Manage offboarding process professionally'
     })
-  }, [teamStats.totalMembers, teamStats.activeProjects])
+  }, [teamStats])
 
   // Handler 11: Team Directory Access
   const handleTeamDirectory = useCallback(() => {
-    console.log('📇 TEAM HUB: Team directory accessed')
-    console.log('👥 TEAM HUB: Total members in directory: ' + teamStats.totalMembers)
-    console.log('🏢 TEAM HUB: Departments: ' + departments.length)
-    console.log('🌐 TEAM HUB: Online members: ' + teamStats.onlineMembers)
-    console.log('✅ TEAM HUB: Directory loaded successfully')
-    toast.success('📇 Team Directory', {
-      description: 'Access directory of ' + teamStats.totalMembers + ' team members'
+    logger.info('Team directory accessed', {
+      totalMembers: teamStats.totalMembers,
+      departments: departments.length,
+      onlineMembers: teamStats.onlineMembers
     })
-  }, [teamStats.totalMembers, teamStats.onlineMembers])
+    toast.success('Team Directory', {
+      description: `Access directory of ${teamStats.totalMembers} team members`
+    })
+  }, [teamStats, departments])
 
   // Handler 12: Team Calendar View
   const handleTeamCalendar = useCallback(() => {
-    console.log('📅 TEAM HUB: Team calendar view opened')
-    console.log('👥 TEAM HUB: Members scheduled: ' + teamStats.totalMembers)
-    console.log('🎯 TEAM HUB: Active projects: ' + teamStats.activeProjects)
-    console.log('🌐 TEAM HUB: Online members: ' + teamStats.onlineMembers)
-    console.log('✅ TEAM HUB: Calendar synchronized and ready')
-    toast.info('📅 Team Calendar', {
-      description: 'View schedules for ' + teamStats.totalMembers + ' team members'
+    logger.info('Team calendar accessed', {
+      membersScheduled: teamStats.totalMembers,
+      activeProjects: teamStats.activeProjects,
+      onlineMembers: teamStats.onlineMembers
     })
-  }, [teamStats.totalMembers, teamStats.activeProjects, teamStats.onlineMembers])
+    toast.info('Team Calendar', {
+      description: `View schedules for ${teamStats.totalMembers} team members`
+    })
+  }, [teamStats])
 
   // Handler 13: Team Files Management
   const handleTeamFiles = useCallback(() => {
-    console.log('📁 TEAM HUB: Team files management opened')
-    console.log('👥 TEAM HUB: Team members with access: ' + teamStats.totalMembers)
-    console.log('🏢 TEAM HUB: Departments: ' + departments.length)
-    console.log('📊 TEAM HUB: Project files for: ' + teamStats.activeProjects + ' projects')
-    console.log('✅ TEAM HUB: File management system ready')
-    toast.success('📁 Team Files', {
-      description: 'Access files for ' + teamStats.activeProjects + ' active projects'
+    logger.info('Team files management accessed', {
+      membersWithAccess: teamStats.totalMembers,
+      departments: departments.length,
+      projectFiles: teamStats.activeProjects
     })
-  }, [teamStats.totalMembers, teamStats.activeProjects])
+    toast.success('Team Files', {
+      description: `Access files for ${teamStats.activeProjects} active projects`
+    })
+  }, [teamStats, departments])
 
   // Handler 14: Team Projects Overview
   const handleTeamProjects = useCallback(() => {
-    console.log('🎯 TEAM HUB: Team projects overview accessed')
-    console.log('📊 TEAM HUB: Active projects: ' + teamStats.activeProjects)
-    console.log('👥 TEAM HUB: Team members assigned: ' + teamStats.totalMembers)
-    console.log('✅ TEAM HUB: Completed tasks: ' + teamStats.completedTasks)
-    console.log('🚀 TEAM HUB: Projects dashboard ready')
-    toast.success('🎯 Team Projects', {
-      description: 'Overview of ' + teamStats.activeProjects + ' active team projects'
+    logger.info('Team projects overview accessed', {
+      activeProjects: teamStats.activeProjects,
+      membersAssigned: teamStats.totalMembers,
+      completedTasks: teamStats.completedTasks
     })
-  }, [teamStats.activeProjects, teamStats.totalMembers, teamStats.completedTasks])
+    toast.success('Team Projects', {
+      description: `Overview of ${teamStats.activeProjects} active team projects`
+    })
+  }, [teamStats])
 
   // Handler 15: Team Tasks Assignment
   const handleTeamTasks = useCallback(() => {
-    console.log('✅ TEAM HUB: Team tasks assignment initiated')
-    console.log('👥 TEAM HUB: Available members: ' + teamStats.totalMembers)
-    console.log('🌐 TEAM HUB: Online members: ' + teamStats.onlineMembers)
-    console.log('📊 TEAM HUB: Completed tasks: ' + teamStats.completedTasks)
-    console.log('🎯 TEAM HUB: Task management system ready')
-    toast.info('✅ Team Tasks', {
-      description: 'Assign tasks to ' + teamStats.onlineMembers + ' available members'
+    logger.info('Team tasks assignment accessed', {
+      availableMembers: teamStats.totalMembers,
+      onlineMembers: teamStats.onlineMembers,
+      completedTasks: teamStats.completedTasks
     })
-  }, [teamStats.totalMembers, teamStats.onlineMembers, teamStats.completedTasks])
-
-  // Handler 16: Team Data Export
-  const handleTeamExport = useCallback(() => {
-    console.log('📤 TEAM HUB: Team data export initiated')
-    console.log('👥 TEAM HUB: Exporting data for: ' + teamStats.totalMembers + ' members')
-    console.log('📊 TEAM HUB: Active projects: ' + teamStats.activeProjects)
-    console.log('✅ TEAM HUB: Completed tasks: ' + teamStats.completedTasks)
-    console.log('💾 TEAM HUB: Generating export file')
-    console.log('🎉 TEAM HUB: Export completed successfully')
-    toast.success('📤 Data Export Complete', {
-      description: 'Exported data for ' + teamStats.totalMembers + ' team members'
+    toast.info('Team Tasks', {
+      description: `Assign tasks to ${teamStats.onlineMembers} available members`
     })
-  }, [teamStats.totalMembers, teamStats.activeProjects, teamStats.completedTasks])
+  }, [teamStats])
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -417,11 +609,23 @@ export default function TeamHubPage() {
     }
   }
 
-  const filteredMembers = teamMembers.filter(member =>
-    member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.department.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  // REAL SEARCH AND FILTER - Actually filters the team members
+  const filteredMembers = teamMembers.filter(member => {
+    // Search filter
+    const matchesSearch = searchTerm === '' ||
+      member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.email.toLowerCase().includes(searchTerm.toLowerCase())
+
+    // Status filter
+    const matchesStatus = filterStatus === 'all' || member.status === filterStatus
+
+    // Department filter
+    const matchesDepartment = filterDepartment === 'all' || member.department === filterDepartment
+
+    return matchesSearch && matchesStatus && matchesDepartment
+  })
 
   // A+++ LOADING STATE
   if (isLoading) {
@@ -513,12 +717,12 @@ export default function TeamHubPage() {
             variant="outline"
             size="sm"
             onClick={() => {
-              console.log('⚙️ TEAM HUB: Settings opened')
-              console.log('👥 TEAM HUB: Total team members: ' + teamStats.totalMembers)
-              console.log('📊 TEAM HUB: Active projects: ' + teamStats.activeProjects)
-              console.log('🌐 TEAM HUB: Online members: ' + teamStats.onlineMembers)
-              console.log('✅ TEAM HUB: Settings modal ready')
-              toast.info('⚙️ Team Settings', {
+              logger.info('Team settings accessed', {
+                totalMembers: teamStats.totalMembers,
+                activeProjects: teamStats.activeProjects,
+                onlineMembers: teamStats.onlineMembers
+              })
+              toast.info('Team Settings', {
                 description: 'Configure team preferences and permissions'
               })
             }}
@@ -529,22 +733,7 @@ export default function TeamHubPage() {
           <Button
             data-testid="add-member-btn"
             size="sm"
-            onClick={() => {
-              console.log('➕ TEAM HUB: Add member initiated')
-              console.log('📝 TEAM HUB: Opening invitation form')
-              console.log('👥 TEAM HUB: Current team size: ' + teamStats.totalMembers)
-              const memberName = prompt('Enter new member name:')
-              if (memberName) {
-                console.log('📧 TEAM HUB: Sending invitation to: ' + memberName)
-                console.log('✉️ TEAM HUB: Preparing invitation email')
-                console.log('✅ TEAM HUB: Invitation sent successfully')
-                toast.success('✨ Invitation Sent', {
-                  description: 'Team invitation sent to ' + memberName
-                })
-              } else {
-                console.log('❌ TEAM HUB: Invitation cancelled')
-              }
-            }}
+            onClick={handleAddMember}
           >
             <UserPlus className="h-4 w-4 mr-2" />
             Add Member
@@ -684,13 +873,12 @@ export default function TeamHubPage() {
                     variant="outline"
                     className="h-20 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
                     onClick={() => {
-                      console.log('💬 TEAM HUB: Team chat initiated')
-                      console.log('👥 TEAM HUB: Online members: ' + teamStats.onlineMembers)
-                      console.log('📱 TEAM HUB: Opening chat interface')
-                      console.log('🌐 TEAM HUB: Total team members: ' + teamStats.totalMembers)
-                      console.log('✅ TEAM HUB: Chat ready')
-                      toast.success('💬 Team Chat', {
-                        description: teamStats.onlineMembers + ' members online and ready to chat'
+                      logger.info('Team chat initiated', {
+                        onlineMembers: teamStats.onlineMembers,
+                        totalMembers: teamStats.totalMembers
+                      })
+                      toast.success('Team Chat', {
+                        description: `${teamStats.onlineMembers} members online and ready to chat`
                       })
                     }}
                   >
@@ -702,13 +890,12 @@ export default function TeamHubPage() {
                     variant="outline"
                     className="h-20 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
                     onClick={() => {
-                      console.log('📅 TEAM HUB: Schedule view opened')
-                      console.log('📊 TEAM HUB: Loading team calendar')
-                      console.log('🎯 TEAM HUB: Active projects: ' + teamStats.activeProjects)
-                      console.log('👥 TEAM HUB: Team members scheduled: ' + teamStats.totalMembers)
-                      console.log('✅ TEAM HUB: Schedule loaded')
-                      toast.info('📅 Team Schedule', {
-                        description: 'View availability for ' + teamStats.totalMembers + ' team members'
+                      logger.info('Team schedule accessed', {
+                        activeProjects: teamStats.activeProjects,
+                        membersScheduled: teamStats.totalMembers
+                      })
+                      toast.info('Team Schedule', {
+                        description: `View availability for ${teamStats.totalMembers} team members`
                       })
                     }}
                   >
@@ -720,13 +907,12 @@ export default function TeamHubPage() {
                     variant="outline"
                     className="h-20 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
                     onClick={() => {
-                      console.log('📹 TEAM HUB: Video call initiated')
-                      console.log('👥 TEAM HUB: Available participants: ' + teamStats.onlineMembers)
-                      console.log('🎥 TEAM HUB: Setting up video room')
-                      console.log('🌐 TEAM HUB: Total team members: ' + teamStats.totalMembers)
-                      console.log('✅ TEAM HUB: Video call ready')
-                      toast.success('📹 Video Call Starting', {
-                        description: 'Connecting with ' + teamStats.onlineMembers + ' online team members'
+                      logger.info('Video call initiated', {
+                        availableParticipants: teamStats.onlineMembers,
+                        totalMembers: teamStats.totalMembers
+                      })
+                      toast.success('Video Call Starting', {
+                        description: `Connecting with ${teamStats.onlineMembers} online team members`
                       })
                     }}
                   >
@@ -738,13 +924,11 @@ export default function TeamHubPage() {
                     variant="outline"
                     className="h-20 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
                     onClick={() => {
-                      console.log('📊 TEAM HUB: Reports generation initiated')
-                      console.log('📈 TEAM HUB: Gathering team analytics')
-                      console.log('📋 TEAM HUB: Processing performance data')
-                      console.log('👥 TEAM HUB: Team members analyzed: ' + teamStats.totalMembers)
-                      console.log('🎯 TEAM HUB: Active projects: ' + teamStats.activeProjects)
-                      console.log('✅ TEAM HUB: Report ready')
-                      toast.success('📊 Generating Reports', {
+                      logger.info('Team reports accessed', {
+                        membersAnalyzed: teamStats.totalMembers,
+                        activeProjects: teamStats.activeProjects
+                      })
+                      toast.success('Generating Reports', {
                         description: 'Team analytics and performance metrics'
                       })
                     }}
@@ -777,12 +961,12 @@ export default function TeamHubPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  console.log('🔍 TEAM HUB: Filter panel opened')
-                  console.log('📊 TEAM HUB: Available filters: All, Online, By Department, By Role')
-                  console.log('🏢 TEAM HUB: Departments: ' + departments.length)
-                  console.log('👥 TEAM HUB: Total members to filter: ' + teamMembers.length)
-                  console.log('✅ TEAM HUB: Filter options ready')
-                  toast.info('🔍 Filter Options', {
+                  logger.info('Filter panel accessed', {
+                    departments: departments.length,
+                    totalMembers: teamMembers.length,
+                    currentFilters: { status: filterStatus, department: filterDepartment }
+                  })
+                  toast.info('Filter Options', {
                     description: 'Filter by status, department, or role'
                   })
                 }}
@@ -844,18 +1028,15 @@ export default function TeamHubPage() {
                       variant="outline"
                       className="flex-1 hover:bg-blue-50 hover:border-blue-200 transition-colors"
                       onClick={() => {
-                        console.log('👤 TEAM HUB: Member profile opened')
-                        console.log('📛 TEAM HUB: Name: ' + member.name)
-                        console.log('💼 TEAM HUB: Role: ' + member.role)
-                        console.log('🏢 TEAM HUB: Department: ' + member.department)
-                        console.log('📊 TEAM HUB: Projects: ' + member.projects)
-                        console.log('✅ TEAM HUB: Tasks completed: ' + member.tasksCompleted)
-                        console.log('⭐ TEAM HUB: Rating: ' + member.rating)
-                        console.log('📍 TEAM HUB: Location: ' + member.location)
-                        console.log('🌐 TEAM HUB: Status: ' + member.availability)
-                        console.log('✅ TEAM HUB: Opening chat interface')
-                        toast.success('💬 Chat Opened', {
-                          description: 'Starting conversation with ' + member.name
+                        logger.info('Member chat initiated', {
+                          memberId: member.id,
+                          memberName: member.name,
+                          role: member.role,
+                          department: member.department,
+                          status: member.status
+                        })
+                        toast.success('Chat Opened', {
+                          description: `Starting conversation with ${member.name}`
                         })
                       }}
                     >
@@ -867,7 +1048,7 @@ export default function TeamHubPage() {
                       variant="outline"
                       className="hover:bg-green-50 hover:border-green-200 transition-colors"
                       onClick={() => {
-                        console.log('📧 TEAM HUB: Email to:', member.email)
+                        logger.info('Email member', { memberId: member.id, memberName: member.name, email: member.email })
                         window.open(`mailto:${member.email}`, '_blank')
                       }}
                     >
@@ -878,7 +1059,7 @@ export default function TeamHubPage() {
                       variant="outline"
                       className="hover:bg-yellow-50 hover:border-yellow-200 transition-colors"
                       onClick={() => {
-                        console.log('📞 TEAM HUB: Calling:', member.phone)
+                        logger.info('Call member', { memberId: member.id, memberName: member.name, phone: member.phone })
                         window.open(`tel:${member.phone}`, '_blank')
                       }}
                     >
