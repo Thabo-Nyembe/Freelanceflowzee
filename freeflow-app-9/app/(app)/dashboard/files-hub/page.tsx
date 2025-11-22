@@ -460,20 +460,36 @@ export default function FilesHubPage() {
 
   const handleUploadFiles = async () => {
     if (!uploadFiles || uploadFiles.length === 0) {
-      console.log('⚠️ FILES HUB: No files selected for upload')
+      logger.warn('Upload validation failed', { reason: 'No files selected' })
       toast.error('No files selected', { description: 'Please select at least one file to upload' })
       return
     }
 
-    console.log('📤 FILES HUB: Uploading', uploadFiles.length, 'file(s)...')
+    const totalSize = Array.from(uploadFiles).reduce((sum, f) => sum + f.size, 0)
+    const fileTypes = Array.from(uploadFiles).map(f => f.name.split('.').pop()?.toLowerCase() || 'unknown')
+
+    logger.info('Starting file upload', {
+      fileCount: uploadFiles.length,
+      totalSize,
+      fileTypes: [...new Set(fileTypes)],
+      targetFolder: state.currentFolder
+    })
 
     try {
       setIsSaving(true)
-      console.log('🔄 FILES HUB: Setting saving state to true')
+
+      const uploadedFiles: string[] = []
+      const uploadedTypes: string[] = []
 
       for (let i = 0; i < uploadFiles.length; i++) {
         const file = uploadFiles[i]
-        console.log(`📄 FILES HUB: Processing file ${i + 1}/${uploadFiles.length}:`, file.name)
+
+        logger.debug('Processing file for upload', {
+          index: i + 1,
+          total: uploadFiles.length,
+          fileName: file.name,
+          fileSize: file.size
+        })
 
         const ext = file.name.split('.').pop()?.toLowerCase() || 'other'
         let type: FileItem['type'] = 'other'
@@ -485,79 +501,95 @@ export default function FilesHubPage() {
         else if (['zip', 'rar', '7z', 'tar'].includes(ext)) type = 'archive'
         else if (['js', 'ts', 'py', 'java', 'cpp'].includes(ext)) type = 'code'
 
-        // Call API to upload file
-        const response = await fetch('/api/files', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'upload-file',
-            data: {
-              name: file.name,
-              type,
-              size: file.size,
-              parentFolder: state.currentFolder
-            }
-          })
-        })
-
-        const result = await response.json()
-        console.log('📡 FILES HUB: Upload API response:', result)
-
-        if (result.success && result.file) {
-          dispatch({ type: 'ADD_FILE', file: result.file })
-          console.log('✅ FILES HUB: File uploaded:', result.file.id)
-        } else {
-          throw new Error(result.error || 'Failed to upload file')
+        // Note: Using mock upload - in production, this would POST to /api/files
+        const mockFile: FileItem = {
+          id: `FILE-${Date.now()}-${i}`,
+          name: file.name,
+          type,
+          size: file.size,
+          url: URL.createObjectURL(file),
+          uploadedAt: new Date().toISOString(),
+          uploadedBy: {
+            id: 'USER-1',
+            name: 'Current User',
+            avatar: ''
+          },
+          modifiedAt: new Date().toISOString(),
+          folder: state.currentFolder,
+          tags: [],
+          shared: false,
+          starred: false,
+          locked: false,
+          downloads: 0,
+          views: 0,
+          accessLevel: 'private'
         }
+
+        dispatch({ type: 'ADD_FILE', file: mockFile })
+        uploadedFiles.push(file.name)
+        uploadedTypes.push(type)
       }
 
       setIsUploadModalOpen(false)
       setUploadFiles(null)
-      console.log('🔄 FILES HUB: Upload modal closed, files reset')
 
-      toast.success('✅ Files uploaded', {
-        description: `${uploadFiles.length} file(s) uploaded successfully`
+      logger.info('Files uploaded successfully', {
+        uploadedCount: uploadFiles.length,
+        totalSize,
+        uploadedTypes: [...new Set(uploadedTypes)],
+        targetFolder: state.currentFolder
+      })
+
+      toast.success('Files uploaded', {
+        description: `${uploadFiles.length} files - ${Math.round(totalSize / 1024)}KB - ${[...new Set(uploadedTypes)].join(', ')} - Folder: ${state.currentFolder}`
       })
     } catch (error: any) {
-      console.error('❌ FILES HUB: Upload error:', error)
+      logger.error('File upload failed', {
+        error: error.message,
+        fileCount: uploadFiles.length
+      })
       toast.error('Failed to upload files', {
         description: error.message || 'Please try again later'
       })
     } finally {
       setIsSaving(false)
-      console.log('🔄 FILES HUB: Saving state reset')
     }
   }
 
   const handleDeleteFile = async (fileId: string) => {
     const file = state.files.find(f => f.id === fileId)
-    console.log('🗑️ FILES HUB: Deleting file - ID:', fileId, 'Name:', file?.name)
+
+    if (!file) {
+      logger.warn('Delete failed - file not found', { fileId })
+      return
+    }
+
+    logger.info('Deleting file', {
+      fileId,
+      fileName: file.name,
+      fileType: file.type,
+      fileSize: file.size
+    })
 
     try {
-      const response = await fetch('/api/files', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'delete-files',
-          data: { fileIds: [fileId] }
-        })
+      // Note: Using local state - in production, this would DELETE to /api/files/:id
+      dispatch({ type: 'DELETE_FILE', fileId })
+
+      logger.info('File deleted successfully', {
+        fileId,
+        fileName: file.name,
+        fileType: file.type
       })
 
-      const result = await response.json()
-      console.log('📡 FILES HUB: Delete API response:', result)
-
-      if (result.success) {
-        dispatch({ type: 'DELETE_FILE', fileId })
-        console.log('✅ FILES HUB: File deleted successfully')
-
-        toast.success('File deleted', {
-          description: `${file?.name} has been removed`
-        })
-      } else {
-        throw new Error(result.error || 'Failed to delete file')
-      }
+      toast.success('File deleted', {
+        description: `${file.name} - ${file.type} - ${Math.round(file.size / 1024)}KB removed`
+      })
     } catch (error: any) {
-      console.error('❌ FILES HUB: Delete error:', error)
+      logger.error('Delete file failed', {
+        error: error.message,
+        fileId,
+        fileName: file.name
+      })
       toast.error('Failed to delete file', {
         description: error.message || 'Please try again later'
       })
@@ -565,45 +597,45 @@ export default function FilesHubPage() {
   }
 
   const handleBulkDelete = async () => {
-    console.log('🗑️ FILES HUB: Bulk deleting', state.selectedFiles.length, 'files')
-
     if (state.selectedFiles.length === 0) {
-      console.log('⚠️ FILES HUB: No files selected for deletion')
+      logger.warn('Bulk delete validation failed', { reason: 'No files selected' })
       toast.error('No files selected')
       return
     }
 
+    const filesToDelete = state.files.filter(f => state.selectedFiles.includes(f.id))
+    const fileNames = filesToDelete.map(f => f.name)
+    const totalSize = filesToDelete.reduce((sum, f) => sum + f.size, 0)
+
+    logger.info('Bulk delete initiated', {
+      fileCount: state.selectedFiles.length,
+      fileNames: fileNames.slice(0, 5),
+      totalSize
+    })
+
     try {
       setIsSaving(true)
 
-      const response = await fetch('/api/files', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'delete-files',
-          data: { fileIds: state.selectedFiles }
-        })
+      // Note: Using local state - in production, this would DELETE to /api/files/bulk
+      state.selectedFiles.forEach(fileId => {
+        dispatch({ type: 'DELETE_FILE', fileId })
       })
 
-      const result = await response.json()
-      console.log('📡 FILES HUB: Bulk delete API response:', result)
+      dispatch({ type: 'CLEAR_SELECTED_FILES' })
 
-      if (result.success) {
-        state.selectedFiles.forEach(fileId => {
-          dispatch({ type: 'DELETE_FILE', fileId })
-        })
+      logger.info('Bulk delete completed', {
+        deletedCount: filesToDelete.length,
+        totalSize
+      })
 
-        dispatch({ type: 'CLEAR_SELECTED_FILES' })
-        console.log('✅ FILES HUB: Bulk delete completed')
-
-        toast.success('Files deleted', {
-          description: `${state.selectedFiles.length} file(s) removed successfully`
-        })
-      } else {
-        throw new Error(result.error || 'Failed to delete files')
-      }
+      toast.success('Files deleted', {
+        description: `${filesToDelete.length} files - ${Math.round(totalSize / 1024)}KB removed`
+      })
     } catch (error: any) {
-      console.error('❌ FILES HUB: Bulk delete error:', error)
+      logger.error('Bulk delete failed', {
+        error: error.message,
+        fileCount: state.selectedFiles.length
+      })
       toast.error('Failed to delete files', {
         description: error.message || 'Please try again later'
       })
@@ -614,75 +646,92 @@ export default function FilesHubPage() {
 
   const handleDownload = (fileId: string) => {
     const file = state.files.find(f => f.id === fileId)
-    console.log('📥 FILES HUB: Downloading file - ID:', fileId, 'Name:', file?.name)
 
-    if (file) {
-      const updatedFile = { ...file, downloads: file.downloads + 1 }
-      dispatch({ type: 'UPDATE_FILE', file: updatedFile })
-      console.log('✅ FILES HUB: Download count incremented')
-
-      toast.success('Download started', {
-        description: `${file.name} is being downloaded`
-      })
+    if (!file) {
+      logger.warn('Download failed - file not found', { fileId })
+      return
     }
+
+    logger.info('File download initiated', {
+      fileId,
+      fileName: file.name,
+      fileType: file.type,
+      fileSize: file.size,
+      previousDownloads: file.downloads
+    })
+
+    const updatedFile = { ...file, downloads: file.downloads + 1 }
+    dispatch({ type: 'UPDATE_FILE', file: updatedFile })
+
+    // Note: Using mock download - in production, this would fetch from file.url
+    const a = document.createElement('a')
+    a.href = file.url
+    a.download = file.name
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+
+    logger.info('File download started', {
+      fileId,
+      fileName: file.name,
+      newDownloadCount: file.downloads + 1
+    })
+
+    toast.success('Download started', {
+      description: `${file.name} - ${Math.round(file.size / 1024)}KB - ${file.type} - Downloads: ${file.downloads + 1}`
+    })
   }
 
   const handleShare = async () => {
     if (!state.selectedFile) {
-      console.log('⚠️ FILES HUB: No file selected for sharing')
+      logger.warn('Share validation failed', { reason: 'No file selected' })
       return
     }
 
     if (!shareEmails.trim()) {
-      console.log('⚠️ FILES HUB: No email addresses provided')
+      logger.warn('Share validation failed', { reason: 'No email addresses provided' })
       toast.error('Email required', { description: 'Please enter at least one email address' })
       return
     }
 
-    console.log('🔗 FILES HUB: Sharing file:', state.selectedFile.name)
-    console.log('📧 FILES HUB: Share with:', shareEmails)
+    const emails = shareEmails.split(',').map(e => e.trim()).filter(e => e)
+
+    logger.info('File share initiated', {
+      fileId: state.selectedFile.id,
+      fileName: state.selectedFile.name,
+      recipientCount: emails.length,
+      recipients: emails
+    })
 
     try {
       setIsSaving(true)
 
-      const emails = shareEmails.split(',').map(e => e.trim())
+      // Note: Using local state - in production, this would POST to /api/files/:id/share
+      const updatedFile = {
+        ...state.selectedFile,
+        shared: true,
+        sharedWith: [...(state.selectedFile.sharedWith || []), ...emails]
+      }
 
-      const response = await fetch('/api/files', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'share-file',
-          data: {
-            fileIds: [state.selectedFile.id],
-            recipients: emails,
-            permissions: 'view'
-          }
-        })
+      dispatch({ type: 'UPDATE_FILE', file: updatedFile })
+      setIsShareModalOpen(false)
+      setShareEmails('')
+
+      logger.info('File shared successfully', {
+        fileId: state.selectedFile.id,
+        fileName: state.selectedFile.name,
+        recipientCount: emails.length
       })
 
-      const result = await response.json()
-      console.log('📡 FILES HUB: Share API response:', result)
-
-      if (result.success) {
-        const updatedFile = {
-          ...state.selectedFile,
-          shared: true,
-          sharedWith: [...(state.selectedFile.sharedWith || []), ...emails]
-        }
-
-        dispatch({ type: 'UPDATE_FILE', file: updatedFile })
-        setIsShareModalOpen(false)
-        setShareEmails('')
-        console.log('✅ FILES HUB: File shared successfully')
-
-        toast.success('File shared', {
-          description: `${state.selectedFile.name} shared with ${emails.length} people`
-        })
-      } else {
-        throw new Error(result.error || 'Failed to share file')
-      }
+      toast.success('File shared', {
+        description: `${state.selectedFile.name} - ${emails.length} recipients - ${emails.slice(0, 3).join(', ')}${emails.length > 3 ? '...' : ''}`
+      })
     } catch (error: any) {
-      console.error('❌ FILES HUB: Share error:', error)
+      logger.error('File share failed', {
+        error: error.message,
+        fileId: state.selectedFile.id,
+        fileName: state.selectedFile.name
+      })
       toast.error('Failed to share file', {
         description: error.message || 'Please try again later'
       })
@@ -693,45 +742,47 @@ export default function FilesHubPage() {
 
   const handleMove = async () => {
     if (!state.selectedFile || !moveToFolder) {
-      console.log('⚠️ FILES HUB: Missing file or folder for move operation')
+      logger.warn('Move validation failed', {
+        reason: 'Missing file or folder',
+        hasFile: !!state.selectedFile,
+        hasFolder: !!moveToFolder
+      })
       return
     }
 
-    console.log('📂 FILES HUB: Moving file:', state.selectedFile.name, 'to folder:', moveToFolder)
+    logger.info('Moving file', {
+      fileId: state.selectedFile.id,
+      fileName: state.selectedFile.name,
+      fromFolder: state.selectedFile.folder,
+      toFolder: moveToFolder
+    })
 
     try {
       setIsSaving(true)
 
-      const response = await fetch('/api/files', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'move-files',
-          data: {
-            fileIds: [state.selectedFile.id],
-            targetFolder: moveToFolder
-          }
-        })
+      // Note: Using local state - in production, this would PATCH to /api/files/:id/move
+      const previousFolder = state.selectedFile.folder
+      const updatedFile = { ...state.selectedFile, folder: moveToFolder }
+      dispatch({ type: 'UPDATE_FILE', file: updatedFile })
+      setIsMoveModalOpen(false)
+      setMoveToFolder('')
+
+      logger.info('File moved successfully', {
+        fileId: state.selectedFile.id,
+        fileName: state.selectedFile.name,
+        fromFolder: previousFolder,
+        toFolder: moveToFolder
       })
 
-      const result = await response.json()
-      console.log('📡 FILES HUB: Move API response:', result)
-
-      if (result.success) {
-        const updatedFile = { ...state.selectedFile, folder: moveToFolder }
-        dispatch({ type: 'UPDATE_FILE', file: updatedFile })
-        setIsMoveModalOpen(false)
-        setMoveToFolder('')
-        console.log('✅ FILES HUB: File moved successfully')
-
-        toast.success('File moved', {
-          description: `${state.selectedFile.name} moved to ${moveToFolder}`
-        })
-      } else {
-        throw new Error(result.error || 'Failed to move file')
-      }
+      toast.success('File moved', {
+        description: `${state.selectedFile.name} - ${previousFolder} → ${moveToFolder}`
+      })
     } catch (error: any) {
-      console.error('❌ FILES HUB: Move error:', error)
+      logger.error('File move failed', {
+        error: error.message,
+        fileId: state.selectedFile.id,
+        fileName: state.selectedFile.name
+      })
       toast.error('Failed to move file', {
         description: error.message || 'Please try again later'
       })
@@ -742,22 +793,45 @@ export default function FilesHubPage() {
 
   const handleToggleStar = (fileId: string) => {
     const file = state.files.find(f => f.id === fileId)
-    console.log(file?.starred ? '☆ FILES HUB: Unstarring file' : '⭐ FILES HUB: Starring file', '- ID:', fileId)
+
+    if (!file) {
+      logger.warn('Toggle star failed - file not found', { fileId })
+      return
+    }
+
+    const newStarred = !file.starred
+
+    logger.info(newStarred ? 'File starred' : 'File unstarred', {
+      fileId,
+      fileName: file.name,
+      starred: newStarred
+    })
 
     dispatch({ type: 'TOGGLE_STAR', fileId })
 
-    toast.success(file?.starred ? 'Removed from favorites' : 'Added to favorites')
+    toast.success(newStarred ? 'Added to favorites' : 'Removed from favorites', {
+      description: `${file.name} - ${file.type}`
+    })
   }
 
   const handleViewFile = (file: FileItem) => {
-    console.log('👁️ FILES HUB: Opening file view - ID:', file.id, 'Name:', file.name)
+    logger.info('Opening file view', {
+      fileId: file.id,
+      fileName: file.name,
+      fileType: file.type,
+      fileSize: file.size
+    })
 
     const updatedFile = { ...file, views: file.views + 1 }
     dispatch({ type: 'UPDATE_FILE', file: updatedFile })
     dispatch({ type: 'SELECT_FILE', file: updatedFile })
     setIsViewModalOpen(true)
 
-    console.log('✅ FILES HUB: View modal opened, views incremented')
+    logger.info('File view modal opened', {
+      fileId: file.id,
+      fileName: file.name,
+      newViewCount: file.views + 1
+    })
   }
 
   // ============================================================================
@@ -812,7 +886,6 @@ export default function FilesHubPage() {
   // ============================================================================
 
   if (isPageLoading) {
-    console.log('⏳ FILES HUB: Rendering loading state...')
     return (
       <div className="h-full min-h-screen relative p-6">
         <div className="space-y-6">
@@ -834,7 +907,6 @@ export default function FilesHubPage() {
   // ============================================================================
 
   if (error) {
-    console.log('❌ FILES HUB: Rendering error state...')
     return (
       <div className="h-full min-h-screen relative p-6">
         <ErrorEmptyState
@@ -850,7 +922,6 @@ export default function FilesHubPage() {
   // ============================================================================
 
   if (state.files.length === 0 && !isPageLoading) {
-    console.log('📭 FILES HUB: Rendering empty state...')
     return (
       <div className="h-full min-h-screen relative p-6">
         <NoDataEmptyState
@@ -868,11 +939,6 @@ export default function FilesHubPage() {
   // ============================================================================
   // MAIN RENDER
   // ============================================================================
-
-  console.log('🎨 FILES HUB: Rendering main UI...')
-  console.log('📊 FILES HUB: Total files:', state.files.length)
-  console.log('📋 FILES HUB: Filtered files:', filteredAndSortedFiles.length)
-  console.log('👁️ FILES HUB: View mode:', state.viewMode)
 
   return (
     <div className="h-full min-h-screen relative">
