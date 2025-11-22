@@ -18,6 +18,9 @@ import { GlowEffect } from '@/components/ui/glow-effect'
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('TimeTracking')
 
 interface TimeEntry {
   id: string
@@ -162,9 +165,10 @@ export default function TimeTrackingPage() {
   }
 
   const handleEditEntry = (entry: TimeEntry) => {
-    console.log('✏️ TIME TRACKING: Edit entry initiated')
-    console.log('📝 TIME TRACKING: Entry ID - ' + entry.id)
-    console.log('📋 TIME TRACKING: Current description - ' + entry.description)
+    logger.info('Edit entry initiated', {
+      entryId: entry.id,
+      currentDescription: entry.description
+    })
     const newDescription = prompt('Edit description:', entry.description)
     if (newDescription !== null) {
       setTimeEntries((prev) =>
@@ -172,8 +176,10 @@ export default function TimeTrackingPage() {
           e.id === entry.id ? { ...e, description: newDescription } : e
         )
       )
-      console.log('✅ TIME TRACKING: Entry updated successfully')
-      console.log('📝 TIME TRACKING: New description - ' + newDescription)
+      logger.info('Entry updated successfully', {
+        entryId: entry.id,
+        newDescription
+      })
       toast.success('Entry Updated', {
         description: 'Time entry description has been updated successfully'
       })
@@ -181,12 +187,13 @@ export default function TimeTrackingPage() {
   }
 
   const handleDeleteEntry = (entryId: string) => {
-    console.log('🗑️ TIME TRACKING: Delete entry initiated')
-    console.log('📝 TIME TRACKING: Entry ID - ' + entryId)
+    logger.info('Delete entry initiated', { entryId })
     if (confirm('⚠️ Delete Time Entry?\n\nThis action cannot be undone.\n\nAre you sure?')) {
       setTimeEntries((prev) => prev.filter((e) => e.id !== entryId))
-      console.log('✅ TIME TRACKING: Entry deleted successfully')
-      console.log('📊 TIME TRACKING: Remaining entries - ' + (timeEntries.length - 1))
+      logger.info('Entry deleted successfully', {
+        entryId,
+        remainingEntries: timeEntries.length - 1
+      })
       toast.success('Entry Deleted', {
         description: 'Time entry has been permanently removed from your records'
       })
@@ -194,10 +201,12 @@ export default function TimeTrackingPage() {
   }
 
   const handleAddManualEntry = () => {
-    console.log('➕ TIME TRACKING: Manual entry initiated')
-    console.log('📋 TIME TRACKING: Checking project and task selection')
+    logger.info('Manual entry initiated', {
+      projectSelected: !!selectedProject,
+      taskSelected: !!selectedTask
+    })
     if (!selectedProject || !selectedTask) {
-      console.log('⚠️ TIME TRACKING: Missing project or task selection')
+      logger.warn('Missing project or task selection')
       toast.error('Selection Required', {
         description: 'Please select a project and task before adding a manual entry'
       })
@@ -217,9 +226,10 @@ export default function TimeTrackingPage() {
         isRunning: false,
       }
       setTimeEntries((prev) => [...prev, newEntry])
-      console.log('✅ TIME TRACKING: Manual entry added successfully')
-      console.log('⏱️ TIME TRACKING: Duration - ' + hours + ' hour(s)')
-      console.log('📊 TIME TRACKING: Total entries - ' + (timeEntries.length + 1))
+      logger.info('Manual entry added successfully', {
+        duration: hours + ' hour(s)',
+        totalEntries: timeEntries.length + 1
+      })
       toast.success('Manual Entry Added', {
         description: 'Added ' + hours + ' hour(s) to your time tracking records'
       })
@@ -227,9 +237,10 @@ export default function TimeTrackingPage() {
   }
 
   const handleDuplicateEntry = (entry: TimeEntry) => {
-    console.log('📋 TIME TRACKING: Duplicate entry initiated')
-    console.log('📝 TIME TRACKING: Source entry ID - ' + entry.id)
-    console.log('⏱️ TIME TRACKING: Duration - ' + formatTime(entry.duration))
+    logger.info('Duplicate entry initiated', {
+      sourceEntryId: entry.id,
+      duration: formatTime(entry.duration)
+    })
     const duplicated: TimeEntry = {
       ...entry,
       id: Date.now().toString(),
@@ -238,17 +249,20 @@ export default function TimeTrackingPage() {
       isRunning: false,
     }
     setTimeEntries((prev) => [...prev, duplicated])
-    console.log('✅ TIME TRACKING: Entry duplicated successfully')
-    console.log('📊 TIME TRACKING: Total entries - ' + (timeEntries.length + 1))
+    logger.info('Entry duplicated successfully', {
+      newEntryId: duplicated.id,
+      totalEntries: timeEntries.length + 1
+    })
     toast.success('Entry Duplicated', {
       description: 'Time entry has been duplicated and added to your records'
     })
   }
 
   const handleExportReport = (format: 'csv' | 'pdf' | 'json') => {
-    console.log('💾 TIME TRACKING: Export report initiated')
-    console.log('📊 TIME TRACKING: Export format - ' + format.toUpperCase())
-    console.log('📝 TIME TRACKING: Processing ' + timeEntries.length + ' entries')
+    logger.info('Export report initiated', {
+      format: format.toUpperCase(),
+      entryCount: timeEntries.length
+    })
     const data = timeEntries.map((entry) => ({
       project: projects.find((p) => p.id === entry.projectId)?.name || 'Unknown',
       task: projects.find((p) => p.id === entry.projectId)?.tasks.find((t) => t.id === entry.taskId)?.name || 'Unknown',
@@ -281,30 +295,31 @@ export default function TimeTrackingPage() {
     a.click()
     URL.revokeObjectURL(url)
 
-    console.log('✅ TIME TRACKING: Report exported successfully')
-    console.log('📁 TIME TRACKING: Filename - ' + filename)
-    console.log('📊 TIME TRACKING: Total entries exported - ' + data.length)
+    logger.info('Report exported successfully', {
+      filename,
+      entriesExported: data.length
+    })
     toast.success('Report Exported', {
       description: 'Downloaded ' + filename + ' with ' + data.length + ' entries'
     })
   }
 
   const handleFilterByProject = () => {
-    console.log('🔍 TIME TRACKING: Filter options requested')
-    console.log('📋 TIME TRACKING: Available filters - Project, Date Range, Task, Duration')
-    console.log('📊 TIME TRACKING: Current entries - ' + timeEntries.length)
+    logger.debug('Filter options requested', {
+      availableFilters: ['Project', 'Date Range', 'Task', 'Duration'],
+      currentEntries: timeEntries.length
+    })
     toast.info('Filter Options Available', {
       description: 'Filter by Project, Date Range, Task, or Duration'
     })
   }
 
   const handleFilterByDateRange = () => {
-    console.log('📅 TIME TRACKING: Date range filter initiated')
+    logger.debug('Date range filter initiated')
     const start = prompt('Enter start date (YYYY-MM-DD):')
     const end = prompt('Enter end date (YYYY-MM-DD):')
     if (start && end) {
-      console.log('📅 TIME TRACKING: Filtering entries from ' + start + ' to ' + end)
-      console.log('📊 TIME TRACKING: Date range set successfully')
+      logger.info('Date range filter applied', { start, end })
       toast.info('Date Filter Applied', {
         description: 'Filtering entries from ' + start + ' to ' + end
       })
@@ -312,61 +327,56 @@ export default function TimeTrackingPage() {
   }
 
   const handleClearFilters = () => {
-    console.log('🔄 TIME TRACKING: Clear filters initiated')
-    console.log('📊 TIME TRACKING: Resetting all filter settings')
-    console.log('✅ TIME TRACKING: Filters cleared successfully')
+    logger.info('Filters cleared successfully')
     toast.success('Filters Cleared', {
       description: 'All filters have been reset to show all time entries'
     })
   }
 
   const handleGenerateDailyReport = () => {
-    console.log('📊 TIME TRACKING: Daily report generation initiated')
     const today = new Date().toLocaleDateString()
     const todayEntries = timeEntries.filter(
       (e) => e.startTime.toLocaleDateString() === today
     )
     const totalTime = todayEntries.reduce((sum, e) => sum + e.duration, 0)
-    console.log('📅 TIME TRACKING: Report date - ' + today)
-    console.log('📝 TIME TRACKING: Today entries - ' + todayEntries.length)
-    console.log('⏱️ TIME TRACKING: Total time - ' + formatTime(totalTime))
-    console.log('✅ TIME TRACKING: Daily report generated successfully')
+    logger.info('Daily report generated', {
+      date: today,
+      entries: todayEntries.length,
+      totalTime: formatTime(totalTime)
+    })
     toast.info('Daily Report Generated', {
       description: today + ' - ' + todayEntries.length + ' entries, ' + formatTime(totalTime) + ' total'
     })
   }
 
   const handleGenerateWeeklyReport = () => {
-    console.log('📊 TIME TRACKING: Weekly report generation initiated')
     const totalTime = timeEntries.reduce((sum, e) => sum + e.duration, 0)
-    console.log('📝 TIME TRACKING: Total entries - ' + timeEntries.length)
-    console.log('⏱️ TIME TRACKING: Total time - ' + formatTime(totalTime))
-    console.log('📈 TIME TRACKING: Weekly productivity analysis complete')
-    console.log('✅ TIME TRACKING: Weekly report generated successfully')
+    logger.info('Weekly report generated', {
+      entries: timeEntries.length,
+      totalTime: formatTime(totalTime)
+    })
     toast.info('Weekly Report Generated', {
       description: timeEntries.length + ' entries, ' + formatTime(totalTime) + ' total time tracked'
     })
   }
 
   const handleGenerateMonthlyReport = () => {
-    console.log('📊 TIME TRACKING: Monthly report generation initiated')
     const totalTime = timeEntries.reduce((sum, e) => sum + e.duration, 0)
     const avgPerDay = timeEntries.length > 0 ? totalTime / timeEntries.length : 0
-    console.log('📝 TIME TRACKING: Total entries - ' + timeEntries.length)
-    console.log('⏱️ TIME TRACKING: Total time - ' + formatTime(totalTime))
-    console.log('📊 TIME TRACKING: Average per entry - ' + formatTime(avgPerDay))
-    console.log('📈 TIME TRACKING: Monthly analysis complete')
-    console.log('✅ TIME TRACKING: Monthly report generated successfully')
+    logger.info('Monthly report generated', {
+      entries: timeEntries.length,
+      totalTime: formatTime(totalTime),
+      avgPerEntry: formatTime(avgPerDay)
+    })
     toast.info('Monthly Report Generated', {
       description: timeEntries.length + ' entries, ' + formatTime(totalTime) + ' total, ' + formatTime(avgPerDay) + ' avg'
     })
   }
 
   const handleBulkDeleteEntries = () => {
-    console.log('🗑️ TIME TRACKING: Bulk delete initiated')
-    console.log('📊 TIME TRACKING: Current entry count - ' + timeEntries.length)
+    logger.info('Bulk delete initiated', { currentEntries: timeEntries.length })
     if (timeEntries.length === 0) {
-      console.log('⚠️ TIME TRACKING: No entries available to delete')
+      logger.warn('No entries available to delete')
       toast.error('No Entries', {
         description: 'There are no time entries to delete'
       })
@@ -374,8 +384,7 @@ export default function TimeTrackingPage() {
     }
     if (confirm(`⚠️ Delete All ${timeEntries.length} Entries?\n\nThis action cannot be undone.\n\nAre you sure?`)) {
       setTimeEntries([])
-      console.log('✅ TIME TRACKING: All entries deleted successfully')
-      console.log('📊 TIME TRACKING: Entry count reset to 0')
+      logger.info('All entries deleted successfully')
       toast.success('All Entries Deleted', {
         description: 'All time entries have been permanently removed'
       })
@@ -383,12 +392,10 @@ export default function TimeTrackingPage() {
   }
 
   const handleAddProject = () => {
-    console.log('➕ TIME TRACKING: Add project initiated')
+    logger.info('Add project initiated')
     const projectName = prompt('Enter new project name:')
     if (projectName) {
-      console.log('✅ TIME TRACKING: Project added successfully')
-      console.log('📝 TIME TRACKING: Project name - ' + projectName)
-      console.log('📊 TIME TRACKING: Ready to add tasks to project')
+      logger.info('Project added successfully', { projectName })
       toast.success('Project Added', {
         description: 'Project "' + projectName + '" created - you can now add tasks'
       })
@@ -396,20 +403,22 @@ export default function TimeTrackingPage() {
   }
 
   const handleEditProject = () => {
-    console.log('✏️ TIME TRACKING: Edit project initiated')
+    logger.info('Edit project initiated')
     if (!selectedProject) {
-      console.log('⚠️ TIME TRACKING: No project selected')
+      logger.warn('No project selected for editing')
       toast.error('No Project Selected', {
         description: 'Please select a project to edit'
       })
       return
     }
     const project = projects.find((p) => p.id === selectedProject)
-    console.log('📝 TIME TRACKING: Current project - ' + (project?.name || 'Unknown'))
     const newName = prompt('Edit project name:', project?.name)
     if (newName) {
-      console.log('✅ TIME TRACKING: Project updated successfully')
-      console.log('📝 TIME TRACKING: New name - ' + newName)
+      logger.info('Project updated successfully', {
+        projectId: selectedProject,
+        oldName: project?.name,
+        newName
+      })
       toast.success('Project Updated', {
         description: 'Project name changed to "' + newName + '"'
       })
@@ -417,20 +426,21 @@ export default function TimeTrackingPage() {
   }
 
   const handleDeleteProject = () => {
-    console.log('🗑️ TIME TRACKING: Delete project initiated')
+    logger.info('Delete project initiated')
     if (!selectedProject) {
-      console.log('⚠️ TIME TRACKING: No project selected')
+      logger.warn('No project selected for deletion')
       toast.error('No Project Selected', {
         description: 'Please select a project to delete'
       })
       return
     }
     const project = projects.find((p) => p.id === selectedProject)
-    console.log('📝 TIME TRACKING: Target project - ' + (project?.name || 'Unknown'))
     if (confirm(`⚠️ Delete Project: ${project?.name}?\n\nAll time entries will be preserved.\n\nAre you sure?`)) {
       setSelectedProject('')
-      console.log('✅ TIME TRACKING: Project deleted successfully')
-      console.log('📊 TIME TRACKING: Time entries preserved')
+      logger.info('Project deleted successfully', {
+        projectId: selectedProject,
+        projectName: project?.name
+      })
       toast.success('Project Deleted', {
         description: 'Project removed - all time entries have been preserved'
       })
@@ -438,9 +448,9 @@ export default function TimeTrackingPage() {
   }
 
   const handleAddTask = () => {
-    console.log('➕ TIME TRACKING: Add task initiated')
+    logger.info('Add task initiated')
     if (!selectedProject) {
-      console.log('⚠️ TIME TRACKING: No project selected')
+      logger.warn('No project selected for task creation')
       toast.error('No Project Selected', {
         description: 'Please select a project before adding a task'
       })
@@ -448,9 +458,10 @@ export default function TimeTrackingPage() {
     }
     const taskName = prompt('Enter new task name:')
     if (taskName) {
-      console.log('✅ TIME TRACKING: Task added successfully')
-      console.log('📝 TIME TRACKING: Task name - ' + taskName)
-      console.log('📊 TIME TRACKING: Added to current project')
+      logger.info('Task added successfully', {
+        taskName,
+        projectId: selectedProject
+      })
       toast.success('Task Added', {
         description: 'Task "' + taskName + '" added to project'
       })
@@ -458,9 +469,9 @@ export default function TimeTrackingPage() {
   }
 
   const handleEditTask = () => {
-    console.log('✏️ TIME TRACKING: Edit task initiated')
+    logger.info('Edit task initiated')
     if (!selectedTask) {
-      console.log('⚠️ TIME TRACKING: No task selected')
+      logger.warn('No task selected for editing')
       toast.error('No Task Selected', {
         description: 'Please select a task to edit'
       })
@@ -469,11 +480,13 @@ export default function TimeTrackingPage() {
     const task = projects
       .find((p) => p.id === selectedProject)
       ?.tasks.find((t) => t.id === selectedTask)
-    console.log('📝 TIME TRACKING: Current task - ' + (task?.name || 'Unknown'))
     const newName = prompt('Edit task name:', task?.name)
     if (newName) {
-      console.log('✅ TIME TRACKING: Task updated successfully')
-      console.log('📝 TIME TRACKING: New name - ' + newName)
+      logger.info('Task updated successfully', {
+        taskId: selectedTask,
+        oldName: task?.name,
+        newName
+      })
       toast.success('Task Updated', {
         description: 'Task name changed to "' + newName + '"'
       })
@@ -481,9 +494,9 @@ export default function TimeTrackingPage() {
   }
 
   const handleDeleteTask = () => {
-    console.log('🗑️ TIME TRACKING: Delete task initiated')
+    logger.info('Delete task initiated')
     if (!selectedTask) {
-      console.log('⚠️ TIME TRACKING: No task selected')
+      logger.warn('No task selected for deletion')
       toast.error('No Task Selected', {
         description: 'Please select a task to delete'
       })
@@ -492,11 +505,12 @@ export default function TimeTrackingPage() {
     const task = projects
       .find((p) => p.id === selectedProject)
       ?.tasks.find((t) => t.id === selectedTask)
-    console.log('📝 TIME TRACKING: Target task - ' + (task?.name || 'Unknown'))
     if (confirm(`⚠️ Delete Task: ${task?.name}?\n\nAll time entries will be preserved.\n\nAre you sure?`)) {
       setSelectedTask('')
-      console.log('✅ TIME TRACKING: Task deleted successfully')
-      console.log('📊 TIME TRACKING: Time entries preserved')
+      logger.info('Task deleted successfully', {
+        taskId: selectedTask,
+        taskName: task?.name
+      })
       toast.success('Task Deleted', {
         description: 'Task removed - all time entries have been preserved'
       })
@@ -504,21 +518,19 @@ export default function TimeTrackingPage() {
   }
 
   const handleClearDescription = () => {
-    console.log('🔄 TIME TRACKING: Clear description initiated')
-    console.log('📝 TIME TRACKING: Current description - ' + (description || 'empty'))
+    logger.debug('Description cleared', {
+      previousDescription: description || 'empty'
+    })
     setDescription('')
-    console.log('✅ TIME TRACKING: Description cleared successfully')
     toast.success('Description Cleared', {
       description: 'Task description has been reset'
     })
   }
 
   const handleArchiveEntry = (entryId: string) => {
-    console.log('📦 TIME TRACKING: Archive entry initiated')
-    console.log('📝 TIME TRACKING: Entry ID - ' + entryId)
+    logger.info('Archive entry initiated', { entryId })
     if (confirm('Archive this time entry?\n\nArchived entries can be restored later.')) {
-      console.log('✅ TIME TRACKING: Entry archived successfully')
-      console.log('📊 TIME TRACKING: Entry can be restored from archive')
+      logger.info('Entry archived successfully', { entryId })
       toast.success('Entry Archived', {
         description: 'Time entry archived - can be restored later'
       })
@@ -526,18 +538,17 @@ export default function TimeTrackingPage() {
   }
 
   const handleViewDetailedStats = () => {
-    console.log('📈 TIME TRACKING: Detailed statistics requested')
-    console.log('⏱️ TIME TRACKING: Calculating total time across all entries')
     const totalTime = timeEntries.reduce((sum, e) => sum + e.duration, 0)
     const projectBreakdown = projects.map((project) => {
       const projectEntries = timeEntries.filter((e) => e.projectId === project.id)
       const projectTime = projectEntries.reduce((sum, e) => sum + e.duration, 0)
       return `${project.name}: ${formatTime(projectTime)}`
     }).join('\n')
-    console.log('📊 TIME TRACKING: Total time - ' + formatTime(totalTime))
-    console.log('📝 TIME TRACKING: Total entries - ' + timeEntries.length)
-    console.log('📈 TIME TRACKING: Project breakdown calculated')
-    console.log('✅ TIME TRACKING: Statistics generated successfully')
+    logger.info('Detailed statistics generated', {
+      totalTime: formatTime(totalTime),
+      totalEntries: timeEntries.length,
+      projectCount: projects.length
+    })
     toast.info('Detailed Statistics', {
       description: 'Total: ' + formatTime(totalTime) + ' across ' + timeEntries.length + ' entries'
     })
