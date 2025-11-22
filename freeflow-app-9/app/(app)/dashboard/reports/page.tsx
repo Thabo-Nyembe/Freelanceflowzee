@@ -403,36 +403,38 @@ export default function ReportsPage() {
 
     try {
       setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 1000))
 
-      const newReport: Report = {
-        id: `RPT-${String(state.reports.length + 1).padStart(3, '0')}`,
-        name: reportForm.name,
-        type: reportForm.type,
-        status: 'draft',
-        description: reportForm.description,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        createdBy: 'Current User',
-        dateRange: {
-          start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-          end: new Date().toISOString()
-        },
-        frequency: reportForm.frequency,
-        dataPoints: 0,
-        fileSize: 0,
-        recipients: [],
-        tags: []
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          data: {
+            name: reportForm.name,
+            type: reportForm.type,
+            description: reportForm.description,
+            frequency: reportForm.frequency
+          }
+        })
+      })
+
+      const result = await response.json()
+      console.log('📡 REPORTS: Create API response:', result)
+
+      if (result.success) {
+        dispatch({ type: 'ADD_REPORT', report: result.report })
+        toast.success('Report created successfully')
+        setIsCreateModalOpen(false)
+        setReportForm({ name: '', type: 'analytics', description: '', frequency: 'once' })
+        console.log('✅ REPORTS: Report created')
+      } else {
+        throw new Error(result.error || 'Failed to create report')
       }
-
-      dispatch({ type: 'ADD_REPORT', report: newReport })
-      toast.success('Report created successfully')
-      setIsCreateModalOpen(false)
-      setReportForm({ name: '', type: 'analytics', description: '', frequency: 'once' })
-      console.log('✅ REPORTS: Report created')
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ REPORTS: Create error:', error)
-      toast.error('Failed to create report')
+      toast.error('Failed to create report', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -452,21 +454,38 @@ export default function ReportsPage() {
       dispatch({ type: 'UPDATE_REPORT', report: updatedReport })
       toast.info('Generating report...')
 
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'generate',
+          reportId
+        })
+      })
 
-      const readyReport = {
-        ...updatedReport,
-        status: 'ready' as ReportStatus,
-        dataPoints: Math.floor(Math.random() * 10000) + 1000,
-        fileSize: Math.floor(Math.random() * 5000000) + 100000
+      const result = await response.json()
+      console.log('📡 REPORTS: Generate API response:', result)
+
+      if (result.success) {
+        const readyReport = {
+          ...updatedReport,
+          status: 'ready' as ReportStatus,
+          dataPoints: result.dataPoints,
+          fileSize: result.fileSize,
+          updatedAt: result.report.updatedAt
+        }
+
+        dispatch({ type: 'UPDATE_REPORT', report: readyReport })
+        toast.success('Report generated successfully')
+        console.log('✅ REPORTS: Report generated')
+      } else {
+        throw new Error(result.error || 'Failed to generate report')
       }
-
-      dispatch({ type: 'UPDATE_REPORT', report: readyReport })
-      toast.success('Report generated successfully')
-      console.log('✅ REPORTS: Report generated')
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ REPORTS: Generation error:', error)
-      toast.error('Failed to generate report')
+      toast.error('Failed to generate report', {
+        description: error.message || 'Please try again later'
+      })
     }
   }
 
@@ -475,15 +494,31 @@ export default function ReportsPage() {
     console.log('🗑️ REPORTS: Deleting report - ID:', reportId, 'Name:', report?.name)
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 800))
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          reportId
+        })
+      })
 
-      dispatch({ type: 'DELETE_REPORT', reportId })
-      toast.success('Report deleted successfully')
-      setIsDeleteModalOpen(false)
-      console.log('✅ REPORTS: Report deleted')
-    } catch (error) {
+      const result = await response.json()
+      console.log('📡 REPORTS: Delete API response:', result)
+
+      if (result.success) {
+        dispatch({ type: 'DELETE_REPORT', reportId })
+        toast.success('Report deleted successfully')
+        setIsDeleteModalOpen(false)
+        console.log('✅ REPORTS: Report deleted')
+      } else {
+        throw new Error(result.error || 'Failed to delete report')
+      }
+    } catch (error: any) {
       console.error('❌ REPORTS: Delete error:', error)
-      toast.error('Failed to delete report')
+      toast.error('Failed to delete report', {
+        description: error.message || 'Please try again later'
+      })
     }
   }
 
@@ -495,14 +530,34 @@ export default function ReportsPage() {
 
     try {
       setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 1500))
 
-      toast.success(`Report exported as ${exportFormat.toUpperCase()}`)
-      setIsExportModalOpen(false)
-      console.log('✅ REPORTS: Export complete')
-    } catch (error) {
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'export',
+          reportId: state.selectedReport.id,
+          exportFormat
+        })
+      })
+
+      const result = await response.json()
+      console.log('📡 REPORTS: Export API response:', result)
+
+      if (result.success) {
+        toast.success(`Report exported as ${exportFormat.toUpperCase()}`, {
+          description: result.downloadUrl ? 'Download started' : 'Export completed'
+        })
+        setIsExportModalOpen(false)
+        console.log('✅ REPORTS: Export complete')
+      } else {
+        throw new Error(result.error || 'Failed to export report')
+      }
+    } catch (error: any) {
       console.error('❌ REPORTS: Export error:', error)
-      toast.error('Failed to export report')
+      toast.error('Failed to export report', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -520,22 +575,42 @@ export default function ReportsPage() {
 
     try {
       setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 1000))
 
-      const updatedReport = {
-        ...state.selectedReport,
-        status: 'scheduled' as ReportStatus,
-        nextRun: new Date(scheduleTime).toISOString()
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'schedule',
+          reportId: state.selectedReport.id,
+          scheduleTime
+        })
+      })
+
+      const result = await response.json()
+      console.log('📡 REPORTS: Schedule API response:', result)
+
+      if (result.success) {
+        const updatedReport = {
+          ...state.selectedReport,
+          status: 'scheduled' as ReportStatus,
+          nextRun: result.nextRun
+        }
+
+        dispatch({ type: 'UPDATE_REPORT', report: updatedReport })
+        toast.success('Report scheduled successfully', {
+          description: `Next run: ${new Date(result.nextRun).toLocaleString()}`
+        })
+        setIsScheduleModalOpen(false)
+        setScheduleTime('')
+        console.log('✅ REPORTS: Report scheduled')
+      } else {
+        throw new Error(result.error || 'Failed to schedule report')
       }
-
-      dispatch({ type: 'UPDATE_REPORT', report: updatedReport })
-      toast.success('Report scheduled successfully')
-      setIsScheduleModalOpen(false)
-      setScheduleTime('')
-      console.log('✅ REPORTS: Report scheduled')
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ REPORTS: Schedule error:', error)
-      toast.error('Failed to schedule report')
+      toast.error('Failed to schedule report', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
