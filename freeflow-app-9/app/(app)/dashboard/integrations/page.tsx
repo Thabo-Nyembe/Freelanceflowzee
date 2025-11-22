@@ -444,19 +444,36 @@ export default function IntegrationsPage() {
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 1500))
-
-      dispatch({ type: 'CONNECT_INTEGRATION', integrationId: state.selectedIntegration.id })
-      setIsConnectModalOpen(false)
-      setApiKey('')
-      console.log('✅ INTEGRATIONS: Integration connected successfully')
-
-      toast.success(`${state.selectedIntegration.name} connected`, {
-        description: 'Integration is now active and syncing'
+      const response = await fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'connect',
+          integrationId: state.selectedIntegration.id,
+          apiKey
+        })
       })
-    } catch (error) {
+
+      const result = await response.json()
+      console.log('📡 INTEGRATIONS: Connect API response:', result)
+
+      if (result.success) {
+        dispatch({ type: 'CONNECT_INTEGRATION', integrationId: state.selectedIntegration.id })
+        setIsConnectModalOpen(false)
+        setApiKey('')
+        console.log('✅ INTEGRATIONS: Integration connected successfully')
+
+        toast.success(`${state.selectedIntegration.name} connected`, {
+          description: 'Integration is now active and syncing'
+        })
+      } else {
+        throw new Error(result.error || 'Failed to connect integration')
+      }
+    } catch (error: any) {
       console.error('❌ INTEGRATIONS: Connection error:', error)
-      toast.error('Failed to connect integration')
+      toast.error('Failed to connect integration', {
+        description: error.message || 'Please check your API key and try again'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -473,16 +490,32 @@ export default function IntegrationsPage() {
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'disconnect',
+          integrationId: state.selectedIntegration.id
+        })
+      })
 
-      dispatch({ type: 'DISCONNECT_INTEGRATION', integrationId: state.selectedIntegration.id })
-      setIsDisconnectModalOpen(false)
-      console.log('✅ INTEGRATIONS: Integration disconnected successfully')
+      const result = await response.json()
+      console.log('📡 INTEGRATIONS: Disconnect API response:', result)
 
-      toast.success(`${state.selectedIntegration.name} disconnected`)
-    } catch (error) {
+      if (result.success) {
+        dispatch({ type: 'DISCONNECT_INTEGRATION', integrationId: state.selectedIntegration.id })
+        setIsDisconnectModalOpen(false)
+        console.log('✅ INTEGRATIONS: Integration disconnected successfully')
+
+        toast.success(`${state.selectedIntegration.name} disconnected`)
+      } else {
+        throw new Error(result.error || 'Failed to disconnect integration')
+      }
+    } catch (error: any) {
       console.error('❌ INTEGRATIONS: Disconnection error:', error)
-      toast.error('Failed to disconnect integration')
+      toast.error('Failed to disconnect integration', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -496,18 +529,31 @@ export default function IntegrationsPage() {
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const response = await fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'test',
+          integrationId: state.selectedIntegration.id
+        })
+      })
 
-      const success = Math.random() > 0.2
-      console.log(success ? '✅ INTEGRATIONS: Connection test successful' : '❌ INTEGRATIONS: Connection test failed')
+      const result = await response.json()
+      console.log('📡 INTEGRATIONS: Test API response:', result)
 
-      toast[success ? 'success' : 'error'](
-        success ? 'Connection test successful' : 'Connection test failed',
-        { description: success ? 'Integration is working correctly' : 'Please check your configuration' }
-      )
-    } catch (error) {
+      if (result.success) {
+        console.log('✅ INTEGRATIONS: Connection test successful')
+        toast.success('Connection test successful', {
+          description: result.details ? `Response time: ${result.details.responseTime}` : 'Integration is working correctly'
+        })
+      } else {
+        throw new Error(result.error || 'Connection test failed')
+      }
+    } catch (error: any) {
       console.error('❌ INTEGRATIONS: Test error:', error)
-      toast.error('Failed to test connection')
+      toast.error('Connection test failed', {
+        description: error.message || 'Please check your configuration'
+      })
     } finally {
       setIsSaving(false)
     }
