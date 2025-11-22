@@ -634,11 +634,10 @@ export default function VoiceCollaborationPage() {
     }
 
     try {
-      console.log('⏳ VOICE COLLABORATION: Simulating room creation...')
+      console.log('⏳ VOICE COLLABORATION: Creating room (local state)...')
       dispatch({ type: 'SET_LOADING', isLoading: true })
 
-      await new Promise(resolve => setTimeout(resolve, 1500))
-
+      // Note: Using local state - in production, this would POST to /api/voice-rooms
       const newRoom: VoiceRoom = {
         id: `ROOM-${Date.now()}`,
         name: roomName,
@@ -674,7 +673,9 @@ export default function VoiceCollaborationPage() {
       setRoomPassword('')
       setShowCreateRoomModal(false)
 
-      toast.success('Voice room created successfully')
+      toast.success('🎙️ Voice room created', {
+        description: `${newRoom.name} is now active`
+      })
       announce('Voice room created', 'polite')
     } catch (error) {
       console.log('❌ VOICE COLLABORATION: Create room error:', error)
@@ -713,11 +714,12 @@ export default function VoiceCollaborationPage() {
     }
 
     try {
-      console.log('⏳ VOICE COLLABORATION: Joining room...')
-      toast.info('Joining room...')
+      console.log('⏳ VOICE COLLABORATION: Joining room (local state)...')
+      toast.info('🚪 Joining room...', {
+        description: 'Connecting to voice channel'
+      })
 
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
+      // Note: Using local state - in production, this would POST to /api/voice-rooms/join
       const newParticipant: VoiceParticipant = {
         id: `PART-${Date.now()}`,
         userId: 'USER-CURRENT',
@@ -735,7 +737,9 @@ export default function VoiceCollaborationPage() {
       dispatch({ type: 'JOIN_ROOM', roomId: room.id, participant: newParticipant })
       console.log('✅ VOICE COLLABORATION: Joined room successfully')
 
-      toast.success(`Joined ${room.name}`)
+      toast.success(`✅ Joined ${room.name}`, {
+        description: `You are now connected as ${newParticipant.role}`
+      })
       announce(`Joined ${room.name}`, 'polite')
     } catch (error) {
       console.log('❌ VOICE COLLABORATION: Join room error:', error)
