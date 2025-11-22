@@ -472,8 +472,6 @@ export default function FilesHubPage() {
         const file = uploadFiles[i]
         console.log(`📄 FILES HUB: Processing file ${i + 1}/${uploadFiles.length}:`, file.name)
 
-        await new Promise(resolve => setTimeout(resolve, 500))
-
         const ext = file.name.split('.').pop()?.toLowerCase() || 'other'
         let type: FileItem['type'] = 'other'
 
@@ -484,33 +482,30 @@ export default function FilesHubPage() {
         else if (['zip', 'rar', '7z', 'tar'].includes(ext)) type = 'archive'
         else if (['js', 'ts', 'py', 'java', 'cpp'].includes(ext)) type = 'code'
 
-        const newFile: FileItem = {
-          id: `F-${String(state.files.length + i + 1).padStart(3, '0')}`,
-          name: file.name,
-          type,
-          size: file.size,
-          url: `/files/${file.name}`,
-          uploadedAt: new Date().toISOString(),
-          uploadedBy: {
-            id: 'current-user',
-            name: 'Current User',
-            avatar: '/avatars/current.jpg'
-          },
-          modifiedAt: new Date().toISOString(),
-          folder: 'Uploads',
-          tags: [],
-          shared: false,
-          starred: false,
-          locked: false,
-          downloads: 0,
-          views: 0,
-          version: 1,
-          extension: ext,
-          accessLevel: 'private'
-        }
+        // Call API to upload file
+        const response = await fetch('/api/files', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'upload-file',
+            data: {
+              name: file.name,
+              type,
+              size: file.size,
+              parentFolder: state.currentFolder
+            }
+          })
+        })
 
-        console.log('✅ FILES HUB: File created:', newFile.id)
-        dispatch({ type: 'ADD_FILE', file: newFile })
+        const result = await response.json()
+        console.log('📡 FILES HUB: Upload API response:', result)
+
+        if (result.success && result.file) {
+          dispatch({ type: 'ADD_FILE', file: result.file })
+          console.log('✅ FILES HUB: File uploaded:', result.file.id)
+        } else {
+          throw new Error(result.error || 'Failed to upload file')
+        }
       }
 
       setIsUploadModalOpen(false)
@@ -520,9 +515,11 @@ export default function FilesHubPage() {
       toast.success('✅ Files uploaded', {
         description: `${uploadFiles.length} file(s) uploaded successfully`
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ FILES HUB: Upload error:', error)
-      toast.error('Failed to upload files')
+      toast.error('Failed to upload files', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
       console.log('🔄 FILES HUB: Saving state reset')
@@ -534,17 +531,33 @@ export default function FilesHubPage() {
     console.log('🗑️ FILES HUB: Deleting file - ID:', fileId, 'Name:', file?.name)
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      dispatch({ type: 'DELETE_FILE', fileId })
-      console.log('✅ FILES HUB: File deleted successfully')
-
-      toast.success('File deleted', {
-        description: `${file?.name} has been removed`
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete-files',
+          data: { fileIds: [fileId] }
+        })
       })
-    } catch (error) {
+
+      const result = await response.json()
+      console.log('📡 FILES HUB: Delete API response:', result)
+
+      if (result.success) {
+        dispatch({ type: 'DELETE_FILE', fileId })
+        console.log('✅ FILES HUB: File deleted successfully')
+
+        toast.success('File deleted', {
+          description: `${file?.name} has been removed`
+        })
+      } else {
+        throw new Error(result.error || 'Failed to delete file')
+      }
+    } catch (error: any) {
       console.error('❌ FILES HUB: Delete error:', error)
-      toast.error('Failed to delete file')
+      toast.error('Failed to delete file', {
+        description: error.message || 'Please try again later'
+      })
     }
   }
 
@@ -560,21 +573,37 @@ export default function FilesHubPage() {
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      state.selectedFiles.forEach(fileId => {
-        dispatch({ type: 'DELETE_FILE', fileId })
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete-files',
+          data: { fileIds: state.selectedFiles }
+        })
       })
 
-      dispatch({ type: 'CLEAR_SELECTED_FILES' })
-      console.log('✅ FILES HUB: Bulk delete completed')
+      const result = await response.json()
+      console.log('📡 FILES HUB: Bulk delete API response:', result)
 
-      toast.success('Files deleted', {
-        description: `${state.selectedFiles.length} file(s) removed successfully`
-      })
-    } catch (error) {
+      if (result.success) {
+        state.selectedFiles.forEach(fileId => {
+          dispatch({ type: 'DELETE_FILE', fileId })
+        })
+
+        dispatch({ type: 'CLEAR_SELECTED_FILES' })
+        console.log('✅ FILES HUB: Bulk delete completed')
+
+        toast.success('Files deleted', {
+          description: `${state.selectedFiles.length} file(s) removed successfully`
+        })
+      } else {
+        throw new Error(result.error || 'Failed to delete files')
+      }
+    } catch (error: any) {
       console.error('❌ FILES HUB: Bulk delete error:', error)
-      toast.error('Failed to delete files')
+      toast.error('Failed to delete files', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -613,26 +642,47 @@ export default function FilesHubPage() {
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
       const emails = shareEmails.split(',').map(e => e.trim())
-      const updatedFile = {
-        ...state.selectedFile,
-        shared: true,
-        sharedWith: [...(state.selectedFile.sharedWith || []), ...emails]
-      }
 
-      dispatch({ type: 'UPDATE_FILE', file: updatedFile })
-      setIsShareModalOpen(false)
-      setShareEmails('')
-      console.log('✅ FILES HUB: File shared successfully')
-
-      toast.success('File shared', {
-        description: `${state.selectedFile.name} shared with ${emails.length} people`
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'share-file',
+          data: {
+            fileIds: [state.selectedFile.id],
+            recipients: emails,
+            permissions: 'view'
+          }
+        })
       })
-    } catch (error) {
+
+      const result = await response.json()
+      console.log('📡 FILES HUB: Share API response:', result)
+
+      if (result.success) {
+        const updatedFile = {
+          ...state.selectedFile,
+          shared: true,
+          sharedWith: [...(state.selectedFile.sharedWith || []), ...emails]
+        }
+
+        dispatch({ type: 'UPDATE_FILE', file: updatedFile })
+        setIsShareModalOpen(false)
+        setShareEmails('')
+        console.log('✅ FILES HUB: File shared successfully')
+
+        toast.success('File shared', {
+          description: `${state.selectedFile.name} shared with ${emails.length} people`
+        })
+      } else {
+        throw new Error(result.error || 'Failed to share file')
+      }
+    } catch (error: any) {
       console.error('❌ FILES HUB: Share error:', error)
-      toast.error('Failed to share file')
+      toast.error('Failed to share file', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -649,20 +699,39 @@ export default function FilesHubPage() {
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 800))
-
-      const updatedFile = { ...state.selectedFile, folder: moveToFolder }
-      dispatch({ type: 'UPDATE_FILE', file: updatedFile })
-      setIsMoveModalOpen(false)
-      setMoveToFolder('')
-      console.log('✅ FILES HUB: File moved successfully')
-
-      toast.success('File moved', {
-        description: `${state.selectedFile.name} moved to ${moveToFolder}`
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'move-files',
+          data: {
+            fileIds: [state.selectedFile.id],
+            targetFolder: moveToFolder
+          }
+        })
       })
-    } catch (error) {
+
+      const result = await response.json()
+      console.log('📡 FILES HUB: Move API response:', result)
+
+      if (result.success) {
+        const updatedFile = { ...state.selectedFile, folder: moveToFolder }
+        dispatch({ type: 'UPDATE_FILE', file: updatedFile })
+        setIsMoveModalOpen(false)
+        setMoveToFolder('')
+        console.log('✅ FILES HUB: File moved successfully')
+
+        toast.success('File moved', {
+          description: `${state.selectedFile.name} moved to ${moveToFolder}`
+        })
+      } else {
+        throw new Error(result.error || 'Failed to move file')
+      }
+    } catch (error: any) {
       console.error('❌ FILES HUB: Move error:', error)
-      toast.error('Failed to move file')
+      toast.error('Failed to move file', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
