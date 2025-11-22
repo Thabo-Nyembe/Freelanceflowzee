@@ -534,43 +534,43 @@ export default function ClientsPage() {
       setIsSaving(true)
       console.log('🔄 CLIENTS: Setting saving state to true')
 
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const response = await fetch('/api/clients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          data: formData
+        })
+      })
 
-      const newClient: Client = {
-        id: `CL-${String(state.clients.length + 1).padStart(3, '0')}`,
-        name: formData.name!,
-        company: formData.company || '',
-        email: formData.email!,
-        phone: formData.phone || '',
-        location: formData.location || '',
-        country: formData.country || '',
-        timezone: formData.timezone || '',
-        projects: 0,
-        totalSpend: 0,
-        rating: 0,
-        status: (formData.status as Client['status']) || 'lead',
-        industry: formData.industry,
-        website: formData.website,
-        tags: formData.tags || [],
-        notes: formData.notes,
-        assignedTo: formData.assignedTo,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+      console.log('📡 CLIENTS: API response status:', response.status)
+
+      if (!response.ok) {
+        throw new Error('Failed to create client')
       }
 
-      console.log('✅ CLIENTS: New client created:', newClient.id)
-      dispatch({ type: 'ADD_CLIENT', client: newClient })
+      const result = await response.json()
+      console.log('✅ CLIENTS: API response:', result)
 
-      setIsAddClientModalOpen(false)
-      setFormData({})
-      console.log('🔄 CLIENTS: Form reset, modal closed')
+      if (result.success) {
+        console.log('✅ CLIENTS: New client created:', result.client.id)
+        dispatch({ type: 'ADD_CLIENT', client: result.client })
 
-      toast.success('✅ Client added', {
-        description: `${newClient.name} has been added to your client list`
-      })
-    } catch (error) {
+        setIsAddClientModalOpen(false)
+        setFormData({})
+        console.log('🔄 CLIENTS: Form reset, modal closed')
+
+        toast.success('✅ Client added', {
+          description: `${result.client.name} has been added to your client list`
+        })
+      } else {
+        throw new Error(result.error || 'Failed to create client')
+      }
+    } catch (error: any) {
       console.error('❌ CLIENTS: Add client error:', error)
-      toast.error('Failed to add client')
+      toast.error('Failed to add client', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
       console.log('🔄 CLIENTS: Saving state reset')
@@ -580,6 +580,7 @@ export default function ClientsPage() {
   const handleUpdateClient = async () => {
     if (!state.selectedClient || !formData.name || !formData.email) {
       console.log('⚠️ CLIENTS: Update validation failed')
+      toast.error('Required fields missing')
       return
     }
 
@@ -588,43 +589,85 @@ export default function ClientsPage() {
 
     try {
       setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 1500))
 
-      const updatedClient: Client = {
-        ...state.selectedClient,
-        ...formData,
-        updatedAt: new Date().toISOString()
-      } as Client
-
-      console.log('✅ CLIENTS: Client updated successfully')
-      dispatch({ type: 'UPDATE_CLIENT', client: updatedClient })
-
-      setIsEditClientModalOpen(false)
-      setFormData({})
-
-      toast.success('✅ Client updated', {
-        description: `${updatedClient.name}'s information has been updated`
+      const response = await fetch('/api/clients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          clientId: state.selectedClient.id,
+          data: formData
+        })
       })
-    } catch (error) {
+
+      const result = await response.json()
+      console.log('✅ CLIENTS: Update API response:', result)
+
+      if (result.success) {
+        const updatedClient: Client = {
+          ...state.selectedClient,
+          ...formData,
+          updatedAt: new Date().toISOString()
+        } as Client
+
+        console.log('✅ CLIENTS: Client updated successfully')
+        dispatch({ type: 'UPDATE_CLIENT', client: updatedClient })
+
+        setIsEditClientModalOpen(false)
+        setFormData({})
+
+        toast.success('✅ Client updated', {
+          description: `${updatedClient.name}'s information has been updated`
+        })
+      } else {
+        throw new Error(result.error || 'Failed to update client')
+      }
+    } catch (error: any) {
       console.error('❌ CLIENTS: Update client error:', error)
-      toast.error('Failed to update client')
+      toast.error('Failed to update client', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
   }
 
-  const handleDeleteClient = (clientId: string) => {
+  const handleDeleteClient = async (clientId: string) => {
     const client = state.clients.find(c => c.id === clientId)
     console.log('🗑️ CLIENTS: Delete request for:', clientId)
 
     if (confirm(`⚠️ Delete client ${client?.name}? This action cannot be undone.`)) {
       console.log('✅ CLIENTS: User confirmed deletion')
-      dispatch({ type: 'DELETE_CLIENT', clientId })
-      console.log('✅ CLIENTS: Client deleted successfully')
 
-      toast.success('🗑️ Client deleted', {
-        description: `${client?.name} has been removed`
-      })
+      try {
+        const response = await fetch('/api/clients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'delete',
+            clientId
+          })
+        })
+
+        const result = await response.json()
+        console.log('✅ CLIENTS: Delete API response:', result)
+
+        if (result.success) {
+          dispatch({ type: 'DELETE_CLIENT', clientId })
+          console.log('✅ CLIENTS: Client deleted successfully')
+
+          toast.success('🗑️ Client deleted', {
+            description: `${client?.name} has been removed`
+          })
+        } else {
+          throw new Error(result.error || 'Failed to delete client')
+        }
+      } catch (error: any) {
+        console.error('❌ CLIENTS: Delete error:', error)
+        toast.error('Failed to delete client', {
+          description: error.message || 'Please try again later'
+        })
+      }
     } else {
       console.log('❌ CLIENTS: User canceled deletion')
     }
@@ -711,7 +754,7 @@ export default function ClientsPage() {
     }
   }
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (state.selectedClients.length === 0) {
       console.log('⚠️ CLIENTS: No clients selected for bulk delete')
       return
@@ -721,12 +764,36 @@ export default function ClientsPage() {
 
     if (confirm(`⚠️ Delete ${state.selectedClients.length} clients? This action cannot be undone.`)) {
       console.log('✅ CLIENTS: User confirmed bulk deletion')
-      state.selectedClients.forEach(id => {
-        dispatch({ type: 'DELETE_CLIENT', clientId: id })
-      })
-      dispatch({ type: 'CLEAR_SELECTED_CLIENTS' })
-      console.log('✅ CLIENTS: Bulk deletion complete')
-      toast.success(`🗑️ ${state.selectedClients.length} clients deleted`)
+
+      try {
+        const response = await fetch('/api/clients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'bulk-delete',
+            clientIds: state.selectedClients
+          })
+        })
+
+        const result = await response.json()
+        console.log('✅ CLIENTS: Bulk delete API response:', result)
+
+        if (result.success) {
+          state.selectedClients.forEach(id => {
+            dispatch({ type: 'DELETE_CLIENT', clientId: id })
+          })
+          dispatch({ type: 'CLEAR_SELECTED_CLIENTS' })
+          console.log('✅ CLIENTS: Bulk deletion complete')
+          toast.success(`🗑️ ${result.deletedCount} clients deleted`)
+        } else {
+          throw new Error(result.error || 'Failed to delete clients')
+        }
+      } catch (error: any) {
+        console.error('❌ CLIENTS: Bulk delete error:', error)
+        toast.error('Failed to delete clients', {
+          description: error.message || 'Please try again later'
+        })
+      }
     } else {
       console.log('❌ CLIENTS: User canceled bulk deletion')
     }
@@ -738,18 +805,42 @@ export default function ClientsPage() {
     const client = state.clients.find(c => c.id === clientId)
     if (!client) return
 
-    const updatedClient = {
-      ...client,
-      status: newStatus,
-      updatedAt: new Date().toISOString()
+    try {
+      const response = await fetch('/api/clients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-status',
+          clientId,
+          data: { status: newStatus }
+        })
+      })
+
+      const result = await response.json()
+      console.log('✅ CLIENTS: Status change API response:', result)
+
+      if (result.success) {
+        const updatedClient = {
+          ...client,
+          status: newStatus,
+          updatedAt: new Date().toISOString()
+        }
+
+        dispatch({ type: 'UPDATE_CLIENT', client: updatedClient })
+        console.log('✅ CLIENTS: Status updated successfully')
+
+        toast.success('✅ Status updated', {
+          description: `${client.name} is now ${newStatus}`
+        })
+      } else {
+        throw new Error(result.error || 'Failed to update status')
+      }
+    } catch (error: any) {
+      console.error('❌ CLIENTS: Status change error:', error)
+      toast.error('Failed to update status', {
+        description: error.message || 'Please try again later'
+      })
     }
-
-    dispatch({ type: 'UPDATE_CLIENT', client: updatedClient })
-    console.log('✅ CLIENTS: Status updated successfully')
-
-    toast.success('✅ Status updated', {
-      description: `${client.name} is now ${newStatus}`
-    })
   }
 
   // ============================================================================
