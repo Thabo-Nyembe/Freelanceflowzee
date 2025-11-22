@@ -18,6 +18,9 @@ import { TextShimmer } from '@/components/ui/text-shimmer'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Financial')
 import {
   DollarSign,
   TrendingUp,
@@ -395,9 +398,10 @@ export default function FinancialPage() {
 
   // Transaction Filtering with useMemo
   const filteredTransactions = useMemo(() => {
-    console.log('🔍 FILTERING TRANSACTIONS')
-    console.log('🔎 Search Term:', searchTerm || '(none)')
-    console.log('📁 Category Filter:', filterCategory)
+    logger.debug('Filtering transactions', {
+      searchTerm: searchTerm || '(none)',
+      category: filterCategory
+    })
 
     const filtered = KAZI_FINANCIAL_DATA.transactions.filter(transaction => {
       const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -406,16 +410,16 @@ export default function FinancialPage() {
       return matchesSearch && matchesCategory
     })
 
-    console.log('✅ FILTERED RESULTS:', filtered.length, 'transactions')
-    if (filtered.length < KAZI_FINANCIAL_DATA.transactions.length) {
-      console.log('📉 Filtered out:', KAZI_FINANCIAL_DATA.transactions.length - filtered.length, 'transactions')
-    }
+    logger.debug('Filtered results', {
+      resultCount: filtered.length,
+      filteredOut: KAZI_FINANCIAL_DATA.transactions.length - filtered.length
+    })
 
     return filtered
   }, [searchTerm, filterCategory])
 
   const handleExportReport = async (format: 'pdf' | 'csv' | 'xlsx') => {
-    console.log('💾 EXPORT FINANCIAL REPORT - Format:', format.toUpperCase())
+    logger.info('Export report initiated', { format: format.toUpperCase() })
 
     try {
       const response = await fetch('/api/financial/reports', {
@@ -448,13 +452,7 @@ export default function FinancialPage() {
         document.body.removeChild(a)
         toast.success(`Report exported as ${format.toUpperCase()}`)
 
-        // Log next steps
-        console.log('📝 FINANCIAL: Next steps:')
-        console.log('  • Open the CSV file in Excel or Google Sheets')
-        console.log('  • Review revenue and expense trends')
-        console.log('  • Share with your accountant or financial advisor')
-        console.log('  • Use insights for tax planning and budgeting')
-        console.log('  • Set up recurring exports for monthly reviews')
+        logger.info('Report exported successfully', { format })
       } else {
         // Handle JSON/PDF response
         const result = await response.json()
@@ -465,10 +463,13 @@ export default function FinancialPage() {
           if (result.downloadUrl) {
             window.open(result.downloadUrl, '_blank')
           }
+          logger.info('Report generated successfully', {
+            hasDownloadUrl: !!result.downloadUrl
+          })
         }
       }
     } catch (error: any) {
-      console.error('Export Report Error:', error)
+      logger.error('Failed to export report', { error, format })
       toast.error('Failed to export report', {
         description: error.message || 'Please try again later'
       })
@@ -476,7 +477,7 @@ export default function FinancialPage() {
   }
 
   const handleImportData = async () => {
-    console.log('📥 IMPORT FINANCIAL DATA')
+    logger.info('Import financial data initiated')
 
     // Create file input
     const input = document.createElement('input')
@@ -527,16 +528,14 @@ export default function FinancialPage() {
             description: `${result.recordsImported || 0} records imported`
           })
 
-          // Log next steps
-          console.log('📝 FINANCIAL: Import complete - Next steps:')
-          console.log('  • Review imported transactions in the dashboard')
-          console.log('  • Verify all amounts and categories are correct')
-          console.log('  • Reconcile with bank statements')
-          console.log('  • Update any missing information')
-          console.log('  • Generate updated financial reports')
+          logger.info('Data imported successfully', {
+            fileName: file.name,
+            fileType: file.type,
+            recordsImported: result.recordsImported || 0
+          })
         }
       } catch (error: any) {
-        console.error('Import Data Error:', error)
+        logger.error('Failed to import data', { error, fileName: file?.name })
         toast.error('Failed to import data', {
           description: error.message || 'Please check file format and try again'
         })
@@ -547,11 +546,13 @@ export default function FinancialPage() {
   }
 
   const handleScheduleReview = () => {
-    console.log('📅 FINANCIAL: Schedule review initiated')
+    logger.info('Schedule review initiated')
     const reviewDate = prompt('Enter review date (YYYY-MM-DD):')
     if (reviewDate) {
-      console.log('📅 FINANCIAL: Review scheduled for:', reviewDate)
-      console.log('⏰ FINANCIAL: Reminder: 24 hours before')
+      logger.info('Review scheduled', {
+        reviewDate,
+        reminder: '24 hours before'
+      })
       toast.success('📅 Financial Review Scheduled', {
         description: `Date: ${reviewDate} • Reminder set`
       })
@@ -559,23 +560,23 @@ export default function FinancialPage() {
   }
 
   const handleViewAllTransactions = () => {
-    console.log('📋 FINANCIAL: View all transactions')
-    console.log('📊 FINANCIAL: Features available:')
-    console.log('  • Filter by date range')
-    console.log('  • Filter by type')
-    console.log('  • Search by description')
+    logger.info('View all transactions')
     toast.info('📋 All Transactions', {
       description: 'Complete transaction history'
     })
   }
 
   const handleAddTransaction = (type: 'income' | 'expense') => {
-    console.log(`➕ FINANCIAL: Add ${type} initiated`)
+    logger.info('Add transaction initiated', { type })
     const description = prompt(`Enter ${type} description:`)
     if (description) {
       const amount = prompt('Enter amount:')
       if (amount) {
-        console.log(`✅ FINANCIAL: ${type} added:`, description, 'Amount: $' + amount)
+        logger.info('Transaction added', {
+          type,
+          description,
+          amount: parseFloat(amount)
+        })
         toast.success(`✅ ${type === 'income' ? 'Income' : 'Expense'} Added`, {
           description: `${description} • $${amount}`
         })
@@ -584,10 +585,13 @@ export default function FinancialPage() {
   }
 
   const handleEditTransaction = (transactionId: number) => {
-    console.log('✏️ FINANCIAL: Edit transaction:', transactionId)
+    logger.info('Edit transaction initiated', { transactionId })
     const newDescription = prompt('Edit transaction description:')
     if (newDescription) {
-      console.log('✅ FINANCIAL: Transaction updated:', newDescription)
+      logger.info('Transaction updated', {
+        transactionId,
+        newDescription
+      })
       toast.success('✅ Transaction Updated', {
         description: newDescription
       })
@@ -595,29 +599,29 @@ export default function FinancialPage() {
   }
 
   const handleDeleteTransaction = (transactionId: number) => {
-    console.log('🗑️ FINANCIAL: Delete transaction:', transactionId)
+    logger.info('Delete transaction initiated', { transactionId })
     if (confirm('⚠️ Delete Transaction?\n\nThis action cannot be undone.\n\nAre you sure?')) {
-      console.log('✅ FINANCIAL: Transaction deleted')
+      logger.info('Transaction deleted', { transactionId })
       toast.success('✅ Transaction deleted successfully!')
     }
   }
 
   const handleFilterTransactions = (filter: string) => {
-    console.log('🔍 FINANCIAL: Filter transactions:', filter)
+    logger.debug('Filter transactions', { filter })
     toast.info('🔍 Filtering transactions by: ' + filter)
   }
 
   const handleSearchTransactions = () => {
-    console.log('🔍 FINANCIAL: Search transactions')
+    logger.info('Search transactions initiated')
     const query = prompt('Search transactions:')
     if (query) {
-      console.log('🔍 FINANCIAL: Searching for:', query)
+      logger.debug('Searching transactions', { query })
       toast.info('🔍 Searching for: "' + query + '"')
     }
   }
 
   const handleCreateInvoice = async () => {
-    console.log('➕ CREATE INVOICE')
+    logger.info('Create invoice initiated')
 
     // Simplified invoice creation - in production would have a form modal
     const client = prompt('Enter client name:')
@@ -660,17 +664,15 @@ export default function FinancialPage() {
           description: `Invoice ${result.invoiceNumber} • PDF available`
         })
 
-        // Log invoice details and next steps
-        console.log('📝 FINANCIAL: Invoice created:')
-        console.log('  • Invoice Number:', result.invoiceNumber)
-        console.log('  • PDF:', result.pdfUrl)
-        console.log('📝 FINANCIAL: Next steps:')
-        console.log('  • Review invoice details')
-        console.log('  • Send to client')
-        console.log('  • Track payment status')
+        logger.info('Invoice created successfully', {
+          invoiceNumber: result.invoiceNumber,
+          pdfUrl: result.pdfUrl,
+          client,
+          amount: parseFloat(amount)
+        })
       }
     } catch (error: any) {
-      console.error('Create Invoice Error:', error)
+      logger.error('Failed to create invoice', { error, client })
       toast.error('Failed to create invoice', {
         description: error.message || 'Please try again later'
       })
@@ -678,126 +680,112 @@ export default function FinancialPage() {
   }
 
   const handleViewAllInvoices = () => {
-    console.log('📋 FINANCIAL: View all invoices')
-    console.log('📊 FINANCIAL: Showing:')
-    console.log('  • Paid invoices')
-    console.log('  • Pending invoices')
-    console.log('  • Overdue invoices')
-    console.log('  • Draft invoices')
+    logger.info('View all invoices')
     toast.info('📋 All Invoices', {
       description: 'Paid, pending, overdue & draft'
     })
   }
 
   const handleEditInvoice = (invoiceId: number) => {
-    console.log('✏️ FINANCIAL: Edit invoice:', invoiceId)
-    console.log('📝 FINANCIAL: Opening editor for invoice #' + invoiceId)
+    logger.info('Edit invoice initiated', { invoiceId })
     toast.info('✏️ Edit Invoice #' + invoiceId, {
       description: 'Modify details and line items'
     })
   }
 
   const handleDeleteInvoice = (invoiceId: number) => {
-    console.log('🗑️ FINANCIAL: Delete invoice:', invoiceId)
+    logger.info('Delete invoice initiated', { invoiceId })
     if (confirm('⚠️ Delete Invoice?\n\nThis action cannot be undone.\n\nAre you sure?')) {
-      console.log('✅ FINANCIAL: Invoice deleted:', invoiceId)
+      logger.info('Invoice deleted', { invoiceId })
       toast.success('✅ Invoice deleted successfully!')
     }
   }
 
   const handleSendInvoice = (invoiceId: number) => {
-    console.log('📧 FINANCIAL: Send invoice:', invoiceId)
-    console.log('📧 FINANCIAL: Email includes payment instructions')
+    logger.info('Send invoice initiated', { invoiceId })
     toast.success('📧 Sending Invoice #' + invoiceId, {
       description: 'Emailing to client with payment instructions'
     })
   }
 
   const handleMarkInvoicePaid = (invoiceId: number) => {
-    console.log('✅ FINANCIAL: Mark invoice paid:', invoiceId)
+    logger.info('Mark invoice paid initiated', { invoiceId })
     if (confirm('Mark this invoice as paid?')) {
-      console.log('✅ FINANCIAL: Invoice marked as paid:', invoiceId)
+      logger.info('Invoice marked as paid', { invoiceId })
       toast.success('✅ Invoice #' + invoiceId + ' marked as paid!')
     }
   }
 
   const handleSendPaymentReminder = (invoiceId: number) => {
-    console.log('📧 FINANCIAL: Send payment reminder:', invoiceId)
-    console.log('📧 FINANCIAL: Friendly reminder email sent')
+    logger.info('Payment reminder sent', { invoiceId })
     toast.success('📧 Payment Reminder Sent', {
       description: 'Invoice #' + invoiceId + ' • Email sent to client'
     })
   }
 
   const handleGenerateProfitLoss = () => {
-    console.log('📊 FINANCIAL: Generate P&L report')
-    console.log('📊 FINANCIAL: Generating monthly P&L...')
-    console.log('  • Revenue: $45,231')
-    console.log('  • Expenses: $18,500')
-    console.log('  • Net Profit: $26,731')
-    console.log('✅ FINANCIAL: Report ready!')
+    logger.info('Generate P&L report', {
+      revenue: 45231,
+      expenses: 18500,
+      netProfit: 26731
+    })
     toast.success('📊 Profit & Loss Statement', {
       description: 'Net Profit: $26,731'
     })
   }
 
   const handleGenerateCashFlow = () => {
-    console.log('📊 FINANCIAL: Generate cash flow report')
-    console.log('📊 FINANCIAL: Analyzing cash flow...')
-    console.log('  • Inflows: +$48,500')
-    console.log('  • Outflows: -$21,769')
-    console.log('  • Net Cash Flow: +$26,731')
-    console.log('✅ FINANCIAL: Report ready!')
+    logger.info('Generate cash flow report', {
+      inflows: 48500,
+      outflows: 21769,
+      netCashFlow: 26731
+    })
     toast.success('📊 Cash Flow Report', {
       description: 'Net Cash Flow: +$26,731'
     })
   }
 
   const handleGenerateTaxSummary = () => {
-    console.log('📊 FINANCIAL: Generate tax summary')
-    console.log('📊 FINANCIAL: Calculating quarterly taxes...')
-    console.log('  • Taxable Income: $26,731')
-    console.log('  • Estimated Tax: $6,682.75')
-    console.log('  • Quarterly Payment: $1,670.69')
-    console.log('✅ FINANCIAL: Report ready!')
+    logger.info('Generate tax summary', {
+      taxableIncome: 26731,
+      estimatedTax: 6682.75,
+      quarterlyPayment: 1670.69
+    })
     toast.success('📊 Tax Summary Report', {
       description: 'Quarterly Payment: $1,670.69'
     })
   }
 
   const handleGenerateExpenseReport = () => {
-    console.log('📊 FINANCIAL: Generate expense report')
-    console.log('📊 FINANCIAL: Analyzing expenses...')
-    console.log('  • Total Expenses: $18,500')
-    console.log('  • Software: $5,200')
-    console.log('  • Marketing: $4,500')
-    console.log('  • Operations: $8,800')
-    console.log('✅ FINANCIAL: Report ready!')
+    logger.info('Generate expense report', {
+      totalExpenses: 18500,
+      software: 5200,
+      marketing: 4500,
+      operations: 8800
+    })
     toast.success('📊 Expense Report', {
       description: 'Total: $18,500'
     })
   }
 
   const handleDownloadReport = (reportType: string) => {
-    console.log('📥 FINANCIAL: Download report:', reportType)
-    console.log('📄 FINANCIAL: Format: PDF')
-    console.log('✅ FINANCIAL: Download started')
+    logger.info('Download report', { reportType, format: 'PDF' })
     toast.success('📥 Downloading ' + reportType, {
       description: 'PDF format • Download started'
     })
   }
 
   const handlePrintReport = (reportType: string) => {
-    console.log('🖨️ FINANCIAL: Print report:', reportType)
-    console.log('🖨️ FINANCIAL: Sending to default printer')
+    logger.info('Print report', { reportType })
     toast.success('🖨️ Printing ' + reportType, {
       description: 'Sending to default printer'
     })
   }
 
   const handleRefreshData = () => {
-    console.log('🔄 FINANCIAL: Refresh data initiated')
-    console.log('✅ FINANCIAL: Financial data updated with latest transactions')
+    logger.info('Refresh financial data', {
+      action: 'manual_refresh'
+    })
     toast.success('🔄 Data Refreshed', {
       description: 'Updated with latest transactions'
     })
