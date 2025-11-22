@@ -12,6 +12,7 @@ import { Slider } from '@/components/ui/slider'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import {
   Brain,
@@ -419,19 +420,51 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
       setGenerationStage('Finalizing output...')
       await new Promise(resolve => setTimeout(resolve, 200))
 
-      // Typing effect
-      let currentText = ''
-      const typeSpeed = 10
+      // A++++ Phase 2: Streaming or Typing effect
+      if (streamingEnabled) {
+        setGenerationStage('Streaming content...')
 
-      for (let i = 0; i < generatedContent.length; i++) {
-        currentText += generatedContent[i]
-        setTypingEffect(currentText)
-        await new Promise(resolve => setTimeout(resolve, typeSpeed))
+        // Use streaming with live metrics
+        const controller = await simulateStreaming(generatedContent, {
+          tokensPerSecond: 50,
+          onToken: (token, metrics) => {
+            setTypingEffect(prev => prev + token)
+            setStreamingMetrics(metrics)
+
+            // Update progress based on streaming
+            const streamProgress = 90 + (metrics.progress * 10)
+            setProgress(streamProgress)
+          },
+          onComplete: (finalContent, finalMetrics) => {
+            setResult(finalContent)
+            setStreamingMetrics(finalMetrics)
+            setProgress(100)
+            setGenerationStage('Complete!')
+          },
+          onError: (error) => {
+            toast.error(`Streaming error: ${error.message}`)
+            // Fallback to instant display
+            setTypingEffect(generatedContent)
+            setResult(generatedContent)
+          }
+        })
+
+        setStreamController(controller)
+      } else {
+        // Regular typing effect
+        let currentText = ''
+        const typeSpeed = 10
+
+        for (let i = 0; i < generatedContent.length; i++) {
+          currentText += generatedContent[i]
+          setTypingEffect(currentText)
+          await new Promise(resolve => setTimeout(resolve, typeSpeed))
+        }
+
+        setResult(generatedContent)
+        setProgress(100)
+        setGenerationStage('Complete!')
       }
-
-      setResult(generatedContent)
-      setProgress(100)
-      setGenerationStage('Complete!')
 
       // Add to history with full Generation object
       const newGeneration: Generation = {
@@ -974,6 +1007,21 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
                     />
                   </div>
 
+                  {/* Streaming Toggle */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="streaming-toggle">Enable Streaming</Label>
+                        <p className="text-xs text-gray-500">Show live progress during generation</p>
+                      </div>
+                      <Switch
+                        id="streaming-toggle"
+                        checked={streamingEnabled}
+                        onCheckedChange={setStreamingEnabled}
+                      />
+                    </div>
+                  </div>
+
                   <Button
                     onClick={() => setActiveTab('templates')}
                     className="w-full"
@@ -1090,6 +1138,42 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
                             />
                           ))}
                         </div>
+
+                        {/* A++++ Phase 2: Streaming Metrics */}
+                        {streamingEnabled && streamingMetrics && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-purple-200 dark:border-purple-800"
+                          >
+                            <div className="text-center">
+                              <div className="text-xs text-purple-600 dark:text-purple-400">Tokens/sec</div>
+                              <div className="text-lg font-bold text-purple-700 dark:text-purple-300">
+                                {streamingMetrics.tokensPerSecond.toFixed(1)}
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-xs text-purple-600 dark:text-purple-400">Tokens</div>
+                              <div className="text-lg font-bold text-purple-700 dark:text-purple-300">
+                                {streamingMetrics.tokensGenerated}/{streamingMetrics.totalTokens}
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-xs text-purple-600 dark:text-purple-400">Progress</div>
+                              <div className="text-lg font-bold text-purple-700 dark:text-purple-300">
+                                {(streamingMetrics.progress * 100).toFixed(0)}%
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-xs text-purple-600 dark:text-purple-400">ETA</div>
+                              <div className="text-lg font-bold text-purple-700 dark:text-purple-300">
+                                {streamingMetrics.estimatedTimeRemaining > 0
+                                  ? `${(streamingMetrics.estimatedTimeRemaining / 1000).toFixed(1)}s`
+                                  : 'Done'}
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
                       </motion.div>
                     )}
                   </AnimatePresence>
