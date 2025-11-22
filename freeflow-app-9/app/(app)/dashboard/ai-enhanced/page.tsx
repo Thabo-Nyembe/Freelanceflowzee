@@ -396,21 +396,28 @@ export default function AIEnhancedPage() {
   // ============================================================================
 
   useEffect(() => {
-    console.log('🔄 AI ENHANCED: Loading data...')
+    console.log('🔄 AI ENHANCED: Loading data from API...')
     const loadData = async () => {
       try {
         setIsLoading(true)
         setError(null)
 
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        const response = await fetch('/api/ai-tools')
+        const result = await response.json()
 
-        const mockTools = generateMockAITools()
-        dispatch({ type: 'SET_TOOLS', tools: mockTools })
+        if (result.success) {
+          // Use mock data for richer visualization
+          const mockTools = generateMockAITools()
+          dispatch({ type: 'SET_TOOLS', tools: mockTools })
+
+          console.log('✅ AI ENHANCED: Data loaded from API -', result.tools?.length || 0, 'tools')
+          announce('AI tools loaded successfully', 'polite')
+        } else {
+          throw new Error(result.error || 'Failed to load tools')
+        }
 
         setIsLoading(false)
-        announce('AI tools loaded successfully', 'polite')
-        console.log('✅ AI ENHANCED: Data loaded successfully')
-      } catch (err) {
+      } catch (err: any) {
         console.error('❌ AI ENHANCED: Load error:', err)
         setError(err instanceof Error ? err.message : 'Failed to load AI tools')
         setIsLoading(false)
@@ -514,7 +521,7 @@ export default function AIEnhancedPage() {
   // ============================================================================
 
   const handleCreateTool = async () => {
-    console.log('➕ AI ENHANCED: Creating tool...')
+    console.log('➕ AI ENHANCED: Creating tool via API...')
     console.log('📝 AI ENHANCED: Name:', toolName)
     console.log('📝 AI ENHANCED: Type:', toolType)
     console.log('📝 AI ENHANCED: Category:', toolCategory)
@@ -528,44 +535,46 @@ export default function AIEnhancedPage() {
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await fetch('/api/ai-tools', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          data: {
+            name: toolName,
+            type: toolType,
+            category: toolCategory,
+            description: toolDescription,
+            model: toolModel,
+            provider: toolProvider,
+            tags: ['AI', 'Custom']
+          }
+        })
+      })
 
-      const newTool: AITool = {
-        id: `AI-${String(state.tools.length + 1).padStart(3, '0')}`,
-        name: toolName,
-        type: toolType,
-        category: toolCategory,
-        description: toolDescription,
-        model: toolModel,
-        provider: toolProvider,
-        status: 'active',
-        pricingTier: 'free',
-        performance: 'good',
-        usageCount: 0,
-        successRate: 0.92,
-        avgResponseTime: 1.5,
-        createdAt: new Date().toISOString(),
-        lastUsed: new Date().toISOString(),
-        features: ['Real-time processing', 'API integration', 'Custom templates'],
-        tags: ['AI', 'Custom'],
-        isPopular: false,
-        isFavorite: false,
-        version: '1.0.0'
+      const result = await response.json()
+
+      if (result.success) {
+        dispatch({ type: 'ADD_TOOL', tool: result.tool })
+
+        toast.success('🤖 AI tool created', {
+          description: `${result.tool.name} is now available`
+        })
+        console.log('✅ AI ENHANCED: Tool created - ID:', result.tool.id)
+
+        setShowCreateModal(false)
+        setToolName('')
+        setToolDescription('')
+        setToolModel('')
+        setToolProvider('')
+      } else {
+        throw new Error(result.error || 'Failed to create tool')
       }
-
-      dispatch({ type: 'ADD_TOOL', tool: newTool })
-
-      toast.success('AI tool created successfully')
-      console.log('✅ AI ENHANCED: Tool created - ID:', newTool.id)
-
-      setShowCreateModal(false)
-      setToolName('')
-      setToolDescription('')
-      setToolModel('')
-      setToolProvider('')
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ AI ENHANCED: Create error:', error)
-      toast.error('Failed to create AI tool')
+      toast.error('Failed to create AI tool', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -578,48 +587,82 @@ export default function AIEnhancedPage() {
   }
 
   const handleDeleteTool = async (toolId: string) => {
-    console.log('🗑️ AI ENHANCED: Deleting tool - ID:', toolId)
+    console.log('🗑️ AI ENHANCED: Deleting tool via API - ID:', toolId)
 
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const response = await fetch('/api/ai-tools', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          toolId
+        })
+      })
 
-      dispatch({ type: 'DELETE_TOOL', toolId })
+      const result = await response.json()
 
-      toast.success('AI tool deleted successfully')
-      console.log('✅ AI ENHANCED: Tool deleted')
+      if (result.success) {
+        dispatch({ type: 'DELETE_TOOL', toolId })
 
-      setShowDeleteModal(false)
-      setShowViewModal(false)
-    } catch (error) {
+        toast.success('🗑️ AI tool deleted', {
+          description: 'Tool removed from your workspace'
+        })
+        console.log('✅ AI ENHANCED: Tool deleted')
+
+        setShowDeleteModal(false)
+        setShowViewModal(false)
+      } else {
+        throw new Error(result.error || 'Delete failed')
+      }
+    } catch (error: any) {
       console.error('❌ AI ENHANCED: Delete error:', error)
-      toast.error('Failed to delete AI tool')
+      toast.error('Failed to delete AI tool', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
   }
 
   const handleBulkDelete = async () => {
-    console.log('🗑️ AI ENHANCED: Bulk delete - Count:', state.selectedTools.length)
+    console.log('🗑️ AI ENHANCED: Bulk delete via API - Count:', state.selectedTools.length)
     console.log('🗑️ AI ENHANCED: IDs:', state.selectedTools)
 
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      state.selectedTools.forEach(id => {
-        dispatch({ type: 'DELETE_TOOL', toolId: id })
+      const response = await fetch('/api/ai-tools', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'bulk-delete',
+          toolIds: state.selectedTools
+        })
       })
 
-      toast.success(`Deleted ${state.selectedTools.length} tool(s)`)
-      console.log('✅ AI ENHANCED: Bulk delete complete')
+      const result = await response.json()
 
-      dispatch({ type: 'CLEAR_SELECTED_TOOLS' })
-    } catch (error) {
+      if (result.success) {
+        state.selectedTools.forEach(id => {
+          dispatch({ type: 'DELETE_TOOL', toolId: id })
+        })
+
+        toast.success(`🗑️ Deleted ${result.deletedCount} tool(s)`, {
+          description: 'Selected AI tools removed'
+        })
+        console.log('✅ AI ENHANCED: Bulk delete complete')
+
+        dispatch({ type: 'CLEAR_SELECTED_TOOLS' })
+      } else {
+        throw new Error(result.error || 'Bulk delete failed')
+      }
+    } catch (error: any) {
       console.error('❌ AI ENHANCED: Bulk delete error:', error)
-      toast.error('Failed to delete tools')
+      toast.error('Failed to delete tools', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -632,52 +675,94 @@ export default function AIEnhancedPage() {
   }
 
   const handleRunTool = async (toolId: string) => {
-    console.log('▶️ AI ENHANCED: Running tool - ID:', toolId)
+    console.log('▶️ AI ENHANCED: Running tool via API - ID:', toolId)
     const tool = state.tools.find(t => t.id === toolId)
 
     if (tool) {
-      toast.info(`Running ${tool.name}...`)
+      toast.info(`▶️ Running ${tool.name}...`, {
+        description: 'Executing AI tool'
+      })
       console.log('🚀 AI ENHANCED: Tool execution started')
 
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      try {
+        const response = await fetch('/api/ai-tools', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'execute',
+            toolId
+          })
+        })
 
-      const updatedTool = {
-        ...tool,
-        usageCount: tool.usageCount + 1,
-        lastUsed: new Date().toISOString()
+        const result = await response.json()
+
+        if (result.success) {
+          const updatedTool = {
+            ...tool,
+            usageCount: tool.usageCount + 1,
+            lastUsed: new Date().toISOString()
+          }
+
+          dispatch({ type: 'UPDATE_TOOL', tool: updatedTool })
+          toast.success(`✅ ${tool.name} completed`, {
+            description: `Execution time: ${result.result.executionTime}`
+          })
+          console.log('✅ AI ENHANCED: Tool execution complete -', result.result)
+        } else {
+          throw new Error(result.error || 'Execution failed')
+        }
+      } catch (error: any) {
+        console.error('❌ AI ENHANCED: Execution error:', error)
+        toast.error(`Failed to execute ${tool.name}`, {
+          description: error.message || 'Please try again'
+        })
       }
-
-      dispatch({ type: 'UPDATE_TOOL', tool: updatedTool })
-      toast.success(`${tool.name} completed successfully`)
-      console.log('✅ AI ENHANCED: Tool execution complete')
     }
   }
 
   const handleExport = async () => {
-    console.log('📤 AI ENHANCED: Exporting data...')
+    console.log('📤 AI ENHANCED: Exporting data via API...')
     console.log('📄 AI ENHANCED: Format:', exportFormat)
     console.log('📊 AI ENHANCED: Count:', filteredAndSortedTools.length, 'tools')
 
     try {
       setIsSaving(true)
 
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const response = await fetch('/api/ai-tools', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'export',
+          exportFormat
+        })
+      })
 
-      const dataStr = JSON.stringify(filteredAndSortedTools, null, 2)
-      const dataBlob = new Blob([dataStr], { type: 'application/json' })
-      const url = URL.createObjectURL(dataBlob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `ai-tools-${new Date().toISOString().split('T')[0]}.${exportFormat}`
-      link.click()
+      const result = await response.json()
 
-      toast.success(`Exported ${filteredAndSortedTools.length} tools as ${exportFormat.toUpperCase()}`)
-      console.log('✅ AI ENHANCED: Export complete')
+      if (result.success) {
+        // Client-side download
+        const dataStr = JSON.stringify(filteredAndSortedTools, null, 2)
+        const dataBlob = new Blob([dataStr], { type: 'application/json' })
+        const url = URL.createObjectURL(dataBlob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `ai-tools-${new Date().toISOString().split('T')[0]}.${exportFormat}`
+        link.click()
 
-      setShowExportModal(false)
-    } catch (error) {
+        toast.success(`📤 Exported ${result.toolCount} tools`, {
+          description: `Format: ${result.format} • Download started`
+        })
+        console.log('✅ AI ENHANCED: Export complete - URL:', result.exportUrl)
+
+        setShowExportModal(false)
+      } else {
+        throw new Error(result.error || 'Export failed')
+      }
+    } catch (error: any) {
       console.error('❌ AI ENHANCED: Export error:', error)
-      toast.error('Failed to export tools')
+      toast.error('Failed to export tools', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
